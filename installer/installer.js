@@ -25,7 +25,7 @@ Installer.prototype = {
             var res = prompt.yesno("\n  "+this.name+" has an install script."+
                   "\n    WARNING! Install scripts may be evil.  "+
                   "\n    You can run it manually after reading the file by running:"+
-                  "\n      load('jmvc/plugins/"+this.name+"/install.js')"+
+                  "\n      load('steal/plugins/"+this.name+"/install.js')"+
                   "\n\n  Would you like to run it now? (yN):")
             if(res){
               print("  running ...")
@@ -42,7 +42,7 @@ Installer.prototype = {
   check_plugin_list : function(){
         print("  Looking for plugin ...")
         
-        var plugin_list_source = readUrl("http://javascriptmvc.googlecode.com/svn/trunk/jmvc/rhino/command/plugin_list.json");
+        var plugin_list_source = readUrl("http://javascriptmvc.googlecode.com/svn/trunk/steal/rhino/command/plugin_list.json");
         var plugin_list;
         eval("plugin_list = "+plugin_list_source);
         this.uri = plugin_list[this.name]

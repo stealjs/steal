@@ -1,16 +1,16 @@
 #!/bin/sh
 # This script checks for arguments, if they don't exist it opens the Rhino dialog
 # if arguments do exist, it loads the script in the first argument and passes the other arguments to the script
-# ie: ./js jmvc/script/controller Todo
+# ie: ./js steal/script/controller Todo
 
 if [ $# -eq 0 ]
 then
-  java -cp jmvc/rhino/js.jar:jmvc/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main
+  java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main
   exit 127
 fi
 if [ $1 = "-selenium" ]
 then
-  java -jar jmvc/rhino/selenium-server.jar
+  java -jar steal/rhino/selenium-server.jar
   exit 127
 fi
 
@@ -23,10 +23,10 @@ echo -e "./js -d\t\t\t\tOpens the Rhino debugger"
 echo -e "./js [FILE]\t\t\tRuns FILE in the Rhino environment"
 echo -e ""
 echo  -e "JavaScriptMVC script usage:"
-echo  -e "./js jmvc/generate/app [NAME]\t\tCreates a new JavaScriptMVC application"
-echo  -e "./js jmvc/generate/page [APP] [PAGE]\tGenerates a page for the application"
-echo  -e "./js jmvc/generate/controller [NAME]\tGenerates a Controller file"
-echo  -e "./js jmvc/generate/model [TYPE] [NAME]\tGenerates a Model file"
+echo  -e "./js steal/generate/app [NAME]\t\tCreates a new JavaScriptMVC application"
+echo  -e "./js steal/generate/page [APP] [PAGE]\tGenerates a page for the application"
+echo  -e "./js steal/generate/controller [NAME]\tGenerates a Controller file"
+echo  -e "./js steal/generate/model [TYPE] [NAME]\tGenerates a Model file"
 echo  -e "./js apps/[NAME]/compress.js\t\tCompress your application and generate documentation"
   exit 127
 fi
@@ -34,7 +34,7 @@ fi
 
 if [ $1 = "-d" ]
 then
-        java -classpath jmvc/rhino/js.jar:jmvc/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.debugger.Main
+        java -classpath steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.debugger.Main
         exit 127
 fi
 
@@ -47,4 +47,4 @@ do
   fi
 done
 ARGS=$ARGS]
-java -cp jmvc/rhino/js.jar:jmvc/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -e 'load('"'"$1"'"')'
+java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -e 'load('"'"$1"'"')'

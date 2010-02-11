@@ -1,0 +1,5 @@
+<%%for(var i = 0; i < <%=plural%>.length ; i++){%>
+    <tr class='<%= underscore%> <%%= <%=plural%>[i].identity()%>'>
+        <%%= view('views/<%= underscore%>/show',<%=plural%>[i])%>
+    </tr>
+<%%}%>

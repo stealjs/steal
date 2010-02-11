@@ -41,7 +41,7 @@ steal.File.prototype = {
     /**
      * Returns the path of this file referenced form another url.
      * @codestart
-     * new include.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
+     * new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
      * @codeend
      * @param {Object} url
      * @param {Object} expand

@@ -1,0 +1,32 @@
+if (!_args[0]) {
+	print("Usage: js steal/generate/controller YourController")
+	quit();
+}else if(/_/.test(_args[0])){
+	print("Usage: js steal/generate/controller YourController")
+	quit();
+}
+
+load('steal/rhino/loader.js')
+rhinoLoader(function(){
+	steal.plugins('view','util/generator');
+});
+
+(function(){
+	//clear name
+	var name =  _args[0].replace(/controller/i, '');
+	var data = {
+		path: jQuery.String.underscore(name),
+		name: name
+	};
+	Generator.createFolder("controllers");
+	
+	Generator.renderTo("controllers/" + data.path+"_controller.js", "../generate/templates/controller.ejs", data);
+	Generator.renderTo("test/functional/" + data.path + "_test.js", "../generate/templates/functional_test.ejs", data);
+	Generator.createFolder("views/" + data.path);
+	Generator.postGenerationMessage();
+
+
+})();
+
+
+

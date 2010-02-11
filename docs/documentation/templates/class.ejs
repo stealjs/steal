@@ -1,0 +1,16 @@
+<div><h1><%= name%> <label>API</label></h1>
+
+<div id='shortcuts'><%= get_quicklinks()%></div>
+<%if(this.author){%>
+    <div class='author'>Author: <%= this.author %></div>
+<%}%>
+<%if(this.inherits){%>
+    <div class='inherits'>Inherits: <b><%= steal.Doc.link(this.inherits) %></b></div>
+<%}%>
+<%if(this.alias){%>
+    <div class='alias'>Aliased as: <b><%= this.alias %></b></div>
+<%}%>
+<div class='group'><%= this.cleaned_comment() %></div>
+
+<%= make(children)%>
+</div>

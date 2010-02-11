@@ -1,0 +1,36 @@
+jQuery.Test.Functional.extend('Tests.Functional.<%= name %>Controller',{
+    test_<%= plural %>Present: function(){
+        this.driver.exists('.<%= underscore %>', this.timeoutCallback('ready', 5000));
+    },
+    ready : function(){
+        this.assert(true)
+    },
+    test_create : function(){
+        this.driver.type("form input[name=name]","Ice")
+        this.driver.type("form input[name=description]","Cold Water")
+        this.driver.click("form input[type=submit]")
+        this.driver.exists('.<%= underscore %>:nth-child(2)', this.timeoutCallback('created', 5000));
+    },
+    created : function(){
+        this.assert(/Ice/.test(  this.driver.text('.<%= underscore %>:nth-child(2) td:first') )  )
+    },
+    test_edit : function(){
+        this.driver.click('.<%= underscore %>:nth-child(2) a.edit');
+        this.driver.type(".<%= underscore %> input[name=name]"," Water")
+        this.driver.type(".<%= underscore %> input[name=description]","\b\b\b\b\bTap Water")
+        this.driver.click(".update")
+        this.driver.exists('.<%= underscore %>:nth-child(2) .edit', this.timeoutCallback('updated', 5000));
+    },
+    updated : function(){
+        this.assert(/Ice Water/.test(  this.driver.text('.<%= underscore %>:nth-child(2) td:first') )  )
+        this.assert(/Cold Tap Water/.test(  this.driver.text('.<%= underscore %>:nth-child(2) td:nth-child(2)') )  )
+    },
+    test_destroy : function(){
+        this.driver.click(".<%= underscore %>:nth-child(2) .destroy")
+        this.driver.missing('.<%= underscore %>:nth-child(2)', this.timeoutCallback('destroyed', 5000))
+    },
+    destroyed : function(){
+        this.assert(true)
+    }
+    
+});

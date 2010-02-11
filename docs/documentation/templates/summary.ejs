@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+	<head>
+		<title>JavaScriptMVC</title>
+        <link rel="stylesheet" type='text/css' href='steal/plugins/documentation/app/style.css' />
+	</head>
+	<body scroll="no">
+	    
+        <div id='documentation'>
+	        <div id='top'>
+	            <input id='search' type='input' disabled='true'/>
+                <div id='defaults'>
+                    <div style='color:white;float: right;margin-right: 10px; position: relative; top: -3px'>JavaScript<img src='steal/plugins/documentation/app/images/logo.png' style="position: relative; top: 5px;left: 2px"/></div>
+                    <a href="#&amp;search=home&amp;who=index">Home</a>
+                    <a href="#&amp;search=core">Core</a>
+                    <a href="#favorites">Favorites</a>
+					<a href="http://groups.google.com/group/javascriptmvc" class="red" title="Google Group Discussion">Discuss</a>
+                    <a href="http://javascriptmvc.googlecode.com/" class="red" title="Google Code SVN Repository">Google Code</a>
+                    
+                </div>
+	        </div>
+            
+            <div id='bottom'>
+                
+            
+                <div id='left'>
+                    <a>Loading ... </a>
+                </div>
+                <div id='doc_container'>
+                    <div id='doc'>
+                        <%= this.indexPage ? this.indexPage.real_comment : "Add a page named 'index' to see something here." %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id='low'>
+            <a href="http://jupiterit.com">&copy; Jupiter IT - JavaScriptMVC Training and Support</a>
+        </div>
+		<script type='text/javascript'>
+            DOCS_LOCATION = "apps/<%=name%>/docs/"
+        </script>
+        <script type='text/javascript' 
+                src='steal/steal.js?steal/plugins/documentation/app/init.js,production'>   
+        </script>
+	</body>
+</html>

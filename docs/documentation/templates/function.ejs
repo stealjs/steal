@@ -1,0 +1,24 @@
+<div class='method'>
+ <% if(this.plugin){%> 
+     <div class='added_by'><%= this.plugin%></div>
+ <% } %>
+ 
+ <h3 id="<%= this.full_name()%>"><%=this.name%></h3>
+ <pre class='signiture'><code><%= this.signiture()%></code></pre>
+ <div class='real_comment'><%= steal.Doc.link_content(this.real_comment)%></div>
+ <% var ordered = this.ordered_params() 
+  	for(var n = 0; n < ordered.length; n++){   
+       var param = ordered[n]; %>  
+      <div class='param <%= param.optional ? "optional" : ""%>'>
+          <label><%= param.name%></label>
+          <code>{<%=(param.optional ? '' : '') +""+steal.Doc.link(param.type) %>}</code> - <%= steal.Doc.link_content(param.description) %>
+      </div>
+ <% } %>
+
+ <% if(this.ret.type != "undefined") {%>
+     <div class='return'>
+         <label>returns</label> 
+         <code>{<%=steal.Doc.link(this.ret.type)%>}</code> - <%= steal.Doc.link_content(this.ret.description)%>
+     </div>
+ <% } %>               
+</div>

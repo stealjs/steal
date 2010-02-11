@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="../../steal/plugins/documentation/style.css" type="text/css" />
+        <title><%= this.name%></title>
+    </head>
+    <body>
+        <div id='left_side'><%= summary %></div>
+        <div id='right_side'><%= this.toHTML() %></div>
+        <script type="text/javascript" src="../../steal/plugins/documentation/highlight/highlight.js"></script>
+        <script type="text/javascript">
+          hljs.initHighlightingOnLoad('html', 'css','javascript');
+        </script>
+        <script type="text/javascript">
+            //select someone
+            parts = window.location.href.split("/")
+            var selected = document.getElementById(parts.pop().replace(/[#|?].*/,""))
+            if(selected){
+                selected.className = "selected";
+            }
+        </script>
+    </body>
+</html>

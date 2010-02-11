@@ -1,0 +1,15 @@
+steal.plugins('view','lang/class','lang/json');
+steal(
+    'application',
+    'pair',
+    'directives',
+    'function',
+    'class',
+    'constructor',
+    'file',
+    'add',
+    'static',
+    'prototype',
+    'attribute',
+    'page'
+)

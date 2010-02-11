@@ -1,0 +1,17 @@
+/**
+ * @tag controllers, home
+ */
+jQuery.Controller.extend('<%=name%>Controller',
+/* @Static */
+{
+    onDocument: true<%if(this.scaffold){%>,
+    init: function(){
+      this.scaffold();
+      this._super()
+    }
+<%}%>
+},
+/* @Prototype */
+{
+    
+});

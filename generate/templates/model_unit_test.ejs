@@ -1,0 +1,48 @@
+jQuery.Test.Unit.extend("Tests.Unit.<%= name %>",{
+    init : function(){ //setup code
+        
+    },
+    destroy : function(){ //teardown code
+        
+    },
+    test_findAll: function() {
+       <%= name %>.findAll({}, this.callback("found"))
+    },
+    found : function(<%= plural %>){
+        this.assert(<%= plural %>)
+        this.assert(<%= plural %>.length)
+        this.assert(<%= plural %>[0].name)
+        this.assert(<%= plural %>[0].description)
+    },
+    test_create : function(){
+        new <%= name %>({name: "dry cleaning", description: "take to street corner"}).save(this.callback("created"))
+    },
+    created : function(<%= underscore %>){
+        this.assert(<%= underscore %>);
+        this.assert(<%= underscore %>.id);
+        this.assertEqual("dry cleaning",<%= underscore %>.name)
+        <%= underscore %>.destroy()
+    },
+    test_update : function(){
+        new <%= name %>({name: "cook dinner", description: "chicken"}).
+            save(this.callback("updateCreated"))
+    },
+    updateCreated : function(<%= underscore %>){
+        this.assertEqual("chicken",<%= underscore %>.description);
+        <%= underscore %>.update({description: "steak"},this.callback("updated"))
+    },
+    updated : function(<%= underscore %>){
+        this.assertEqual("steak",<%= underscore %>.description);
+        <%= underscore %>.destroy();
+    },
+    test_destroy : function(){
+        new <%= name %>({name: "mow grass", description: "use riding mower"}).
+            save(this.callback("destroyCreated"))
+    },
+    destroyCreated : function(<%= underscore %>){
+        <%= underscore %>.destroy(this.callback("destroyed"))
+    },
+    destroyed : function(<%= underscore %>){
+        this.assertNull( <%= name %>.store.findOne(<%= underscore %>.id) )
+    }
+});

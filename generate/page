@@ -1,0 +1,48 @@
+if (_args.length < 2) {
+	print("Creates an html page that loads one of your applications.\n")
+	print("USAGE: js steal/generate/test app_name page_location\n")
+	print();
+	quit();
+}
+
+load('steal/rhino/loader.js')
+rhinoLoader(function(){
+	steal.plugins('view','util/generator');
+});
+
+(function(){
+
+	var steal = steal.File.cwd();
+	var steal_folders = steal.split(/\/|\\/);
+	
+	var loc = _args[1]
+	var loc_folders = loc.split(/\/|\\/);
+	
+	//for each .. in loc folders, replace with steal folder
+	
+	var i = 0;
+	
+	if (loc_folders[i] == "..") {
+		while(loc_folders[i] == "..") {
+			loc_folders[i] = steal_folders.pop();
+			i++;
+		}
+	} else
+	    for(i=0; i < loc_folders.length - 1; i++)
+	    	loc_folders[i] = ".."
+	
+	loc_folders.pop();
+	loc_folders.push("steal");
+	loc_folders.push("steal.js");
+	
+	var data = {
+		path_to_steal: loc_folders.join("/"),
+		application_name: _args[0]
+	}
+	
+	//test/tests/engine.html -> ../../steal/steal.js
+	
+	Generator.renderTo(loc, "../generate/templates/page.ejs", data);
+	Generator.postGenerationMessage();
+
+})();

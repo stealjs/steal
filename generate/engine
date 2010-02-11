@@ -1,0 +1,35 @@
+if (!_args[0]) {
+	print("Usage: js steal/generate/engine engine_name")
+	quit();
+}
+
+
+load('steal/rhino/loader.js')
+rhinoLoader(function(){
+	steal.plugins('view','util/generator');
+});
+
+
+(function(){
+	var data = {
+		class_name: _args[0], 
+		application_name: _args[0]
+	};
+	
+	var root_path = "engines/" + data.class_name;
+	
+	Generator.createFolder(root_path);
+	Generator.createFolder(root_path + "/apps");
+	Generator.createFolder(root_path + "/controllers");
+	Generator.createFolder(root_path + "/models");
+	Generator.createFolder(root_path + "/resources");
+	Generator.createFolder(root_path + "/images");
+	Generator.createFolder(root_path + "/stylesheets");
+	Generator.createFolder(root_path + "/views");
+	
+	Generator.renderTo(root_path + "/apps/init.js", "../generate/templates/application.ejs", data);
+	
+	//render_to(root_path + "/apps/" + data.class_name + ".js", "../rhino/command/templates/application.ejs", data);
+	Generator.postGenerationMessage();
+
+})();
