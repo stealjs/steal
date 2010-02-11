@@ -7,7 +7,7 @@
 /**
  * @author thatcher
  */
-var Envjs = function(){
+Envjs = function(){
     if(arguments.length === 2){
         for ( var i in arguments[1] ) {
     		var g = arguments[1].__lookupGetter__(i), 

@@ -1,9 +1,34 @@
-Generator ={
-	first: true,
-	indent: "             ",
-	renderTo : function(file, ejs, data) {
-	    this.print_generating_message(file);
+Generate = function(path, data, viewPrefix){
+	this.paths = [path];
+	this.data = data;
+	this.first = true;
+	this.viewPrefix = viewPrefix;
+	this.indent= "             "
+}
+
+Generate.prototype ={
+	push : function(p){
+		this.paths.push(p)
+		return this;
+	},
+	pop : function(){
+		this.paths.pop();
+		return this;
+	},
+	render : function(file, ejs, data) {
+	    if(file)
+			file = this.paths.length ? this.paths.concat(file).join("/") : file;
+		else
+			file = this.paths.join("/")
+		data = data || this.data
+		this.print_generating_message(file);
+		
+		if(this.viewPrefix){
+			ejs = this.viewPrefix+ejs;
+		}
+		
 	    new steal.File(file).save( new EJS({ url : ejs }).render(data)  );
+		return this;
 	},
 	print_generating_message : function(path) {
 		if (this.first)
@@ -11,18 +36,29 @@ Generator ={
 		
 		print(this.indent + path);
 		this.first = false;
+		return this;
 	},
 	renderTextTo : function(file, text) {
+		if(file)
+			file = this.paths.length ? this.paths.concat(file).join("/") : file;
+		else
+			file = this.paths.join("/")
 		this.print_generating_message(file);
 		new steal.File(file).save(text);
+		return this;
 	},
-	createFolder : function(file) {
+	folder : function(file) {
+		if(file)
+			file = this.paths.length ? this.paths.concat(file).join("/") : file;
+		else
+			file = this.paths.join("/")
 		this.print_generating_message(file);
 		new steal.File(file).mkdirs();
-
+		return this;
 	},
 	postGenerationMessage : function() {
 		print("\n" + this.indent + "Make sure to add new files to your application and test file!\n");
+		return this;
 	}
 };
 

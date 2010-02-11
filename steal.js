@@ -786,7 +786,15 @@ steal.resources = steal.applier(function(i){return '../../resources/'+i});
  * Includes a list of files in the <b>/views</b> directory.
  * @param {String} view_path view you want to load.
  */
-steal.views = function(path){
+steal.views = function(){
+	for(var i=0; i< arguments.length; i++){	
+		steal.view(arguments[i])
+    }
+	return steal;
+};
+
+
+steal.view = function(path){
     var type = path.match(/\.\w+$/gi)[0].replace(".","");
 	steal({src: path, type: type});    
 	return steal;
@@ -801,7 +809,6 @@ var script_tag = function(){
 var insert = function(src, type, onlyInsert){
     // source we need to know how to get to steal, then load 
     // relative to path to steal
-    console.log(src)
 	if(src){
         var src_file = new File(src);
         if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())

@@ -16,5 +16,5 @@ rhinoLoader(function(){
 	$modelType = _args[1];
 	load("steal/generate/parts/convert.js")
 	load("steal/generate/parts/model.js")
-	Generator.postGenerationMessage();
+	Generate.postGenerationMessage();
 })();

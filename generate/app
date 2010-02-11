@@ -1,21 +1,23 @@
 // _args = ['thing']; load('steal/generate/app')
 if (!_args[0]) {
-	print("Usage: js steal/generate/app path");
+	print("Usage: steal/js steal/generate/app path");
 	quit();
 }
 
-load('steal/rhino/loader.js')
+load('steal/rhino/loader.js');
+
+
 rhinoLoader(function(){
 	steal.plugins('steal/ejs','steal/file','steal/generate');
 });
 
-
+;
 
 
 (function(){
 
-	var steal = steal.File.cwd();
-	var steal_folders = steal.split(/\/|\\/);
+	var stealloc = steal.File.cwd();
+	var stealloc_folders = stealloc.split(/\/|\\/);
 	
 	var loc = _args[0]
 	var loc_folders = loc.split(/\/|\\/);
@@ -26,7 +28,7 @@ rhinoLoader(function(){
 	
 	if (loc_folders[i] == "..") {
 		while(loc_folders[i] == "..") {
-			loc_folders[i] = steal_folders.pop();
+			loc_folders[i] = stealloc_folders.pop();
 			i++;
 		}
 	} else
@@ -82,51 +84,60 @@ rhinoLoader(function(){
 	};
 	
 	var app_root = _args[0];
-	Generator.createFolder(app_root);
-	Generator.renderTo(app_root + "/"+data.application_name+".js", 						 "../generate/templates/application.ejs", data);
-	Generator.renderTo(app_root + "/"+data.application_name+".html", 					"../generate/templates/page.ejs", data);
+	new Generate(app_root, data, "../generate/templates/")
+      .folder()
+      .render(data.application_name+".js",  "application.ejs")
+      .render(data.application_name+".html",  "page.ejs")
+      .push("test").folder()
+        .push("qunit").folder()
+          .render("qunit.html", "qunit/html.ejs")
+          .render("qunit.js", "qunit/qunit.ejs")
+          .render(data.application_name+"_test.js", "qunit/test.ejs")
+          .render("run.js", "qunit/run.ejs")
+          .pop()
+        .push("funcunit").folder()
+          .render("funcunit.html", "funcunit/html.ejs")
+          .render("funcunit.js", "funcunit/funcunit.ejs")
+          .render(data.application_name+"_test.js", "funcunit/test.ejs")
+          .render("run.js", "funcunit/run.ejs")
+          .pop()
+        .pop()
+      .folder("docs")
+      .push("scripts").folder()
+        .render("compress.js", "compress_script.ejs")
+        .render("doc.js","docs_script.ejs")
+			.folder("controllers")
+			.folder("models")
+			.folder("views")
+			.folder("resources")
+				.
+					
 	
-	Generator.createFolder(app_root+"/test");
-	
-	Generator.createFolder(app_root+"/test/qunit");
-	Generator.renderTo(app_root + "/test/qunit/qunit.html", 						 "../generate/templates/qunit/html.ejs", data);
-	Generator.renderTo(app_root + "/test/qunit/qunit.js",   						 "../generate/templates/qunit/qunit.ejs", data);
-	Generator.renderTo(app_root + "/test/qunit/"+data.application_name+"_test.js",   "../generate/templates/qunit/test.ejs", data);
-	Generator.renderTo(app_root + "/test/qunit/run.js",   					    	 "../generate/templates/qunit/run.ejs", data);
 	
 	
 	
 	
-	Generator.createFolder(app_root+"/test/funcunit");
-	Generator.renderTo(app_root + "/funcunit.html", 						 			 "../generate/templates/funcunit/html.ejs", data);
-	Generator.renderTo(app_root + "/test/funcunit/funcunit.js",   						 "../generate/templates/funcunit/funcunit.ejs", data);
-	Generator.renderTo(app_root + "/test/funcunit/"+data.application_name+"_test.js",    "../generate/templates/funcunit/test.ejs", data);
 	
-	Generator.renderTo(app_root + "/test/funcunit/run.js",    							 "../generate/templates/funcunit/run.ejs", data);
 	
-	Generator.renderTo(app_root + "/scripts/compress.js", "../generate/templates/compress_script.ejs", data);
-	
-	Generator.renderTo(app_root + "/scripts/docs.js", "../generate/templates/docs_script.ejs", data);
-	Generator.createFolder(app_root+"/docs");
 	
 	/*
 	
-	Generator.createFolder(app_root+"/scripts");
-	Generator.createFolder(app_root+"/docs");
+
+	Generate.folder(app_root+"/docs");
 	
 	
-	Generator.renderTo(app_root + "/"+data.application_name, "../generate/templates/application.ejs", data);
+	Generate.render(app_root + "/"+data.application_name, "../generate/templates/application.ejs", data);
 	
-	Generator.renderTo(app_root + "/index.html", "../generate/templates/compress_page.ejs", data);
-	Generator.createFolder(app_root+"/test");
-	Generator.renderTo(app_root + "/test/unit.js", "../generate/templates/unit.ejs", data);
-	Generator.renderTo(app_root + "/test/run_unit.js", "../generate/templates/unit_script.ejs", data);
-	Generator.renderTo(app_root + "/test/functional.js", "../generate/templates/functional.ejs", data);
-	Generator.renderTo(app_root + "/test/run_functional.js", "../generate/templates/run_functional.ejs", data);
-	Generator.renderTo(app_root + "/test/selenium_config.js", "../generate/templates/selenium_config.ejs", data);
-	Generator.createFolder(app_root+"/docs");
-	Generator.renderTo("test/unit/truth_test.js", "../generate/templates/unit_test.ejs", {name: "Truth"});
-	Generator.renderTo("test/functional/truth_functional_test.js", "../generate/templates/functional_test.ejs", {name: "Truth"});
+	Generate.render(app_root + "/index.html", "../generate/templates/compress_page.ejs", data);
+	Generate.folder(app_root+"/test");
+	Generate.render(app_root + "/test/unit.js", "../generate/templates/unit.ejs", data);
+	Generate.render(app_root + "/test/run_unit.js", "../generate/templates/unit_script.ejs", data);
+	Generate.render(app_root + "/test/functional.js", "../generate/templates/functional.ejs", data);
+	Generate.render(app_root + "/test/run_functional.js", "../generate/templates/run_functional.ejs", data);
+	Generate.render(app_root + "/test/selenium_config.js", "../generate/templates/selenium_config.ejs", data);
+	Generate.folder(app_root+"/docs");
+	Generate.render("test/unit/truth_test.js", "../generate/templates/unit_test.ejs", {name: "Truth"});
+	Generate.render("test/functional/truth_functional_test.js", "../generate/templates/functional_test.ejs", {name: "Truth"});
 	
 	
 	
@@ -137,10 +148,10 @@ rhinoLoader(function(){
 	
 	//test/tests/engine.html -> ../../steal/steal.js
 	
-	Generator.renderTo(_args[0]+".html", "../generate/templates/page.ejs", dta);
-	Generator.postGenerationMessage();
+	Generate.render(_args[0]+".html", "../generate/templates/page.ejs", dta);
+	Generate.postGenerationMessage();
 	
-	//Generator.postGenerationMessage();
+	//Generate.postGenerationMessage();
     */
 })();
 

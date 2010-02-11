@@ -20,8 +20,8 @@ rhinoLoader(function(){
 	var method = _args[0].toLowerCase();
 	//if nothing else, must be the name
 	if(_args.length == 1){
-		Generator.createFolder("/test/fixtures");
-		Generator.renderTo("/test/fixtures"+method, "../generate/templates/application.ejs", {});
+		Generate.folder("/test/fixtures");
+		Generate.render("/test/fixtures"+method, "../generate/templates/application.ejs", {});
 		return;
 	}
 	
@@ -35,14 +35,14 @@ rhinoLoader(function(){
 	for(var i =0; i < folders.length; i++){
 		if(folders[i]){
 			base.push(folders[i]);
-			Generator.createFolder(base.join( "/" ) );
+			Generate.folder(base.join( "/" ) );
 		}
 	}
 	
 	base.push(file_name + "." + method)
 	
 
-	Generator.renderTo(base.join( "/" ), "../generate/templates/application.ejs", {});
+	Generate.render(base.join( "/" ), "../generate/templates/application.ejs", {});
 	
 	//print_post_generation_message();
 })();

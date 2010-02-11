@@ -18,11 +18,11 @@ rhinoLoader(function(){
 		path: jQuery.String.underscore(name),
 		name: name
 	};
-	Generator.createFolder("test/unit");
+	Generate.folder("test/unit");
 
-	Generator.renderTo("test/unit/" + data.path + "_test.js", "../generate/templates/unit_test.ejs", data);
+	Generate.render("test/unit/" + data.path + "_test.js", "../generate/templates/unit_test.ejs", data);
 
-	Generator.postGenerationMessage();
+	Generate.postGenerationMessage();
 
 
 })();

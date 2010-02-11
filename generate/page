@@ -42,7 +42,7 @@ rhinoLoader(function(){
 	
 	//test/tests/engine.html -> ../../steal/steal.js
 	
-	Generator.renderTo(loc, "../generate/templates/page.ejs", data);
-	Generator.postGenerationMessage();
+	Generate.render(loc, "../generate/templates/page.ejs", data);
+	Generate.postGenerationMessage();
 
 })();

@@ -18,12 +18,12 @@ rhinoLoader(function(){
 		path: jQuery.String.underscore(name),
 		name: name
 	};
-	Generator.createFolder("controllers");
+	Generate.folder("controllers");
 	
-	Generator.renderTo("controllers/" + data.path+"_controller.js", "../generate/templates/controller.ejs", data);
-	Generator.renderTo("test/functional/" + data.path + "_test.js", "../generate/templates/functional_test.ejs", data);
-	Generator.createFolder("views/" + data.path);
-	Generator.postGenerationMessage();
+	Generate.render("controllers/" + data.path+"_controller.js", "../generate/templates/controller.ejs", data);
+	Generate.render("test/functional/" + data.path + "_test.js", "../generate/templates/functional_test.ejs", data);
+	Generate.folder("views/" + data.path);
+	Generate.postGenerationMessage();
 
 
 })();

@@ -1,3 +1,7 @@
-steal.apps().then(function(){
-
-});
+steal.plugins('jquery/controller',
+			  'jquery/view',
+			  'jquery/model')
+     .resources()
+     .models()
+     .controllers()
+     .views()

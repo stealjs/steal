@@ -1,10 +1,22 @@
-if(typeof steal == "undefined") steal = {};
+if(typeof steal == "undefined") 
+	steal = {};
+;
+(function(){
+	
+	var extend = function(d, s){
+		for(var n in s){
+			d[n] = s[n]
+		}
+	}
+	
+	if(!steal.File){
+		steal.File = function(path){
+			this.path = path;
+		}
+	}
 
-steal.File = function(path){
-	this.path = path;
-}
 
-steal.File.prototype = {	
+extend(steal.File.prototype, {	
 	/**
 	 * Removes hash and params
 	 * @return {String}
@@ -148,10 +160,15 @@ steal.File.prototype = {
     basename: function(){
         return this.path.match(/\/?([^\/]*)\/?$/)[1];
     }
-};
+});
+
 steal.File.cwdURL = function(){
     return new java.io.File("").toURL().toString();
 }
 steal.File.cwd = function(){
     return String(new java.io.File('').getAbsoluteFile().toString());
 }
+	
+	
+})();
+

@@ -16,17 +16,17 @@ rhinoLoader(function(){
 	
 
 	//create controller stuff
-	Generator.createFolder("controllers");
-	Generator.renderTo("controllers/" + data.underscore+"_controller.js", "../generate/templates/scaffold/controller.ejs", data);
-	//Generator.renderTo("test/functional/" + data.underscore + "_test.js", "../generate/templates/scaffold/functional_test.ejs", data);
-	Generator.createFolder("views/" + data.underscore);
+	Generate.folder("controllers");
+	Generate.render("controllers/" + data.underscore+"_controller.js", "../generate/templates/scaffold/controller.ejs", data);
+	//Generate.render("test/functional/" + data.underscore + "_test.js", "../generate/templates/scaffold/functional_test.ejs", data);
+	Generate.folder("views/" + data.underscore);
 	//create views for things
-	Generator.renderTo("views/" + data.underscore+"/edit.ejs", "../generate/templates/scaffold/edit.ejs", data);
-	Generator.renderTo("views/" + data.underscore+"/init.ejs", "../generate/templates/scaffold/init.ejs", data);
-	Generator.renderTo("views/" + data.underscore+"/list.ejs", "../generate/templates/scaffold/list.ejs", data);
-	Generator.renderTo("views/" + data.underscore+"/show.ejs", "../generate/templates/scaffold/show.ejs", data);
+	Generate.render("views/" + data.underscore+"/edit.ejs", "../generate/templates/scaffold/edit.ejs", data);
+	Generate.render("views/" + data.underscore+"/init.ejs", "../generate/templates/scaffold/init.ejs", data);
+	Generate.render("views/" + data.underscore+"/list.ejs", "../generate/templates/scaffold/list.ejs", data);
+	Generate.render("views/" + data.underscore+"/show.ejs", "../generate/templates/scaffold/show.ejs", data);
 	//functional test
-	Generator.renderTo("test/functional/" + data.underscore+"_controller_test.js", "../generate/templates/scaffold/functional_test.ejs", data);
+	Generate.render("test/functional/" + data.underscore+"_controller_test.js", "../generate/templates/scaffold/functional_test.ejs", data);
 	
 	//model stuff
 	$modelName = _args[0];
@@ -34,7 +34,7 @@ rhinoLoader(function(){
 	load("steal/generate/parts/convert.js")
 	load("steal/generate/parts/model.js")
 	
-	Generator.postGenerationMessage();
+	Generate.postGenerationMessage();
 	
 })();
 

@@ -18,18 +18,18 @@ rhinoLoader(function(){
 	
 	var root_path = "engines/" + data.class_name;
 	
-	Generator.createFolder(root_path);
-	Generator.createFolder(root_path + "/apps");
-	Generator.createFolder(root_path + "/controllers");
-	Generator.createFolder(root_path + "/models");
-	Generator.createFolder(root_path + "/resources");
-	Generator.createFolder(root_path + "/images");
-	Generator.createFolder(root_path + "/stylesheets");
-	Generator.createFolder(root_path + "/views");
+	Generate.folder(root_path);
+	Generate.folder(root_path + "/apps");
+	Generate.folder(root_path + "/controllers");
+	Generate.folder(root_path + "/models");
+	Generate.folder(root_path + "/resources");
+	Generate.folder(root_path + "/images");
+	Generate.folder(root_path + "/stylesheets");
+	Generate.folder(root_path + "/views");
 	
-	Generator.renderTo(root_path + "/apps/init.js", "../generate/templates/application.ejs", data);
+	Generate.render(root_path + "/apps/init.js", "../generate/templates/application.ejs", data);
 	
 	//render_to(root_path + "/apps/" + data.class_name + ".js", "../rhino/command/templates/application.ejs", data);
-	Generator.postGenerationMessage();
+	Generate.postGenerationMessage();
 
 })();
