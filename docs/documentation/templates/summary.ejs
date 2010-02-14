@@ -3,7 +3,7 @@
 <html lang="en">
 	<head>
 		<title>JavaScriptMVC</title>
-        <link rel="stylesheet" type='text/css' href='steal/plugins/documentation/app/style.css' />
+        <link rel="stylesheet" type='text/css' href='../style.css' />
 	</head>
 	<body scroll="no">
 	    
@@ -11,7 +11,7 @@
 	        <div id='top'>
 	            <input id='search' type='input' disabled='true'/>
                 <div id='defaults'>
-                    <div style='color:white;float: right;margin-right: 10px; position: relative; top: -3px'>JavaScript<img src='steal/plugins/documentation/app/images/logo.png' style="position: relative; top: 5px;left: 2px"/></div>
+                    <div style='color:white;float: right;margin-right: 10px; position: relative; top: -3px'>JavaScript<img src='../images/logo.png' style="position: relative; top: 5px;left: 2px"/></div>
                     <a href="#&amp;search=home&amp;who=index">Home</a>
                     <a href="#&amp;search=core">Core</a>
                     <a href="#favorites">Favorites</a>
@@ -23,7 +23,8 @@
             
             <div id='bottom'>
                 
-            
+                <div id='docjs'></div>
+                
                 <div id='left'>
                     <a>Loading ... </a>
                 </div>
@@ -38,10 +39,10 @@
             <a href="http://jupiterit.com">&copy; Jupiter IT - JavaScriptMVC Training and Support</a>
         </div>
 		<script type='text/javascript'>
-            DOCS_LOCATION = "apps/<%=name%>/docs/"
+            DOCS_LOCATION = "docs/"
         </script>
         <script type='text/javascript' 
-                src='steal/steal.js?steal/plugins/documentation/app/init.js,production'>   
+                src='../../steal/steal.js?steal[app]=docjs&steal[env]=development'>   
         </script>
 	</body>
 </html>
