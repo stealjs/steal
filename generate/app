@@ -11,7 +11,6 @@ rhinoLoader(function(){
 	steal.plugins('steal/ejs','steal/file','steal/generate');
 });
 
-;
 
 
 (function(){
@@ -106,12 +105,12 @@ rhinoLoader(function(){
       .push("scripts").folder()
         .render("compress.js", "compress_script.ejs")
         .render("doc.js","docs_script.ejs")
-			.folder("controllers")
-			.folder("models")
-			.folder("views")
-			.folder("resources")
-				.
-					
+        .pop()
+      .folder("controllers")
+      .folder("models")
+      .folder("views")
+      .folder("resources")
+
 	
 	
 	
