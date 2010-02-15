@@ -437,7 +437,7 @@
 						new Synthetic("submit").send( form );
 				}
 				if(element.nodeName.toLowerCase() == "a" && element.href && !/^\s*javascript:/.test(element.href)){
-					window.location.href= element.href;
+					this.scope.location.href = element.href;
 				}
 				
 				if(element.nodeName.toLowerCase() == "input" && element.type == "checkbox"){
@@ -473,6 +473,7 @@
 						new Synthetic("change").send(  element.parentNode );
 					}
 				}
+				
 			}
 			return res;
 		},
