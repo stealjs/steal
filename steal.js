@@ -181,7 +181,7 @@ steal.fn = steal.prototype = {
             this.func();
             insert();
         }else if(this.type){
-        	insert(this.path, "text/" + this.type);
+            insert(this.path, "text/" + this.type);
         }else{
             if( steal.options.env == 'compress'){
                 this.setSrc();
@@ -763,24 +763,72 @@ steal.engine = steal.resetApp(function(p){
  *     'engines/<i>engine</i>/apps/<i>part</i>/init.js'.
  */
 steal.engines = steal.callOnArgs(steal.engine);
+
+/**
+ * @function prependControllersPath
+ * Will prepend controllers\ to controllers with relative paths.
+ * @param {String} src The controller path.
+ */
+var prependControllersPath = function(src) {
+	if(src){
+        var src_file = new File(src);
+        if(src_file.isLocalAbsolute() || src_file.isDomainAbsolute()){
+            return src;
+        }
+        return 'controllers/'+src+'_controller';
+    }
+}
+
 /**
  * @function controllers
  * Includes controllers from the controllers directory.  Will add _controller.js to each name passed in.
  * @param {String} controller_name A controller to steal.  "_controller.js" is added to the name provided.
  */
-steal.controllers = steal.applier(function(i){return 'controllers/'+i+'_controller'});
+steal.controllers = steal.applier(prependControllersPath);
+
+/**
+ * @function prependModelsPath
+ * Will prepend model\ to models with relative paths.
+ * @param {String} src The model path.
+ */
+var prependModelsPath = function(src) {
+	if(src){
+        var src_file = new File(src);
+        if(src_file.isLocalAbsolute() || src_file.isDomainAbsolute()){
+            return src;
+        }
+        return 'models/'+src;
+    }
+}
+
 /**
  * @function models
  * Includes files in the /models directory.
  * @param {String} model_name the name of the model file you want to load.
  */
-steal.models = steal.applier(function(i){return 'models/'+i});
+steal.models = steal.applier(prependModelsPath);
+ 
+/*
+ * @function prependResourcesPath
+ * Will prepend resources\ to resources with relative paths.
+ * @param {String} src The resource path.
+ */
+var prependResourcesPath = function(src) {
+	if(src){
+        var src_file = new File(src);
+        if(src_file.isLocalAbsolute() || src_file.isDomainAbsolute()){
+            return src;
+        }
+        return 'resources/'+src;
+    }
+}
+ 
 /**
  * @function resources
  * Includes a list of files in the <b>/resources</b> directory.
  * @param {String} resource_path resource you want to load.
  */
-steal.resources = steal.applier(function(i){return 'resources/'+i});
+steal.resources = steal.applier(prependResourcesPath);
 /**
  * @function views
  * Includes a list of files in the <b>/views</b> directory.
