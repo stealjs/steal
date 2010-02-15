@@ -87,7 +87,8 @@
 		
 		var selector = args.shift(),
 			context = args.shift(),
-			method = args.shift();
+			method = args.shift(), 
+			q;
 			
 		//convert context	
 		if(context == S.window.document){
@@ -99,7 +100,12 @@
 		
 		
 		
-		var q = jQuery(selector, context);
+		if (S._window.jQuery) {
+		    q = jQuery(S._window.jQuery(selector).get());
+		} else {
+		    q = jQuery(selector, context);
+		}
+		
 		return q[method].apply(q, args);
 	}
 	
