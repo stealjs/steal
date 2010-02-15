@@ -765,70 +765,44 @@ steal.engine = steal.resetApp(function(p){
 steal.engines = steal.callOnArgs(steal.engine);
 
 /**
- * @function prependControllersPath
- * Will prepend controllers\ to controllers with relative paths.
- * @param {String} src The controller path.
- */
-var prependControllersPath = function(src) {
-	if(src){
-        var src_file = new File(src);
-        if(src_file.isLocalAbsolute() || src_file.isDomainAbsolute()){
-            return src;
-        }
-        return 'controllers/'+src+'_controller';
-    }
-}
-
-/**
  * @function controllers
  * Includes controllers from the controllers directory.  Will add _controller.js to each name passed in.
  * @param {String} controller_name A controller to steal.  "_controller.js" is added to the name provided.
  */
-steal.controllers = steal.applier(prependControllersPath);
-
-/**
- * @function prependModelsPath
- * Will prepend model\ to models with relative paths.
- * @param {String} src The model path.
- */
-var prependModelsPath = function(src) {
-	if(src){
-        var src_file = new File(src);
-        if(src_file.isLocalAbsolute() || src_file.isDomainAbsolute()){
-            return src;
-        }
-        return 'models/'+src;
+steal.controllers = steal.applier(function(i){
+    if (i.match(/^\/\//)) {
+        i = steal.root.join( i.substr(2) )
+        return i;
     }
-}
+    return 'controllers/'+i+'_controller';
+});
 
 /**
  * @function models
  * Includes files in the /models directory.
  * @param {String} model_name the name of the model file you want to load.
  */
-steal.models = steal.applier(prependModelsPath);
- 
-/*
- * @function prependResourcesPath
- * Will prepend resources\ to resources with relative paths.
- * @param {String} src The resource path.
- */
-var prependResourcesPath = function(src) {
-	if(src){
-        var src_file = new File(src);
-        if(src_file.isLocalAbsolute() || src_file.isDomainAbsolute()){
-            return src;
-        }
-        return 'resources/'+src;
+steal.models = steal.applier(function(i){
+    if (i.match(/^\/\//)) {
+        i = steal.root.join( i.substr(2) )
+        return i;
     }
-}
+    return 'models/'+i;
+});
  
 /**
  * @function resources
  * Includes a list of files in the <b>/resources</b> directory.
  * @param {String} resource_path resource you want to load.
  */
-steal.resources = steal.applier(prependResourcesPath);
+steal.resources = steal.applier(function(i){
+    if (i.match(/^\/\//)) {
+        i = steal.root.join( i.substr(2) )
+        return i;
+    }
+    return 'resources/'+i;
+});
+
 /**
  * @function views
  * Includes a list of files in the <b>/views</b> directory.
