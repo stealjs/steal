@@ -11,7 +11,6 @@ jQuery.wrapped = function(){
 	    q = jQuery(selector, context);
 	}
 	
-	var q = jQuery(selector, context);
 	//need to conver to json
 	var res = q[method].apply(q, args);
     

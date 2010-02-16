@@ -3,7 +3,7 @@
 
 
 //load global selenium settings
-load('settings/selenium.js')
+load('steal/settings/selenium.js')
 
 // load qfunctional
 load('steal/rhino/loader.js');
