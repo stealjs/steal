@@ -410,6 +410,13 @@
 			//jQuery(element).unbind("click", set)
 			if(href){
 				element.setAttribute('href',href)
+            }
+			
+			// prevents the access denied issue in IE if the click causes the element to be destroyed
+			try {
+			    element.nodeType;
+			} catch(e){
+			    return res;
 			}
 
 			if(!support.linkHrefJS && /^\s*javascript:/.test(element.href)){

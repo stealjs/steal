@@ -80,21 +80,17 @@
         var selector = args.shift(),
 			context = args.shift(),
 			method = args.shift(),
-			q,
-			forceContext = false;
+			q;
 
         //convert context	
         if (context == S.window.document) {
             context = S._window.document
         } else if (typeof context == "number" || typeof context == "string") {
             context = S._window.frames[context].document;
-            forceContext = true;
         }
 
 
-        if (S._window.jQuery && !forceContext) {
-            q = jQuery(S._window.jQuery(selector).get());
-        } else if (S._window.jQuery && forceContext) {
+        if (S._window.jQuery && parseFloat(S._window.jQuery().jquery) >= 1.3) {
             q = jQuery(S._window.jQuery(selector, context).get());
         } else {
             q = jQuery(selector, context);
