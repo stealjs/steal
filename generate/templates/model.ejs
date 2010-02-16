@@ -17,13 +17,13 @@ $.Model.extend('<%=name%>',
      */
     findAll : function(params, success, error){
         $.ajax({
-            url: '/<%= plural %>',
+            url: '/<%= underscore %>',
             type: 'get',
             dataType: 'json',
             data: params,
             success: this.callback(['wrapMany',success]),
 			error: error,
-            fixture: true //calculates the fixture path from the url and type.
+            fixture: "//<%= appPath %>/fixtures/<%= underscore %>.get" //calculates the fixture path from the url and type.
         })
     },
     /**

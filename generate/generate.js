@@ -1,7 +1,7 @@
-Generate = function(path, data, viewPrefix){
+Generate = function(path, data, viewPrefix, first){
 	this.paths = [path];
 	this.data = data;
-	this.first = true;
+	this.first = first !== undefined ? first : true;
 	this.viewPrefix = viewPrefix;
 	this.indent= "             "
 }
@@ -61,6 +61,20 @@ Generate.prototype ={
 		return this;
 	}
 };
+
+Generate.regexps = {
+        colons : /::/,
+        words: /([A-Z]+)([A-Z][a-z])/g,
+        lowerUpper : /([a-z\d])([A-Z])/g,
+        dash : /([a-z\d])([A-Z])/g
+    }
+Generate.underscore = function(s){
+        var regs = this.regexps;
+        return s.replace(regs.colons, '/').
+                 replace(regs.words,'$1_$2').
+                 replace(regs.lowerUpper,'$1_$2').
+                 replace(regs.dash,'_').toLowerCase()
+    }
 
 
 

@@ -110,7 +110,7 @@ rhinoLoader(function(){
       .folder("models")
       .folder("views")
       .folder("resources")
-
+	  .folder("fixtures")
 	
 	
 	
