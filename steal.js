@@ -8,7 +8,7 @@
  * -Checks if the file has already been loaded, if it has, calls steal.end
  * -Defines the MVC namespace.
  * -Defines File
- * -Inspects the DOM for the script tag that steald steal.js, with it extracts:
+ * -Inspects the DOM for the script tag that stolen steal.js, with it extracts:
  *     * the location of steal
  *     * the location of the application directory
  *     * the application's name
@@ -26,7 +26,25 @@
 if(typeof steal != 'undefined' && steal.nodeType)
     throw("Include is defined as function or an element's id!");
 
-var oldsteal = window.steal;
+// make some useful helpers and other stuff
+var oldsteal = window.steal,
+    guid = 0,
+	extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;},
+    getLastPart = function(p){ return p.match(/[^\/]+$/)[0]},
+	browser = {
+        msie:     !!(window.attachEvent && !window.opera),
+        opera:  !!window.opera,
+        safari: navigator.userAgent.indexOf('AppleWebKit/') > -1,
+        firefox:  navigator.userAgent.indexOf('Gecko') > -1 && navigator.userAgent.indexOf('KHTML') == -1,
+        mobilesafari: !!navigator.userAgent.match(/Apple.*Mobile.*Safari/),
+        rhino : navigator.userAgent.match(/Rhino/) && true
+    },
+	factory = function(){ return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();};
+	random = ""+parseInt(Math.random()*100)
+
+
+
+
 
 
 /**
@@ -48,7 +66,7 @@ var oldsteal = window.steal;
  * })
  * @codeend
  * Includes are performed relative to the including file. 
- * Files are steald last-in-first-out after the current file has been loaded and run.
+ * Files are stolen last-in-first-out after the current file has been loaded and run.
  * <h2>Concat and Compress</h2>
  * In your terminal simply run:
  * @codestart no-highlight
@@ -103,22 +121,20 @@ var oldsteal = window.steal;
     </tbody></table>
  */
 steal = function(){
-    
-    if(steal.options.env.match(/development|compress|test/)){
-        
-        for(var i=0; i < arguments.length; i++) 
-            steal.add(  new steal.fn.init(arguments[i]) );
-
+    if( /development|compress|test/.test(steal.options.env) ){
+        for( var i=0; i < arguments.length; i++ ) {
+			steal.add( new steal.fn.init(arguments[i]) );
+		}
     }else{
         //production file
-        if(!first_wave_done && (typeof arguments[0] != 'function')) return; 
-        for(var i=0; i < arguments.length; i++){
+        for( var i=0; i < arguments.length; i++ ){
+			if( !first_wave_done && (typeof arguments[i] != 'function' )) continue;
             steal.add( new steal.fn.init(arguments[i]) );
         }
     }
     return steal;
 };
-var id = 0;
+
 /* @prototype */
 steal.fn = steal.prototype = {
     /**
@@ -143,19 +159,18 @@ steal.fn = steal.prototype = {
      * @return {steal} a new steal object
      */
     init : function(options){
-        this.id = (++id)
-		if(typeof options == 'function'){
+        this.guid = (++guid)
+		if( typeof options == 'function' ){
             var path = steal.getPath();
             this.func = function(){
                 steal.setPath(path);
-                options(window.jQuery); //should return what was steald before 'then'
+                options(window.jQuery); //should return what was stolen before 'then'
             };
             this.options = options;
-        } else if(options.type) { 
+        } else if( options.type ) { 
             this.path = options.src;
             this.type = options.type;
         } else { //something we are going to steal and run
-            
             if(typeof options == 'string' ){
                 this.path = options.indexOf('.js') == -1  ? options+'.js' : options
             }else {
@@ -165,7 +180,7 @@ steal.fn = steal.prototype = {
             //get actual path
             var pathFile = new File(this.path);
             this.path = pathFile.normalize();
-            this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
+            this.absolute = pathFile.isRelative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
             this.dir = new File(this.path).dir();
         }
         
@@ -177,7 +192,7 @@ steal.fn = steal.prototype = {
     run : function(){
         steal.current = this;
         if(this.func){
-            //run function and continue to next steald
+            //run function and continue to next steal
             this.func();
             insert();
         }else if(this.type){
@@ -196,7 +211,6 @@ steal.fn = steal.prototype = {
      */
     runNow : function(){
         steal.setPath(this.dir);
-        
         return browser.rhino ? load(this.path) : 
                     steal.insert_head( steal.root.join(this.path) );
     },
@@ -213,30 +227,14 @@ steal.fn = steal.prototype = {
         this.src = steal.request(steal.root.join(this.path));
     }
     
-}
+};
+//expose some useful stuff
 steal.fn.init.prototype = steal.fn;
-
-
-var extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;},
-    getLastPart = function(p){ return p.match(/[^\/]+$/)[0]};
+steal.browser = browser,
 steal.extend = extend;
-var browser = {
-        msie:     !!(window.attachEvent && !window.opera),
-        opera:  !!window.opera,
-        safari: navigator.userAgent.indexOf('AppleWebKit/') > -1,
-        firefox:  navigator.userAgent.indexOf('Gecko') > -1 && navigator.userAgent.indexOf('KHTML') == -1,
-        mobilesafari: !!navigator.userAgent.match(/Apple.*Mobile.*Safari/),
-        rhino : navigator.userAgent.match(/Rhino/) && true
-    }
-    steal.browser = browser;
-var random = ""+parseInt(Math.random()*100)
-
-
 steal.root = null;
 steal.pageDir = null;
 
-
-var factory = function(){ return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();};
 
 
 
@@ -264,7 +262,7 @@ File.prototype =
      */
     dir: function(){
         var last = this.clean().lastIndexOf('/');
-        return last != -1 ? this.clean().substring(0,last) : ''; //this.clean();
+        return last != -1 ? this.clean().substring(0,last) : ''; 
     },
     /**
      * Returns the domain for the current path.
@@ -295,13 +293,14 @@ File.prototype =
      * @return {String} 
      */
     joinFrom: function( url, expand){
-        if(this.isDomainAbsolute()){
+        if(this.isHardRelative()){
+			return this.path.substr(2);
+		}
+		else if(this.isDomainAbsolute()){
             var u = new File(url);
-            if(this.domain() && this.domain() == u.domain() ) 
-                return this.after_domain();
-            else if(this.domain() == u.domain()) { // we are from a file
-                return this.to_reference_from_same_domain(url);
-            }else
+            if(this.domain() == u.domain() && !u.isCrossDomain() ) 
+                return this.toRelative(url);
+            else
                 return this.path;
         }else if(url == steal.pageDir && !expand){
             return this.path;
@@ -313,11 +312,20 @@ File.prototype =
         else{
             
             if(url == '') return this.path.replace(/\/$/,'');
-            var urls = url.split('/'), paths = this.path.split('/'), path = paths[0];
-            if(url.match(/\/$/) ) urls.pop();
+            var urls = url.split('/'), 
+			    paths = this.path.split('/'), 
+				path = paths[0],
+				empty = false;
+            if(/\/$/.test(url) ) urls.pop();
             while(path == '..' && paths.length > 0){
                 paths.shift();
-                urls.pop();
+				if(empty){
+					urls.push('..')
+				}else if(!urls.pop()){
+					empty = true;
+					urls.push('..');
+				}
+				
                 path =paths[0];
             }
             return urls.concat(paths).join('/');
@@ -326,64 +334,49 @@ File.prototype =
     /**
      * Joins the file to the current working directory.
      */
-    join_current: function(){
+    joinCurrent: function(){
         return this.joinFrom(steal.getPath());
     },
     /**
      * Returns true if the file is relative
      */
-    relative: function(){        return this.path.match(/^(https?:|file:|\/)/) == null;},
+    isRelative: function(){        return !/^(https?:|file:|\/)/.test(this.path);},
     /**
      * Returns the part of the path that is after the domain part
      */
-    after_domain: function(){    return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
+    pathname: function(){ return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
     /**
-     * 
+     * Takes a urls with the same domain parts as the file, and returns a relative url
+     * to the passed in url.
      * @param {Object} url
      */
-    to_reference_from_same_domain: function(url){
-        var parts = this.path.split('/'), other_parts = url.split('/'), result = '';
+    toRelative: function(url){
+        var parts = this.path.split('/'), 
+		            other_parts = url.split('/'), 
+					result = [];
         while(parts.length > 0 && other_parts.length >0 && parts[0] == other_parts[0]){
-            parts.shift(); other_parts.shift();
+            parts.shift(); 
+			other_parts.shift();
         }
-        for(var i = 0; i< other_parts.length; i++) result += '../';
-        return result+ parts.join('/');
+        return new Array(other_parts.length+1).join("../")+parts.join('/');
     },
     /**
      * Is the file on the same domain as our page.
      */
-    is_cross_domain : function(){
-        if(this.isLocalAbsolute()) return false;
-        return this.domain() != new File(window.location.href).domain();
+    isCrossDomain : function(){
+        return this.isLocalAbsolute() ? false : this.domain() != new File(window.location.href).domain()
     },
-    isLocalAbsolute : function(){    return this.path.indexOf('/') === 0},
-    isDomainAbsolute : function(){return this.path.match(/^(https?:|file:)/) != null},
+	isHardRelative : function(){  return /^\/\//.test(this.path) },
+    isLocalAbsolute : function(){ return /^\/[^\/]/.test(this.path)},
+    isDomainAbsolute : function(){return /^(https?:|file:)/.test(this.path)},
     /**
      * For a given path, a given working directory, and file location, update the path so 
      * it points to the right location.
      * This should probably folded under joinFrom
      */
     normalize: function(){
-        var current_path = steal.getPath();
-        //if you are cross domain from the page, and providing a path that doesn't have an domain
-        var path = this.path;
-        if (this.isCurrentCrossDomain() && !this.isDomainAbsolute()) {
-			//if the path starts with /
-			path = this.isLocalAbsolute() ? 
-				current_path.split('/').slice(0, 3).join('/') + path :
-				this.joinFrom(current_path);
-		}
-		else if (current_path != '' && this.relative()) {
-			path = this.joinFrom(current_path + (current_path.lastIndexOf('/') === current_path.length - 1 ? '' : '/'));
-		}
-		else if (/^\/\//.test(this.path)) {
-			path = this.path.substr(2);
-		}
-        return path;
-    },
-	isCurrentCrossDomain : function(){
-		return new File(steal.getAbsolutePath()).is_cross_domain();
-	}
+        return this.joinCurrent();
+    }
 };
 /**
  *  @add steal
@@ -434,12 +427,12 @@ steal.options = {
 
 
 // variables used while including
-var first = true ,                                 //If we haven't steald a file yet
-    first_wave_done = false,                       //If all files have been steald 
-    steald_paths = [],                           //a list of all steald paths
+var first = true ,                                 //If we haven't stolen a file yet
+    first_wave_done = false,                       //If all files have been stolen 
+    stolen_paths = [],                             //a list of all stolen paths
     cwd = '',                                      //where we are currently including
-    steals=[],                                   //    
-    current_steals=[],                           //steals that are pending to be steald
+    steals=[],                                     //    
+    current_steals=[],                             //steals that are pending to be stolen
     total = [];                                    //
 
 
@@ -547,7 +540,7 @@ extend(steal,
     },
     getAbsolutePath: function(){
         var fwd = new File(cwd);
-        return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : cwd;
+        return fwd.isRelative() ? fwd.joinFrom(steal.root.path, true) : cwd;
     },
     // Adds an steal to the pending list of steals.
     add: function(newInclude){
@@ -561,8 +554,8 @@ extend(steal,
         //if we have already performed loads, insert new steals in head
         
 
-        //now we should check if it has already been steald or added earlier in this file
-        if(steal.should_add(newInclude)){
+        //now we should check if it has already been stolen or added earlier in this file
+        if(steal.shouldAdd(newInclude)){
             if(first_wave_done) {
                 return newInclude.runNow();
             }
@@ -577,7 +570,7 @@ extend(steal,
         }
     },
     //
-    should_add : function(inc){
+    shouldAdd : function(inc){
         var path = inc.absolute;
         for(var i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
         for(var i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
@@ -599,15 +592,15 @@ extend(steal,
             first_wave_done = true;
             steal.done();
         }else{
-            //add to the total list of things that have been steald, and clear current steals
+            //add to the total list of things that have been stolen, and clear current steals
             total.push( next);
             current_steals = [];
             next.run();
         }
         
     },
-    //steal.end_of_production is written at the end of the production script to call this function
-    end_of_production: function(){ first_wave_done = true;steal.done(); },
+    //steal.endOfProduction is written at the end of the production script to call this function
+    endOfProduction: function(){ first_wave_done = true;steal.done(); },
     
     /**
      * Starts loading files.  This is useful when steal is being used without providing an initial file or app to load.
@@ -654,7 +647,7 @@ extend(steal,
         var arg;
         for(var i=0; i < arguments.length; i++){
             arg = arguments[i];
-            var current = new File(arg+".css").join_current();
+            var current = new File(arg+".css").joinCurrent();
             steal.create_link( steal.root.join(current)  );
         }
     },
@@ -841,18 +834,20 @@ var insert = function(src, type, onlyInsert){
         if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
             src = steal.root.join(src);
     }
+	var scriptText = 	['<script type="', type ? type :'text/javascript', '"' ]
 
-    var scriptTag = '<script type="'+((typeof type!='undefined')?(type+'" '):'text/javascript" ');
-    scriptTag += src?('src="'+src+'" '):'';
-    scriptTag += src?('id="'+src.replace(/[\/\.]/g,"_")+'" '):'';
-    scriptTag += 'compress="'+((typeof steal.current['compress']!='undefined')?
-        (steal.current['compress']+'" '):'true" ');
-    scriptTag += 'package="'+((typeof steal.current['package']!='undefined')?
-        (steal.current['package']+'">'):'production.js">');    
-    scriptTag += '</script>'; 
+    if(src){
+		scriptText.push('src="',src,'" ')
+		scriptText.push('id="',src.replace(/[\/\.]/g,"_"),'" ')
+	}
+	scriptText.push('compress="',steal.current['compress'] != null ? steal.current['compress']+'" ' :'true" ' )
+	
+	scriptText.push('package="',steal.current['package']!=null ? steal.current['package']+'">' :'production.js">');  
+	scriptText.push('</script>')
+	
     
     document.write(
-        (src? scriptTag : '') + (onlyInsert ? "" : call_end())
+        (src? scriptText.join("") : '') + (onlyInsert ? "" : call_end())
     );
 
 };
