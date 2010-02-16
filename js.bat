@@ -12,7 +12,7 @@ if "%1"=="-?" GOTO PRINT_HELP
 if "%1"=="--help" GOTO PRINT_HELP
 
 if "%1"=="-d" (
-	java -classpath steal\rhino\selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
+	java -classpath steal/rhino/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
 	GOTO END
 )
 if "%1"=="-selenium" (
@@ -34,7 +34,7 @@ for %%a in (",''=") do ( call set ARGS=%%ARGS:%%~a%% )
 ::remove the spaces
 for /f "tokens=1*" %%A in ("%ARGS%") do SET ARGS=%%A
 SET ARGS=%ARGS%]
-java -cp steal\rhino\js.jar org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+java -cp steal/rhino/selenium-java-client-driver.jar;steal\rhino\js.jar org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
 
 GOTO END
 
