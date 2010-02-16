@@ -361,24 +361,29 @@ File.prototype =
     /**
      * For a given path, a given working directory, and file location, update the path so 
      * it points to the right location.
+     * This should probably folded under joinFrom
      */
     normalize: function(){
         var current_path = steal.getPath();
         //if you are cross domain from the page, and providing a path that doesn't have an domain
         var path = this.path;
-        if(new File(steal.getAbsolutePath()).is_cross_domain() && !this.isDomainAbsolute() ){
-            //if the path starts with /
-            if( this.isLocalAbsolute() ){
-                var domain_part = current_path.split('/').slice(0,3).join('/');
-                path = domain_part+path;
-            }else{ //otherwise
-                path = this.joinFrom(current_path);
-            }
-        }else if(current_path != '' && this.relative()){
-            path = this.joinFrom( current_path+(current_path.lastIndexOf('/') === current_path.length - 1 ? '' : '/')  );
-        }
+        if (this.isCurrentCrossDomain() && !this.isDomainAbsolute()) {
+			//if the path starts with /
+			path = this.isLocalAbsolute() ? 
+				current_path.split('/').slice(0, 3).join('/') + path :
+				this.joinFrom(current_path);
+		}
+		else if (current_path != '' && this.relative()) {
+			path = this.joinFrom(current_path + (current_path.lastIndexOf('/') === current_path.length - 1 ? '' : '/'));
+		}
+		else if (/^\/\//.test(this.path)) {
+			path = this.path.substr(2);
+		}
         return path;
-    }
+    },
+	isCurrentCrossDomain : function(){
+		return new File(steal.getAbsolutePath()).is_cross_domain();
+	}
 };
 /**
  *  @add steal
