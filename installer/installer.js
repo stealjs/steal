@@ -1,5 +1,6 @@
-Installer =  function(uri, name, getter){
+Installer =  function(uri, name, getter, tag){
     this.getter = getter;
+	this.tag = tag;
 	if(! uri.match(/^http/)){
         this.name = uri;
         return this.check_plugin_list();
@@ -17,7 +18,7 @@ Installer.prototype = {
         
         options = options || {};
         new steal.File(this.name).mkdir();
-        var fetcher = new this.getter(this.uri, -1, this.name)
+        var fetcher = new this.getter(this.uri, -1, this.name, null, this.tag)
         fetcher.quiet = options.quiet || true
         fetcher.fetch();
         print("\n  "+this.name+" plugin downloaded.");

@@ -1,5 +1,6 @@
 // steal\js steal\plugin install http://github.com/pinhook/steal/ steal_plugin
 // steal\js steal\plugin install http://jabbify.googlecode.com/svn/trunk/jabbify/ jabbify
+// steal\js steal\plugin install http://github.com/moschel/gittest/ testing v1.0.0
 if(_args < 2 || _args[0]!="install"){
   print("Usage: steal/js steal/plugin install url name")
   quit();
@@ -15,7 +16,7 @@ load('steal/installer/installer.js');
 
 
 if(_args[1].indexOf("github.com") != -1) {
-	e = new Installer(_args[1], _args[2], GithubGetter);
+	e = new Installer(_args[1], _args[2], GithubGetter, _args[3]);
 } else {
 	e = new Installer(_args[1], _args[2], Getter);
 }

@@ -7,7 +7,7 @@
 
 
 
-GithubGetter = function(urls_to_fetch, level, cwd, ignore){
+GithubGetter = function(urls_to_fetch, level, cwd, ignore, tag){
     this.urls_to_fetch = [urls_to_fetch];
     this.level = level || 0
     this.cwd = cwd || ".";
@@ -19,7 +19,7 @@ GithubGetter = function(urls_to_fetch, level, cwd, ignore){
 	var split = urls_to_fetch.split("/")
 	this.username = split[3];
 	this.project = split[4];
-	this.branch = "master";
+	this.branch = tag || "master";
 }
 GithubGetter.prototype = new Getter();
 
