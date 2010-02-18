@@ -152,7 +152,8 @@ steal.fn = steal.prototype = {
             };
             this.options = options;
         } else if(options.type) { 
-            this.path = options.src;
+            
+			this.path = options.src;
             this.type = options.type;
         } else { //something we are going to steal and run
             
@@ -180,10 +181,11 @@ steal.fn = steal.prototype = {
 		if(this.func){
             //run function and continue to next steald
             this.func();
-            steal.end()
+            steal.end();
 			//insert();
         }else if(this.type){
-            isProduction ? true : insert(this.path, "text/" + this.type);
+			isProduction ? true : insert(this.path, "text/" + this.type);
+			
         }else{
             if( steal.options.env == 'compress'){
                 this.setSrc();
@@ -571,8 +573,9 @@ extend(steal,
                 return newInclude.runNow();
             }
             //but the file could still be in the list of steals but we need it earlier, so remove it and add it here
-            for(var i = 0; i < steals.length; i++){
-                if(steals[i].absolute == newInclude.absolute){
+            var path = newInclude.absolute || newInclude.path;
+			for(var i = 0; i < steals.length; i++){
+                if(steals[i].absolute == path){
                     steals.splice(i,1);
                     break;
                 }
@@ -582,7 +585,7 @@ extend(steal,
     },
     //
     should_add : function(inc){
-        var path = inc.absolute;
+		var path = inc.absolute || inc.path;
         for(var i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
         for(var i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
         return true;
@@ -593,10 +596,10 @@ extend(steal,
     // Called after every file is loaded.  Gets the next file and steals it.
     end: function(src){
         // add steals that were just added to the end of the list
+		var got = current_steals.length;
 		steals = steals.concat(current_steals);
-        
         // take the last one
-        var next = steals.pop();
+		var next = steals.pop();
         
         // if there are no more
         if(!next) {
@@ -827,6 +830,7 @@ steal.views = function(){
 
 steal.view = function(path){
     var type = path.match(/\.\w+$/gi)[0].replace(".","");
+	//print(path+" --!")
 	steal({src: path, type: type});    
 	return steal;
 };
@@ -840,21 +844,35 @@ var script_tag = function(){
 var insert = function(src, type, onlyInsert){
     // source we need to know how to get to steal, then load 
     // relative to path to steal
+	
+	
 	if(src){
-        var src_file = new File(src);
+        var id = src.replace(/[\/\.]/g,"_")
+		var src_file = new File(src);
         if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
             src = steal.root.join(src);
+		
     }
+	var text = "", writeSrc = true;
+	if(type && type != 'test/javascript' && !browser.rhino){
+		text = steal.request(src);
+		if(!text)
+			throw "you got nothing at "+src;
+		writeSrc = false
+	}
 
     var scriptTag = '<script type="'+((typeof type!='undefined')?(type+'" '):'text/javascript" ');
-    scriptTag += src?('src="'+src+'" '):'';
-    scriptTag += src?('id="'+src.replace(/[\/\.]/g,"_")+'" '):'';
+    if(writeSrc)
+		scriptTag += src?('src="'+src+'" '):'';
+    scriptTag += src?('id="'+id+'" '):'';
     scriptTag += 'compress="'+((typeof steal.current['compress']!='undefined')?
         (steal.current['compress']+'" '):'true" ');
     scriptTag += 'package="'+((typeof steal.current['package']!='undefined')?
         (steal.current['package']+'">'):'production.js">');    
+	if(text)
+		scriptTag += text;
     scriptTag += '</script>'; 
-    
+
     document.write(
         (src? scriptTag : '') + (onlyInsert ? "" : call_end())
     );
