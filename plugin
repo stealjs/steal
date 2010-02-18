@@ -1,3 +1,4 @@
+// steal\js steal\plugin install http://github.com/pinhook/steal/ my_folder
 if(_args < 2 || _args[0]!="install"){
   print("Usage: steal/js steal/plugin install url name")
   quit();
@@ -5,7 +6,7 @@ if(_args < 2 || _args[0]!="install"){
 
 load('steal/file/file.js');
 load('steal/json/json.js');
-load('steal/getter/getter.js');
+load('steal/getter/github.js');
 load("steal/prompt/prompt.js");
 load('steal/installer/installer.js');
 
@@ -14,4 +15,3 @@ load('steal/installer/installer.js');
 
 e = new Installer(_args[1], _args[2]);
 e.install_using_http();
-

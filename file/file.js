@@ -69,7 +69,7 @@ extend(steal.File.prototype, {
 			}else
 				return this.path;
 		}else if(this.isLocalAbsolute()){
-            var u = new steail.File(url);
+            var u = new steal.File(url);
             if(!u.domain()) return this.path;
             return u.protocol()+"//"+u.domain() + this.path;
         }

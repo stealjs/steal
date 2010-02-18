@@ -16,7 +16,7 @@ Installer.prototype = {
         
         options = options || {};
         new steal.File(this.name).mkdir();
-        var fetcher = new Getter(this.uri, -1, this.name)
+        var fetcher = new GithubGetter(this.uri, -1, this.name)
         fetcher.quiet = options.quiet || true
         fetcher.fetch();
         print("\n  "+this.name+" plugin downloaded.");
