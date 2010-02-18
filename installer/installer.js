@@ -1,5 +1,6 @@
-Installer =  function(uri, name){
-    if(! uri.match(/^http/)){
+Installer =  function(uri, name, getter){
+    this.getter = getter;
+	if(! uri.match(/^http/)){
         this.name = uri;
         return this.check_plugin_list();
     }
@@ -16,7 +17,7 @@ Installer.prototype = {
         
         options = options || {};
         new steal.File(this.name).mkdir();
-        var fetcher = new GithubGetter(this.uri, -1, this.name)
+        var fetcher = new this.getter(this.uri, -1, this.name)
         fetcher.quiet = options.quiet || true
         fetcher.fetch();
         print("\n  "+this.name+" plugin downloaded.");
