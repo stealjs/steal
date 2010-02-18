@@ -36,7 +36,7 @@ Steal.Compress.prototype = {
        //send to output
        idx = 0;
        for(var p in this.packages){
-           var compressed = this.packages[p].join("\n");
+           var compressed = "steal.end();\n"+this.packages[p].join("\nsteal.end();\n")+";\nsteal.end();";
            new Steal.File(this.outputFolder + p).save(compressed);           
            print("Package #" + idx + ": " + this.outputFolder + p);
            idx++;

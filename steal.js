@@ -104,18 +104,18 @@ var oldsteal = window.steal;
  */
 steal = function(){
     
-    if(steal.options.env.match(/development|compress|test/)){
+    //if(steal.options.env.match(/development|compress|test/)){
         
         for(var i=0; i < arguments.length; i++) 
             steal.add(  new steal.fn.init(arguments[i]) );
 
-    }else{
+    /*}else{
         //production file
-        if(!first_wave_done && (typeof arguments[0] != 'function')) return; 
+        if(!first_wave_done && (typeof arguments[0] != 'function')) return steal; 
         for(var i=0; i < arguments.length; i++){
             steal.add( new steal.fn.init(arguments[i]) );
         }
-    }
+    }*/
     return steal;
 };
 var id = 0;
@@ -176,16 +176,20 @@ steal.fn = steal.prototype = {
      */
     run : function(){
         steal.current = this;
-        if(this.func){
+		var isProduction = (steal.options.env == "production");
+		if(this.func){
             //run function and continue to next steald
             this.func();
-            insert();
+            steal.end()
+			//insert();
         }else if(this.type){
-            insert(this.path, "text/" + this.type);
+            isProduction ? true : insert(this.path, "text/" + this.type);
         }else{
             if( steal.options.env == 'compress'){
                 this.setSrc();
-            }
+            }else if(isProduction){
+				 return;
+			}
             steal.setPath(this.dir);
               this.skipInsert ? insert() : insert(this.path);
         }
