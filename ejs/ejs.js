@@ -38,7 +38,7 @@ EJS = function( options ){
 	if(options.precompiled){
 		this.template = {};
 		this.template.process = options.precompiled;
-		EJS.update(this.name, this);
+		vEJS.update(this.name, this);
 		return;
 	}
     if(options.element)
@@ -56,32 +56,33 @@ EJS = function( options ){
 		this.name = options.element.id
 		this.type = '['
 	}else if(options.url){
-        options.url = EJS.endExt(options.url, this.extMatch);
+        options.url = vEJS.endExt(options.url, this.extMatch);
 		this.name = this.name ? this.name : options.url;
         var url = options.url
         //options.view = options.absolute_url || options.view || options.;
-		var template = EJS.get(this.name /*url*/, this.cache);
+		var template = vEJS.get(this.name /*url*/, this.cache);
 		if (template) return template;
-	    if (template == EJS.INVALID_PATH) return null;
+	    if (template == vEJS.INVALID_PATH) return null;
         try{
-            this.text = EJS.request( url+(this.cache ? '' : '?'+Math.random() ));
+            this.text = vEJS.request( url+(this.cache ? '' : '?'+Math.random() ));
         }catch(e){}
 
 		if(this.text == null){
-            throw( {type: 'EJS', message: 'There is no template at '+url}  );
+            throw( {type: 'vEJS', message: 'There is no template at '+url}  );
 		}
 		//this.name = url;
 	}
-	var template = new EJS.Compiler(this.text, this.type);
+	var template = new vEJS.Compiler(this.text, this.type);
 
 	template.compile(options, this.name);
 
 	
-	EJS.update(this.name, this);
+	vEJS.update(this.name, this);
 	this.template = template;
 };
+var vEJS = EJS;
 /* @Prototype*/
-EJS.prototype = {
+vEJS.prototype = {
 	/**
 	 * Renders an object with extra view helpers attached to the view.
 	 * @param {Object} object data to be rendered
@@ -91,7 +92,7 @@ EJS.prototype = {
     render : function(object, extra_helpers){
         object = object || {};
         this._extra_helpers = extra_helpers;
-		var v = new EJS.Helpers(object, extra_helpers || {});
+		var v = new vEJS.Helpers(object, extra_helpers || {});
 		return this.template.process.call(object, object,v);
 	},
     update : function(element, options){
@@ -101,7 +102,7 @@ EJS.prototype = {
 		if(options == null){
 			_template = this;
 			return function(object){
-				EJS.prototype.update.call(_template, element, object)
+				vEJS.prototype.update.call(_template, element, object)
 			}
 		}
 		if(typeof options == 'string'){
@@ -110,9 +111,9 @@ EJS.prototype = {
 			_template = this;
 			params.onComplete = function(request){
 				var object = eval( request.responseText )
-				EJS.prototype.update.call(_template, element, object)
+				vEJS.prototype.update.call(_template, element, object)
 			}
-			EJS.ajax_request(params)
+			vEJS.ajax_request(params)
 		}else
 		{
 			element.innerHTML = this.render(options)
@@ -126,15 +127,15 @@ EJS.prototype = {
      * @param {Object} options
      */
 	set_options : function(options){
-        this.type = options.type || EJS.type;
-		this.cache = options.cache != null ? options.cache : EJS.cache;
+        this.type = options.type || vEJS.type;
+		this.cache = options.cache != null ? options.cache : vEJS.cache;
 		this.text = options.text || null;
 		this.name =  options.name || null;
-		this.ext = options.ext || EJS.ext;
+		this.ext = options.ext || vEJS.ext;
 		this.extMatch = new RegExp(this.ext.replace(/\./, '\.'));
 	}
 };
-EJS.endExt = function(path, match){
+vEJS.endExt = function(path, match){
 	if(!path) return null;
 	match.lastIndex = 0
 	return path+ (match.test(path) ? '' : this.ext )
@@ -144,7 +145,7 @@ EJS.endExt = function(path, match){
 
 
 /* @Static*/
-EJS.Scanner = function(source, left, right) {
+vEJS.Scanner = function(source, left, right) {
 	
     extend(this,
         {left_delimiter: 	left +'%',
@@ -161,7 +162,7 @@ EJS.Scanner = function(source, left, right) {
 	this.lines = 0;
 };
 
-EJS.Scanner.to_text = function(input){
+vEJS.Scanner.to_text = function(input){
 	if(input == null || input === undefined)
         return '';
     if(input instanceof Date)
@@ -171,7 +172,7 @@ EJS.Scanner.to_text = function(input){
 	return '';
 };
 
-EJS.Scanner.prototype = {
+vEJS.Scanner.prototype = {
   scan: function(block) {
      scanline = this.scanline;
 	 regex = this.SplitRegexp;
@@ -193,7 +194,7 @@ EJS.Scanner.prototype = {
 		   	try{
 	         	block(token, this);
 		 	}catch(e){
-				throw {type: 'EJS.Scanner', line: this.lines};
+				throw {type: 'vEJS.Scanner', line: this.lines};
 			}
        }
 	 }
@@ -201,7 +202,7 @@ EJS.Scanner.prototype = {
 };
 
 
-EJS.Buffer = function(pre_cmd, post_cmd) {
+vEJS.Buffer = function(pre_cmd, post_cmd) {
 	this.line = new Array();
 	this.script = "";
 	this.pre_cmd = pre_cmd;
@@ -211,7 +212,7 @@ EJS.Buffer = function(pre_cmd, post_cmd) {
 		this.push(pre_cmd[i]);
 	}
 };
-EJS.Buffer.prototype = {
+vEJS.Buffer.prototype = {
 	
   push: function(cmd) {
 	this.line.push(cmd);
@@ -237,7 +238,7 @@ EJS.Buffer.prototype = {
 };
 
 
-EJS.Compiler = function(source, left) {
+vEJS.Compiler = function(source, left) {
     this.pre_cmd = ['var ___ViewO = [];'];
 	this.post_cmd = new Array();
 	this.source = ' ';	
@@ -267,16 +268,16 @@ EJS.Compiler = function(source, left) {
 			throw left+' is not a supported deliminator';
 			break;
 	}
-	this.scanner = new EJS.Scanner(this.source, left, right);
+	this.scanner = new vEJS.Scanner(this.source, left, right);
 	this.out = '';
 };
-EJS.Compiler.prototype = {
+vEJS.Compiler.prototype = {
   compile: function(options, name) {
   	options = options || {};
 	this.out = '';
 	var put_cmd = "___ViewO.push(";
 	var insert_cmd = put_cmd;
-	var buff = new EJS.Buffer(this.pre_cmd, this.post_cmd);		
+	var buff = new vEJS.Buffer(this.pre_cmd, this.post_cmd);		
 	var content = '';
 	var clean = function(content)
 	{
@@ -329,7 +330,7 @@ EJS.Compiler.prototype = {
 							}
 							break;
 						case scanner.left_equal:
-							buff.push(insert_cmd + "(EJS.Scanner.to_text(" + content + ")))");
+							buff.push(insert_cmd + "(vEJS.Scanner.to_text(" + content + ")))");
 							break;
 					}
 					scanner.stag = null;
@@ -399,44 +400,44 @@ EJS.Compiler.prototype = {
 	</tbody></table>
  * 
  */
-EJS.config = function(options){
-	EJS.cache = options.cache != null ? options.cache : EJS.cache;
-	EJS.type = options.type != null ? options.type : EJS.type;
-	EJS.ext = options.ext != null ? options.ext : EJS.ext;
+vEJS.config = function(options){
+	vEJS.cache = options.cache != null ? options.cache : vEJS.cache;
+	vEJS.type = options.type != null ? options.type : vEJS.type;
+	vEJS.ext = options.ext != null ? options.ext : vEJS.ext;
 	
-	var templates_directory = EJS.templates_directory || {}; //nice and private container
-	EJS.templates_directory = templates_directory;
-	EJS.get = function(path, cache){
+	var templates_directory = vEJS.templates_directory || {}; //nice and private container
+	vEJS.templates_directory = templates_directory;
+	vEJS.get = function(path, cache){
 		if(cache == false) return null;
 		if(templates_directory[path]) return templates_directory[path];
   		return null;
 	};
 	
-	EJS.update = function(path, template) { 
+	vEJS.update = function(path, template) { 
 		if(path == null) return;
 		templates_directory[path] = template ;
 	};
 	
-	EJS.INVALID_PATH =  -1;
+	vEJS.INVALID_PATH =  -1;
 };
-EJS.config( {cache: true, type: '<', ext: '.ejs' } );
+vEJS.config( {cache: true, type: '<', ext: '.ejs' } );
 
 
 
 /**
  * @constructor
- * By adding functions to EJS.Helpers.prototype, those functions will be available in the 
+ * By adding functions to vEJS.Helpers.prototype, those functions will be available in the 
  * views.
  * @init Creates a view helper.  This function is called internally.  You should never call it.
  * @param {Object} data The data passed to the view.  Helpers have access to it through this._data
  */
-EJS.Helpers = function(data, extras){
+vEJS.Helpers = function(data, extras){
 	this._data = data;
     this._extras = extras;
     extend(this, extras );
 };
 /* @prototype*/
-EJS.Helpers.prototype = {
+vEJS.Helpers.prototype = {
     /**
      * Renders a new view.  If data is passed in, uses that to render the view.
      * @param {Object} options standard options passed to a new view.
@@ -446,7 +447,7 @@ EJS.Helpers.prototype = {
 	view: function(options, data, helpers){
         if(!helpers) helpers = this._extras
 		if(!data) data = this._data;
-		return new EJS(options).render(data, helpers);
+		return new vEJS(options).render(data, helpers);
 	},
     /**
      * For a given value, tries to create a human representation.
@@ -461,7 +462,7 @@ EJS.Helpers.prototype = {
 		return '';
 	}
 };
-    EJS.newRequest = function(){
+    vEJS.newRequest = function(){
 	   var factories = [function() { return new ActiveXObject("Msxml2.XMLHTTP"); },function() { return new XMLHttpRequest(); },function() { return new ActiveXObject("Microsoft.XMLHTTP"); }];
 	   for(var i = 0; i < factories.length; i++) {
 	        try {
@@ -472,8 +473,8 @@ EJS.Helpers.prototype = {
 	   }
 	}
 	
-	EJS.request = function(path){
-	   var request = new EJS.newRequest()
+	vEJS.request = function(path){
+	   var request = new vEJS.newRequest()
 	   request.open("GET", path, false);
 	   
 	   try{request.send(null);}
@@ -483,10 +484,10 @@ EJS.Helpers.prototype = {
 	   
 	   return request.responseText
 	}
-	EJS.ajax_request = function(params){
+	vEJS.ajax_request = function(params){
 		params.method = ( params.method ? params.method : 'GET')
 		
-		var request = new EJS.newRequest();
+		var request = new vEJS.newRequest();
 		request.onreadystatechange = function(){
 			if(request.readyState == 4){
 				if(request.status == 200){

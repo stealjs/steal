@@ -8,7 +8,7 @@ if(typeof steal == "undefined")
 			d[n] = s[n]
 		}
 	}
-	
+	steal.extend = extend;
 	if(!steal.File){
 		steal.File = function(path){
 			this.path = path;
