@@ -104,18 +104,18 @@ var oldsteal = window.steal;
  */
 steal = function(){
     
-    if(steal.options.env.match(/development|compress|test/)){
+    //if(steal.options.env.match(/development|compress|test/)){
         
         for(var i=0; i < arguments.length; i++) 
             steal.add(  new steal.fn.init(arguments[i]) );
 
-    }else{
+    /*}else{
         //production file
-        if(!first_wave_done && (typeof arguments[0] != 'function')) return; 
+        if(!first_wave_done && (typeof arguments[0] != 'function')) return steal; 
         for(var i=0; i < arguments.length; i++){
             steal.add( new steal.fn.init(arguments[i]) );
         }
-    }
+    }*/
     return steal;
 };
 var id = 0;
@@ -152,7 +152,8 @@ steal.fn = steal.prototype = {
             };
             this.options = options;
         } else if(options.type) { 
-            this.path = options.src;
+            
+			this.path = options.src;
             this.type = options.type;
         } else { //something we are going to steal and run
             
@@ -176,16 +177,21 @@ steal.fn = steal.prototype = {
      */
     run : function(){
         steal.current = this;
-        if(this.func){
+		var isProduction = (steal.options.env == "production");
+		if(this.func){
             //run function and continue to next steald
             this.func();
-            insert();
+            steal.end();
+			//insert();
         }else if(this.type){
-            insert(this.path, "text/" + this.type);
+			isProduction ? true : insert(this.path, "text/" + this.type);
+			
         }else{
             if( steal.options.env == 'compress'){
                 this.setSrc();
-            }
+            }else if(isProduction){
+				 return;
+			}
             steal.setPath(this.dir);
               this.skipInsert ? insert() : insert(this.path);
         }
@@ -361,24 +367,29 @@ File.prototype =
     /**
      * For a given path, a given working directory, and file location, update the path so 
      * it points to the right location.
+     * This should probably folded under joinFrom
      */
     normalize: function(){
         var current_path = steal.getPath();
         //if you are cross domain from the page, and providing a path that doesn't have an domain
         var path = this.path;
-        if(new File(steal.getAbsolutePath()).is_cross_domain() && !this.isDomainAbsolute() ){
-            //if the path starts with /
-            if( this.isLocalAbsolute() ){
-                var domain_part = current_path.split('/').slice(0,3).join('/');
-                path = domain_part+path;
-            }else{ //otherwise
-                path = this.joinFrom(current_path);
-            }
-        }else if(current_path != '' && this.relative()){
-            path = this.joinFrom( current_path+(current_path.lastIndexOf('/') === current_path.length - 1 ? '' : '/')  );
-        }
+        if (this.isCurrentCrossDomain() && !this.isDomainAbsolute()) {
+			//if the path starts with /
+			path = this.isLocalAbsolute() ? 
+				current_path.split('/').slice(0, 3).join('/') + path :
+				this.joinFrom(current_path);
+		}
+		else if (current_path != '' && this.relative()) {
+			path = this.joinFrom(current_path + (current_path.lastIndexOf('/') === current_path.length - 1 ? '' : '/'));
+		}
+		else if (/^\/\//.test(this.path)) {
+			path = this.path.substr(2);
+		}
         return path;
-    }
+    },
+	isCurrentCrossDomain : function(){
+		return new File(steal.getAbsolutePath()).is_cross_domain();
+	}
 };
 /**
  *  @add steal
@@ -562,8 +573,9 @@ extend(steal,
                 return newInclude.runNow();
             }
             //but the file could still be in the list of steals but we need it earlier, so remove it and add it here
-            for(var i = 0; i < steals.length; i++){
-                if(steals[i].absolute == newInclude.absolute){
+            var path = newInclude.absolute || newInclude.path;
+			for(var i = 0; i < steals.length; i++){
+                if(steals[i].absolute == path){
                     steals.splice(i,1);
                     break;
                 }
@@ -573,7 +585,7 @@ extend(steal,
     },
     //
     should_add : function(inc){
-        var path = inc.absolute;
+		var path = inc.absolute || inc.path;
         for(var i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
         for(var i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
         return true;
@@ -584,10 +596,10 @@ extend(steal,
     // Called after every file is loaded.  Gets the next file and steals it.
     end: function(src){
         // add steals that were just added to the end of the list
+		var got = current_steals.length;
 		steals = steals.concat(current_steals);
-        
         // take the last one
-        var next = steals.pop();
+		var next = steals.pop();
         
         // if there are no more
         if(!next) {
@@ -818,6 +830,7 @@ steal.views = function(){
 
 steal.view = function(path){
     var type = path.match(/\.\w+$/gi)[0].replace(".","");
+	//print(path+" --!")
 	steal({src: path, type: type});    
 	return steal;
 };
@@ -831,21 +844,35 @@ var script_tag = function(){
 var insert = function(src, type, onlyInsert){
     // source we need to know how to get to steal, then load 
     // relative to path to steal
+	
+	
 	if(src){
-        var src_file = new File(src);
+        var id = src.replace(/[\/\.]/g,"_")
+		var src_file = new File(src);
         if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
             src = steal.root.join(src);
+		
     }
+	var text = "", writeSrc = true;
+	if(type && type != 'test/javascript' && !browser.rhino){
+		text = steal.request(src);
+		if(!text)
+			throw "you got nothing at "+src;
+		writeSrc = false
+	}
 
     var scriptTag = '<script type="'+((typeof type!='undefined')?(type+'" '):'text/javascript" ');
-    scriptTag += src?('src="'+src+'" '):'';
-    scriptTag += src?('id="'+src.replace(/[\/\.]/g,"_")+'" '):'';
+    if(writeSrc)
+		scriptTag += src?('src="'+src+'" '):'';
+    scriptTag += src?('id="'+id+'" '):'';
     scriptTag += 'compress="'+((typeof steal.current['compress']!='undefined')?
         (steal.current['compress']+'" '):'true" ');
     scriptTag += 'package="'+((typeof steal.current['package']!='undefined')?
         (steal.current['package']+'">'):'production.js">');    
+	if(text)
+		scriptTag += text;
     scriptTag += '</script>'; 
-    
+
     document.write(
         (src? scriptTag : '') + (onlyInsert ? "" : call_end())
     );

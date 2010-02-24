@@ -2,12 +2,15 @@ jQuery.wrapped = function(){
 	var args = jQuery.makeArray(arguments),
 	    selector = args.shift(),
 	    context =  args.shift(),
-		method = args.shift();
-	//eval each param ...
-	//for(var a = 0; a < args.length; a++){
-	//	args[a] = jQuery.evalJSON(args[a])
-	//}
-	var q = jQuery(selector, context);
+		method = args.shift(), 
+		q;
+
+	if (_win().jQuery && parseFloat(_win().jQuery().jquery) >= 1.3) {
+	    q = jQuery(_win().jQuery(selector, context).get());
+	} else {
+	    q = jQuery(selector, context);
+	}
+	
 	//need to conver to json
 	var res = q[method].apply(q, args);
     

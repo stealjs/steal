@@ -36,7 +36,7 @@ Steal.Compress.prototype = {
        //send to output
        idx = 0;
        for(var p in this.packages){
-           var compressed = this.packages[p].join("\n");
+           var compressed = "steal.end();\n"+this.packages[p].join("\nsteal.end();\n")+";\nsteal.end();";
            new Steal.File(this.outputFolder + p).save(compressed);           
            print("Package #" + idx + ": " + this.outputFolder + p);
            idx++;
@@ -56,7 +56,7 @@ Steal.Compress.prototype = {
                 }
             },
             onLoadUnknownTypeScript: function(script){
-                self.scripts.push(script);   
+				self.scripts.push(script);   
             }
         });    
     },
@@ -95,7 +95,7 @@ Steal.Compress.prototype = {
     },
     
     'text/ejs': function(script){
-        var text = this.loadScriptText(script.src, true);
+		var text = this.loadScriptText(script.src, true);
         var id = script.getAttribute("id");
 		return $.View.registerScript("ejs",id, text);           
     },

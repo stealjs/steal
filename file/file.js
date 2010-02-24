@@ -69,7 +69,7 @@ extend(steal.File.prototype, {
 			}else
 				return this.path;
 		}else if(this.isLocalAbsolute()){
-            var u = new steail.File(url);
+            var u = new steal.File(url);
             if(!u.domain()) return this.path;
             return u.protocol()+"//"+u.domain() + this.path;
         }
@@ -128,6 +128,23 @@ extend(steal.File.prototype, {
     mkdirs: function(){
         var out = new java.io.File( this.path )
         out.mkdirs();
+    },
+    exists: function(){
+        var exists = (new java.io.File(this.path)).exists();
+        return exists;
+    },
+    copy_to: function(dest){
+        var fin = new java.io.FileInputStream(new java.io.File( this.path ));
+        var fout = new java.io.FileOutputStream(new java.io.File(dest));
+    
+        // Transfer bytes from in to out
+        var data = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+        var len = 0;
+        while ((len = fin.read(data)) > 0) {
+            fout.write(data, 0, len);
+        }
+        fin.close();
+        fout.close();
     },
     save: function(src, encoding){
           var fout = new java.io.FileOutputStream(new java.io.File( this.path ));
