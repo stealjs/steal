@@ -58,9 +58,9 @@ steal.Loader.prototype = {
 	'text/javascript': function(script){
         if(script.src){
             var text = this.loadScriptText(script.src, false);
-            if(script.getAttribute('compress') == "true"){
-                return this.compressString(text);
-            }
+            //if(script.getAttribute('compress') == "true"){
+            //    return this.compressString(text);
+            //}
             return text;
         }
     },

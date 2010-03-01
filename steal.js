@@ -103,19 +103,10 @@ var oldsteal = window.steal;
     </tbody></table>
  */
 steal = function(){
-    
-    //if(steal.options.env.match(/development|compress|test/)){
-        
-        for(var i=0; i < arguments.length; i++) 
-            steal.add(  new steal.fn.init(arguments[i]) );
+    for(var i=0; i < arguments.length; i++) 
+        steal.add(  new steal.fn.init(arguments[i]) );
 
-    /*}else{
-        //production file
-        if(!first_wave_done && (typeof arguments[0] != 'function')) return steal; 
-        for(var i=0; i < arguments.length; i++){
-            steal.add( new steal.fn.init(arguments[i]) );
-        }
-    }*/
+
     return steal;
 };
 var id = 0;
