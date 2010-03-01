@@ -61,7 +61,7 @@ GithubGetter.prototype.links = function(base_url, contents){
 }
 GithubGetter.prototype.download = function(link){
 	// get real download link
-	// http://github.com/pinhook/steal/test/qunit/qunit.js
+	// http://github.com/pinhook/funcunit/qunit/qunit.js
 	// http://github.com/pinhook/steal/raw/master/test/qunit/qunit.js
 	var rawUrl = this.urls_to_fetch[0]+"raw/"+this.branch+"/"+link.replace(this.urls_to_fetch[0], "")
     var bn = new steal.File(link).basename();
