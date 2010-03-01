@@ -32,7 +32,7 @@ var oldsteal = window.steal;
 /**
  * @class steal
  * @tag core
- * Include is used to:
+ * Steal is used to:
  * <ul>
  *  <li> easily load and compress your application's JavaScript files.  </li>
  *  <li> switch to a different environment [development, test, compress, production]</li>
