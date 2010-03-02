@@ -1,5 +1,9 @@
-//load("steal/compress/plugin.js");
+// usage: 
+// steal\js steal\compress\plugin.js funcunit/functional funcunit/dist/funcunit.js
+// steal\js steal\compress\plugin.js jquery/controller
+
 var plugin = _args[0]
+var path = _args[1] || plugin+".js";
 
 rhinoLoader = {
      callback : function(){steal.plugins(plugin.replace(/\./,"/"));}
@@ -8,7 +12,11 @@ rhinoLoader = {
 (function(){
      
     load('steal/rhino/env.js');
-    Envjs('steal/rhino/empty.html', {scriptTypes: {"text/javascript" : true,"text/envjs" : true}, fireLoad: true, logLevel: 2
+	window.build_in_progress = true;
+    Envjs('steal/rhino/empty.html', 
+		{scriptTypes: {"text/javascript" : true,"text/envjs" : true}, 
+		//fireLoad: true, 
+		logLevel: 2
     });
     
 })();
@@ -40,6 +48,6 @@ for(var i = 0 ; i < steal.total.length; i++){
         out.push("\n("+steal.total[i].options.toString()+")();\n");
     }
 }
-new File(plugin+".js").save(out.join(""));
+new File(path).save(out.join(""));
 
 //grab every script except jquery
