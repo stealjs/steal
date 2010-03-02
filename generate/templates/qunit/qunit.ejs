@@ -3,7 +3,3 @@ steal
  .plugins("<%= path %>")  //load your app
  .plugins('funcunit/qunit')  //load qunit
  .then("<%= application_name %>_test")
- 
-if(steal.browser.rhino){
-  steal.plugins('funcunit/qunit/env')
-}
