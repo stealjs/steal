@@ -149,7 +149,7 @@ steal.fn = steal.prototype = {
         } else { //something we are going to steal and run
             
             if(typeof options == 'string' ){
-                this.path = options.indexOf('.js') == -1  ? options+'.js' : options
+                this.path = /\.js$/ig.test(options) ? options : options+'.js'
             }else {
                 extend( this, options)
             }
