@@ -1,2 +1,2 @@
-load('steal/rhino/env.rhino.js');
+load('steal/rhino/env.js');
 print(typeof Envjs)
