@@ -1,4 +1,5 @@
-/* _args = ['thing']; load('steal/generate/app')*/
+// _args = ['thing']; load('steal/generate/app')
+
 if (!_args[0]) {
 	print("Usage: steal/js steal/generate/app path");
 	quit();

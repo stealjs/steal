@@ -174,7 +174,8 @@ Envjs = function(){
                             }
                         }else{
                             $env.loadInlineScript(script);
-							$env.afterInlineScriptLoad(script)
+							if($env.afterInlineScriptLoad)
+								$env.afterInlineScriptLoad(script)
                         }
                     }else{
                         if(!script.src && script.type == "text/javascript"){
