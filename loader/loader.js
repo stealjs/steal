@@ -50,8 +50,10 @@ Steal.Loader.prototype = {
         return text;
     },
 	each : function(ths, func){
-		for(var i = 0 ; i < this.scripts.length; i++){
-			func.call(ths, this.scripts[i], this.getScriptContent(this.scripts[i]), i)
+		var scripts = document.getElementsByTagName('script')
+		//print(scripts.length)
+		for(var i = 0 ; i < scripts.length; i++){
+			func.call(ths,scripts[i], this.getScriptContent(scripts[i]), i)
 		}
 	},
 	getScriptContent : function(script){
