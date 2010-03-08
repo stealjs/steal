@@ -1,19 +1,50 @@
-if (_args.length == 0) {
-	print("Usage: js steal/generate/scaffold ClassName Type")
-	print("Types (optional): json_rest")
+if (_args.length < 1) {
+	print("USAGE : steal/js steal/generate/scaffold FullName Type")
+	print("TYPES : JsonRest\n")
+	print("EX    : steal/js steal/generate/scaffold Cashnet.Models.Customer");
+	print("      > cashnet/models/customer.js ....")
+	print();
 	quit();
 }
 
-load('steal/rhino/loader.js')
+
+load('steal/rhino/loader.js');
 rhinoLoader(function(){
-	steal.plugins('view','util/generator','lang/inflector');
+	steal.plugins('steal/ejs','steal/file','steal/generate','steal/inflector');
 });
 
 (function(){
-	//clear name
+	$modelName = _args[0];
+	$modelType = _args[1];
 	load("steal/generate/parts/convert.js")
-	var data = $convert(_args[0]);
+	var md = $convert($modelName);
 	
+	md.type = $modelType
+	
+	md.appPath =  md.path.replace(/\/models$/,"");
+	
+	
+	//clear name
+	
+	
+	
+	new Generate(md.appPath, md, "../generate/templates/")
+		.folder()
+		.push("controllers").folder()
+			.render(md.underscore+"_controller.js","scaffold/controller.ejs")
+			.pop()
+		.push("views").folder()
+			.push(md.underscore).folder()
+				.render("edit.ejs","scaffold/edit.ejs")
+				.render("init.ejs","scaffold/init.ejs")
+				.render("list.ejs","scaffold/list.ejs")
+				.render("show.ejs","scaffold/show.ejs")
+	
+	
+	
+	load("steal/generate/parts/model.js")
+	
+	return;
 
 	//create controller stuff
 	Generate.folder("controllers");

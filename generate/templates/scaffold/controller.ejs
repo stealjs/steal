@@ -5,7 +5,7 @@
  * ["<%=name%>Controller.prototype.&#46;edit click" edit],
  * or ["<%=name%>Controller.prototype.&#46;destroy click" destroy] <%= plural %>.
  */
-jQuery.Controller.extend('<%=name%>Controller',
+jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
 /* @Static */
 {
     onDocument: true
@@ -64,8 +64,8 @@ jQuery.Controller.extend('<%=name%>Controller',
      * Updates the <%= underscore %> from the edit values.
      */
     '.update click': function(el){
-        var <%= underscore %>El = el.parents('.<%= underscore %>'); 
-        <%= underscore %>El.model().update( <%= underscore %>El.formParams()  )
+        var $<%= underscore %> = el.closest('.<%= underscore %>'); 
+        $<%= underscore %>.model().update( $<%= underscore %>.formParams()  )
     },
     /**
      * Listens for updated <%= plural %>.  When a <%= underscore %> is updated, 
