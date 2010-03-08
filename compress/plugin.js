@@ -11,7 +11,7 @@ rhinoLoader = {
 
 (function(){
      
-    load('steal/rhino/env.js');
+    load('steal/rhino/env.rhino.js');
 	window.build_in_progress = true;
     Envjs('steal/rhino/empty.html', 
 		{scriptTypes: {"text/javascript" : true,"text/envjs" : true}, 

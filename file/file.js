@@ -1,22 +1,19 @@
-if(typeof steal == "undefined") 
-	steal = {};
-;
-(function(){
+;(function(S){
 	
 	var extend = function(d, s){
 		for(var n in s){
 			d[n] = s[n]
 		}
 	}
-	steal.extend = extend;
-	if(!steal.File){
-		steal.File = function(path){
+	S.extend = extend;
+	if(!S.File){
+		S.File = function(path){
 			this.path = path;
 		}
 	}
 
 
-extend(steal.File.prototype, {	
+extend(S.File.prototype, {	
 	/**
 	 * Removes hash and params
 	 * @return {String}
@@ -48,7 +45,7 @@ extend(steal.File.prototype, {
      * @param {Object} url
      */
 	join: function(url){
-		return new steal.File(url).joinFrom(this.path);
+		return new S.File(url).joinFrom(this.path);
 	},
     /**
      * Returns the path of this file referenced form another url.
@@ -61,7 +58,7 @@ extend(steal.File.prototype, {
      */
 	joinFrom: function( url, expand){
 		if(this.isDomainAbsolute()){
-			var u = new steal.File(url);
+			var u = new S.File(url);
 			if(this.domain() && this.domain() == u.domain() ) 
 				return this.after_domain();
 			else if(this.domain() == u.domain()) { // we are from a file
@@ -69,7 +66,7 @@ extend(steal.File.prototype, {
 			}else
 				return this.path;
 		}else if(this.isLocalAbsolute()){
-            var u = new steal.File(url);
+            var u = new S.File(url);
             if(!u.domain()) return this.path;
             return u.protocol()+"//"+u.domain() + this.path;
         }
@@ -111,7 +108,7 @@ extend(steal.File.prototype, {
      */
 	is_cross_domain : function(){
 		if(this.isLocalAbsolute()) return false;
-		return this.domain() != new steal.File(location.href).domain();
+		return this.domain() != new S.File(location.href).domain();
 	},
 	isLocalAbsolute : function(){	return this.path.indexOf('/') === 0},
 	isDomainAbsolute : function(){return this.path.match(/^(https?:|file:)/) != null},
@@ -176,16 +173,22 @@ extend(steal.File.prototype, {
     },
     basename: function(){
         return this.path.match(/\/?([^\/]*)\/?$/)[1];
+    },
+	remove: function(){
+        var file = new java.io.File( this.path );
+        file["delete"]();
     }
 });
 
-steal.File.cwdURL = function(){
+S.File.cwdURL = function(){
     return new java.io.File("").toURL().toString();
 }
-steal.File.cwd = function(){
+S.File.cwd = function(){
     return String(new java.io.File('').getAbsoluteFile().toString());
 }
 	
 	
-})();
+})(typeof steal == 'undefined' ? (steal = {}) : steal);
+
+
 

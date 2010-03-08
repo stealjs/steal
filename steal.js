@@ -517,11 +517,10 @@ extend(steal,
                  steal( new File(steal.options.startFile).dir()+"/test/unit.js");
             }
         }
-        if(steal.options.env == 'compress'){
-            steal.plugin({path: 'util/compress', ignore: true}) //should get ignored
-        }
+
         if(steal.options.env == 'production' && steal.options.loadProduction){
-            document.write('<script type="text/javascript" src="'+steal.options.production+'"></script>' );
+            steal.end()
+			document.write('<script type="text/javascript" src="'+steal.options.production+'"></script>' );
             return
         }
             
@@ -622,9 +621,8 @@ extend(steal,
      * The above code loads steal, then uses steal to load the plugin controller.
      */
     start: function(){
-        steal.start_called = true;
-            if (steal.options.env != 'production')
-                steal.end();
+		steal.start_called = true;
+        steal.end();
     },
     start_called : false,
     functions: [],

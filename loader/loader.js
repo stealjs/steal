@@ -1,30 +1,36 @@
-if (typeof steal == 'undefined') steal = {};
-
-steal.Loader = function(url, scriptTypes){
+(function(Steal){
+	
+Steal.Loader = function(url, scriptTypes){
 	this.url = url;
 	this.scripts = [];
 	this.scriptTypes = scriptTypes || {"text/javascript" : true,"text/envjs" : true};
 	this.load();
 	
 }
-steal.Loader.prototype = {
+Steal.Loader.prototype = {
 	load : function(){
 		var self = this;
         load('steal/rhino/env.js');
-        Envjs(this.url, {scriptTypes: this.scriptTypes, fireLoad: true, logLevel: 2,
+		Envjs(this.url, {scriptTypes: this.scriptTypes, fireLoad: true, logLevel: 2,
             afterScriptLoad: {".*": function(script){ 
-                    self.scripts.push(script);
+					self.scripts.push(script);
                 }
             },
             onLoadUnknownTypeScript: function(script){
                 self.scripts.push(script);   
+            },
+			afterInlineScriptLoad : function(script){
+				self.scripts.push(script);   
             }
         }); 
+		
+		
 	},
-	loadScriptText: function(src, isView){
+	loadScriptText: function(src, isView, script){
     	var text = "";
         var base = "" + window.location;
-        var url = Envjs.location(src.match(/([^\?#]*)/)[1], base);
+
+		var url = Envjs.location(src.match(/([^\?#]*)/)[1], base);
         
         if(isView){
         	// FIXME assumes view paths start one folder deep from root
@@ -43,6 +49,11 @@ steal.Loader.prototype = {
 
         return text;
     },
+	each : function(ths, func){
+		for(var i = 0 ; i < this.scripts.length; i++){
+			func.call(ths, this.scripts[i], this.getScriptContent(this.scripts[i]), i)
+		}
+	},
 	getScriptContent : function(script){
 		return this[script.type] && this[script.type](script);
 	},
@@ -57,12 +68,10 @@ steal.Loader.prototype = {
 	},
 	'text/javascript': function(script){
         if(script.src){
-            var text = this.loadScriptText(script.src, false);
-            //if(script.getAttribute('compress') == "true"){
-            //    return this.compressString(text);
-            //}
-            return text;
-        }
+            return this.loadScriptText(script.src, false, script);
+        }else{
+			return script.text
+		}
     },
     
     'text/ejs': function(script){
@@ -81,3 +90,7 @@ steal.Loader.prototype = {
 		return $.View.registerScript("jaml",id, text);     
     }
 }
+
+	
+})(typeof steal == 'undefined' ? (steal = {}) : steal);
+
