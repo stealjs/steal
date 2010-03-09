@@ -47,4 +47,4 @@ do
   fi
 done
 ARGS=$ARGS]
-java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -e 'load('"'"$1"'"')'
+java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -opt -1 -e 'load('"'"$1"'"')'
