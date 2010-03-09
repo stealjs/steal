@@ -1,24 +1,18 @@
 module("<%= underscore %>")
 
-test("<%= underscore %> scaffold test", function(){
+test("<%= plural %> present", function(){
 
         S.open("<%= appName %>.html");
-		S.wait(10, function(){
-			ok(true, "things working");
-		})
+		S('.<%= underscore %>').exists(function(){
+			ok(true, "<%= plural %> present");
+	    });
 
-})
-
-test("<%= plural %> present", function(){
-    S('.<%= underscore %>').exists(function(){
-		ok(true, "<%= plural %> present");
-    });
 })
 
 test("create <%= plural %>", function(){
-    S("form input[name=name]").type("Ice")
-    S("form input[name=description]").type("Cold Water")
-    S("form input[type=submit]").click()
+    S("[name=name]").type("Ice")
+    S("[name=description]").type("Cold Water")
+    S("[type=submit]").click()
     S('.<%= underscore %>:nth-child(2)').exists()
     S('.<%= underscore %>:nth-child(2) td:first').text(function(text){
         ok(text.match(/Ice/), "Typed Ice");
@@ -42,6 +36,7 @@ test("edit <%= plural %>", function(){
 
 test("destroy", function(){
     S(".<%= underscore %>:nth-child(2) .destroy").click()
-    S('.<%= underscore %>:nth-child(2)').missing()
+    S.confirm(true);
+	S('.<%= underscore %>:nth-child(2)').missing()
     ok("destroyed");
 });
