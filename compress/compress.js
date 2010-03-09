@@ -28,9 +28,11 @@ load('steal/loader/loader.js');
 	       var self= this;
 		    this.compressString = this["closureCompressor"]();    
 			var currentPackage = [];
+		   print("\nPackaging ....")
 		   this.loader.each(this, function(script, text, i){
 		   		var name =  script.src ? script.src.replace(/\?.*$/,"").replace(/^(\.\.\/)+/,"") : text
-				print("Script #" + i + ": " + name  );
+				if(script.src)
+					print("   " + name  );
 				
 				var p = script.getAttribute('package');
 				if(p && !this.packages[p]) 
