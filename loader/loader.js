@@ -11,7 +11,7 @@ Steal.Loader.prototype = {
 	load : function(){
 		var self = this;
         load('steal/rhino/env.js');
-		Envjs(this.url, {scriptTypes: this.scriptTypes, fireLoad: true, logLevel: 2,
+		Envjs(this.url, {scriptTypes: this.scriptTypes, fireLoad: false, logLevel: 2,
             afterScriptLoad: {".*": function(script){ 
 					self.scripts.push(script);
                 }

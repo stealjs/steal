@@ -4974,7 +4974,7 @@ __extend__(DOMDocument.prototype, {
             
             //finally fire the window.onload event
             
-			if(_this === document){
+			if(_this === document && $env.fireLoad !== false){
                 var windowLoad = _this.createEvent();
                 windowLoad.initEvent("load", false, false);
                 $w.dispatchEvent( windowLoad, false );

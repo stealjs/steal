@@ -143,7 +143,7 @@ steal.fn = steal.prototype = {
             };
             this.options = options;
         } else if(options.type) { 
-            
+            extend( this, options)
 			this.path = options.src;
             this.type = options.type;
         } else { //something we are going to steal and run
@@ -151,14 +151,14 @@ steal.fn = steal.prototype = {
             if(typeof options == 'string' ){
                 this.path = /\.js$/ig.test(options) ? options : options+'.js'
             }else {
-                extend( this, options)
+				extend( this, options)
             }
             this.originalPath = this.path;
             //get actual path
             var pathFile = new File(this.path);
             this.path = pathFile.normalize();
             this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
-            this.dir = new File(this.path).dir();
+			this.dir = new File(this.path).dir();
         }
         
     },
@@ -178,9 +178,7 @@ steal.fn = steal.prototype = {
 			isProduction ? true : insert(this.path, "text/" + this.type);
 			
         }else{
-            if( steal.options.env == 'compress'){
-                this.setSrc();
-            }else if(isProduction){
+			if(isProduction){
 				 return;
 			}
             steal.setPath(this.dir);
@@ -196,18 +194,6 @@ steal.fn = steal.prototype = {
         
         return browser.rhino ? load(this.path) : 
                     steal.insert_head( steal.root.join(this.path) );
-    },
-    /**
-     * Sets the src property for an steal.  This is used by compression.
-     * @hide
-     */
-    setSrc : function(){
-        if(steal.options.debug){
-            var parts = this.path.split("/")
-            if(parts.length > 4) parts = parts.slice(parts.length - 4);
-            print("   "+parts.join("/"));
-        }
-        this.src = steal.request(steal.root.join(this.path));
     }
     
 }
@@ -819,8 +805,7 @@ steal.views = function(){
 
 steal.view = function(path){
     var type = path.match(/\.\w+$/gi)[0].replace(".","");
-	//print(path+" --!")
-	steal({src: path, type: type, compress: false});    
+	steal({src: path, type: type, compress: "false"});    
 	return steal;
 };
 
@@ -851,7 +836,7 @@ var insert = function(src, type, onlyInsert){
 	}
 
     var scriptTag = '<script type="'+((typeof type!='undefined')?(type+'" '):'text/javascript" ');
-    if(writeSrc)
+	if(writeSrc)
 		scriptTag += src?('src="'+src+'" '):'';
     scriptTag += src?('id="'+id+'" '):'';
     scriptTag += 'compress="'+((typeof steal.current['compress']!='undefined')?
