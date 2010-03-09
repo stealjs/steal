@@ -820,7 +820,7 @@ steal.views = function(){
 steal.view = function(path){
     var type = path.match(/\.\w+$/gi)[0].replace(".","");
 	//print(path+" --!")
-	steal({src: path, type: type});    
+	steal({src: path, type: type, compress: false});    
 	return steal;
 };
 
