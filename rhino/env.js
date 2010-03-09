@@ -25,7 +25,7 @@ Envjs = function(){
 };
 
 /*
-*	env.rhino.js
+*	env.js
 */
 (function($env){
     
@@ -296,7 +296,7 @@ Envjs = function(){
 })(Envjs);
 
 /*
-*	env.rhino.js
+*	env.js
 */
 (function($env){
     
