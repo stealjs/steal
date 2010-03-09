@@ -1,10 +1,7 @@
-//load("<%= path %>/test/funcunit/run.js")
-
-
-//load global selenium settings, change if you want something different
-load('settings/selenium.js')
-
-load('steal/rhino/loader.js');
-rhinoLoader(function(){
-    steal.plugins('<%= path %>/test/funcunit');  // load tests
-}, true);
+load('<%= path %>/test/funcunit/settings.js')
+load('steal/rhino/env.js');
+Envjs('<%= path %>/test/funcunit/test.html', 
+	{scriptTypes : {"text/javascript" : true,"text/envjs" : true}, 
+	fireLoad: true, 
+	logLevel: 2
+});

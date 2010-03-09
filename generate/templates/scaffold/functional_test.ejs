@@ -1,36 +1,47 @@
-jQuery.Test.Functional.extend('Tests.Functional.<%= name %>Controller',{
-    test_<%= plural %>Present: function(){
-        this.driver.exists('.<%= underscore %>', this.timeoutCallback('ready', 5000));
-    },
-    ready : function(){
-        this.assert(true)
-    },
-    test_create : function(){
-        this.driver.type("form input[name=name]","Ice")
-        this.driver.type("form input[name=description]","Cold Water")
-        this.driver.click("form input[type=submit]")
-        this.driver.exists('.<%= underscore %>:nth-child(2)', this.timeoutCallback('created', 5000));
-    },
-    created : function(){
-        this.assert(/Ice/.test(  this.driver.text('.<%= underscore %>:nth-child(2) td:first') )  )
-    },
-    test_edit : function(){
-        this.driver.click('.<%= underscore %>:nth-child(2) a.edit');
-        this.driver.type(".<%= underscore %> input[name=name]"," Water")
-        this.driver.type(".<%= underscore %> input[name=description]","\b\b\b\b\bTap Water")
-        this.driver.click(".update")
-        this.driver.exists('.<%= underscore %>:nth-child(2) .edit', this.timeoutCallback('updated', 5000));
-    },
-    updated : function(){
-        this.assert(/Ice Water/.test(  this.driver.text('.<%= underscore %>:nth-child(2) td:first') )  )
-        this.assert(/Cold Tap Water/.test(  this.driver.text('.<%= underscore %>:nth-child(2) td:nth-child(2)') )  )
-    },
-    test_destroy : function(){
-        this.driver.click(".<%= underscore %>:nth-child(2) .destroy")
-        this.driver.missing('.<%= underscore %>:nth-child(2)', this.timeoutCallback('destroyed', 5000))
-    },
-    destroyed : function(){
-        this.assert(true)
-    }
-    
+module("<%= underscore %>")
+
+test("<%= underscore %> scaffold test", function(){
+
+        S.open("<%= appName %>.html");
+		S.wait(10, function(){
+			ok(true, "things working");
+		})
+
+})
+
+test("<%= plural %> present", function(){
+    S('.<%= underscore %>').exists(function(){
+		ok(true, "<%= plural %> present");
+    });
+})
+
+test("create <%= plural %>", function(){
+    S("form input[name=name]").type("Ice")
+    S("form input[name=description]").type("Cold Water")
+    S("form input[type=submit]").click()
+    S('.<%= underscore %>:nth-child(2)').exists()
+    S('.<%= underscore %>:nth-child(2) td:first').text(function(text){
+        ok(text.match(/Ice/), "Typed Ice");
+    });
+})
+
+test("edit <%= plural %>", function(){
+    S('.<%= underscore %>:nth-child(2) a.edit').click();
+    S(".<%= underscore %> input[name=name]").type(" Water")
+    S(".<%= underscore %> input[name=description]").type("\b\b\b\b\bTap Water")
+    S(".update").click()
+    S('.<%= underscore %>:nth-child(2) .edit').exists()
+    S('.<%= underscore %>:nth-child(2) td:first').text(function(text){
+        ok(text.match(/Ice Water/), "Typed Ice Water");
+    });
+    S('.<%= underscore %>:nth-child(2) td:nth-child(2)').text(function(text){
+        ok(text.match(/Cold Tap Water/), "Typed Ice Water");
+    });
+})
+
+
+test("destroy", function(){
+    S(".<%= underscore %>:nth-child(2) .destroy").click()
+    S('.<%= underscore %>:nth-child(2)').missing()
+    ok("destroyed");
 });

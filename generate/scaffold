@@ -39,6 +39,11 @@ rhinoLoader(function(){
 				.render("init.ejs","scaffold/init.ejs")
 				.render("list.ejs","scaffold/list.ejs")
 				.render("show.ejs","scaffold/show.ejs")
+				.pop()
+			.pop()
+		.push("test").folder()
+			.push("funcunit").folder()
+				.render(md.underscore+"_controller_test.js","scaffold/functional_test.ejs")
 	
 	
 	

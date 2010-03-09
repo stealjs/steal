@@ -40,17 +40,6 @@ rhinoLoader(function(){
 	
 	var	path_to_steal = loc_folders.join("/");
 
-    //print(path_to_steal);
-    //return;
-
-
-
-
-
-
-
-
-
 	// if browser exists, returns the path, otherwise null
 	var get_browser_location = function(browser_name){
 		var runtime = java.lang.Runtime.getRuntime();
@@ -87,17 +76,17 @@ rhinoLoader(function(){
       .folder()
       .render(data.application_name+".js",  "application.ejs")
       .render(data.application_name+".html",  "page.ejs")
+      .render("funcunit.html",  "funcunit/html.ejs")
+      .render("qunit.html",  "qunit/html.ejs")
       .push("test").folder()
         .push("qunit").folder()
-          .render("qunit.html", "qunit/html.ejs")
+          .render("test.html", "qunit/html.ejs")
           .render("qunit.js", "qunit/qunit.ejs")
-          .render(data.application_name+"_test.js", "qunit/test.ejs")
           .render("run.js", "qunit/run.ejs")
           .pop()
         .push("funcunit").folder()
-          .render("funcunit.html", "funcunit/html.ejs")
+          .render("test.html", "funcunit/html.ejs")
           .render("funcunit.js", "funcunit/funcunit.ejs")
-          .render(data.application_name+"_test.js", "funcunit/test.ejs")
           .render("run.js", "funcunit/run.ejs")
           .pop()
         .pop()

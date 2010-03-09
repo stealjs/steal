@@ -1,5 +1,3 @@
-//we probably have to have this only describing where the tests are
 steal
- .plugins("<%= path %>")  //load your app
- .plugins('funcunit/qunit')  //load qunit
- .then("<%= application_name %>_test")
+  .plugins('funcunit/functional')
+  .then("<%= application_name %>_test")
