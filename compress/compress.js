@@ -10,7 +10,7 @@ load('steal/loader/loader.js');
 	   }
 	   this.url = url;
 	   this.outputFolder = outputFolder || "";
-	   if(this.outputFolder.match(/\\$/) == null && this.outputFolder != '') this.outputFolder += "\\";
+	   if(this.outputFolder.match(/\\$/) == null && this.outputFolder != '') this.outputFolder += "/";
 	   delete steal;
 	   this.loader = new Steal.Loader(this.url)
 	   this.init();

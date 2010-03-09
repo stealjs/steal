@@ -40,7 +40,7 @@ Steal.Loader.prototype = {
         
         if(url.match(/^file\:/)) {
             url = url.replace("file:/","").replace("\\", "/");
-            text = readFile(url);
+            text = readFile("/"+url);
         }
         
         if(url.match(/^http\:/)) {
