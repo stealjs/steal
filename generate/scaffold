@@ -44,6 +44,9 @@ rhinoLoader(function(){
 		.push("test").folder()
 			.push("funcunit").folder()
 				.render(md.underscore+"_controller_test.js","scaffold/functional_test.ejs")
+				.pop()
+			.push("qunit").folder()
+				.render(md.underscore+"_test.js","scaffold/unit_test.ejs")
 	
 	
 	
