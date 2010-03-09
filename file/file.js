@@ -11,7 +11,19 @@
 			this.path = path;
 		}
 	}
-
+	var copy = function(jFile1, jFile2){
+		var fin = new java.io.FileInputStream(jFile1);
+        var fout = new java.io.FileOutputStream(jFile2);
+    
+        // Transfer bytes from in to out
+        var data = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+        var len = 0;
+        while ((len = fin.read(data)) > 0) {
+            fout.write(data, 0, len);
+        }
+        fin.close();
+        fout.close();
+	}
 
 extend(S.File.prototype, {	
 	/**
@@ -130,18 +142,18 @@ extend(S.File.prototype, {
         var exists = (new java.io.File(this.path)).exists();
         return exists;
     },
-    copy_to: function(dest){
-        var fin = new java.io.FileInputStream(new java.io.File( this.path ));
-        var fout = new java.io.FileOutputStream(new java.io.File(dest));
-    
-        // Transfer bytes from in to out
-        var data = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-        var len = 0;
-        while ((len = fin.read(data)) > 0) {
-            fout.write(data, 0, len);
-        }
-        fin.close();
-        fout.close();
+    copyTo: function(dest){
+        var me = new java.io.File(this.path)
+		var you = new java.io.File(dest);
+		
+	    if (me.isDirectory()) {
+	        var children = me.list();
+	        for (var i=0; i<children.length; i++) {
+	            copy(new java.io.File(me, children[i]), new java.io.File(you, children[i])  )
+	        }
+			return;
+	    }
+		copy(me, you)
     },
     save: function(src, encoding){
           var fout = new java.io.FileOutputStream(new java.io.File( this.path ));
@@ -186,7 +198,29 @@ S.File.cwdURL = function(){
 S.File.cwd = function(){
     return String(new java.io.File('').getAbsoluteFile().toString());
 }
+S.File.pathToSteal = function(loc){
+	var stealFolders = S.File.cwd().split(/\/|\\/),
+		locFolders = loc.split(/\/|\\/);
 	
+	//for each .. in loc folders, replace with steal folder
+	
+	var i = 0;
+	
+	if (locFolders[i] == "..") {
+		while(locFolders[i] == "..") {
+			locFolders[i] = stealFolders.pop();
+			i++;
+		}
+	} else
+	    for(i=0; i < locFolders.length - 1; i++)
+	    	locFolders[i] = ".."
+	
+	locFolders.pop();
+	locFolders.push('..')
+
+	return  locFolders.join("/");
+	
+}
 	
 })(typeof steal == 'undefined' ? (steal = {}) : steal);
 

@@ -63,6 +63,10 @@ _S = {
 		if(a !== b)
 			throw ""+a+"!="+b+":"+message
 	},
+	ok : function(v, message){
+		if(!v)
+			throw "not "+v+" "+message
+	},
 	open : function(src){
 		load("steal/rhino/env.js")
 		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2});

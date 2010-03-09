@@ -1,6 +1,3 @@
-//js <%= path %>/compress.js
-
+//steal/js <%= path %>/compress.js
 load("steal/compress/compress.js")
-var compress = new Steal.Compress(['<%= path %>/<%= application_name %>.html',
-                                   '<%= path %>']);
-compress.init();
+new steal.Compress('<%= path %>/<%= application_name %>.html','<%= path %>');

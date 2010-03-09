@@ -28,9 +28,11 @@ load('steal/loader/loader.js');
 	       var self= this;
 		    this.compressString = this["closureCompressor"]();    
 			var currentPackage = [];
+		   print("\nPackaging ....")
 		   this.loader.each(this, function(script, text, i){
-		   		var name =  script.src ? script.src.replace(/\?.*$/,"") : text
-				print("Script #" + i + ": " + name  );
+		   		var name =  script.src ? script.src.replace(/\?.*$/,"").replace(/^(\.\.\/)+/,"") : text
+				if(script.src)
+					print("   " + name  );
 				
 				var p = script.getAttribute('package');
 				if(p && !this.packages[p]) 
@@ -39,21 +41,21 @@ load('steal/loader/loader.js');
 					currentPackage = this.packages[p];
 				}
 				if(script.getAttribute('compress') == "true"){
-	                text =  this.compressString(text);
+	                text =  this.compressString(text, /jquery.js/.test(name));
 	            }
 				currentPackage.push(text);
 		   })
 		  
 		   var idx = 0;
-	       
+	       print();
 		   for(var p in this.packages){
-	           var compressed = /*"steal.end();\n"+*/this.packages[p].join(";\n") /*+";\nsteal.end();"*/;
+	           var compressed = this.packages[p].join(";\n");
 	           new Steal.File(this.outputFolder + p).save(compressed);           
 	           print("Package #" + idx + ": " + this.outputFolder + p);
 	           idx++;
 	       }
 	      
-	       print("Compression Finished.");
+	       //print("Compression Finished.");
 	       //if(!window.MVCDontQuit) quit();  
 		   
 		   
@@ -153,7 +155,7 @@ load('steal/loader/loader.js');
 	//      }
 	
 	    closureCompressor: function(){  
-	        return function(src){
+	        return function(src, quiet){
 	        	var rnd = Math.floor( Math.random()*1000000+1 );
 	        	var filename = "tmp" + rnd + ".js";
 	            var tmpFile = new Steal.File( filename );
@@ -161,8 +163,14 @@ load('steal/loader/loader.js');
 	            
 	        	var outBaos = new java.io.ByteArrayOutputStream();
 	        	var output = new java.io.PrintStream(outBaos);
-	            runCommand("java", "-jar", "steal/rhino/compiler.jar", "--compilation_level",
-	                "SIMPLE_OPTIMIZATIONS", "--js", filename, {output: output});
+	            if(quiet){
+					runCommand("java", "-jar", "steal/rhino/compiler.jar", "--compilation_level",
+	                	"SIMPLE_OPTIMIZATIONS", "--warning_level","QUIET",  "--js", filename, {output: output});
+				}else{
+					runCommand("java", "-jar", "steal/rhino/compiler.jar", "--compilation_level",
+	                	"SIMPLE_OPTIMIZATIONS", "--js", filename, {output: output});
+				}
+				
 	            
 	            tmpFile.remove();
 	            
