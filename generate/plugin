@@ -39,19 +39,7 @@ rhinoLoader(function(){
 	loc_folders.pop();
 	loc_folders.push('..')
 	
-	
 	var	path_to_steal = loc_folders.join("/");
-
-    //print(path_to_steal);
-    //return;
-
-
-
-
-
-
-
-
 
 	// if browser exists, returns the path, otherwise null
 	var get_browser_location = function(browser_name){
@@ -72,16 +60,19 @@ rhinoLoader(function(){
 		var path = get_browser_location("firefox");
 		if(path) firefox_location = "*firefox "+path;
 	}
-
 	
-
+	var application_name = _args[0].match(/[^\/]*$/)[0];
+	var funcunit_html_name = "funcunit.html";
+	if(application_name == "funcunit") funcunit_html_name = "funcunit_test.html"
+	
 	var data = {
 		path: _args[0], 
-		application_name: _args[0].match(/[^\/]*$/)[0],
+		application_name: application_name,
 		current_path: steal.File.cwdURL(),
 		windows: windows,
 		firefox_location: firefox_location,
-		path_to_steal : path_to_steal
+		path_to_steal : path_to_steal, 
+		funcunit_html_name: funcunit_html_name
 	};
 	
 	var app_root = _args[0];
@@ -89,57 +80,28 @@ rhinoLoader(function(){
       .folder()
       .render(data.application_name+".js",  "application.ejs")
       .render(data.application_name+".html",  "page.ejs")
+      .render(funcunit_html_name,  "funcunit/html.ejs")
+      .render("qunit.html",  "qunit/html.ejs")
       .push("test").folder()
         .push("qunit").folder()
-          .render("qunit.html", "qunit/html.ejs")
           .render("qunit.js", "qunit/qunit.ejs")
-          .render(data.application_name+"_test.js", "qunit/test.ejs")
           .render("run.js", "qunit/run.ejs")
+          .push("tests").folder()
+            .render("basic.js", "qunit/basic.ejs")
+            .pop()
           .pop()
         .push("funcunit").folder()
-          .render("funcunit.html", "funcunit/html.ejs")
           .render("funcunit.js", "funcunit/funcunit.ejs")
-          .render(data.application_name+"_test.js", "funcunit/test.ejs")
           .render("run.js", "funcunit/run.ejs")
+          .render("settings.js", "funcunit/settings.ejs")
+          .push("tests").folder()
+            .render("basic.js", "funcunit/basic.ejs")
+            .pop()
           .pop()
         .pop()
       .folder("docs")
       .push("scripts").folder()
         .render("compress.js", "compress_script.ejs")
         .render("doc.js","docs_script.ejs")
-	
-	/*
-	
-
-	Generate.folder(app_root+"/docs");
-	
-	
-	Generate.render(app_root + "/"+data.application_name, "../generate/templates/application.ejs", data);
-	
-	Generate.render(app_root + "/index.html", "../generate/templates/compress_page.ejs", data);
-	Generate.folder(app_root+"/test");
-	Generate.render(app_root + "/test/unit.js", "../generate/templates/unit.ejs", data);
-	Generate.render(app_root + "/test/run_unit.js", "../generate/templates/unit_script.ejs", data);
-	Generate.render(app_root + "/test/functional.js", "../generate/templates/functional.ejs", data);
-	Generate.render(app_root + "/test/run_functional.js", "../generate/templates/run_functional.ejs", data);
-	Generate.render(app_root + "/test/selenium_config.js", "../generate/templates/selenium_config.ejs", data);
-	Generate.folder(app_root+"/docs");
-	Generate.render("test/unit/truth_test.js", "../generate/templates/unit_test.ejs", {name: "Truth"});
-	Generate.render("test/functional/truth_functional_test.js", "../generate/templates/functional_test.ejs", {name: "Truth"});
-	
-	
-	
-	var dta = {
-		path_to_steal: "steal/steal.js",
-		application_name: _args[0]
-	}
-	
-	//test/tests/engine.html -> ../../steal/steal.js
-	
-	Generate.render(_args[0]+".html", "../generate/templates/page.ejs", dta);
-	Generate.postGenerationMessage();
-	
-	//Generate.postGenerationMessage();
-    */
 })();
 

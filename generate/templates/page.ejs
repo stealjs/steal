@@ -16,10 +16,23 @@
             <li>Include plugins and files in <i><%= path %>/<%= application_name %>.js</i>.</li>
             <li>Change to production mode by changing <i>development</i> to <i>production</i> in this file.</li>
         </ul>
+		<input id="typehere"/><input type='submit' value="Copy" id='copy'/>
+		<p id='seewhatyoutyped'></p>
 		<script type='text/javascript' 
                 src='<%= path_to_steal %>/steal/steal.js?steal[app]=<%=path%>&steal[env]=development'
                 package='main.js'
                 compress='false'>   
         </script>
+		<script type='text/javascript'>
+			$(function(){
+				$("#typehere").keyup(function(){
+					$("#seewhatyoutyped").html("typed "+this.value)
+				})
+				$("#copy").click(function(){
+					$("#seewhatyoutyped").html("copied "+$("#typehere").val())
+				})
+				
+			})
+		</script>
 	</body>
 </html>
