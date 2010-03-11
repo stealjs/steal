@@ -53,6 +53,7 @@ rhinoLoader(function(){
     // am i non-windows?
     var windows = true;
     var firefox_location = "*firefox";
+    var filesystem_path = new java.io.File(".").getCanonicalPath();
 	if(java.lang.System.getProperty("os.name").indexOf("Windows") == -1){
 		windows = false;
 		// does current browser config have a path?
@@ -68,7 +69,8 @@ rhinoLoader(function(){
 		current_path: steal.File.cwdURL(),
 		windows: windows,
 		firefox_location: firefox_location,
-		path_to_steal : path_to_steal
+		path_to_steal : path_to_steal, 
+		filesystem_path: filesystem_path
 	};
 	
 	var app_root = _args[0];
