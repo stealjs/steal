@@ -19,9 +19,9 @@ if "%1"=="-selenium" (
 	java -jar steal\rhino\selenium-server.jar
 	GOTO END
 )
-SET CP=steal\rhino\js.jar
+SET CP=steal/rhino/selenium-java-client-driver.jar;steal\rhino\js.jar
 if "%1"=="-mail" (
-	SET CP=steal\rhino\selenium-java-client-driver.jar;steal\rhino\js.jar;steal\rhino\mail.jar
+	SET CP=steal/rhino/mail.jar;steal/rhino/selenium-java-client-driver.jar;steal\rhino\js.jar
 	SHIFT /0
 )
 SET ARGS=[
@@ -34,7 +34,7 @@ for %%a in (",''=") do ( call set ARGS=%%ARGS:%%~a%% )
 ::remove the spaces
 for /f "tokens=1*" %%A in ("%ARGS%") do SET ARGS=%%A
 SET ARGS=%ARGS%]
-java -cp steal/rhino/selenium-java-client-driver.jar;steal\rhino\js.jar org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+java -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
 
 GOTO END
 

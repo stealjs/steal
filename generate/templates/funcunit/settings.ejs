@@ -13,3 +13,11 @@ SeleniumDefaults = {
 
 // the list of browsers that selenium runs tests on
 SeleniumBrowsers = ["*firefox"]
+
+EmailerDefaults = {
+    host: "smtp.myserver.com",
+    port: 25,
+    from: "myemail@gmail.com",
+    to: "myemail@gmail.com",
+    subject: "Test Logs"
+}

@@ -1,3 +1,24 @@
+importPackage(javax.mail);
+Emailer = {
+    _msg: null,
+    setup: function(options) {
+        var props = new java.util.Properties();
+        props.put("mail.smtp.host", options.host);
+        props.put("mail.smtp.port", options.port);
+        var session = javax.mail.Session.getDefaultInstance(props);
+        this._msg = new javax.mail.internet.MimeMessage(session);
+        var from = new javax.mail.internet.InternetAddress(options.from);
+        this._msg.setFrom(from);
+        var to = javax.mail.internet.InternetAddress.parse(options.to);
+        this._msg.setRecipients(javax.mail.Message.RecipientType.TO, to);
+        this._msg.setSubject(options.subject)
+    },
+    send: function(text) {
+        this._msg.setText(text);
+        javax.mail.Transport.send(this._msg);
+    }
+}
+
 /**
 // The following code should import the classes from the jar, but it doesn't quite work.
 var mail = {};
@@ -99,24 +120,3 @@ msg.setSubject("Test Logs")
 msg.setText("boooo");
 javax.mail.Transport.send(msg);
 **/
-
-importPackage(javax.mail);
-var email = {
-    _msg: null,
-    setup: function(options) {
-        var props = new java.util.Properties();
-        props.put("mail.smtp.host", options.host);
-        props.put("mail.smtp.port", options.port);
-        var session = javax.mail.Session.getDefaultInstance(props);
-        this._msg = new javax.mail.internet.MimeMessage(session);
-    },
-    send: function(options) {
-        var from = new javax.mail.internet.InternetAddress(options.from);
-        this._msg.setFrom(from);
-        var to = javax.mail.internet.InternetAddress.parse(options.to);
-        this._msg.setRecipients(javax.mail.Message.RecipientType.TO, to);
-        this._msg.setSubject(options.subject)
-        this._msg.setText(options.text);
-        javax.mail.Transport.send(this._msg);
-    }
-}
