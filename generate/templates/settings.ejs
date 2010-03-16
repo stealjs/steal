@@ -26,7 +26,7 @@ EmailerDefaults = {
 	username: "yourname@gmail.com",
 	password: "yourpass",
     from: "yourname@gmail.com",
-    to: "yourname@gmail.com",
+    to: ["yourname@gmail.com", "anotherdev@gmail.com"],
     subject: "Test Logs"
 }
 * Example 2: SMTP Server without authentication 
@@ -34,7 +34,7 @@ EmailerDefaults = {
     host: "smtp.myserver.com",
     port: 25,
     from: "myemail@myserver.com",
-    to: "myemail@myserver.com",
+    to: ["yourname@myserver.com", "anotherdev@myserver.com"],
     subject: "Test Logs"
 }
 */

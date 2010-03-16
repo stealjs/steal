@@ -22,13 +22,18 @@ Emailer = {
         this._msg = new javax.mail.internet.MimeMessage(session);
         var from = new javax.mail.internet.InternetAddress(options.from);
         this._msg.setFrom(from);
-        var to = javax.mail.internet.InternetAddress.parse(options.to);
-        this._msg.setRecipients(javax.mail.Message.RecipientType.TO, to);
+		var to;
+		for(var i=0; i<options.to.length; i++){
+        	to = javax.mail.internet.InternetAddress.parse(options.to[i]);
+        	this._msg.setRecipients(javax.mail.Message.RecipientType.TO, to);
+		}
         this._msg.setSubject(options.subject)
     },
     send: function(text) {
         this._msg.setText(text);
+		print("Sending email.....")
         javax.mail.Transport.send(this._msg);
+		print("Email sent.")
     }
 }
 
