@@ -1,36 +1,11 @@
 module("<%=application_name%> test", { 
 	setup: function(){
         S.open("<%=application_name%>.html");
-		
-		// ***REMOVE THE CODE BELOW***
-		// This code is only here for demo purposes.
-		// It adds some simple html and event handlers to the tested page so we can demonstrate basic testing. 
-		S.add(function(success, error){
-			var html = "<input id='typehere'/>"+
-				"<input type='submit' value='Copy' id='copy'/>"+
-				"<p id='seewhatyoutyped'></p>"
-			S.$(html, null, "appendTo", S._window.document.body)
-			S._window.$("#typehere").keyup(function(){
-				S._window.$("#seewhatyoutyped").html("typed "+this.value)
-			})
-			S._window.$("#copy").click(function(){
-				S._window.$("#seewhatyoutyped").html("copied "+S._window.$("#typehere").val())
-			})
-			success()
-		})
 	}
 })
 
 test("Copy Test", function(){
-		
-		S("#typehere").type("javascriptmvc")
-		
-		S("#seewhatyoutyped").text(function(val){
-			equals(val, "typed javascriptmvc","typing");
-		})
-		S("#copy").click();
-		S("#seewhatyoutyped").text(function(val){
-			equals(val, "copied javascriptmvc","copy");
-		})
-
+	S("h1").text(function(val){
+		equals(val, "Welcome to JavaScriptMVC 3.0!","welcome text");
+	})
 })
