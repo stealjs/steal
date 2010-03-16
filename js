@@ -13,6 +13,12 @@ then
   java -jar steal/rhino/selenium-server.jar
   exit 127
 fi
+CP=steal/rhino/selenium-java-client-driver.jar:steal/rhino/js.jar
+if [ $1 = "-mail" ]
+then
+	CP=steal/rhino/mail.jar:steal/rhino/selenium-java-client-driver.jar:steal/rhino/js.jar
+	shift
+fi
 
 if [ $1 = "-h" -o $1 = "-?" -o $1 = "--help" ]
 then
@@ -47,4 +53,4 @@ do
   fi
 done
 ARGS=$ARGS]
-java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -opt -1 -e 'load('"'"$1"'"')'
+java -cp $CP org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -opt -1 -e 'load('"'"$1"'"')'
