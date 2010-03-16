@@ -9,12 +9,12 @@ load('<%= path %>/test/settings.js')
 load('steal/email/email.js');
 
 if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
-	runCommand("cmd", "/C", "start /b steal\\js <%= path %>/scripts/funcunit.js > funcunit/test.log")
-	runCommand("cmd", "/C", "start /b steal\\js <%= path %>/scripts/qunit.js >> funcunit/test.log")
+	runCommand("cmd", "/C", "start /b steal\\js <%= path %>/scripts/funcunit.js > <%= path %>/test.log")
+	runCommand("cmd", "/C", "start /b steal\\js <%= path %>/scripts/qunit.js >> <%= path %>/test.log")
 }
 else {
-	print("not yet implemented");
-	quit();
+	runCommand("sh", "-c", "nohup ./steal/js <%= path %>/scripts/funcunit.js > <%= path %>/test.log")
+	runCommand("sh", "-c", "nohup ./steal/js <%= path %>/scripts/qunit.js >> <%= path %>/test.log")
 }
 
 var log = readFile('<%= path %>/test.log');
