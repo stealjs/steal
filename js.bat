@@ -12,16 +12,16 @@ if "%1"=="-?" GOTO PRINT_HELP
 if "%1"=="--help" GOTO PRINT_HELP
 
 if "%1"=="-d" (
-	java -classpath steal/rhino/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
+	java -classpath funcunit/dist/selenium/selenium/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
 	GOTO END
 )
 if "%1"=="-selenium" (
-	java -jar steal\rhino\selenium-server.jar
+	java -jar funcunit\dist\selenium\selenium\selenium-server.jar
 	GOTO END
 )
-SET CP=steal/rhino/selenium-java-client-driver.jar;steal\rhino\js.jar
+SET CP=funcunit/dist/selenium/selenium/selenium-java-client-driver.jar;steal\rhino\js.jar
 if "%1"=="-mail" (
-	SET CP=steal/rhino/mail.jar;steal/rhino/selenium-java-client-driver.jar;steal\rhino\js.jar
+	SET CP=steal/rhino/mail.jar;funcunit/dist/selenium/selenium/selenium-java-client-driver.jar;steal\rhino\js.jar
 	SHIFT /0
 )
 SET ARGS=[
