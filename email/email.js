@@ -12,7 +12,7 @@ Emailer = {
 			props.put("mail.smtp.auth", "true");
 			MyAuth = new JavaAdapter(javax.mail.Authenticator, {
 				getPasswordAuthentication : function(){
-					return new PasswordAuthentication("spartacus727@gmail.com","Bg.17509");
+					return new PasswordAuthentication(options.username, options.password);
 				}
 			});
 			session = javax.mail.Session.getDefaultInstance(props, MyAuth);
