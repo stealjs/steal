@@ -9262,6 +9262,7 @@ $w.setTimeout = function(fn, time){
     $timers[num] = new $timer(tfn, time);
     $timers[num].start();
   });
+  $env.wait();
   return num;
 };
 
@@ -9283,6 +9284,7 @@ $w.setInterval = function(fn, time){
     $timers[num] = new $timer(fn, time);
     $timers[num].start();
   });
+  $env.wait();
   return num;
 };
 
