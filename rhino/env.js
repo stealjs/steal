@@ -1,952 +1,1210 @@
 /*
- * Envjs env-js.1.1.rc2 
+ * Envjs core-env.1.2.0.10 
  * Pure JavaScript Browser Environment
- *   By John Resig <http://ejohn.org/>
- * Copyright 2008-2009 John Resig, under the MIT License
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
  */
-/**
- * @author thatcher
- */
-Envjs = function(){
-    if(arguments.length === 2){
-        for ( var i in arguments[1] ) {
-    		var g = arguments[1].__lookupGetter__(i), 
-                s = arguments[1].__lookupSetter__(i);
-    		if ( g || s ) {
-    			if ( g ) Envjs.__defineGetter__(i, g);
-    			if ( s ) Envjs.__defineSetter__(i, s);
-    		} else
-    			Envjs[i] = arguments[1][i];
-    	}
-    }
 
-    if (arguments[0] != null && arguments[0] != "")
+var Envjs = function(){
+    var i,
+        name
+        override = function(){
+            for(i=0;i<arguments.length;i++){
+                for ( name in arguments[i] ) {
+                    var g = arguments[i].__lookupGetter__(name), 
+                        s = arguments[i].__lookupSetter__(name);
+                    if ( g || s ) {
+                        if ( g ) Envjs.__defineGetter__(name, g);
+                        if ( s ) Envjs.__defineSetter__(name, s);
+                    } else
+                        Envjs[name] = arguments[i][name];
+                }
+            }
+        };
+    if(arguments.length === 1 && typeof(arguments[0]) == 'string'){
         window.location = arguments[0];
-};
+    }else if (arguments.length === 1 && typeof(arguments[0]) == "object"){
+        override(arguments[0])
+    }else if(arguments.length === 2 && typeof(arguments[0]) == 'string'){
+        override(arguments[1]);
+        window.location = arguments[0];
+    }
+    return;
+},
+__this__ = this;
+
+//eg "Mozilla"
+Envjs.appCodeName  = "Envjs";
+
+//eg "Gecko/20070309 Firefox/2.0.0.3"
+Envjs.appName      = "Resig/20070309 PilotFish/1.2.0.10";
+
+Envjs.version = "1.6";//?
 
 /*
-*	env.js
-*/
-(function($env){
-    
-    //You can emulate different user agents by overriding these after loading env
-    $env.appCodeName  = "Envjs";//eg "Mozilla"
-    $env.appName      = "Resig/20070309 BirdDog/0.0.0.1";//eg "Gecko/20070309 Firefox/2.0.0.3"
-
-    //set this to true and see profile/profile.js to select which methods
-    //to profile
-    $env.profile = false;
-    
-    $env.log = function(msg, level){};
-	
-    $env.DEBUG  = 4;
-    $env.INFO   = 3;
-    $env.WARN   = 2;
-    $env.ERROR  = 1;
-	$env.NONE   = 0;
-	
-    //set this if you want to get some internal log statements
-    $env.logLevel = $env.INFO;
-    
-    $env.debug  = function(msg){
-		if($env.logLevel >= $env.DEBUG)
-            $env.log(msg,"DEBUG"); 
-    };
-    $env.info = function(msg){
-        if($env.logLevel >= $env.INFO)
-            $env.log(msg,"INFO"); 
-    };
-    $env.warn   = function(msg){
-        if($env.logLevel >= $env.WARN)
-            $env.log(msg,"WARNIING");    
-    };
-    $env.error = function(msg, e){
-        if ($env.logLevel >= $env.ERROR) {
-			$env.log(msg + " Line: " + $env.lineSource(e), 'ERROR');
-			$env.log(e || "", 'ERROR');
-		}
-    };
-    
-    $env.info("Initializing Core Platform Env");
-
-
-    // if we're running in an environment without env.js' custom extensions
-    // for manipulating the JavaScript scope chain, put in trivial emulations
-    $env.debug("performing check for custom Java methods in env-js.jar");
-    var countOfMissing = 0, dontCare;
-    try { dontCare = getFreshScopeObj; }
-    catch (ex){      getFreshScopeObj  = function(){ return {}; };
-                                                       countOfMissing++; }
-    try { dontCare = getProxyFor; }
-    catch (ex){      getProxyFor       = function(obj){ return obj; };
-                                                       countOfMissing++; }
-    try { dontCare = getScope; }
-    catch (ex){      getScope          = function(){}; countOfMissing++; }
-    try { dontCare = setScope; }
-    catch (ex){      setScope          = function(){}; countOfMissing++; }
-    try { dontCare = configureScope; }
-    catch (ex){      configureScope    = function(){}; countOfMissing++; }
-    try { dontCare = restoreScope; }
-    catch (ex){      restoreScope      = function(){}; countOfMissing++; }
-    try { $env.loadIntoFnsScope = loadIntoFnsScope; }
-    catch (ex){      $env.loadIntoFnsScope = load;     countOfMissing++; }
-    if (countOfMissing != 0 && countOfMissing != 7)
-        $env.warn("Some but not all of scope-manipulation functions were " +
-                  "not present in environment.  JavaScript execution may " +
-                  "not occur correctly.");
-
-    $env.lineSource = function(e){};
-    
-    //resolves location relative to base or window location
-    $env.location = function(path, base){};
-  
-    $env.sync = function(fn){
-      var self = this;
-      return function(){ return fn.apply(self,arguments); }
-    }
-  
-    $env.javaEnabled = false;	
-    
-    //Used in the XMLHttpRquest implementation to run a
-    // request in a seperate thread
-    $env.runAsync = function(fn){};
-    
-    //Used to write to a local file
-    $env.writeToFile = function(text, url){};
-    
-    //Used to write to a local file
-    $env.writeToTempFile = function(text, suffix){};
-    
-    //Used to delete a local file
-    $env.deleteFile = function(url){};
-    
-    $env.connection = function(xhr, responseHandler, data){};
-    
-    $env.parseHTML = function(htmlstring){};
-    $env.parseXML = function(xmlstring){};
-    $env.xpath = function(expression, doc){};
-    
-    $env.tmpdir         = ''; 
-    $env.os_name        = ''; 
-    $env.os_arch        = ''; 
-    $env.os_version     = ''; 
-    $env.lang           = ''; 
-    $env.platform       = "Rhino ";//how do we get the version
-    
-    $env.scriptTypes = {
-        "text/javascript"   :false,
-        "text/envjs"        :true
-    };
-    
-    $env.onScriptLoadError = function(){};
-    $env.loadLocalScript = function(script, parser){
-        $env.debug("loading script ");
-        var types, type, src, i, base, 
-            docWrites = [],
-            write = document.write,
-            writeln = document.writeln,
-            okay = true;
-        // SMP: see also the note in html/document.js about script.type
-        var script_type = script.type === null ? "text/javascript" : script.type;
-        try{
-            if(script_type){
-                types = script_type?script_type.split(";"):[];
-                for(i=0;i<types.length;i++){
-                    if($env.scriptTypes[types[i]]){
-						if(script.src){
-                            $env.info("loading allowed external script :" + script.src);
-                            //lets you register a function to execute 
-                            //before the script is loaded
-                            if($env.beforeScriptLoad){
-                                for(src in $env.beforeScriptLoad){
-                                    if(script.src.match(src)){
-                                        $env.beforeScriptLoad[src]();
-                                    }
-                                }
-                            }
-                            base = "" + window.location;
-                            var filename = $env.location(script.src.match(/([^\?#]*)/)[1], base );
-                            try {                      
-                              load(filename);
-                            } catch(e) {
-                              $env.warn("could not load script "+ filename +": "+e );
-                              okay = false;
-                            }
-                            //lets you register a function to execute 
-                            //after the script is loaded
-                            if($env.afterScriptLoad){
-                                for(src in $env.afterScriptLoad){
-                                    if(script.src.match(src)){
-                                        $env.afterScriptLoad[src](script);
-                                    }
-                                }
-                            }
-                        }else{
-                            $env.loadInlineScript(script);
-                        }
-                    }else{
-                        if(!script.src && script_type == "text/javascript"){
-                            $env.loadInlineScript(script);
-                        } else {
-                          // load prohbited ...
-                          okay = false;
-                        }
-                    }
-                }
-            }else{
-                // SMP this branch is probably dead ...
-                //anonymous type and anonymous src means inline
-                if(!script.src){
-                    $env.loadInlineScript(script);
-                }
-            }
-        }catch(e){
-            okay = false;
-            $env.error("Error loading script.", e);
-            $env.onScriptLoadError(script);
-        }finally{
-            /*if(parser){
-                parser.appendFragment(docWrites.join(''));
-			}
-			//return document.write to it's non-script loading form
-            document.write = write;
-            document.writeln = writeln;*/
-        }
-        return okay;
-    };
-    
-    $env.loadInlineScript = function(script){};
-    $env.loadFrame = function(frameElement, url){
-        try {
-            if (frameElement._content){
-                $env.unload(frameElement._content);
-                $env.reload(frameElement._content, url);
-            }
-            else
-                frameElement._content = $env.newwindow(this,
-                    frameElement.ownerDocument.parentWindow, url);
-        } catch(e){
-            $env.error("failed to load frame content: from " + url, e);
-        }
-    };
-
-    $env.reload = function(oldWindowProxy, url){
-        var newWindowProxy = $env.newwindow(
-                                 oldWindowProxy.opener,
-                                 oldWindowProxy.parent,
-                                 url);
-        var newWindow = newWindowProxy.__proto__;
-        
-        oldWindowProxy.__proto__ = newWindow;
-        newWindow.$thisWindowsProxyObject = oldWindowProxy;
-        newWindow.document._parentWindow = oldWindowProxy;
-    };
-
-    $env.newwindow = function(openingWindow, parentArg, url){
-        var newWindow = $env.getFreshScopeObj();
-        var newProxy  = $env.getProxyFor(newWindow);
-        newWindow.$thisWindowsProxyObject = newProxy;
-
-        var local__window__    = $env.window,
-            local_env          = $env,
-            local_opener       = openingWindow,
-            local_parent       = parentArg ? parentArg : newWindow;
-
-        var inNewContext = function(){
-            local__window__(newWindow,        // object to "window-ify"
-                            local_env,        // our scope for globals
-                            local_parent,     // win's "parent"
-                            local_opener,     // win's "opener"
-                            local_parent.top, // win's "top"
-                            false             // this win isn't the original
-                           );
-            if (url)
-                $env.load(url);
-        };
-
-        var scopes = recordScopesOfKeyObjects(inNewContext);
-        setScopesOfKeyObjects(inNewContext, newWindow);
-        inNewContext(); // invoke local fn to window-ify new scope object
-        restoreScopesOfKeyObjects(inNewContext, scopes);
-        return newProxy;
-    };
-
-    function recordScopesOfKeyObjects(fnToExecInOtherContext){
-        return {                //   getScope()/setScope() from Window.java
-            frame :          getScope(fnToExecInOtherContext),
-            window :         getScope($env.window),
-            global_load :    getScope($env.loadIntoFnsScope),
-            local_load :     getScope($env.loadLocalScript)
-        };
-    }
-
-    function setScopesOfKeyObjects(fnToExecInOtherContext, windowObj){
-        setScope(fnToExecInOtherContext,  windowObj);
-        setScope($env.window,             windowObj);
-        setScope($env.loadIntoFnsScope,   windowObj);
-        setScope($env.loadLocalScript,    windowObj);
-    }
-
-    function restoreScopesOfKeyObjects(fnToExecInOtherContext, scopes){
-        setScope(fnToExecInOtherContext,  scopes.frame);
-        setScope($env.window,             scopes.window);
-        setScope($env.loadIntoFnsScope,   scopes.global_load);
-        setScope($env.loadLocalScript,    scopes.local_load);
-    }
-})(Envjs);
-
-/*
-*	env.js
-*/
-(function($env){
-    
-    $env.log = function(msg, level){
-         print(' '+ (level?level:'LOG') + ':\t['+ new Date()+"] {ENVJS} "+msg);
-    };
-    
-    $env.lineSource = function(e){
-        return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
-    };
-    
-    $env.sync = sync;
-  
-    //For Java the window.location object is a java.net.URL
-    $env.location = function(path, base){
-      var protocol = new RegExp('(^file\:|^http\:|^https\:)');
-        var m = protocol.exec(path);
-        if(m&&m.length>1){
-            return new java.net.URL(path).toString()+'';
-        }else if(base){
-          return new java.net.URL(new java.net.URL(base), path).toString()+'';
-        }else{
-            //return an absolute url from a url relative to the window location
-                base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-            if(window.location.href.length > 0){
-                return base + '/' + path;
-            }else{
-                return new java.io.File(  path ).toURL().toString()+'';
-            }
-        }
-    };
-    
-    //Since we're running in rhino I guess we can safely assume
-    //java is 'enabled'.  I'm sure this requires more thought
-    //than I've given it here
-    $env.javaEnabled = true;	
-    
-    
-    //Used in the XMLHttpRquest implementation to run a
-    // request in a seperate thread
-    $env.onInterrupt = function(){};
-    $env.runAsync = function(fn){
-        $env.debug("running async");
-        var running = true;
-        
-        var run = sync(function(){ //while happening only thing in this timer    
-    	    //$env.debug("running timed function");
-            fn();
-        });
-        
-        try{
-            spawn(run);
-        }catch(e){
-            $env.error("error while running async", e);
-            $env.onInterrupt();
-        }
-    };
-    
-    //Used to write to a local file
-    $env.writeToFile = function(text, url){
-        $env.debug("writing text to url : " + url);
-        var out = new java.io.FileWriter( 
-            new java.io.File( 
-                new java.net.URI(url.toString())));	
-        out.write( text, 0, text.length );
-        out.flush();
-        out.close();
-    };
-    
-    //Used to write to a local file
-    $env.writeToTempFile = function(text, suffix){
-        $env.debug("writing text to temp url : " + suffix);
-        // Create temp file.
-        var temp = java.io.File.createTempFile("envjs-tmp", suffix);
-    
-        // Delete temp file when program exits.
-        temp.deleteOnExit();
-    
-        // Write to temp file
-        var out = new java.io.FileWriter(temp);
-        out.write(text, 0, text.length);
-        out.close();
-        return temp.getAbsolutePath().toString()+'';
-    };
-    
-    //Used to delete a local file
-    $env.deleteFile = function(url){
-        var file = new java.io.File( new java.net.URI( url ) );
-        file["delete"]();
-    };
-    
-    $env.connection = function(xhr, responseHandler, data){
-        var url = java.net.URL(xhr.url);//, $w.location);
-      var connection;
-        if ( /^file\:/.test(url) ) {
-            try{
-                if ( xhr.method == "PUT" ) {
-                    var text =  data || "" ;
-                    $env.writeToFile(text, url);
-                } else if ( xhr.method == "DELETE" ) {
-                    $env.deleteFile(url);
-                } else {
-                    connection = url.openConnection();
-                    connection.connect();
-                    //try to add some canned headers that make sense
-                    
-                    try{
-                        if(xhr.url.match(/html$/)){
-                            xhr.responseHeaders["Content-Type"] = 'text/html';
-                        }else if(xhr.url.match(/.xml$/)){
-                            xhr.responseHeaders["Content-Type"] = 'text/xml';
-                        }else if(xhr.url.match(/.js$/)){
-                            xhr.responseHeaders["Content-Type"] = 'text/javascript';
-                        }else if(xhr.url.match(/.json$/)){
-                            xhr.responseHeaders["Content-Type"] = 'application/json';
-                        }else{
-                            xhr.responseHeaders["Content-Type"] = 'text/plain';
-                        }
-                    //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
-                    //xhr.responseHeaders['Content-Length'] = headerValue+'';
-                    //xhr.responseHeaders['Date'] = new Date()+'';*/
-                    }catch(e){
-                        $env.error('failed to load response headers',e);
-                    }
-                    	
-                }
-            }catch(e){
-                $env.error('failed to open file '+ url, e);
-                connection = null;
-                xhr.readyState = 4;
-                xhr.statusText = "Local File Protocol Error";
-                xhr.responseText = "<html><head/><body><p>"+ e+ "</p></body></html>";
-            }
-        } else { 
-            connection = url.openConnection();
-            connection.setRequestMethod( xhr.method );
-			
-            // Add headers to Java connection
-            for (var header in xhr.headers){
-                connection.addRequestProperty(header+'', xhr.headers[header]+'');
-            }
-			
-			//write data to output stream if required
-            if(data&&data.length&&data.length>0){
-				 if ( xhr.method == "PUT" || xhr.method == "POST" ) {
-                	connection.setDoOutput(true);
-					var outstream = connection.getOutputStream(),
-						outbuffer = new java.lang.String(data).getBytes('UTF-8');
-					
-                    outstream.write(outbuffer, 0, outbuffer.length);
-					outstream.close();
-            	}
-			}else{
-		  		connection.connect();
-			}
-			
-            
-        }
-        if(connection){
-            try{
-                var respheadlength = connection.getHeaderFields().size();
-                // Stick the response headers into responseHeaders
-                for (var i = 0; i < respheadlength; i++) { 
-                    var headerName = connection.getHeaderFieldKey(i); 
-                    var headerValue = connection.getHeaderField(i); 
-                    if (headerName)
-                        xhr.responseHeaders[headerName+''] = headerValue+'';
-                }
-            }catch(e){
-                $env.error('failed to load response headers',e);
-            }
-            
-            xhr.readyState = 4;
-            xhr.status = parseInt(connection.responseCode,10) || undefined;
-            xhr.statusText = connection.responseMessage || "";
-            
-            var contentEncoding = connection.getContentEncoding() || "utf-8",
-                baos = new java.io.ByteArrayOutputStream(),
-                buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
-                length,
-                stream = null,
-                responseXML = null;
-
-            try{
-                stream = (contentEncoding.equalsIgnoreCase("gzip") || contentEncoding.equalsIgnoreCase("decompress") )?
-                        new java.util.zip.GZIPInputStream(connection.getInputStream()) :
-                        connection.getInputStream();
-            }catch(e){
-                if (connection.getResponseCode() == 404)
-                    $env.info('failed to open connection stream \n' +
-                              e.toString(), e);
-                else
-                    $env.error('failed to open connection stream \n' +
-                               e.toString(), e);
-                stream = connection.getErrorStream();
-            }
-            
-            while ((length = stream.read(buffer)) != -1) {
-                baos.write(buffer, 0, length);
-            }
-
-            baos.close();
-            stream.close();
-
-            xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
-                decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
-                
-        }
-        if(responseHandler){
-            $env.debug('calling ajax response handler');
-            responseHandler();
-        }
-    };
-    
-    var htmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
-    htmlDocBuilder.setNamespaceAware(false);
-    htmlDocBuilder.setValidating(false);
-    
-    var tidy;
-    $env.tidyHTML = false;
-    $env.tidy = function(htmlString){
-        $env.debug('Cleaning html :\n'+htmlString);
-        var xmlString,
-		    baos = new java.io.ByteArrayOutputStream(),
-		    bais = new java.io.ByteArrayInputStream(
-			           (new java.lang.String(htmlString)).
-					        getBytes("UTF8"));
-		try{
-	        if(!tidy){
-	            tidy = new org.w3c.tidy.Tidy();
-	        }
-            $env.debug('tidying');
-	        tidy.parse(bais,baos);
-			xmlString = java.nio.charset.Charset.forName("UTF-8").
-                decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
-            $env.debug('finished tidying');
-		}catch(e){
-            $env.error('error in html tidy', e);
-        }finally{
-            try{
-                bais.close();
-                baos.close();
-            }catch(ee){
-                //swallow
-            }
-        }
-        $env.debug('Cleaned html :\n'+xmlString);
-        return xmlString;
-    };
-    
-    var xmlDocBuilder = Packages.javax.xml.parsers.DocumentBuilderFactory.newInstance();
-    xmlDocBuilder.setNamespaceAware(true);
-    xmlDocBuilder.setValidating(false);
-    
-    $env.parseXML = function(xmlstring){
-        return xmlDocBuilder.newDocumentBuilder().parse(
-                  new java.io.ByteArrayInputStream(
-                        (new java.lang.String(xmlstring)).getBytes("UTF8")));
-    };
-    
-    
-    $env.xpath = function(expression, doc){
-        return Packages.javax.xml.xpath.
-          XPathFactory.newInstance().newXPath().
-            evaluate(expression, doc, javax.xml.xpath.XPathConstants.NODESET);
-    };
-    
-    var jsonmlxslt;
-    $env.jsonml = function(xmlstring){
-        jsonmlxslt = jsonmlxslt||$env.xslt($env.xml2jsonml.toXMLString());
-        var jsonml = $env.transform(jsonmlxslt, xmlstring);
-        //$env.debug('jsonml :\n'+jsonml);
-        return eval(jsonml);
-    };
-    var transformerFactory;
-    $env.xslt = function(xsltstring){
-        transformerFactory = transformerFactory||
-            Packages.javax.xml.transform.TransformerFactory.newInstance();
-        return transformerFactory.newTransformer(
-              new javax.xml.transform.dom.DOMSource(
-                  $env.parseXML(xsltstring)
-              )
-          );
-    };
-    $env.transform = function(xslt, xmlstring){
-        var baos = new java.io.ByteArrayOutputStream();
-        xslt.transform(
-            new javax.xml.transform.dom.DOMSource($env.parseHTML(xmlstring)),
-            new javax.xml.transform.stream.StreamResult(baos)
-        );
-        return java.nio.charset.Charset.forName("UTF-8").
-            decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
-    };
-    
-    $env.tmpdir         = java.lang.System.getProperty("java.io.tmpdir"); 
-    $env.os_name        = java.lang.System.getProperty("os.name"); 
-    $env.os_arch        = java.lang.System.getProperty("os.arch"); 
-    $env.os_version     = java.lang.System.getProperty("os.version"); 
-    $env.lang           = java.lang.System.getProperty("user.lang"); 
-    $env.platform       = "Rhino ";//how do we get the version
-
-    $env.scriptTypes = {
-        "text/javascript"   :false,
-        "text/envjs"        :true
-    };
-    
-    
-    $env.loadInlineScript = function(script){
-        var tmpFile = $env.writeToTempFile(script.text, 'js') ;
-        $env.debug("loading " + tmpFile);
-        $env.loadIntoFnsScope(tmpFile);
-    };
-    
-    //injected by org.mozilla.javascript.tools.envjs.
-    $env.getFreshScopeObj = getFreshScopeObj;
-    $env.getProxyFor = getProxyFor;
-    $env.getScope = getScope;
-    $env.setScope = setScope;
-    $env.configureScope = configureScope;
-    $env.restoreScope = restoreScope;
-    
-})(Envjs);/*
- * Envjs env-js.1.1.rc2 
+ * Envjs core-env.1.2.0.10 
  * Pure JavaScript Browser Environment
- *   By John Resig <http://ejohn.org/>
- * Copyright 2008-2009 John Resig, under the MIT License
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-try {
+(function(){
 
-    Envjs.window = function($w,
-                            $env,
-                            $parentWindow,
-                            $openingWindow,
-                            $initTop,
-                            $thisIsTheOriginalWindow){
 
-        // The Window Object
-        var __this__ = $w;
-        $w.__defineGetter__('window', function(){
-            return __this__;
-        });
-        $w.$isOriginalWindow = $thisIsTheOriginalWindow;
-        $w.$haveCalledWindowLocationSetter = false;
 
-        
-        /*
-*	window.js
-*   - this file will be wrapped in a closure providing the window object as $w
-*/
-// a logger or empty function available to all modules.
-var $log = $env.log,
-    $debug = $env.debug,
-    $info = $env.info,
-    $warn = $env.warn,
-    $error = $env.error;
+
+
+/**
+ * Writes message to system out
+ * @param {String} message
+ */
+Envjs.log = function(message){};
+
+/**
+ * Constants providing enumerated levels for logging in modules
+ */
+Envjs.DEBUG = 1;
+Envjs.INFO = 2;
+Envjs.WARN = 3;
+Envjs.ERROR = 3;
+Envjs.NONE = 3;
+
+/**
+ * Writes error info out to console
+ * @param {Error} e
+ */
+Envjs.lineSource = function(e){};
+
+/**
+ * 
+ * @param {Object} event
+ */
+Envjs.defaultEventBehaviors = {};
+
+
+/**
+ * describes which script src values will trigger Envjs to load
+ * the script like a browser would
+ */
+Envjs.scriptTypes = {
+    "text/javascript"   :false,
+    "text/envjs"        :true
+};
     
-//The version of this application
-var $version = "0.1";
-//This should be hooked to git or svn or whatever
-var $revision = "0.0.0.0";
-
-//These descriptions of window properties are taken loosely David Flanagan's
-//'JavaScript - The Definitive Guide' (O'Reilly)
-
-/**> $cookies - see cookie.js <*/
-// read only boolean specifies whether the window has been closed
-var $closed = false;
-
-// a read/write string that specifies the default message that appears in the status line 
-var $defaultStatus = "Done";
-
-// a read-only reference to the Document object belonging to this window
-/**> $document - See document.js <*/
-
-//IE only, refers to the most recent event object - this maybe be removed after review
-var $event = null;
-
-//A read-only array of window objects
-//var $frames = [];    // TODO: since window.frames can be accessed like a
-                       //   hash, will need an object to really implement
-
-// a read-only reference to the History object
-/**>  $history - see location.js <**/
-
-// read-only properties that specify the height and width, in pixels
-var $innerHeight = 600, $innerWidth = 800;
-
-// a read-only reference to the Location object.  the location object does expose read/write properties
-/**> $location - see location.js <**/
-
-// The name of window/frame.  Set directly, when using open(), or in frameset.
-// May be used when specifying the target attribute of links
-var $name;
-
-// a read-only reference to the Navigator object
-/**> $navigator - see navigator.js <**/
-
-// a read/write reference to the Window object that contained the script that called open() to 
-//open this browser window.  This property is valid only for top-level window objects.
-var $opener = $openingWindow;
-
-// Read-only properties that specify the total height and width, in pixels, of the browser window.
-// These dimensions include the height and width of the menu bar, toolbars, scrollbars, window
-// borders and so on.  These properties are not supported by IE and IE offers no alternative 
-// properties;
-var $outerHeight = $innerHeight, $outerWidth = $innerWidth;
-
-// Read-only properties that specify the number of pixels that the current document has been scrolled
-//to the right and down.  These are not supported by IE.
-var $pageXOffset = 0, $pageYOffset = 0;
-
-
-// A read-only reference to the Window object that contains this window
-// or frame.  If the window is a top-level window, parent refers to
-// the window itself.  If this window is a frame, this property refers
-// to the window or frame that conatins it.
-var $parent = $parentWindow;
-try {
-    if ($parentWindow.$thisWindowsProxyObject)
-        $parent = $parentWindow.$thisWindowsProxyObject;
-} catch(e){}
-
-
-
-// a read-only refernce to the Screen object that specifies information about the screen: 
-// the number of available pixels and the number of available colors.
-/**> $screen - see screen.js <**/
-// read only properties that specify the coordinates of the upper-left corner of the screen.
-var $screenX = 0, $screenY = 0;
-var $screenLeft = $screenX, $screenTop = $screenY;
-
-// a read/write string that specifies the current contents of the status line.
-var $status = '';
-
-// a read-only reference to the top-level window that contains this window.  If this
-// window is a top-level window it is simply a refernce to itself.  If this window 
-// is a frame, the top property refers to the top-level window that contains the frame.
-var $top = $initTop;
-
-// the window property is identical to the self property and to this obj
-var $window = $w;
-try {
-    if ($w.$thisWindowsProxyObject)
-        $window = $w.$thisWindowsProxyObject;
-} catch(e){}
-
-
-$debug("Initializing Window.");
-__extend__($w,{
-  get closed(){return $closed;},
-  get defaultStatus(){return $defaultStatus;},
-  set defaultStatus(_defaultStatus){$defaultStatus = _defaultStatus;},
-  //get document(){return $document;}, - see document.js
-  get event(){return $event;},
-
-  get frames(){return undefined;}, // TODO: not yet any code to maintain list
-  get length(){return undefined;}, //   should be frames.length, but.... TODO
-
-  //get history(){return $history;}, - see history.js
-  get innerHeight(){return $innerHeight;},
-  get innerWidth(){return $innerWidth;},
-  get clientHeight(){return $innerHeight;},
-  get clientWidth(){return $innerWidth;},
-  //get location(){return $location;}, see location.js
-  get name(){return $name;},
-  set name(newName){ $name = newName; },
-  //get navigator(){return $navigator;}, see navigator.js
-  get opener(){return $opener;},
-  get outerHeight(){return $outerHeight;},
-  get outerWidth(){return $outerWidth;},
-  get pageXOffest(){return $pageXOffset;},
-  get pageYOffset(){return $pageYOffset;},
-  get parent(){return $parent;},
-  //get screen(){return $screen;}, see screen.js
-  get screenLeft(){return $screenLeft;},
-  get screenTop(){return $screenTop;},
-  get screenX(){return $screenX;},
-  get screenY(){return $screenY;},
-  get self(){return $window;},
-  get status(){return $status;},
-  set status(_status){$status = _status;},
-  get top(){return $top || $window;},
-  get window(){return $window;} /*,
-  toString : function(){
-      return '[object Window]';
-  } FIX SMP */
-});
-
-$w.open = function(url, name, features, replace){
-  if (features)
-    $env.warn("'features' argument for 'window.open()' not yet implemented");
-  if (replace)
-    $env.warn("'replace' argument for 'window.open()' not yet implemented");
-
-  var newWindow = $env.newwindow(this, null, url);
-  newWindow.$name = name;
-  return newWindow;
-};
-
-$w.close = function(){
-  $env.unload($w);
-  $closed = true;
-};     
-
-$env.unload = function(windowToUnload){
-  try {
-    var event = windowToUnload.document.createEvent();
-    event.initEvent("unload");
-    windowToUnload.document.getElementsByTagName('body')[0].
-      dispatchEvent(event, false);
-  }
-  catch (e){}   // maybe no/bad document loaded, ignore
-
-  var event = windowToUnload.document.createEvent();
-  event.initEvent("unload");
-  windowToUnload.dispatchEvent(event, false);
-};
-  
-  
-$env.load = function(url){
-    $location = $env.location(url);
-    __setHistory__($location);
-    $w.document.load($location);
+/**
+ * will be called when loading a script throws an error
+ * @param {Object} script
+ * @param {Object} e
+ */
+Envjs.onScriptLoadError = function(script, e){
+    console.log('error loading script %s %s', script, e);
 };
 
 
-/* Time related functions - see timer.js
-*   - clearTimeout
-*   - clearInterval
-*   - setTimeout
-*   - setInterval
-*/
+/**
+ * load and execute script tag text content
+ * @param {Object} script
+ */
+Envjs.loadInlineScript = function(script){
+    var tmpFile;
+    tmpFile = Envjs.writeToTempFile(script.text, 'js') ;
+    load(tmpFile);
+};
 
+/**
+ * Should evaluate script in some context
+ * @param {Object} context
+ * @param {Object} source
+ * @param {Object} name
+ */
+Envjs.eval = function(context, source, name){};
+
+
+/**
+ * Executes a script tag
+ * @param {Object} script
+ * @param {Object} parser
+ */
+Envjs.loadLocalScript = function(script){
+    //console.log("loading script %s", script);
+    var types, 
+        src, 
+        i, 
+        base,
+        filename,
+        xhr;
+    
+    if(script.type){
+        types = script.type.split(";");
+        for(i=0;i<types.length;i++){
+            if(Envjs.scriptTypes[types[i]]){
+                //ok this script type is allowed
+                break;
+            }
+            if(i+1 == types.length){
+                //console.log('wont load script type %s', script.type);
+                return false;
+            }
+        }
+    }
+    
+    try{
+        //console.log('handling inline scripts');
+        if(!script.src.length){
+            Envjs.loadInlineScript(script);
+            return true;
+        }
+    }catch(e){
+        //Envjs.error("Error loading script.", e);
+        Envjs.onScriptLoadError(script, e);
+        return false;
+    }
+        
+        
+    //console.log("loading allowed external script %s", script.src);
+    
+    //lets you register a function to execute 
+    //before the script is loaded
+    if(Envjs.beforeScriptLoad){
+        for(src in Envjs.beforeScriptLoad){
+            if(script.src.match(src)){
+                Envjs.beforeScriptLoad[src](script);
+            }
+        }
+    }
+    base = "" + script.ownerDocument.location;
+    filename = Envjs.uri(script.src.match(/([^\?#]*)/)[1], base );
+    //console.log('loading script from base %s', base);
+    //filename = Envjs.uri(script.src, base);
+    try {          
+        xhr = new XMLHttpRequest();
+        xhr.open("GET", filename, false/*syncronous*/);
+        //console.log("loading external script %s", filename);
+        xhr.onreadystatechange = function(){
+            //console.log("readyState %s", xhr.readyState);
+            if(xhr.readyState === 4){
+                Envjs.eval(
+                    script.ownerDocument.ownerWindow,
+                    xhr.responseText,
+                    filename
+                );
+            }    
+        };
+        xhr.send(null, false);
+    } catch(e) {
+        console.log("could not load script %s \n %s", filename, e );
+        Envjs.onScriptLoadError(script, e);
+        return false;
+    }
+    //lets you register a function to execute 
+    //after the script is loaded
+    if(Envjs.afterScriptLoad){
+        for(src in Envjs.afterScriptLoad){
+            if(script.src.match(src)){
+                Envjs.afterScriptLoad[src](script);
+            }
+        }
+    }
+    return true;
+};
+    
+/**
+ * synchronizes thread modifications
+ * @param {Function} fn
+ */
+Envjs.sync = function(fn){};
+
+/**
+ * sleep thread for specified duration
+ * @param {Object} millseconds
+ */
+Envjs.sleep = function(millseconds){};
+    
+/**
+ * Interval to wait on event loop when nothing is happening
+ */
+Envjs.WAIT_INTERVAL = 20;//milliseconds
+
+
+/**
+ * resolves location relative to base or window location
+ * @param {Object} path
+ * @param {Object} base
+ */
+Envjs.uri = function(path, base){};
+    
+    
+/**
+ * Used in the XMLHttpRquest implementation to run a
+ * request in a seperate thread
+ * @param {Object} fn
+ */
+Envjs.runAsync = function(fn){};
+
+
+/**
+ * Used to write to a local file
+ * @param {Object} text
+ * @param {Object} url
+ */
+Envjs.writeToFile = function(text, url){};
+
+
+/**
+ * Used to write to a local file
+ * @param {Object} text
+ * @param {Object} suffix
+ */
+Envjs.writeToTempFile = function(text, suffix){};
+
+/**
+ * Used to delete a local file
+ * @param {Object} url
+ */
+Envjs.deleteFile = function(url){};
+
+/**
+ * establishes connection and calls responsehandler
+ * @param {Object} xhr
+ * @param {Object} responseHandler
+ * @param {Object} data
+ */
+Envjs.connection = function(xhr, responseHandler, data){};
+
+
+    
+    
+/**
+ * Makes an object window-like by proxying object accessors
+ * @param {Object} scope
+ * @param {Object} parent
+ */
+Envjs.proxy = function(scope, parent, aliasList){};
+
+Envjs.javaEnabled = false;   
+
+Envjs.tmpdir         = ''; 
+Envjs.os_name        = ''; 
+Envjs.os_arch        = ''; 
+Envjs.os_version     = ''; 
+Envjs.lang           = ''; 
+Envjs.platform       = '';//how do we get the version
+    
+/**
+ * 
+ * @param {Object} frameElement
+ * @param {Object} url
+ */
+Envjs.loadFrame = function(frame, url){
+    try {
+        if(frame.contentWindow){
+            //mark for garbage collection
+            frame.contentWindow = null; 
+        }
+        
+        //create a new scope for the window proxy
+        //platforms will need to override this function
+        //to make sure the scope is global-like
+        frame.contentWindow = (function(){return this;})();
+        new Window(frame.contentWindow, window);
+        
+        //I dont think frames load asynchronously in firefox
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
+        frame.contentDocument = frame.contentWindow.document;
+        frame.contentDocument.async = false;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
+    } catch(e) {
+        console.log("failed to load frame content: from %s %s", url, e);
+    }
+};
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
 /*
-* Events related functions - see event.js
-*   - addEventListener
-*   - attachEvent
-*   - detachEvent
-*   - removeEventListener
-*   
-* These functions are identical to the Element equivalents.
-*/
+ * Envjs rhino-env.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
 
+var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
+
+Envjs.platform       = "Rhino";
+Envjs.revision       = "1.7.0.rc2";
 /*
-* UIEvents related functions - see uievent.js
-*   - blur
-*   - focus
-*
-* These functions are identical to the Element equivalents.
-*/
+ * Envjs rhino-env.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
 
-/* Dialog related functions - see dialog.js
-*   - alert
-*   - confirm
-*   - prompt
-*/
+(function(){
 
-/* Screen related functions - see screen.js
-*   - moveBy
-*   - moveTo
-*   - print
-*   - resizeBy
-*   - resizeTo
-*   - scrollBy
-*   - scrollTo
-*/
 
-/* CSS related functions - see css.js
-*   - getComputedStyle
-*/
 
-/*
-* Shared utility methods
-*/
+
+
+/**
+ * @author john resig
+ */
 // Helper method for extending one object with another.  
 function __extend__(a,b) {
-	for ( var i in b ) {
-		var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
-		if ( g || s ) {
-			if ( g ) a.__defineGetter__(i, g);
-			if ( s ) a.__defineSetter__(i, s);
-		} else
-			a[i] = b[i];
-	} return a;
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
 };
-	
+/**
+ * Writes message to system out
+ * @param {Object} message
+ */
+Envjs.log = function(message){
+    print(message);
+};
 
-// from ariel flesler http://flesler.blogspot.com/2008/11/fast-trim-function-for-javascript.html
-// this might be a good utility function to provide in the env.core
-// as in might be useful to the parser and other areas as well
-function trim( str ){
-    return (str || "").replace( /^\s+|\s+$/g, "" );
+Envjs.lineSource = function(e){
+    return e&&e.rhinoException?e.rhinoException.lineSource():"(line ?)";
+};
+/**
+ * load and execute script tag text content
+ * @param {Object} script
+ */
+Envjs.loadInlineScript = function(script){
+    if(script.ownerDocument.ownerWindow){
+        Envjs.eval(
+            script.ownerDocument.ownerWindow,
+            script.text,
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
+        );
+    }else{
+        Envjs.eval(
+            __this__,
+            script.text,
+            'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
+        );
+    }
+    //console.log('evaluated at scope %s \n%s', 
+    //    script.ownerDocument.ownerWindow.guid, script.text);
+};
+
+
+Envjs.eval = function(context, source, name){
+    __context__.evaluateString(
+        context,
+        source,
+        name,
+        0,
+        null
+    );
+}
+
+//Temporary patch for parser module
+Packages.org.mozilla.javascript.Context.
+    getCurrentContext().setOptimizationLevel(-1);
+    
+/**
+ * Rhino provides a very succinct 'sync'
+ * @param {Function} fn
+ */
+try{
+    Envjs.sync = sync;
+    Envjs.spawn = spawn;
+}catch(e){
+    //sync unavailable on AppEngine 
+    Envjs.sync = function(fn){
+        console.log('Threadless platform, sync is safe');
+        return fn;
+    };
+    Envjs.spawn = function(fn){
+        console.log('Threadless platform, spawn shares main thread.');
+        return fn();
+    };
+}
+
+/**
+ * sleep thread for specified duration
+ * @param {Object} millseconds
+ */
+Envjs.sleep = function(millseconds){
+    try{
+        java.lang.Thread.currentThread().sleep(millseconds);
+    }catch(e){
+        console.log('Threadless platform, cannot sleep.');
+    }
+};
+
+/**
+ * provides callback hook for when the system exits
+ */
+Envjs.onExit = function(callback){
+    var rhino = Packages.org.mozilla.javascript,
+        contextFactory =  __context__.getFactory(),
+        listener = new rhino.ContextFactory.Listener({
+            contextReleased: function(context){
+                if(context === __context__)
+                    console.log('context released', context);
+                contextFactory.removeListener(this);
+                if(callback)
+                    callback();
+            }
+        });
+    contextFactory.addListener(listener);
+};
+
+
+/**
+ * resolves location relative to doc location
+ * @param {Object} path
+ * @param {Object} path
+ * @param {Object} base
+ */
+Envjs.uri = function(path, base){
+    //console.log('constructing uri from path %s and base %s', path, base);
+    var protocol = new RegExp('(^file\:|^http\:|^https\:)'),
+        m = protocol.exec(path),
+        baseURI, absolutepath;
+    if(m&&m.length>1){
+        return (new java.net.URL(path).toString()+'')
+            .replace('file:/', 'file:///');
+    }else if(base){
+        baseURI = base.substring(0, base.lastIndexOf('/'));
+        if(baseURI.length > 0){
+            absolutepath = baseURI + '/' + path;
+        }else{
+            absolutepath = (new java.net.URL(new java.net.URL(base), path)+'')
+                .replace('file:/', 'file:///');
+        }
+        //console.log('constructed absolute path %s', absolutepath);
+        return absolutepath;
+    }else{
+        //return an absolute url from a url relative to the window location
+        //TODO: window should not be inlined here. this should be passed as a 
+        //      parameter to Envjs.location :DONE
+        if(document){
+            baseURI = document.baseURI;
+            if(baseURI == 'about:blank'){
+                //console.log('about:blank change: baseURI %s', document.baseURI);
+                baseURI = (java.io.File(path).toURL().toString()+'')
+                        .replace('file:/', 'file:///');
+                //console.log('baseURI %s', baseURI);
+                return baseURI;
+            }else{
+                if(path.match(/^\//)){
+                    //absolute path change
+                    //console.log('absolute path change: baseURI %s', document.baseURI);
+                    absolutepath = (new Location(baseURI)).pathname;
+                    return baseURI.substring(0, baseURI.lastIndexOf(absolutepath)) + path;
+                }else{
+                    //relative path change
+                    //console.log('relative path change: baseURI %s', document.baseURI);
+                    base = baseURI.substring(0, baseURI.lastIndexOf('/'));
+                    if(base.length > 0){
+                        return base + '/' + path;
+                    }else{
+                        return (new java.io.File(path).toURL().toString()+'')
+                            .replace('file:/', 'file:///');
+                    }
+                }
+            }
+        }else{
+            return (new java.io.File(path).toURL().toString()+'')
+                        .replace('file:/', 'file:///');
+        }
+    }
+};
+
+/**
+ * 
+ * @param {Object} fn
+ * @param {Object} onInterupt
+ */
+Envjs.runAsync = function(fn, onInterupt){
+    ////Envjs.debug("running async");
+    var running = true,
+        run;
+    
+    try{
+        run = Envjs.sync(function(){ 
+            fn();
+            Envjs.wait();
+        });
+        Envjs.spawn(run);
+    }catch(e){
+        console.log("error while running async operation", e);
+        try{if(onInterrupt)onInterrupt(e)}catch(ee){};
+    }
+};
+
+/**
+ * Used to write to a local file
+ * @param {Object} text
+ * @param {Object} url
+ */
+Envjs.writeToFile = function(text, url){
+    //Envjs.debug("writing text to url : " + url);
+    var out = new java.io.FileWriter( 
+        new java.io.File( 
+            new java.net.URI(url.toString()))); 
+    out.write( text, 0, text.length );
+    out.flush();
+    out.close();
+};
+    
+/**
+ * Used to write to a local file
+ * @param {Object} text
+ * @param {Object} suffix
+ */
+Envjs.writeToTempFile = function(text, suffix){
+    //Envjs.debug("writing text to temp url : " + suffix);
+    // Create temp file.
+    var temp = java.io.File.createTempFile("envjs-tmp", suffix);
+
+    // Delete temp file when program exits.
+    temp.deleteOnExit();
+
+    // Write to temp file
+    var out = new java.io.FileWriter(temp);
+    out.write(text, 0, text.length);
+    out.close();
+    return temp.getAbsolutePath().toString()+'';
+};
+    
+
+/**
+ * Used to delete a local file
+ * @param {Object} url
+ */
+Envjs.deleteFile = function(url){
+    var file = new java.io.File( new java.net.URI( url ) );
+    file["delete"]();
+};
+    
+/**
+ * establishes connection and calls responsehandler
+ * @param {Object} xhr
+ * @param {Object} responseHandler
+ * @param {Object} data
+ */
+Envjs.connection = function(xhr, responseHandler, data){
+    var url = java.net.URL(xhr.url),
+        connection;
+    if ( /^file\:/.test(url) ) {
+        try{
+            if ( xhr.method == "PUT" ) {
+                var text =  data || "" ;
+                Envjs.writeToFile(text, url);
+            } else if ( xhr.method == "DELETE" ) {
+                Envjs.deleteFile(url);
+            } else {
+                connection = url.openConnection();
+                connection.connect();
+                //try to add some canned headers that make sense
+                
+                try{
+                    if(xhr.url.match(/html$/)){
+                        xhr.responseHeaders["Content-Type"] = 'text/html';
+                    }else if(xhr.url.match(/.xml$/)){
+                        xhr.responseHeaders["Content-Type"] = 'text/xml';
+                    }else if(xhr.url.match(/.js$/)){
+                        xhr.responseHeaders["Content-Type"] = 'text/javascript';
+                    }else if(xhr.url.match(/.json$/)){
+                        xhr.responseHeaders["Content-Type"] = 'application/json';
+                    }else{
+                        xhr.responseHeaders["Content-Type"] = 'text/plain';
+                    }
+                //xhr.responseHeaders['Last-Modified'] = connection.getLastModified();
+                //xhr.responseHeaders['Content-Length'] = headerValue+'';
+                //xhr.responseHeaders['Date'] = new Date()+'';*/
+                }catch(e){
+                    console.log('failed to load response headers',e);
+                }
+            }
+        }catch(e){
+            console.log('failed to open file %s %s', url, e);
+            connection = null;
+            xhr.readyState = 4;
+            xhr.statusText = "Local File Protocol Error";
+            xhr.responseText = "<html><head/><body><p>"+ e+ "</p></body></html>";
+        }
+    } else { 
+        connection = url.openConnection();
+        connection.setRequestMethod( xhr.method );
+        
+        // Add headers to Java connection
+        for (var header in xhr.headers){
+            connection.addRequestProperty(header+'', xhr.headers[header]+'');
+        }
+        
+        //write data to output stream if required
+        if(data){
+            if(data instanceof Document){
+                if ( xhr.method == "PUT" || xhr.method == "POST" ) {
+                    connection.setDoOutput(true);
+                    var outstream = connection.getOutputStream(),
+                        xml = (new XMLSerializer()).serializeToString(data),
+                        outbuffer = new java.lang.String(xml).getBytes('UTF-8');
+                    outstream.write(outbuffer, 0, outbuffer.length);
+                    outstream.close();
+                }
+            }else if(data.length&&data.length>0){
+                if ( xhr.method == "PUT" || xhr.method == "POST" ) {
+                    connection.setDoOutput(true);
+                    var outstream = connection.getOutputStream(),
+                        outbuffer = new java.lang.String(data).getBytes('UTF-8');
+                    outstream.write(outbuffer, 0, outbuffer.length);
+                    outstream.close();
+                }
+            }
+            connection.connect();
+        }else{
+            connection.connect();
+        }
+    }
+    
+    if(connection){
+        try{
+            var respheadlength = connection.getHeaderFields().size();
+            // Stick the response headers into responseHeaders
+            for (var i = 0; i < respheadlength; i++) { 
+                var headerName = connection.getHeaderFieldKey(i); 
+                var headerValue = connection.getHeaderField(i); 
+                if (headerName)
+                    xhr.responseHeaders[headerName+''] = headerValue+'';
+            }
+        }catch(e){
+            console.log('failed to load response headers \n%s',e);
+        }
+        
+        xhr.readyState = 4;
+        xhr.status = parseInt(connection.responseCode,10) || undefined;
+        xhr.statusText = connection.responseMessage || "";
+        
+        var contentEncoding = connection.getContentEncoding() || "utf-8",
+            baos = new java.io.ByteArrayOutputStream(),
+            buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024),
+            length,
+            stream = null,
+            responseXML = null;
+
+        try{
+            stream = (contentEncoding.equalsIgnoreCase("gzip") || 
+                      contentEncoding.equalsIgnoreCase("decompress") )?
+                new java.util.zip.GZIPInputStream(connection.getInputStream()) :
+                connection.getInputStream();
+        }catch(e){
+            if (connection.getResponseCode() == 404){
+                console.log('failed to open connection stream \n %s %s',
+                          e.toString(), e);
+            }else{
+                console.log('failed to open connection stream \n %s %s',
+                           e.toString(), e);
+            }
+            stream = connection.getErrorStream();
+        }
+        
+        while ((length = stream.read(buffer)) != -1) {
+            baos.write(buffer, 0, length);
+        }
+
+        baos.close();
+        stream.close();
+
+        xhr.responseText = java.nio.charset.Charset.forName("UTF-8").
+            decode(java.nio.ByteBuffer.wrap(baos.toByteArray())).toString()+"";
+            
+    }
+    if(responseHandler){
+        //Envjs.debug('calling ajax response handler');
+        responseHandler();
+    }
+};
+
+//Since we're running in rhino I guess we can safely assume
+//java is 'enabled'.  I'm sure this requires more thought
+//than I've given it here
+Envjs.javaEnabled = true;   
+
+Envjs.tmpdir         = java.lang.System.getProperty("java.io.tmpdir"); 
+Envjs.os_name        = java.lang.System.getProperty("os.name"); 
+Envjs.os_arch        = java.lang.System.getProperty("os.arch"); 
+Envjs.os_version     = java.lang.System.getProperty("os.version"); 
+Envjs.lang           = java.lang.System.getProperty("user.lang"); 
+    
+
+/**
+ * 
+ * @param {Object} frameElement
+ * @param {Object} url
+ */
+Envjs.loadFrame = function(frame, url){
+    try {
+        if(frame.contentWindow){
+            //mark for garbage collection
+            frame.contentWindow = null; 
+        }
+        
+        //create a new scope for the window proxy
+        frame.contentWindow = Envjs.proxy();
+        new Window(frame.contentWindow, window);
+        
+        //I dont think frames load asynchronously in firefox
+        //and I think the tests have verified this but for
+        //some reason I'm less than confident... Are there cases?
+        frame.contentDocument = frame.contentWindow.document;
+        frame.contentDocument.async = false;
+        if(url){
+            //console.log('envjs.loadFrame async %s', frame.contentDocument.async);
+            frame.contentWindow.location = url;
+        }
+    } catch(e) {
+        console.log("failed to load frame content: from %s %s", url, e);
+    }
+};
+
+/**
+ * unloadFrame
+ * @param {Object} frame
+ */
+Envjs.unloadFrame = function(frame){
+    var all, length, i;
+    try{
+        //clean up all the nodes
+        /*all = frame.contentDocument.all,
+        length = all.length;
+        for(i=0;i<length;i++){
+            all[i].removeEventListeners('*', null, null);
+            delete all.pop();
+        }*/
+        delete frame.contentDocument;
+        frame.contentDocument = null;
+        if(frame.contentWindow){
+            frame.contentWindow.close();
+        }
+        gc();
+    }catch(e){
+        console.log(e);
+    }
+};
+
+/**
+ * Makes an object window-like by proxying object accessors
+ * @param {Object} scope
+ * @param {Object} parent
+ */
+Envjs.proxy = function(scope, parent){
+
+    try{   
+        if(scope+'' == '[object global]'){
+            return scope
+        }else{
+            return  __context__.initStandardObjects();
+        }
+    }catch(e){
+        console.log('failed to init standard objects %s %s \n%s', scope, parent, e);
+    }
     
 };
-/*function trim( str ){
-    var start = -1,
-    end = str.length;
-    /*jsl:ignore*
-    while( str.charCodeAt(--end) < 33 );
-    while( str.charCodeAt(++start) < 33 );
-    /*jsl:end*
-    return str.slice( start, end + 1 );
-};*/
 
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+
+/**
+ * @author envjs team
+ */
+var Console,
+    console;
+
+/*
+ * Envjs console.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author envjs team
+ * borrowed 99%-ish with love from firebug-lite
+ */
+Console = function(module){
+    var $level,
+        $logger,
+        $null = function(){};
+    
+    
+    if(Envjs[module] && Envjs[module].loglevel){
+        $level = Envjs.module.loglevel;
+        $logger = {
+            log: function(level){
+                logFormatted(arguments, (module)+" ");
+            },
+            debug: $level>1 ? $null: function() {
+                logFormatted(arguments, (module)+" debug");
+            },
+            info: $level>2 ? $null:function(){
+                logFormatted(arguments, (module)+" info");
+            },
+            warn: $level>3 ? $null:function(){
+                logFormatted(arguments, (module)+" warning");
+            },
+            error: $level>4 ? $null:function(){
+                logFormatted(arguments, (module)+" error");
+            }
+        };
+    }else{
+        $logger = {
+            log: function(level){
+                logFormatted(arguments, "");
+            },
+            debug: $null,
+            info: $null,
+            warn: $null,
+            error: $null
+        };
+    }
+   
+    return $logger;
+};       
+
+console = new Console("console",1);
+    
+function logFormatted(objects, className)
+{
+    var html = [];
+
+    var format = objects[0];
+    var objIndex = 0;
+
+    if (typeof(format) != "string")
+    {
+        format = "";
+        objIndex = -1;
+    }
+
+    var parts = parseFormat(format);
+    for (var i = 0; i < parts.length; ++i)
+    {
+        var part = parts[i];
+        if (part && typeof(part) == "object")
+        {
+            var object = objects[++objIndex];
+            part.appender(object, html);
+        }
+        else
+            appendText(part, html);
+    }
+
+    for (var i = objIndex+1; i < objects.length; ++i)
+    {
+        appendText(" ", html);
+        
+        var object = objects[i];
+        if (typeof(object) == "string")
+            appendText(object, html);
+        else
+            appendObject(object, html);
+    }
+    
+    Envjs.log(html.join(' '));
+}
+
+function parseFormat(format)
+{
+    var parts = [];
+
+    var reg = /((^%|[^\\]%)(\d+)?(\.)([a-zA-Z]))|((^%|[^\\]%)([a-zA-Z]))/;    
+    var appenderMap = {s: appendText, d: appendInteger, i: appendInteger, f: appendFloat};
+
+    for (var m = reg.exec(format); m; m = reg.exec(format))
+    {
+        var type = m[8] ? m[8] : m[5];
+        var appender = type in appenderMap ? appenderMap[type] : appendObject;
+        var precision = m[3] ? parseInt(m[3]) : (m[4] == "." ? -1 : 0);
+
+        parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
+        parts.push({appender: appender, precision: precision});
+
+        format = format.substr(m.index+m[0].length);
+    }
+
+    parts.push(format);
+
+    return parts;
+}
+
+function escapeHTML(value)
+{
+   return value;
+}
+
+function objectToString(object)
+{
+    try
+    {
+        return object+"";
+    }
+    catch (exc)
+    {
+        return null;
+    }
+}
+
+// ********************************************************************************************
+
+function appendText(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendNull(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendString(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendInteger(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendFloat(object, html)
+{
+    html.push(escapeHTML(objectToString(object)));
+}
+
+function appendFunction(object, html)
+{
+    var reName = /function ?(.*?)\(/;
+    var m = reName.exec(objectToString(object));
+    var name = m ? m[1] : "function";
+    html.push(escapeHTML(name));
+}
+
+function appendObject(object, html)
+{
+    try
+    {
+        if (object == undefined)
+            appendNull("undefined", html);
+        else if (object == null)
+            appendNull("null", html);
+        else if (typeof object == "string")
+            appendString(object, html);
+        else if (typeof object == "number")
+            appendInteger(object, html);
+        else if (typeof object == "function")
+            appendFunction(object, html);
+        else if (object.nodeType == 1)
+            appendSelector(object, html);
+        else if (typeof object == "object")
+            appendObjectFormatted(object, html);
+        else
+            appendText(object, html);
+    }
+    catch (exc)
+    {
+    }
+}
+    
+function appendObjectFormatted(object, html)
+{
+    var text = objectToString(object);
+    var reObject = /\[object (.*?)\]/;
+
+    var m = reObject.exec(text);
+    html.push( m ? m[1] : text)
+}
+
+function appendSelector(object, html)
+{
+
+    html.push(escapeHTML(object.nodeName.toLowerCase()));
+    if (object.id)
+        html.push(escapeHTML(object.id));
+    if (object.className)
+        html.push(escapeHTML(object.className));
+
+}
+
+function appendNode(node, html)
+{
+    if (node.nodeType == 1)
+    {
+        html.push( node.nodeName.toLowerCase());
+
+        for (var i = 0; i < node.attributes.length; ++i)
+        {
+            var attr = node.attributes[i];
+            if (!attr.specified)
+                continue;
+            
+            html.push( attr.nodeName.toLowerCase(),escapeHTML(attr.nodeValue))
+        }
+
+        if (node.firstChild)
+        {
+            for (var child = node.firstChild; child; child = child.nextSibling)
+                appendNode(child, html);
+                
+            html.push( node.nodeName.toLowerCase());
+        }
+    }
+    else if (node.nodeType == 3)
+    {
+        html.push(escapeHTML(node.nodeValue));
+    }
+};
+
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+/*
+ * Envjs dom.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ * 
+ * Parts of the implementation were originally written by:\
+ * and Jon van Noort   (jon@webarcana.com.au) \
+ * and David Joham     (djoham@yahoo.com)",\ 
+ * and Scott Severtson
+ * 
+ * This file simply provides the global definitions we need to \
+ * be able to correctly implement to core browser DOM interfaces."
+ */
+
+var Attr,
+    CDATASection,
+    CharacterData,
+    Comment,
+    Document,
+    DocumentFragment,
+    DocumentType,
+    DOMException,
+    DOMImplementation,
+    Element,
+    Entity,
+    EntityReference,
+    NamedNodeMap,
+    Namespace,
+    Node,
+    NodeList,
+    Notation,
+    ProcessingInstruction,
+    Text,
+    Range,
+    XMLSerializer,
+    DOMParser;
+
+
+
+/*
+ * Envjs dom.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * @author john resig
+ */
 //from jQuery
 function __setArray__( target, array ) {
-	// Resetting the length to 0, then using the native Array push
-	// is a super-fast way to populate an object with array-like properties
-	target.length = 0;
-	Array.prototype.push.apply( target, array );
+    // Resetting the length to 0, then using the native Array push
+    // is a super-fast way to populate an object with array-like properties
+    target.length = 0;
+    Array.prototype.push.apply( target, array );
 };
-$debug("Defining NodeList");
-/*
-* NodeList - DOM Level 2
-*/
 /**
- * @class  DOMNodeList - provides the abstraction of an ordered collection of nodes
+ * @class  NodeList - 
+ *      provides the abstraction of an ordered collection of nodes
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- *
- * @param  ownerDocument : DOMDocument - the ownerDocument
- * @param  parentNode    : DOMNode - the node that the DOMNodeList is attached to (or null)
+ * @param  ownerDocument : Document - the ownerDocument
+ * @param  parentNode    : Node - the node that the NodeList is attached to (or null)
  */
-var DOMNodeList = function(ownerDocument, parentNode) {
+NodeList = function(ownerDocument, parentNode) {
     this.length = 0;
     this.parentNode = parentNode;
     this.ownerDocument = ownerDocument;
-    
     this._readonly = false;
-    
     __setArray__(this, []);
 };
-__extend__(DOMNodeList.prototype, {
+
+__extend__(NodeList.prototype, {
     item : function(index) {
         var ret = null;
-        //$log("NodeList item("+index+") = " + this[index]);
-        if ((index >= 0) && (index < this.length)) { // bounds check
-            ret = this[index];                    // return selected Node
+        if ((index >= 0) && (index < this.length)) {
+            // bounds check 
+            ret = this[index];                    
         }
-        
-        return ret;                                    // if the index is out of bounds, default value null is returned
+        // if the index is out of bounds, default value null is returned
+        return ret;
     },
     get xml() {
-        var ret = "";
+        var ret = "",
+            i;
         
         // create string containing the concatenation of the string values of each child
-        for (var i=0; i < this.length; i++) {
+        for (i=0; i < this.length; i++) {
             if(this[i]){
-                if(this[i].nodeType == DOMNode.TEXT_NODE && i>0 && this[i-1].nodeType == DOMNode.TEXT_NODE){
+                if(this[i].nodeType == Node.TEXT_NODE && i>0 && 
+                   this[i-1].nodeType == Node.TEXT_NODE){
                     //add a single space between adjacent text nodes
                     ret += " "+this[i].xml;
                 }else{
@@ -954,59 +1212,60 @@ __extend__(DOMNodeList.prototype, {
                 }
             }
         }
-        
         return ret;
     },
     toArray: function () {
-        var children = [];
-        for ( var i=0; i < this.length; i++) {
-                children.push (this[i]);
+        var children = [],
+            i;
+        for ( i=0; i < this.length; i++) {
+            children.push (this[i]);
         }
         return children;
     },
     toString: function(){
-      return "[ "+(this.length > 0?Array.prototype.join.apply(this, [", "]):"Empty NodeList")+" ]";
+        return "[object NodeList]";
     }
 });
 
 
 /**
- * @method DOMNodeList._findItemIndex - find the item index of the node with the specified internal id
+ * @method __findItemIndex__ 
+ *      find the item index of the node
  * @author Jon van Noort (jon@webarcana.com.au)
- * @param  id : int - unique internal id
+ * @param  node : Node 
  * @return : int
  */
-var __findItemIndex__ = function (nodelist, id) {
-  var ret = -1;
-
-  // test that id is valid
-  if (id > -1) {
-    for (var i=0; i<nodelist.length; i++) {
-      // compare id to each node's _id
-      if (nodelist[i]._id == id) {            // found it!
-        ret = i;
-        break;
-      }
+var __findItemIndex__ = function (nodelist, node) {
+    var ret = -1, i;
+    for (i=0; i<nodelist.length; i++) {
+        // compare id to each node's _id
+        if (nodelist[i] === node) {            
+            // found it!
+            ret = i;
+            break;
+        }
     }
-  }
-
-  return ret;                                    // if node is not found, default value -1 is returned
+    // if node is not found, default value -1 is returned
+    return ret;
 };
 
 /**
- * @method DOMNodeList._insertBefore - insert the specified Node into the NodeList before the specified index
- *   Used by DOMNode.insertBefore(). Note: DOMNode.insertBefore() is responsible for Node Pointer surgery
- *   DOMNodeList._insertBefore() simply modifies the internal data structure (Array).
- *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  newChild      : DOMNode - the Node to be inserted
+ * @method __insertBefore__ 
+ *      insert the specified Node into the NodeList before the specified index
+ *      Used by Node.insertBefore(). Note: Node.insertBefore() is responsible 
+ *      for Node Pointer surgery __insertBefore__ simply modifies the internal 
+ *      data structure (Array).
+ * @param  newChild      : Node - the Node to be inserted
  * @param  refChildIndex : int     - the array index to insert the Node before
  */
 var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
-    if ((refChildIndex >= 0) && (refChildIndex <= nodelist.length)) { // bounds check
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
+    if ((refChildIndex >= 0) && (refChildIndex <= nodelist.length)) { 
+        // bounds check
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {  
+            // node is a DocumentFragment
             // append the children of DocumentFragment
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 0].concat(newChild.childNodes.toArray()));
+            Array.prototype.splice.apply(nodelist,
+                [refChildIndex, 0].concat(newChild.childNodes.toArray()));
         }
         else {
             // append the newChild
@@ -1016,66 +1275,74 @@ var __insertBefore__ = function(nodelist, newChild, refChildIndex) {
 };
 
 /**
- * @method DOMNodeList._replaceChild - replace the specified Node in the NodeList at the specified index
- *   Used by DOMNode.replaceChild(). Note: DOMNode.replaceChild() is responsible for Node Pointer surgery
- *   DOMNodeList._replaceChild() simply modifies the internal data structure (Array).
+ * @method __replaceChild__
+ *      replace the specified Node in the NodeList at the specified index
+ *      Used by Node.replaceChild(). Note: Node.replaceChild() is responsible 
+ *      for Node Pointer surgery __replaceChild__ simply modifies the internal 
+ *      data structure (Array).
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  newChild      : DOMNode - the Node to be inserted
+ * @param  newChild      : Node - the Node to be inserted
  * @param  refChildIndex : int     - the array index to hold the Node
  */
 var __replaceChild__ = function(nodelist, newChild, refChildIndex) {
     var ret = null;
     
-    if ((refChildIndex >= 0) && (refChildIndex < nodelist.length)) { // bounds check
-        ret = nodelist[refChildIndex];            // preserve old child for return
+    // bounds check
+    if ((refChildIndex >= 0) && (refChildIndex < nodelist.length)) { 
+        // preserve old child for return
+        ret = nodelist[refChildIndex];            
     
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {  
+            // node is a DocumentFragment
             // get array containing children prior to refChild
-            Array.prototype.splice.apply(nodelist,[refChildIndex, 1].concat(newChild.childNodes.toArray()));
+            Array.prototype.splice.apply(nodelist,
+                [refChildIndex, 1].concat(newChild.childNodes.toArray()));
         }
         else {
-            // simply replace node in array (links between Nodes are made at higher level)
+            // simply replace node in array (links between Nodes are 
+            // made at higher level)
             nodelist[refChildIndex] = newChild;
         }
     }
-    
-    return ret;                                   // return replaced node
+    // return replaced node
+    return ret;                                   
 };
 
 /**
- * @method DOMNodeList._removeChild - remove the specified Node in the NodeList at the specified index
- *   Used by DOMNode.removeChild(). Note: DOMNode.removeChild() is responsible for Node Pointer surgery
- *   DOMNodeList._replaceChild() simply modifies the internal data structure (Array).
- *
- * @author Jon van Noort (jon@webarcana.com.au)
+ * @method __removeChild__ 
+ *      remove the specified Node in the NodeList at the specified index
+ *      Used by Node.removeChild(). Note: Node.removeChild() is responsible 
+ *      for Node Pointer surgery __removeChild__ simply modifies the internal 
+ *      data structure (Array).
  * @param  refChildIndex : int - the array index holding the Node to be removed
  */
 var __removeChild__ = function(nodelist, refChildIndex) {
     var ret = null;
     
-    if (refChildIndex > -1) {                              // found it!
-        ret = nodelist[refChildIndex];                    // return removed node
+    if (refChildIndex > -1) {                              
+        // found it!
+        // return removed node
+        ret = nodelist[refChildIndex];                    
         
         // rebuild array without removed child
         Array.prototype.splice.apply(nodelist,[refChildIndex, 1]);
     }
-    
-    return ret;                                   // return removed node
+    // return removed node
+    return ret;                                   
 };
 
 /**
- * @method DOMNodeList._appendChild - append the specified Node to the NodeList
- *   Used by DOMNode.appendChild(). Note: DOMNode.appendChild() is responsible for Node Pointer surgery
- *   DOMNodeList._appendChild() simply modifies the internal data structure (Array).
- *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  newChild      : DOMNode - the Node to be inserted
+ * @method __appendChild__ 
+ *      append the specified Node to the NodeList. Used by Node.appendChild(). 
+ *      Note: Node.appendChild() is responsible for Node Pointer surgery
+ *      __appendChild__ simply modifies the internal data structure (Array).
+ * @param  newChild      : Node - the Node to be inserted
  */
 var __appendChild__ = function(nodelist, newChild) {
-    if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {  // node is a DocumentFragment
+    if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {  
+        // node is a DocumentFragment
         // append the children of DocumentFragment
-         Array.prototype.push.apply(nodelist, newChild.childNodes.toArray() );
+        Array.prototype.push.apply(nodelist, newChild.childNodes.toArray() );
     } else {
         // simply add node to array (links between Nodes are made at higher level)
         Array.prototype.push.apply(nodelist, [newChild]);
@@ -1084,16 +1351,17 @@ var __appendChild__ = function(nodelist, newChild) {
 };
 
 /**
- * @method DOMNodeList._cloneNodes - Returns a NodeList containing clones of the Nodes in this NodeList
- *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  deep : boolean - If true, recursively clone the subtree under each of the nodes;
- *   if false, clone only the nodes themselves (and their attributes, if it is an Element).
- * @param  parentNode : DOMNode - the new parent of the cloned NodeList
- * @return : DOMNodeList - NodeList containing clones of the Nodes in this NodeList
+ * @method __cloneNodes__ - 
+ *      Returns a NodeList containing clones of the Nodes in this NodeList
+ * @param  deep : boolean - 
+ *      If true, recursively clone the subtree under each of the nodes;
+ *      if false, clone only the nodes themselves (and their attributes, 
+ *      if it is an Element).
+ * @param  parentNode : Node - the new parent of the cloned NodeList
+ * @return : NodeList - NodeList containing clones of the Nodes in this NodeList
  */
 var __cloneNodes__ = function(nodelist, deep, parentNode) {
-    var cloneNodeList = new DOMNodeList(nodelist.ownerDocument, parentNode);
+    var cloneNodeList = new NodeList(nodelist.ownerDocument, parentNode);
     
     // create list containing clones of each child
     for (var i=0; i < nodelist.length; i++) {
@@ -1103,41 +1371,41 @@ var __cloneNodes__ = function(nodelist, deep, parentNode) {
     return cloneNodeList;
 };
 
-$w.NodeList = DOMNodeList;
 /**
- * @class  DOMNamedNodeMap - used to represent collections of nodes that can be accessed by name
- *  typically a set of Element attributes
+ * @class  NamedNodeMap - 
+ *      used to represent collections of nodes that can be accessed by name
+ *      typically a set of Element attributes
  *
- * @extends DOMNodeList - note W3C spec says that this is not the case,
- *   but we need an item() method identicle to DOMNodeList's, so why not?
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - the ownerDocument
- * @param  parentNode    : DOMNode - the node that the DOMNamedNodeMap is attached to (or null)
+ * @extends NodeList - 
+ *      note W3C spec says that this is not the case, but we need an item() 
+ *      method identical to NodeList's, so why not?
+ * @param  ownerDocument : Document - the ownerDocument
+ * @param  parentNode    : Node - the node that the NamedNodeMap is attached to (or null)
  */
-var DOMNamedNodeMap = function(ownerDocument, parentNode) {
-    //$log("\t\tcreating dom namednodemap");
-    this.DOMNodeList = DOMNodeList;
-    this.DOMNodeList(ownerDocument, parentNode);
+NamedNodeMap = function(ownerDocument, parentNode) {
+    NodeList.apply(this, arguments);
     __setArray__(this, []);
 };
-DOMNamedNodeMap.prototype = new DOMNodeList;
-__extend__(DOMNamedNodeMap.prototype, {
+NamedNodeMap.prototype = new NodeList;
+__extend__(NamedNodeMap.prototype, {
     add: function(name){
         this[this.length] = name;
     },
     getNamedItem : function(name) {
         var ret = null;
-        
+        //console.log('NamedNodeMap getNamedItem %s', name);
         // test that Named Node exists
         var itemIndex = __findNamedItemIndex__(this, name);
         
-        if (itemIndex > -1) {                          // found it!
-            ret = this[itemIndex];                // return NamedNode
+        if (itemIndex > -1) { 
+            // found it!                         
+            ret = this[itemIndex];                
         }
-        
-        return ret;                                    // if node is not found, default value null is returned
+        // if node is not found, default value null is returned
+        return ret;                                    
     },
     setNamedItem : function(arg) {
+      //console.log('setNamedItem %s', arg);
       // test for exceptions
       if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if arg was not created by this Document
@@ -1156,10 +1424,12 @@ __extend__(DOMNamedNodeMap.prototype, {
             }
       }
     
+     //console.log('setNamedItem __findNamedItemIndex__ ');
       // get item index
       var itemIndex = __findNamedItemIndex__(this, arg.name);
       var ret = null;
     
+     //console.log('setNamedItem __findNamedItemIndex__ %s', itemIndex);
       if (itemIndex > -1) {                          // found it!
             ret = this[itemIndex];                // use existing Attribute
         
@@ -1172,18 +1442,24 @@ __extend__(DOMNamedNodeMap.prototype, {
             }
       } else {
             // add new NamedNode
+           //console.log('setNamedItem add new named node map (by index)');
             Array.prototype.push.apply(this, [arg]);
-            this[arg.name.toLowerCase()] = arg;
+           //console.log('setNamedItem add new named node map (by name) %s %s', arg, arg.name);
+            this[arg.name] = arg;
+           //console.log('finsished setNamedItem add new named node map (by name) %s', arg.name);
+            
       }
     
+     //console.log('setNamedItem parentNode');
       arg.ownerElement = this.parentNode;            // update ownerElement
-    
-      return ret;                                    // return old node or null
+      // return old node or new node
+     //console.log('setNamedItem exit');
+      return ret;                                    
     },
     removeNamedItem : function(name) {
           var ret = null;
           // test for exceptions
-          // throw Exception if DOMNamedNodeMap is readonly
+          // throw Exception if NamedNodeMap is readonly
           if (__ownerDocument__(this).implementation.errorChecking && 
                 (this._readonly || (this.parentNode && this.parentNode._readonly))) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
@@ -1210,62 +1486,68 @@ __extend__(DOMNamedNodeMap.prototype, {
           return __removeChild__(this, itemIndex);
     },
     getNamedItemNS : function(namespaceURI, localName) {
-          var ret = null;
+        var ret = null;
         
-          // test that Named Node exists
-          var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
+        // test that Named Node exists
+        var itemIndex = __findNamedItemNSIndex__(this, namespaceURI, localName);
         
-          if (itemIndex > -1) {                          // found it!
-            ret = this[itemIndex];                // return NamedNode
-          }
-        
-          return ret;                                    // if node is not found, default value null is returned
+        if (itemIndex > -1) {
+            // found it! return NamedNode
+            ret = this[itemIndex];
+        }
+        // if node is not found, default value null is returned
+        return ret;                                    
     },
     setNamedItemNS : function(arg) {
-          // test for exceptions
-          if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if DOMNamedNodeMap is readonly
+        //console.log('setNamedItemNS %s', arg);
+        // test for exceptions
+        if (__ownerDocument__(this).implementation.errorChecking) {
+            // throw Exception if NamedNodeMap is readonly
             if (this._readonly || (this.parentNode && this.parentNode._readonly)) {
-              throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+                throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
-        
+            
             // throw Exception if arg was not created by this Document
             if (__ownerDocument__(this) != __ownerDocument__(arg)) {
-              throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
+                throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
             }
-        
+            
             // throw Exception if arg is already an attribute of another Element object
             if (arg.ownerElement && (arg.ownerElement != this.parentNode)) {
-              throw(new DOMException(DOMException.INUSE_ATTRIBUTE_ERR));
+                throw(new DOMException(DOMException.INUSE_ATTRIBUTE_ERR));
             }
-          }
+        }
         
-          // get item index
-          var itemIndex = __findNamedItemNSIndex__(this, arg.namespaceURI, arg.localName);
-          var ret = null;
+        // get item index
+        var itemIndex = __findNamedItemNSIndex__(this, arg.namespaceURI, arg.localName);
+        var ret = null;
         
-          if (itemIndex > -1) {                          // found it!
-            ret = this[itemIndex];                // use existing Attribute
-            // throw Exception if DOMAttr is readonly
+        if (itemIndex > -1) {
+            // found it!
+            // use existing Attribute
+            ret = this[itemIndex];
+            // throw Exception if Attr is readonly
             if (__ownerDocument__(this).implementation.errorChecking && ret._readonly) {
-              throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+                throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             } else {
-              this[itemIndex] = arg;                // over-write existing NamedNode
+                // over-write existing NamedNode
+                this[itemIndex] = arg;
             }
-          }else {
+        }else {
             // add new NamedNode
             Array.prototype.push.apply(this, [arg]);
-          }
-          arg.ownerElement = this.parentNode;
+        }
+        arg.ownerElement = this.parentNode;
         
-        
-          return ret;                                    // return old node or null
+        // return old node or null
+        return ret;
+        //console.log('finished setNamedItemNS %s', arg);
     },
     removeNamedItemNS : function(namespaceURI, localName) {
           var ret = null;
         
           // test for exceptions
-          // throw Exception if DOMNamedNodeMap is readonly
+          // throw Exception if NamedNodeMap is readonly
           if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || (this.parentNode && this.parentNode._readonly))) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
           }
@@ -1302,240 +1584,288 @@ __extend__(DOMNamedNodeMap.prototype, {
           }
         
           return ret;
+    },
+    toString : function(){
+        return "[object NamedNodeMap]";
     }
 
 });
 
 /**
- * @method DOMNamedNodeMap._findNamedItemIndex - find the item index of the node with the specified name
+ * @method __findNamedItemIndex__ 
+ *      find the item index of the node with the specified name
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  name : string - the name of the required node
- * @param  isnsmap : if its a DOMNamespaceNodeMap
+ * @param  isnsmap : if its a NamespaceNodeMap
  * @return : int
  */
 var __findNamedItemIndex__ = function(namednodemap, name, isnsmap) {
-  var ret = -1;
-
-  // loop through all nodes
-  for (var i=0; i<namednodemap.length; i++) {
-    // compare name to each node's nodeName
-    if(isnsmap){
-        if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {         // found it!
-          ret = i;
-          break;
-        }
-    }else{
-        if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         // found it!
-          ret = i;
-          break;
+    var ret = -1;
+    // loop through all nodes
+    for (var i=0; i<namednodemap.length; i++) {
+        // compare name to each node's nodeName
+        if(namednodemap[i].localName && name && isnsmap){
+            if (namednodemap[i].localName.toLowerCase() == name.toLowerCase()) {
+                // found it!         
+                ret = i;
+                break;
+            }
+        }else{
+            if(namednodemap[i].name && name){
+                if (namednodemap[i].name.toLowerCase() == name.toLowerCase()) {         
+                    // found it!
+                    ret = i;
+                    break;
+                }
+            }
         }
     }
-  }
-
-  return ret;                                    // if node is not found, default value -1 is returned
+    // if node is not found, default value -1 is returned
+    return ret;                                    
 };
 
 /**
- * @method DOMNamedNodeMap._findNamedItemNSIndex - find the item index of the node with the specified namespaceURI and localName
+ * @method __findNamedItemNSIndex__ 
+ *      find the item index of the node with the specified 
+ *      namespaceURI and localName
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  namespaceURI : string - the namespace URI of the required node
  * @param  localName    : string - the local name of the required node
  * @return : int
  */
 var __findNamedItemNSIndex__ = function(namednodemap, namespaceURI, localName) {
-  var ret = -1;
-
-  // test that localName is not null
-  if (localName) {
-    // loop through all nodes
-    for (var i=0; i<namednodemap.length; i++) {
-      // compare name to each node's namespaceURI and localName
-      if ((namednodemap[i].namespaceURI.toLowerCase() == namespaceURI.toLowerCase()) && 
-          (namednodemap[i].localName.toLowerCase() == localName.toLowerCase())) {
-        ret = i;                                 // found it!
-        break;
-      }
+    var ret = -1;
+    // test that localName is not null
+    if (localName) {
+        // loop through all nodes
+        for (var i=0; i<namednodemap.length; i++) {
+            if(namednodemap[i].namespaceURI && namednodemap[i].localName){
+                // compare name to each node's namespaceURI and localName
+                if ((namednodemap[i].namespaceURI.toLowerCase() == namespaceURI.toLowerCase()) && 
+                    (namednodemap[i].localName.toLowerCase() == localName.toLowerCase())) {
+                    // found it!
+                    ret = i;                                 
+                    break;
+                }
+            }
+        }
     }
-  }
-
-  return ret;                                    // if node is not found, default value -1 is returned
+    // if node is not found, default value -1 is returned
+    return ret;                                    
 };
 
 /**
- * @method DOMNamedNodeMap._hasAttribute - Returns true if specified node exists
+ * @method __hasAttribute__ 
+ *      Returns true if specified node exists
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  name : string - the name of the required node
  * @return : boolean
  */
 var __hasAttribute__ = function(namednodemap, name) {
-  var ret = false;
-
-  // test that Named Node exists
-  var itemIndex = __findNamedItemIndex__(namednodemap, name);
-
-  if (itemIndex > -1) {                          // found it!
-    ret = true;                                  // return true
-  }
-
-  return ret;                                    // if node is not found, default value false is returned
+    var ret = false;
+    // test that Named Node exists
+    var itemIndex = __findNamedItemIndex__(namednodemap, name);
+        if (itemIndex > -1) {                          
+        // found it!
+        ret = true;                                  
+    }
+    // if node is not found, default value false is returned
+    return ret;                                    
 }
 
 /**
- * @method DOMNamedNodeMap._hasAttributeNS - Returns true if specified node exists
+ * @method __hasAttributeNS__ 
+ *      Returns true if specified node exists
  *
- * @author Jon van Noort (jon@webarcana.com.au)
  * @param  namespaceURI : string - the namespace URI of the required node
  * @param  localName    : string - the local name of the required node
  * @return : boolean
  */
 var __hasAttributeNS__ = function(namednodemap, namespaceURI, localName) {
-  var ret = false;
-
-  // test that Named Node exists
-  var itemIndex = __findNamedItemNSIndex__(namednodemap, namespaceURI, localName);
-
-  if (itemIndex > -1) {                          // found it!
-    ret = true;                                  // return true
-  }
-
-  return ret;                                    // if node is not found, default value false is returned
+    var ret = false;
+    // test that Named Node exists
+    var itemIndex = __findNamedItemNSIndex__(namednodemap, namespaceURI, localName);
+    if (itemIndex > -1) {
+        // found it!
+        ret = true;
+    }
+    // if node is not found, default value false is returned
+    return ret;                                    
 }
 
 /**
- * @method DOMNamedNodeMap._cloneNodes - Returns a NamedNodeMap containing clones of the Nodes in this NamedNodeMap
+ * @method __cloneNamedNodes__ 
+ *      Returns a NamedNodeMap containing clones of the Nodes in this NamedNodeMap
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  parentNode : DOMNode - the new parent of the cloned NodeList
- * @param  isnsmap : bool - is this a DOMNamespaceNodeMap
- * @return : DOMNamedNodeMap - NamedNodeMap containing clones of the Nodes in this DOMNamedNodeMap
+ * @param  parentNode : Node - the new parent of the cloned NodeList
+ * @param  isnsmap : bool - is this a NamespaceNodeMap
+ * @return NamedNodeMap containing clones of the Nodes in this NamedNodeMap
  */
 var __cloneNamedNodes__ = function(namednodemap, parentNode, isnsmap) {
-  var cloneNamedNodeMap = isnsmap?
-    new DOMNamespaceNodeMap(namednodemap.ownerDocument, parentNode):
-    new DOMNamedNodeMap(namednodemap.ownerDocument, parentNode);
+    var cloneNamedNodeMap = isnsmap?
+        new NamespaceNodeMap(namednodemap.ownerDocument, parentNode):
+        new NamedNodeMap(namednodemap.ownerDocument, parentNode);
 
-  // create list containing clones of all children
-  for (var i=0; i < namednodemap.length; i++) {
-      $debug("cloning node in named node map :" + namednodemap[i]);
-    __appendChild__(cloneNamedNodeMap, namednodemap[i].cloneNode(false));
-  }
-
-  return cloneNamedNodeMap;
+    // create list containing clones of all children
+    for (var i=0; i < namednodemap.length; i++) {
+        __appendChild__(cloneNamedNodeMap, namednodemap[i].cloneNode(false));
+    }
+    
+    return cloneNamedNodeMap;
 };
 
 
 /**
- * @class  DOMNamespaceNodeMap - used to represent collections of namespace nodes that can be accessed by name
- *  typically a set of Element attributes
+ * @class  NamespaceNodeMap - 
+ *      used to represent collections of namespace nodes that can be 
+ *      accessed by name typically a set of Element attributes
  *
- * @extends DOMNamedNodeMap
+ * @extends NamedNodeMap
  *
- * @author Jon van Noort (jon@webarcana.com.au)
- *
- * @param  ownerDocument : DOMDocument - the ownerDocument
- * @param  parentNode    : DOMNode - the node that the DOMNamespaceNodeMap is attached to (or null)
+ * @param  ownerDocument : Document - the ownerDocument
+ * @param  parentNode    : Node - the node that the NamespaceNodeMap is attached to (or null)
  */
-var DOMNamespaceNodeMap = function(ownerDocument, parentNode) {
-    //$log("\t\t\tcreating dom namespacednodemap");
-    this.DOMNamedNodeMap = DOMNamedNodeMap;
-    this.DOMNamedNodeMap(ownerDocument, parentNode);
+var NamespaceNodeMap = function(ownerDocument, parentNode) {
+    this.NamedNodeMap = NamedNodeMap;
+    this.NamedNodeMap(ownerDocument, parentNode);
     __setArray__(this, []);
 };
-DOMNamespaceNodeMap.prototype = new DOMNamedNodeMap;
-__extend__(DOMNamespaceNodeMap.prototype, {
+NamespaceNodeMap.prototype = new NamedNodeMap;
+__extend__(NamespaceNodeMap.prototype, {
     get xml() {
-          var ret = "";
-        
-          // identify namespaces declared local to this Element (ie, not inherited)
-          for (var ind = 0; ind < this.length; ind++) {
+        var ret = "",
+            ns,
+            ind;
+        // identify namespaces declared local to this Element (ie, not inherited)
+        for (ind = 0; ind < this.length; ind++) {
             // if namespace declaration does not exist in the containing node's, parentNode's namespaces
-            var ns = null;
+            ns = null;
             try {
                 var ns = this.parentNode.parentNode._namespaces.
                     getNamedItem(this[ind].localName);
-            }
-            catch (e) {
+            }catch (e) {
                 //breaking to prevent default namespace being inserted into return value
                 break;
             }
             if (!(ns && (""+ ns.nodeValue == ""+ this[ind].nodeValue))) {
-              // display the namespace declaration
-              ret += this[ind].xml +" ";
+                // display the namespace declaration
+                ret += this[ind].xml +" ";
             }
-          }
-        
-          return ret;
+        }
+        return ret;
     }
 });
-$debug("Defining Node");
-/*
-* Node - DOM Level 2
-*/	
+
 /**
- * @class  DOMNode - The Node interface is the primary datatype for the entire Document Object Model.
- *   It represents a single node in the document tree.
- * @author Jon van Noort (jon@webarcana.com.au), David Joham (djoham@yahoo.com) and Scott Severtson
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Node - 
+ *      The Node interface is the primary datatype for the entire 
+ *      Document Object Model. It represents a single node in the 
+ *      document tree.
+ * @param  ownerDocument : Document - The Document object associated with this node.
  */
-var DOMNode = function(ownerDocument) {
-  if (ownerDocument) {
-    this._id = ownerDocument._genId();           // generate unique internal id
-  }
-  
-  this.namespaceURI = "";                        // The namespace URI of this node (Level 2)
-  this.prefix       = "";                        // The namespace prefix of this node (Level 2)
-  this.localName    = "";                        // The localName of this node (Level 2)
 
-  this.nodeName = "";                            // The name of this node
-  this.nodeValue = null;                           // The value of this node
-  //this.className = "";                           // The CSS class name of this node.
-  
-  // The parent of this node. All nodes, except Document, DocumentFragment, and Attr may have a parent.
-  // However, if a node has just been created and not yet added to the tree, or if it has been removed from the tree, this is null
-  this.parentNode      = null;
-
-  // A NodeList that contains all children of this node. If there are no children, this is a NodeList containing no nodes.
-  // The content of the returned NodeList is "live" in the sense that, for instance, changes to the children of the node object
-  // that it was created from are immediately reflected in the nodes returned by the NodeList accessors;
-  // it is not a static snapshot of the content of the node. This is true for every NodeList, including the ones returned by the getElementsByTagName method.
-  this.childNodes      = new DOMNodeList(ownerDocument, this);
-
-  this.firstChild      = null;                   // The first child of this node. If there is no such node, this is null
-  this.lastChild       = null;                   // The last child of this node. If there is no such node, this is null.
-  this.previousSibling = null;                   // The node immediately preceding this node. If there is no such node, this is null.
-  this.nextSibling     = null;                   // The node immediately following this node. If there is no such node, this is null.
-
-  this.ownerDocument   = ownerDocument;          // The Document object associated with this node
-  this.attributes = new DOMNamedNodeMap(this.ownerDocument, this);
-  this._namespaces = new DOMNamespaceNodeMap(ownerDocument, this);  // The namespaces in scope for this node
-  this._readonly = false;
+Node = function(ownerDocument) {
+    this.baseURI = 'about:blank';
+    this.namespaceURI = null;
+    this.nodeName = "";
+    this.nodeValue = null;
+    
+    // A NodeList that contains all children of this node. If there are no 
+    // children, this is a NodeList containing no nodes.  The content of the 
+    // returned NodeList is "live" in the sense that, for instance, changes to 
+    // the children of the node object that it was created from are immediately 
+    // reflected in the nodes returned by the NodeList accessors; it is not a 
+    // static snapshot of the content of the node. This is true for every 
+    // NodeList, including the ones returned by the getElementsByTagName method.
+    this.childNodes      = new NodeList(ownerDocument, this);
+    
+    // The first child of this node. If there is no such node, this is null
+    this.firstChild      = null;
+    // The last child of this node. If there is no such node, this is null.
+    this.lastChild       = null;
+    // The node immediately preceding this node. If there is no such node, 
+    // this is null.
+    this.previousSibling = null;
+    // The node immediately following this node. If there is no such node, 
+    // this is null.
+    this.nextSibling     = null;
+    
+    this.attributes = null;
+    // The namespaces in scope for this node
+    this._namespaces = new NamespaceNodeMap(ownerDocument, this);  
+    this._readonly = false;
+    
+    //IMPORTANT: These must come last so rhino will not iterate parent 
+    //           properties before child properties.  (qunit.equiv issue)
+    
+    // The parent of this node. All nodes, except Document, DocumentFragment, 
+    // and Attr may have a parent.  However, if a node has just been created 
+    // and not yet added to the tree, or if it has been removed from the tree, 
+    // this is null
+    this.parentNode      = null;
+    // The Document object associated with this node
+    this.ownerDocument = ownerDocument;
+    
 };
 
 // nodeType constants
-DOMNode.ELEMENT_NODE                = 1;
-DOMNode.ATTRIBUTE_NODE              = 2;
-DOMNode.TEXT_NODE                   = 3;
-DOMNode.CDATA_SECTION_NODE          = 4;
-DOMNode.ENTITY_REFERENCE_NODE       = 5;
-DOMNode.ENTITY_NODE                 = 6;
-DOMNode.PROCESSING_INSTRUCTION_NODE = 7;
-DOMNode.COMMENT_NODE                = 8;
-DOMNode.DOCUMENT_NODE               = 9;
-DOMNode.DOCUMENT_TYPE_NODE          = 10;
-DOMNode.DOCUMENT_FRAGMENT_NODE      = 11;
-DOMNode.NOTATION_NODE               = 12;
-DOMNode.NAMESPACE_NODE              = 13;
+Node.ELEMENT_NODE                = 1;
+Node.ATTRIBUTE_NODE              = 2;
+Node.TEXT_NODE                   = 3;
+Node.CDATA_SECTION_NODE          = 4;
+Node.ENTITY_REFERENCE_NODE       = 5;
+Node.ENTITY_NODE                 = 6;
+Node.PROCESSING_INSTRUCTION_NODE = 7;
+Node.COMMENT_NODE                = 8;
+Node.DOCUMENT_NODE               = 9;
+Node.DOCUMENT_TYPE_NODE          = 10;
+Node.DOCUMENT_FRAGMENT_NODE      = 11;
+Node.NOTATION_NODE               = 12;
+Node.NAMESPACE_NODE              = 13;
 
-__extend__(DOMNode.prototype, {
+Node.DOCUMENT_POSITION_EQUAL        = 0x00;
+Node.DOCUMENT_POSITION_DISCONNECTED = 0x01;
+Node.DOCUMENT_POSITION_PRECEDING    = 0x02;
+Node.DOCUMENT_POSITION_FOLLOWING    = 0x04;
+Node.DOCUMENT_POSITION_CONTAINS     = 0x08;
+Node.DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC      = 0x20;
+
+
+__extend__(Node.prototype, {
+    get localName(){
+        return this.prefix?
+            this.nodeName.substring(this.prefix.length+1, this.nodeName.length):
+            this.nodeName;
+    },
+    get prefix(){
+        return this.nodeName.split(':').length>1?
+            this.nodeName.split(':')[0]:
+            null;
+    },
+    set prefix(value){
+        if(value === null){
+            this.nodeName = this.localName;
+        }else{
+            this.nodeName = value+':'+this.localName;
+        }
+    },
     hasAttributes : function() {
         if (this.attributes.length == 0) {
             return false;
         }else{
             return true;
         }
+    },
+    get textContent(){
+        return __recursivelyGatherText__(this);
+    },
+    set textContent(newText){
+        while(this.firstChild != null){
+            this.removeChild( this.firstChild );
+        }
+        var text = this.ownerDocument.createTextNode(newText);
+        this.appendChild(text);
     },
     insertBefore : function(newChild, refChild) {
         var prevNode;
@@ -1550,7 +1880,7 @@ __extend__(DOMNode.prototype, {
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if DOMNode is readonly
+            // throw Exception if Node is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
@@ -1566,19 +1896,20 @@ __extend__(DOMNode.prototype, {
             }
         }
         
-        if (refChild) {                                // if refChild is specified, insert before it
+        // if refChild is specified, insert before it
+        if (refChild) {                                
             // find index of refChild
-            var itemIndex = __findItemIndex__(this.childNodes, refChild._id);
+            var itemIndex = __findItemIndex__(this.childNodes, refChild);
             // throw Exception if there is no child node with this id
             if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
-              throw(new DOMException(DOMException.NOT_FOUND_ERR));
+                throw(new DOMException(DOMException.NOT_FOUND_ERR));
             }
             
             // if the newChild is already in the tree,
             var newChildParent = newChild.parentNode;
             if (newChildParent) {
-              // remove it
-              newChildParent.removeChild(newChild);
+                // remove it
+                newChildParent.removeChild(newChild);
             }
             
             // insert newChild into childNodes
@@ -1588,46 +1919,49 @@ __extend__(DOMNode.prototype, {
             prevNode = refChild.previousSibling;
             
             // handle DocumentFragment
-            if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
-              if (newChild.childNodes.length > 0) {
-                // set the parentNode of DocumentFragment's children
-                for (var ind = 0; ind < newChild.childNodes.length; ind++) {
-                  newChild.childNodes[ind].parentNode = this;
+            if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+                if (newChild.childNodes.length > 0) {
+                    // set the parentNode of DocumentFragment's children
+                    for (var ind = 0; ind < newChild.childNodes.length; ind++) {
+                        newChild.childNodes[ind].parentNode = this;
+                    }
+                    
+                    // link refChild to last child of DocumentFragment
+                    refChild.previousSibling = newChild.childNodes[newChild.childNodes.length-1];
                 }
-            
-                // link refChild to last child of DocumentFragment
-                refChild.previousSibling = newChild.childNodes[newChild.childNodes.length-1];
-              }
             }else {
-                newChild.parentNode = this;                // set the parentNode of the newChild
-                refChild.previousSibling = newChild;       // link refChild to newChild
+                // set the parentNode of the newChild
+                newChild.parentNode = this;
+                // link refChild to newChild
+                refChild.previousSibling = newChild;
             }
             
-        }else {                                         // otherwise, append to end
+        }else {                                         
+            // otherwise, append to end
             prevNode = this.lastChild;
             this.appendChild(newChild);
         }
         
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
             // do node pointer surgery for DocumentFragment
             if (newChild.childNodes.length > 0) {
                 if (prevNode) {  
                     prevNode.nextSibling = newChild.childNodes[0];
-                }else {                                         // this is the first child in the list
+                }else {                                         
+                    // this is the first child in the list
                     this.firstChild = newChild.childNodes[0];
                 }
-            
                 newChild.childNodes[0].previousSibling = prevNode;
                 newChild.childNodes[newChild.childNodes.length-1].nextSibling = refChild;
             }
         }else {
             // do node pointer surgery for newChild
             if (prevNode) {
-              prevNode.nextSibling = newChild;
-            }else {                                         // this is the first child in the list
-              this.firstChild = newChild;
+                prevNode.nextSibling = newChild;
+            }else {                                         
+                // this is the first child in the list
+                this.firstChild = newChild;
             }
-            
             newChild.previousSibling = prevNode;
             newChild.nextSibling     = refChild;
         }
@@ -1643,7 +1977,7 @@ __extend__(DOMNode.prototype, {
         
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if DOMNode is readonly
+            // throw Exception if Node is readonly
             if (this._readonly) {
                 throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
@@ -1660,7 +1994,7 @@ __extend__(DOMNode.prototype, {
         }
         
         // get index of oldChild
-        var index = __findItemIndex__(this.childNodes, oldChild._id);
+        var index = __findItemIndex__(this.childNodes, oldChild);
         
         // throw Exception if there is no child node with this id
         if (__ownerDocument__(this).implementation.errorChecking && (index < 0)) {
@@ -1678,7 +2012,7 @@ __extend__(DOMNode.prototype, {
         ret = __replaceChild__(this.childNodes,newChild, index);
         
         
-        if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
             // do node pointer surgery for Document Fragment
             if (newChild.childNodes.length > 0) {
                 for (var ind = 0; ind < newChild.childNodes.length; ind++) {
@@ -1724,13 +2058,14 @@ __extend__(DOMNode.prototype, {
         if(!oldChild){
             return null;
         }
-        // throw Exception if DOMNamedNodeMap is readonly
-        if (__ownerDocument__(this).implementation.errorChecking && (this._readonly || oldChild._readonly)) {
+        // throw Exception if NamedNodeMap is readonly
+        if (__ownerDocument__(this).implementation.errorChecking && 
+            (this._readonly || oldChild._readonly)) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         
         // get index of oldChild
-        var itemIndex = __findItemIndex__(this.childNodes, oldChild._id);
+        var itemIndex = __findItemIndex__(this.childNodes, oldChild);
         
         // throw Exception if there is no child node with this id
         if (__ownerDocument__(this).implementation.errorChecking && (itemIndex < 0)) {
@@ -1763,66 +2098,64 @@ __extend__(DOMNode.prototype, {
         if(!newChild){
             return null;
         }
-      // test for exceptions
-      if (__ownerDocument__(this).implementation.errorChecking) {
-        // throw Exception if Node is readonly
-        if (this._readonly) {
-          throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+        // test for exceptions
+        if (__ownerDocument__(this).implementation.errorChecking) {
+            // throw Exception if Node is readonly
+            if (this._readonly) {
+                throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
+            }
+            
+            // throw Exception if arg was not created by this Document
+            if (__ownerDocument__(this) != __ownerDocument__(this)) {
+                throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
+            }
+            
+            // throw Exception if the node is an ancestor
+            if (__isAncestor__(this, newChild)) {
+              throw(new DOMException(DOMException.HIERARCHY_REQUEST_ERR));
+            }
         }
     
-        // throw Exception if arg was not created by this Document
-        if (__ownerDocument__(this) != __ownerDocument__(this)) {
-          throw(new DOMException(DOMException.WRONG_DOCUMENT_ERR));
+        // if the newChild is already in the tree,
+        var newChildParent = newChild.parentNode;
+        if (newChildParent) {
+            // remove it
+           //console.debug('removing node %s', newChild);
+            newChildParent.removeChild(newChild);
         }
     
-        // throw Exception if the node is an ancestor
-        if (__isAncestor__(this, newChild)) {
-          throw(new DOMException(DOMException.HIERARCHY_REQUEST_ERR));
-        }
-      }
+        // add newChild to childNodes
+        __appendChild__(this.childNodes, newChild);
     
-      // if the newChild is already in the tree,
-      var newChildParent = newChild.parentNode;
-      if (newChildParent) {
-        // remove it
-        newChildParent.removeChild(newChild);
-      }
-    
-      // add newChild to childNodes
-      __appendChild__(this.childNodes, newChild);
-    
-      if (newChild.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
-        // do node pointer surgery for DocumentFragment
-        if (newChild.childNodes.length > 0) {
-          for (var ind = 0; ind < newChild.childNodes.length; ind++) {
-            newChild.childNodes[ind].parentNode = this;
-          }
-    
-          if (this.lastChild) {
-            this.lastChild.nextSibling = newChild.childNodes[0];
-            newChild.childNodes[0].previousSibling = this.lastChild;
-            this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
-          }
-          else {
-            this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
-            this.firstChild = newChild.childNodes[0];
-          }
-        }
-      }
-      else {
-        // do node pointer surgery for newChild
-        newChild.parentNode = this;
-        if (this.lastChild) {
-          this.lastChild.nextSibling = newChild;
-          newChild.previousSibling = this.lastChild;
-          this.lastChild = newChild;
-        }
-        else {
-          this.lastChild = newChild;
-          this.firstChild = newChild;
-        }
-      }
-      return newChild;
+        if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+            // do node pointer surgery for DocumentFragment
+            if (newChild.childNodes.length > 0) {
+                for (var ind = 0; ind < newChild.childNodes.length; ind++) {
+                    newChild.childNodes[ind].parentNode = this;
+                }
+                
+                if (this.lastChild) {
+                    this.lastChild.nextSibling = newChild.childNodes[0];
+                    newChild.childNodes[0].previousSibling = this.lastChild;
+                    this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
+                } else {
+                    this.lastChild = newChild.childNodes[newChild.childNodes.length-1];
+                    this.firstChild = newChild.childNodes[0];
+                }
+            }
+        } else {
+            // do node pointer surgery for newChild
+            newChild.parentNode = this;
+            if (this.lastChild) {
+                this.lastChild.nextSibling = newChild;
+                newChild.previousSibling = this.lastChild;
+                this.lastChild = newChild;
+            } else {
+                this.lastChild = newChild;
+                this.firstChild = newChild;
+            }
+       }
+       return newChild;
     },
     hasChildNodes : function() {
         return (this.childNodes.length > 0);
@@ -1840,29 +2173,38 @@ __extend__(DOMNode.prototype, {
     },
     normalize : function() {
         var inode;
-        var nodesToRemove = new DOMNodeList();
+        var nodesToRemove = new NodeList();
         
-        if (this.nodeType == DOMNode.ELEMENT_NODE || this.nodeType == DOMNode.DOCUMENT_NODE) {
+        if (this.nodeType == Node.ELEMENT_NODE || this.nodeType == Node.DOCUMENT_NODE) {
             var adjacentTextNode = null;
         
             // loop through all childNodes
             for(var i = 0; i < this.childNodes.length; i++) {
                 inode = this.childNodes.item(i);
             
-                if (inode.nodeType == DOMNode.TEXT_NODE) { // this node is a text node
-                    if (inode.length < 1) {                  // this text node is empty
-                        __appendChild__(nodesToRemove, inode);      // add this node to the list of nodes to be remove
+                if (inode.nodeType == Node.TEXT_NODE) { 
+                    // this node is a text node
+                    if (inode.length < 1) {                  
+                        // this text node is empty
+                        // add this node to the list of nodes to be remove
+                        __appendChild__(nodesToRemove, inode);      
                     }else {
-                        if (adjacentTextNode) {                // if previous node was also text
-                            adjacentTextNode.appendData(inode.data);     // merge the data in adjacent text nodes
-                            __appendChild__(nodesToRemove, inode);    // add this node to the list of nodes to be removed
-                        }else {
-                            adjacentTextNode = inode;              // remember this node for next cycle
+                        if (adjacentTextNode) {                
+                            // previous node was also text
+                            adjacentTextNode.appendData(inode.data);
+                            // merge the data in adjacent text nodes
+                            // add this node to the list of nodes to be removed
+                            __appendChild__(nodesToRemove, inode);
+                        } else {
+                            // remember this node for next cycle
+                            adjacentTextNode = inode;              
                         }
                     }
                 } else {
-                    adjacentTextNode = null;                 // (soon to be) previous node is not a text node
-                    inode.normalize();                       // normalise non Text childNodes
+                    // (soon to be) previous node is not a text node
+                    adjacentTextNode = null;
+                    // normalize non Text childNodes
+                    inode.normalize();                       
                 }
             }
                 
@@ -1874,13 +2216,13 @@ __extend__(DOMNode.prototype, {
         }
     },
     isSupported : function(feature, version) {
-        // use Implementation.hasFeature to determin if this feature is supported
+        // use Implementation.hasFeature to determine if this feature is supported
         return __ownerDocument__(this).implementation.hasFeature(feature, version);
     },
     getElementsByTagName : function(tagname) {
         // delegate to _getElementsByTagNameRecursive
         // recurse childNodes
-        var nodelist = new DOMNodeList(__ownerDocument__(this));
+        var nodelist = new NodeList(__ownerDocument__(this));
         for(var i = 0; i < this.childNodes.length; i++) {
             nodeList = __getElementsByTagNameRecursive__(this.childNodes.item(i), tagname, nodelist);
         }
@@ -1889,138 +2231,198 @@ __extend__(DOMNode.prototype, {
     getElementsByTagNameNS : function(namespaceURI, localName) {
         // delegate to _getElementsByTagNameNSRecursive
         return __getElementsByTagNameNSRecursive__(this, namespaceURI, localName, 
-            new DOMNodeList(__ownerDocument__(this)));
+            new NodeList(__ownerDocument__(this)));
     },
     importNode : function(importedNode, deep) {
         
         var importNode;
 
-        // debug("importing node " + importedNode.nodeName + "(" + importedNode.nodeType + ")" + "(?deep = "+deep+")");
-
         //there is no need to perform namespace checks since everything has already gone through them
         //in order to have gotten into the DOM in the first place. The following line
         //turns namespace checking off in ._isValidNamespace
-        __ownerDocument__(this)._performingImportNodeOperation = true;
+        __ownerDocument__(this).importing = true;
         
-            if (importedNode.nodeType == DOMNode.ELEMENT_NODE) {
-                if (!__ownerDocument__(this).implementation.namespaceAware) {
-                    // create a local Element (with the name of the importedNode)
-                    importNode = __ownerDocument__(this).createElement(importedNode.tagName);
-                
-                    // create attributes matching those of the importedNode
-                    for(var i = 0; i < importedNode.attributes.length; i++) {
-                        importNode.setAttribute(importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
-                    }
-                }else {
-                    // create a local Element (with the name & namespaceURI of the importedNode)
-                    importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
-                
-                    // create attributes matching those of the importedNode
-                    for(var i = 0; i < importedNode.attributes.length; i++) {
-                        importNode.setAttributeNS(importedNode.attributes.item(i).namespaceURI, 
-                            importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
-                    }
-                
-                    // create namespace definitions matching those of the importedNode
-                    for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
-                        importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
-                    }
+        if (importedNode.nodeType == Node.ELEMENT_NODE) {
+            if (!__ownerDocument__(this).implementation.namespaceAware) {
+                // create a local Element (with the name of the importedNode)
+                importNode = __ownerDocument__(this).createElement(importedNode.tagName);
+            
+                // create attributes matching those of the importedNode
+                for(var i = 0; i < importedNode.attributes.length; i++) {
+                    importNode.setAttribute(importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
                 }
-            } else if (importedNode.nodeType == DOMNode.ATTRIBUTE_NODE) {
-                if (!__ownerDocument__(this).implementation.namespaceAware) {
-                    // create a local Attribute (with the name of the importedAttribute)
-                    importNode = __ownerDocument__(this).createAttribute(importedNode.name);
-                } else {
-                    // create a local Attribute (with the name & namespaceURI of the importedAttribute)
-                    importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
-                
-                    // create namespace definitions matching those of the importedAttribute
-                    for(var i = 0; i < importedNode._namespaces.length; i++) {
-                        importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
-                        importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
-                    }
+            }else {
+                // create a local Element (with the name & namespaceURI of the importedNode)
+                importNode = __ownerDocument__(this).createElementNS(importedNode.namespaceURI, importedNode.nodeName);
+            
+                // create attributes matching those of the importedNode
+                for(var i = 0; i < importedNode.attributes.length; i++) {
+                    importNode.setAttributeNS(importedNode.attributes.item(i).namespaceURI, 
+                        importedNode.attributes.item(i).name, importedNode.attributes.item(i).value);
                 }
             
-                // set the value of the local Attribute to match that of the importedAttribute
-                importNode.value = importedNode.value;
-                
-            } else if (importedNode.nodeType == DOMNode.DOCUMENT_FRAGMENT_NODE) {
-                // create a local DocumentFragment
-                importNode = __ownerDocument__(this).createDocumentFragment();
-            } else if (importedNode.nodeType == DOMNode.NAMESPACE_NODE) {
-                // create a local NamespaceNode (with the same name & value as the importedNode)
-                importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
-                importNode.value = importedNode.value;
-            } else if (importedNode.nodeType == DOMNode.TEXT_NODE) {
-                // create a local TextNode (with the same data as the importedNode)
-                importNode = __ownerDocument__(this).createTextNode(importedNode.data);
-            } else if (importedNode.nodeType == DOMNode.CDATA_SECTION_NODE) {
-                // create a local CDATANode (with the same data as the importedNode)
-                importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
-            } else if (importedNode.nodeType == DOMNode.PROCESSING_INSTRUCTION_NODE) {
-                // create a local ProcessingInstruction (with the same target & data as the importedNode)
-                importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
-            } else if (importedNode.nodeType == DOMNode.COMMENT_NODE) {
-                // create a local Comment (with the same data as the importedNode)
-                importNode = __ownerDocument__(this).createComment(importedNode.data);
-            } else {  // throw Exception if nodeType is not supported
-                throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
-            }
-            
-            if (deep) {                                    // recurse childNodes
-                for(var i = 0; i < importedNode.childNodes.length; i++) {
-                    importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
+                // create namespace definitions matching those of the importedNode
+                for(var i = 0; i < importedNode._namespaces.length; i++) {
+                    importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
+                    importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
                 }
             }
+        } else if (importedNode.nodeType == Node.ATTRIBUTE_NODE) {
+            if (!__ownerDocument__(this).implementation.namespaceAware) {
+                // create a local Attribute (with the name of the importedAttribute)
+                importNode = __ownerDocument__(this).createAttribute(importedNode.name);
+            } else {
+                // create a local Attribute (with the name & namespaceURI of the importedAttribute)
+                importNode = __ownerDocument__(this).createAttributeNS(importedNode.namespaceURI, importedNode.nodeName);
             
-            //reset _performingImportNodeOperation
-            __ownerDocument__(this)._performingImportNodeOperation = false;
-            return importNode;
+                // create namespace definitions matching those of the importedAttribute
+                for(var i = 0; i < importedNode._namespaces.length; i++) {
+                    importNode._namespaces[i] = __ownerDocument__(this).createNamespace(importedNode._namespaces.item(i).localName);
+                    importNode._namespaces[i].value = importedNode._namespaces.item(i).value;
+                }
+            }
+        
+            // set the value of the local Attribute to match that of the importedAttribute
+            importNode.value = importedNode.value;
+            
+        } else if (importedNode.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+            // create a local DocumentFragment
+            importNode = __ownerDocument__(this).createDocumentFragment();
+        } else if (importedNode.nodeType == Node.NAMESPACE_NODE) {
+            // create a local NamespaceNode (with the same name & value as the importedNode)
+            importNode = __ownerDocument__(this).createNamespace(importedNode.nodeName);
+            importNode.value = importedNode.value;
+        } else if (importedNode.nodeType == Node.TEXT_NODE) {
+            // create a local TextNode (with the same data as the importedNode)
+            importNode = __ownerDocument__(this).createTextNode(importedNode.data);
+        } else if (importedNode.nodeType == Node.CDATA_SECTION_NODE) {
+            // create a local CDATANode (with the same data as the importedNode)
+            importNode = __ownerDocument__(this).createCDATASection(importedNode.data);
+        } else if (importedNode.nodeType == Node.PROCESSING_INSTRUCTION_NODE) {
+            // create a local ProcessingInstruction (with the same target & data as the importedNode)
+            importNode = __ownerDocument__(this).createProcessingInstruction(importedNode.target, importedNode.data);
+        } else if (importedNode.nodeType == Node.COMMENT_NODE) {
+            // create a local Comment (with the same data as the importedNode)
+            importNode = __ownerDocument__(this).createComment(importedNode.data);
+        } else {  // throw Exception if nodeType is not supported
+            throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
+        }
+        
+        if (deep) {                                    
+            // recurse childNodes
+            for(var i = 0; i < importedNode.childNodes.length; i++) {
+                importNode.appendChild(__ownerDocument__(this).importNode(importedNode.childNodes.item(i), true));
+            }
+        }
+        
+        //reset importing
+        __ownerDocument__(this).importing = false;
+        return importNode;
         
     },
     contains : function(node){
-            while(node && node != this ){
-                node = node.parentNode;
-            }
-            return !!node;
+        while(node && node != this ){
+            node = node.parentNode;
+        }
+        return !!node;
     },
     compareDocumentPosition : function(b){
-        var a = this;
-        var number = (a != b && a.contains(b) && 16) + (a != b && b.contains(a) && 8);
-        //find position of both
-        var all = document.getElementsByTagName("*");
-        var my_location = 0, node_location = 0;
-        for(var i=0; i < all.length; i++){
-            if(all[i] == a) my_location = i;
-            if(all[i] == b) node_location = i;
-            if(my_location && node_location) break;
+        //console.log("comparing document position %s %s", this, b);
+        var i, 
+            length, 
+            a = this, 
+            parent,
+            aparents,
+            bparents;
+        //handle a couple simpler case first
+        if(a === b)
+            return Node.DOCUMENT_POSITION_EQUAL;
+        
+        if(a.ownerDocument !== b.ownerDocument)
+            return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
+               Node.DOCUMENT_POSITION_FOLLOWING|
+               Node.DOCUMENT_POSITION_DISCONNECTED;
+            
+        if(a.parentNode === b.parentNode){
+            length = a.parentNode.childNodes.length;
+            for(i=0;i<length;i++){
+                if(a.parentNode.childNodes[i] === a){
+                    return Node.DOCUMENT_POSITION_FOLLOWING;
+                }else if(a.parentNode.childNodes[i] === b){
+                    return Node.DOCUMENT_POSITION_PRECEDING;
+                }
+            }
         }
-        number += (my_location < node_location && 4)
-        number += (my_location > node_location && 2)
-        return number;
-    } 
+        
+        if(a.contains(b))
+            return Node.DOCUMENT_POSITION_CONTAINED_BY|
+                   Node.DOCUMENT_POSITION_FOLLOWING;
+            
+        if(b.contains(a))
+            return Node.DOCUMENT_POSITION_CONTAINS|
+                   Node.DOCUMENT_POSITION_PRECEDING;
+            
+        aparents = [];
+        parent = a.parentNode;
+        while(parent){
+            aparents[aparents.length] = parent;
+            parent = parent.parentNode;
+        }
+        
+        bparents = [];
+        parent = b.parentNode;
+        while(parent){
+            i = aparents.indexOf(parent);
+            if(i < 0){
+                bparents[bparents.length] = parent;
+                parent = parent.parentNode;
+            }else{
+                //i cant be 0 since we already checked for equal parentNode
+                if(bparents.length > aparents.length){
+                    return Node.DOCUMENT_POSITION_FOLLOWING;
+                }else if(bparents.length < aparents.length){
+                    return Node.DOCUMENT_POSITION_PRECEDING;
+                }else{ 
+                    //common ancestor diverge point
+                    if(i === 0)
+                        return Node.DOCUMENT_POSITION_FOLLOWING;
+                    else
+                        parent = aparents[i-1];
+                        
+                    return parent.compareDocumentPosition(bparents.pop());
+                }
+            }
+        }
+            
+        return Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC|
+               Node.DOCUMENT_POSITION_DISCONNECTED;
+        
+    },
+    toString : function(){
+        return "[object Node]";
+    }
 
 });
 
 
 
 /**
- * @method DOMNode._getElementsByTagNameRecursive - implements getElementsByTagName()
- * @param  elem     : DOMElement  - The element which are checking and then recursing into
+ * @method __getElementsByTagNameRecursive__ - implements getElementsByTagName()
+ * @param  elem     : Element  - The element which are checking and then recursing into
  * @param  tagname  : string      - The name of the tag to match on. The special value "*" matches all tags
- * @param  nodeList : DOMNodeList - The accumulating list of matching nodes
+ * @param  nodeList : NodeList - The accumulating list of matching nodes
  *
- * @return : DOMNodeList
+ * @return : NodeList
  */
 var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
     
-    if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
+    if (elem.nodeType == Node.ELEMENT_NODE || elem.nodeType == Node.DOCUMENT_NODE) {
     
-        if(elem.nodeType !== DOMNode.DOCUMENT_NODE && 
+        if(elem.nodeType !== Node.DOCUMENT_NODE && 
             ((elem.nodeName.toUpperCase() == tagname.toUpperCase()) || 
                 (tagname == "*")) ){
-            __appendChild__(nodeList, elem);               // add matching node to nodeList
+            // add matching node to nodeList
+            __appendChild__(nodeList, elem);               
         }
     
         // recurse childNodes
@@ -2033,70 +2435,148 @@ var __getElementsByTagNameRecursive__ = function (elem, tagname, nodeList) {
 };
 
 /**
- * @method DOMNode._getElementsByTagNameNSRecursive - implements getElementsByTagName()
+ * @method __getElementsByTagNameNSRecursive__  
+ *      implements getElementsByTagName()
  *
- * @param  elem     : DOMElement  - The element which are checking and then recursing into
+ * @param  elem     : Element  - The element which are checking and then recursing into
  * @param  namespaceURI : string - the namespace URI of the required node
  * @param  localName    : string - the local name of the required node
- * @param  nodeList     : DOMNodeList - The accumulating list of matching nodes
+ * @param  nodeList     : NodeList - The accumulating list of matching nodes
  *
- * @return : DOMNodeList
+ * @return : NodeList
  */
 var __getElementsByTagNameNSRecursive__ = function(elem, namespaceURI, localName, nodeList) {
-  if (elem.nodeType == DOMNode.ELEMENT_NODE || elem.nodeType == DOMNode.DOCUMENT_NODE) {
-
-    if (((elem.namespaceURI == namespaceURI) || (namespaceURI == "*")) && ((elem.localName == localName) || (localName == "*"))) {
-      __appendChild__(nodeList, elem);               // add matching node to nodeList
+    if (elem.nodeType == Node.ELEMENT_NODE || elem.nodeType == Node.DOCUMENT_NODE) {
+    
+        if (((elem.namespaceURI == namespaceURI) || (namespaceURI == "*")) && 
+            ((elem.localName == localName) || (localName == "*"))) {
+            // add matching node to nodeList
+            __appendChild__(nodeList, elem);               
+        }
+        
+        // recurse childNodes
+        for(var i = 0; i < elem.childNodes.length; i++) {
+            nodeList = __getElementsByTagNameNSRecursive__(
+                elem.childNodes.item(i), namespaceURI, localName, nodeList);
+        }
     }
-
-    // recurse childNodes
-    for(var i = 0; i < elem.childNodes.length; i++) {
-      nodeList = __getElementsByTagNameNSRecursive__(elem.childNodes.item(i), namespaceURI, localName, nodeList);
-    }
-  }
-
-  return nodeList;
+    
+    return nodeList;
 };
 
 /**
- * @method DOMNode._isAncestor - returns true if node is ancestor of target
- * @param  target         : DOMNode - The node we are using as context
- * @param  node         : DOMNode - The candidate ancestor node
+ * @method __isAncestor__ - returns true if node is ancestor of target
+ * @param  target         : Node - The node we are using as context
+ * @param  node         : Node - The candidate ancestor node
  * @return : boolean
  */
 var __isAncestor__ = function(target, node) {
-  // if this node matches, return true,
-  // otherwise recurse up (if there is a parentNode)
-  return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
+    // if this node matches, return true,
+    // otherwise recurse up (if there is a parentNode)
+    return ((target == node) || ((target.parentNode) && (__isAncestor__(target.parentNode, node))));
 };
 
 var __ownerDocument__ = function(node){
-    return (node.nodeType == DOMNode.DOCUMENT_NODE)?node:node.ownerDocument;
+    return (node.nodeType == Node.DOCUMENT_NODE)?node:node.ownerDocument;
 };
 
-$w.Node = DOMNode;
+
+var __recursivelyGatherText__ = function(aNode) {
+    var accumulateText = "",
+        idx,
+        node;
+    for (idx=0;idx < aNode.childNodes.length;idx++){
+        node = aNode.childNodes.item(idx);
+        if(node.nodeType == Node.TEXT_NODE)
+            accumulateText += node.data;
+        else
+            accumulateText += __recursivelyGatherText__(node);
+    }
+    return accumulateText;
+};
 
 /**
- * @class  DOMNamespace - The Namespace interface represents an namespace in an Element object
- *
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * function __escapeXML__
+ * @param  str : string - The string to be escaped
+ * @return : string - The escaped string
  */
-var DOMNamespace = function(ownerDocument) {
-  this.DOMNode = DOMNode;
-  this.DOMNode(ownerDocument);
+var escAmpRegEx = /&(?!(amp;|lt;|gt;|quot|apos;))/g;
+var escLtRegEx = /</g;
+var escGtRegEx = />/g;
+var quotRegEx = /"/g;
+var aposRegEx = /'/g;
 
-  this.name      = "";                           // the name of this attribute
+function __escapeXML__(str) {
+    str = str.replace(escAmpRegEx, "&amp;").
+            replace(escLtRegEx, "&lt;").
+            replace(escGtRegEx, "&gt;").
+            replace(quotRegEx, "&quot;").
+            replace(aposRegEx, "&apos;");
 
-  // If this attribute was explicitly given a value in the original document, this is true; otherwise, it is false.
-  // Note that the implementation is in charge of this attribute, not the user.
-  // If the user changes the value of the attribute (even if it ends up having the same value as the default value)
-  // then the specified flag is automatically flipped to true
-  this.specified = false;
+    return str;
 };
-DOMNamespace.prototype = new DOMNode;
-__extend__(DOMNamespace.prototype, {
+
+/*
+function __escapeHTML5__(str) {
+    str = str.replace(escAmpRegEx, "&amp;").
+            replace(escLtRegEx, "&lt;").
+            replace(escGtRegEx, "&gt;");
+
+    return str;
+};
+function __escapeHTML5Atribute__(str) {
+    str = str.replace(escAmpRegEx, "&amp;").
+            replace(escLtRegEx, "&lt;").
+            replace(escGtRegEx, "&gt;").
+            replace(quotRegEx, "&quot;").
+            replace(aposRegEx, "&apos;");
+
+    return str;
+};
+*/
+
+/**
+ * function __unescapeXML__
+ * @param  str : string - The string to be unescaped
+ * @return : string - The unescaped string
+ */
+var unescAmpRegEx = /&amp;/g;
+var unescLtRegEx = /&lt;/g;
+var unescGtRegEx = /&gt;/g;
+var unquotRegEx = /&quot;/g;
+var unaposRegEx = /&apos;/g;
+function __unescapeXML__(str) {
+    str = str.replace(unescAmpRegEx, "&").
+            replace(unescLtRegEx, "<").
+            replace(unescGtRegEx, ">").
+            replace(unquotRegEx, "\"").
+            replace(unaposRegEx, "'");
+
+    return str;
+};
+
+
+/**
+ * @class  Namespace - 
+ *      The Namespace interface represents an namespace in an Element object
+ *
+ * @param  ownerDocument : The Document object associated with this node.
+ */
+Namespace = function(ownerDocument) {
+    Node.apply(this, arguments);
+    // the name of this attribute
+    this.name      = "";                           
+    
+    // If this attribute was explicitly given a value in the original document, 
+    // this is true; otherwise, it is false.
+    // Note that the implementation is in charge of this attribute, not the user.
+    // If the user changes the value of the attribute (even if it ends up having 
+    // the same value as the default value) then the specified flag is 
+    // automatically flipped to true
+    this.specified = false;
+};
+Namespace.prototype = new Node;
+__extend__(Namespace.prototype, {
     get value(){
         // the value of the attribute is returned as a string
         return this.nodeValue;
@@ -2105,7 +2585,7 @@ __extend__(DOMNamespace.prototype, {
         this.nodeValue = value+'';
     },
     get nodeType(){
-        return DOMNode.NAMESPACE_NODE;
+        return Node.NAMESPACE_NODE;
     },
     get xml(){
         var ret = "";
@@ -2121,35 +2601,36 @@ __extend__(DOMNamespace.prototype, {
           return ret;
     },
     toString: function(){
-        return "Namespace #" + this.id;
+        return '[object Namespace]';
     }
 });
 
-$debug("Defining CharacterData");
-/*
-* CharacterData - DOM Level 2
-*/
+
 /**
- * @class  DOMCharacterData - parent abstract class for DOMText and DOMComment
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  CharacterData - parent abstract class for Text and Comment
+ * @extends Node
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMCharacterData = function(ownerDocument) {
-  this.DOMNode  = DOMNode;
-  this.DOMNode(ownerDocument);
+CharacterData = function(ownerDocument) {
+    Node.apply(this, arguments);
 };
-DOMCharacterData.prototype = new DOMNode;
-__extend__(DOMCharacterData.prototype,{
+CharacterData.prototype = new Node;
+__extend__(CharacterData.prototype,{
     get data(){
         return this.nodeValue;
     },
     set data(data){
         this.nodeValue = data;
     },
+    get textContent(){
+        return this.nodeValue;
+    },
+    set textContent(newText){
+        this.nodeValue = newText;
+    },
     get length(){return this.nodeValue.length;},
     appendData: function(arg){
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -2157,7 +2638,7 @@ __extend__(DOMCharacterData.prototype,{
         this.data = "" + this.data + arg;
     },
     deleteData: function(offset, count){ 
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -2178,7 +2659,7 @@ __extend__(DOMCharacterData.prototype,{
         }
     },
     insertData: function(offset, arg){
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if(__ownerDocument__(this).implementation.errorChecking && this._readonly){
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -2203,7 +2684,7 @@ __extend__(DOMCharacterData.prototype,{
         }
     },
     replaceData: function(offset, count, arg){
-        // throw Exception if DOMCharacterData is readonly
+        // throw Exception if CharacterData is readonly
         if (__ownerDocument__(this).implementation.errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
@@ -2240,178 +2721,182 @@ __extend__(DOMCharacterData.prototype,{
             }
         }
         return ret;
+    },
+    toString : function(){
+        return "[object CharacterData]";
     }
 });
 
-$w.CharacterData = DOMCharacterData;$debug("Defining Text");
-/*
-* Text - DOM Level 2
-*/
 /**
- * @class  DOMText - The Text interface represents the textual content (termed character data in XML) of an Element or Attr.
- *   If there is no markup inside an element's content, the text is contained in a single object implementing the Text interface
- *   that is the only child of the element. If there is markup, it is parsed into a list of elements and Text nodes that form the
- *   list of children of the element.
- * @extends DOMCharacterData
- * @author Jon van Noort (jon@webarcana.com.au) and David Joham (djoham@yahoo.com)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Text  
+ *      The Text interface represents the textual content (termed 
+ *      character data in XML) of an Element or Attr.
+ *      If there is no markup inside an element's content, the text is 
+ *      contained in a single object implementing the Text interface that 
+ *      is the only child of the element. If there is markup, it is 
+ *      parsed into a list of elements and Text nodes that form the
+ *      list of children of the element.
+ * @extends CharacterData
+ * @param  ownerDocument The Document object associated with this node.
  */
-var DOMText = function(ownerDocument) {
-  this.DOMCharacterData  = DOMCharacterData;
-  this.DOMCharacterData(ownerDocument);
-
-  this.nodeName  = "#text";
+Text = function(ownerDocument) {
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#text";
 };
-DOMText.prototype = new DOMCharacterData;
-__extend__(DOMText.prototype,{
-    //Breaks this Text node into two Text nodes at the specified offset,
-    // keeping both in the tree as siblings. This node then only contains all the content up to the offset point.
-    // And a new Text node, which is inserted as the next sibling of this node, contains all the content at and after the offset point.
+Text.prototype = new CharacterData;
+__extend__(Text.prototype,{
+    get localName(){
+        return null;
+    },
+    // Breaks this Text node into two Text nodes at the specified offset,
+    // keeping both in the tree as siblings. This node then only contains 
+    // all the content up to the offset point.  And a new Text node, which 
+    // is inserted as the next sibling of this node, contains all the 
+    // content at and after the offset point.
     splitText : function(offset) {
-        var data, inode;
-        
+        var data, 
+            inode;
         // test for exceptions
         if (__ownerDocument__(this).implementation.errorChecking) {
             // throw Exception if Node is readonly
             if (this._readonly) {
               throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
             }
-            
             // throw Exception if offset is negative or greater than the data length,
             if ((offset < 0) || (offset > this.data.length)) {
               throw(new DOMException(DOMException.INDEX_SIZE_ERR));
             }
         }
-        
         if (this.parentNode) {
             // get remaining string (after offset)
             data  = this.substringData(offset);
-            
             // create new TextNode with remaining string
             inode = __ownerDocument__(this).createTextNode(data);
-            
             // attach new TextNode
             if (this.nextSibling) {
               this.parentNode.insertBefore(inode, this.nextSibling);
-            }
-            else {
+            } else {
               this.parentNode.appendChild(inode);
             }
-            
             // remove remaining string from original TextNode
             this.deleteData(offset);
         }
-        
         return inode;
     },
     get nodeType(){
-        return DOMNode.TEXT_NODE;
+        return Node.TEXT_NODE;
     },
     get xml(){
-        return __escapeHTML5__(""+ this.nodeValue);
+        return __escapeXML__(""+ this.nodeValue);
     },
     toString: function(){
-        return "Text #" + this._id;    
+        return "[object Text]";    
     }
 });
 
-$w.Text = DOMText;$debug("Defining CDATASection");
-/*
-* CDATASection - DOM Level 2
-*/
 /**
- * @class  DOMCDATASection - CDATA sections are used to escape blocks of text containing characters that would otherwise be regarded as markup.
- *   The only delimiter that is recognized in a CDATA section is the "\]\]\>" string that ends the CDATA section
- * @extends DOMCharacterData
- * @author Jon van Noort (jon@webarcana.com.au) and David Joham (djoham@yahoo.com)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class CDATASection 
+ *      CDATA sections are used to escape blocks of text containing 
+ *      characters that would otherwise be regarded as markup.
+ *      The only delimiter that is recognized in a CDATA section is 
+ *      the "\]\]\>" string that ends the CDATA section
+ * @extends Text
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMCDATASection = function(ownerDocument) {
-  this.DOMText  = DOMText;
-  this.DOMText(ownerDocument);
-
-  this.nodeName  = "#cdata-section";
+CDATASection = function(ownerDocument) {
+    Text.apply(this, arguments);
+    this.nodeName = '#cdata-section';
 };
-DOMCDATASection.prototype = new DOMText;
-__extend__(DOMCDATASection.prototype,{
+CDATASection.prototype = new Text;
+__extend__(CDATASection.prototype,{
     get nodeType(){
-        return DOMNode.CDATA_SECTION_NODE;
+        return Node.CDATA_SECTION_NODE;
     },
     get xml(){
         return "<![CDATA[" + this.nodeValue + "]]>";
     },
     toString : function(){
-        return "CDATA #"+this._id;
+        return "[object CDATASection]";
     }
 });
-
-$w.CDATASection = DOMCDATASection;$debug("Defining Comment");
-/* 
-* Comment - DOM Level 2
-*/
 /**
- * @class  DOMComment - This represents the content of a comment, i.e., all the characters between the starting '<!--' and ending '-->'
- * @extends DOMCharacterData
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Comment 
+ *      This represents the content of a comment, i.e., all the 
+ *      characters between the starting '<!--' and ending '-->'
+ * @extends CharacterData
+ * @param  ownerDocument :  The Document object associated with this node.
  */
-var DOMComment = function(ownerDocument) {
-  this.DOMCharacterData  = DOMCharacterData;
-  this.DOMCharacterData(ownerDocument);
-
-  this.nodeName  = "#comment";
+Comment = function(ownerDocument) {
+    CharacterData.apply(this, arguments);
+    this.nodeName  = "#comment";
 };
-DOMComment.prototype = new DOMCharacterData;
-__extend__(DOMComment.prototype, {
+Comment.prototype = new CharacterData;
+__extend__(Comment.prototype, {
+    get localName(){
+        return null;
+    },
     get nodeType(){
-        return DOMNode.COMMENT_NODE;
+        return Node.COMMENT_NODE;
     },
     get xml(){
         return "<!--" + this.nodeValue + "-->";
     },
     toString : function(){
-        return "Comment #"+this._id;
+        return "[object Comment]";
     }
 });
 
-$w.Comment = DOMComment;
-$debug("Defining DocumentType");
-;/*
-* DocumentType - DOM Level 2
-*/
-var DOMDocumentType    = function() { 
-    $error("DOMDocumentType.constructor(): Not Implemented"   ); 
-};
 
-$w.DocumentType = DOMDocumentType;
-$debug("Defining Attr");
-/*
-* Attr - DOM Level 2
-*/
 /**
- * @class  DOMAttr - The Attr interface represents an attribute in an Element object
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @author envjs team
+ * @param {Document} onwnerDocument
  */
-var DOMAttr = function(ownerDocument) {
-    this.DOMNode = DOMNode;
-    this.DOMNode(ownerDocument);
-                   
-    this.ownerElement = null;               // set when Attr is added to NamedNodeMap
+DocumentType = function(ownerDocument) {
+    Node.apply(this, arguments);
+    this.systemId = null;
+    this.publicId = null;
 };
-DOMAttr.prototype = new DOMNode; 
-__extend__(DOMAttr.prototype, {
+DocumentType.prototype = new Node;
+__extend__({
+    get name(){
+        return this.nodeName;
+    },
+    get entities(){
+        return null;
+    },
+    get internalSubsets(){
+        return null;
+    },
+    get notations(){
+        return null;
+    },
+    toString : function(){
+        return "[object DocumentType]";
+    }
+});
+
+/**
+ * @class  Attr 
+ *      The Attr interface represents an attribute in an Element object
+ * @extends Node
+ * @param  ownerDocument : The Document object associated with this node.
+ */
+Attr = function(ownerDocument) {
+    Node.apply(this, arguments);
+    // set when Attr is added to NamedNodeMap
+    this.ownerElement = null;
+    //TODO: our implementation of Attr is incorrect because we don't
+    //      treat the value of the attribute as a child text node.
+};
+Attr.prototype = new Node;
+__extend__(Attr.prototype, {
     // the name of this attribute
     get name(){
         return this.nodeName;
     },
-    set name(name){
-        this.nodeName = name;
-    },
     // the value of the attribute is returned as a string
     get value(){
-        return this.nodeValue;
+        return this.nodeValue||'';
     },
     set value(value){
         // throw Exception if Attribute is readonly
@@ -2421,51 +2906,49 @@ __extend__(DOMAttr.prototype, {
         // delegate to node
         this.nodeValue = value;
     },
+    get textContent(){
+        return this.nodeValue;
+    },
+    set textContent(newText){
+        this.nodeValue = newText;
+    },
     get specified(){
         return (this!==null&&this!=undefined);
     },
     get nodeType(){
-        return DOMNode.ATTRIBUTE_NODE;
+        return Node.ATTRIBUTE_NODE;
     },
     get xml(){
         if(this.nodeValue)
-            return ' '+this.nodeName + '="' + __escapeXML__(this.nodeValue+"") + '"';
+            return  __escapeXML__(this.nodeValue+"");
         else
             return '';
     },
     toString : function(){
-        return "Attr #" + this._id + " " + this.name;
+        return "[object Attr]";
     }
 });
 
-$w.Attr = DOMAttr;
-$debug("Defining Element");
+
 /**
- * @class  DOMElement - By far the vast majority of objects (apart from text) that authors encounter
- *   when traversing a document are Element nodes.
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au) and David Joham (djoham@yahoo.com)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  Element - 
+ *      By far the vast majority of objects (apart from text) 
+ *      that authors encounter when traversing a document are 
+ *      Element nodes.
+ * @extends Node
+ * @param  ownerDocument : The Document object associated with this node.
  */
-var DOMElement = function(ownerDocument) {
-    this.DOMNode  = DOMNode;
-    this.DOMNode(ownerDocument);                   
-    //this.id = null;                                  // the ID of the element
+Element = function(ownerDocument) {
+    Node.apply(this, arguments);
+    this.attributes = new NamedNodeMap(this.ownerDocument, this);
 };
-DOMElement.prototype = new DOMNode;
-__extend__(DOMElement.prototype, {	
+Element.prototype = new Node;
+__extend__(Element.prototype, {	
     // The name of the element.
     get tagName(){
         return this.nodeName;  
     },
-    set tagName(name){
-        this.nodeName = name;  
-    },
     
-    addEventListener        : function(type, fn, phase){ __addEventListener__(this, type, fn); },
-    removeEventListener     : function(type){ __removeEventListener__(this, type); },
-    dispatchEvent           : function(event, bubbles){ __dispatchEvent__(this, event, bubbles); },
-   
     getAttribute: function(name) {
         var ret = null;
         // if attribute exists, use it
@@ -2473,18 +2956,21 @@ __extend__(DOMElement.prototype, {
         if (attr) {
             ret = attr.value;
         }
-        return ret; // if Attribute exists, return its value, otherwise, return null
+        // if Attribute exists, return its value, otherwise, return null
+        return ret; 
     },
     setAttribute : function (name, value) {
         // if attribute exists, use it
         var attr = this.attributes.getNamedItem(name);
-        
-        //I had to add this check becuase as the script initializes
+       //console.log('attr %s', attr);
+        //I had to add this check because as the script initializes
         //the id may be set in the constructor, and the html element
         //overrides the id property with a getter/setter.
         if(__ownerDocument__(this)){
             if (attr===null||attr===undefined) {
-                attr = __ownerDocument__(this).createAttribute(name);  // otherwise create it
+                // otherwise create it
+                attr = __ownerDocument__(this).createAttribute(name);  
+               //console.log('attr %s', attr);
             }
             
             
@@ -2496,30 +2982,28 @@ __extend__(DOMElement.prototype, {
                 }
                 
                 // throw Exception if the value string contains an illegal character
-                if (!__isValidString__(value)) {
+                if (!__isValidString__(value+'')) {
                     throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
                 }
             }
-            
-            /*if (__isIdDeclaration__(name)) {
-                this.id = value;  // cache ID for getElementById()
-            }*/
             
             // assign values to properties (and aliases)
             attr.value     = value + '';
             
             // add/replace Attribute in NamedNodeMap
             this.attributes.setNamedItem(attr);
+           //console.log('element setNamedItem %s', attr);
         }else{
-            $warn('Element has no owner document '+this.tagName+'\n\t cant set attribute ' + name + ' = '+value );
+           console.warn('Element has no owner document '+this.tagName+
+                '\n\t cant set attribute ' + name + ' = '+value );
         }
     },
     removeAttribute : function removeAttribute(name) {
-        // delegate to DOMNamedNodeMap.removeNamedItem
+        // delegate to NamedNodeMap.removeNamedItem
         return this.attributes.removeNamedItem(name);
     },
     getAttributeNode : function getAttributeNode(name) {
-        // delegate to DOMNamedNodeMap.getNamedItem
+        // delegate to NamedNodeMap.getNamedItem
         return this.attributes.getNamedItem(name);
     },
     setAttributeNode: function(newAttr) {
@@ -2527,7 +3011,7 @@ __extend__(DOMElement.prototype, {
         if (__isIdDeclaration__(newAttr.name)) {
             this.id = newAttr.value;  // cache ID for getElementById()
         }
-        // delegate to DOMNamedNodeMap.setNamedItem
+        // delegate to NamedNodeMap.setNamedItem
         return this.attributes.setNamedItem(newAttr);
     },
     removeAttributeNode: function(oldAttr) {
@@ -2548,7 +3032,7 @@ __extend__(DOMElement.prototype, {
     },
     getAttributeNS : function(namespaceURI, localName) {
         var ret = "";
-        // delegate to DOMNAmedNodeMap.getNamedItemNS
+        // delegate to NAmedNodeMap.getNamedItemNS
         var attr = this.attributes.getNamedItemNS(namespaceURI, localName);
         if (attr) {
             ret = attr.value;
@@ -2556,7 +3040,8 @@ __extend__(DOMElement.prototype, {
         return ret;  // if Attribute exists, return its value, otherwise return ""
     },
     setAttributeNS : function(namespaceURI, qualifiedName, value) {
-        // call DOMNamedNodeMap.getNamedItem
+        // call NamedNodeMap.getNamedItem
+        //console.log('setAttributeNS %s %s %s', namespaceURI, qualifiedName, value);
         var attr = this.attributes.getNamedItem(namespaceURI, qualifiedName);
         
         if (!attr) {  // if Attribute exists, use it
@@ -2574,7 +3059,7 @@ __extend__(DOMElement.prototype, {
             }
             
             // throw Exception if the Namespace is invalid
-            if (!__isValidNamespace__(namespaceURI, qualifiedName)) {
+            if (!__isValidNamespace__(this.ownerDocument, namespaceURI, qualifiedName, true)) {
                 throw(new DOMException(DOMException.NAMESPACE_ERR));
             }
             
@@ -2585,23 +3070,23 @@ __extend__(DOMElement.prototype, {
         }
         
         // if this Attribute is an ID
-        if (__isIdDeclaration__(name)) {
-            this.id = value;  // cache ID for getElementById()
-        }
+        //if (__isIdDeclaration__(name)) {
+        //    this.id = value;
+        //}
         
         // assign values to properties (and aliases)
         attr.value     = value;
         attr.nodeValue = value;
         
-        // delegate to DOMNamedNodeMap.setNamedItem
+        // delegate to NamedNodeMap.setNamedItem
         this.attributes.setNamedItemNS(attr);
     },
     removeAttributeNS : function(namespaceURI, localName) {
-        // delegate to DOMNamedNodeMap.removeNamedItemNS
+        // delegate to NamedNodeMap.removeNamedItemNS
         return this.attributes.removeNamedItemNS(namespaceURI, localName);
     },
     getAttributeNodeNS : function(namespaceURI, localName) {
-        // delegate to DOMNamedNodeMap.getNamedItemNS
+        // delegate to NamedNodeMap.getNamedItemNS
         return this.attributes.getNamedItemNS(namespaceURI, localName);
     },
     setAttributeNodeNS : function(newAttr) {
@@ -2610,50 +3095,72 @@ __extend__(DOMElement.prototype, {
             this.id = newAttr.value+'';  // cache ID for getElementById()
         }
         
-        // delegate to DOMNamedNodeMap.setNamedItemNS
+        // delegate to NamedNodeMap.setNamedItemNS
         return this.attributes.setNamedItemNS(newAttr);
     },
     hasAttribute : function(name) {
-        // delegate to DOMNamedNodeMap._hasAttribute
+        // delegate to NamedNodeMap._hasAttribute
         return __hasAttribute__(this.attributes,name);
     },
     hasAttributeNS : function(namespaceURI, localName) {
-        // delegate to DOMNamedNodeMap._hasAttributeNS
+        // delegate to NamedNodeMap._hasAttributeNS
         return __hasAttributeNS__(this.attributes, namespaceURI, localName);
     },
     get nodeType(){
-        return DOMNode.ELEMENT_NODE;
+        return Node.ELEMENT_NODE;
     },
     get xml() {
-        var ret = "";
+        var ret = "",
+            ns = "",
+            attrs,
+            attrstring,
+            i;
         
         // serialize namespace declarations
-        var ns = this._namespaces.xml;
-        if (ns.length > 0) ns = " "+ ns;
+        if (this.namespaceURI ){
+            if((this === this.ownerDocument.documentElement) ||
+                (!this.parentNode)||
+                (this.parentNode && (this.parentNode.namespaceURI !== this.namespaceURI)))
+                ns = ' xmlns'+(this.prefix?(':'+this.prefix):'')+
+                    '="'+this.namespaceURI+'"';
+        }
         
         // serialize Attribute declarations
-        var attrs = this.attributes.xml;
+        attrs = this.attributes;
+        attrstring = "";
+        for(i=0;i< attrs.length;i++){
+            if(attrs[i].name.match('xmlns:'))
+                attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+        }
+        for(i=0;i< attrs.length;i++){
+            if(!attrs[i].name.match('xmlns:'))
+                attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+        }
         
-        // serialize this Element
-        ret += "<" + this.nodeName.toLowerCase() + ns + attrs +">";
-        ret += this.childNodes.xml;
-        ret += "</" + this.nodeName.toLowerCase() + ">";
+        if(this.hasChildNodes()){
+            // serialize this Element
+            ret += "<" + this.tagName + ns + attrstring +">";
+            ret += this.childNodes.xml;
+            ret += "</" + this.tagName + ">";
+        }else{
+            ret += "<" + this.tagName + ns + attrstring +"/>";
+        }
         
         return ret;
     },
     toString : function(){
-        return "Element #"+this._id + " "+ this.tagName + (this.id?" => "+this.id:'');
+        return '[object Element]';
     }
 });
 
-$w.Element = DOMElement;
+
 /**
  * @class  DOMException - raised when an operation is impossible to perform
  * @author Jon van Noort (jon@webarcana.com.au)
  * @param  code : int - the exception code (one of the DOMException constants)
  */
-var DOMException = function(code) {
-  this.code = code;
+DOMException = function(code) {
+    this.code = code;
 };
 
 // DOMException constants
@@ -2675,25 +3182,21 @@ DOMException.SYNTAX_ERR                     = 12;
 DOMException.INVALID_MODIFICATION_ERR       = 13;
 DOMException.NAMESPACE_ERR                  = 14;
 DOMException.INVALID_ACCESS_ERR             = 15;
-$debug("Defining DocumentFragment");
-/* 
-* DocumentFragment - DOM Level 2
-*/
+
 /**
- * @class  DOMDocumentFragment - DocumentFragment is a "lightweight" or "minimal" Document object.
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au) and David Joham (djoham@yahoo.com)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @class  DocumentFragment - 
+ *      DocumentFragment is a "lightweight" or "minimal" Document object.
+ * @extends Node
+ * @param  ownerDocument :  The Document object associated with this node.
  */
-var DOMDocumentFragment = function(ownerDocument) {
-  this.DOMNode = DOMNode;
-  this.DOMNode(ownerDocument);
-  this.nodeName  = "#document-fragment";
+DocumentFragment = function(ownerDocument) {
+    Node.apply(this, arguments);
+    this.nodeName  = "#document-fragment";
 };
-DOMDocumentFragment.prototype = new DOMNode;
-__extend__(DOMDocumentFragment.prototype,{
+DocumentFragment.prototype = new Node;
+__extend__(DocumentFragment.prototype,{
     get nodeType(){
-        return DOMNode.DOCUMENT_FRAGMENT_NODE;
+        return Node.DOCUMENT_FRAGMENT_NODE;
     },
     get xml(){
         var xml = "",
@@ -2707,37 +3210,44 @@ __extend__(DOMDocumentFragment.prototype,{
         return xml;
     },
     toString : function(){
-        return "DocumentFragment #"+this._id;
+        return "[object DocumentFragment]";
+    },
+    get localName(){
+        return null;
     }
 });
 
-$w.DocumentFragment = DOMDocumentFragment;
-$debug("Defining ProcessingInstruction");
-/*
-* ProcessingInstruction - DOM Level 2
-*/
+ 
 /**
- * @class  DOMProcessingInstruction - The ProcessingInstruction interface represents a "processing instruction",
- *   used in XML as a way to keep processor-specific information in the text of the document
- * @extends DOMNode
+ * @class  ProcessingInstruction - 
+ *      The ProcessingInstruction interface represents a 
+ *      "processing instruction", used in XML as a way to 
+ *      keep processor-specific information in the text of 
+ *      the document
+ * @extends Node
  * @author Jon van Noort (jon@webarcana.com.au)
- * @param  ownerDocument : DOMDocument - The Document object associated with this node.
+ * @param  ownerDocument :  The Document object associated with this node.
  */
-var DOMProcessingInstruction = function(ownerDocument) {
-  this.DOMNode  = DOMNode;
-  this.DOMNode(ownerDocument);
+ProcessingInstruction = function(ownerDocument) {
+    Node.apply(this, arguments);
 };
-DOMProcessingInstruction.prototype = new DOMNode;
-__extend__(DOMProcessingInstruction.prototype, {
+ProcessingInstruction.prototype = new Node;
+__extend__(ProcessingInstruction.prototype, {
     get data(){
         return this.nodeValue;
     },
     set data(data){
-        // throw Exception if DOMNode is readonly
+        // throw Exception if Node is readonly
         if (__ownerDocument__(this).errorChecking && this._readonly) {
             throw(new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR));
         }
         this.nodeValue = data;
+    },
+    get textContent(){
+        return this.data;
+    },
+    get localName(){
+        return null;
     },
     get target(){
       // The target of this processing instruction.
@@ -2752,1236 +3262,26 @@ __extend__(DOMProcessingInstruction.prototype, {
         this.nodeName = value;
     },
     get nodeType(){
-        return DOMNode.PROCESSING_INSTRUCTION_NODE;
+        return Node.PROCESSING_INSTRUCTION_NODE;
     },
     get xml(){
-        return "<?" + this.nodeName +" "+ this.nodeValue + " ?>";
+        return "<?" + this.nodeName +" "+ this.nodeValue + "?>";
     },
     toString : function(){
-        return "ProcessingInstruction #"+this._id;
-    }
-});
-
-$w.ProcessesingInstruction = DOMProcessingInstruction;
-$debug("Defining DOMParser");
-/*
-* DOMParser
-*/
-
-var DOMParser = function(){};
-__extend__(DOMParser.prototype,{
-    parseFromString: function(xmlString){
-        $debug("Parsing XML String: " +xmlString);
-        return document.implementation.createDocument().loadXML(xmlString);
-    }
-});
-
-$debug("Initializing Internal DOMParser.");
-//keep one around for internal use
-$domparser = new DOMParser();
-
-$w.DOMParser = DOMParser;
-// =========================================================================
-//
-// xmlsax.js - an XML SAX parser in JavaScript.
-//
-// version 3.1
-//
-// =========================================================================
-//
-// Copyright (C) 2001 - 2002 David Joham (djoham@yahoo.com) and Scott Severtson
-//
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2.1 of the License, or (at your option) any later version.
-
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// Lesser General Public License for more details.
-
-// You should have received a copy of the GNU Lesser General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//
-// Visit the XML for <SCRIPT> home page at http://xmljs.sourceforge.net
-//
-
-// CONSTANTS
-var whitespace = "\n\r\t ";
-
-
-/**
-*   function:   this is the constructor to the XMLP Object
-*   Author:   Scott Severtson
-*   Description:XMLP is a pull-based parser. The calling application passes in a XML string
-*   to the constructor, then repeatedly calls .next() to parse the next segment.
-*   .next() returns a flag indicating what type of segment was found, and stores
-*   data temporarily in couple member variables (name, content, array of
-*   attributes), which can be accessed by several .get____() methods.
-*
-*   Basically, XMLP is the lowest common denominator parser - an very simple
-*   API which other wrappers can be built against.
-**/
-
-
-/*var XMLP = function(strXML) {
-    // Normalize line breaks
-    strXML = SAXStrings.replace(strXML, null, null, "\r\n", "\n");
-    strXML = SAXStrings.replace(strXML, null, null, "\r", "\n");
-
-    this.m_xml = strXML;
-    this.m_iP = 0;
-    this.m_iState = XMLP._STATE_PROLOG;
-    this.m_stack = new Stack();
-    this._clearAttributes();
-    this.replaceEntities = true;
-};
-
-
-// CONSTANTS    (these must be below the constructor)
-
-
-XMLP._NONE    = 0;
-XMLP._ELM_B   = 1;
-XMLP._ELM_E   = 2;
-XMLP._ELM_EMP = 3;
-XMLP._ATT     = 4;
-XMLP._TEXT    = 5;
-XMLP._ENTITY  = 6;
-XMLP._PI      = 7;
-XMLP._CDATA   = 8;
-XMLP._COMMENT = 9;
-XMLP._DTD     = 10;
-XMLP._ERROR   = 11;
-
-XMLP._CONT_XML = 0;
-XMLP._CONT_ALT = 1;
-
-XMLP._ATT_NAME = 0;
-XMLP._ATT_VAL  = 1;
-
-XMLP._STATE_PROLOG = 1;
-XMLP._STATE_DOCUMENT = 2;
-XMLP._STATE_MISC = 3;
-
-XMLP._errs = new Array();
-XMLP._errs[XMLP.ERR_CLOSE_PI       = 0 ] = "PI: missing closing sequence";
-XMLP._errs[XMLP.ERR_CLOSE_DTD      = 1 ] = "DTD: missing closing sequence";
-XMLP._errs[XMLP.ERR_CLOSE_COMMENT  = 2 ] = "Comment: missing closing sequence";
-XMLP._errs[XMLP.ERR_CLOSE_CDATA    = 3 ] = "CDATA: missing closing sequence";
-XMLP._errs[XMLP.ERR_CLOSE_ELM      = 4 ] = "Element: missing closing sequence";
-XMLP._errs[XMLP.ERR_CLOSE_ENTITY   = 5 ] = "Entity: missing closing sequence";
-XMLP._errs[XMLP.ERR_PI_TARGET      = 6 ] = "PI: target is required";
-XMLP._errs[XMLP.ERR_ELM_EMPTY      = 7 ] = "Element: cannot be both empty and closing";
-XMLP._errs[XMLP.ERR_ELM_NAME       = 8 ] = "Element: name must immediatly follow \"<\"";
-XMLP._errs[XMLP.ERR_ELM_LT_NAME    = 9 ] = "Element: \"<\" not allowed in element names";
-XMLP._errs[XMLP.ERR_ATT_VALUES     = 10] = "Attribute: values are required and must be in quotes";
-XMLP._errs[XMLP.ERR_ATT_LT_NAME    = 11] = "Element: \"<\" not allowed in attribute names";
-XMLP._errs[XMLP.ERR_ATT_LT_VALUE   = 12] = "Attribute: \"<\" not allowed in attribute values";
-XMLP._errs[XMLP.ERR_ATT_DUP        = 13] = "Attribute: duplicate attributes not allowed";
-XMLP._errs[XMLP.ERR_ENTITY_UNKNOWN = 14] = "Entity: unknown entity";
-XMLP._errs[XMLP.ERR_INFINITELOOP   = 15] = "Infininte loop";
-XMLP._errs[XMLP.ERR_DOC_STRUCTURE  = 16] = "Document: only comments, processing instructions, or whitespace allowed outside of document element";
-XMLP._errs[XMLP.ERR_ELM_NESTING    = 17] = "Element: must be nested correctly";
-
-
-
-XMLP.prototype._addAttribute = function(name, value) {
-    this.m_atts[this.m_atts.length] = new Array(name, value);
-}
-
-
-XMLP.prototype._checkStructure = function(iEvent) {
-
-    if(XMLP._STATE_PROLOG == this.m_iState) {
-
-	    //The prolog is initial state of the document before parsing
-	    //has really begun.  A rigid xml parsing implementation would not
-		//allow anything but '<' as the first non-whitespace character
-        if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
-            if(SAXStrings.indexOfNonWhitespace(this.getContent(), 
-			    this.getContentBegin(), this.getContentEnd()) != -1) {
-                    //TODO: HTML Helper here.
-                    return this._setErr(XMLP.ERR_DOC_STRUCTURE);
-            }
-        }
-
-        if((XMLP._ELM_B == iEvent) || (XMLP._ELM_EMP == iEvent)) {
-            this.m_iState = XMLP._STATE_DOCUMENT;
-            // Don't return - fall through to next state
-        }
-		
-    }
-	
-	
-    if(XMLP._STATE_DOCUMENT == this.m_iState) {
-        //The document is the state that the parser is in after the
-		//first element event, and remains in that state until
-		//the initial element is closed
-        if((XMLP._ELM_B == iEvent) || (XMLP._ELM_EMP == iEvent)) {
-            this.m_stack.push(this.getName());
-        }
-
-        if((XMLP._ELM_E == iEvent) || (XMLP._ELM_EMP == iEvent)) {
-            var strTop = this.m_stack.pop();
-            if((strTop == null) || (strTop != this.getName())) {
-                return this._setErr(XMLP.ERR_ELM_NESTING);
-            }
-        }
-
-        if(this.m_stack.count() == 0) {
-            this.m_iState = XMLP._STATE_MISC;
-            return iEvent;
-        }
-    }
-	
-	
-    if(XMLP._STATE_MISC == this.m_iState) {
-        //The misc parser state occurs after the root element has been
-		//closed.  basically a rigid xml parser would throw an error
-		//for any element or text found after this
-        if((XMLP._ELM_B == iEvent) || 
-		   (XMLP._ELM_E == iEvent) || 
-		   (XMLP._ELM_EMP == iEvent) || 
-		   (XMLP.EVT_DTD == iEvent)) {
-            //TODO: HTML Helper here.
-            return this._setErr(XMLP.ERR_DOC_STRUCTURE);
-        }
-
-        if((XMLP._TEXT == iEvent) || (XMLP._ENTITY == iEvent)) {
-            if(SAXStrings.indexOfNonWhitespace(this.getContent(), 
-			     this.getContentBegin(), this.getContentEnd()) != -1) {
-                    //TODO: HTML Helper here.
-                    return this._setErr(XMLP.ERR_DOC_STRUCTURE);
-            }
-        }
-    }
-
-    return iEvent;
-
-};
-
-
-XMLP.prototype._clearAttributes = function() {
-    this.m_atts = new Array();
-};
-
-
-XMLP.prototype._findAttributeIndex = function(name) {
-    for(var i = 0; i < this.m_atts.length; i++) {
-        if(this.m_atts[i][XMLP._ATT_NAME] == name) {
-            return i;
-        }
-    }
-    return -1;
-
-};
-
-
-XMLP.prototype.getAttributeCount = function() {
-
-    return this.m_atts ? this.m_atts.length : 0;
-
-};
-
-
-XMLP.prototype.getAttributeName = function(index) {
-
-    return ((index < 0) || (index >= this.m_atts.length)) ? 
-       null : 
-       this.m_atts[index][XMLP._ATT_NAME];
-
-};
-
-
-XMLP.prototype.getAttributeValue = function(index) {
-
-    return ((index < 0) || (index >= this.m_atts.length)) ? 
-       null : 
-	   __unescapeXML__(this.m_atts[index][XMLP._ATT_VAL]);
-
-};
-
-
-XMLP.prototype.getAttributeValueByName = function(name) {
-
-    return this.getAttributeValue(this._findAttributeIndex(name));
-
-};
-
-
-XMLP.prototype.getColumnNumber = function() {
-
-    return SAXStrings.getColumnNumber(this.m_xml, this.m_iP);
-
-};
-
-
-XMLP.prototype.getContent = function() {
-
-    return (this.m_cSrc == XMLP._CONT_XML) ? 
-	   this.m_xml : 
-	   this.m_cAlt;
-
-};
-
-
-XMLP.prototype.getContentBegin = function() {
-
-    return this.m_cB;
-
-};
-
-
-XMLP.prototype.getContentEnd = function() {
-
-    return this.m_cE;
-
-};
-
-
-XMLP.prototype.getLineNumber = function() {
-
-    return SAXStrings.getLineNumber(this.m_xml, this.m_iP);
-
-};
-
-
-XMLP.prototype.getName = function() {
-
-    return this.m_name;
-
-};
-
-
-XMLP.prototype.next = function() {
-
-    return this._checkStructure(this._parse());
-
-};
-
-XMLP.prototype.appendFragment = function(xmlfragment) {
-
-    var start = this.m_xml.slice(0,this.m_iP);
-    var end = this.m_xml.slice(this.m_iP);
-    this.m_xml = start+xmlfragment+end;
-
-};
-
-
-XMLP.prototype._parse = function() {
-
-    if(this.m_iP == this.m_xml.length) {
-        return XMLP._NONE;
-    }
-
-    if(this.m_iP == this.m_xml.indexOf("<", this.m_iP)){
-        if(this.m_xml.charAt(this.m_iP+1) == "?") {
-            return this._parsePI(this.m_iP + 2);
-        }
-        else if(this.m_xml.charAt(this.m_iP+1) == "!") {
-            if(this.m_xml.charAt(this.m_iP+2) == "D") {
-                return this._parseDTD(this.m_iP + 9);
-            }
-            else if(this.m_xml.charAt(this.m_iP+2) == "-") {
-                return this._parseComment(this.m_iP + 4);
-            }
-            else if(this.m_xml.charAt(this.m_iP+2) == "[") {
-                return this._parseCDATA(this.m_iP + 9);
-            }
-        }
-        else{
-              
-            return this._parseElement(this.m_iP + 1);
-        }
-    }
-    else if(this.m_iP == this.m_xml.indexOf("&", this.m_iP)) {
-        return this._parseEntity(this.m_iP + 1);
-    }
-    else{
-          
-        return this._parseText(this.m_iP);
-    }
-
-
-}
-
-
-XMLP.prototype._parseAttribute = function(iB, iE) {
-    var iNB, iNE, iEq, iVB, iVE;
-    var cQuote, strN, strV;
-
-    //resets the value so we don't use an old one by 
-	//accident (see testAttribute7 in the test suite)
-	this.m_cAlt = ""; 
-
-    iNB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
-    if((iNB == -1) ||(iNB >= iE)) {
-        return iNB;
-    }
-
-    iEq = this.m_xml.indexOf("=", iNB);
-    if((iEq == -1) || (iEq > iE)) {
-        return this._setErr(XMLP.ERR_ATT_VALUES);
-    }
-
-    iNE = SAXStrings.lastIndexOfNonWhitespace(this.m_xml, iNB, iEq);
-
-    iVB = SAXStrings.indexOfNonWhitespace(this.m_xml, iEq + 1, iE);
-    if((iVB == -1) ||(iVB > iE)) {
-        return this._setErr(XMLP.ERR_ATT_VALUES);
-    }
-
-    cQuote = this.m_xml.charAt(iVB);
-    if(_SAXStrings.QUOTES.indexOf(cQuote) == -1) {
-        return this._setErr(XMLP.ERR_ATT_VALUES);
-    }
-
-    iVE = this.m_xml.indexOf(cQuote, iVB + 1);
-    if((iVE == -1) ||(iVE > iE)) {
-        return this._setErr(XMLP.ERR_ATT_VALUES);
-    }
-
-    strN = this.m_xml.substring(iNB, iNE + 1);
-    strV = this.m_xml.substring(iVB + 1, iVE);
-
-    if(strN.indexOf("<") != -1) {
-        return this._setErr(XMLP.ERR_ATT_LT_NAME);
-    }
-
-    if(strV.indexOf("<") != -1) {
-        return this._setErr(XMLP.ERR_ATT_LT_VALUE);
-    }
-
-    strV = SAXStrings.replace(strV, null, null, "\n", " ");
-    strV = SAXStrings.replace(strV, null, null, "\t", " ");
-        iRet = this._replaceEntities(strV);
-    if(iRet == XMLP._ERROR) {
-        return iRet;
-    }
-
-    strV = this.m_cAlt;
-
-    if(this._findAttributeIndex(strN) == -1) {
-        this._addAttribute(strN, strV);
-    }else {
-        return this._setErr(XMLP.ERR_ATT_DUP);
-    }
-
-    this.m_iP = iVE + 2;
-
-    return XMLP._ATT;
-
-}
-
-
-XMLP.prototype._parseCDATA = function(iB) {
-    var iE = this.m_xml.indexOf("]]>", iB);
-    if (iE == -1) {
-        return this._setErr(XMLP.ERR_CLOSE_CDATA);
-    }
-
-    this._setContent(XMLP._CONT_XML, iB, iE);
-
-    this.m_iP = iE + 3;
-
-    return XMLP._CDATA;
-
-}
-
-
-XMLP.prototype._parseComment = function(iB) {
-    var iE = this.m_xml.indexOf("-" + "->", iB);
-    if (iE == -1) {
-        return this._setErr(XMLP.ERR_CLOSE_COMMENT);
-    }
-
-    this._setContent(XMLP._CONT_XML, iB, iE);
-
-    this.m_iP = iE + 3;
-
-    return XMLP._COMMENT;
-
-}
-
-
-XMLP.prototype._parseDTD = function(iB) {
-
-    // Eat DTD
-
-    var iE, strClose, iInt, iLast;
-
-    iE = this.m_xml.indexOf(">", iB);
-    if(iE == -1) {
-        return this._setErr(XMLP.ERR_CLOSE_DTD);
-    }
-
-    iInt = this.m_xml.indexOf("[", iB);
-    strClose = ((iInt != -1) && (iInt < iE)) ? "]>" : ">";
-
-    while(true) {
-       
-        iE = this.m_xml.indexOf(strClose, iB);
-        if(iE == -1) {
-            return this._setErr(XMLP.ERR_CLOSE_DTD);
-        }
-
-        // Make sure it is not the end of a CDATA section
-        if (this.m_xml.substring(iE - 1, iE + 2) != "]]>") {
-            break;
-        }
-    }
-
-    this.m_iP = iE + strClose.length;
-
-    return XMLP._DTD;
-
-}
-
-
-XMLP.prototype._parseElement = function(iB) {
-    var iE, iDE, iNE, iRet;
-    var iType, strN, iLast;
-
-    iDE = iE = this.m_xml.indexOf(">", iB);
-    if(iE == -1) {
-        return this._setErr(XMLP.ERR_CLOSE_ELM);
-    }
-
-    if(this.m_xml.charAt(iB) == "/") {
-        iType = XMLP._ELM_E;
-        iB++;
-    } else {
-        iType = XMLP._ELM_B;
-    }
-
-    if(this.m_xml.charAt(iE - 1) == "/") {
-        if(iType == XMLP._ELM_E) {
-            return this._setErr(XMLP.ERR_ELM_EMPTY);
-        }
-        iType = XMLP._ELM_EMP;
-        iDE--;
-    }
-
-    iDE = SAXStrings.lastIndexOfNonWhitespace(this.m_xml, iB, iDE);
-
-    //djohack
-    //hack to allow for elements with single character names to be recognized
-
-    ///if (iE - iB != 1 ) {
-    ///    if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB) {
-    ///        return this._setErr(XMLP.ERR_ELM_NAME);
-    ///    }
-    ///}
-    
-    // end hack -- original code below
-
-    
-    ///if(SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iDE) != iB)
-    ///    return this._setErr(XMLP.ERR_ELM_NAME);
-    ///
-    this._clearAttributes();
-
-    iNE = SAXStrings.indexOfWhitespace(this.m_xml, iB, iDE);
-    if(iNE == -1) {
-        iNE = iDE + 1;
-    }
-    else {
-        this.m_iP = iNE;
-        while(this.m_iP < iDE) {
-            // DEBUG: Remove
-            //if(this.m_iP == iLast) return this._setErr(XMLP.ERR_INFINITELOOP);
-            //iLast = this.m_iP;
-            // DEBUG: Remove End
-
-
-            iRet = this._parseAttribute(this.m_iP, iDE);
-            if(iRet == XMLP._ERROR) return iRet;
-        }
-    }
-
-    strN = this.m_xml.substring(iB, iNE);
-
-    ///if(strN.indexOf("<") != -1) {
-    ///    return this._setErr(XMLP.ERR_ELM_LT_NAME);
-    ///}s
-
-    this.m_name = strN;
-    this.m_iP = iE + 1;
-
-    return iType;
-
-}
-
-
-XMLP.prototype._parseEntity = function(iB) {
-    var iE = this.m_xml.indexOf(";", iB);
-    if(iE == -1) {
-        return this._setErr(XMLP.ERR_CLOSE_ENTITY);
-    }
-
-    this.m_iP = iE + 1;
-
-    return this._replaceEntity(this.m_xml, iB, iE);
-
-}
-
-
-XMLP.prototype._parsePI = function(iB) {
-
-    var iE, iTB, iTE, iCB, iCE;
-
-    iE = this.m_xml.indexOf("?>", iB);
-    if(iE   == -1) {
-        return this._setErr(XMLP.ERR_CLOSE_PI);
-    }
-
-    iTB = SAXStrings.indexOfNonWhitespace(this.m_xml, iB, iE);
-    if(iTB == -1) {
-        return this._setErr(XMLP.ERR_PI_TARGET);
-    }
-
-    iTE = SAXStrings.indexOfWhitespace(this.m_xml, iTB, iE);
-    if(iTE  == -1) {
-        iTE = iE;
-    }
-
-    iCB = SAXStrings.indexOfNonWhitespace(this.m_xml, iTE, iE);
-    if(iCB == -1) {
-        iCB = iE;
-    }
-
-    iCE = SAXStrings.lastIndexOfNonWhitespace(this.m_xml, iCB, iE);
-    if(iCE  == -1) {
-        iCE = iE - 1;
-    }
-
-    this.m_name = this.m_xml.substring(iTB, iTE);
-    this._setContent(XMLP._CONT_XML, iCB, iCE + 1);
-    this.m_iP = iE + 2;
-
-    return XMLP._PI;
-
-}
-
-
-XMLP.prototype._parseText = function(iB) {
-    var iE, iEE;
-
-    iE = this.m_xml.indexOf("<", iB);
-    if(iE == -1) {
-        iE = this.m_xml.length;
-    }
-
-    if(this.replaceEntities) {
-        iEE = this.m_xml.indexOf("&", iB);
-        if((iEE != -1) && (iEE <= iE)) {
-            iE = iEE;
-        }
-    }
-
-    this._setContent(XMLP._CONT_XML, iB, iE);
-
-    this.m_iP = iE;
-
-    return XMLP._TEXT;
-
-}
-
-
-XMLP.prototype._replaceEntities = function(strD, iB, iE) {
-    if(SAXStrings.isEmpty(strD)) return "";
-    iB = iB || 0;
-    iE = iE || strD.length;
-
-
-    var iEB, iEE, strRet = "";
-
-    iEB = strD.indexOf("&", iB);
-    iEE = iB;
-
-    while((iEB > 0) && (iEB < iE)) {
-        strRet += strD.substring(iEE, iEB);
-
-        iEE = strD.indexOf(";", iEB) + 1;
-
-        if((iEE == 0) || (iEE > iE)) {
-            return this._setErr(XMLP.ERR_CLOSE_ENTITY);
-        }
-
-        iRet = this._replaceEntity(strD, iEB + 1, iEE - 1);
-        if(iRet == XMLP._ERROR) {
-            return iRet;
-        }
-
-        strRet += this.m_cAlt;
-
-        iEB = strD.indexOf("&", iEE);
-    }
-
-    if(iEE != iE) {
-        strRet += strD.substring(iEE, iE);
-    }
-
-    this._setContent(XMLP._CONT_ALT, strRet);
-
-    return XMLP._ENTITY;
-
-}
-
-
-XMLP.prototype._replaceEntity = function(strD, iB, iE) {
-    if(SAXStrings.isEmpty(strD)) return -1;
-    iB = iB || 0;
-    iE = iE || strD.length;
-
-
-    ent = strD.substring(iB, iE);
-    strEnt = $w.$entityDefinitions[ent];
-    if (!strEnt)  // special case for entity name==JS reserved keyword
-        strEnt = $w.$entityDefinitions[ent+"XX"];
-    if (!strEnt) {
-        if(strD.charAt(iB) == "#")
-            strEnt = String.fromCharCode(
-                         parseInt(strD.substring(iB + 1, iE)))+'';
-        else
-            return this._setErr(XMLP.ERR_ENTITY_UNKNOWN);
-    }
-
-    this._setContent(XMLP._CONT_ALT, strEnt);
-    return XMLP._ENTITY;
-}
-
-
-XMLP.prototype._setContent = function(iSrc) {
-    var args = arguments;
-
-    if(XMLP._CONT_XML == iSrc) {
-        this.m_cAlt = null;
-        this.m_cB = args[1];
-        this.m_cE = args[2];
-    } else {
-        this.m_cAlt = args[1];
-        this.m_cB = 0;
-        this.m_cE = args[1].length;
-    }
-    this.m_cSrc = iSrc;
-
-}
-
-
-XMLP.prototype._setErr = function(iErr) {
-    var strErr = XMLP._errs[iErr];
-
-    this.m_cAlt = strErr;
-    this.m_cB = 0;
-    this.m_cE = strErr.length;
-    this.m_cSrc = XMLP._CONT_ALT;
-
-    return XMLP._ERROR;
-
-}
-*/
-
-/**
-* function:   SAXDriver
-* Author:   Scott Severtson
-* Description:
-*    SAXDriver is an object that basically wraps an XMLP instance, and provides an
-*   event-based interface for parsing. This is the object users interact with when coding
-*   with XML for <SCRIPT>
-**/
-/*
-var SAXDriver = function() {
-    this.m_hndDoc = null;
-    this.m_hndErr = null;
-    this.m_hndLex = null;
-}
-
-
-// CONSTANTS
-SAXDriver.DOC_B = 1;
-SAXDriver.DOC_E = 2;
-SAXDriver.ELM_B = 3;
-SAXDriver.ELM_E = 4;
-SAXDriver.CHARS = 5;
-SAXDriver.PI    = 6;
-SAXDriver.CD_B  = 7;
-SAXDriver.CD_E  = 8;
-SAXDriver.CMNT  = 9;
-SAXDriver.DTD_B = 10;
-SAXDriver.DTD_E = 11;
-
-
-
-SAXDriver.prototype.parse = function(strD) {
-    var parser = new XMLP(strD);
-
-    if(this.m_hndDoc && this.m_hndDoc.setDocumentLocator) {
-        this.m_hndDoc.setDocumentLocator(this);
-    }
-
-    this.m_parser = parser;
-    this.m_bErr = false;
-
-    if(!this.m_bErr) {
-        this._fireEvent(SAXDriver.DOC_B);
-    }
-    this._parseLoop();
-    if(!this.m_bErr) {
-        this._fireEvent(SAXDriver.DOC_E);
-    }
-
-    this.m_xml = null;
-    this.m_iP = 0;
-
-}
-
-
-SAXDriver.prototype.setDocumentHandler = function(hnd) {
-
-    this.m_hndDoc = hnd;
-
-}
-
-
-SAXDriver.prototype.setErrorHandler = function(hnd) {
-
-    this.m_hndErr = hnd;
-
-}
-
-
-SAXDriver.prototype.setLexicalHandler = function(hnd) {
-
-    this.m_hndLex = hnd;
-
-}
-
-
-    
-    /// LOCATOR/PARSE EXCEPTION INTERFACE
-    
-
-SAXDriver.prototype.getColumnNumber = function() {
-
-    return this.m_parser.getColumnNumber();
-
-}
-
-
-SAXDriver.prototype.getLineNumber = function() {
-
-    return this.m_parser.getLineNumber();
-
-}
-
-
-SAXDriver.prototype.getMessage = function() {
-
-    return this.m_strErrMsg;
-
-}
-
-
-SAXDriver.prototype.getPublicId = function() {
-
-    return null;
-
-}
-
-
-SAXDriver.prototype.getSystemId = function() {
-
-    return null;
-
-}
-
-
-
-    /// Attribute List Interface
-    
-    
-SAXDriver.prototype.getLength = function() {
-
-    return this.m_parser.getAttributeCount();
-
-}
-
-
-SAXDriver.prototype.getName = function(index) {
-
-    return this.m_parser.getAttributeName(index);
-
-}
-
-
-SAXDriver.prototype.getValue = function(index) {
-
-    return this.m_parser.getAttributeValue(index);
-
-}
-
-
-SAXDriver.prototype.getValueByName = function(name) {
-
-    return this.m_parser.getAttributeValueByName(name);
-
-}
-
-
-    ///    Private functions
-
-SAXDriver.prototype._fireError = function(strMsg) {
-    this.m_strErrMsg = strMsg;
-    this.m_bErr = true;
-
-    if(this.m_hndErr && this.m_hndErr.fatalError) {
-        this.m_hndErr.fatalError(this);
-    }
-
-}   // end function _fireError
-
-
-SAXDriver.prototype._fireEvent = function(iEvt) {
-    var hnd, func, args = arguments, iLen = args.length - 1;
-
-    if(this.m_bErr) return;
-
-    if(SAXDriver.DOC_B == iEvt) {
-        func = "startDocument";         hnd = this.m_hndDoc;
-    }
-    else if (SAXDriver.DOC_E == iEvt) {
-        func = "endDocument";           hnd = this.m_hndDoc;
-    }
-    else if (SAXDriver.ELM_B == iEvt) {
-        func = "startElement";          hnd = this.m_hndDoc;
-    }
-    else if (SAXDriver.ELM_E == iEvt) {
-        func = "endElement";            hnd = this.m_hndDoc;
-    }
-    else if (SAXDriver.CHARS == iEvt) {
-        func = "characters";            hnd = this.m_hndDoc;
-    }
-    else if (SAXDriver.PI    == iEvt) {
-        func = "processingInstruction"; hnd = this.m_hndDoc;
-    }
-    else if (SAXDriver.CD_B  == iEvt) {
-        func = "startCDATA";            hnd = this.m_hndLex;
-    }
-    else if (SAXDriver.CD_E  == iEvt) {
-        func = "endCDATA";              hnd = this.m_hndLex;
-    }
-    else if (SAXDriver.CMNT  == iEvt) {
-        func = "comment";               hnd = this.m_hndLex;
-    }
-
-    if(hnd && hnd[func]) {
-        if(0 == iLen) {
-            hnd[func]();
-        }
-        else if (1 == iLen) {
-            hnd[func](args[1]);
-        }
-        else if (2 == iLen) {
-            hnd[func](args[1], args[2]);
-        }
-        else if (3 == iLen) {
-            hnd[func](args[1], args[2], args[3]);
-        }
-    }
-
-}  // end function _fireEvent
-
-
-SAXDriver.prototype._parseLoop = function(parser) {
-    var iEvent, parser;
-
-    parser = this.m_parser;
-    while(!this.m_bErr) {
-        iEvent = parser.next();
-
-        if(iEvent == XMLP._ELM_B) {
-            this._fireEvent(SAXDriver.ELM_B, parser.getName(), this);
-        }
-        else if(iEvent == XMLP._ELM_E) {
-            this._fireEvent(SAXDriver.ELM_E, parser.getName());
-        }
-        else if(iEvent == XMLP._ELM_EMP) {
-            this._fireEvent(SAXDriver.ELM_B, parser.getName(), this);
-            this._fireEvent(SAXDriver.ELM_E, parser.getName());
-        }
-        else if(iEvent == XMLP._TEXT) {
-            this._fireEvent(SAXDriver.CHARS, parser.getContent(), parser.getContentBegin(), parser.getContentEnd() - parser.getContentBegin());
-        }
-        else if(iEvent == XMLP._ENTITY) {
-            this._fireEvent(SAXDriver.CHARS, parser.getContent(), parser.getContentBegin(), parser.getContentEnd() - parser.getContentBegin());
-        }
-        else if(iEvent == XMLP._PI) {
-            this._fireEvent(SAXDriver.PI, parser.getName(), parser.getContent().substring(parser.getContentBegin(), parser.getContentEnd()));
-        }
-        else if(iEvent == XMLP._CDATA) {
-            this._fireEvent(SAXDriver.CD_B);
-            this._fireEvent(SAXDriver.CHARS, parser.getContent(), parser.getContentBegin(), parser.getContentEnd() - parser.getContentBegin());
-            this._fireEvent(SAXDriver.CD_E);
-        }
-        else if(iEvent == XMLP._COMMENT) {
-            this._fireEvent(SAXDriver.CMNT, parser.getContent(), parser.getContentBegin(), parser.getContentEnd() - parser.getContentBegin());
-        }
-        else if(iEvent == XMLP._DTD) {
-        }
-        else if(iEvent == XMLP._ERROR) {
-            this._fireError(parser.getContent());
-        }
-        else if(iEvent == XMLP._NONE) {
-            return;
-        }
-    }
-
-}  // end function _parseLoop
-
-///
-///   function:   SAXStrings
-///   Author:   Scott Severtson
-///   Description: a useful object containing string manipulation functions
-///
-
-var _SAXStrings = function() {};
-
-
-_SAXStrings.WHITESPACE = " \t\n\r";
-_SAXStrings.NONWHITESPACE = /\S/;
-_SAXStrings.QUOTES = "\"'";
-
-
-_SAXStrings.prototype.getColumnNumber = function(strD, iP) {
-    if((strD === null) || (strD.length === 0)) {
-        return -1;
-    }
-    iP = iP || strD.length;
-
-    var arrD = strD.substring(0, iP).split("\n");
-    var strLine = arrD[arrD.length - 1];
-    arrD.length--;
-    var iLinePos = arrD.join("\n").length;
-
-    return iP - iLinePos;
-
-}  // end function getColumnNumber
-
-
-_SAXStrings.prototype.getLineNumber = function(strD, iP) {
-    if((strD === null) || (strD.length === 0)) {
-        return -1;
-    }
-    iP = iP || strD.length;
-
-    return strD.substring(0, iP).split("\n").length
-}  // end function getLineNumber
-
-
-_SAXStrings.prototype.indexOfNonWhitespace = function(strD, iB, iE) {
-    if((strD === null) || (strD.length === 0)) {
-        return -1;
-    }
-    iB = iB || 0;
-    iE = iE || strD.length;
-
-    //var i = strD.substring(iB, iE).search(_SAXStrings.NONWHITESPACE);
-    //return i < 0 ? i : iB + i;
-
-    while( strD.charCodeAt(iB++) < 33 );
-    return (iB > iE)?-1:iB-1;
-    ///for(var i = iB; i < iE; i++){
-    ///    if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1) {
-    ///        return i;
-    ///    }
-    ///}
-    ///return -1;
-
-}  // end function indexOfNonWhitespace
-
-
-_SAXStrings.prototype.indexOfWhitespace = function(strD, iB, iE) {
-    if((strD === null) || (strD.length === 0)) {
-        return -1;
-    }
-    iB = iB || 0;
-    iE = iE || strD.length;
-
-
-    while( strD.charCodeAt(iB++) >= 33 );
-    return (iB > iE)?-1:iB-1;
-
-    ///for(var i = iB; i < iE; i++) {
-    ///    if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) != -1) {
-    ///        return i;
-    ///    }
-    ///}
-    ///return -1;
-}  // end function indexOfWhitespace
-
-
-_SAXStrings.prototype.isEmpty = function(strD) {
-
-    return (strD == null) || (strD.length == 0);
-
-}
-
-
-_SAXStrings.prototype.lastIndexOfNonWhitespace = function(strD, iB, iE) {
-    if((strD === null) || (strD.length === 0)) {
-        return -1;
-    }
-    iB = iB || 0;
-    iE = iE || strD.length;
-
-    while( (iE >= iB) && strD.charCodeAt(--iE) < 33 );
-    return (iE < iB)?-1:iE;
-
-    ///for(var i = iE - 1; i >= iB; i--){
-    ///    if(_SAXStrings.WHITESPACE.indexOf(strD.charAt(i)) == -1){
-    ///         return i;
-    ///    }
-    ///}
-    ///return -1;
-}
-
-
-_SAXStrings.prototype.replace = function(strD, iB, iE, strF, strR) {
-    if((strD == null) || (strD.length == 0)) {
-        return "";
-    }
-    iB = iB || 0;
-    iE = iE || strD.length;
-
-    return strD.substring(iB, iE).split(strF).join(strR);
-
-};
-
-var SAXStrings = new _SAXStrings();
-
-
-
-/***************************************************************************************************************
-Stack: A simple stack class, used for verifying document structure.
-
-    Author:   Scott Severtson
-*****************************************************************************************************************/
-/*
-var Stack = function() {
-    this.m_arr = new Array();
-};
-__extend__(Stack.prototype, {
-    clear : function() {
-        this.m_arr = new Array();
-    },
-    count : function() {
-        return this.m_arr.length;
-    },
-    destroy : function() {
-        this.m_arr = null;
-    },
-    peek : function() {
-        if(this.m_arr.length == 0) {
-            return null;
-        }
-        return this.m_arr[this.m_arr.length - 1];
-    },
-    pop : function() {
-        if(this.m_arr.length == 0) {
-            return null;
-        }
-        var o = this.m_arr[this.m_arr.length - 1];
-        this.m_arr.length--;
-        return o;
-    },
-    push : function(o) {
-        this.m_arr[this.m_arr.length] = o;
+        return "[object ProcessingInstruction]";
     }
 });
 
 
-///
-/// function: isEmpty
-/// Author: mike@idle.org
-/// Description:  convenience function to identify an empty string
-///
-function isEmpty(str) {
-    return (str==null) || (str.length==0);
-};
-*/
-
 /**
- * function __escapeXML__
- * author: David Joham djoham@yahoo.com
- * @param  str : string - The string to be escaped
- * @return : string - The escaped string
- */
-var escAmpRegEx = /&(?!(amp;|lt;|gt;|quot|apos;))/g;
-var escLtRegEx = /</g;
-var escGtRegEx = />/g;
-var quotRegEx = /"/g;
-var aposRegEx = /'/g;
-function __escapeXML__(str) {
-    str = str.replace(escAmpRegEx, "&amp;").
-            replace(escLtRegEx, "&lt;").
-            replace(escGtRegEx, "&gt;").
-            replace(quotRegEx, "&quot;").
-            replace(aposRegEx, "&apos;");
-
-    return str;
-};
-function __escapeHTML5__(str) {
-    str = str.replace(escAmpRegEx, "&amp;").
-            replace(escLtRegEx, "&lt;").
-            replace(escGtRegEx, "&gt;");
-
-    return str;
-};
-function __escapeHTML5Atribute__(str) {
-    str = str.replace(escAmpRegEx, "&amp;").
-            replace(escLtRegEx, "&lt;").
-            replace(escGtRegEx, "&gt;").
-            replace(quotRegEx, "&quot;").
-            replace(aposRegEx, "&apos;");
-
-    return str;
-};
-/**
- * function __unescapeXML__
- * author: David Joham djoham@yahoo.com
- * @param  str : string - The string to be unescaped
- * @return : string - The unescaped string
- */
-var unescAmpRegEx = /&amp;/g;
-var unescLtRegEx = /&lt;/g;
-var unescGtRegEx = /&gt;/g;
-var unquotRegEx = /&quot;/g;
-var unaposRegEx = /&apos;/g;
-function __unescapeXML__(str) {
-    str = str.replace(unescAmpRegEx, "&").
-            replace(unescLtRegEx, "<").
-            replace(unescGtRegEx, ">").
-            replace(unquotRegEx, "\"").
-            replace(unaposRegEx, "'");
-
-    return str;
-};
-
-/**
- * @author Glen Ivey (gleneivey@wontology.org)
+ * @author envjs team
  */
 
-$debug("Instantiating list of HTML4 standard entities");
-/*
- * $w.$entityDefinitions
- */
+Entity = function() { 
+    throw new Error("Entity Not Implemented" ); 
+};
 
-var $entityDefinitions = {
+Entity.constants = {
         // content taken from W3C "HTML 4.01 Specification"
         //                        "W3C Recommendation 24 December 1999"
 
@@ -4242,21 +3542,26 @@ var $entityDefinitions = {
     apos: "'"
 };
 
-
-$w.$entityDefinitions = $entityDefinitions;
-
-//DOMImplementation
-$debug("Defining DOMImplementation");
 /**
- * @class  DOMImplementation - provides a number of methods for performing operations
- *   that are independent of any particular instance of the document object model.
+ * @author envjs team
+ */
+
+EntityReference = function() { 
+    throw new Error("EntityReference Not Implemented" ); 
+};
+
+/**
+ * @class  DOMImplementation - 
+ *      provides a number of methods for performing operations
+ *      that are independent of any particular instance of the 
+ *      document object model.
  *
  * @author Jon van Noort (jon@webarcana.com.au)
  */
-var DOMImplementation = function() {
+DOMImplementation = function() {
     this.preserveWhiteSpace = false;  // by default, ignore whitespace
     this.namespaceAware = true;       // by default, handle namespaces
-    this.errorChecking  = true;       // by default, test for exceptions
+    this.errorChecking  = true;      // by default, test for exceptions
 };
 
 __extend__(DOMImplementation.prototype,{
@@ -4278,13 +3583,31 @@ __extend__(DOMImplementation.prototype,{
         }
         return ret;
     },
-    createDocumentType : function(qname, publicid, systemid){
-        return new DOMDocumentType();
+    createDocumentType : function(qname, publicId, systemId){
+        var doctype = new DocumentType();
+        doctype.nodeName = qname?qname.toUpperCase():null;
+        doctype.publicId = publicId?publicId:null;
+        doctype.systemId = systemId?systemId:null;
+        return doctype;
     },
     createDocument : function(nsuri, qname, doctype){
-        //TODO - this currently returns an empty doc
-        //but needs to handle the args
-        return new Document($implementation, null);
+        
+        var doc = null, documentElement;
+            
+        doc = new Document(this, null);
+        if(doctype){
+            doc.doctype = doctype;
+        }
+        
+        if(nsuri && qname){
+            documentElement = doc.createElementNS(nsuri, qname);
+        }else if(qname){
+            documentElement = doc.createElement(qname);
+        }
+        if(documentElement){
+            doc.appendChild(documentElement);
+        }
+        return doc;
     },
     createHTMLDocument : function(title){
         var doc = new HTMLDocument($implementation, null, "");
@@ -4368,359 +3691,12 @@ __extend__(DOMImplementation.prototype,{
       }
 
       return msg;
+    },
+    toString : function(){
+        return "[object DOMImplementation]";
     }
 });
 
-
-/**
-* Defined 'globally' to this scope.  Remember everything is wrapped in a closure so this doesnt show up
-* in the outer most global scope.
-*/
-
-/**
- *  process SAX events
- *
- * @author Jon van Noort (jon@webarcana.com.au), David Joham (djoham@yahoo.com) and Scott Severtson
- *
- * @param  impl : DOMImplementation
- * @param  doc : DOMDocument - the Document to contain the parsed XML string
- * @param  p   : XMLP        - the SAX Parser
- *
- * @return : DOMDocument
- */
-
-/*function __parseLoop__(impl, doc, p, isWindowDocument) {
-    var iEvt, iNode, iAttr, strName;
-    var iNodeParent = doc;
-
-    var el_close_count = 0;
-
-    var entitiesList = new Array();
-    var textNodesList = new Array();
-
-    // if namespaceAware, add default namespace
-    if (impl.namespaceAware) {
-        var iNS = doc.createNamespace(""); // add the default-default namespace
-        iNS.value = "http://www.w3.org/2000/xmlns/";
-        doc._namespaces.setNamedItem(iNS);
-    }
-
-  // loop until SAX parser stops emitting events
-  var q = 0;
-  while(true) {
-    // get next event
-    iEvt = p.next();
-    
-    if (iEvt == XMLP._ELM_B) {                      // Begin-Element Event
-      var pName = p.getName();                      // get the Element name
-      pName = trim(pName, true, true);              // strip spaces from Element name
-      if(pName.toLowerCase() == 'script')
-        p.replaceEntities = false;
-
-      if (!impl.namespaceAware) {
-        iNode = doc.createElement(p.getName());     // create the Element
-        // add attributes to Element
-        for(var i = 0; i < p.getAttributeCount(); i++) {
-          strName = p.getAttributeName(i);          // get Attribute name
-          iAttr = iNode.getAttributeNode(strName);  // if Attribute exists, use it
-
-          if(!iAttr) {
-            iAttr = doc.createAttribute(strName);   // otherwise create it
-          }
-
-          iAttr.value = p.getAttributeValue(i);   // set Attribute value
-          iNode.setAttributeNode(iAttr);            // attach Attribute to Element
-        }
-      }
-      else {  // Namespace Aware
-        // create element (with empty namespaceURI,
-        //  resolve after namespace 'attributes' have been parsed)
-        iNode = doc.createElementNS("", p.getName());
-
-        // duplicate ParentNode's Namespace definitions
-        iNode._namespaces = __cloneNamedNodes__(iNodeParent._namespaces, iNode);
-
-        // add attributes to Element
-        for(var i = 0; i < p.getAttributeCount(); i++) {
-          strName = p.getAttributeName(i);          // get Attribute name
-
-          // if attribute is a namespace declaration
-          if (__isNamespaceDeclaration__(strName)) {
-            // parse Namespace Declaration
-            var namespaceDec = __parseNSName__(strName);
-
-            if (strName != "xmlns") {
-              iNS = doc.createNamespace(strName);   // define namespace
-            }
-            else {
-              iNS = doc.createNamespace("");        // redefine default namespace
-            }
-            iNS.value = p.getAttributeValue(i);   // set value = namespaceURI
-
-            iNode._namespaces.setNamedItem(iNS);    // attach namespace to namespace collection
-          }
-          else {  // otherwise, it is a normal attribute
-            iAttr = iNode.getAttributeNode(strName);        // if Attribute exists, use it
-
-            if(!iAttr) {
-              iAttr = doc.createAttributeNS("", strName);   // otherwise create it
-            }
-
-            iAttr.value = p.getAttributeValue(i);         // set Attribute value
-            iNode.setAttributeNodeNS(iAttr);                // attach Attribute to Element
-
-            if (__isIdDeclaration__(strName)) {
-              iNode.id = p.getAttributeValue(i);    // cache ID for getElementById()
-            }
-          }
-        }
-
-        // resolve namespaceURIs for this Element
-        if (iNode._namespaces.getNamedItem(iNode.prefix)) {
-          iNode.namespaceURI = iNode._namespaces.getNamedItem(iNode.prefix).value;
-        }
-
-        //  for this Element's attributes
-        for (var i = 0; i < iNode.attributes.length; i++) {
-          if (iNode.attributes.item(i).prefix != "") {  // attributes do not have a default namespace
-            if (iNode._namespaces.getNamedItem(iNode.attributes.item(i).prefix)) {
-              iNode.attributes.item(i).namespaceURI = iNode._namespaces.getNamedItem(iNode.attributes.item(i).prefix).value;
-            }
-          }
-        }
-      }
-
-      // if this is the Root Element
-      if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
-      }
-
-      iNodeParent.appendChild(iNode);               // attach Element to parentNode
-      iNodeParent = iNode;                          // descend one level of the DOM Tree
-    }
-
-    else if(iEvt == XMLP._ELM_E) {                  // End-Element Event        
-        __endHTMLElement__(iNodeParent, doc, p);
-        iNodeParent = iNodeParent.parentNode;         // ascend one level of the DOM Tree
-    }
-
-    else if(iEvt == XMLP._ELM_EMP) {                // Empty Element Event
-      pName = p.getName();                          // get the Element name
-      pName = trim(pName, true, true);              // strip spaces from Element name
-
-      if (!impl.namespaceAware) {
-        iNode = doc.createElement(pName);           // create the Element
-
-        // add attributes to Element
-        for(var i = 0; i < p.getAttributeCount(); i++) {
-          strName = p.getAttributeName(i);          // get Attribute name
-          iAttr = iNode.getAttributeNode(strName);  // if Attribute exists, use it
-
-          if(!iAttr) {
-            iAttr = doc.createAttribute(strName);   // otherwise create it
-          }
-
-          iAttr.value = p.getAttributeValue(i);   // set Attribute value
-          iNode.setAttributeNode(iAttr);            // attach Attribute to Element
-        }
-      }
-      else {  // Namespace Aware
-        // create element (with empty namespaceURI,
-        //  resolve after namespace 'attributes' have been parsed)
-        iNode = doc.createElementNS("", p.getName());
-
-        // duplicate ParentNode's Namespace definitions
-        iNode._namespaces = __cloneNamedNodes__(iNodeParent._namespaces, iNode);
-
-        // add attributes to Element
-        for(var i = 0; i < p.getAttributeCount(); i++) {
-          strName = p.getAttributeName(i);          // get Attribute name
-
-          // if attribute is a namespace declaration
-          if (__isNamespaceDeclaration__(strName)) {
-            // parse Namespace Declaration
-            var namespaceDec = __parseNSName__(strName);
-
-            if (strName != "xmlns") {
-              iNS = doc.createNamespace(strName);   // define namespace
-            }
-            else {
-              iNS = doc.createNamespace("");        // redefine default namespace
-            }
-            iNS.value = p.getAttributeValue(i);   // set value = namespaceURI
-
-            iNode._namespaces.setNamedItem(iNS);    // attach namespace to namespace collection
-          }
-          else {  // otherwise, it is a normal attribute
-            iAttr = iNode.getAttributeNode(strName);        // if Attribute exists, use it
-
-            if(!iAttr) {
-              iAttr = doc.createAttributeNS("", strName);   // otherwise create it
-            }
-
-            iAttr.value = p.getAttributeValue(i);         // set Attribute value
-            iNode.setAttributeNodeNS(iAttr);                // attach Attribute to Element
-
-            if (__isIdDeclaration__(strName)) {
-              iNode.id = p.getAttributeValue(i);    // cache ID for getElementById()
-            }
-          }
-        }
-
-        // resolve namespaceURIs for this Element
-        if (iNode._namespaces.getNamedItem(iNode.prefix)) {
-          iNode.namespaceURI = iNode._namespaces.getNamedItem(iNode.prefix).value;
-        }
-
-        //  for this Element's attributes
-        for (var i = 0; i < iNode.attributes.length; i++) {
-          if (iNode.attributes.item(i).prefix != "") {  // attributes do not have a default namespace
-            if (iNode._namespaces.getNamedItem(iNode.attributes.item(i).prefix)) {
-              iNode.attributes.item(i).namespaceURI = iNode._namespaces.getNamedItem(iNode.attributes.item(i).prefix).value;
-            }
-          }
-        }
-      }
-
-      // if this is the Root Element
-      if (iNodeParent.nodeType == DOMNode.DOCUMENT_NODE) {
-        iNodeParent._documentElement = iNode;        // register this Element as the Document.documentElement
-      }
-
-      iNodeParent.appendChild(iNode);               // attach Element to parentNode
-      __endHTMLElement__(iNode, doc, p);
-    }
-    else if(iEvt == XMLP._TEXT || iEvt == XMLP._ENTITY) {                   // TextNode and entity Events
-      // get Text content
-      var pContent = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
-
-      if (!impl.preserveWhiteSpace ) {
-        if (trim(pContent, true, true) == "") {
-            pContent = ""; //this will cause us not to create the text node below
-        }
-      }
-
-      if (pContent.length > 0) {                    // ignore empty TextNodes
-        var textNode = doc.createTextNode(pContent);
-        iNodeParent.appendChild(textNode); // attach TextNode to parentNode
-
-        //the sax parser breaks up text nodes when it finds an entity. For
-        //example hello&lt;there will fire a text, an entity and another text
-        //this sucks for the dom parser because it looks to us in this logic
-        //as three text nodes. I fix this by keeping track of the entity nodes
-        //and when we're done parsing, calling normalize on their parent to
-        //turn the multiple text nodes into one, which is what DOM users expect
-        //the code to do this is at the bottom of this function
-        if (iEvt == XMLP._ENTITY) {
-            entitiesList[entitiesList.length] = textNode;
-        }
-        else {
-            //I can't properly decide how to handle preserve whitespace
-            //until the siblings of the text node are built due to
-            //the entitiy handling described above. I don't know that this
-            //will be all of the text node or not, so trimming is not appropriate
-            //at this time. Keep a list of all the text nodes for now
-            //and we'll process the preserve whitespace stuff at a later time.
-            textNodesList[textNodesList.length] = textNode;
-        }
-      }
-    }
-    else if(iEvt == XMLP._PI) {                     // ProcessingInstruction Event
-      // attach ProcessingInstruction to parentNode
-      iNodeParent.appendChild(doc.createProcessingInstruction(p.getName(), p.getContent().substring(p.getContentBegin(), p.getContentEnd())));
-    }
-    else if(iEvt == XMLP._CDATA) {                  // CDATA Event
-      // get CDATA data
-      pContent = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
-
-      if (!impl.preserveWhiteSpace) {
-        pContent = trim(pContent, true, true);      // trim whitespace
-        pContent.replace(/ +/g, ' ');               // collapse multiple spaces to 1 space
-      }
-
-      if (pContent.length > 0) {                    // ignore empty CDATANodes
-        iNodeParent.appendChild(doc.createCDATASection(pContent)); // attach CDATA to parentNode
-      }
-    }
-    else if(iEvt == XMLP._COMMENT) {                // Comment Event
-      // get COMMENT data
-      var pContent = p.getContent().substring(p.getContentBegin(), p.getContentEnd());
-
-      if (!impl.preserveWhiteSpace) {
-        pContent = trim(pContent, true, true);      // trim whitespace
-        pContent.replace(/ +/g, ' ');               // collapse multiple spaces to 1 space
-      }
-
-      if (pContent.length > 0) {                    // ignore empty CommentNodes
-        iNodeParent.appendChild(doc.createComment(pContent));  // attach Comment to parentNode
-      }
-    }
-    else if(iEvt == XMLP._DTD) {                    // ignore DTD events
-    }
-    else if(iEvt == XMLP._ERROR) {
-        $error("Fatal Error: " + p.getContent() +
-                "\nLine: " + p.getLineNumber() +
-                "\nColumn: " + p.getColumnNumber() + "\n");
-        throw(new DOMException(DOMException.SYNTAX_ERR));
-    }
-    else if(iEvt == XMLP._NONE) {                   // no more events
-      //steven woods notes that unclosed tags are rejected elsewhere and this check
-	  //breaks a table patching routine
-	  //if (iNodeParent == doc) {                     // confirm that we have recursed back up to root
-      //  break;
-      //}
-      //else {
-      //  throw(new DOMException(DOMException.SYNTAX_ERR));  // one or more Tags were not closed properly
-      //}
-        break;
-
-    }
-  }
-
-  //normalize any entities in the DOM to a single textNode
-  for (var i = 0; i < entitiesList.length; i++) {
-      var entity = entitiesList[i];
-      //its possible (if for example two entities were in the
-      //same domnode, that the normalize on the first entitiy
-      //will remove the parent for the second. Only do normalize
-      //if I can find a parent node
-      var parentNode = entity.parentNode;
-      if (parentNode) {
-          parentNode.normalize();
-
-          //now do whitespace (if necessary)
-          //it was not done for text nodes that have entities
-          if(!impl.preserveWhiteSpace) {
-                var children = parentNode.childNodes;
-                for ( var j = 0; j < children.length; j++) {
-                    var child = children.item(j);
-                    if (child.nodeType == DOMNode.TEXT_NODE) {
-                        var childData = child.data;
-                        childData.replace(/\s/g, ' ');
-                        child.data = childData;
-                    }
-                }
-          }
-      }
-  }
-
-  //do the preserve whitespace processing on the rest of the text nodes
-  //It's possible (due to the processing above) that the node will have been
-  //removed from the tree. Only do whitespace checking if parentNode is not null.
-  //This may duplicate the whitespace processing for some nodes that had entities in them
-  //but there's no way around that
-  if (!impl.preserveWhiteSpace) {
-    for (var i = 0; i < textNodesList.length; i++) {
-        var node = textNodesList[i];
-        if (node.parentNode != null) {
-            var nodeData = node.data;
-            nodeData.replace(/\s/g, ' ');
-            node.data = nodeData;
-        }
-    }
-
-  }
-};*/
 
 
 /**
@@ -4784,20 +3760,19 @@ var re_invalidStringChars = /\x01|\x02|\x03|\x04|\x05|\x06|\x07|\x08|\x0B|\x0C|\
     ]
  */
 function __parseNSName__(qualifiedName) {
-  var resultNSName = new Object();
-
-  resultNSName.prefix          = qualifiedName;  // unless the qname has a namespaceName, the prefix is the entire String
-  resultNSName.namespaceName   = "";
-
-  // split on ':'
-  var delimPos = qualifiedName.indexOf(':');
-  if (delimPos > -1) {
-    // get prefix
-    resultNSName.prefix        = qualifiedName.substring(0, delimPos);
-    // get namespaceName
-    resultNSName.namespaceName = qualifiedName.substring(delimPos +1, qualifiedName.length);
-  }
-  return resultNSName;
+    var resultNSName = {};
+    // unless the qname has a namespaceName, the prefix is the entire String
+    resultNSName.prefix          = qualifiedName;  
+    resultNSName.namespaceName   = "";
+    // split on ':'
+    var delimPos = qualifiedName.indexOf(':');
+    if (delimPos > -1) {
+        // get prefix
+        resultNSName.prefix        = qualifiedName.substring(0, delimPos);
+        // get namespaceName
+        resultNSName.namespaceName = qualifiedName.substring(delimPos +1, qualifiedName.length);
+    }
+    return resultNSName;
 };
 
 /**
@@ -4807,90 +3782,156 @@ function __parseNSName__(qualifiedName) {
  * @return : QName
  */
 function __parseQName__(qualifiedName) {
-  var resultQName = new Object();
-
-  resultQName.localName = qualifiedName;  // unless the qname has a prefix, the local name is the entire String
-  resultQName.prefix    = "";
-
-  // split on ':'
-  var delimPos = qualifiedName.indexOf(':');
-
-  if (delimPos > -1) {
-    // get prefix
-    resultQName.prefix    = qualifiedName.substring(0, delimPos);
-
-    // get localName
-    resultQName.localName = qualifiedName.substring(delimPos +1, qualifiedName.length);
-  }
-
-  return resultQName;
+    var resultQName = {};
+    // unless the qname has a prefix, the local name is the entire String
+    resultQName.localName = qualifiedName; 
+    resultQName.prefix    = "";
+    // split on ':'
+    var delimPos = qualifiedName.indexOf(':');
+    if (delimPos > -1) {
+        // get prefix
+        resultQName.prefix    = qualifiedName.substring(0, delimPos);
+        // get localName
+        resultQName.localName = qualifiedName.substring(delimPos +1, qualifiedName.length);
+    }
+    return resultQName;
 };
 
-$debug("Initializing document.implementation");
-var $implementation =  new DOMImplementation();
-$implementation.namespaceAware = false;
-$implementation.errorChecking = false;
     
 // Local Variables:
 // espresso-indent-level:4
 // c-basic-offset:4
 // tab-width:4
 // End:
-$debug("Defining Document");
 /**
- * @class  DOMDocument - The Document interface represents the entire HTML 
+ * @author envjs team
+ */
+Notation = function() { 
+    throw new Error("Notation Not Implemented" ); 
+};/**
+ * @author thatcher
+ */
+Range = function(){
+
+};
+
+__extend__(Range.prototype, {
+    get startContainer(){
+
+    },
+    get endContainer(){
+
+    },
+    get startOffset(){
+
+    },
+    get endOffset(){
+
+    },
+    get collapsed(){
+
+    },
+    get commonAncestorContainer(){
+
+    },
+    setStart: function(refNode, offset){//throws RangeException
+
+    },
+    setEnd: function(refNode, offset){//throws RangeException
+    
+    },
+    setStartBefore: function(refNode){//throws RangeException
+    
+    },
+    setStartAfter: function(refNode){//throws RangeException
+    
+    },
+    setEndBefore: function(refNode){//throws RangeException
+    
+    },
+    setEndAfter: function(refNode){//throws RangeException
+    
+    },
+    collapse: function(toStart){//throws RangeException
+    
+    },
+    selectNode: function(refNode){//throws RangeException
+    
+    },
+    selectNodeContents: function(refNode){//throws RangeException
+    
+    },
+    compareBoundaryPoints: function(how, sourceRange){
+
+    },
+    deleteContents: function(){
+
+    },
+    extractContents: function(){
+
+    },
+    cloneContents: function(){
+
+    },
+    insertNode: function(newNode){
+
+    },
+    surroundContents: function(newParent){
+
+    },
+    cloneRange: function(){
+
+    },
+    toString: function(){
+        return '[object Range]';
+    },
+    detach: function(){
+
+    }
+});
+
+
+  // CompareHow
+Range.START_TO_START                 = 0;
+Range.START_TO_END                   = 1;
+Range.END_TO_END                     = 2;
+Range.END_TO_START                   = 3;
+  
+/**
+ * @class  Document - The Document interface represents the entire HTML 
  *      or XML document. Conceptually, it is the root of the document tree, 
  *      and provides the primary access to the document's data.
  *
- * @extends DOMNode
- * @author Jon van Noort (jon@webarcana.com.au)
+ * @extends Node
  * @param  implementation : DOMImplementation - the creator Implementation
  */
-var DOMDocument = function(implementation, docParentWindow) {
-    //$log("\tcreating dom document");
-    this.DOMNode = DOMNode;
-    this.DOMNode(this);
+Document = function(implementation, docParentWindow) {
+    Node.apply(this, arguments);
     
-    this.doctype = null;                  // The Document Type Declaration (see DocumentType) associated with this document
-    this.implementation = implementation; // The DOMImplementation object that handles this document.
-    
-    // "private" variable providing the read-only document.parentWindow property
-    this._parentWindow = docParentWindow;
-    try {
-        if (docParentWindow.$thisWindowsProxyObject)
-            this._parentWindow = docParentWindow.$thisWindowsProxyObject;
-    } catch(e){}
+    //TODO: Temporary!!! Cnage back to true!!!
+    this.async = true;
+    // The Document Type Declaration (see DocumentType) associated with this document
+    this.doctype = null;
+    // The DOMImplementation object that handles this document.
+    this.implementation = implementation
 
     this.nodeName  = "#document";
-    this._id = 0;
-    this._lastId = 0;
-    this._parseComplete = false;                   // initially false, set to true by parser
-    this._url = "";
+    // initially false, set to true by parser
+    this.parsing = false;
+    this.baseURI = 'about:blank';
     
     this.ownerDocument = null;
     
-    this._performingImportNodeOperation = false;
+    this.importing = false;
+    this.location = null;
 };
-DOMDocument.prototype = new DOMNode;
-__extend__(DOMDocument.prototype, {	
-
-    addEventListener        : function(type, fn){ __addEventListener__(this, type, fn); },
-	removeEventListener     : function(type){ __removeEventListener__(this, type); },
-	attachEvent             : function(type, fn){ __addEventListener__(this, type, fn); },
-	detachEvent             : function(type){ __removeEventListener__(this, type); },
-	dispatchEvent           : function(event, bubbles){ __dispatchEvent__(this, event, bubbles); },
-
-    toString : function(){
-        return '[object DOMDocument]';
+Document.prototype = new Node;
+__extend__(Document.prototype,{
+    get localName(){
+        return null;
     },
-    addEventListener        : function(){ $w.addEventListener.apply(this, arguments); },
-	removeEventListener     : function(){ $w.removeEventListener.apply(this, arguments); },
-	attachEvent             : function(){ $w.addEventListener.apply(this, arguments); },
-	detachEvent             : function(){ $w.removeEventListener.apply(this, arguments); },
-	dispatchEvent           : function(){ $w.dispatchEvent.apply(this, arguments); },
-
-    get styleSheets(){ 
-        return [];/*TODO*/ 
+    get textContent(){
+        return null;
     },
     get all(){
         return this.getElementsByTagName("*");
@@ -4898,4822 +3939,423 @@ __extend__(DOMDocument.prototype, {
     get documentElement(){
         var i, length = this.childNodes?this.childNodes.length:0;
         for(i=0;i<length;i++){
-           if(this.childNodes[i].nodeType == DOMNode.ELEMENT_NODE){
+            if(this.childNodes[i].nodeType == Node.ELEMENT_NODE){
                 return this.childNodes[i];
             }
         }
         return null;
     },
-    get parentWindow(){
-        return this._parentWindow;
+    get documentURI(){
+        return this.baseURI;
     },
-    loadXML : function(xmlString) {
-        // create DOM Document
-        if(this === $document){
-            $debug("Setting internal window.document");
-            $document = this;
-        }
-        // populate Document with Parsed Nodes
-        try {
-            // make sure thid document object is empty before we try to load ...
-            this.childNodes      = new DOMNodeList(this, this);
-            this.firstChild      = null;
-            this.lastChild       = null;
-            this.attributes      = new DOMNamedNodeMap(this, this);
-            this._namespaces     = new DOMNamespaceNodeMap(this, this);
-            this._readonly = false;
-
-            $w.parseHtmlDocument(xmlString, this, null, null);
-            
-            $env.wait(-1);
-        } catch (e) {
-            $error(e);
-        }
-
-        // set parseComplete flag, (Some validation Rules are relaxed if this is false)
-        this._parseComplete = true;
-        return this;
-    },
-    load: function(url){
-		$debug("Loading url into DOM Document: "+ url + " - (Asynch? "+$w.document.async+")");
-        var scripts, _this = this;
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, $w.document.async);
-        xhr.onreadystatechange = function(){
-            try{
-        	    _this.loadXML(xhr.responseText);
-            }catch(e){
-                $error("Error Parsing XML - ",e);
-                _this.loadXML(
-                "<html><head></head><body>"+
-                    "<h1>Parse Error</h1>"+
-                    "<p>"+e.toString()+"</p>"+  
-                "</body></html>");
-            }
-            _this._url = url;
-            
-        	$info("Sucessfully loaded document at "+url);
-
-            // first fire body-onload event
-            var bodyLoad = _this.createEvent();
-            bodyLoad.initEvent("load");
-            try {  // assume <body> element, but just in case....
-                _this.getElementsByTagName('body')[0].
-                  dispatchEvent( bodyLoad, false );
-            } catch (e){;}
-
-            // then fire this onload event
-            //event = _this.createEvent();
-            //event.initEvent("load");
-            //_this.dispatchEvent( event, false );
-			
-			//also use DOMContentLoaded event
-            var domContentLoaded = _this.createEvent();
-            domContentLoaded.initEvent("DOMContentLoaded");
-            _this.dispatchEvent( domContentLoaded, false );
-            
-            //finally fire the window.onload event
-            
-			if(_this === document && $env.fireLoad !== false){
-                var windowLoad = _this.createEvent();
-                windowLoad.initEvent("load", false, false);
-                $w.dispatchEvent( windowLoad, false );
-                $env.wait()
-            }
-            
-        };
-        xhr.send();
-    },
-	createEvent             : function(eventType){ 
-        var event;
-        if(eventType === "UIEvents"){ event = new UIEvent();}
-        else if(eventType === "MouseEvents"){ event = new MouseEvent();}
-        else{ event = new Event(); } 
-        return event;
-    },
-    createExpression        : function(xpath, nsuriMap){ 
+    createExpression: function(xpath, nsuriMap){ 
         return new XPathExpression(xpath, nsuriMap);
     },
-    createElement : function(tagName) {
-          //$debug("DOMDocument.createElement( "+tagName+" )");
-          // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking 
-            && (!__isValidName__(tagName))) {
-            throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
-        
-          // create DOMElement specifying 'this' as ownerDocument
-          var node = new DOMElement(this);
-        
-          // assign values to properties (and aliases)
-          node.tagName  = tagName;
-        
-          return node;
-    },
-    createDocumentFragment : function() {
-          // create DOMDocumentFragment specifying 'this' as ownerDocument
-          var node = new DOMDocumentFragment(this);
-          return node;
+    createDocumentFragment: function() {
+        var node = new DocumentFragment(this);
+        return node;
     },
     createTextNode: function(data) {
-          // create DOMText specifying 'this' as ownerDocument
-          var node = new DOMText(this);
-        
-          // assign values to properties (and aliases)
-          node.data      = data;
-        
-          return node;
+        var node = new Text(this);
+        node.data = data;
+        return node;
     },
-    createComment : function(data) {
-          // create DOMComment specifying 'this' as ownerDocument
-          var node = new DOMComment(this);
-        
-          // assign values to properties (and aliases)
-          node.data      = data;
-        
-          return node;
+    createComment: function(data) {
+        var node = new Comment(this);
+        node.data = data;
+        return node;
     },
     createCDATASection : function(data) {
-          // create DOMCDATASection specifying 'this' as ownerDocument
-          var node = new DOMCDATASection(this);
-        
-          // assign values to properties (and aliases)
-          node.data      = data;
-        
-          return node;
+        var node = new CDATASection(this);
+        node.data = data;
+        return node;
     },
-    createProcessingInstruction : function(target, data) {
-          // throw Exception if the target string contains an illegal character
-          //$log("DOMDocument.createProcessingInstruction( "+target+" )");
-          if (__ownerDocument__(this).implementation.errorChecking 
+    createProcessingInstruction: function(target, data) {
+        // throw Exception if the target string contains an illegal character
+        if (__ownerDocument__(this).implementation.errorChecking 
             && (!__isValidName__(target))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
+        }
         
-          // create DOMProcessingInstruction specifying 'this' as ownerDocument
-          var node = new DOMProcessingInstruction(this);
+        var node = new ProcessingInstruction(this);
+        node.target = target;
+        node.data = data;
+        return node;
+    },
+    createElement: function(tagName) {
+        // throw Exception if the tagName string contains an illegal character
+        if (__ownerDocument__(this).implementation.errorChecking 
+                && (!__isValidName__(tagName))) {
+            throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+        }
+        var node = new Element(this);
+        node.nodeName = tagName;
+        return node;
+    },
+    createElementNS : function(namespaceURI, qualifiedName) {
+        //we use this as a parser flag to ignore the xhtml
+        //namespace assumed by the parser
+        //console.log('creating element %s %s', namespaceURI, qualifiedName);
+        if(this.baseURI === 'http://envjs.com/xml' && 
+            namespaceURI === 'http://www.w3.org/1999/xhtml'){
+            return this.createElement(qualifiedName);
+        }
+        //console.log('createElementNS %s %s', namespaceURI, qualifiedName);
+        if (__ownerDocument__(this).implementation.errorChecking) {
+            // throw Exception if the Namespace is invalid
+            if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
+                throw(new DOMException(DOMException.NAMESPACE_ERR));
+            }
+            
+            // throw Exception if the qualifiedName string contains an illegal character
+            if (!__isValidName__(qualifiedName)) {
+                throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+            }
+        }
+        var node  = new Element(this);
+        var qname = __parseQName__(qualifiedName);
+        node.namespaceURI = namespaceURI;
+        node.prefix       = qname.prefix;
+        node.nodeName     = qualifiedName;
         
-          // assign values to properties (and aliases)
-          node.target    = target;
-          node.data      = data;
-        
-          return node;
+        //console.log('created element %s %s', namespaceURI, qualifiedName);
+        return node;
     },
     createAttribute : function(name) {
+        //console.log('createAttribute %s ', name);
         // throw Exception if the name string contains an illegal character
-        //$log("DOMDocument.createAttribute( "+target+" )");
         if (__ownerDocument__(this).implementation.errorChecking 
             && (!__isValidName__(name))) {
             throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
         }
-        
-        // create DOMAttr specifying 'this' as ownerDocument
-        var node = new DOMAttr(this);
+        var node = new Attr(this);
+        node.nodeName = name;
+        return node;
+    },
+    createAttributeNS : function(namespaceURI, qualifiedName) {
+        //we use this as a parser flag to ignore the xhtml
+        //namespace assumed by the parser
+        if(this.baseURI === 'http://envjs.com/xml' && 
+            namespaceURI === 'http://www.w3.org/1999/xhtml'){
+            return this.createAttribute(qualifiedName);
+        }
+        //console.log('createAttributeNS %s %s', namespaceURI, qualifiedName);
+        // test for exceptions
+        if (this.implementation.errorChecking) {
+            // throw Exception if the Namespace is invalid
+            if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
+                throw(new DOMException(DOMException.NAMESPACE_ERR));
+            }
+            
+            // throw Exception if the qualifiedName string contains an illegal character
+            if (!__isValidName__(qualifiedName)) {
+                throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
+            }
+        }
+        var node  = new Attr(this);
+        var qname = __parseQName__(qualifiedName);
+        node.namespaceURI = namespaceURI===''?null:namespaceURI;
+        node.prefix       = qname.prefix;
+        node.nodeName     = qualifiedName;
+        node.nodeValue    = "";
+        //console.log('attribute %s %s %s', node.namespaceURI, node.prefix, node.nodeName);
+        return node;
+    },
+    createNamespace : function(qualifiedName) {
+        //console.log('createNamespace %s', qualifiedName);
+        // create Namespace specifying 'this' as ownerDocument
+        var node  = new Namespace(this);
+        var qname = __parseQName__(qualifiedName);
         
         // assign values to properties (and aliases)
-        node.name     = name;
+        node.prefix       = qname.prefix;
+        node.localName    = qname.localName;
+        node.name         = qualifiedName;
+        node.nodeValue    = "";
         
         return node;
     },
-    createElementNS : function(namespaceURI, qualifiedName) {
-        //$log("DOMDocument.createElement( "+namespaceURI+", "+qualifiedName+" )");
-          // test for exceptions
-          if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if the Namespace is invalid
-            if (!__isValidNamespace__(this, namespaceURI, qualifiedName)) {
-              throw(new DOMException(DOMException.NAMESPACE_ERR));
-            }
-        
-            // throw Exception if the qualifiedName string contains an illegal character
-            if (!__isValidName__(qualifiedName)) {
-              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-            }
-          }
-        
-          // create DOMElement specifying 'this' as ownerDocument
-          var node  = new DOMElement(this);
-          var qname = __parseQName__(qualifiedName);
-        
-          // assign values to properties (and aliases)
-          node.namespaceURI = namespaceURI;
-          node.prefix       = qname.prefix;
-          node.localName    = qname.localName;
-          node.tagName      = qualifiedName;
-        
-          return node;
+    
+    createRange: function(){
+        return new Range();
     },
-    createAttributeNS : function(namespaceURI, qualifiedName) {
-          // test for exceptions
-          if (__ownerDocument__(this).implementation.errorChecking) {
-            // throw Exception if the Namespace is invalid
-            if (!__isValidNamespace__(this, namespaceURI, qualifiedName, true)) {
-              throw(new DOMException(DOMException.NAMESPACE_ERR));
-            }
-        
-            // throw Exception if the qualifiedName string contains an illegal character
-            if (!__isValidName__(qualifiedName)) {
-              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-            }
-          }
-        
-          // create DOMAttr specifying 'this' as ownerDocument
-          var node  = new DOMAttr(this);
-          var qname = __parseQName__(qualifiedName);
-        
-          // assign values to properties (and aliases)
-          node.namespaceURI = namespaceURI;
-          node.prefix       = qname.prefix;
-          node.localName    = qname.localName;
-          node.name         = qualifiedName;
-          node.nodeValue    = "";
-        
-          return node;
+    
+    evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
+        //return new XPathExpression().evaluate();
+        throw Error('Document.evaluate not supported yet!');
     },
-    createNamespace : function(qualifiedName) {
-          // create DOMNamespace specifying 'this' as ownerDocument
-          var node  = new DOMNamespace(this);
-          var qname = __parseQName__(qualifiedName);
-        
-          // assign values to properties (and aliases)
-          node.prefix       = qname.prefix;
-          node.localName    = qname.localName;
-          node.name         = qualifiedName;
-          node.nodeValue    = "";
-        
-          return node;
-    },
-    /** from David Flanagan's JavaScript - The Definitive Guide
-     * 
-     * @param {String} xpathText
-     *     The string representing the XPath expression to evaluate.
-     * @param {Node} contextNode 
-     *     The node in this document against which the expression is to
-     *     be evaluated.
-     * @param {Function} nsuriMapper 
-     *     A function that will map from namespace prefix to to a full 
-     *     namespace URL or null if no such mapping is required.
-     * @param {Number} resultType 
-     *     Specifies the type of object expected as a result, using
-     *     XPath conversions to coerce the result. Possible values for
-     *     type are the constrainsts defined by the XPathResult object.
-     *     (null if not required)
-     * @param {XPathResult} result 
-     *     An XPathResult object to be reused or null
-     *     if you want a new XPathResult object to be created.
-     * @returns {XPathResult} result
-     *     A XPathResult object representing the evaluation of the 
-     *     expression against the given context node.
-     * @throws {Exception} e
-     *     This method may throw an exception if the xpathText contains 
-     *     a syntax error, if the expression cannot be converted to the
-     *     desired resultType, if the expression contains namespaces 
-     *     that nsuriMapper cannot resolve, or if contextNode is of the 
-     *     wrong type or is not assosciated with this document.
-     * @seealso
-     *     Document.evaluate
-     */
-    /*evaluate: function(xpathText, contextNode, nsuriMapper, resultType, result){
-        return new XPathExpression().evaluate();
-    },*/
+    
     getElementById : function(elementId) {
-          var retNode = null,
-              node;
-          // loop through all Elements in the 'all' collection
-          var all = this.all;
-          for (var i=0; i < all.length; i++) {
+        var retNode = null,
+            node;
+        // loop through all Elements in the 'all' collection
+        var all = this.all;
+        for (var i=0; i < all.length; i++) {
             node = all[i];
-            // if id matches & node is alive (ie, connected (in)directly to the documentElement)
+            // if id matches
             if (node.id == elementId) {
-                if((__ownerDocument__(node).documentElement._id == this.documentElement._id)){
-                    retNode = node;
-                    //$log("Found node with id = " + node.id);
-                    break;
-                }
+                //found the node
+                retNode = node;
+                break;
             }
-          }
-          
-          //if(retNode == null){$log("Couldn't find id " + elementId);}
-          return retNode;
+        }
+        return retNode;
     },
     normalizeDocument: function(){
-	    this.documentElement.normalize();
+	    this.normalize();
     },
     get nodeType(){
-        return DOMNode.DOCUMENT_NODE;
+        return Node.DOCUMENT_NODE;
     },
     get xml(){
-        //$log("Serializing " + this);
         return this.documentElement.xml;
     },
 	toString: function(){ 
-	    return "DOMDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
+	    return "[object XMLDocument]"; 
     },
 	get defaultView(){ 
 		return { getComputedStyle: function(elem){
-			return $w.getComputedStyle(elem);
+			return window.getComputedStyle(elem);
 		}};
 	},
-    _genId : function() {
-          this._lastId += 1;                             // increment lastId (to generate unique id)
-          return this._lastId;
+    get styleSheets(){
+        /*TODO*/  
+        return [];
     }
 });
 
 
 var __isValidNamespace__ = function(doc, namespaceURI, qualifiedName, isAttribute) {
 
-      if (doc._performingImportNodeOperation == true) {
+    if (doc.importing == true) {
         //we're doing an importNode operation (or a cloneNode) - in both cases, there
         //is no need to perform any namespace checking since the nodes have to have been valid
         //to have gotten into the DOM in the first place
         return true;
-      }
+    }
     
-      var valid = true;
-      // parse QName
-      var qName = __parseQName__(qualifiedName);
+    var valid = true;
+    // parse QName
+    var qName = __parseQName__(qualifiedName);
     
     
-      //only check for namespaces if we're finished parsing
-      if (this._parseComplete == true) {
+    //only check for namespaces if we're finished parsing
+    if (this.parsing == false) {
     
         // if the qualifiedName is malformed
         if (qName.localName.indexOf(":") > -1 ){
             valid = false;
         }
-    
+        
         if ((valid) && (!isAttribute)) {
             // if the namespaceURI is not null
             if (!namespaceURI) {
-            valid = false;
+                valid = false;
             }
         }
-    
+        
         // if the qualifiedName has a prefix
         if ((valid) && (qName.prefix == "")) {
             valid = false;
         }
     
-      }
+    }
     
-      // if the qualifiedName has a prefix that is "xml" and the namespaceURI is
-      //  different from "http://www.w3.org/XML/1998/namespace" [Namespaces].
-      if ((valid) && (qName.prefix == "xml") && (namespaceURI != "http://www.w3.org/XML/1998/namespace")) {
+    // if the qualifiedName has a prefix that is "xml" and the namespaceURI is
+    //  different from "http://www.w3.org/XML/1998/namespace" [Namespaces].
+    if ((valid) && (qName.prefix == "xml") && (namespaceURI != "http://www.w3.org/XML/1998/namespace")) {
         valid = false;
-      }
-    
-      return valid;
-};
-
-$w.Document = DOMDocument;
-/*
-*	parser.js
-*/
-/*
- * HTML Parser By John Resig (ejohn.org)
- * Original code by Erik Arvidsson, Mozilla Public License
- * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
- *
- * // Use like so:
- * HTMLParser(htmlString, {
- *     start: function(tag, attrs, unary) {},
- *     end: function(tag) {},
- *     chars: function(text) {},
- *     comment: function(text) {}
- * });
- *
- * // or to get an XML string:
- * HTMLtoXML(htmlString);
- *
- * // or to get an XML DOM Document
- * HTMLtoDOM(htmlString);
- *
- * // or to inject into an existing document/DOM node
- * HTMLtoDOM(htmlString, document);
- * HTMLtoDOM(htmlString, document.body);
- *
- */
- var html2dom, html2xml;
-
-(function(){
-
-	// Regular Expressions for parsing tags and attributes
-	var startTag = /^<([\w\:\-]+)((?:\s+[\w\:\-]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
-        endTag = /^<\/([\w\:\-]+)[^>]*>/,
-        attr = /([\w\:\-]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g; 	
-	// Empty Elements - HTML 4.01
-	var empty = makeMap("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed");
-
-	// Block Elements - HTML 4.01
-	var block = makeMap("address,applet,blockquote,button,center,dd,del,dir,div,dl,dt,fieldset,form,frameset,hr,iframe,ins,isindex,li,map,menu,noframes,noscript,object,ol,p,pre,script,table,tbody,td,tfoot,th,thead,tr,ul");
-
-	// Inline Elements - HTML 4.01
-	var inline = makeMap("a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,textarea,tt,u,var");
-
-	// Elements that you can, intentionally, leave open
-	// (and which close themselves)
-	var closeSelf = makeMap("colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr");
-
-	// Attributes that have their values filled in disabled="disabled"
-	var fillAttrs = makeMap("checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected");
-
-	// Special Elements (can contain anything)
-	var special = makeMap("script,style");
-
-	var HTMLParser  = function( html, handler ) {
-		var index, chars, match, stack = [], last = html;
-		stack.last = function(){
-			return this[ this.length - 1 ];
-		};
-
-		while ( html ) {
-		    //$log("HTMLParser: chunking... ");
-			chars = true;
-
-			// Make sure we're not in a script or style element
-			if ( !stack.last() || !special[ stack.last() ] ) {
-            
-		        //$log("HTMLParser: ... ");
-				// Comment
-				if ( html.indexOf("<!--") === 0 ) {
-		            //$log("HTMLParser: comment ");
-					index = html.indexOf("-->");
-	
-					if ( index >= 0 ) {
-						if ( handler.comment )
-							handler.comment( html.substring( 4, index ) );
-						html = html.substring( index + 3 );
-						chars = false;
-					}
-	
-				// end tag
-				} else if ( html.indexOf("</") === 0 ) {
-		            //$log("HTMLParser: endtag ");
-					match = html.match( endTag );
-	
-					if ( match ) {
-		                //$log("HTMLParser: endtag match : "+match[0]);
-						html = html.substring( match[0].length );
-						match[0].replace( endTag, parseEndTag );
-						chars = false;
-					}
-	
-				// start tag
-				} else if ( html.indexOf("<") === 0 ) {
-		            //$log("HTMLParser: starttag ");
-					match = html.match( startTag );
-	
-					if ( match ) {
-		                //$log("HTMLParser: starttag match : "+match[0]);
-						html = html.substring( match[0].length );
-						match[0].replace( startTag, parseStartTag );
-						chars = false;
-					}
-				}
-
-				if ( chars ) {
-		            //$log("HTMLParser: other ");
-					index = html.indexOf("<");
-					var text = index < 0 ? html : html.substring( 0, index );
-					html = index < 0 ? "" : html.substring( index );
-					if ( handler.chars ){
-		                //$log("HTMLParser: chars " + text);
-					    handler.chars( text );
-				    }
-				}
-			} else {
-		        //$log("HTMLParser: special ");
-				html = html.replace(new RegExp("(.*)<\/" + stack.last() + "[^>]*>"), function(all, text){
-					text = text.replace(/<!--(.*?)-->/g, "$1").
-						replace(/<!\[CDATA\[(.*?)]]>/g, "$1");
-					if ( handler.chars ){
-		                //$log("HTMLParser: special chars " + text);
-					    handler.chars( text );
-				    }
-					return "";
-				});
-				parseEndTag( "", stack.last() );
-			}
-			if ( html == last ){throw "Parse Error: " + html;}
-			last = html;
-		}
-		
-		// Clean up any remaining tags
-		parseEndTag();
-
-		function parseStartTag( tag, tagName, rest, unary ) {
-			if ( block[ tagName ] ) {
-				while ( stack.last() && inline[ stack.last() ] ) {
-					parseEndTag( "", stack.last() );
-				}
-			}
-
-			if ( closeSelf[ tagName ] && stack.last() == tagName ) {
-				parseEndTag( "", tagName );
-			}
-
-			unary = empty[ tagName ] || !!unary;
-
-			if ( !unary )
-				stack.push( tagName );
-			
-			if ( handler.start ) {
-				var attrs = [];
-	
-				rest.replace(attr, function(match, name) {
-					var value = arguments[2] ? arguments[2] :
-						arguments[3] ? arguments[3] :
-						arguments[4] ? arguments[4] :
-						fillAttrs[name] ? name : "";
-					
-					attrs.push({
-						name: name,
-						value: value,
-						escaped: value.replace(/(^|[^\\])"/g, '$1\\\"') //"
-					});
-				});
-	
-				if ( handler.start ){
-				    //$log("unary ? : "+unary);
-					handler.start( tagName, attrs, unary );
-				}
-			}
-		}
-
-		function parseEndTag( tag, tagName ) {
-		  var pos;
-			// If no tag name is provided, clean shop
-			if ( !tagName ){
-				pos = 0;
-			}else{
-			// Find the closest opened tag of the same type
-				for ( pos = stack.length - 1; pos >= 0; pos-- ){
-					//$log("parseEndTag : "+stack[ pos ] );
-					if ( stack[ pos ] == tagName ){ 
-					    break; 
-				    }
-				}
-            }
-			if ( pos >= 0 ) {
-				// Close all the open elements, up the stack
-				for ( var i = stack.length - 1; i >= pos; i-- ){
-                    if ( handler.end ){
-					    //$log("end : "+stack[ i ] );
-                        handler.end( stack[ i ] );
-                    }
-				}
-				// Remove the open elements from the stack
-				//$log("setting stack length : " + stack.length + " -> " +pos );
-				stack.length = pos;
-			}
-		}
-	};
-	
-	html2xml = function( html ) {
-		var results = "";
-		
-		HTMLParser(html, {
-			start: function( tag, attrs, unary ) {
-				results += "<" + tag;
-		
-				for ( var i = 0; i < attrs.length; i++ )
-					results += " " + attrs[i].name + '="' + attrs[i].escaped + '"';
-		
-				results += (unary ? "/" : "") + ">";
-			},
-			end: function( tag ) {
-				results += "</" + tag + ">";
-			},
-			chars: function( text ) {
-				results += text;
-			},
-			comment: function( text ) {
-				results += "<!--" + text + "-->";
-			}
-		});
-		
-		return results;
-	};
-	
-	html2dom = function( html, doc ) {
-		// There can be only one of these elements
-		var one = makeMap("html,head,body,title");
-		
-		// Enforce a structure for the document
-		/*var structure = {
-			link: "head",
-			base: "head"
-		};*/
-	
-		if ( !doc ) {
-			if ( typeof DOMDocument != "undefined" ){
-				doc = new DOMDocument();
-			}else if ( typeof document != "undefined" && document.implementation && document.implementation.createDocument ){
-				doc = document.implementation.createDocument("", "", null);
-			}else if ( typeof ActiveX != "undefined" ){
-				doc = new ActiveXObject("Msxml.DOMDocument");
-			}
-		} else {
-			doc = doc.ownerDocument ||
-				doc.getOwnerDocument && doc.getOwnerDocument() ||
-				doc;
-		}
-		
-		var elems = [],
-			documentElement = doc.documentElement || 
-			    doc.getDocumentElement && doc.getDocumentElement();
-				
-		// If we're dealing with an empty document then we
-		// need to pre-populate it with the HTML document structure
-		/*if ( !documentElement && doc.createElement ) (function(){
-		    //$log("HTMLtoDOM: adding structure... ");
-			var html = doc.createElement("html");
-			var head = doc.createElement("head");
-			head.appendChild( doc.createElement("title") );
-			html.appendChild( head );
-			html.appendChild( doc.createElement("body") );
-			doc.appendChild( html );
-			doc.documentElement = html;
-		})();*/
-		
-		// Find all the unique elements
-		/*if ( doc.getElementsByTagName ){
-			for ( var i in one ){
-			   one[ i ] = doc.getElementsByTagName( i )[0];
-            }
-		}*/
-		
-		// If we're working with a document, inject contents into
-		// the body element
-		var curParentNode;// = one.body;
-		
-		//$log("HTMLtoDOM: Parsing... ");
-		HTMLParser( html, {
-			start: function( tagName, attrs, unary ) {
-			    
-				var elem;
-		        //$log("HTMLtoDOM: createElement... " + tagName);
-				elem = doc.createElement( tagName );
-			
-				
-				for ( var attr in attrs ){
-		            //$log("HTMLtoDOM: setAttribute... " +  attrs[ attr ].name);
-					elem.setAttribute( attrs[ attr ].name, attrs[ attr ].value );
-				}
-				
-				if ( !doc.documentElement ){		            
-				    //$log("HTMLtoDOM: documentElement... " +  elem.nodeName);
-		            doc.documentElement = elem;
-			        doc.appendChild( elem );
-				}
-				
-				else if ( curParentNode && curParentNode.appendChild ){
-		            //$log("HTMLtoDOM: curParentNode.appendChild... " +  curParentNode.nodeName + " -> " +elem.nodeName);
-					curParentNode.appendChild( elem );
-				}
-					
-				if ( !unary ) {
-				    //$log("start : push into elems[] " + tagName);
-					elems.push( elem );
-					curParentNode = elem;
-				}
-			},
-			end: function( tag ) {
-			    //$log(tag + " : elems.lengths : "+elems.length);
-			    elems.length -= 1;
-				
-				// Init the new parentNode
-				curParentNode = elems[ elems.length - 1 ];
-
-			},
-			chars: function( text ) {
-				curParentNode.appendChild( doc.createTextNode( text ) );
-			},
-			comment: function( text ) {
-				curParentNode.appendChild( doc.createComment( text ) );
-			}
-		});
-				
-        //$log("HTMLtoDOM: doc... " + doc);
-		return doc;
-	};
-
-	function makeMap(str){
-		var obj = {}, items = str.split(",");
-		for ( var i = 0; i < items.length; i++ )
-			obj[ items[i] ] = true;
-		return obj;
-	};
-	
-})( );
-$debug("Defining HTMLDocument");
-/*
-* HTMLDocument - DOM Level 2
-*/
-/**
- * @class  HTMLDocument - The Document interface represents the entire HTML or XML document.
- *   Conceptually, it is the root of the document tree, and provides the primary access to the document's data.
- *
- * @extends DOMDocument
- */
-var HTMLDocument = function(implementation, docParentWindow, docReferrer) {
-  this.DOMDocument = DOMDocument;
-  this.DOMDocument(implementation, docParentWindow);
-
-  this._referrer = docReferrer;
-  this._domain;
-  this._open = false;
-  this.$async = false;
-};
-HTMLDocument.prototype = new DOMDocument;
-__extend__(HTMLDocument.prototype, {
-    createElement: function(tagName){
-          //print('createElement :'+tagName);
-          // throw Exception if the tagName string contains an illegal character
-          if (__ownerDocument__(this).implementation.errorChecking && 
-                (!__isValidName__(tagName))) {
-              throw(new DOMException(DOMException.INVALID_CHARACTER_ERR));
-          }
-          tagName = tagName.toUpperCase();
-          // create DOMElement specifying 'this' as ownerDocument
-          //This is an html document so we need to use explicit interfaces per the 
-          if(     tagName.match(/^A$/))                 {node = new HTMLAnchorElement(this);}
-          else if(tagName.match(/^AREA$/))              {node = new HTMLAreaElement(this);}
-          else if(tagName.match(/BASE/))                {node = new HTMLBaseElement(this);}
-          else if(tagName.match(/BLOCKQUOTE|Q/))        {node = new HTMLQuoteElement(this);}
-          else if(tagName.match(/BODY/))                {node = new HTMLBodyElement(this);}
-          else if(tagName.match(/BR/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/BUTTON/))              {node = new HTMLButtonElement(this);}
-          else if(tagName.match(/CAPTION/))             {node = new HTMLElement(this);}
-          else if(tagName.match(/COL|COLGROUP/))        {node = new HTMLTableColElement(this);}
-          else if(tagName.match(/DEL|INS/))             {node = new HTMLModElement(this);}
-          else if(tagName.match(/DIV/))                 {node = new HTMLDivElement(this);}
-          else if(tagName.match(/DL/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/FIELDSET/))            {node = new HTMLFieldSetElement(this);}
-          else if(tagName.match(/FORM/))                {node = new HTMLFormElement(this);}
-          else if(tagName.match(/^FRAME$/))             {node = new HTMLFrameElement(this);}
-          else if(tagName.match(/FRAMESET/))            {node = new HTMLFrameSetElement(this);}
-          else if(tagName.match(/H1|H2|H3|H4|H5|H6/))   {node = new HTMLElement(this);}
-          else if(tagName.match(/HEAD/))                {node = new HTMLHeadElement(this);}
-          else if(tagName.match(/HR/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/HTML/))                {node = new HTMLElement(this);}
-          else if(tagName.match(/IFRAME/))              {node = new HTMLIFrameElement(this);}
-          else if(tagName.match(/IMG/))                 {node = new HTMLImageElement(this);}
-          else if(tagName.match(/INPUT/))               {node = new HTMLInputElement(this);}
-          else if(tagName.match(/LABEL/))               {node = new HTMLLabelElement(this);}
-          else if(tagName.match(/LEGEND/))              {node = new HTMLLegendElement(this);}
-          else if(tagName.match(/^LI$/))                {node = new HTMLElement(this);}
-          else if(tagName.match(/LINK/))                {node = new HTMLLinkElement(this);}
-          else if(tagName.match(/MAP/))                 {node = new HTMLMapElement(this);}
-          else if(tagName.match(/META/))                {node = new HTMLMetaElement(this);}
-          else if(tagName.match(/OBJECT/))              {node = new HTMLObjectElement(this);}
-          else if(tagName.match(/OL/))                  {node = new HTMLElement(this);}
-          else if(tagName.match(/OPTGROUP/))            {node = new HTMLOptGroupElement(this);}
-          else if(tagName.match(/OPTION/))              {node = new HTMLOptionElement(this);;}
-          else if(tagName.match(/^P$/))                 {node = new HTMLElement(this);}
-          else if(tagName.match(/PARAM/))               {node = new HTMLParamElement(this);}
-          else if(tagName.match(/PRE/))                 {node = new HTMLElement(this);}
-          else if(tagName.match(/SCRIPT/))              {node = new HTMLScriptElement(this);}
-          else if(tagName.match(/SELECT/))              {node = new HTMLSelectElement(this);}
-          else if(tagName.match(/STYLE/))               {node = new HTMLStyleElement(this);}
-          else if(tagName.match(/TABLE/))               {node = new HTMLTableElement(this);}
-          else if(tagName.match(/TBODY|TFOOT|THEAD/))   {node = new HTMLTableSectionElement(this);}
-          else if(tagName.match(/TD|TH/))               {node = new HTMLTableCellElement(this);}
-          else if(tagName.match(/TEXTAREA/))            {node = new HTMLTextAreaElement(this);}
-          else if(tagName.match(/TITLE/))               {node = new HTMLTitleElement(this);}
-          else if(tagName.match(/TR/))                  {node = new HTMLTableRowElement(this);}
-          else if(tagName.match(/UL/))                  {node = new HTMLElement(this);}
-          else{
-            node = new HTMLElement(this);
-          }
-        
-          // assign values to properties (and aliases)
-          node.tagName  = tagName;
-          return node;
-    },
-    createElementNS : function (uri, local) {
-        //print('createElementNS :'+uri+" "+local);
-        if(!uri){
-            return this.createElement(local);
-        }else if ("http://www.w3.org/1999/xhtml" == uri) {
-             return this.createElement(local);
-        } else if ("http://www.w3.org/1998/Math/MathML" == uri) {
-          if (!this.mathplayerinitialized) {
-              var obj = this.createElement("object");
-              obj.setAttribute("id", "mathplayer");
-              obj.setAttribute("classid", "clsid:32F66A20-7614-11D4-BD11-00104BD3F987");
-              this.getElementsByTagName("head")[0].appendChild(obj);
-              this.namespaces.add("m", "http://www.w3.org/1998/Math/MathML", "#mathplayer");  
-              this.mathplayerinitialized = true;
-          }
-          return this.createElement("m:" + local);
-        } else {
-            return DOMDocument.prototype.createElementNS.apply(this,[uri, local]);
-        }
-    },
-    get anchors(){
-        return new HTMLCollection(this.getElementsByTagName('a'), 'Anchor');
-        
-    },
-    get applets(){
-        return new HTMLCollection(this.getElementsByTagName('applet'), 'Applet');
-        
-    },
-    get body(){ 
-        var nodelist = this.getElementsByTagName('body');
-        return nodelist.item(0);
-        
-    },
-    set body(html){
-        return this.replaceNode(this.body,html);
-        
-    },
-
-    get title(){
-        var titleArray = this.getElementsByTagName('title');
-        if (titleArray.length < 1)
-            return "";
-        return titleArray[0].text;
-    },
-    set title(titleStr){
-        titleArray = this.getElementsByTagName('title');
-        if (titleArray.length < 1){
-            // need to make a new element and add it to "head"
-            var titleElem = new HTMLTitleElement(this);
-            titleElem.text = titleStr;
-            var headArray = this.getElementsByTagName('head');
-	    if (headArray.length < 1)
-                return;  // ill-formed, just give up.....
-            headArray[0].appendChild(titleElem);
-        }
-        else {
-            titleArray[0].text = titleStr;
-        }
-    },
-
-    //set/get cookie see cookie.js
-    get domain(){
-        return this._domain||$w.location.domain;
-        
-    },
-    set domain(){
-        /* TODO - requires a bit of thought to enforce domain restrictions */ 
-        return; 
-        
-    },
-    get forms(){
-      return new HTMLCollection(this.getElementsByTagName('form'), 'Form');
-    },
-    get images(){
-        return new HTMLCollection(this.getElementsByTagName('img'), 'Image');
-        
-    },
-    get lastModified(){ 
-        /* TODO */
-        return this._lastModified; 
-    
-    },
-    get links(){
-        return new HTMLCollection(this.getElementsByTagName('a'), 'Link');
-        
-    },
-    get location(){
-        return $w.location
-    },
-    get referrer(){
-        return this._referrer;
-    },
-	close : function(){ 
-	    /* TODO */ 
-	    this._open = false;
-    },
-	getElementsByName : function(name){
-        //returns a real Array + the DOMNodeList
-        var retNodes = __extend__([],new DOMNodeList(this, this.documentElement)),
-          node;
-        // loop through all Elements in the 'all' collection
-        var all = this.all;
-        for (var i=0; i < all.length; i++) {
-            node = all[i];
-            if (node.nodeType == DOMNode.ELEMENT_NODE && node.getAttribute('name') == name) {
-                retNodes.push(node);
-            }
-        }
-        return retNodes;
-	},
-	open : function(){ 
-	    /* TODO */
-	    this._open = true;  
-    },
-	write: function(htmlstring){ 
-	    /* TODO */
-	    return; 
-	
-    },
-	writeln: function(htmlstring){ 
-	    this.write(htmlstring+'\n'); 
-    },
-	toString: function(){ 
-	    return "HTMLDocument" +  (typeof this._url == "string" ? ": " + this._url : ""); 
-    },
-	get innerHTML(){ 
-	    return this.documentElement.outerHTML; 
-	    
-    },
-	get __html__(){
-	    return true;
-	    
-    },
-    get async(){ return this.$async;},
-    set async(async){ this.$async = async; },
-    get baseURI(){ return $env.location('./'); },
-    get URL(){ return $w.location.href;  },
-    set URL(url){ $w.location.href = url;  }
-});
-
-var __elementPopped__ = function(ns, name, node){
-    // print('Element Popped: '+ns+" "+name+ " "+ node+" " +node.type+" "+node.nodeName);
-    var doc = __ownerDocument__(node);
-    // SMP: subtle issue here: we're currently getting two kinds of script nodes from the html5 parser.
-    // The "fake" nodes come with a type of undefined. The "real" nodes come with the type that's given,
-    // or null if not given. So the following check has the side-effect of ignoring the "fake" nodes. So
-    // something to watch for if this code changes.
-    var type = ( node.type === null ) ? "text/javascript" : node.type;
-    try{
-        if(node.nodeName.toLowerCase() == 'script' && type == "text/javascript"){
-            //$env.debug("element popped: script\n"+node.xml);
-            // unless we're parsing in a window context, don't execute scripts
-            if (doc.parentWindow){
-                //p.replaceEntities = true;
-                var okay = $env.loadLocalScript(node, null);
-                // only fire event if we actually had something to load
-                if (node.src && node.src.length > 0){
-                    var event = doc.createEvent();
-                    event.initEvent( okay ? "load" : "error", false, false );
-                    node.dispatchEvent( event, false );
-                  }
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'frame' ||
-                 node.nodeName.toLowerCase() == 'iframe'   ){
-            
-            //$env.debug("element popped: iframe\n"+node.xml);
-            if (node.src && node.src.length > 0){
-                $debug("getting content document for (i)frame from " + node.src);
-    
-                $env.loadFrame(node, $env.location(node.src));
-    
-                var event = doc.createEvent();
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'link'){
-            //$env.debug("element popped: link\n"+node.xml);
-            if (node.href && node.href.length > 0){
-                // don't actually load anything, so we're "done" immediately:
-                var event = doc.createEvent();
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-        else if (node.nodeName.toLowerCase() == 'img'){
-            //$env.debug("element popped: img \n"+node.xml);
-            if (node.src && node.src.length > 0){
-                // don't actually load anything, so we're "done" immediately:
-                var event = doc.createEvent();
-                event.initEvent("load", false, false);
-                node.dispatchEvent( event, false );
-            }
-        }
-    }catch(e){
-        $env.error('error loading html element', e);
-    }
-};
-
-$w.HTMLDocument = HTMLDocument;
-$debug("Defining HTMLElement");
-/*
-* HTMLElement - DOM Level 2
-*/
-var HTMLElement = function(ownerDocument) {
-    this.DOMElement = DOMElement;
-    this.DOMElement(ownerDocument);
-    
-    this.$css2props = null;
-};
-HTMLElement.prototype = new DOMElement;
-__extend__(HTMLElement.prototype, {
-
-		get className() { 
-		    return this.getAttribute("class")||''; 
-	    },
-		set className(value) { 
-		    return this.setAttribute("class",trim(value)); 
-		    
-	    },
-		get dir() { 
-		    return this.getAttribute("dir")||"ltr"; 
-		    
-	    },
-		set dir(val) { 
-		    return this.setAttribute("dir",val); 
-		    
-	    },
-		get id(){  
-		    return this.getAttribute('id'); 
-		    
-	    },
-		set id(id){  
-		    this.setAttribute('id', id); 
-            
-	    },
-		get innerHTML(){  
-		    return this.childNodes.xml; 
-		    
-	    },
-		set innerHTML(html){
-		    //Should be replaced with HTMLPARSER usage
-            //$debug('SETTING INNER HTML ('+this+'+'+html.substring(0,64));
-            var doc = new HTMLDocument($implementation,null,"");
-            $w.parseHtmlDocument(html,doc,null,null);
-            $env.wait(-1);
-            var parent = doc.body;
-			while(this.firstChild != null){
-			    this.removeChild( this.firstChild );
-			}
-			var importedNode;
-			while(parent.firstChild != null){
-	            importedNode = this.importNode( 
-	                parent.removeChild( parent.firstChild ), true);
-			    this.appendChild( importedNode );   
-		    }
-		    //Mark for garbage collection
-		    doc = null;
-		},
-        get innerText(){
-            return __recursivelyGatherText__(this);
-        },
-        set innerText(newText){
-			while(this.firstChild != null){
-			    this.removeChild( this.firstChild );
-			}
-            var text = this.ownerDocument.createTextNode(newText);
-            this.appendChild(text);
-        },
-		get lang() { 
-		    return this.getAttribute("lang"); 
-		    
-	    },
-		set lang(val) { 
-		    return this.setAttribute("lang",val); 
-		    
-	    },
-		get offsetHeight(){
-		    return Number(this.style["height"].replace("px",""));
-		},
-		get offsetWidth(){
-		    return Number(this.style["width"].replace("px",""));
-		},
-		offsetLeft: 0,
-		offsetRight: 0,
-		get offsetParent(){
-		    /* TODO */
-		    return;
-	    },
-		set offsetParent(element){
-		    /* TODO */
-		    return;
-	    },
-		scrollHeight: 0,
-		scrollWidth: 0,
-		scrollLeft: 0, 
-		scrollRight: 0,
-		get style(){
-		    if(this.$css2props === null){
-	            this.$css2props = new CSS2Properties(this);
-	        }
-	        return this.$css2props;
-		},
-        set style(values){
-		    __updateCss2Props__(this, values);
-        },
-		setAttribute: function (name, value) {
-            DOMElement.prototype.setAttribute.apply(this,[name, value]);
-		    if (name === "style") {
-		        __updateCss2Props__(this, value);
-		    }
-		},
-		get title() { 
-		    return this.getAttribute("title"); 
-		    
-	    },
-		set title(value) { 
-		    return this.setAttribute("title", value); 
-		    
-	    },
-		get tabIndex(){
-            var ti = this.getAttribute('tabindex');
-            if(ti!==null)
-                return Number(ti);
-            else
-                return 0;
-        },
-        set tabIndex(value){
-            if(value===undefined||value===null)
-                value = 0;
-            this.setAttribute('tabindex',Number(value));
-        },
-		//Not in the specs but I'll leave it here for now.
-		get outerHTML(){ 
-		    return this.xml; 
-		    
-	    },
-	    scrollIntoView: function(){
-	        /*TODO*/
-	        return;
-	    
-        },
-
-		onclick: function(event){
-		    __eval__(this.getAttribute('onclick')||'', this);
-	    },
-        
-
-		ondblclick: function(event){
-            __eval__(this.getAttribute('ondblclick')||'', this);
-	    },
-		onkeydown: function(event){
-            __eval__(this.getAttribute('onkeydown')||'', this);
-	    },
-		onkeypress: function(event){
-            __eval__(this.getAttribute('onkeypress')||'', this);
-	    },
-		onkeyup: function(event){
-            __eval__(this.getAttribute('onkeyup')||'', this);
-	    },
-		onmousedown: function(event){
-            __eval__(this.getAttribute('onmousedown')||'', this);
-	    },
-		onmousemove: function(event){
-            __eval__(this.getAttribute('onmousemove')||'', this);
-	    },
-		onmouseout: function(event){
-            __eval__(this.getAttribute('onmouseout')||'', this);
-	    },
-		onmouseover: function(event){
-            __eval__(this.getAttribute('onmouseover')||'', this);
-	    },
-		onmouseup: function(event){
-            __eval__(this.getAttribute('onmouseup')||'', this);
-	    }
-});
-
-
-var __recursivelyGatherText__ = function(aNode) {
-    var accumulateText = "";
-    var idx; var n;
-    for (idx=0;idx < aNode.childNodes.length;idx++){
-        n = aNode.childNodes.item(idx);
-        if(n.nodeType == DOMNode.TEXT_NODE)
-            accumulateText += n.data;
-        else
-            accumulateText += __recursivelyGatherText__(n);
-    }
-
-    return accumulateText;
-};
-    
-var __eval__ = function(script, startingNode){
-    if (script == "")
-        return;                    // don't assemble environment if no script...
-
-    try{
-        var doEval = function(scriptText){
-            eval(scriptText);
-        }
-
-        var listOfScopes = [];
-        for (var node = startingNode; node != null; node = node.parentNode)
-            listOfScopes.push(node);
-        listOfScopes.push($w);
-
-
-        var oldScopesArray = $env.configureScope(
-          doEval,        // the function whose scope chain to change
-          listOfScopes); // last array element is "head" of new chain
-        doEval.call(startingNode, script);
-        $env.restoreScope(oldScopesArray);
-                         // oldScopesArray is N-element array of two-element
-                         // arrays.  First element is JS object whose scope
-                         // was modified, second is original value to restore.
-    }catch(e){
-        $error(e);
-    }
-};
-
-var __updateCss2Props__ = function(elem, values){
-    if(elem.$css2props === null){
-        elem.$css2props = new CSS2Properties(elem);
-    }
-    __cssTextToStyles__(elem.$css2props, values);
-};
-
-var __registerEventAttrs__ = function(elm){
-    if(elm.hasAttribute('onclick')){ 
-        elm.addEventListener('click', elm.onclick ); 
-    }
-    if(elm.hasAttribute('ondblclick')){ 
-        elm.addEventListener('dblclick', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onkeydown')){ 
-        elm.addEventListener('keydown', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onkeypress')){ 
-        elm.addEventListener('keypress', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onkeyup')){ 
-        elm.addEventListener('keyup', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onmousedown')){ 
-        elm.addEventListener('mousedown', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onmousemove')){ 
-        elm.addEventListener('mousemove', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onmouseout')){ 
-        elm.addEventListener('mouseout', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onmouseover')){ 
-        elm.addEventListener('mouseover', elm.onclick ); 
-    }
-    if(elm.hasAttribute('onmouseup')){ 
-        elm.addEventListener('mouseup', elm.onclick ); 
-    }
-    return elm;
-};
-	
-// non-ECMA function, but no other way for click events to enter env.js
-var  __click__ = function(element){
-    var event = new Event({
-      target:element,
-      currentTarget:element
-    });
-    event.initEvent("click");
-    element.dispatchEvent(event);
-};
-var __submit__ = function(element){
-	var event = new Event({
-	  target:element,
-	  currentTarget:element
-	});
-	event.initEvent("submit");
-	element.dispatchEvent(event);
-};
-var __focus__ = function(element){
-	var event = new Event({
-	  target:element,
-	  currentTarget:element
-	});
-	event.initEvent("focus");
-	element.dispatchEvent(event);
-};
-var __blur__ = function(element){
-	var event = new Event({
-	  target:element,
-	  currentTarget:element
-	});
-	event.initEvent("blur");
-	element.dispatchEvent(event);
-};
-
-$w.HTMLElement = HTMLElement;
-
-// Local Variables:
-// espresso-indent-level:4
-// c-basic-offset:4
-// tab-width:4
-// End:
-$debug("Defining HTMLCollection");
-/*
-* HTMLCollection - DOM Level 2
-* Implementation Provided by Steven Wood
-*/
-var HTMLCollection = function(nodelist, type){
-
-  __setArray__(this, []);
-  for (var i=0; i<nodelist.length; i++) {
-      this[i] = nodelist[i];
-  }
-  
-  this.length = nodelist.length;
-
-}
-
-HTMLCollection.prototype = {
-        
-    item : function (idx) {
-        var ret = null;
-        if ((idx >= 0) && (idx < this.length)) { 
-            ret = this[idx];                    
-        }
-    
-        return ret;   
-    },
-    
-    namedItem : function (name) {
-    }
-};
-
-$w.HTMLCollection = HTMLCollection;
-
-/*var HTMLCollection = function(nodelist, type){
-  var $items = [], 
-      $item, i;
-  if(type === "Anchor" ){
-    for(i=0;i<nodelist.length;i++){ 
-      //The name property is required to be add to the collection
-      if(nodelist.item(i).name){
-        item = new nodelist.item(i);
-        $items.push(item);
-        this[nodelist.item(i).name] = item;
-      }
-    }
-  }else if(type === "Link"){
-    for(i=0;i<nodelist.length;i++){ 
-      //The name property is required to be add to the collection
-      if(nodelist.item(i).href){
-        item = new nodelist.item(i);
-        $items.push(item);
-        this[nodelist.item(i).name] = item;
-      }
-    }
-  }else if(type === "Form"){
-    for(i=0;i<nodelist.length;i++){ 
-      //The name property is required to be add to the collection
-      if(nodelist.item(i).href){
-        item = new nodelist.item(i);
-        $items.push(item);
-        this[nodelist.item(i).name] = item;
-      }
-    }
-  }
-  setArray(this, $items);
-  return __extend__(this, {
-    item : function(i){return this[i];},
-    namedItem : function(name){return this[name];}
-  });
-};*/
-
-	/*
- *  a set of convenience classes to centralize implementation of
- * properties and methods across multiple in-form elements
- *
- *  the hierarchy of related HTML elements and their members is as follows:
- *
- *
- *    HTMLInputCommon:  common to all elements
- *       .form
- *
- *    <legend>
- *          [common plus:]
- *       .align
- *
- *    <fieldset>
- *          [identical to "legend" plus:]
- *       .margin
- *
- *
- *  ****
- *
- *    <label>
- *          [common plus:]
- *       .dataFormatAs
- *       .htmlFor
- *       [plus data properties]
- *
- *    <option>
- *          [common plus:]
- *       .defaultSelected
- *       .index
- *       .label
- *       .selected
- *       .text
- *       .value   // unique implementation, not duplicated
- *
- *  ****
- *
- *    HTMLTypeValueInputs:  common to remaining elements
- *          [common plus:]
- *       .name
- *       .type
- *       .value
- *       [plus data properties]
- *
- *
- *    <select>
- *       .length
- *       .multiple
- *       .options[]
- *       .selectedIndex
- *       .add()
- *       .remove()
- *       .item()                                       // unimplemented
- *       .namedItem()                                  // unimplemented
- *       [plus ".onchange"]
- *       [plus focus events]
- *       [plus data properties]
- *       [plus ".size"]
- *
- *    <button>
- *       .dataFormatAs   // duplicated from above, oh well....
- *       [plus ".status", ".createTextRange()"]
- *
- *  ****
- *
- *    HTMLInputAreaCommon:  common to remaining elements
- *       .defaultValue
- *       .readOnly
- *       .handleEvent()                                // unimplemented
- *       .select()
- *       .onselect
- *       [plus ".size"]
- *       [plus ".status", ".createTextRange()"]
- *       [plus focus events]
- *       [plus ".onchange"]
- *
- *    <textarea>
- *       .cols
- *       .rows
- *       .wrap                                         // unimplemented
- *       .onscroll                                     // unimplemented
- *
- *    <input>
- *       .alt
- *       .accept                                       // unimplemented
- *       .checked
- *       .complete                                     // unimplemented
- *       .defaultChecked
- *       .dynsrc                                       // unimplemented
- *       .height
- *       .hspace                                       // unimplemented
- *       .indeterminate                                // unimplemented
- *       .loop                                         // unimplemented
- *       .lowsrc                                       // unimplemented
- *       .maxLength
- *       .src
- *       .start                                        // unimplemented
- *       .useMap
- *       .vspace                                       // unimplemented
- *       .width
- *       .onclick
- *       [plus ".size"]
- *       [plus ".status", ".createTextRange()"]
-
- *    [data properties]                                // unimplemented
- *       .dataFld
- *       .dataSrc
-
- *    [status stuff]                                   // unimplemented
- *       .status
- *       .createTextRange()
-
- *    [focus events]
- *       .onblur
- *       .onfocus
-
- */
-
-
-
-
-$debug("Defining input element 'mix in' objects");
-var inputElements_dataProperties = {};
-var inputElements_status = {};
-
-var inputElements_onchange = {
-    onchange: function(event){
-        __eval__(this.getAttribute('onchange')||'', this)
-    }
-};
-
-var inputElements_size = {
-    get size(){
-        return Number(this.getAttribute('size'));
-    },
-    set size(value){
-        this.setAttribute('size',value);
-    }
-};
-
-var inputElements_focusEvents = {
-    blur: function(){
-        __blur__(this);
-
-        if (this._oldValue != this.value){
-            var event = document.createEvent();
-            event.initEvent("change");
-            this.dispatchEvent( event );
-        }
-    },
-    focus: function(){
-        __focus__(this);
-        this._oldValue = this.value;
-    }
-};
-
-
-$debug("Defining HTMLInputCommon");
-
-/*
-* HTMLInputCommon - convenience class, not DOM
-*/
-var HTMLInputCommon = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLInputCommon.prototype = new HTMLElement;
-__extend__(HTMLInputCommon.prototype, {
-    get form(){
-        var parent = this.parentNode;
-        while(parent.nodeName.toLowerCase() != 'form'){
-            parent = parent.parentNode;
-        }
-        return parent;
-    },
-    get accessKey(){
-        return this.getAttribute('accesskey');
-    },
-    set accessKey(value){
-        this.setAttribute('accesskey',value);
-    },
-    get access(){
-        return this.getAttribute('access');
-    },
-    set access(value){
-        this.setAttribute('access', value);
-    },
-    get disabled(){
-        return (this.getAttribute('disabled')=='disabled');
-    },
-    set disabled(value){
-        this.setAttribute('disabled', (value ? 'disabled' :''));
-    }
-});
-
-$w.HTMLInputCommon = HTMLInputCommon;
-
-
-$debug("Defining HTMLTypeValueInputs");
-
-/*
-* HTMLTypeValueInputs - convenience class, not DOM
-*/
-var HTMLTypeValueInputs = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
-
-    this._oldValue = "";
-};
-HTMLTypeValueInputs.prototype = new HTMLInputCommon;
-__extend__(HTMLTypeValueInputs.prototype, inputElements_size);
-__extend__(HTMLTypeValueInputs.prototype, inputElements_status);
-__extend__(HTMLTypeValueInputs.prototype, inputElements_dataProperties);
-__extend__(HTMLTypeValueInputs.prototype, {
-    get defaultValue(){
-        return this.getAttribute('defaultValue');
-    },
-    set defaultValue(value){
-        this.setAttribute('defaultValue', value);
-    },
-    get name(){
-        return this.getAttribute('name')||'';
-    },
-    set name(value){
-        this.setAttribute('name',value);
-    },
-    get type(){
-        return this.getAttribute('type');
-    },
-    set type(type){
-        return this.setAttribute('type', type);
-    },
-    get value(){
-        return this.getAttribute('value')||'';
-    },
-    set value(newValue){
-        this.setAttribute('value',newValue);
-    },
-    setAttribute: function(name, value){
-        if(name == 'value' && !this.defaultValue){
-            this.defaultValue = value;
-        }
-        HTMLElement.prototype.setAttribute.apply(this, [name, value]);
-    }
-});
-
-$w.HTMLTypeValueInputs = HTMLTypeValueInputs;
-
-
-
-$debug("Defining HTMLInputAreaCommon");
-
-/*
-* HTMLInputAreaCommon - convenience class, not DOM
-*/
-var HTMLInputAreaCommon = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
-};
-HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;
-__extend__(HTMLInputAreaCommon.prototype, inputElements_focusEvents);
-__extend__(HTMLInputAreaCommon.prototype, inputElements_onchange);
-__extend__(HTMLInputAreaCommon.prototype, {
-    get readOnly(){
-        return (this.getAttribute('readonly')=='readonly');
-    },
-    set readOnly(value){
-        this.setAttribute('readonly', (value ? 'readonly' :''));
-    },
-    select:function(){
-        __select__(this);
-
-    }
-});
-
-$w.HTMLInputAreaCommon = HTMLInputAreaCommon;
-$debug("Defining HTMLAnchorElement");
-/* 
-* HTMLAnchorElement - DOM Level 2
-*/
-var HTMLAnchorElement = function(ownerDocument) {
-    //$log("creating anchor element");
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLAnchorElement.prototype = new HTMLElement;
-__extend__(HTMLAnchorElement.prototype, {
-	get accessKey() { 
-	    return this.getAttribute("accesskey"); 
-	    
-    },
-	set accessKey(val) { 
-	    return this.setAttribute("accesskey",val); 
-	    
-    },
-	get charset() { 
-	    return this.getAttribute("charset"); 
-	    
-    },
-	set charset(val) { 
-	    return this.setAttribute("charset",val); 
-	    
-    },
-	get coords() { 
-	    return this.getAttribute("coords"); 
-	    
-    },
-	set coords(val) { 
-	    return this.setAttribute("coords",val); 
-	    
-    },
-	get href() { 
-	    return this.getAttribute("href"); 
-	    
-    },
-	set href(val) { 
-	    return this.setAttribute("href",val); 
-	    
-    },
-	get hreflang() { 
-	    return this.getAttribute("hreflang"); 
-	    
-    },
-	set hreflang(val) { 
-	    return this.setAttribute("hreflang",val); 
-	    
-    },
-	get name() { 
-	    return this.getAttribute("name"); 
-	    
-    },
-	set name(val) { 
-	    return this.setAttribute("name",val); 
-	    
-    },
-	get rel() { 
-	    return this.getAttribute("rel"); 
-	    
-    },
-	set rel(val) { 
-	    return this.setAttribute("rel",val); 
-	    
-    },
-	get rev() { 
-	    return this.getAttribute("rev"); 
-	    
-    },
-	set rev(val) { 
-	    return this.setAttribute("rev",val); 
-	    
-    },
-	get shape() { 
-	    return this.getAttribute("shape"); 
-	    
-    },
-	set shape(val) { 
-	    return this.setAttribute("shape",val); 
-	    
-    },
-	get target() { 
-	    return this.getAttribute("target"); 
-	    
-    },
-	set target(val) { 
-	    return this.setAttribute("target",val); 
-	    
-    },
-	get type() { 
-	    return this.getAttribute("type"); 
-	    
-    },
-	set type(val) { 
-	    return this.setAttribute("type",val); 
-	    
-    },
-	blur:function(){
-	    __blur__(this);
-	    
-    },
-	focus:function(){
-	    __focus__(this);
-	    
-    }
-});
-
-$w.HTMLAnchorElement = HTMLAnchorElement;$debug("Defining Anchor");
-/* 
-* Anchor - DOM Level 2
-*/
-var Anchor = function(ownerDocument) {
-    this.HTMLAnchorElement = HTMLAnchorElement;
-    this.HTMLAnchorElement(ownerDocument);
-};
-
-(function(){
-    //static regular expressions
-	var hash 	 = new RegExp('(\\#.*)'),
-        hostname = new RegExp('\/\/([^\:\/]+)'),
-        pathname = new RegExp('(\/[^\\?\\#]*)'),
-        port 	 = new RegExp('\:(\\d+)\/'),
-        protocol = new RegExp('(^\\w*\:)'),
-        search 	 = new RegExp('(\\?[^\\#]*)');
-			
-    __extend__(Anchor.prototype, {
-		get hash(){
-			var m = hash.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set hash(_hash){
-			//setting the hash is the only property of the location object
-			//that doesn't cause the window to reload
-			_hash = _hash.indexOf('#')===0?_hash:"#"+_hash;	
-			this.href = this.protocol + this.host + this.pathname + this.search + _hash;
-		},
-		get host(){
-			return this.hostname + (this.port !== "")?":"+this.port:"";
-		},
-		set host(_host){
-			this.href = this.protocol + _host + this.pathname + this.search + this.hash;
-		},
-		get hostname(){
-			var m = hostname.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set hostname(_hostname){
-			this.href = this.protocol + _hostname + ((this.port=="")?"":(":"+this.port)) +
-			 	 this.pathname + this.search + this.hash;
-		},
-		get pathname(){
-			var m = this.href;
-			m = pathname.exec(m.substring(m.indexOf(this.hostname)));
-			return m&&m.length>1?m[1]:"/";
-		},
-		set pathname(_pathname){
-			this.href = this.protocol + this.host + _pathname + 
-				this.search + this.hash;
-		},
-		get port(){
-			var m = port.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set port(_port){
-			this.href = this.protocol + this.hostname + ":"+_port + this.pathname + 
-				this.search + this.hash;
-		},
-		get protocol(){
-			return protocol.exec(this.href)[0];
-		},
-		set protocol(_protocol){
-			this.href = _protocol + this.host + this.pathname + 
-				this.search + this.hash;
-		},
-		get search(){
-			var m = search.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set search(_search){
-			this.href = this.protocol + this.host + this.pathname + 
-				_search + this.hash;
-		}
-  });
-
-})();
-
-$w.Anchor = Anchor;
-$debug("Defining HTMLAreaElement");
-/* 
-* HTMLAreaElement - DOM Level 2
-*/
-var HTMLAreaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLAreaElement.prototype = new HTMLElement;
-__extend__(HTMLAreaElement.prototype, {
-    get accessKey(){
-        return this.getAttribute('accesskey');
-    },
-    set accessKey(value){
-        this.setAttribute('accesskey',value);
-    },
-    get alt(){
-        return this.getAttribute('alt');
-    },
-    set alt(value){
-        this.setAttribute('alt',value);
-    },
-    get coords(){
-        return this.getAttribute('coords');
-    },
-    set coords(value){
-        this.setAttribute('coords',value);
-    },
-    get href(){
-        return this.getAttribute('href');
-    },
-    set href(value){
-        this.setAttribute('href',value);
-    },
-    get noHref(){
-        return this.hasAttribute('href');
-    },
-    get shape(){
-        //TODO
-        return 0;
-    },
-    /*get tabIndex(){
-        return this.getAttribute('tabindex');
-    },
-    set tabIndex(value){
-        this.setAttribute('tabindex',value);
-    },*/
-    get target(){
-        return this.getAttribute('target');
-    },
-    set target(value){
-        this.setAttribute('target',value);
-    }
-});
-
-$w.HTMLAreaElement = HTMLAreaElement;
-			$debug("Defining HTMLBaseElement");
-/* 
-* HTMLBaseElement - DOM Level 2
-*/
-var HTMLBaseElement = function(ownerDocument) {
-    //$log("creating anchor element");
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLBaseElement.prototype = new HTMLElement;
-__extend__(HTMLBaseElement.prototype, {
-    get href(){
-        return this.getAttribute('href');
-    },
-    set href(value){
-        this.setAttribute('href',value);
-    },
-    get target(){
-        return this.getAttribute('target');
-    },
-    set target(value){
-        this.setAttribute('target',value);
-    }
-});
-
-$w.HTMLBaseElement = HTMLBaseElement;		$debug("Defining HTMLQuoteElement");
-/* 
-* HTMLQuoteElement - DOM Level 2
-*/
-var HTMLQuoteElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLQuoteElement.prototype = new HTMLElement;
-__extend__(HTMLQuoteElement.prototype, {
-    get cite(){
-        return this.getAttribute('cite');
-    },
-    set cite(value){
-        this.setAttribute('cite',value);
-    }
-});
-
-$w.HTMLQuoteElement = HTMLQuoteElement;		$debug("Defining HTMLBodyElement");
-/*
-* HTMLBodyElement - DOM Level 2
-*/
-var HTMLBodyElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLBodyElement.prototype = new HTMLElement;
-__extend__(HTMLBodyElement.prototype, {
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
-    },
-    onunload: function(event){
-        __eval__(this.getAttribute('onunload')||'', this)
-    }
-});
-
-$w.HTMLBodyElement = HTMLBodyElement;
-$debug("Defining HTMLButtonElement");
-/*
-* HTMLButtonElement - DOM Level 2
-*/
-var HTMLButtonElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
-};
-HTMLButtonElement.prototype = new HTMLTypeValueInputs;
-__extend__(HTMLButtonElement.prototype, inputElements_status);
-__extend__(HTMLButtonElement.prototype, {
-    get dataFormatAs(){
-        return this.getAttribute('dataFormatAs');
-    },
-    set dataFormatAs(value){
-        this.setAttribute('dataFormatAs',value);
-    }
-});
-
-$w.HTMLButtonElement = HTMLButtonElement;
-
-$debug("Defining HTMLTableColElement");
-/* 
-* HTMLTableColElement - DOM Level 2
-*/
-var HTMLTableColElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLTableColElement.prototype = new HTMLElement;
-__extend__(HTMLTableColElement.prototype, {
-    get align(){
-        return this.getAttribute('align');
-    },
-    set align(value){
-        this.setAttribute('align', value);
-    },
-    get ch(){
-        return this.getAttribute('ch');
-    },
-    set ch(value){
-        this.setAttribute('ch', value);
-    },
-    get chOff(){
-        return this.getAttribute('ch');
-    },
-    set chOff(value){
-        this.setAttribute('ch', value);
-    },
-    get span(){
-        return this.getAttribute('span');
-    },
-    set span(value){
-        this.setAttribute('span', value);
-    },
-    get vAlign(){
-        return this.getAttribute('valign');
-    },
-    set vAlign(value){
-        this.setAttribute('valign', value);
-    },
-    get width(){
-        return this.getAttribute('width');
-    },
-    set width(value){
-        this.setAttribute('width', value);
-    }
-});
-
-$w.HTMLTableColElement = HTMLTableColElement;
-$debug("Defining HTMLModElement");
-/* 
-* HTMLModElement - DOM Level 2
-*/
-var HTMLModElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLModElement.prototype = new HTMLElement;
-__extend__(HTMLModElement.prototype, {
-    get cite(){
-        return this.getAttribute('cite');
-    },
-    set cite(value){
-        this.setAttribute('cite', value);
-    },
-    get dateTime(){
-        return this.getAttribute('datetime');
-    },
-    set dateTime(value){
-        this.setAttribute('datetime', value);
-    }
-});
-
-$w.HTMLModElement = HTMLModElement;	/*
- * This file is a component of env.js,
- *     http://github.com/gleneivey/env-js/commits/master/README
- * a Pure JavaScript Browser Environment
- * Copyright 2009 John Resig, licensed under the MIT License
- *     http://www.opensource.org/licenses/mit-license.php
- */
-
-
-$debug("Defining HTMLDivElement");
-/*
-* HTMLDivElement - DOM Level 2
-*/
-var HTMLDivElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLDivElement.prototype = new HTMLElement;
-__extend__(HTMLDivElement.prototype, {
-    get align(){
-        return this.getAttribute('align') || 'left';
-    },
-    set align(value){
-        this.setAttribute('align', value);
-    }
-});
-
-$w.HTMLDivElement = HTMLDivElement;
-$debug("Defining HTMLLegendElement");
-/*
-* HTMLLegendElement - DOM Level 2
-*/
-var HTMLLegendElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
-};
-HTMLLegendElement.prototype = new HTMLInputCommon;
-__extend__(HTMLLegendElement.prototype, {
-    get align(){
-        return this.getAttribute('align');
-    },
-    set align(value){
-        this.setAttribute('align',value);
-    }
-});
-
-$w.HTMLLegendElement = HTMLLegendElement;
-$debug("Defining HTMLFieldSetElement");
-/*
-* HTMLFieldSetElement - DOM Level 2
-*/
-var HTMLFieldSetElement = function(ownerDocument) {
-    this.HTMLLegendElement = HTMLLegendElement;
-    this.HTMLLegendElement(ownerDocument);
-};
-HTMLFieldSetElement.prototype = new HTMLLegendElement;
-__extend__(HTMLFieldSetElement.prototype, {
-    get margin(){
-        return this.getAttribute('margin');
-    },
-    set margin(value){
-        this.setAttribute('margin',value);
-    }
-});
-
-$w.HTMLFieldSetElement = HTMLFieldSetElement;
-$debug("Defining HTMLFormElement");
-/* 
-* HTMLFormElement - DOM Level 2
-*/
-var HTMLFormElement = function(ownerDocument){
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLFormElement.prototype = new HTMLElement;
-__extend__(HTMLFormElement.prototype,{
-    get acceptCharset(){ 
-        return this.getAttribute('accept-charset');
-        
-    },
-    set acceptCharset(acceptCharset){
-        this.setAttribute('accept-charset', acceptCharset);
-        
-    },
-    get action(){
-        return this.getAttribute('action');
-        
-    },
-    set action(action){
-        this.setAttribute('action', action);
-        
-    },
-    get elements() {
-        return this.getElementsByTagName("*");
-        
-    },
-    get enctype(){
-        return this.getAttribute('enctype');
-        
-    },
-    set enctype(enctype){
-        this.setAttribute('enctype', enctype);
-        
-    },
-    get length() {
-        return this.elements.length;
-        
-    },
-    get method(){
-        return this.getAttribute('method');
-        
-    },
-    set method(action){
-        this.setAttribute('method', method);
-        
-    },
-	get name() {
-	    return this.getAttribute("name"); 
-	    
-    },
-	set name(val) { 
-	    return this.setAttribute("name",val); 
-	    
-    },
-	get target() { 
-	    return this.getAttribute("target"); 
-	    
-    },
-	set target(val) { 
-	    return this.setAttribute("target",val); 
-	    
-    },
-	submit:function(){
-	    __submit__(this);
-	    
-    },
-	reset:function(){
-	    __reset__(this);
-	    
-    },
-    onsubmit:function(){
-        if (__eval__(this.getAttribute('onsubmit')||'', this)) {
-            this.submit();
-        }
-    },
-    onreset:function(){
-        if (__eval__(this.getAttribute('onreset')||'', this)) {
-            this.reset();
-        }
-    }
-});
-
-$w.HTMLFormElement	= HTMLFormElement;$debug("Defining HTMLFrameElement");
-/* 
-* HTMLFrameElement - DOM Level 2
-*/
-var HTMLFrameElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLFrameElement.prototype = new HTMLElement;
-__extend__(HTMLFrameElement.prototype, {
-    get frameBorder(){
-        return this.getAttribute('border')||"";
-    },
-    set frameBorder(value){
-        this.setAttribute('border', value);
-    },
-    get longDesc(){
-        return this.getAttribute('longdesc')||"";
-    },
-    set longDesc(value){
-        this.setAttribute('longdesc', value);
-    },
-    get marginHeight(){
-        return this.getAttribute('marginheight')||"";
-    },
-    set marginHeight(value){
-        this.setAttribute('marginheight', value);
-    },
-    get marginWidth(){
-        return this.getAttribute('marginwidth')||"";
-    },
-    set marginWidth(value){
-        this.setAttribute('marginwidth', value);
-    },
-    get name(){
-        return this.getAttribute('name')||"";
-    },
-    set name(value){
-        this.setAttribute('name', value);
-    },
-    get noResize(){
-        return this.getAttribute('noresize')||"";
-    },
-    set noResize(value){
-        this.setAttribute('noresize', value);
-    },
-    get scrolling(){
-        return this.getAttribute('scrolling')||"";
-    },
-    set scrolling(value){
-        this.setAttribute('scrolling', value);
-    },
-    get src(){
-        return this.getAttribute('src')||"";
-    },
-    set src(value){
-        this.setAttribute('src', value);
-
-        if (value && value.length > 0){
-            $env.loadFrame(this, $env.location(value));
-            
-            var event = document.createEvent();
-            event.initEvent("load");
-            this.dispatchEvent( event, false );
-        }
-    },
-    get contentDocument(){
-        if (!this._content)
-            return null;
-        return this._content.document;
-    },
-    get contentWindow(){
-        return this._content;
-    },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
-    }
-});
-
-$w.HTMLFrameElement = HTMLFrameElement;
-$debug("Defining HTMLFrameSetElement");
-/* 
-* HTMLFrameSetElement - DOM Level 2
-*/
-var HTMLFrameSetElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLFrameSetElement.prototype = new HTMLElement;
-__extend__(HTMLFrameSetElement.prototype, {
-    get cols(){
-        return this.getAttribute('cols');
-    },
-    set cols(value){
-        this.setAttribute('cols', value);
-    },
-    get rows(){
-        return this.getAttribute('rows');
-    },
-    set rows(value){
-        this.setAttribute('rows', value);
-    }
-});
-
-$w.HTMLFrameSetElement = HTMLFrameSetElement;	$debug("Defining HTMLHeadElement");
-/* 
-* HTMLHeadElement - DOM Level 2
-*/
-var HTMLHeadElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLHeadElement.prototype = new HTMLElement;
-__extend__(HTMLHeadElement.prototype, {
-    get profile(){
-        return this.getAttribute('profile');
-    },
-    set profile(value){
-        this.setAttribute('profile', value);
-    },
-    //we override this so we can apply browser behavior specific to head children
-    //like loading scripts
-    appendChild : function(newChild) {
-        var newChild = HTMLElement.prototype.appendChild.apply(this,[newChild]);
-        //__evalScript__(newChild);
-        return newChild;
-    },
-    insertBefore : function(newChild, refChild) {
-        var newChild = HTMLElement.prototype.insertBefore.apply(this,[newChild]);
-        //__evalScript__(newChild);
-        return newChild;
-    }
-});
-
-var __evalScript__ = function(newChild){
-    //check to see if this is a script element and apply a script loading strategy
-    //the check against the ownerDocument isnt really enough to support frames in
-    // the long run, but for now it's ok
-    if(newChild.nodeType == DOMNode.ELEMENT_NODE && 
-        newChild.ownerDocument == window.document ){
-        if(newChild.nodeName.toUpperCase() == "SCRIPT"){
-            $debug("loading script via policy. ");
-            $policy.loadScript(newChild);
-        }
-    }
-};
-
-$w.HTMLHeadElement = HTMLHeadElement;
-$debug("Defining HTMLIFrameElement");
-/* 
-* HTMLIFrameElement - DOM Level 2
-*/
-var HTMLIFrameElement = function(ownerDocument) {
-    this.HTMLFrameElement = HTMLFrameElement;
-    this.HTMLFrameElement(ownerDocument);
-};
-HTMLIFrameElement.prototype = new HTMLFrameElement;
-__extend__(HTMLIFrameElement.prototype, {
-	get height() { 
-	    return this.getAttribute("height") || ""; 
-    },
-	set height(val) { 
-	    return this.setAttribute("height",val); 
-    },
-	get width() { 
-	    return this.getAttribute("width") || ""; 
-    },
-	set width(val) { 
-	    return this.setAttribute("width",val); 
-    }
-});
-
-$w.HTMLIFrameElement = HTMLIFrameElement;
-			$debug("Defining HTMLImageElement");
-/* 
-* HTMLImageElement - DOM Level 2
-*/
-var HTMLImageElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLImageElement.prototype = new HTMLElement;
-__extend__(HTMLImageElement.prototype, {
-    get alt(){
-        return this.getAttribute('alt');
-    },
-    set alt(value){
-        this.setAttribute('alt', value);
-    },
-    get height(){
-        return this.getAttribute('height');
-    },
-    set height(value){
-        this.setAttribute('height', value);
-    },
-    get isMap(){
-        return this.hasAttribute('map');
-    },
-    set useMap(value){
-        this.setAttribute('map', value);
-    },
-    get longDesc(){
-        return this.getAttribute('longdesc');
-    },
-    set longDesc(value){
-        this.setAttribute('longdesc', value);
-    },
-    get name(){
-        return this.getAttribute('name');
-    },
-    set name(value){
-        this.setAttribute('name', value);
-    },
-    get src(){
-        return this.getAttribute('src');
-    },
-    set src(value){
-        this.setAttribute('src', value);
-
-        var event = document.createEvent();
-        event.initEvent("load");
-        this.dispatchEvent( event, false );
-    },
-    get width(){
-        return this.getAttribute('width');
-    },
-    set width(value){
-        this.setAttribute('width', value);
-    },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
-    }
-});
-
-$w.HTMLImageElement = HTMLImageElement;$debug("Defining HTMLInputElement");
-/*
-* HTMLInputElement - DOM Level 2
-*/
-var HTMLInputElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
-};
-HTMLInputElement.prototype = new HTMLInputAreaCommon;
-__extend__(HTMLInputElement.prototype, {
-    get alt(){
-        return this.getAttribute('alt');
-    },
-    set alt(value){
-        this.setAttribute('alt', value);
-    },
-    get checked(){
-        return (this.getAttribute('checked')=='checked');
-    },
-    set checked(value){
-        this.setAttribute('checked', (value ? 'checked' :''));
-    },
-    get defaultChecked(){
-        return this.getAttribute('defaultChecked');
-    },
-    get height(){
-        return this.getAttribute('height');
-    },
-    set height(value){
-        this.setAttribute('height',value);
-    },
-    get maxLength(){
-        return Number(this.getAttribute('maxlength')||'0');
-    },
-    set maxLength(value){
-        this.setAttribute('maxlength', value);
-    },
-    get src(){
-        return this.getAttribute('src');
-    },
-    set src(value){
-        this.setAttribute('src', value);
-    },
-    get useMap(){
-        return this.getAttribute('map');
-    },
-    get width(){
-        return this.getAttribute('width');
-    },
-    set width(value){
-        this.setAttribute('width',value);
-    },
-    click:function(){
-        __click__(this);
-    }
-});
-
-$w.HTMLInputElement = HTMLInputElement;
-
-$debug("Defining HTMLLabelElement");
-/* 
-* HTMLLabelElement - DOM Level 2
-*/
-var HTMLLabelElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
-};
-HTMLLabelElement.prototype = new HTMLInputCommon;
-__extend__(HTMLLabelElement.prototype, inputElements_dataProperties);
-__extend__(HTMLLabelElement.prototype, {
-    get htmlFor(){
-        return this.getAttribute('for');
-    },
-    set htmlFor(value){
-        this.setAttribute('for',value);
-    },
-    get dataFormatAs(){
-        return this.getAttribute('dataFormatAs');
-    },
-    set dataFormatAs(value){
-        this.setAttribute('dataFormatAs',value);
-    }
-});
-
-$w.HTMLLabelElement = HTMLLabelElement;
-/**
-* Link - HTMLElement 
-*/
-$w.__defineGetter__("Link", function(){
-  return function(){
-    throw new Error("Object cannot be created in this context");
-  };
-});
-
-
-$debug("Defining HTMLLinkElement");
-/* 
-* HTMLLinkElement - DOM Level 2
-*/
-var HTMLLinkElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLLinkElement.prototype = new HTMLElement;
-__extend__(HTMLLinkElement.prototype, {
-    get disabled(){
-        return this.getAttribute('disabled');
-    },
-    set disabled(value){
-        this.setAttribute('disabled',value);
-    },
-    get charset(){
-        return this.getAttribute('charset');
-    },
-    set charset(value){
-        this.setAttribute('charset',value);
-    },
-    get href(){
-        return this.getAttribute('href');
-    },
-    set href(value){
-        this.setAttribute('href',value);
-    },
-    get hreflang(){
-        return this.getAttribute('hreflang');
-    },
-    set hreflang(value){
-        this.setAttribute('hreflang',value);
-    },
-    get media(){
-        return this.getAttribute('media');
-    },
-    set media(value){
-        this.setAttribute('media',value);
-    },
-    get rel(){
-        return this.getAttribute('rel');
-    },
-    set rel(value){
-        this.setAttribute('rel',value);
-    },
-    get rev(){
-        return this.getAttribute('rev');
-    },
-    set rev(value){
-        this.setAttribute('rev',value);
-    },
-    get target(){
-        return this.getAttribute('target');
-    },
-    set target(value){
-        this.setAttribute('target',value);
-    },
-    get type(){
-        return this.getAttribute('type');
-    },
-    set type(value){
-        this.setAttribute('type',value);
-    },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this)
-    }
-});
-
-$w.HTMLLinkElement = HTMLLinkElement;
-$debug("Defining HTMLMapElement");
-/* 
-* HTMLMapElement - DOM Level 2
-*/
-var HTMLMapElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLMapElement.prototype = new HTMLElement;
-__extend__(HTMLMapElement.prototype, {
-    get areas(){
-        return this.getElementsByTagName('area');
-    },
-    get name(){
-        return this.getAttribute('name');
-    },
-    set name(value){
-        this.setAttribute('name',value);
-    }
-});
-
-$w.HTMLMapElement = HTMLMapElement;$debug("Defining HTMLMetaElement");
-/* 
-* HTMLMetaElement - DOM Level 2
-*/
-var HTMLMetaElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLMetaElement.prototype = new HTMLElement;
-__extend__(HTMLMetaElement.prototype, {
-    get content(){
-        return this.getAttribute('content');
-    },
-    set content(value){
-        this.setAttribute('content',value);
-    },
-    get httpEquiv(){
-        return this.getAttribute('http-equiv');
-    },
-    set httpEquiv(value){
-        this.setAttribute('http-equiv',value);
-    },
-    get name(){
-        return this.getAttribute('name');
-    },
-    set name(value){
-        this.setAttribute('name',value);
-    },
-    get scheme(){
-        return this.getAttribute('scheme');
-    },
-    set scheme(value){
-        this.setAttribute('scheme',value);
-    }
-});
-
-$w.HTMLMetaElement = HTMLMetaElement;
-$debug("Defining HTMLObjectElement");
-/* 
-* HTMLObjectElement - DOM Level 2
-*/
-var HTMLObjectElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLObjectElement.prototype = new HTMLElement;
-__extend__(HTMLObjectElement.prototype, {
-    get code(){
-        return this.getAttribute('code');
-    },
-    set code(value){
-        this.setAttribute('code',value);
-    },
-    get archive(){
-        return this.getAttribute('archive');
-    },
-    set archive(value){
-        this.setAttribute('archive',value);
-    },
-    get codeBase(){
-        return this.getAttribute('codebase');
-    },
-    set codeBase(value){
-        this.setAttribute('codebase',value);
-    },
-    get codeType(){
-        return this.getAttribute('codetype');
-    },
-    set codeType(value){
-        this.setAttribute('codetype',value);
-    },
-    get data(){
-        return this.getAttribute('data');
-    },
-    set data(value){
-        this.setAttribute('data',value);
-    },
-    get declare(){
-        return this.getAttribute('declare');
-    },
-    set declare(value){
-        this.setAttribute('declare',value);
-    },
-    get height(){
-        return this.getAttribute('height');
-    },
-    set height(value){
-        this.setAttribute('height',value);
-    },
-    get standby(){
-        return this.getAttribute('standby');
-    },
-    set standby(value){
-        this.setAttribute('standby',value);
-    },
-    /*get tabIndex(){
-        return this.getAttribute('tabindex');
-    },
-    set tabIndex(value){
-        this.setAttribute('tabindex',value);
-    },*/
-    get type(){
-        return this.getAttribute('type');
-    },
-    set type(value){
-        this.setAttribute('type',value);
-    },
-    get useMap(){
-        return this.getAttribute('usemap');
-    },
-    set useMap(value){
-        this.setAttribute('usemap',value);
-    },
-    get width(){
-        return this.getAttribute('width');
-    },
-    set width(value){
-        this.setAttribute('width',value);
-    },
-    get contentDocument(){
-        return this.ownerDocument;
-    }
-});
-
-$w.HTMLObjectElement = HTMLObjectElement;
-			$debug("Defining HTMLOptGroupElement");
-/* 
-* HTMLOptGroupElement - DOM Level 2
-*/
-var HTMLOptGroupElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLOptGroupElement.prototype = new HTMLElement;
-__extend__(HTMLOptGroupElement.prototype, {
-    get disabled(){
-        return this.getAttribute('disabled');
-    },
-    set disabled(value){
-        this.setAttribute('disabled',value);
-    },
-    get label(){
-        return this.getAttribute('label');
-    },
-    set label(value){
-        this.setAttribute('label',value);
-    },
-});
-
-$w.HTMLOptGroupElement = HTMLOptGroupElement;		$debug("Defining HTMLOptionElement");
-/*
-* HTMLOptionElement - DOM Level 2
-*/
-var HTMLOptionElement = function(ownerDocument) {
-    this.HTMLInputCommon = HTMLInputCommon;
-    this.HTMLInputCommon(ownerDocument);
-};
-HTMLOptionElement.prototype = new HTMLInputCommon;
-__extend__(HTMLOptionElement.prototype, {
-    get defaultSelected(){
-        return this.getAttribute('defaultSelected');
-    },
-    set defaultSelected(value){
-        this.setAttribute('defaultSelected',value);
-    },
-    get index(){
-        var options = this.parent.childNodes;
-        for(var i; i<options.length;i++){
-            if(this == options[i])
-                return i;
-        }
-        return -1;
-    },
-    get label(){
-        return this.getAttribute('label');
-    },
-    set label(value){
-        this.setAttribute('label',value);
-    },
-    get selected(){
-        return (this.getAttribute('selected')=='selected');
-    },
-    set selected(value){
-        if(this.defaultSelected===null && this.selected!==null){
-            this.defaultSelected = this.selected;
-        }
-        var selectedValue = (value ? 'selected' : '');
-        if (this.getAttribute('selected') == selectedValue) {
-            // prevent inifinite loops (option's selected modifies 
-            // select's value which modifies option's selected)
-            return;
-        }
-        this.setAttribute('selected', selectedValue);
-        if (value) {
-            // set select's value to this option's value (this also 
-            // unselects previously selected value)
-            this.parentNode.value = this.value;
-        } else {
-            // if no other option is selected, select the first option in the select
-            var i, anythingSelected;
-            for (i=0; i<this.parentNode.options.length; i++) {
-                if (this.parentNode.options[i].selected) {
-                    anythingSelected = true;
-                    break;
-                }
-            }
-            if (!anythingSelected) {
-                this.parentNode.value = this.parentNode.options[0].value;
-            }
-        }
-
-    },
-    get text(){
-         return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ?
-             this.innerHTML :
-             this.nodeValue;
-    },
-    get value(){
-        return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
-            this.text :
-            this.getAttribute('value');
-    },
-    set value(value){
-        this.setAttribute('value',value);
-    }
-});
-
-$w.HTMLOptionElement = HTMLOptionElement;
-$debug("Defining HTMLParamElement");
-/* 
-* HTMLParamElement - DOM Level 2
-*/
-var HTMLParamElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLParamElement.prototype = new HTMLElement;
-__extend__(HTMLParamElement.prototype, {
-    get name(){
-        return this.getAttribute('name');
-    },
-    set name(value){
-        this.setAttribute('name',value);
-    },
-    get type(){
-        return this.getAttribute('type');
-    },
-    set type(value){
-        this.setAttribute('type',value);
-    },
-    get value(){
-        return this.getAttribute('value');
-    },
-    set value(value){
-        this.setAttribute('value',value);
-    },
-    get valueType(){
-        return this.getAttribute('valuetype');
-    },
-    set valueType(value){
-        this.setAttribute('valuetype',value);
-    },
-});
-
-$w.HTMLParamElement = HTMLParamElement;
-		$debug("Defining HTMLScriptElement");
-/* 
-* HTMLScriptElement - DOM Level 2
-*/
-var HTMLScriptElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLScriptElement.prototype = new HTMLElement;
-__extend__(HTMLScriptElement.prototype, {
-    get text(){
-        // text of script is in a child node of the element
-        // scripts with < operator must be in a CDATA node
-        for (var i=0; i<this.childNodes.length; i++) {
-            if (this.childNodes[i].nodeType == DOMNode.CDATA_SECTION_NODE) {
-                return this.childNodes[i].nodeValue;
-            }
-        } 
-        // otherwise there will be a text node containing the script
-        if (this.childNodes[0] && this.childNodes[0].nodeType == DOMNode.TEXT_NODE) {
-            return this.childNodes[0].nodeValue;
- 		}
-        return this.nodeValue;
-
-    },
-    set text(value){
-        this.nodeValue = value;
-        $env.loadInlineScript(this);
-    },
-    get htmlFor(){
-        return this.getAttribute('for');
-    },
-    set htmlFor(value){
-        this.setAttribute('for',value);
-    },
-    get event(){
-        return this.getAttribute('event');
-    },
-    set event(value){
-        this.setAttribute('event',value);
-    },
-    get charset(){
-        return this.getAttribute('charset');
-    },
-    set charset(value){
-        this.setAttribute('charset',value);
-    },
-    get defer(){
-        return this.getAttribute('defer');
-    },
-    set defer(value){
-        this.setAttribute('defer',value);
-    },
-    get src(){
-        return this.getAttribute('src');
-    },
-    set src(value){
-        this.setAttribute('src',value);
-    },
-    get type(){
-        return this.getAttribute('type');
-    },
-    set type(value){
-        this.setAttribute('type',value);
-    },
-    onload: function(event){
-        __eval__(this.getAttribute('onload')||'', this);
-    },
-    onerror: function(event){
-        __eval__(this.getAttribute('onerror')||'', this);
-    }
-});
-
-$w.HTMLScriptElement = HTMLScriptElement;$debug("Defining HTMLSelectElement");
-/*
-* HTMLSelectElement - DOM Level 2
-*/
-var HTMLSelectElement = function(ownerDocument) {
-    this.HTMLTypeValueInputs = HTMLTypeValueInputs;
-    this.HTMLTypeValueInputs(ownerDocument);
-
-    this._oldIndex = -1;
-};
-HTMLSelectElement.prototype = new HTMLTypeValueInputs;
-__extend__(HTMLSelectElement.prototype, inputElements_dataProperties);
-__extend__(HTMLButtonElement.prototype, inputElements_size);
-__extend__(HTMLSelectElement.prototype, inputElements_onchange);
-__extend__(HTMLSelectElement.prototype, inputElements_focusEvents);
-__extend__(HTMLSelectElement.prototype, {
-
-    // over-ride the value setter in HTMLTypeValueInputs
-    set value(newValue) {
-        var options = this.options,
-            i, index;
-        for (i=0; i<options.length; i++) {
-            if (options[i].value == newValue) {
-                index = i;
-                break;
-            }
-        }
-        if (index !== undefined) {
-            this.setAttribute('value', newValue);
-            this.selectedIndex = index;
-        }
-    },
-    get value() {
-        var value = this.getAttribute('value');
-        if (value === undefined || value === null) {
-            var index = this.selectedIndex;
-            return (index != -1) ? this.options[index].value : "";
-        } else {
-            return value;
-        }
-    },
-
-
-    get length(){
-        return this.options.length;
-    },
-    get multiple(){
-        return this.getAttribute('multiple');
-    },
-    set multiple(value){
-        this.setAttribute('multiple',value);
-    },
-    get options(){
-        return this.getElementsByTagName('option');
-    },
-    get selectedIndex(){
-        var options = this.options;
-        for(var i=0;i<options.length;i++){
-            if(options[i].selected){
-                return i;
-            }
-        };
-        return -1;
-    },
-    
-    set selectedIndex(value) {
-        var i;
-        for (i=0; i<this.options.length; i++) {
-            this.options[i].selected = (i == Number(value));
-        }
-    },
-    get type(){
-        var type = this.getAttribute('type');
-        return type?type:'select-one';
-    },
-
-    add : function(){
-        __add__(this);
-    },
-    remove : function(){
-        __remove__(this);
-    }
-});
-
-$w.HTMLSelectElement = HTMLSelectElement;
-
-$debug("Defining HTMLStyleElement");
-/* 
-* HTMLStyleElement - DOM Level 2
-*/
-var HTMLStyleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLStyleElement.prototype = new HTMLElement;
-__extend__(HTMLStyleElement.prototype, {
-    get disabled(){
-        return this.getAttribute('disabled');
-    },
-    set disabled(value){
-        this.setAttribute('disabled',value);
-    },
-    get media(){
-        return this.getAttribute('media');
-    },
-    set media(value){
-        this.setAttribute('media',value);
-    },
-    get type(){
-        return this.getAttribute('type');
-    },
-    set type(value){
-        this.setAttribute('type',value);
-    }
-});
-
-$w.HTMLStyleElement = HTMLStyleElement;$debug("Defining HTMLTableElement");
-/* 
-* HTMLTableElement - DOM Level 2
-* Implementation Provided by Steven Wood
-*/
-var HTMLTableElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-
-};
-
-HTMLTableElement.prototype = new HTMLElement;
-__extend__(HTMLTableElement.prototype, {
-    
-        get tFoot() { 
-        //tFoot returns the table footer.
-        return this.getElementsByTagName("tfoot")[0];
-    },
-    
-    createTFoot : function () {
-        var tFoot = this.tFoot;
-       
-        if (!tFoot) {
-            tFoot = document.createElement("tfoot");
-            this.appendChild(tFoot);
-        }
-        
-        return tFoot;
-    },
-    
-    deleteTFoot : function () {
-        var foot = this.tFoot;
-        if (foot) {
-            foot.parentNode.removeChild(foot);
-        }
-    },
-    
-    get tHead() { 
-        //tHead returns the table head.
-        return this.getElementsByTagName("thead")[0];
-    },
-    
-    createTHead : function () {
-        var tHead = this.tHead;
-       
-        if (!tHead) {
-            tHead = document.createElement("thead");
-            this.insertBefore(tHead, this.firstChild);
-        }
-        
-        return tHead;
-    },
-    
-    deleteTHead : function () {
-        var head = this.tHead;
-        if (head) {
-            head.parentNode.removeChild(head);
-        }
-    },
- 
-    appendChild : function (child) {
-        
-        var tagName;
-        if(child&&child.nodeType==DOMNode.ELEMENT_NODE){
-            tagName = child.tagName.toLowerCase();
-            if (tagName === "tr") {
-                // need an implcit <tbody> to contain this...
-                if (!this.currentBody) {
-                    this.currentBody = document.createElement("tbody");
-                
-                    DOMNode.prototype.appendChild.apply(this, [this.currentBody]);
-                }
-              
-                return this.currentBody.appendChild(child); 
-       
-            } else if (tagName === "tbody" || tagName === "tfoot" && this.currentBody) {
-                this.currentBody = child;
-                return DOMNode.prototype.appendChild.apply(this, arguments);  
-                
-            } else {
-                return DOMNode.prototype.appendChild.apply(this, arguments);
-            }
-        }else{
-            //tables can still have text node from white space
-            return DOMNode.prototype.appendChild.apply(this, arguments);
-        }
-    },
-     
-    get tBodies() {
-        return new HTMLCollection(this.getElementsByTagName("tbody"));
-        
-    },
-    
-    get rows() {
-        return new HTMLCollection(this.getElementsByTagName("tr"));
-    },
-    
-    insertRow : function (idx) {
-        if (idx === undefined) {
-            throw new Error("Index omitted in call to HTMLTableElement.insertRow ");
-        }
-        
-        var rows = this.rows, 
-            numRows = rows.length,
-            node,
-            inserted, 
-            lastRow;
-        
-        if (idx > numRows) {
-            throw new Error("Index > rows.length in call to HTMLTableElement.insertRow");
-        }
-        
-        var inserted = document.createElement("tr");
-        // If index is -1 or equal to the number of rows, 
-        // the row is appended as the last row. If index is omitted 
-        // or greater than the number of rows, an error will result
-        if (idx === -1 || idx === numRows) {
-            this.appendChild(inserted);
-        } else {
-            rows[idx].parentNode.insertBefore(inserted, rows[idx]);
-        }
-
-        return inserted;
-    },
-    
-    deleteRow : function (idx) {
-        var elem = this.rows[idx];
-        elem.parentNode.removeChild(elem);
-    },
-    
-    get summary() {
-        return this.getAttribute("summary");
-    },
-    
-    set summary(summary) {
-        this.setAttribute("summary", summary);
-    },
-    
-    get align() {
-        return this.getAttribute("align");
-    },
-    
-    set align(align) {
-        this.setAttribute("align", align);
-    },
-    
-     
-    get bgColor() {
-        return this.getAttribute("bgColor");
-    },
-    
-    set bgColor(bgColor) {
-        return this.setAttribute("bgColor", bgColor);
-    },
-   
-    get cellPadding() {
-        return this.getAttribute("cellPadding");
-    },
-    
-    set cellPadding(cellPadding) {
-        return this.setAttribute("cellPadding", cellPadding);
-    },
-    
-    
-    get cellSpacing() {
-        return this.getAttribute("cellSpacing");
-    },
-    
-    set cellSpacing(cellSpacing) {
-        this.setAttribute("cellSpacing", cellSpacing);
-    },
-
-    get frame() {
-        return this.getAttribute("frame");
-    },
-    
-    set frame(frame) { 
-        this.setAttribute("frame", frame);
-    },
-    
-    get rules() {
-        return this.getAttribute("rules");
-    }, 
-    
-    set rules(rules) {
-        this.setAttribute("rules", rules);
-    }, 
-    
-    get width() {
-        return this.getAttribute("width");
-    },
-    
-    set width(width) {
-        this.setAttribute("width", width);
     }
     
-});
-
-$w.HTMLTableElement = HTMLTableElement;		$debug("Defining HTMLTableSectionElement");
-/* 
-* HTMLxElement - DOM Level 2
-* - Contributed by Steven Wood
-*/
-var HTMLTableSectionElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
+    return valid;
 };
-HTMLTableSectionElement.prototype = new HTMLElement;
-__extend__(HTMLTableSectionElement.prototype, {    
-    
-    appendChild : function (child) {
-    
-        // disallow nesting of these elements.
-        if (child.tagName.match(/TBODY|TFOOT|THEAD/)) {
-            return this.parentNode.appendChild(child);
-        } else {
-            return DOMNode.prototype.appendChild.apply(this, arguments);
-        }
 
-    },
-    
-    get align() {
-        return this.getAttribute("align");
-    },
-
-    get ch() {
-        return this.getAttribute("ch");
-    },
-     
-    set ch(ch) {
-        this.setAttribute("ch", ch);
-    },
-    
-    // ch gets or sets the alignment character for cells in a column. 
-    set chOff(chOff) {
-        this.setAttribute("chOff", chOff);
-    },
-     
-    get chOff(chOff) {
-        return this.getAttribute("chOff");
-    },
-     
-    get vAlign () {
-         return this.getAttribute("vAlign");
-    },
-    
-    get rows() {
-        return new HTMLCollection(this.getElementsByTagName("tr"));
-    },
-    
-    insertRow : function (idx) {
-        if (idx === undefined) {
-            throw new Error("Index omitted in call to HTMLTableSectionElement.insertRow ");
-        }
-        
-        var numRows = this.rows.length,
-            node = null;
-        
-        if (idx > numRows) {
-            throw new Error("Index > rows.length in call to HTMLTableSectionElement.insertRow");
-        }
-        
-        var row = document.createElement("tr");
-        // If index is -1 or equal to the number of rows, 
-        // the row is appended as the last row. If index is omitted 
-        // or greater than the number of rows, an error will result
-        if (idx === -1 || idx === numRows) {
-            this.appendChild(row);
-        } else {
-            node = this.firstChild;
-
-            for (var i=0; i<idx; i++) {
-                node = node.nextSibling;
-            }
-        }
-            
-        this.insertBefore(row, node);
-        
-        return row;
-    },
-    
-    deleteRow : function (idx) {
-        var elem = this.rows[idx];
-        this.removeChild(elem);
-    }
-
-});
-
-$w.HTMLTableSectionElement = HTMLTableSectionElement;
-$debug("Defining HTMLTableCellElement");
-/* 
-* HTMLTableCellElement - DOM Level 2
-* Implementation Provided by Steven Wood
-*/
-var HTMLTableCellElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLTableCellElement.prototype = new HTMLElement;
-__extend__(HTMLTableCellElement.prototype, {
-    
-    
-    // TODO :
-    
-});
-
-$w.HTMLTableCellElement	= HTMLTableCellElement;$debug("Defining HTMLTextAreaElement");
-/*
-* HTMLTextAreaElement - DOM Level 2
-*/
-var HTMLTextAreaElement = function(ownerDocument) {
-    this.HTMLInputAreaCommon = HTMLInputAreaCommon;
-    this.HTMLInputAreaCommon(ownerDocument);
-};
-HTMLTextAreaElement.prototype = new HTMLInputAreaCommon;
-__extend__(HTMLTextAreaElement.prototype, {
-    get cols(){
-        return this.getAttribute('cols');
-    },
-    set cols(value){
-        this.setAttribute('cols', value);
-    },
-    get rows(){
-        return this.getAttribute('rows');
-    },
-    set rows(value){
-        this.setAttribute('rows', value);
-    }
-});
-
-$w.HTMLTextAreaElement = HTMLTextAreaElement;
-$debug("Defining HTMLTitleElement");
-/* 
-* HTMLTitleElement - DOM Level 2
-*/
-var HTMLTitleElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-};
-HTMLTitleElement.prototype = new HTMLElement;
-__extend__(HTMLTitleElement.prototype, {
-    get text() {
-        return this.innerText;
-    },
-
-    set text(titleStr) {
-        this.innerHTML = titleStr; // if paranoid, would error on embedded HTML
-    }
-});
-
-$w.HTMLTitleElement = HTMLTitleElement;
-$debug("Defining HTMLTableRowElement");
-/* 
-* HTMLRowElement - DOM Level 2
-* Implementation Provided by Steven Wood
-*/
-var HTMLTableRowElement = function(ownerDocument) {
-    this.HTMLElement = HTMLElement;
-    this.HTMLElement(ownerDocument);
-
-};
-HTMLTableRowElement.prototype = new HTMLElement;
-__extend__(HTMLTableRowElement.prototype, {
-    
-    appendChild : function (child) {
-    
-       var retVal = DOMNode.prototype.appendChild.apply(this, arguments);
-       retVal.cellIndex = this.cells.length -1;
-             
-       return retVal;
-    },
-    // align gets or sets the horizontal alignment of data within cells of the row.
-    get align() {
-        return this.getAttribute("align");
-    },
-     
-    get bgColor() {
-        return this.getAttribute("bgcolor");
-    },
-         
-    get cells() {
-        var nl = this.getElementsByTagName("td");
-        return new HTMLCollection(nl);
-    },
-       
-    get ch() {
-        return this.getAttribute("ch");
-    },
-     
-    set ch(ch) {
-        this.setAttribute("ch", ch);
-    },
-    
-    // ch gets or sets the alignment character for cells in a column. 
-    set chOff(chOff) {
-        this.setAttribute("chOff", chOff);
-    },
-     
-    get chOff(chOff) {
-        return this.getAttribute("chOff");
-    },
-   
-    get rowIndex() {
-        var nl = this.parentNode.childNodes;
-        for (var i=0; i<nl.length; i++) {
-            if (nl[i] === this) {
-                return i;
-            }
-        }
-    },
-
-    get sectionRowIndex() {
-        var nl = this.parentNode.getElementsByTagName(this.tagName);
-        for (var i=0; i<nl.length; i++) {
-            if (nl[i] === this) {
-                return i;
-            }
-        }
-    },
-     
-    get vAlign () {
-         return this.getAttribute("vAlign");
-    },
-
-    insertCell : function (idx) {
-        if (idx === undefined) {
-            throw new Error("Index omitted in call to HTMLTableRow.insertCell");
-        }
-        
-        var numCells = this.cells.length,
-            node = null;
-        
-        if (idx > numCells) {
-            throw new Error("Index > rows.length in call to HTMLTableRow.insertCell");
-        }
-        
-        var cell = document.createElement("td");
-
-        if (idx === -1 || idx === numCells) {
-            this.appendChild(cell);
-        } else {
-            
-
-            node = this.firstChild;
-
-            for (var i=0; i<idx; i++) {
-                node = node.nextSibling;
-            }
-        }
-            
-        this.insertBefore(cell, node);
-        cell.cellIndex = idx;
-          
-        return cell;
-    },
-
-    
-    deleteCell : function (idx) {
-        var elem = this.cells[idx];
-        this.removeChild(elem);
-    }
-
-});
-
-$w.HTMLTableRowElement = HTMLTableRowElement;
 /**
  * @author thatcher
  */
-$debug("Defining XMLSerializer");
-/*
-* XMLSerializer 
-*/
-$w.__defineGetter__("XMLSerializer", function(){
-    return new XMLSerializer(arguments);
+DOMParser = function(principle, documentURI, baseURI){};
+__extend__(DOMParser.prototype,{
+    parseFromString: function(xmlstring, mimetype){
+        var doc = new Document(new DOMImplementation()),
+            e4;
+        
+        XML.ignoreComments = false;
+        XML.ignoreProcessingInstructions = false;
+        XML.ignoreWhitespace = false;
+        
+        xmlstring = xmlstring.replace(/<\?xml.*\?>/);
+        
+        e4 = new XMLList(xmlstring);
+        
+        __toDomNode__(e4, doc, doc);
+        
+        //console.log('xml \n %s', doc.documentElement.xml);
+        return doc;
+        
+    }
 });
 
-var XMLSerializer = function() {
+var __toDomNode__ = function(e4, parent, doc){
+    var xnode, 
+        domnode,
+        children,
+        target,
+        value,
+        length,
+        element,
+        kind;
+    //console.log('converting e4x node list \n %s', e4)
+    for each(xnode in e4){
+        kind = xnode.nodeKind(); 
+        //console.log('treating node kind %s', kind);
+        switch(kind){
+            case 'element':
+                //console.log('creating element %s %s', xnode.localName(), xnode.namespace());
+                if(xnode.namespace() && (xnode.namespace()+'') !== ''){
+                    //console.log('createElementNS %s %s',xnode.namespace()+'', xnode.localName() );
+                    domnode = doc.createElementNS(xnode.namespace()+'', xnode.localName());
+                }else{
+                    domnode = doc.createElement(xnode.name()+'');
+                }
+                parent.appendChild(domnode);
+                 __toDomNode__(xnode.attributes(), domnode, doc);
+                length = xnode.children().length();
+                //console.log('recursing? %s', length?"yes":"no");
+                if(xnode.children().length()>0){
+                    __toDomNode__(xnode.children(), domnode, doc);
+                }
+                break;
+            case 'attribute':
+                //console.log('setting attribute %s %s %s', 
+                //    xnode.localName(), xnode.namespace(), xnode.text());
+                if(xnode.namespace() && xnode.namespace().prefix){
+                    //console.log("%s", xnode.namespace().prefix);
+                    parent.setAttributeNS(xnode.namespace()+'', 
+                        xnode.namespace().prefix+':'+xnode.localName(), 
+                        xnode.text());
+                }else if((xnode.name()+'').match("http://www.w3.org/2000/xmlns/::")){
+                    if(xnode.localName()!=='xmlns'){
+                        parent.setAttributeNS('http://www.w3.org/2000/xmlns/', 
+                            'xmlns:'+xnode.localName(), 
+                            xnode.text());
+                    }
+                }else{
+                    parent.setAttribute(xnode.localName()+'', xnode.text());
+                }
+                break;
+            case 'text':
+                //console.log('creating text node : %s', xnode);
+                domnode = doc.createTextNode(xnode+'');
+                parent.appendChild(domnode);
+                break;
+            case 'comment':
+                //console.log('creating comment node : %s', xnode);
+                value = xnode+'';
+                domnode = doc.createComment(value.substring(4,value.length-3));
+                parent.appendChild(domnode);
+                break;
+            case 'processing-instruction':
+                //console.log('creating processing-instruction node : %s', xnode);
+                value = xnode+'';
+                target = value.split(' ')[0].substring(2);
+                value = value.split(' ').splice(1).join(" ").replace('?>','');
+                //console.log('creating processing-instruction data : %s', value);
+                domnode = doc.createProcessingInstruction(target, value);
+                parent.appendChild(domnode);
+                break;
+        }
+    }
+}; /**
+ * @author envjs team
+ * @class XMLSerializer 
+ */
 
-};
+XMLSerializer = function() {};
+
 __extend__(XMLSerializer.prototype, {
     serializeToString: function(node){
         return node.xml;
-    }
-});/**
- * @author thatcher
- */
-$debug("Defining XPathExpression");
-/*
-* XPathExpression 
-*/
-$w.__defineGetter__("XPathExpression", function(){
-    return XPathExpression;
-});
-
-var XPathExpression = function() {};
-__extend__(XPathExpression.prototype, {
-    evaluate: function(){
-        //TODO for now just return an empty XPathResult
-        return new XPathResult();        
-    }
-});/**
- * @author thatcher
- */
-$debug("Defining XPathResult");
-/*
-* XPathResult 
-*/
-$w.__defineGetter__("XPathResult", function(){
-    return XPathResult;
-});
-
-var XPathResult = function() {
-    this.snapshotLength = 0;
-    this.stringValue = '';
-};
-
-__extend__( XPathResult, {
-    ANY_TYPE:                     0,
-    NUMBER_TYPE:                  1,
-    STRING_TYPE:                  2,
-    BOOLEAN_TYPE:                 3,
-    UNORDERED_NODE_ITERATOR_TYPE: 4,
-    ORDERED_NODEITERATOR_TYPE:    5,
-    UNORDERED_NODE_SNAPSHOT_TYPE: 6,
-    ORDERED_NODE_SNAPSHOT_TYPE:   7,
-    ANY_ORDERED_NODE_TYPE:        8,
-    FIRST_ORDERED_NODE_TYPE:      9
-});
-
-__extend__(XPathResult.prototype, {
-    get booleanValue(){
-      //TODO  
     },
-    get invalidIteration(){
-        //TODO
-    },
-    get numberValue(){
-        //TODO
-    },
-    get resultType(){
-        //TODO
-    },
-    get singleNodeValue(){
-        //TODO
-    },
-    iterateNext: function(){
-        //TODO
-    },
-    snapshotItem: function(index){
-        //TODO
+    toString : function(){
+        return "[object XMLSerializer]";
     }
 });
 
 /**
- * @author thatcher
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
  */
 
-$w.__defineGetter__("XSLTProcessor", function(){
-    return new XSLTProcessor(arguments);
-});
-
-var XSLTProcessor = function() {
-    this.__stylesheet__ = null;
-};
-__extend__(XSLTProcessor.prototype, {
-    clearParameters: function(){
-        //TODO
-    },
-    getParameter: function(nsuri, name){
-        //TODO
-    },
-    importStyleSheet: function(stylesheet){
-        this.__stylesheet__ = stylesheet;
-    },
-    removeParameter: function(nsuri, name){
-        //TODO
-    },
-    reset: function(){
-        //TODO
-    },
-    setParameter: function(nsuri, name, value){
-        //TODO
-    },
-    transformToDocument: function(sourceNode){
-        return xsltProcess(sourceNode, this.__stylesheet__);
-    },
-    transformToFragment: function(sourceNode, ownerDocument){
-        return xsltProcess(sourceNode, this.__stylesheet__).childNodes;
-    }
-});$debug("Defining Event");
+})();
 /*
-* event.js
-*/
-var Event = function(options){
-      options={};
-  __extend__(this,{
-    CAPTURING_PHASE : 1,
-    AT_TARGET       : 2,
-    BUBBLING_PHASE  : 3
-  });
-  $debug("Creating new Event");
-  var $bubbles = options.bubbles?options.bubbles:true,
-      $cancelable = options.cancelable?options.cancelable:true,
-      $currentTarget = options.currentTarget?options.currentTarget:null,
-      $eventPhase = options.eventPhase?options.eventPhase:Event.CAPTURING_PHASE,
-      $target = options.target?options.target:null,
-      $timestamp = options.timestamp?options.timestamp:new Date().getTime().toString(),
-      $type = options.type?options.type:"";
-  return __extend__(this,{
-    get bubbles(){return $bubbles;},
-    get cancelable(){return $cancelable;},
-    get currentTarget(){return $currentTarget;},
-    get eventPhase(){return $eventPhase;},
-    get target(){return $target;},
-    set target(target){ $target = target;},
-    get timestamp(){return $timestamp;},
-    get type(){return $type;},
-    initEvent: function(type,bubbles,cancelable){
-      $type=type?type:$type;
-      $bubbles=bubbles?bubbles:$bubbles;
-      $cancelable=cancelable?cancelable:$cancelable;
-    },
-    preventDefault: function(){return;/* TODO */},
-    stopPropagation: function(){return;/* TODO */}
-  });
-};
-
-$w.Event = Event;
-$debug("Defining MouseEvent");
+ * Envjs event.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ * 
+ * This file simply provides the global definitions we need to 
+ * be able to correctly implement to core browser DOM Event interfaces.
+ */
+var Event,
+    MouseEvent,
+    UIEvent,
+    KeyboardEvent,
+    MutationEvent,
+    DocumentEvent,
+    EventTarget,
+    EventException,
+    //nonstandard but very useful for implementing mutation events 
+    //among other things like general profiling
+    Aspect;
 /*
-*	mouseevent.js
-*/
-$debug("Defining UiEvent");
-/*
-*	uievent.js
-*/
+ * Envjs event.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
 
-var $onblur,
-    $onfocus,
-    $onresize;/*
-* CSS2Properties - DOM Level 2 CSS
-*/
-var CSS2Properties = function(element){
-    //this.onSetCallback = options.onSet?options.onSet:(function(){});
-    this.styleIndex = __supportedStyles__();
-    this.nameMap = {};
-    this.__previous__ = {};
-    this.__element__ = element;
-    __cssTextToStyles__(this, element.getAttribute('style')||'');
+(function(){
+
+
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
 };
-__extend__(CSS2Properties.prototype, {
-    get cssText(){
-        var css = '';
-        for(var i=0;i<this.length;i++){
-            css+=this[i]+":"+this.getPropertyValue(this[i])+';'
-        }
-        return css;
-    },
-    set cssText(cssText){ 
-        __cssTextToStyles__(this, cssText); 
-    },
-    getPropertyCSSValue : function(name){
-        //?
-    },
-    getPropertyPriority : function(){
-        
-    },
-    getPropertyValue : function(name){
-        if(name in this.styleIndex){
-            //$info(name +' in style index');
-            return this[name];
-        }else if(name in this.nameMap){
-            return this[__toCamelCase__(name)];
-        }
-        //$info(name +' not found');
-        return null;
-    },
-    item : function(index){
-        return this[index];
-    },
-    removeProperty: function(name){
-        this.styleIndex[name] = null;
-    },
-    setProperty: function(name, value){
-        //$info('setting css property '+name+' : '+value);
-        name = __toCamelCase__(name);
-        if(name in this.styleIndex){
-            //$info('setting camel case css property ');
-            if (value!==undefined){
-                this.styleIndex[name] = value;
-            }
-            if(name!==__toDashed__(name)){
-                //$info('setting dashed name css property ');
-                name = __toDashed__(name);
-                this[name] = value;
-                if(!(name in this.nameMap)){
-                    Array.prototype.push.apply(this, [name]);
-                    this.nameMap[name] = this.length;
-                }
-                
-            }
-        }
-        //$info('finished setting css property '+name+' : '+value);
-    },
-    toString:function(){
-        if (this.length >0){
-            return "{\n\t"+Array.prototype.join.apply(this,[';\n\t'])+"}\n";
-        }else{
-            return '';
-        }
-    }
-});
-
-
-
-var __cssTextToStyles__ = function(css2props, cssText){
-    //var styleArray=[];
-    var style, styles = cssText.split(';');
-    for ( var i = 0; i < styles.length; i++ ) {
-        //$log("Adding style property " + styles[i]);
-    	style = styles[i].split(':');
-        //$log(" style  " + style[0]);
-    	if ( style.length == 2 ){
-            //$log(" value  " + style[1]);
-    	    css2props.setProperty( style[0].replace(" ",'','g'), style[1].replace(" ",'','g'));
-    	}
-    }
-};
-
-var __toCamelCase__ = function(name) {
-    //$info('__toCamelCase__'+name);
-    if(name){
-    	return name.replace(/\-(\w)/g, function(all, letter){
-    		return letter.toUpperCase();
-    	});
-    }
-    return name;
-};
-
-var __toDashed__ = function(camelCaseName) {
-    //$info("__toDashed__"+camelCaseName);
-    if(camelCaseName){
-    	return camelCaseName.replace(/[A-Z]/g, function(all) {
-    		return "-" + all.toLowerCase();
-    	});
-    }
-    return camelCaseName;
-};
-
-//Obviously these arent all supported but by commenting out various sections
-//this provides a single location to configure what is exposed as supported.
-var __supportedStyles__ = function(){
-    return {
-        azimuth:                null,
-        background:	            null,
-        backgroundAttachment:	null,
-        backgroundColor:	    null,
-        backgroundImage:	    null,
-        backgroundPosition:	    null,
-        backgroundRepeat:	    null,
-        border:	                null,
-        borderBottom:	        null,
-        borderBottomColor:	    null,
-        borderBottomStyle:	    null,
-        borderBottomWidth:	    null,
-        borderCollapse:	        null,
-        borderColor:	        null,
-        borderLeft:	            null,
-        borderLeftColor:	    null,
-        borderLeftStyle:	    null,
-        borderLeftWidth:	    null,
-        borderRight:	        null,
-        borderRightColor:	    null,
-        borderRightStyle:	    null,
-        borderRightWidth:	    null,
-        borderSpacing:	        null,
-        borderStyle:	        null,
-        borderTop:	            null,
-        borderTopColor:	        null,
-        borderTopStyle:	        null,
-        borderTopWidth:	        null,
-        borderWidth:	        null,
-        bottom:	                null,
-        captionSide:	        null,
-        clear:	                null,
-        clip:	                null,
-        color:	                null,
-        content:	            null,
-        counterIncrement:	    null,
-        counterReset:	        null,
-        cssFloat:	            null,
-        cue:	                null,
-        cueAfter:	            null,
-        cueBefore:	            null,
-        cursor:	                null,
-        direction:	            'ltr',
-        display:	            null,
-        elevation:	            null,
-        emptyCells:	            null,
-        font:	                null,
-        fontFamily:	            null,
-        fontSize:	            "1em",
-        fontSizeAdjust:	null,
-        fontStretch:	null,
-        fontStyle:	null,
-        fontVariant:	null,
-        fontWeight:	null,
-        height:	'1px',
-        left:	null,
-        letterSpacing:	null,
-        lineHeight:	null,
-        listStyle:	null,
-        listStyleImage:	null,
-        listStylePosition:	null,
-        listStyleType:	null,
-        margin:	null,
-        marginBottom:	"0px",
-        marginLeft:	"0px",
-        marginRight:	"0px",
-        marginTop:	"0px",
-        markerOffset:	null,
-        marks:	null,
-        maxHeight:	null,
-        maxWidth:	null,
-        minHeight:	null,
-        minWidth:	null,
-        opacity:	1,
-        orphans:	null,
-        outline:	null,
-        outlineColor:	null,
-        outlineOffset:	null,
-        outlineStyle:	null,
-        outlineWidth:	null,
-        overflow:	null,
-        overflowX:	null,
-        overflowY:	null,
-        padding:	null,
-        paddingBottom:	"0px",
-        paddingLeft:	"0px",
-        paddingRight:	"0px",
-        paddingTop:	"0px",
-        page:	null,
-        pageBreakAfter:	null,
-        pageBreakBefore:	null,
-        pageBreakInside:	null,
-        pause:	null,
-        pauseAfter:	null,
-        pauseBefore:	null,
-        pitch:	null,
-        pitchRange:	null,
-        position:	null,
-        quotes:	null,
-        richness:	null,
-        right:	null,
-        size:	null,
-        speak:	null,
-        speakHeader:	null,
-        speakNumeral:	null,
-        speakPunctuation:	null,
-        speechRate:	null,
-        stress:	null,
-        tableLayout:	null,
-        textAlign:	null,
-        textDecoration:	null,
-        textIndent:	null,
-        textShadow:	null,
-        textTransform:	null,
-        top:	null,
-        unicodeBidi:	null,
-        verticalAlign:	null,
-        visibility:	null,
-        voiceFamily:	null,
-        volume:	null,
-        whiteSpace:	null,
-        widows:	null,
-        width:	'1px',
-        wordSpacing:	null,
-        zIndex:	1
-    };
-};
-
-var __displayMap__ = {
-		"DIV"      : "block",
-		"P"        : "block",
-		"A"        : "inline",
-		"CODE"     : "inline",
-		"PRE"      : "block",
-		"SPAN"     : "inline",
-		"TABLE"    : "table",
-		"THEAD"    : "table-header-group",
-		"TBODY"    : "table-row-group",
-		"TR"       : "table-row",
-		"TH"       : "table-cell",
-		"TD"       : "table-cell",
-		"UL"       : "block",
-		"LI"       : "list-item"
-};
-var __styleMap__ = __supportedStyles__();
-
-for(var style in __supportedStyles__()){
-    (function(name){
-        if(name === 'width' || name === 'height'){
-            CSS2Properties.prototype.__defineGetter__(name, function(){
-                if(this.display==='none'){
-                    return '0px';
-                }
-                //$info(name+' = '+this.getPropertyValue(name));
-                return this.styleIndex[name];
-            });
-        }else if(name === 'display'){
-            //display will be set to a tagName specific value if ""
-            CSS2Properties.prototype.__defineGetter__(name, function(){
-                var val = this.styleIndex[name];
-                val = val?val:__displayMap__[this.__element__.tagName];
-                //$log(" css2properties.get  " + name + "="+val+" for("+this.__element__.tagName+")");
-                return val;
-            });
-        }else{
-            CSS2Properties.prototype.__defineGetter__(name, function(){
-                //$log(" css2properties.get  " + name + "="+this.styleIndex[name]);
-                return this.styleIndex[name];
-            });
-       }
-       CSS2Properties.prototype.__defineSetter__(name, function(value){
-           //$log(" css2properties.set  " + name +"="+value);
-           this.setProperty(name, value);
-       });
-    })(style);
-};
-
-
-$w.CSS2Properties = CSS2Properties;/* 
-* CSSRule - DOM Level 2
-*/
-var CSSRule = function(options){
-  var $style, 
-      $selectorText = options.selectorText?options.selectorText:"";
-      $style = new CSS2Properties({
-          cssText:options.cssText?options.cssText:null
-      });
-    return __extend__(this, {
-      get style(){
-          return $style;
-      },
-      get selectorText(){
-          return $selectorText;
-      },
-      set selectorText(selectorText){
-          $selectorText = selectorText;
-      }
-    });
-};
-$w.CSSRule = CSSRule;
-/* 
-* CSSStyleSheet - DOM Level 2
-*/
-var CSSStyleSheet = function(options){
-    var $cssRules, 
-        $disabled = options.disabled?options.disabled:false,
-        $href = options.href?options.href:null,
-        $parentStyleSheet = options.parentStyleSheet?options.parentStyleSheet:null,
-        $title = options.title?options.title:"",
-        $type = "text/css";
-        
-    function parseStyleSheet(text){
-        $debug("parsing css");
-        //this is pretty ugly, but text is the entire text of a stylesheet
-        var cssRules = [];
-    	if (!text) text = "";
-    	text = trim(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
-    	// TODO: @import ?
-    	var blocks = text.split("}");
-    	blocks.pop();
-    	var i, len = blocks.length;
-    	var definition_block, properties, selectors;
-    	for (i=0; i<len; i++){
-    		definition_block = blocks[i].split("{");
-    		if(definition_block.length === 2){
-      		selectors = definition_block[0].split(",");
-      		for(var j=0;j<selectors.length;j++){
-      		  cssRules.push(new CSSRule({
-      		    selectorText:selectors[j],
-      		    cssText:definition_block[1]
-      		  }));
-      		}
-      		__setArray__($cssRules, cssRules);
-    		}
-    	}
-    };
-    parseStyleSheet(options.text);
-    return __extend__(this, {
-      get cssRules(){return $cssRules;},
-      get rule(){return $cssRules;},//IE - may be deprecated
-      get href(){return $href;},
-      get parentStyleSheet(){return $parentStyleSheet;},
-      get title(){return $title;},
-      get type(){return $type;},
-      addRule: function(selector, style, index){/*TODO*/},
-      deleteRule: function(index){/*TODO*/},
-      insertRule: function(rule, index){/*TODO*/},
-      removeRule: function(index){this.deleteRule(index);}//IE - may be deprecated
-    });
-};
-
-$w.CSSStyleSheet = CSSStyleSheet;
-/*
-*	location.js
-*   - requires env
-*/
-$debug("Initializing Window Location.");
-//the current location
-var $location = '';
-
-$w.__defineSetter__("location", function(url){
-    if ($w.$isOriginalWindow){
-        if ($w.$haveCalledWindowLocationSetter)
-            throw new Error("Cannot call 'window.location=' multiple times " +
-              "from the context used to load 'env.js'.  Try using " +
-              "'window.open()' to get a new context.");
-        $w.$haveCalledWindowLocationSetter = true;
-        $env.load(url);
-    }
-    else {
-        $env.unload($w);
-        var proxy = $w;
-        if (proxy.$thisWindowsProxyObject)
-            proxy = proxy.$thisWindowsProxyObject;
-        $env.reload(proxy, url);
-    }
-});
-
-
-$w.__defineGetter__("location", function(url){
-	var hash 	 = new RegExp('(\\#.*)'),
-		hostname = new RegExp('\/\/([^\:\/]+)'),
-		pathname = new RegExp('(\/[^\\?\\#]*)'),
-		port 	 = new RegExp('\:(\\d+)\/'),
-		protocol = new RegExp('(^\\w*\:)'),
-		search 	 = new RegExp('(\\?[^\\#]*)');
-	return {
-		get hash(){
-			var m = hash.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set hash(_hash){
-			//setting the hash is the only property of the location object
-			//that doesn't cause the window to reload
-			_hash = _hash.indexOf('#')===0?_hash:"#"+_hash;	
-			$location = this.protocol + this.host + this.pathname + 
-				this.search + _hash;
-			setHistory(_hash, "hash");
-		},
-		get host(){
-			return this.hostname + (this.port !== "")?":"+this.port:"";
-		},
-		set host(_host){
-			$w.location = this.protocol + _host + this.pathname + 
-				this.search + this.hash;
-		},
-		get hostname(){
-			var m = hostname.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set hostname(_hostname){
-			$w.location = this.protocol + _hostname + ((this.port==="")?"":(":"+this.port)) +
-			 	 this.pathname + this.search + this.hash;
-		},
-		get href(){
-			//This is the only env specific function
-			return $location;
-		},
-		set href(url){
-			$w.location = url;	
-		},
-		get pathname(){
-			var m = this.href;
-			m = pathname.exec(m.substring(m.indexOf(this.hostname)));
-			return m&&m.length>1?m[1]:"/";
-		},
-		set pathname(_pathname){
-			$w.location = this.protocol + this.host + _pathname + 
-				this.search + this.hash;
-		},
-		get port(){
-			var m = port.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set port(_port){
-			$w.location = this.protocol + this.hostname + ":"+_port + this.pathname + 
-				this.search + this.hash;
-		},
-		get protocol(){
-			return this.href && protocol.exec(this.href)[0];
-		},
-		set protocol(_protocol){
-			$w.location = _protocol + this.host + this.pathname + 
-				this.search + this.hash;
-		},
-		get search(){
-			var m = search.exec(this.href);
-			return m&&m.length>1?m[1]:"";
-		},
-		set search(_search){
-			$w.location = this.protocol + this.host + this.pathname + 
-				_search + this.hash;
-		},
-		toString: function(){
-			return this.href;
-		},
-        reload: function(force){
-            // ignore 'force': we don't implement a cache
-            var thisWindow = $w;
-            $env.unload(thisWindow);
-            try { thisWindow = thisWindow.$thisWindowsProxyObject; }catch (e){}
-            $env.reload(thisWindow, thisWindow.location.href);
-        },
-        replace: function(url){
-            $location = url;
-            $w.location.reload();
-        }
-    };
-});
-
-/*
-*	history.js
-*/
-
-	$currentHistoryIndex = 0;
-	$history = [];
-	
-	// Browser History
-	$w.__defineGetter__("history", function(){	
-		return {
-			get length(){ return $history.length; },
-			back : function(count){
-				if(count){
-					go(-count);
-				}else{go(-1);}
-			},
-			forward : function(count){
-				if(count){
-					go(count);
-				}else{go(1);}
-			},
-			go : function(target){
-				if(typeof target == "number"){
-					target = $currentHistoryIndex+target;
-					if(target > -1 && target < $history.length){
-						if($history[target].location == "hash"){
-							$w.location.hash = $history[target].value;
-						}else{
-							$w.location = $history[target].value;
-						}
-						$currentHistoryIndex = target;
-						//remove the last item added to the history
-						//since we are moving inside the history
-						$history.pop();
-					}
-				}else{
-					//TODO: walk throu the history and find the 'best match'
-				}
-			}
-		};
-	});
-
-	//Here locationPart is the particutlar method/attribute 
-	// of the location object that was modified.  This allows us
-	// to modify the correct portion of the location object
-	// when we navigate the history
-	var __setHistory__ = function( value, locationPart){
-	    $info("adding value to history: " +value);
-		$currentHistoryIndex++;
-		$history.push({
-			location: locationPart||"href",
-			value: value
-		});
-	};
-	/*
-*	navigator.js
-*   - requires env
-*/
-$debug("Initializing Window Navigator.");
-
-var $appCodeName  = $env.appCodeName;//eg "Mozilla"
-var $appName      = $env.appName;//eg "Gecko/20070309 Firefox/2.0.0.3"
-
-// Browser Navigator
-$w.__defineGetter__("navigator", function(){	
-	return {
-		get appCodeName(){
-			return $appCodeName;
-		},
-		get appName(){
-			return $appName;
-		},
-		get appVersion(){
-			return $version +" ("+ 
-			    $w.navigator.platform +"; "+
-			    "U; "+//?
-			    $env.os_name+" "+$env.os_arch+" "+$env.os_version+"; "+
-			    $env.lang+"; "+
-			    "rv:"+$revision+
-			  ")";
-		},
-		get cookieEnabled(){
-			return true;
-		},
-		get mimeTypes(){
-			return [];
-		},
-		get platform(){
-			return $env.platform;
-		},
-		get plugins(){
-			return [];
-		},
-		get userAgent(){
-			return $w.navigator.appCodeName + "/" + $w.navigator.appVersion + " " + $w.navigator.appName;
-		},
-		javaEnabled : function(){
-			return $env.javaEnabled;	
-		}
-	};
-});
-
-/*
-*	timer.js
-*/
-
-$debug("Initializing Window Timer.");
-
-//private
-var $timers = $env.timers = $env.timers || [];
-var $event_loop_running = false;
-$timers.lock = $env.sync(function(fn){fn();});
-
-var $timer = function(fn, interval){
-  this.fn = fn;
-  this.interval = interval;
-  this.at = Date.now() + interval;
-  this.running = false; // allows for calling wait() from callbacks
-};
-  
-$timer.prototype.start = function(){};
-$timer.prototype.stop = function(){};
-
-var convert_time = function(time) {
-  time = time*1;
-  if ( isNaN(time) || time < 0 ) {
-    time = 0;
-  }
-  // html5 says this should be at least 4, but the parser is using a setTimeout for the SAX stuff
-  // which messes up the world
-  var min = /* 4 */ 0;
-  if ( $event_loop_running && time < min ) {
-    time = min;
-  }
-  return time;
-}
-
-$w.setTimeout = function(fn, time){
-  var num;
-  time = convert_time(time);
-  $timers.lock(function(){
-    num = $timers.length+1;
-    var tfn;
-    if (typeof fn == 'string') {
-      tfn = function() {
-        
-		try {
-          eval(fn);
-        } catch (e) {
-          $env.error(e);
-        } finally {
-          $w.clearInterval(num);
-        }
-      };
-    } else {
-      tfn = function() {
-	  	//print("  exec   "+num)
-        try {
-          fn();
-        } catch (e) {
-          $env.error(e);
-        } finally {
-          $w.clearInterval(num);
-        }
-      };
-    }
-    //print("  create "+num);
-    $timers[num] = new $timer(tfn, time);
-    $timers[num].start();
-  });
-  $env.wait();
-  return num;
-};
-
-$w.setInterval = function(fn, time){
-  time = convert_time(time);
-  if ( time < 10 ) {
-    time = 10;
-  }
-  if (typeof fn == 'string') {
-    var fnstr = fn; 
-    fn = function() { 
-      eval(fnstr);
-    }; 
-  }
-  var num;
-  $timers.lock(function(){
-    num = $timers.length+1;
-    //$debug("Creating timer number "+num);
-    $timers[num] = new $timer(fn, time);
-    $timers[num].start();
-  });
-  $env.wait();
-  return num;
-};
-
-$w.clearInterval = $w.clearTimeout = function(num){
-  //$log("clearing interval "+num);
-  $timers.lock(function(){
-    if ( $timers[num] ) {
-      $timers[num].stop();
-      delete $timers[num];
-    }
-  });
-};	
-
-// wait === null/undefined: execute any timers as they fire, waiting until there are none left
-// wait(n) (n > 0): execute any timers as they fire until there are none left waiting at least n ms
-// but no more, even if there are future events/current threads
-// wait(0): execute any immediately runnable timers and return
-// wait(-n): keep sleeping until the next event is more than n ms in the future
-
-// FIX: make a priority queue ...
-
-$w.$wait = $env.wait = $env.wait || function(wait) {
-  //print("in wait "+wait);
-  var delta_wait;
-  if (wait < 0) {
-    delta_wait = -wait;
-    wait = 0;
-  }
-  var start = Date.now();
-  var old_loop_running = $event_loop_running;
-  $event_loop_running = true; 
-  if (wait !== 0 && wait !== null && wait !== undefined){
-    wait += Date.now();
-  }
-  for (;;) {
-    var earliest;
-    $timers.lock(function(){
-      earliest = undefined;
-      for(var i in $timers){
-        if( isNaN(i*0) ) {
-          continue;
-        }
-        var timer = $timers[i];
-        if( !timer.running && ( !earliest || timer.at < earliest.at) ) {
-          earliest = timer;
-        }
-      }
-    });
-    var sleep = earliest && earliest.at - Date.now();
-    if ( earliest && sleep <= 0 ) {
-      var f = earliest.fn;
-      try {
-        earliest.running = true;
-        //print("running early");
-        f();
-      } catch (e) {
-        $env.error(e);
-      } finally {
-        earliest.running = false;
-      }
-      var goal = earliest.at + earliest.interval;
-      var now = Date.now();
-      if ( goal < now ) {
-        earliest.at = now;
-      } else {
-        earliest.at = goal;
-      }
-      continue;
-    }
-
-    // bunch of subtle cases here ...
-    if ( !earliest ) {
-      // no events in the queue (but maybe XHR will bring in events, so ...
-      if ( !wait || wait < Date.now() ) {
-        // Loop ends if there are no events and a wait hasn't been requested or has expired
-        break;
-      }
-      // no events, but a wait requested: fall through to sleep
-    } else {
-      // there are events in the queue, but they aren't firable now
-      if ( delta_wait && sleep <= delta_wait ) {
-        // if they will happen within the next delta, fall through to sleep
-      } else if ( wait === 0 || ( wait > 0 && wait < Date.now () ) ) {
-        // loop ends even if there are events but the user specifcally asked not to wait too long
-        break;
-      }
-      // there are events and the user wants to wait: fall through to sleep
-    }
-
-    // Related to ajax threads ... hopefully can go away ..
-    var interval =  $wait.interval || 100;
-    if ( !sleep || sleep > interval ) {
-      sleep = interval;
-    }
-    //print("sleeping "+sleep); 
-    java.lang.Thread.currentThread().sleep(sleep);
-  }
-  $event_loop_running = old_loop_running;
-};
-
-/*
-* event.js
-*/
-// Window Events
-//$debug("Initializing Window Event.");
-var $events = [{}],
-    $onerror,
-    $onload,
-    $onunload;
-
-function __addEventListener__(target, type, fn){
-
-    //$debug("adding event listener \n\t" + type +" \n\tfor "+target+" with callback \n\t"+fn);
-    if ( !target.uuid ) {
-        target.uuid = $events.length;
-        $events[target.uuid] = {};
-    }
-    if ( !$events[target.uuid][type] ){
-        $events[target.uuid][type] = [];
-    }
-    if ( $events[target.uuid][type].indexOf( fn ) < 0 ){
-        $events[target.uuid][type].push( fn );
-    }
-};
-
-
-$w.addEventListener = function(type, fn){
-    __addEventListener__(this, type, fn);
-};
-
-
-function __removeEventListener__(target, type, fn){
-  if ( !target.uuid ) {
-    target.uuid = $events.length;
-    $events[target.uuid] = {};
-  }
-  if ( !$events[target.uuid][type] ){
-		$events[target.uuid][type] = [];
-	}	
-  $events[target.uuid][type] =
-    $events[target.uuid][type].filter(function(f){
-			return f != fn;
-		});
-};
-
-$w.removeEventListener = function(type, fn){
-    __removeEventListener__(this, type, fn)
-};
-
-
-
-function __dispatchEvent__(target, event, bubbles){
-    //$debug("dispatching event " + event.type);
-
-    //the window scope defines the $event object, for IE(^^^) compatibility;
-    $event = event;
-
-    if (bubbles == undefined || bubbles == null)
-        bubbles = true;
-
-    if (!event.target) {
-        //$debug("no event target : "+event.target);
-        event.target = target;
-    }
-    //$debug("event target: " + event.target);
-    if ( event.type && (target.nodeType             ||
-                        target === window           ||
-                        target.__proto__ === window ||
-                        target.$thisWindowsProxyObject === window)) {
-        //$debug("nodeType: " + target.nodeType);
-        if ( target.uuid && $events[target.uuid][event.type] ) {
-            var _this = target;
-            //$debug('calling event handlers '+$events[target.uuid][event.type].length);
-            $events[target.uuid][event.type].forEach(function(fn){
-                //$debug('calling event handler '+fn+' on target '+_this);
-                fn( event );
-            });
-        }
-    
-        if (target["on" + event.type]) {
-            //$debug('calling event handler on'+event.type+' on target '+target);
-            target["on" + event.type](event);
-        }
-    }else{
-        //$debug("non target: " + event.target + " \n this->"+target);
-    }
-    if (bubbles && target.parentNode){
-        //$debug('bubbling to parentNode '+target.parentNode);
-        __dispatchEvent__(target.parentNode, event, bubbles);
-    }
-};
-	
-$w.dispatchEvent = function(event, bubbles){
-    __dispatchEvent__(this, event, bubbles);
-};
-
-$w.__defineGetter__('onerror', function(){
-  return function(){
-   //$w.dispatchEvent('error');
-  };
-});
-
-$w.__defineSetter__('onerror', function(fn){
-  //$w.addEventListener('error', fn);
-});
-
-/*$w.__defineGetter__('onload', function(){
-  return function(){
-		//var event = document.createEvent();
-		//event.initEvent("load");
-   //$w.dispatchEvent(event);
-  };
-});
-
-$w.__defineSetter__('onload', function(fn){
-  //$w.addEventListener('load', fn);
-});
-
-$w.__defineGetter__('onunload', function(){
-  return function(){
-   //$w.dispatchEvent('unload');
-  };
-});
-
-$w.__defineSetter__('onunload', function(fn){
-  //$w.addEventListener('unload', fn);
-});*//*
-*	xhr.js
-*/
-$debug("Initializing Window XMLHttpRequest.");
-// XMLHttpRequest
-// Originally implemented by Yehuda Katz
-$w.XMLHttpRequest = function(){
-	this.headers = {};
-	this.responseHeaders = {};
-    this.$continueProcessing = true;
-	$debug("creating xhr");
-};
-
-XMLHttpRequest.prototype = {
-	open: function(method, url, async, user, password){ 
-		this.readyState = 1;
-		if (async === false ){
-			this.async = false;
-		}else{ this.async = true; }
-		this.method = method || "GET";
-		this.url = $env.location(url);
-		this.onreadystatechange();
-	},
-	setRequestHeader: function(header, value){
-		this.headers[header] = value;
-	},
-	send: function(data){
-		var _this = this;
-		
-		function makeRequest(){
-            $env.connection(_this, function(){
-                if (_this.$continueProcessing){
-                    var responseXML = null;
-                    _this.__defineGetter__("responseXML", function(){
-                        if ( _this.responseText.match(/^\s*</) ) {
-                          if(responseXML){
-                              return responseXML;
-
-                          }else{
-                                try {
-                                    $debug("parsing response text into xml document");
-                                    responseXML = $domparser.parseFromString(_this.responseText+"");
-                                    return responseXML;
-                                } catch(e) {
-                                    $error('response XML does not apear to be well formed xml', e);
-                                    responseXML = $domparser.parseFromString("<html>"+
-                                        "<head/><body><p> parse error </p></body></html>");
-                                    return responseXML;
-                                }
-                            }
-                        }else{
-                            $env.warn('response XML does not apear to be xml');
-                            return null;
-                        }
-                    });
-                    _this.__defineSetter__("responseXML",function(xml){
-                        responseXML = xml;
-                    });
-                }
-			}, data);
-
-            if (_this.$continueProcessing)
-                _this.onreadystatechange();
-		}
-
-		if (this.async){
-		    $debug("XHR sending asynch;");
-			$env.runAsync(makeRequest);
-		}else{
-		    $debug("XHR sending synch;");
-			makeRequest();
-		}
-	},
-	abort: function(){
-        this.$continueProcessing = false;
-	},
-	onreadystatechange: function(){
-		//TODO
-	},
-	getResponseHeader: function(header){
-        $debug('GETTING RESPONSE HEADER '+header);
-	  var rHeader, returnedHeaders;
-		if (this.readyState < 3){
-			throw new Error("INVALID_STATE_ERR");
-		} else {
-			returnedHeaders = [];
-			for (rHeader in this.responseHeaders) {
-				if (rHeader.match(new RegExp(header, "i")))
-					returnedHeaders.push(this.responseHeaders[rHeader]);
-			}
-            
-			if (returnedHeaders.length){ 
-                $debug('GOT RESPONSE HEADER '+returnedHeaders.join(", "));
-                return returnedHeaders.join(", "); 
-            }
-		}
-        return null;
-	},
-	getAllResponseHeaders: function(){
-	  var header, returnedHeaders = [];
-		if (this.readyState < 3){
-			throw new Error("INVALID_STATE_ERR");
-		} else {
-			for (header in this.responseHeaders){
-				returnedHeaders.push( header + ": " + this.responseHeaders[header] );
-			}
-		}return returnedHeaders.join("\r\n");
-	},
-	async: true,
-	readyState: 0,
-	responseText: "",
-	status: 0
-};/*
-*	css.js
-*/
-$debug("Initializing Window CSS");
-// returns a CSS2Properties object that represents the style
-// attributes and values used to render the specified element in this
-// window.  Any length values are always expressed in pixel, or
-// absolute values.
-
-$w.getComputedStyle = function(elt, pseudo_elt){
-  //TODO
-  //this is a naive implementation
-  $debug("Getting computed style");
-  return elt?elt.style:new CSS2Properties({cssText:""});
-};/*
-*	screen.js
-*/
-$debug("Initializing Window Screen.");
-
-var $availHeight  = 600,
-    $availWidth   = 800,
-    $colorDepth    = 16,
-    $height       = 600,
-    $width        = 800;
-    
-$w.__defineGetter__("screen", function(){
-  return {
-    get availHeight(){return $availHeight;},
-    get availWidth(){return $availWidth;},
-    get colorDepth(){return $colorDepth;},
-    get height(){return $height;},
-    get width(){return $width;}
-  };
-});
-
-
-$w.moveBy = function(dx,dy){
-  //TODO
-};
-
-$w.moveTo = function(x,y) {
-  //TODO
-};
-
-/*$w.print = function(){
-  //TODO
-};*/
-
-$w.resizeBy = function(dw, dh){
-  $w.resizeTo($width+dw,$height+dh);
-};
-
-$w.resizeTo = function(width, height){
-  $width = (width <= $availWidth) ? width : $availWidth;
-  $height = (height <= $availHeight) ? height : $availHeight;
-};
-
-
-$w.scroll = function(x,y){
-  //TODO
-};
-$w.scrollBy = function(dx, dy){
-  //TODO
-};
-$w.scrollTo = function(x,y){
-  //TODO
-};/*
-*	dialog.js
-*/
-$debug("Initializing Window Dialogs.");
-$w.alert = function(message){
-     $env.warn(message);
-};
-
-$w.confirm = function(question){
-  //TODO
-};
-
-$w.prompt = function(message, defaultMsg){
-  //TODO
+/**
+ * @author john resig
+ */
+//from jQuery
+function __setArray__( target, array ) {
+    // Resetting the length to 0, then using the native Array push
+    // is a super-fast way to populate an object with array-like properties
+    target.length = 0;
+    Array.prototype.push.apply( target, array );
 };/**
-* jQuery AOP - jQuery plugin to add features of aspect-oriented programming (AOP) to jQuery.
-* http://jquery-aop.googlecode.com/
-*
-* Licensed under the MIT license:
-* http://www.opensource.org/licenses/mit-license.php
-*
-* Version: 1.1
-*/
-window.$profiler;
-
+ * Borrowed with love from:
+ * 
+ * jQuery AOP - jQuery plugin to add features of aspect-oriented programming (AOP) to jQuery.
+ * http://jquery-aop.googlecode.com/
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/mit-license.php
+ *
+ * Version: 1.1
+ */
 (function() {
 
 	var _after	= 1;
@@ -9802,7 +4444,7 @@ window.$profiler;
 
 	};
 
-	window.$profiler = 
+	Aspect = 
 	{
 		/**
 		 * Creates an advice after the defined point-cut. The advice will be executed after the point-cut method 
@@ -9943,591 +4585,4515 @@ window.$profiler;
 })();
 
 
-var $profile = window.$profile = {};
+
+/**
+ * 
+ * // Introduced in DOM Level 2:
+ * interface DocumentEvent {
+ *   Event createEvent (in DOMString eventType) 
+ *      raises (DOMException);
+ * };
+ */
+DocumentEvent = function(){};
+DocumentEvent.prototype.createEvent = function(eventType){
+    //console.debug('createEvent(%s)', eventType); 
+    switch (eventType){
+        case 'Events':
+            return new Event(); 
+            break;
+        case 'HTMLEvents':
+            return new Event(); 
+            break;
+        case 'UIEvents':
+            return new UIEvent();
+            break;
+        case 'MouseEvents':
+            return new MouseEvent();
+            break;
+        case 'KeyEvents':
+            return new KeyboardEvent();
+            break;
+        case 'KeyboardEvent':
+            return new KeyboardEvent();
+            break;
+        case 'MutationEvents':
+            return new MutationEvent();
+            break;
+        default:
+            throw(new DOMException(DOMException.NOT_SUPPORTED_ERR));
+    }
+};
+
+Document.prototype.createEvent = DocumentEvent.prototype.createEvent;
+
+/**
+ * @name EventTarget 
+ * @w3c:domlevel 2 
+ * @uri -//TODO: paste dom event level 2 w3c spc uri here
+ */
+EventTarget = function(){};
+EventTarget.prototype.addEventListener = function(type, fn, phase){ 
+    __addEventListener__(this, type, fn, phase); 
+};
+EventTarget.prototype.removeEventListener = function(type, fn){ 
+    __removeEventListener__(this, type, fn); 
+};
+EventTarget.prototype.dispatchEvent = function(event, bubbles){ 
+    __dispatchEvent__(this, event, bubbles); 
+};
+
+__extend__(Node.prototype, EventTarget.prototype);
 
 
-var __profile__ = function(id, invocation){
-    var start = new Date().getTime();
-    var retval = invocation.proceed(); 
-    var finish = new Date().getTime();
-    $profile[id] = $profile[id] ? $profile[id] : {};
-    $profile[id].callCount = $profile[id].callCount !== undefined ? 
-        $profile[id].callCount+1 : 0;
-    $profile[id].times = $profile[id].times ? $profile[id].times : [];
-    $profile[id].times[$profile[id].callCount++] = (finish-start);
-    return retval;
+var $events = [{}];
+
+function __addEventListener__(target, type, fn, phase){
+    phase = !!phase?"CAPTURING":"BUBBLING";
+    if ( !target.uuid ) {
+        //console.log('event uuid %s %s', target, target.uuid);
+        target.uuid = $events.length+'';
+    }
+    if ( !$events[target.uuid] ) {
+        //console.log('creating listener for target: %s %s', target, target.uuid);
+        $events[target.uuid] = {};
+    }
+    if ( !$events[target.uuid][type] ){
+        //console.log('creating listener for type: %s %s %s', target, target.uuid, type);
+        $events[target.uuid][type] = {
+            CAPTURING:[],
+            BUBBLING:[]
+        };
+    }
+    if ( $events[target.uuid][type][phase].indexOf( fn ) < 0 ){
+        //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
+        //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
+        //console.log('creating listener for function: %s %s %s', target, target.uuid, phase);
+        $events[target.uuid][type][phase].push( fn );
+        //console.log('adding event listener %s %s %s %s %s %s', target, target.uuid, type, phase, 
+        //    $events[target.uuid][type][phase].length, $events[target.uuid][type][phase].indexOf( fn ));
+    }
+    //console.log('registered event listeners %s', $events.length);
 };
 
 
-window.$profiler.stats = function(raw){
-    var max     = 0,
-        avg     = -1,
-        min     = 10000000,
-        own     = 0;
-    for(var i = 0;i<raw.length;i++){
-        if(raw[i] > 0){
-            own += raw[i];
-        };
-        if(raw[i] > max){
-            max = raw[i];
+function __removeEventListener__(target, type, fn, phase){
+
+    phase = !!phase?"CAPTURING":"BUBBLING";
+    if ( !target.uuid ) {
+        return;
+    }
+    if ( !$events[target.uuid] ) {
+        return;
+    }
+    if(type == '*'){
+        //used to clean all event listeners for a given node
+        //console.log('cleaning all event listeners for node %s %s',target, target.uuid);
+        delete $events[target.uuid];
+        $events[target.uuid] = null;
+        return;
+    }else if ( !$events[target.uuid][type] ){
+        return;
+    }
+    $events[target.uuid][type][phase] =
+    $events[target.uuid][type][phase].filter(function(f){
+        //console.log('removing event listener %s %s %s %s', target, type, phase, fn);
+        return f != fn;
+    });
+};
+
+var __eventuuid__ = 0;
+function __dispatchEvent__(target, event, bubbles){
+
+    if(!event.uuid)
+        event.uuid = __eventuuid__++;
+    //the window scope defines the $event object, for IE(^^^) compatibility;
+    //$event = event;
+    //console.log('dispatching event %s', event.uuid);
+    if (bubbles == undefined || bubbles == null)
+        bubbles = true;
+
+    if (!event.target) {
+        event.target = target;
+    }
+    
+    //console.log('dispatching? %s %s %s', target, event.type, bubbles);
+    if ( event.type && (target.nodeType || target === window )) {
+
+        //console.log('dispatching event %s %s %s', target, event.type, bubbles);
+        __captureEvent__(target, event);
+        
+        event.eventPhase = Event.AT_TARGET;
+        if ( target.uuid && $events[target.uuid] && $events[target.uuid][event.type] ) {
+            event.currentTarget = target;
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['CAPTURING'].length);
+            $events[target.uuid][event.type]['CAPTURING'].forEach(function(fn){
+                //console.log('AT_TARGET (CAPTURING) event %s', fn);
+                var returnValue = fn( event );
+                //console.log('AT_TARGET (CAPTURING) return value %s', returnValue);
+                if(returnValue === false){
+                    event.stopPropagation();
+                }
+            });
+            //console.log('dispatching %s %s %s %s', target, event.type, 
+            //  $events[target.uuid][event.type]['BUBBLING'].length);
+            $events[target.uuid][event.type]['BUBBLING'].forEach(function(fn){
+                //console.log('AT_TARGET (BUBBLING) event %s', fn);
+                var returnValue = fn( event );
+                //console.log('AT_TARGET (BUBBLING) return value %s', returnValue);
+                if(returnValue === false){
+                    event.stopPropagation();
+                }
+            });
         }
-        if(raw[i] < min){
-            min = raw[i];
+        if (target["on" + event.type]) {
+            target["on" + event.type](event);
+        }
+        if (bubbles && !event.cancelled){
+            __bubbleEvent__(target, event);
+        }
+        if(!event._preventDefault){
+            //At this point I'm guessing that just HTMLEvents are concerned
+            //with default behavior being executed in a browser but I could be
+            //wrong as usual.  The goal is much more to filter at this point
+            //what events have no need to be handled
+            //console.log('triggering default behavior for %s', event.type);
+            if(event.type in Envjs.defaultEventBehaviors){
+                Envjs.defaultEventBehaviors[event.type](event);
+            }
+        }
+        //console.log('deleting event %s', event.uuid);
+        event.target = null;
+        event = null;
+    }else{
+        throw new EventException(EventException.UNSPECIFIED_EVENT_TYPE_ERR);
+    }
+};
+
+function __captureEvent__(target, event){
+    var ancestorStack = [],
+        parent = target.parentNode;
+        
+    event.eventPhase = Event.CAPTURING_PHASE;
+    while(parent){
+        if(parent.uuid && $events[parent.uuid] && $events[parent.uuid][event.type]){
+            ancestorStack.push(parent);
+        }
+        parent = parent.parentNode;
+    }
+    while(ancestorStack.length && !event.cancelled){
+        event.currentTarget = ancestorStack.pop();
+        if($events[event.currentTarget.uuid] && $events[event.currentTarget.uuid][event.type]){
+            $events[event.currentTarget.uuid][event.type]['CAPTURING'].forEach(function(fn){
+                var returnValue = fn( event );
+                if(returnValue === false){
+                    event.stopPropagation();
+                }
+            });
         }
     }
-    avg = Math.floor(own/raw.length);
-    return {
-        min: min,
-        max: max,
-        avg: avg,
-        own: own
-    };
 };
 
-if($env.profile){
-    /**
-    *   CSS2Properties
-    */
-    window.$profiler.around({ target: CSS2Properties,  method:"getPropertyCSSValue"}, function(invocation) {
-        return __profile__("CSS2Properties.getPropertyCSSValue", invocation);
-    });  
-    window.$profiler.around({ target: CSS2Properties,  method:"getPropertyPriority"}, function(invocation) {
-        return __profile__("CSS2Properties.getPropertyPriority", invocation);
-    });  
-    window.$profiler.around({ target: CSS2Properties,  method:"getPropertyValue"}, function(invocation) {
-        return __profile__("CSS2Properties.getPropertyValue", invocation);
-    });  
-    window.$profiler.around({ target: CSS2Properties,  method:"item"}, function(invocation) {
-        return __profile__("CSS2Properties.item", invocation);
-    });  
-    window.$profiler.around({ target: CSS2Properties,  method:"removeProperty"}, function(invocation) {
-        return __profile__("CSS2Properties.removeProperty", invocation);
-    });  
-    window.$profiler.around({ target: CSS2Properties,  method:"setProperty"}, function(invocation) {
-        return __profile__("CSS2Properties.setProperty", invocation);
-    });  
-    window.$profiler.around({ target: CSS2Properties,  method:"toString"}, function(invocation) {
-        return __profile__("CSS2Properties.toString", invocation);
-    });  
-               
-    
-    /**
-    *   DOMNode
-    */
-                    
-    window.$profiler.around({ target: DOMNode,  method:"hasAttributes"}, function(invocation) {
-        return __profile__("DOMNode.hasAttributes", invocation);
-    });          
-    window.$profiler.around({ target: DOMNode,  method:"insertBefore"}, function(invocation) {
-        return __profile__("DOMNode.insertBefore", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"replaceChild"}, function(invocation) {
-        return __profile__("DOMNode.replaceChild", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"removeChild"}, function(invocation) {
-        return __profile__("DOMNode.removeChild", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"replaceChild"}, function(invocation) {
-        return __profile__("DOMNode.replaceChild", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"appendChild"}, function(invocation) {
-        return __profile__("DOMNode.appendChild", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"hasChildNodes"}, function(invocation) {
-        return __profile__("DOMNode.hasChildNodes", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"cloneNode"}, function(invocation) {
-        return __profile__("DOMNode.cloneNode", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"normalize"}, function(invocation) {
-        return __profile__("DOMNode.normalize", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"isSupported"}, function(invocation) {
-        return __profile__("DOMNode.isSupported", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"getElementsByTagName"}, function(invocation) {
-        return __profile__("DOMNode.getElementsByTagName", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"getElementsByTagNameNS"}, function(invocation) {
-        return __profile__("DOMNode.getElementsByTagNameNS", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"importNode"}, function(invocation) {
-        return __profile__("DOMNode.importNode", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"contains"}, function(invocation) {
-        return __profile__("DOMNode.contains", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNode,  method:"compareDocumentPosition"}, function(invocation) {
-        return __profile__("DOMNode.compareDocumentPosition", invocation);
-    }); 
-    
-    
-    /**
-    *   DOMDocument
-    */
-    window.$profiler.around({ target: DOMDocument,  method:"addEventListener"}, function(invocation) {
-        return __profile__("DOMDocument.addEventListener", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"removeEventListener"}, function(invocation) {
-        return __profile__("DOMDocument.removeEventListener", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"attachEvent"}, function(invocation) {
-        return __profile__("DOMDocument.attachEvent", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"detachEvent"}, function(invocation) {
-        return __profile__("DOMDocument.detachEvent", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"dispatchEvent"}, function(invocation) {
-        return __profile__("DOMDocument.dispatchEvent", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"loadXML"}, function(invocation) {
-        return __profile__("DOMDocument.loadXML", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"load"}, function(invocation) {
-        return __profile__("DOMDocument.load", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createEvent"}, function(invocation) {
-        return __profile__("DOMDocument.createEvent", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createExpression"}, function(invocation) {
-        return __profile__("DOMDocument.createExpression", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createElement"}, function(invocation) {
-        return __profile__("DOMDocument.createElement", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createDocumentFragment"}, function(invocation) {
-        return __profile__("DOMDocument.createDocumentFragment", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createTextNode"}, function(invocation) {
-        return __profile__("DOMDocument.createTextNode", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createComment"}, function(invocation) {
-        return __profile__("DOMDocument.createComment", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createCDATASection"}, function(invocation) {
-        return __profile__("DOMDocument.createCDATASection", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createProcessingInstruction"}, function(invocation) {
-        return __profile__("DOMDocument.createProcessingInstruction", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createAttribute"}, function(invocation) {
-        return __profile__("DOMDocument.createAttribute", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createElementNS"}, function(invocation) {
-        return __profile__("DOMDocument.createElementNS", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createAttributeNS"}, function(invocation) {
-        return __profile__("DOMDocument.createAttributeNS", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"createNamespace"}, function(invocation) {
-        return __profile__("DOMDocument.createNamespace", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"getElementById"}, function(invocation) {
-        return __profile__("DOMDocument.getElementById", invocation);
-    });
-    window.$profiler.around({ target: DOMDocument,  method:"normalizeDocument"}, function(invocation) {
-        return __profile__("DOMDocument.normalizeDocument", invocation);
-    });
-    
-    
-    /**
-    *   HTMLDocument
-    */      
-    window.$profiler.around({ target: HTMLDocument,  method:"createElement"}, function(invocation) {
-        return __profile__("HTMLDocument.createElement", invocation);
-    }); 
-    
-    /**
-    *   DOMParser
-    */      
-    window.$profiler.around({ target: DOMParser,  method:"parseFromString"}, function(invocation) {
-        return __profile__("DOMParser.parseFromString", invocation);
-    }); 
-    
-    /**
-    *   DOMNodeList
-    */      
-    window.$profiler.around({ target: DOMNodeList,  method:"item"}, function(invocation) {
-        return __profile__("DOMNode.item", invocation);
-    }); 
-    window.$profiler.around({ target: DOMNodeList,  method:"toString"}, function(invocation) {
-        return __profile__("DOMNode.toString", invocation);
-    }); 
-    
-    /**
-    *   XMLP
-    */      
-    window.$profiler.around({ target: XMLP,  method:"_addAttribute"}, function(invocation) {
-        return __profile__("XMLP._addAttribute", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_checkStructure"}, function(invocation) {
-        return __profile__("XMLP._checkStructure", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_clearAttributes"}, function(invocation) {
-        return __profile__("XMLP._clearAttributes", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_findAttributeIndex"}, function(invocation) {
-        return __profile__("XMLP._findAttributeIndex", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getAttributeCount"}, function(invocation) {
-        return __profile__("XMLP.getAttributeCount", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getAttributeName"}, function(invocation) {
-        return __profile__("XMLP.getAttributeName", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getAttributeValue"}, function(invocation) {
-        return __profile__("XMLP.getAttributeValue", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getAttributeValueByName"}, function(invocation) {
-        return __profile__("XMLP.getAttributeValueByName", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getColumnNumber"}, function(invocation) {
-        return __profile__("XMLP.getColumnNumber", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getContentBegin"}, function(invocation) {
-        return __profile__("XMLP.getContentBegin", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getContentEnd"}, function(invocation) {
-        return __profile__("XMLP.getContentEnd", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getLineNumber"}, function(invocation) {
-        return __profile__("XMLP.getLineNumber", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"getName"}, function(invocation) {
-        return __profile__("XMLP.getName", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"next"}, function(invocation) {
-        return __profile__("XMLP.next", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parse"}, function(invocation) {
-        return __profile__("XMLP._parse", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parse"}, function(invocation) {
-        return __profile__("XMLP._parse", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseAttribute"}, function(invocation) {
-        return __profile__("XMLP._parseAttribute", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseCDATA"}, function(invocation) {
-        return __profile__("XMLP._parseCDATA", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseComment"}, function(invocation) {
-        return __profile__("XMLP._parseComment", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseDTD"}, function(invocation) {
-        return __profile__("XMLP._parseDTD", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseElement"}, function(invocation) {
-        return __profile__("XMLP._parseElement", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseEntity"}, function(invocation) {
-        return __profile__("XMLP._parseEntity", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parsePI"}, function(invocation) {
-        return __profile__("XMLP._parsePI", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_parseText"}, function(invocation) {
-        return __profile__("XMLP._parseText", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_replaceEntities"}, function(invocation) {
-        return __profile__("XMLP._replaceEntities", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_replaceEntity"}, function(invocation) {
-        return __profile__("XMLP._replaceEntity", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_setContent"}, function(invocation) {
-        return __profile__("XMLP._setContent", invocation);
-    }); 
-    window.$profiler.around({ target: XMLP,  method:"_setErr"}, function(invocation) {
-        return __profile__("XMLP._setErr", invocation);
-    }); 
-    
-    
-    /**
-    *   SAXDriver
-    */      
-    window.$profiler.around({ target: SAXDriver,  method:"parse"}, function(invocation) {
-        return __profile__("SAXDriver.parse", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"setDocumentHandler"}, function(invocation) {
-        return __profile__("SAXDriver.setDocumentHandler", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"setErrorHandler"}, function(invocation) {
-        return __profile__("SAXDriver.setErrorHandler", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"setLexicalHandler"}, function(invocation) {
-        return __profile__("SAXDriver.setLexicalHandler", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getColumnNumber"}, function(invocation) {
-        return __profile__("SAXDriver.getColumnNumber", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getLineNumber"}, function(invocation) {
-        return __profile__("SAXDriver.getLineNumber", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getMessage"}, function(invocation) {
-        return __profile__("SAXDriver.getMessage", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getPublicId"}, function(invocation) {
-        return __profile__("SAXDriver.getPublicId", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getSystemId"}, function(invocation) {
-        return __profile__("SAXDriver.getSystemId", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getLength"}, function(invocation) {
-        return __profile__("SAXDriver.getLength", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getName"}, function(invocation) {
-        return __profile__("SAXDriver.getName", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getValue"}, function(invocation) {
-        return __profile__("SAXDriver.getValue", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"getValueByName"}, function(invocation) {
-        return __profile__("SAXDriver.getValueByName", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"_fireError"}, function(invocation) {
-        return __profile__("SAXDriver._fireError", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"_fireEvent"}, function(invocation) {
-        return __profile__("SAXDriver._fireEvent", invocation);
-    }); 
-    window.$profiler.around({ target: SAXDriver,  method:"_parseLoop"}, function(invocation) {
-        return __profile__("SAXDriver._parseLoop", invocation);
-    }); 
-    
-    /**
-    *   SAXStrings    
-    */
-    window.$profiler.around({ target: SAXStrings,  method:"getColumnNumber"}, function(invocation) {
-        return __profile__("SAXStrings.getColumnNumber", invocation);
-    }); 
-    window.$profiler.around({ target: SAXStrings,  method:"getLineNumber"}, function(invocation) {
-        return __profile__("SAXStrings.getLineNumber", invocation);
-    }); 
-    window.$profiler.around({ target: SAXStrings,  method:"indexOfNonWhitespace"}, function(invocation) {
-        return __profile__("SAXStrings.indexOfNonWhitespace", invocation);
-    }); 
-    window.$profiler.around({ target: SAXStrings,  method:"indexOfWhitespace"}, function(invocation) {
-        return __profile__("SAXStrings.indexOfWhitespace", invocation);
-    }); 
-    window.$profiler.around({ target: SAXStrings,  method:"isEmpty"}, function(invocation) {
-        return __profile__("SAXStrings.isEmpty", invocation);
-    }); 
-    window.$profiler.around({ target: SAXStrings,  method:"lastIndexOfNonWhitespace"}, function(invocation) {
-        return __profile__("SAXStrings.lastIndexOfNonWhitespace", invocation);
-    }); 
-    window.$profiler.around({ target: SAXStrings,  method:"replace"}, function(invocation) {
-        return __profile__("SAXStrings.replace", invocation);
-    }); 
-    
-    /**
-    *   Stack - SAX Utility
-    window.$profiler.around({ target: Stack,  method:"clear"}, function(invocation) {
-        return __profile__("Stack.clear", invocation);
-    }); 
-    window.$profiler.around({ target: Stack,  method:"count"}, function(invocation) {
-        return __profile__("Stack.count", invocation);
-    }); 
-    window.$profiler.around({ target: Stack,  method:"destroy"}, function(invocation) {
-        return __profile__("Stack.destroy", invocation);
-    }); 
-    window.$profiler.around({ target: Stack,  method:"peek"}, function(invocation) {
-        return __profile__("Stack.peek", invocation);
-    }); 
-    window.$profiler.around({ target: Stack,  method:"pop"}, function(invocation) {
-        return __profile__("Stack.pop", invocation);
-    }); 
-    window.$profiler.around({ target: Stack,  method:"push"}, function(invocation) {
-        return __profile__("Stack.push", invocation);
-    }); 
-    */
-}
-      
-/*
-*	document.js
-*
-*	DOM Level 2 /DOM level 3 (partial)
-*	
-*	This file adds the document object to the window and allows you
-*	you to set the window.document using an html string or dom object.
-*
-*/
-
-// read only reference to the Document object
-var $document;
-{    // a temporary scope, nothing more
-  var referrer = "";
-  try {
-    referrer = $openingWindow.location.href;
-  } catch (e){ /* or not */ }
-  $document = new HTMLDocument($implementation, $w, referrer);
-}
-
-$w.__defineGetter__("document", function(){
-	return $document;
-});
-$debug("Defining document.cookie");
-/*
-*	cookie.js
-*   - requires env
-*/
-
-var $cookies = {
-	persistent:{
-		//domain - key on domain name {
-			//path - key on path {
-				//name - key on name {
-					 //value : cookie value
-					 //other cookie properties
-				//}
-			//}
-		//}
-		//expire - provides a timestamp for expiring the cookie
-		//cookie - the cookie!
-	},
-	temporary:{//transient is a reserved word :(
-		//like above
-	}
+function __bubbleEvent__(target, event){
+    var parent = target.parentNode;
+    event.eventPhase = Event.BUBBLING_PHASE;
+    while(parent){
+        if(parent.uuid && $events[parent.uuid] && $events[parent.uuid][event.type] ){
+            event.currentTarget = parent;
+            $events[event.currentTarget.uuid][event.type]['BUBBLING'].forEach(function(fn){
+                var returnValue = fn( event );
+                if(returnValue === false){
+                    event.stopPropagation();
+                }
+            });
+        }
+        parent = parent.parentNode;
+    }
 };
 
-//HTMLDocument cookie
-document.__defineSetter__("cookie", function(cookie){
-	var i,name,value,properties = {},attr,attrs = cookie.split(";");
-	//for now the strategy is to simply create a json object
-	//and post it to a file in the .cookies.js file.  I hate parsing
-	//dates so I decided not to implement support for 'expires' 
-	//(which is deprecated) and instead focus on the easier 'max-age'
-	//(which succeeds 'expires') 
-	cookie = {};//keyword properties of the cookie
-	for(i=0;i<attrs.length;i++){
-		var index = attrs[i].indexOf("=");
-        if(index > -1){
-            name = trim(attrs[i].slice(0,index));
-            value = trim(attrs[i].slice(index+1));
-            cookie['domain'] = "";
-            if(name=='max-age'){
-               //we'll have to set a timer to check these
-				//and garbage collect expired cookies
-				cookie[name] = parseInt(value, 10);
-			} else if(name=='domain'){
-				if(domainValid(value)){
-					cookie['domain']=value;
-				}else{
-					cookie['domain']=$w.location.domain;
-				}
-			} else if(name=='path'){
-				//not sure of any special logic for path
-				cookie['path'] = value;
-			} else {
-				//its not a cookie keyword so store it in our array of properties
-				//and we'll serialize individually in a moment
-				properties[name] = value;
-			}
-		}else{
-			if(attrs[i] == 'secure'){
-                cookie[attrs[i]] = true;
-			}
-		}
-	}
-	if(!cookie['max-age']){
-		//it's a transient cookie so it only lasts as long as 
-		//the window.location remains the same
-		mergeCookie($cookies.temporary, cookie, properties);
-	}else if(cookie['max-age']===0){
-		//delete the cookies
-		//TODO
-	}else{
-		//the cookie is persistent
-		mergeCookie($cookies.persistent, cookie, properties);
-		persistCookies();
-	}
+/**
+ * @class Event
+ */
+Event = function(options){
+    // event state is kept read-only by forcing
+    // a new object for each event.  This may not
+    // be appropriate in the long run and we'll
+    // have to decide if we simply dont adhere to
+    // the read-only restriction of the specification
+    this._bubbles = true;
+    this._cancelable = true;
+    this._cancelled = false;
+    this._currentTarget = null;
+    this._target = null;
+    this._eventPhase = Event.AT_TARGET;
+    this._timeStamp = new Date().getTime();
+    this._preventDefault = false;
+    this._stopPropogation = false;
+};
+
+__extend__(Event.prototype,{       
+    get bubbles(){return this._bubbles;},
+    get cancelable(){return this._cancelable;},
+    get currentTarget(){return this._currentTarget;},
+    set currentTarget(currentTarget){ this._currentTarget = currentTarget; },
+    get eventPhase(){return this._eventPhase;},
+    set eventPhase(eventPhase){this._eventPhase = eventPhase;},
+    get target(){return this._target;},
+    set target(target){ this._target = target;},
+    get timeStamp(){return this._timeStamp;},
+    get type(){return this._type;},
+    initEvent: function(type, bubbles, cancelable){
+        this._type=type?type:'';
+        this._bubbles=!!bubbles;
+        this._cancelable=!!cancelable;
+    },
+    preventDefault: function(){
+        this._preventDefault = true;
+    },
+    stopPropagation: function(){
+        if(this._cancelable){
+            this._cancelled = true;
+            this._bubbles = false;
+        }
+    },
+    get cancelled(){
+        return this._cancelled;
+    },
+    toString: function(){
+        return '[object Event]';
+    }
 });
 
-document.__defineGetter__("cookie", function(c){
-	//The cookies that are returned must belong to the same domain
-	//and be at or below the current window.location.path.  Also
-	//we must check to see if the cookie was set to 'secure' in which
-	//case we must check our current location.protocol to make sure it's
-	//https:
-	var allcookies = [], i;
-	return cookieString($cookies.temporary) + cookieString($cookies.persistent); 	
+__extend__(Event,{
+    CAPTURING_PHASE : 1,
+    AT_TARGET       : 2,
+    BUBBLING_PHASE  : 3
 });
 
-var cookieString = function(cookies) {
-    var cookieString = "";
-    for (var i in cookies) {
-        // check if the cookie is in the current domain (if domain is set)
-        if (i == "" || i == $w.location.domain) {
-            for (var j in cookies[i]) {
-                // make sure path is at or below the window location path
-                if (j == "/" || $w.location.pathname.indexOf(j) === 0) {
-                    for (var k in cookies[i][j]) {
-                        cookieString += k + "=" + cookies[i][j][k].value+";";
-                    }
+
+
+
+/**
+ * @name UIEvent
+ * @param {Object} options
+ */
+UIEvent = function(options) {
+    this._view = null;
+    this._detail = 0;
+};
+
+UIEvent.prototype = new Event;
+__extend__(UIEvent.prototype,{
+    get view(){
+        return this._view;
+    },
+    get detail(){
+        return this._detail;
+    },
+    initUIEvent: function(type, bubbles, cancelable, windowObject, detail){
+        this.initEvent(type, bubbles, cancelable);
+        this._detail = 0;
+        this._view = windowObject;
+    }
+});
+
+var $onblur,
+    $onfocus,
+    $onresize;
+    
+    
+/**
+ * @name MouseEvent
+ * @w3c:domlevel 2 
+ * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
+ */
+MouseEvent = function(options) {
+    this._screenX= 0;
+    this._screenY= 0;
+    this._clientX= 0;
+    this._clientY= 0;
+    this._ctrlKey= false;
+    this._metaKey= false;
+    this._altKey= false;
+    this._button= null;
+    this._relatedTarget= null;
+};
+MouseEvent.prototype = new UIEvent;
+__extend__(MouseEvent.prototype,{
+    get screenX(){
+        return this._screenX;
+    },
+    get screenY(){
+        return this._screenY;
+    },
+    get clientX(){
+        return this._clientX;
+    },
+    get clientY(){
+        return this._clientY;
+    },
+    get ctrlKey(){
+        return this._ctrlKey;
+    },
+    get altKey(){
+        return this._altKey;
+    },
+    get shiftKey(){
+        return this._shiftKey;
+    },
+    get metaKey(){
+        return this._metaKey;
+    },
+    get button(){
+        return this._button;
+    },
+    get relatedTarget(){
+        return this._relatedTarget;
+    },
+    initMouseEvent: function(type, bubbles, cancelable, windowObject, detail,
+            screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, 
+            metaKey, button, relatedTarget){
+        this.initUIEvent(type, bubbles, cancelable, windowObject, detail);
+        this._screenX = screenX;
+        this._screenY = screenY;
+        this._clientX = clientX;
+        this._clientY = clientY;
+        this._ctrlKey = ctrlKey;
+        this._altKey = altKey;
+        this._shiftKey = shiftKey;
+        this._metaKey = metaKey;
+        this._button = button;
+        this._relatedTarget = relatedTarget;
+    }
+});
+
+/**
+ * Interface KeyboardEvent (introduced in DOM Level 3)
+ */
+KeyboardEvent = function(options) {
+    this._keyIdentifier = 0;
+    this._keyLocation = 0;
+    this._ctrlKey = false;
+    this._metaKey = false;
+    this._altKey = false;
+    this._metaKey = false;
+};
+KeyboardEvent.prototype = new UIEvent;
+
+__extend__(KeyboardEvent.prototype,{
+        
+    get ctrlKey(){
+        return this._ctrlKey;
+    },
+    get altKey(){
+        return this._altKey;
+    },
+    get shiftKey(){
+        return this._shiftKey;
+    },
+    get metaKey(){
+        return this._metaKey;
+    },
+    get button(){
+        return this._button;
+    },
+    get relatedTarget(){
+        return this._relatedTarget;
+    },
+    getModifiersState: function(keyIdentifier){
+
+    },
+    initMouseEvent: function(type, bubbles, cancelable, windowObject, 
+            keyIdentifier, keyLocation, modifiersList, repeat){
+        this.initUIEvent(type, bubbles, cancelable, windowObject, 0);
+        this._keyIdentifier = keyIdentifier;
+        this._keyLocation = keyLocation;
+        this._modifiersList = modifiersList;
+        this._repeat = repeat;
+    }
+});
+
+KeyboardEvent.DOM_KEY_LOCATION_STANDARD      = 0;
+KeyboardEvent.DOM_KEY_LOCATION_LEFT          = 1;
+KeyboardEvent.DOM_KEY_LOCATION_RIGHT         = 2;
+KeyboardEvent.DOM_KEY_LOCATION_NUMPAD        = 3;
+KeyboardEvent.DOM_KEY_LOCATION_MOBILE        = 4;
+KeyboardEvent.DOM_KEY_LOCATION_JOYSTICK      = 5;
+
+
+
+//We dont fire mutation events until someone has registered for them
+var __supportedMutations__ = /DOMSubtreeModified|DOMNodeInserted|DOMNodeRemoved|DOMAttrModified|DOMCharacterDataModified/;
+
+var __fireMutationEvents__ = Aspect.before({
+    target: EventTarget, 
+    method: 'addEventListener'
+}, function(target, type){
+    if(type && type.match(__supportedMutations__)){
+        //unweaving removes the __addEventListener__ aspect
+        __fireMutationEvents__.unweave();
+        // These two methods are enough to cover all dom 2 manipulations
+        Aspect.around({ 
+            target: Node,  
+            method:"removeChild"
+        }, function(invocation){
+            var event,
+                node = invocation.arguments[0];
+            event = node.ownerDocument.createEvent('MutationEvents');
+            event.initEvent('DOMNodeRemoved', true, false, node.parentNode, null, null, null, null);
+            node.dispatchEvent(event, false);
+            return invocation.proceed();
+            
+        }); 
+        Aspect.around({ 
+            target: Node,  
+            method:"appendChild"
+        }, function(invocation) {
+            var event,
+                node = invocation.proceed();
+            event = node.ownerDocument.createEvent('MutationEvents');
+            event.initEvent('DOMNodeInserted', true, false, node.parentNode, null, null, null, null);
+            node.dispatchEvent(event, false); 
+            return node;
+        });
+    }
+});
+
+/**
+ * @name MutationEvent
+ * @param {Object} options
+ */
+MutationEvent = function(options) {
+    this._cancelable = false;
+    this._timeStamp = 0;
+};
+
+MutationEvent.prototype = new Event;
+__extend__(MutationEvent.prototype,{
+    get relatedNode(){
+        return this._relatedNode;
+    },
+    get prevValue(){
+        return this._prevValue;
+    },
+    get newValue(){
+        return this._newValue;
+    },
+    get attrName(){
+        return this._attrName;
+    },
+    get attrChange(){
+        return this._attrChange;
+    },
+    initMutationEvent: function( type, bubbles, cancelable, 
+            relatedNode, prevValue, newValue, attrName, attrChange ){
+        this._relatedNode = relatedNode;
+        this._prevValue = prevValue;
+        this._newValue = newValue;
+        this._attrName = attrName;
+        this._attrChange = attrChange;
+        switch(type){
+            case "DOMSubtreeModified":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeInserted":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeRemoved":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMNodeRemovedFromDocument":
+                this.initEvent(type, false, false);
+                break;
+            case "DOMNodeInsertedIntoDocument":
+                this.initEvent(type, false, false);
+                break;
+            case "DOMAttrModified":
+                this.initEvent(type, true, false);
+                break;
+            case "DOMCharacterDataModified":
+                this.initEvent(type, true, false);
+                break;
+            default:
+                this.initEvent(type, bubbles, cancelable);
+        }
+    }
+});
+
+// constants
+MutationEvent.ADDITION = 0;
+MutationEvent.MODIFICATION = 1;
+MutationEvent.REMOVAL = 2;
+
+
+/**
+ * @name EventException
+ */
+EventException = function(code) {
+  this.code = code;
+};
+EventException.UNSPECIFIED_EVENT_TYPE_ERR = 0;
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+
+/*
+ * Envjs timer.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ * 
+ * Parts of the implementation were originally written by:\
+ * Steven Parkes
+ * 
+ * requires Envjs.wait, Envjs.sleep, Envjs.WAIT_INTERVAL
+ */
+var setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval;
+    
+/*
+ * Envjs timer.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+/*
+*	timer.js
+*   implementation provided by Steven Parkes
+*/
+
+//private
+var $timers = [],
+    EVENT_LOOP_RUNNING = false;
+    
+$timers.lock = function(fn){
+    Envjs.sync(fn)();
+};
+
+//private internal class
+var Timer = function(fn, interval){
+    this.fn = fn;
+    this.interval = interval;
+    this.at = Date.now() + interval;
+    // allows for calling wait() from callbacks
+    this.running = false; 
+};
+  
+Timer.prototype.start = function(){};
+Timer.prototype.stop = function(){};
+
+//static
+Timer.normalize = function(time) {
+    time = time*1;
+    if ( isNaN(time) || time < 0 ) {
+        time = 0;
+    }
+    
+    if ( EVENT_LOOP_RUNNING && time < Timer.MIN_TIME ) {
+        time = Timer.MIN_TIME;
+    }
+    return time;
+};
+// html5 says this should be at least 4, but the parser is using 
+// a setTimeout for the SAX stuff which messes up the world
+Timer.MIN_TIME = /* 4 */ 0; 
+
+/**
+ * @function setTimeout
+ * @param {Object} fn
+ * @param {Object} time
+ */
+setTimeout = function(fn, time){
+    var num;
+    time = Timer.normalize(time);
+    $timers.lock(function(){
+        num = $timers.length+1;
+        var tfn;
+        if (typeof fn == 'string') {
+            tfn = function() {
+                try {
+                    eval(fn);
+                } catch (e) {
+                    console.log('timer error %s %s', fn, e);
+                } finally {
+                    clearInterval(num);
+                }
+            };
+        } else {
+            tfn = function() {
+                try {
+                    fn();
+                } catch (e) {
+                    console.log('timer error %s %s', fn, e);
+                } finally {
+                    clearInterval(num);
+                }
+            };
+        }
+        //console.log("Creating timer number %s", num);
+        $timers[num] = new Timer(tfn, time);
+        $timers[num].start();
+    });
+    return num;
+};
+
+/**
+ * @function setInterval
+ * @param {Object} fn
+ * @param {Object} time
+ */
+setInterval = function(fn, time){
+    //console.log('setting interval %s %s', time, fn.toString().substring(0,64));
+    time = Timer.normalize(time);
+    if ( time < 10 ) {
+        time = 10;
+    }
+    if (typeof fn == 'string') {
+        var fnstr = fn; 
+        fn = function() { 
+            eval(fnstr);
+        }; 
+    }
+    var num;
+    $timers.lock(function(){
+        num = $timers.length+1;
+        //Envjs.debug("Creating timer number "+num);
+        $timers[num] = new Timer(fn, time);
+        $timers[num].start();
+    });
+    return num;
+};
+
+/**
+ * clearInterval
+ * @param {Object} num
+ */
+clearInterval = clearTimeout = function(num){
+    //console.log("clearing interval "+num);
+    $timers.lock(function(){
+        if ( $timers[num] ) {
+            $timers[num].stop();
+            delete $timers[num];
+        }
+    });
+};	
+
+// wait === null/undefined: execute any timers as they fire, 
+//  waiting until there are none left
+// wait(n) (n > 0): execute any timers as they fire until there 
+//  are none left waiting at least n ms but no more, even if there 
+//  are future events/current threads
+// wait(0): execute any immediately runnable timers and return
+// wait(-n): keep sleeping until the next event is more than n ms 
+//  in the future
+//
+// TODO: make a priority queue ...
+
+Envjs.wait = function(wait) {
+    //console.log('wait %s', wait);
+    var delta_wait,
+        start = Date.now(),
+        was_running = EVENT_LOOP_RUNNING;
+    
+    if (wait < 0) {
+        delta_wait = -wait;
+        wait = 0;
+    }
+    EVENT_LOOP_RUNNING = true; 
+    if (wait !== 0 && wait !== null && wait !== undefined){
+        wait += Date.now();
+    }
+    
+    var earliest,
+        timer,
+        sleep,
+        index,
+        goal,
+        now,
+        nextfn;
+        
+    for (;;) {
+        //console.log('timer loop');
+        earliest = sleep = goal = now = nextfn = null;
+        $timers.lock(function(){
+            for(index in $timers){
+                if( isNaN(index*0) ) {
+                    continue;
+                }
+                timer = $timers[index];
+                // determine timer with smallest run-at time that is
+                // not already running
+                if( !timer.running && ( !earliest || timer.at < earliest.at) ) {
+                    earliest = timer;
+                }
+            }
+        });
+        //next sleep time
+        sleep = earliest && earliest.at - Date.now();
+        if ( earliest && sleep <= 0 ) {
+            nextfn = earliest.fn;
+            try {
+                //console.log('running stack %s', nextfn.toString().substring(0,64));
+                earliest.running = true;
+                nextfn();
+            } catch (e) {
+                console.log('timer error %s %s', nextfn, e);
+            } finally {
+                earliest.running = false;
+            }
+            goal = earliest.at + earliest.interval;
+            now = Date.now();
+            if ( goal < now ) {
+                earliest.at = now;
+            } else {
+                earliest.at = goal;
+            }
+            continue;
+        }
+
+        // bunch of subtle cases here ...
+        if ( !earliest ) {
+            // no events in the queue (but maybe XHR will bring in events, so ...
+            if ( !wait || wait < Date.now() ) {
+                // Loop ends if there are no events and a wait hasn't been 
+                // requested or has expired
+                break;
+            }
+        // no events, but a wait requested: fall through to sleep
+        } else {
+            // there are events in the queue, but they aren't firable now
+            /*if ( delta_wait && sleep <= delta_wait ) {
+                //TODO: why waste a check on a tight 
+                // loop if it just falls through?
+            // if they will happen within the next delta, fall through to sleep
+            } else */if ( wait === 0 || ( wait > 0 && wait < Date.now () ) ) {
+                // loop ends even if there are events but the user 
+                // specifcally asked not to wait too long
+                break;
+            }
+            // there are events and the user wants to wait: fall through to sleep
+        }
+
+        // Related to ajax threads ... hopefully can go away ..
+        var interval =  Envjs.WAIT_INTERVAL || 100;
+        if ( !sleep || sleep > interval ) {
+            sleep = interval;
+        }
+        //console.log('sleeping %s', sleep);
+        Envjs.sleep(sleep);
+        
+    }
+    EVENT_LOOP_RUNNING = was_running;
+};
+
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+/*
+ * Envjs html.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ * 
+ * This file simply provides the global definitions we need to 
+ * be able to correctly implement to core browser DOM HTML interfaces.
+ */
+var HTMLDocument,
+    HTMLElement,
+    HTMLCollection,
+    HTMLAnchorElement,
+    HTMLAreaElement,
+    HTMLBaseElement,
+    HTMLQuoteElement,
+    HTMLBodyElement,
+    HTMLButtonElement,
+    HTMLCanvasElement,
+    HTMLTableColElement,
+    HTMLModElement,
+    HTMLDivElement,
+    HTMLFieldSetElement,
+    HTMLFormElement,
+    HTMLFrameElement,
+    HTMLFrameSetElement,
+    HTMLHeadElement,
+    HTMLIFrameElement,
+    HTMLImageElement,
+    HTMLInputElement,
+    HTMLLabelElement,
+    HTMLLegendElement,
+    HTMLLinkElement,
+    HTMLMapElement,
+    HTMLMetaElement,
+    HTMLObjectElement,
+    HTMLOptGroupElement,
+    HTMLOptionElement,
+    HTMLParamElement,
+    HTMLScriptElement,
+    HTMLSelectElement,
+    HTMLStyleElement,
+    HTMLTableElement,
+    HTMLTableSectionElement,
+    HTMLTableCellElement,
+    HTMLTableRowElement,
+    HTMLTextAreaElement,
+    HTMLTitleElement,
+    HTMLUnknownElement;
+    
+/*
+ * Envjs html.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author ariel flesler
+ *    http://flesler.blogspot.com/2008/11/fast-trim-function-for-javascript.html 
+ * @param {Object} str
+ */
+function __trim__( str ){
+    return (str || "").replace( /^\s+|\s+$/g, "" );
+    
+};
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * @author john resig
+ */
+//from jQuery
+function __setArray__( target, array ) {
+    // Resetting the length to 0, then using the native Array push
+    // is a super-fast way to populate an object with array-like properties
+    target.length = 0;
+    Array.prototype.push.apply( target, array );
+};
+/**
+ * @class  HTMLDocument
+ *      The Document interface represents the entire HTML or XML document.
+ *      Conceptually, it is the root of the document tree, and provides 
+ *      the primary access to the document's data.
+ *
+ * @extends Document
+ */
+HTMLDocument = function(implementation, ownerWindow, referrer) {
+    Document.apply(this, arguments);
+    this.referrer = referrer;
+    this.baseURI = "about:blank";
+    this.ownerWindow = ownerWindow;
+    this.head;
+    this.body;
+};
+HTMLDocument.prototype = new Document;
+
+__extend__(HTMLDocument.prototype, {
+    createElement: function(tagName){
+        tagName = tagName.toUpperCase();
+        // create Element specifying 'this' as ownerDocument
+        // This is an html document so we need to use explicit interfaces per the 
+        //TODO: would be much faster as a big switch
+        switch(tagName){
+            case "A":
+                node = new HTMLAnchorElement(this);break;
+            case "AREA":
+                node = new HTMLAreaElement(this);break;
+            case "BASE":
+                node = new HTMLBaseElement(this);break;
+            case "BLOCKQUOTE":
+                node = new HTMLQuoteElement(this);break;
+            case "Q":
+                node = new HTMLQuoteElement(this);break;
+            case "BODY":
+                node = new HTMLBodyElement(this);break;
+            case "BR":
+                node = new HTMLElement(this);break;
+            case "BUTTON":
+                node = new HTMLButtonElement(this);break;
+            case "CAPTION":
+                node = new HTMLElement(this);break;
+            case "COL":
+                node = new HTMLTableColElement(this);break;
+            case "COLGROUP":
+                node = new HTMLTableColElement(this);break;
+            case "DEL":
+                node = new HTMLModElement(this);break;
+            case "INS":
+                node = new HTMLModElement(this);break;
+            case "DIV":
+                node = new HTMLDivElement(this);break;
+            case "DL":
+                node = new HTMLElement(this);break;
+            case "FIELDSET":
+                node = new HTMLFieldSetElement(this);break;
+            case "FORM":
+                node = new HTMLFormElement(this);break;
+            case "FRAME":
+                node = new HTMLFrameElement(this);break;
+            case "H1":
+                node = new HTMLHeadElement(this);break;
+            case "H2":
+                node = new HTMLHeadElement(this);break;
+            case "H3":
+                node = new HTMLHeadElement(this);break;
+            case "H4":
+                node = new HTMLHeadElement(this);break;
+            case "H5":
+                node = new HTMLHeadElement(this);break;
+            case "H6":
+                node = new HTMLHeadElement(this);break;
+            case "HR":
+                node = new HTMLElement(this);break;
+            case "HTML":
+                node = new HTMLElement(this);break;
+            case "IFRAME":
+                node = new HTMLIFrameElement(this);break;
+            case "IMG":
+                node = new HTMLImageElement(this);break;
+            case "INPUT":
+                node = new HTMLInputElement(this);break;
+            case "LABEL":
+                node = new HTMLLabelElement(this);break;
+            case "LEGEND":
+                node = new HTMLLegendElement(this);break;
+            case "LI":
+                node = new HTMLElement(this);break;
+            case "LINK":
+                node = new HTMLLinkElement(this);break;
+            case "MAP":
+                node = new HTMLMapElement(this);break;
+            case "META":
+                node = new HTMLObjectElement(this);break;
+            case "OBJECT":
+                node = new HTMLMapElement(this);break;
+            case "OPTGROUP":
+                node = new HTMLOptGroupElement(this);break;
+            case "OPTION":
+                node = new HTMLOptionElement(this);break;
+            case "P":
+                node = new HTMLParagraphElement(this);break;
+            case "PARAM":
+                node = new HTMLParamElement(this);break;
+            case "PRE":
+                node = new HTMLElement(this);break;
+            case "SCRIPT":
+                node = new HTMLScriptElement(this);break;
+            case "SELECT":
+                node = new HTMLSelectElement(this);break;
+            case "STYLE":
+                node = new HTMLStyleElement(this);break;
+            case "TABLE":
+                node = new HTMLTableElement(this);break;
+            case "TBODY":
+                node = new HTMLTableSectionElement(this);break;
+            case "TFOOT":
+                node = new HTMLTableSectionElement(this);break;
+            case "THEAD":
+                node = new HTMLTableSectionElement(this);break;
+            case "TD":
+                node = new HTMLTableCellElement(this);break;
+            case "TH":
+                node = new HTMLTableCellElement(this);break;
+            case "TEXTAREA":
+                node = new HTMLTextAreaElement(this);break;
+            case "TITLE":
+                node = new HTMLTitleElement(this);break;
+            case "TR":
+                node = new HTMLTableRowElement(this);break;
+            case "UL":
+                node = new HTMLElement(this);break;
+            default:
+                node = new HTMLUnknownElement(this);
+        }
+        // assign values to properties (and aliases)
+        node.nodeName  = tagName;
+        return node;
+    },
+    createElementNS : function (uri, local) {
+        //print('createElementNS :'+uri+" "+local);
+        if(!uri){
+            return this.createElement(local);
+        }else if ("http://www.w3.org/1999/xhtml" == uri) {
+            return this.createElement(local);
+        } else if ("http://www.w3.org/1998/Math/MathML" == uri) {
+            return this.createElement(local);
+        } else {
+            return Document.prototype.createElementNS.apply(this,[uri, local]);
+        }
+    },
+    get anchors(){
+        return new HTMLCollection(this.getElementsByTagName('a'));
+        
+    },
+    get applets(){
+        return new HTMLCollection(this.getElementsByTagName('applet'));
+        
+    },
+    //document.head is non-standard
+    get head(){
+        //console.log('get head');
+        if(!this.documentElement)
+            this.appendChild(this.createElement('html'));
+        var element = this.documentElement,
+            length = element.childNodes.length,
+            i;
+        //check for the presence of the head element in this html doc
+        for(i=0;i<length;i++){
+            if(element.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(element.childNodes[i].tagName.toLowerCase() === 'head'){
+                    return element.childNodes[i];
                 }
             }
         }
+        //no head?  ugh bad news html.. I guess we'll force the issue?
+        var head = element.appendChild(this.createElement('head'));
+        return head;
+    },
+    get title(){
+        //console.log('get title');
+        if(!this.documentElement)
+            this.appendChild(this.createElement('html'));
+        var title,
+            head = this.head,
+            length = head.childNodes.length,
+            i;
+        //check for the presence of the title element in this head element
+        for(i=0;i<length;i++){
+            if(head.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(head.childNodes[i].tagName.toLowerCase() === 'title'){
+                    return head.childNodes[i].textContent;
+                }
+            }
+        }
+        //no title?  ugh bad news html.. I guess we'll force the issue?
+        title = head.appendChild(this.createElement('title'));
+        return title.appendChild(this.createTextNode('Untitled Document')).nodeValue;
+    },
+    set title(titleStr){
+        //console.log('set title %s', titleStr);
+        if(!this.documentElement)
+            this.appendChild(this.createElement('html'));
+        var title = this.title;
+        title.textContent = titleStr;
+    },
+
+    get body(){ 
+        //console.log('get body');
+        if(!this.documentElement)
+            this.appendChild(this.createElement('html'));
+        var body,
+            element = this.documentElement,
+            length = element.childNodes.length,
+            i;
+        //check for the presence of the head element in this html doc
+        for(i=0;i<length;i++){
+            if(element.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                if(element.childNodes[i].tagName.toLowerCase() === 'body'){
+                    return element.childNodes[i];
+                }
+            }
+        }
+        //no head?  ugh bad news html.. I guess we'll force the issue?
+        return element.appendChild(this.createElement('body'));
+    },
+    set body(){console.log('set body');/**in firefox this is a benevolent do nothing*/},
+    get cookie(){
+        return Cookies.get(this);
+    },
+    set cookie(cookie){
+        return Cookies.set(this, cookie);
+    },
+    get location(){
+        return this.baseURI;
+    },
+    set location(url){
+        this.baseURI = url;
+    },
+    get domain(){
+        var HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
+            matches = HOSTNAME.exec(this.baseURI);
+        return matches&&matches.length>1?matches[1]:"";
+    },
+    set domain(value){
+        var i,
+            domainParts = this.domain.splt('.').reverse(),
+            newDomainParts = value.split('.').reverse();
+        if(newDomainParts.length > 1){
+            for(i=0;i<newDomainParts.length;i++){
+                if(!(newDomainParts[i] == domainParts[i])){
+                    return;
+                }
+            }
+            this.baseURI = this.baseURI.replace(domainParts.join('.'), value);
+        }
+    },
+    get forms(){
+      return new HTMLCollection(this.getElementsByTagName('form'));
+    },
+    get images(){
+        return new HTMLCollection(this.getElementsByTagName('img'));
+    },
+    get lastModified(){ 
+        /* TODO */
+        return this._lastModified; 
+    },
+    get links(){
+        return new HTMLCollection(this.getElementsByTagName('a'));
+    },
+	getElementsByName : function(name){
+        //returns a real Array + the NodeList
+        var retNodes = __extend__([],new NodeList(this, this.documentElement)),
+          node;
+        // loop through all Elements in the 'all' collection
+        var all = this.all;
+        for (var i=0; i < all.length; i++) {
+            node = all[i];
+            if (node.nodeType == Node.ELEMENT_NODE && 
+                node.getAttribute('name') == name) {
+                retNodes.push(node);
+            }
+        }
+        return retNodes;
+	},
+	toString: function(){ 
+	    return "[object HTMLDocument]"; 
+    },
+	get innerHTML(){ 
+	    return this.documentElement.outerHTML; 
+    },
+    get URL(){ 
+        return this.location;  
+    },
+    set URL(url){
+        this.location = url;  
     }
-    return cookieString;
+});
+
+
+Aspect.around({ 
+    target: Node,  
+    method:"appendChild"
+}, function(invocation) {
+    var event,
+        okay,
+        node = invocation.proceed(),
+        doc = node.ownerDocument;
+    if((node.nodeType !== Node.ELEMENT_NODE)){
+        //for now we are only handling element insertions.  probably we will need
+        //to handle text node changes to script tags and changes to src 
+        //attributes
+        return node;
+    }
+    //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
+    switch(doc.parsing){
+        case true:
+            //handled by parser if included
+            //console.log('html document in parse mode');
+            break;
+        case false:
+            switch(node.namespaceURI){
+                case null:
+                    //fall through
+                case "":
+                    //fall through
+                case "http://www.w3.org/1999/xhtml":
+                    switch(node.tagName.toLowerCase()){
+                        case 'script':
+                            if((this.nodeName.toLowerCase() == 'head')){
+                                try{
+                                    okay = Envjs.loadLocalScript(node, null);
+                                    //console.log('loaded script? %s %s', node.uuid, okay);
+                                    // only fire event if we actually had something to load
+                                    if (node.src && node.src.length > 0){
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent( okay ? "load" : "error", false, false );
+                                        node.dispatchEvent( event, false );
+                                    }
+                                }catch(e){
+                                    console.log('error loading html element %s %e', node, e.toString());
+                                }
+                            }
+                            break;
+                        case 'frame':
+                        case 'iframe':
+                            node.contentWindow = { };
+                            node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
+                            node.contentWindow.document = node.contentDocument;
+                            try{
+                                Window;
+                            }catch(e){
+                                node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                });
+                            }
+                            try{
+                                if (node.src && node.src.length > 0){
+                                    //console.log("getting content document for (i)frame from %s", node.src);
+                                    Envjs.loadFrame(node, Envjs.uri(node.src));
+                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                    event.initEvent("load", false, false);
+                                    node.dispatchEvent( event, false );
+                                }else{
+                                    //I dont like this being here:
+                                    //TODO: better  mix-in strategy so the try/catch isnt required
+                                    try{
+                                        if(Window){
+                                            Envjs.loadFrame(node);
+                                            //console.log('src/html/document.js: triggering frame load');
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){}
+                                }
+                            }catch(e){
+                                console.log('error loading html element %s %e', node, e.toString());
+                            }
+                            break;
+                        case 'link':
+                            if (node.href && node.href.length > 0){
+                                // don't actually load anything, so we're "done" immediately:
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            }
+                            break;
+                        case 'img':
+                            if (node.src && node.src.length > 0){
+                                // don't actually load anything, so we're "done" immediately:
+                                event = doc.createEvent('HTMLEvents');
+                                event.initEvent("load", false, false);
+                                node.dispatchEvent( event, false );
+                            }
+                            break;
+                        default:
+                            if(node.getAttribute('onload')){
+                                console.log('calling attribute onload %s | %s', node.onload, node.tagName);
+                                node.onload();
+                            }
+                            break;
+                    }//switch on name
+                default:
+                    break;
+            }//switch on ns
+            break;
+        default: 
+            console.log('element appended: %s %s', node+'', node.namespaceURI);
+    }//switch on doc.parsing
+    return node;
+
+});
+
+Aspect.around({ 
+    target: Node,  
+    method:"removeChild"
+}, function(invocation) {
+    var event,
+        okay,
+        node = invocation.proceed(),
+        doc = node.ownerDocument;
+    if((node.nodeType !== Node.ELEMENT_NODE)){
+        //for now we are only handling element insertions.  probably we will need
+        //to handle text node changes to script tags and changes to src 
+        //attributes
+        if(node.nodeType !== Node.DOCUMENT_NODE && node.uuid){
+            //console.log('removing event listeners, %s', node, node.uuid);
+            node.removeEventListener('*', null, null);
+        }
+        return node;
+    }
+    //console.log('appended html element %s %s %s', node.namespaceURI, node.nodeName, node);
+    
+    switch(doc.parsing){
+        case true:
+            //handled by parser if included
+            break;
+        case false:
+            switch(node.namespaceURI){
+                case null:
+                    //fall through
+                case "":
+                    //fall through
+                case "http://www.w3.org/1999/xhtml":
+                    //this is interesting dillema since our event engine is
+                    //storing the registered events in an array accessed
+                    //by the uuid property of the node.  unforunately this
+                    //means listeners hang out way after(forever ;)) the node
+                    //has been removed and gone out of scope.
+                    //console.log('removing event listeners, %s', node, node.uuid);
+                    node.removeEventListener('*', null, null);
+                    switch(node.tagName.toLowerCase()){
+                        case 'frame':
+                        case 'iframe':
+                            try{
+                                //console.log('removing iframe document');
+                                try{
+                                    Envjs.unloadFrame(node);
+                                }catch(e){
+                                    console.log('error freeing resources from frame %s', e);
+                                }
+                                node.contentWindow = null;
+                                node.contentDocument = null;
+                            }catch(e){
+                                console.log('error unloading html element %s %e', node, e.toString());
+                            }
+                            break;
+                        default:
+                            break;
+                    }//switch on name
+                default:
+                    break;
+            }//switch on ns
+            break;
+        default: 
+            console.log('element appended: %s %s', node+'', node.namespaceURI);
+    }//switch on doc.parsing
+    return node;
+
+});
+
+
+/**
+ * @name HTMLEvents
+ * @w3c:domlevel 2 
+ * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
+ */
+var HTMLEvents= function(){};
+HTMLEvents.prototype = {
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this);
+    },
+    onunload: function(event){
+        __eval__(this.getAttribute('onunload')||'', this);
+    },
+    onabort: function(event){
+        __eval__(this.getAttribute('onabort')||'', this);
+    },
+    onerror: function(event){
+        __eval__(this.getAttribute('onerror')||'', this);
+    },
+    onselect: function(event){
+        __eval__(this.getAttribute('onselect')||'', this);
+    },
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this);
+    },
+    onsubmit: function(event){
+        if (__eval__(this.getAttribute('onsubmit')||'', this)) {
+            this.submit();
+        }
+    },
+    onreset: function(event){
+        __eval__(this.getAttribute('onreset')||'', this);
+    },
+    onfocus: function(event){
+        __eval__(this.getAttribute('onfocus')||'', this);
+    },
+    onblur: function(event){
+        __eval__(this.getAttribute('onblur')||'', this);
+    },
+    onresize: function(event){
+        __eval__(this.getAttribute('onresize')||'', this);
+    },
+    onscroll: function(event){
+        __eval__(this.getAttribute('onscroll')||'', this);
+    }
+};
+
+
+var __eval__ = function(script, node){
+    if (!script == ""){
+        // don't assemble environment if no script...
+        try{
+            eval(script);
+        }catch(e){
+            console.log('error evaluating %s', e);
+        }               
+    }
+};
+
+
+
+//HTMLDocument, HTMLFramesetElement, HTMLObjectElement
+var  __load__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("load", false, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HTMLFramesetElement, HTMLBodyElement
+var  __unload__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("unload", false, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HTMLObjectElement
+var  __abort__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("abort", true, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HTMLFramesetElement, HTMLObjectElement, HTMLBodyElement 
+var  __error__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("error", true, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HTMLInputElement, HTMLTextAreaElement
+var  __select__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("select", true, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement
+var  __change__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("change", true, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HtmlFormElement
+var __submit__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("submit", true, true);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//HtmlFormElement
+var  __reset__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("reset", false, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//LABEL, INPUT, SELECT, TEXTAREA, and BUTTON
+var __focus__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("focus", false, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//LABEL, INPUT, SELECT, TEXTAREA, and BUTTON
+var __blur__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("blur", false, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//Window
+var __resize__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("resize", true, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+//Window
+var __scroll__ = function(element){
+    var event = new Event('HTMLEvents');
+    event.initEvent("scroll", true, false);
+    element.dispatchEvent(event);
+    return event;
+};
+
+/**
+ * @name KeyboardEvents
+ * @w3c:domlevel 2 
+ * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
+ */
+var KeyboardEvents= function(){};
+KeyboardEvents.prototype = {
+    onkeydown: function(event){
+        __eval__(this.getAttribute('onkeydown')||'', this);
+    },
+    onkeypress: function(event){
+        __eval__(this.getAttribute('onkeypress')||'', this);
+    },
+    onkeyup: function(event){
+        __eval__(this.getAttribute('onkeyup')||'', this);
+    }
+};
+
+
+var __registerKeyboardEventAttrs__ = function(elm){
+    if(elm.hasAttribute('onkeydown')){ 
+        elm.addEventListener('keydown', elm.onkeydown, false); 
+    }
+    if(elm.hasAttribute('onkeypress')){ 
+        elm.addEventListener('keypress', elm.onkeypress, false); 
+    }
+    if(elm.hasAttribute('onkeyup')){ 
+        elm.addEventListener('keyup', elm.onkeyup, false); 
+    }
+    return elm;
+};
+
+//HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement
+var  __keydown__ = function(element){
+    var event = new Event('KeyboardEvents');
+    event.initEvent("keydown", false, false);
+    element.dispatchEvent(event);
+};
+
+//HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement
+var  __keypress__ = function(element){
+    var event = new Event('KeyboardEvents');
+    event.initEvent("keypress", false, false);
+    element.dispatchEvent(event);
+};
+
+//HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement
+var  __keyup__ = function(element){
+    var event = new Event('KeyboardEvents');
+    event.initEvent("keyup", false, false);
+    element.dispatchEvent(event);
+};
+
+/**
+ * @name MaouseEvents
+ * @w3c:domlevel 2 
+ * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
+ */
+var MouseEvents= function(){};
+MouseEvents.prototype = {
+    onclick: function(event){
+        __eval__(this.getAttribute('onclick')||'', this);
+    },
+    ondblclick: function(event){
+        __eval__(this.getAttribute('ondblclick')||'', this);
+    },
+    onmousedown: function(event){
+        __eval__(this.getAttribute('onmousedown')||'', this);
+    },
+    onmousemove: function(event){
+        __eval__(this.getAttribute('onmousemove')||'', this);
+    },
+    onmouseout: function(event){
+        __eval__(this.getAttribute('onmouseout')||'', this);
+    },
+    onmouseover: function(event){
+        __eval__(this.getAttribute('onmouseover')||'', this);
+    },
+    onmouseup: function(event){
+        __eval__(this.getAttribute('onmouseup')||'', this);
+    }  
+};
+
+var __registerMouseEventAttrs__ = function(elm){
+    if(elm.hasAttribute('onclick')){ 
+        elm.addEventListener('click', elm.onclick, false); 
+    }
+    if(elm.hasAttribute('ondblclick')){ 
+        elm.addEventListener('dblclick', elm.ondblclick, false); 
+    }
+    if(elm.hasAttribute('onmousedown')){ 
+        elm.addEventListener('mousedown', elm.onmousedown, false); 
+    }
+    if(elm.hasAttribute('onmousemove')){ 
+        elm.addEventListener('mousemove', elm.onmousemove, false); 
+    }
+    if(elm.hasAttribute('onmouseout')){ 
+        elm.addEventListener('mouseout', elm.onmouseout, false); 
+    }
+    if(elm.hasAttribute('onmouseover')){ 
+        elm.addEventListener('mouseover', elm.onmouseover, false); 
+    }
+    if(elm.hasAttribute('onmouseup')){ 
+        elm.addEventListener('mouseup', elm.onmouseup, false); 
+    }
+    return elm;
+};
+
+
+var  __click__ = function(element){
+    var event = new Event('MouseEvents');
+    event.initEvent("click", true, true, null, 0,
+                0, 0, 0, 0, false, false, false, 
+                false, null, null);
+    element.dispatchEvent(event);
+};
+var  __mousedown__ = function(element){
+    var event = new Event('MouseEvents');
+    event.initEvent("mousedown", true, true, null, 0,
+                0, 0, 0, 0, false, false, false, 
+                false, null, null);
+    element.dispatchEvent(event);
+};
+var  __mouseup__ = function(element){
+    var event = new Event('MouseEvents');
+    event.initEvent("mouseup", true, true, null, 0,
+                0, 0, 0, 0, false, false, false, 
+                false, null, null);
+    element.dispatchEvent(event);
+};
+var  __mouseover__ = function(element){
+    var event = new Event('MouseEvents');
+    event.initEvent("mouseover", true, true, null, 0,
+                0, 0, 0, 0, false, false, false, 
+                false, null, null);
+    element.dispatchEvent(event);
+};
+var  __mousemove__ = function(element){
+    var event = new Event('MouseEvents');
+    event.initEvent("mousemove", true, true, null, 0,
+                0, 0, 0, 0, false, false, false, 
+                false, null, null);
+    element.dispatchEvent(event);
+};
+var  __mouseout__ = function(element){
+    var event = new Event('MouseEvents');
+    event.initEvent("mouseout", true, true, null, 0,
+                0, 0, 0, 0, false, false, false, 
+                false, null, null);
+    element.dispatchEvent(event);
+};
+
+/**
+* HTMLElement - DOM Level 2
+*/
+HTMLElement = function(ownerDocument) {
+    Element.apply(this, arguments);
+};
+HTMLElement.prototype = new Element;
+//TODO: Not sure where HTMLEvents belongs in the chain
+//      but putting it here satisfies a lowest common 
+//      denominator.
+__extend__(HTMLElement.prototype, HTMLEvents.prototype);
+__extend__(HTMLElement.prototype, {
+	get className() { 
+	    return this.getAttribute("class")||''; 
+    },
+	set className(value) { 
+	    return this.setAttribute("class",__trim__(value)); 
+    },
+	get dir() { 
+	    return this.getAttribute("dir")||"ltr"; 
+    },
+	set dir(val) { 
+	    return this.setAttribute("dir",val); 
+    },
+	get id(){  
+	    return this.getAttribute('id'); 
+    },
+	set id(id){  
+	    this.setAttribute('id', id); 
+    },
+	get innerHTML(){  
+	    var ret = "",
+            i;
+        
+        // create string containing the concatenation of the string 
+        // values of each child
+        for (i=0; i < this.childNodes.length; i++) {
+            if(this.childNodes[i]){
+                if(this.childNodes[i].nodeType === Node.ELEMENT_NODE){
+                    ret += this.childNodes[i].xhtml;
+                }else if(this.childNodes[i].nodeType == Node.TEXT_NODE && i>0 && 
+                    this.childNodes[i-1].nodeType == Node.TEXT_NODE){
+                    //add a single space between adjacent text nodes
+                    ret += " "+this.childNodes[i].xml;
+                }else{
+                    ret += this.childNodes[i].xml;
+                }
+            }
+        }
+        return ret;
+    },
+	get lang() { 
+	    return this.getAttribute("lang"); 
+    },
+	set lang(val) { 
+	    return this.setAttribute("lang",val); 
+    },
+	get offsetHeight(){
+	    return Number((this.style["height"]||'').replace("px",""));
+	},
+	get offsetWidth(){
+	    return Number((this.style["width"]||'').replace("px",""));
+	},
+	offsetLeft: 0,
+	offsetRight: 0,
+	get offsetParent(){
+	    /* TODO */
+	    return;
+    },
+	set offsetParent(element){
+	    /* TODO */
+	    return;
+    },
+	scrollHeight: 0,
+	scrollWidth: 0,
+	scrollLeft: 0, 
+	scrollRight: 0,
+	get style(){
+        return this.getAttribute('style')||'';
+	},
+	get title() { 
+	    return this.getAttribute("title"); 
+    },
+	set title(value) { 
+	    return this.setAttribute("title", value);
+    },
+	get tabIndex(){
+        var tabindex = this.getAttribute('tabindex');
+        if(tabindex!==null){
+            return Number(tabindex);
+        } else {
+            return 0;
+        }
+    },
+    set tabIndex(value){
+        if(value===undefined||value===null)
+            value = 0;
+        this.setAttribute('tabindex',Number(value));
+    },
+	get outerHTML(){ 
+        //Not in the specs but I'll leave it here for now.
+	    return this.xhtml; 
+    },
+    scrollIntoView: function(){
+        /*TODO*/
+        return;
+    },
+    toString: function(){
+        return '[object HTMLElement]';
+    },
+    get xhtml() {
+        // HTMLDocument.xhtml is non-standard
+        // This is exactly like Document.xml except the tagName has to be 
+        // lower cased.  I dont like to duplicate this but its really not
+        // a simple work around between xml and html serialization via
+        // XMLSerializer (which uppercases html tags) and innerHTML (which
+        // lowercases tags)
+        
+        var ret = "",
+            ns = "",
+            name = (this.tagName+"").toLowerCase(),
+            attrs,
+            attrstring = "",
+            i;
+
+        // serialize namespace declarations
+        if (this.namespaceURI){
+            if((this === this.ownerDocument.documentElement) ||
+                (!this.parentNode)||
+                (this.parentNode && 
+                (this.parentNode.namespaceURI !== this.namespaceURI)))
+                ns = ' xmlns'+(this.prefix?(':'+this.prefix):'')+
+                    '="'+this.namespaceURI+'"';
+        }
+        
+        // serialize Attribute declarations
+        attrs = this.attributes;
+        for(i=0;i< attrs.length;i++){
+            attrstring += " "+attrs[i].name+'="'+attrs[i].xml+'"';
+        }
+        
+        if(this.hasChildNodes()){
+            // serialize this Element
+            ret += "<" + name + ns + attrstring +">";
+            for(i=0;i< this.childNodes.length;i++){
+                ret += this.childNodes[i].xhtml ?
+                           this.childNodes[i].xhtml : 
+                           this.childNodes[i].xml
+            }
+            ret += "</" + name + ">";
+        }else{
+            switch(name){
+                case 'script':
+                    ret += "<" + name + ns + attrstring +"></"+name+">";
+                default:
+                    ret += "<" + name + ns + attrstring +"/>";
+            }
+        }
+        
+        return ret;
+    }
+});
+
+
+/*
+* HTMLCollection - DOM Level 2
+* Implementation Provided by Steven Wood
+*/
+HTMLCollection = function(nodelist, type){
+
+    __setArray__(this, []);
+    for (var i=0; i<nodelist.length; i++) {
+        this[i] = nodelist[i];
+        if('name' in nodelist[i]){
+            this[nodelist[i].name] = nodelist[i];
+        }
+    }
+    
+    this.length = nodelist.length;
+
 }
 
-
-var domainValid = function(domain){
-	//make sure the domain
-	//TODO 	
+HTMLCollection.prototype = {
+        
+    item : function (idx) {
+        var ret = null;
+        if ((idx >= 0) && (idx < this.length)) { 
+            ret = this[idx];                    
+        }
+    
+        return ret;   
+    },
+    
+    namedItem : function (name) {
+        if(name in this){
+            return this[name];
+        }
+        return null;
+    }
 };
 
-var mergeCookie = function(target, cookie, properties){
-	var name, now;
-	if(!target[cookie.domain]){
-		target[cookie.domain] = {};
-	}
-	if(!target[cookie.domain][cookie.path]){
-		target[cookie.domain][cookie.path] = {};
-	}
-	for(name in properties){
-		now = new Date().getTime();
-		target[cookie.domain][cookie.path][name] = {
-			value:properties[name],
-			"@env:secure":cookie.secure,
-			"@env:max-age":cookie['max-age'],
-			"@env:date-created":now,
-			"@env:expiration":now + cookie['max-age']
-		};
-	}
-};
 
-var persistCookies = function(){
-	//TODO
-	//I think it should be done via $env so it can be customized
-};
 
-var loadCookies = function(){
-	//TODO
-	//should also be configurable via $env	
-};
 
-//We simply use the default ajax get to load the .cookies.js file
-//if it doesn't exist we create it with a post.  Cookies are maintained
-//in memory, but serialized with each set.
-try{
-	//TODO - load cookies
-	loadCookies();
-}catch(e){
-	//TODO - fail gracefully
-}	
-	/**
- * @author thatcher
+	/*
+ *  a set of convenience classes to centralize implementation of
+ * properties and methods across multiple in-form elements
+ *
+ *  the hierarchy of related HTML elements and their members is as follows:
+ *
+ *
+ *    HTMLInputCommon:  common to all elements
+ *       .form
+ *
+ *    <legend>
+ *          [common plus:]
+ *       .align
+ *
+ *    <fieldset>
+ *          [identical to "legend" plus:]
+ *       .margin
+ *
+ *
+ *  ****
+ *
+ *    <label>
+ *          [common plus:]
+ *       .dataFormatAs
+ *       .htmlFor
+ *       [plus data properties]
+ *
+ *    <option>
+ *          [common plus:]
+ *       .defaultSelected
+ *       .index
+ *       .label
+ *       .selected
+ *       .text
+ *       .value   // unique implementation, not duplicated
+ *
+ *  ****
+ *
+ *    HTMLTypeValueInputs:  common to remaining elements
+ *          [common plus:]
+ *       .name
+ *       .type
+ *       .value
+ *       [plus data properties]
+ *
+ *
+ *    <select>
+ *       .length
+ *       .multiple
+ *       .options[]
+ *       .selectedIndex
+ *       .add()
+ *       .remove()
+ *       .item()                                       // unimplemented
+ *       .namedItem()                                  // unimplemented
+ *       [plus ".onchange"]
+ *       [plus focus events]
+ *       [plus data properties]
+ *       [plus ".size"]
+ *
+ *    <button>
+ *       .dataFormatAs   // duplicated from above, oh well....
+ *       [plus ".status", ".createTextRange()"]
+ *
+ *  ****
+ *
+ *    HTMLInputAreaCommon:  common to remaining elements
+ *       .defaultValue
+ *       .readOnly
+ *       .handleEvent()                                // unimplemented
+ *       .select()
+ *       .onselect
+ *       [plus ".size"]
+ *       [plus ".status", ".createTextRange()"]
+ *       [plus focus events]
+ *       [plus ".onchange"]
+ *
+ *    <textarea>
+ *       .cols
+ *       .rows
+ *       .wrap                                         // unimplemented
+ *       .onscroll                                     // unimplemented
+ *
+ *    <input>
+ *       .alt
+ *       .accept                                       // unimplemented
+ *       .checked
+ *       .complete                                     // unimplemented
+ *       .defaultChecked
+ *       .dynsrc                                       // unimplemented
+ *       .height
+ *       .hspace                                       // unimplemented
+ *       .indeterminate                                // unimplemented
+ *       .loop                                         // unimplemented
+ *       .lowsrc                                       // unimplemented
+ *       .maxLength
+ *       .src
+ *       .start                                        // unimplemented
+ *       .useMap
+ *       .vspace                                       // unimplemented
+ *       .width
+ *       .onclick
+ *       [plus ".size"]
+ *       [plus ".status", ".createTextRange()"]
+
+ *    [data properties]                                // unimplemented
+ *       .dataFld
+ *       .dataSrc
+
+ *    [status stuff]                                   // unimplemented
+ *       .status
+ *       .createTextRange()
+
+ *    [focus events]
+ *       .onblur
+ *       .onfocus
+
  */
-(function(window,document){
 
-var Html5Parser;
-(function () {window.nu_validator_htmlparser_HtmlParser=function(){var k='',v='" for "gwt:onLoadErrorFn"',t='" for "gwt:onPropertyErrorFn"',z='#',B='/',w='<script id="__gwt_marker_nu.validator.htmlparser.HtmlParser"><\/script>',q='=',A='?',s='Bad handler "',x='DOMContentLoaded',y='__gwt_marker_nu.validator.htmlparser.HtmlParser',C='base',E='clear.cache.gif',p='content',u='gwt:onLoadErrorFn',r='gwt:onPropertyErrorFn',o='gwt:property',D='img',m='meta',n='name',l='nu.validator.htmlparser.HtmlParser';var F=window,j=document,gb,eb,db=k,jb={},qb=[],pb=[],cb=[],mb,ob;if(!F.__gwt_stylesLoaded){F.__gwt_stylesLoaded={}}if(!F.__gwt_scriptsLoaded){F.__gwt_scriptsLoaded={}}function ib(){if(gb&&eb){gb(mb,l,db)}}
-function fb(){var i,h;j.write(w);h=j.getElementById(y);if(h){i=h.previousSibling}function f(b){var a=b.lastIndexOf(z);if(a==-1){a=b.length}var c=b.indexOf(A);if(c==-1){c=b.length}var d=b.lastIndexOf(B,Math.min(c,a));return d>=0?b.substring(0,d+1):k}
-;if(i&&i.src){db=f(i.src)}if(db==k){var e=j.getElementsByTagName(C);if(e.length>0){db=e[e.length-1].href}else{db=f(j.location.href)}}else if(db.match(/^\w+:\/\//)){}else{var g=j.createElement(D);g.src=db+E;db=f(g.src)}if(h){h.parentNode.removeChild(h)}}
-function nb(){var f=document.getElementsByTagName(m);for(var d=0,g=f.length;d<g;++d){var e=f[d],h=e.getAttribute(n),b;if(h){if(h==o){b=e.getAttribute(p);if(b){var i,c=b.indexOf(q);if(c>=0){h=b.substring(0,c);i=b.substring(c+1)}else{h=b;i=k}jb[h]=i}}else if(h==r){b=e.getAttribute(p);if(b){try{ob=eval(b)}catch(a){alert(s+b+t)}}}else if(h==u){b=e.getAttribute(p);if(b){try{mb=eval(b)}catch(a){alert(s+b+v)}}}}}}
-nu_validator_htmlparser_HtmlParser.onScriptLoad=function(a){nu_validator_htmlparser_HtmlParser=null;gb=a;ib()};fb();nb();var lb;/*envjsedit*/var kb = Html5Parser = function(){if(!eb){eb=true;ib();if(false/*envjsedit*/){j.removeEventListener(x,kb,false)}if(lb){clearInterval(lb)}}}
-/*envjsedit*/};nu_validator_htmlparser_HtmlParser.__gwt_initHandlers=function(i,e,j){var d=window,g=d.onresize,f=d.onbeforeunload,h=d.onunload;d.onresize=function(a){try{i()}finally{g&&g(a)}};d.onbeforeunload=function(a){var c,b;try{c=e()}finally{b=f&&f(a)}if(c!=null){return c}if(b!=null){return b}};d.onunload=function(a){try{j()}finally{h&&h(a);d.onresize=null;d.onbeforeunload=null;d.onunload=null}}};nu_validator_htmlparser_HtmlParser();})();(function () {var $gwt_version = "1.5.1";var $wnd = window;var $doc = $wnd.document;var $moduleName, $moduleBase;var $stats = $wnd.__gwtStatsEvent ? function(a) {$wnd.__gwtStatsEvent(a)} : null;var cNh='',qPg='\n',n4h='\n ',Bxg=' which is not a legal XML 1.0 character.',cNg='#mathplayer',zOg='#renesis',rZg='(',vxg=').',iwh='): ',fPh='+//silmaril//dtd html pro v0r11 19970101//',cWg=', ',mih=', Size: ',dNh='-//W3C//DTD HTML 4.0 Frameset//EN',oNh='-//W3C//DTD HTML 4.0 Transitional//EN',zNh='-//W3C//DTD HTML 4.0//EN',eOh='-//W3C//DTD HTML 4.01 Frameset//EN',pOh='-//W3C//DTD HTML 4.01 Transitional//EN',AOh='-//W3C//DTD HTML 4.01//EN',utg='-//W3C//DTD XHTML 1.0 Strict//EN',lug='-//W3C//DTD XHTML 1.1//EN',qPh='-//advasoft ltd//dtd html 3.0 aswedit + extensions//',BPh='-//as//dtd html 3.0 aswedit + extensions//',gQh='-//ietf//dtd html 2.0 level 1//',sQh='-//ietf//dtd html 2.0 level 2//',DQh='-//ietf//dtd html 2.0 strict level 1//',iRh='-//ietf//dtd html 2.0 strict level 2//',tRh='-//ietf//dtd html 2.0 strict//',ERh='-//ietf//dtd html 2.0//',jSh='-//ietf//dtd html 2.1e//',uSh='-//ietf//dtd html 3.0//',FSh='-//ietf//dtd html 3.2 final//',kTh='-//ietf//dtd html 3.2//',vTh='-//ietf//dtd html 3//',bUh='-//ietf//dtd html level 0//',mUh='-//ietf//dtd html level 1//',xUh='-//ietf//dtd html level 2//',cVh='-//ietf//dtd html level 3//',nVh='-//ietf//dtd html strict level 0//',yVh='-//ietf//dtd html strict level 1//',dWh='-//ietf//dtd html strict level 2//',oWh='-//ietf//dtd html strict level 3//',zWh='-//ietf//dtd html strict//',eXh='-//ietf//dtd html//',qXh='-//metrius//dtd metrius presentational//',BXh='-//microsoft//dtd internet explorer 2.0 html strict//',gYh='-//microsoft//dtd internet explorer 2.0 html//',rYh='-//microsoft//dtd internet explorer 2.0 tables//',CYh='-//microsoft//dtd internet explorer 3.0 html strict//',hZh='-//microsoft//dtd internet explorer 3.0 html//',sZh='-//microsoft//dtd internet explorer 3.0 tables//',DZh='-//netscape comm. corp.//dtd html//',i0h='-//netscape comm. corp.//dtd strict html//',t0h="-//o'reilly and associates//dtd html 2.0//",F0h="-//o'reilly and associates//dtd html extended 1.0//",k1h="-//o'reilly and associates//dtd html extended relaxed 1.0//",v1h='-//softquad software//dtd hotmetal pro 6.0::19990601::extensions to html 4.0//',a2h='-//softquad//dtd hotmetal pro 4.0::19971010::extensions to html 4.0//',l2h='-//spyglass//dtd html 2.0 extended//',w2h='-//sq//dtd html 2.0 hotmetal + extensions//',b3h='-//sun microsystems corp.//dtd hotjava html//',m3h='-//sun microsystems corp.//dtd hotjava strict html//',x3h='-//w3c//dtd html 3 1995-03-24//',c4h='-//w3c//dtd html 3.2 draft//',o4h='-//w3c//dtd html 3.2 final//',z4h='-//w3c//dtd html 3.2//',e5h='-//w3c//dtd html 3.2s draft//',p5h='-//w3c//dtd html 4.0 frameset//',A5h='-//w3c//dtd html 4.0 transitional//',Czg='-//w3c//dtd html 4.01 frameset//en',rzg='-//w3c//dtd html 4.01 transitional//en',f6h='-//w3c//dtd html experimental 19960712//',q6h='-//w3c//dtd html experimental 970421//',B6h='-//w3c//dtd w3 html//',gzg='-//w3c//dtd xhtml 1.0 frameset//en',Byg='-//w3c//dtd xhtml 1.0 transitional//en',g7h='-//w3o//dtd w3 html 3.0//',sAg='-//w3o//dtd w3 html strict 3.0//en//',r7h='-//webtechs//dtd mozilla html 2.0//',Cqg='-//webtechs//dtd mozilla html//',DAg='-/w3c/dtd html 4.0 transitional/en',Dxg='.',gyg='0123456789ABCDEF',iBg=':',Aqg=': ',q6g='=',zqg='@',txg='A character reference expanded to a form feed which is not legal XML 1.0 white space.',iyg='AElig',jyg='AElig;',wLh='ALLOW',fKh='ALMOST_STANDARDS_MODE',mMh='ALTER_INFOSET',kyg='AMP',lyg='AMP;',yzh='AUTO',myg='Aacute',nyg='Aacute;',oyg='Abreve;',DIh='AbstractCollection',rJh='AbstractHashMap',tJh='AbstractHashMap$EntrySet',uJh='AbstractHashMap$EntrySetIterator',wJh='AbstractHashMap$MapEntryNull',xJh='AbstractHashMap$MapEntryString',EIh='AbstractList',yJh='AbstractList$IteratorImpl',zJh='AbstractList$ListIteratorImpl',qJh='AbstractMap',vJh='AbstractMapEntry',BJh='AbstractSequentialList',sJh='AbstractSet',pyg='Acirc',ryg='Acirc;',syg='Acy;',ePg='Add not supported on this collection',obh='Add not supported on this list',tyg='Afr;',uyg='Agrave',vyg='Agrave;',wyg='Alpha;',xyg='Amacr;',yyg='And;',zyg='Aogon;',Ayg='Aopf;',Cyg='ApplyFunction;',Dyg='Aring',Eyg='Aring;',vLg='Array types must match',FIh='ArrayList',cJh='ArrayStoreException',Fyg='Ascr;',azg='Assign;',bzg='Atilde',czg='Atilde;',mxg='Attribute \u201C',vKh='AttributeName',uKh='AttributeName;',dzg='Auml',ezg='Auml;',fzg='Backslash;',hzg='Barv;',izg='Barwed;',jzg='Bcy;',kzg='Because;',lzg='Bernoullis;',mzg='Beta;',nzg='Bfr;',ozg='Bopf;',pzg='Breve;',mKh='BrowserTreeBuilder',nKh='BrowserTreeBuilder$ScriptHolder',qzg='Bscr;',szg='Bumpeq;',ixg='CDATA[',tzg='CHcy;',uzg='COPY',vzg='COPY;',wzg='Cacute;',Blh="Can't get element ",xxg="Can't use FATAL here.",xzg='Cap;',yzg='CapitalDifferentialD;',zzg='Cayleys;',Azg='Ccaron;',Bzg='Ccedil',Dzg='Ccedil;',Ezg='Ccirc;',Fzg='Cconint;',aAg='Cdot;',bAg='Cedilla;',cAg='CenterDot;',dAg='Cfr;',uxg='Character reference expands to a control character (',eAg='Chi;',fAg='CircleDot;',gAg='CircleMinus;',iAg='CirclePlus;',jAg='CircleTimes;',fJh='Class',gJh='ClassCastException',kAg='ClockwiseContourIntegral;',lAg='CloseCurlyDoubleQuote;',mAg='CloseCurlyQuote;',kKh='CoalescingTreeBuilder',nAg='Colon;',oAg='Colone;',CJh='Comparators$1',pAg='Congruent;',qAg='Conint;',rAg='ContourIntegral;',tAg='Copf;',uAg='Coproduct;',vAg='CounterClockwiseContourIntegral;',wAg='Cross;',xAg='Cscr;',yAg='Cup;',zAg='CupCap;',AAg='DD;',BAg='DDotrahd;',CAg='DJcy;',EAg='DScy;',FAg='DZcy;',aBg='Dagger;',bBg='Darr;',cBg='Dashv;',dBg='Dcaron;',eBg='Dcy;',fBg='Del;',gBg='Delta;',hBg='Dfr;',kBg='DiacriticalAcute;',lBg='DiacriticalDot;',mBg='DiacriticalDoubleAcute;',nBg='DiacriticalGrave;',oBg='DiacriticalTilde;',pBg='Diamond;',qBg='DifferentialD;',dKh='DoctypeExpectation',eKh='DocumentMode',rBg='Dopf;',sBg='Dot;',tBg='DotDot;',vBg='DotEqual;',wBg='DoubleContourIntegral;',xBg='DoubleDot;',yBg='DoubleDownArrow;',zBg='DoubleLeftArrow;',ABg='DoubleLeftRightArrow;',BBg='DoubleLeftTee;',CBg='DoubleLongLeftArrow;',DBg='DoubleLongLeftRightArrow;',EBg='DoubleLongRightArrow;',aCg='DoubleRightArrow;',bCg='DoubleRightTee;',cCg='DoubleUpArrow;',dCg='DoubleUpDownArrow;',eCg='DoubleVerticalBar;',fCg='DownArrow;',gCg='DownArrowBar;',hCg='DownArrowUpArrow;',iCg='DownBreve;',jCg='DownLeftRightVector;',lCg='DownLeftTeeVector;',mCg='DownLeftVector;',nCg='DownLeftVectorBar;',oCg='DownRightTeeVector;',pCg='DownRightVector;',qCg='DownRightVectorBar;',rCg='DownTee;',sCg='DownTeeArrow;',tCg='Downarrow;',uCg='Dscr;',wCg='Dstrok;',qxg='Duplicate attribute \u201C',xCg='ENG;',yCg='ETH',zCg='ETH;',ACg='Eacute',BCg='Eacute;',CCg='Ecaron;',DCg='Ecirc',ECg='Ecirc;',FCg='Ecy;',bDg='Edot;',cDg='Efr;',dDg='Egrave',eDg='Egrave;',isg='Element name \u201C',fDg='Element;',xKh='ElementName',wKh='ElementName;',gDg='Emacr;',hDg='EmptySmallSquare;',iDg='EmptyVerySmallSquare;',AIh='Enum',jDg='Eogon;',kDg='Eopf;',mDg='Epsilon;',nDg='Equal;',oDg='EqualTilde;',pDg='Equilibrium;',zKh='ErrorReportingTokenizer',qDg='Escr;',rDg='Esim;',sDg='Eta;',tDg='Euml',uDg='Euml;',sIh='Exception',vDg='Exists;',xDg='ExponentialE;',bMh='FATAL',yDg='Fcy;',zDg='Ffr;',ADg='FilledSmallSquare;',BDg='FilledVerySmallSquare;',CDg='Fopf;',DDg='ForAll;',Cxg='Forbidden code point ',EDg='Fouriertrf;',FDg='Fscr;',aEg='GJcy;',cEg='GT',dEg='GT;',eEg='Gamma;',fEg='Gammad;',gEg='Gbreve;',hEg='Gcedil;',iEg='Gcirc;',jEg='Gcy;',kEg='Gdot;',lEg='Gfr;',nEg='Gg;',oEg='Gopf;',pEg='GreaterEqual;',qEg='GreaterEqualLess;',rEg='GreaterFullEqual;',sEg='GreaterGreater;',tEg='GreaterLess;',uEg='GreaterSlantEqual;',vEg='GreaterTilde;',wEg='Gscr;',zEg='Gt;',AEg='HARDcy;',kph='HTML',jwh='HTML401_STRICT',zsh='HTML401_TRANSITIONAL',BEg='Hacek;',DJh='HashMap',CEg='Hat;',DEg='Hcirc;',EEg='Hfr;',FEg='HilbertSpace;',aFg='Hopf;',bFg='HorizontalLine;',cFg='Hscr;',eFg='Hstrok;',AKh='HtmlAttributes',oKh='HtmlParser',pKh='HtmlParser$1',fFg='HumpDownHump;',gFg='HumpEqual;',hFg='IEcy;',iFg='IJlig;',jFg='IOcy;',kFg='Iacute',lFg='Iacute;',mFg='Icirc',nFg='Icirc;',pFg='Icy;',qFg='Idot;',rFg='Ifr;',sFg='Igrave',tFg='Igrave;',hJh='IllegalArgumentException',uFg='Im;',vFg='Imacr;',wFg='ImaginaryI;',xFg='Implies;',Deh='Index: ',bJh='IndexOutOfBoundsException',yFg='Int;',AFg='Integral;',BFg='Intersection;',CFg='InvisibleComma;',DFg='InvisibleTimes;',EFg='Iogon;',FFg='Iopf;',aGg='Iota;',bGg='Iscr;',cGg='Itilde;',dGg='Iukcy;',fGg='Iuml',gGg='Iuml;',vIh='JavaScriptException',wIh='JavaScriptObject$',hGg='Jcirc;',iGg='Jcy;',jGg='Jfr;',kGg='Jopf;',lGg='Jscr;',mGg='Jsercy;',nGg='Jukcy;',oGg='KHcy;',qGg='KJcy;',rGg='Kappa;',sGg='Kcedil;',tGg='Kcy;',uGg='Kfr;',vGg='Kopf;',wGg='Kscr;',xGg='LJcy;',yGg='LT',zGg='LT;',BGg='Lacute;',CGg='Lambda;',DGg='Lang;',EGg='Laplacetrf;',FGg='Larr;',aHg='Lcaron;',bHg='Lcedil;',cHg='Lcy;',dHg='LeftAngleBracket;',eHg='LeftArrow;',gHg='LeftArrowBar;',hHg='LeftArrowRightArrow;',iHg='LeftCeiling;',jHg='LeftDoubleBracket;',kHg='LeftDownTeeVector;',lHg='LeftDownVector;',mHg='LeftDownVectorBar;',nHg='LeftFloor;',oHg='LeftRightArrow;',pHg='LeftRightVector;',rHg='LeftTee;',sHg='LeftTeeArrow;',tHg='LeftTeeVector;',uHg='LeftTriangle;',vHg='LeftTriangleBar;',wHg='LeftTriangleEqual;',xHg='LeftUpDownVector;',yHg='LeftUpTeeVector;',zHg='LeftUpVector;',AHg='LeftUpVectorBar;',CHg='LeftVector;',DHg='LeftVectorBar;',EHg='Leftarrow;',FHg='Leftrightarrow;',aIg='LessEqualGreater;',bIg='LessFullEqual;',cIg='LessGreater;',dIg='LessLess;',eIg='LessSlantEqual;',fIg='LessTilde;',iIg='Lfr;',EJh='LinkedList',FJh='LinkedList$ListIteratorImpl',aKh='LinkedList$Node',jIg='Ll;',kIg='Lleftarrow;',lIg='Lmidot;',BKh='LocatorImpl',mIg='LongLeftArrow;',nIg='LongLeftRightArrow;',oIg='LongRightArrow;',pIg='Longleftarrow;',qIg='Longleftrightarrow;',rIg='Longrightarrow;',tIg='Lopf;',uIg='LowerLeftArrow;',vIg='LowerRightArrow;',wIg='Lscr;',xIg='Lsh;',yIg='Lstrok;',zIg='Lt;',AIg='Map;',BIg='Mcy;',CIg='MediumSpace;',EIg='Mellintrf;',FIg='Mfr;',aJg='MinusPlus;',bJg='Mopf;',cJg='Mscr;',dJg='Mu;',gIg='Must be array types',eJg='NJcy;',hDh='NO_DOCTYPE_ERRORS',fJg='Nacute;',gJg='Ncaron;',hJg='Ncedil;',jJg='Ncy;',kJg='NegativeMediumSpace;',lJg='NegativeThickSpace;',mJg='NegativeThinSpace;',nJg='NegativeVeryThinSpace;',oJg='NestedGreaterGreater;',pJg='NestedLessLess;',qJg='NewLine;',rJg='Nfr;',sxg='No digits after \u201C',sJg='NoBreak;',bKh='NoSuchElementException',uJg='NonBreakingSpace;',vJg='Nopf;',wJg='Not;',xJg='NotCongruent;',yJg='NotCupCap;',zJg='NotDoubleVerticalBar;',AJg='NotElement;',BJg='NotEqual;',CJg='NotExists;',DJg='NotGreater;',FJg='NotGreaterEqual;',aKg='NotGreaterLess;',bKg='NotGreaterTilde;',cKg='NotLeftTriangle;',dKg='NotLeftTriangleEqual;',eKg='NotLess;',fKg='NotLessEqual;',gKg='NotLessGreater;',hKg='NotLessTilde;',iKg='NotPrecedes;',kKg='NotPrecedesSlantEqual;',lKg='NotReverseElement;',mKg='NotRightTriangle;',nKg='NotRightTriangleEqual;',oKg='NotSquareSubsetEqual;',pKg='NotSquareSupersetEqual;',qKg='NotSubsetEqual;',rKg='NotSucceeds;',sKg='NotSucceedsSlantEqual;',tKg='NotSupersetEqual;',vKg='NotTilde;',wKg='NotTildeEqual;',xKg='NotTildeFullEqual;',yKg='NotTildeTilde;',zKg='NotVerticalBar;',AKg='Nscr;',BKg='Ntilde',CKg='Ntilde;',DKg='Nu;',jJh='NullPointerException',EKg='OElig;',aLg='Oacute',bLg='Oacute;',nIh='Object',oJh='Object;',cLg='Ocirc',dLg='Ocirc;',eLg='Ocy;',fLg='Odblac;',gLg='Ofr;',hLg='Ograve',iLg='Ograve;',jLg='Omacr;',lLg='Omega;',mLg='Omicron;',nLg='Oopf;',oLg='OpenCurlyDoubleQuote;',pLg='OpenCurlyQuote;',qLg='Or;',rLg='Oscr;',sLg='Oslash',tLg='Oslash;',uLg='Otilde',xLg='Otilde;',yLg='Otimes;',zLg='Ouml',ALg='Ouml;',BLg='OverBar;',CLg='OverBrace;',DLg='OverBracket;',ELg='OverParenthesis;',qKh='ParseEndListener',FLg='PartialD;',aMg='Pcy;',cMg='Pfr;',dMg='Phi;',eMg='Pi;',fMg='PlusMinus;',gMg='Poincareplane;',hMg='Popf;',iMg='Pr;',jMg='Precedes;',kMg='PrecedesEqual;',lMg='PrecedesSlantEqual;',nMg='PrecedesTilde;',oMg='Prime;',pMg='Product;',qMg='Proportion;',rMg='Proportional;',sMg='Pscr;',tMg='Psi;',lLh='QUIRKS_MODE',uMg='QUOT',vMg='QUOT;',wMg='Qfr;',yMg='Qopf;',zMg='Qscr;',AMg='RBarr;',BMg='REG',CMg='REG;',DMg='Racute;',EMg='Rang;',FMg='Rarr;',aNg='Rarrtl;',bNg='Rcaron;',dNg='Rcedil;',eNg='Rcy;',fNg='Re;',gNg='ReverseElement;',hNg='ReverseEquilibrium;',iNg='ReverseUpEquilibrium;',jNg='Rfr;',kNg='Rho;',lNg='RightAngleBracket;',mNg='RightArrow;',oNg='RightArrowBar;',pNg='RightArrowLeftArrow;',qNg='RightCeiling;',rNg='RightDoubleBracket;',sNg='RightDownTeeVector;',tNg='RightDownVector;',uNg='RightDownVectorBar;',vNg='RightFloor;',wNg='RightTee;',xNg='RightTeeArrow;',zNg='RightTeeVector;',ANg='RightTriangle;',BNg='RightTriangleBar;',CNg='RightTriangleEqual;',DNg='RightUpDownVector;',ENg='RightUpTeeVector;',FNg='RightUpVector;',aOg='RightUpVectorBar;',bOg='RightVector;',cOg='RightVectorBar;',eOg='Rightarrow;',fOg='Ropf;',gOg='RoundImplies;',hOg='Rrightarrow;',iOg='Rscr;',jOg='Rsh;',kOg='RuleDelayed;',tIh='RuntimeException',cLh='SAXException',dLh='SAXParseException',lOg='SHCHcy;',mOg='SHcy;',nOg='SOFTcy;',wGh='STANDARDS_MODE',pOg='Sacute;',dyg='Saw an xmlns attribute.',qOg='Sc;',rOg='Scaron;',sOg='Scedil;',tOg='Scirc;',uOg='Scy;',vOg='Sfr;',wOg='ShortDownArrow;',xOg='ShortLeftArrow;',yOg='ShortRightArrow;',AOg='ShortUpArrow;',BOg='Sigma;',COg='SmallCircle;',DOg='Sopf;',EOg='Sqrt;',FOg='Square;',aPg='SquareIntersection;',bPg='SquareSubset;',cPg='SquareSubsetEqual;',dPg='SquareSuperset;',gPg='SquareSupersetEqual;',hPg='SquareUnion;',iPg='Sscr;',EKh='StackNode',FKh='StackNode;',jPg='Star;',aUh='String',xEg='String index out of range: ',yIh='String;',kJh='StringBuffer',lJh='StringBuilder',mJh='StringIndexOutOfBoundsException',kPg='Sub;',lPg='Subset;',mPg='SubsetEqual;',nPg='Succeeds;',oPg='SucceedsEqual;',pPg='SucceedsSlantEqual;',rPg='SucceedsTilde;',sPg='SuchThat;',tPg='Sum;',uPg='Sup;',vPg='Superset;',wPg='SupersetEqual;',xPg='Supset;',yPg='THORN',zPg='THORN;',APg='TRADE;',CPg='TSHcy;',DPg='TScy;',EPg='Tab;',FPg='Tau;',aQg='Tcaron;',bQg='Tcedil;',cQg='Tcy;',dQg='Tfr;',wxg='The document is not mappable to XML 1.0 due to a trailing hyphen in a comment.',pxg='The document is not mappable to XML 1.0 due to two consecutive hyphens in a comment.',eQg='Therefore;',fQg='Theta;',hQg='ThinSpace;',yxg='This document is not mappable to XML 1.0 without data loss due to ',xMh='This is a searchable index. Insert your search keywords here: ',rIh='Throwable',iQg='Tilde;',jQg='TildeEqual;',kQg='TildeFullEqual;',lQg='TildeTilde;',qIh='Timer',aJh='Timer$1',yKh='Tokenizer',mQg='Topf;',jKh='TreeBuilder',nQg='TripleDot;',oQg='Tscr;',pQg='Tstrok;',hyg='U',byg='U+',ayg='U+0',Fxg='U+00',Exg='U+000',aLh='UTF16Buffer',qQg='Uacute',sQg='Uacute;',tQg='Uarr;',uQg='Uarrocir;',vQg='Ubrcy;',wQg='Ubreve;',xQg='Ucirc',yQg='Ucirc;',zQg='Ucy;',AQg='Udblac;',BQg='Ufr;',DQg='Ugrave',EQg='Ugrave;',FQg='Umacr;',aRg='UnderBar;',bRg='UnderBrace;',cRg='UnderBracket;',dRg='UnderParenthesis;',eRg='Union;',fRg='UnionPlus;',uKg='Unreachable',cyg='Unreachable.',nJh='UnsupportedOperationException',gRg='Uogon;',iRg='Uopf;',jRg='UpArrow;',kRg='UpArrowBar;',lRg='UpArrowDownArrow;',mRg='UpDownArrow;',nRg='UpEquilibrium;',oRg='UpTee;',pRg='UpTeeArrow;',qRg='Uparrow;',rRg='Updownarrow;',tRg='UpperLeftArrow;',uRg='UpperRightArrow;',vRg='Upsi;',wRg='Upsilon;',xRg='Uring;',yRg='Uscr;',zRg='Utilde;',ARg='Uuml',BRg='Uuml;',CRg='VDash;',ERg='Vbar;',FRg='Vcy;',aSg='Vdash;',bSg='Vdashl;',cSg='Vee;',dSg='Verbar;',eSg='Vert;',fSg='VerticalBar;',gSg='VerticalLine;',hSg='VerticalSeparator;',jSg='VerticalTilde;',kSg='VeryThinSpace;',lSg='Vfr;',mSg='Vopf;',nSg='Vscr;',oSg='Vvdash;',pSg='Wcirc;',qSg='Wedge;',rSg='Wfr;',sSg='Wopf;',vSg='Wscr;',wSg='Xfr;',xSg='Xi;',hKh='XmlViolationPolicy',ySg='Xopf;',zSg='Xscr;',ASg='YAcy;',BSg='YIcy;',CSg='YUcy;',DSg='Yacute',ESg='Yacute;',aTg='Ycirc;',bTg='Ycy;',cTg='Yfr;',dTg='Yopf;',eTg='Yscr;',fTg='Yuml;',gTg='ZHcy;',hTg='Zacute;',iTg='Zcaron;',jTg='Zcy;',lTg='Zdot;',mTg='ZeroWidthSpace;',nTg='Zeta;',oTg='Zfr;',pTg='Zopf;',qTg='Zscr;',tSg='[',dJh='[C',iJh='[I',xIh='[Ljava.lang.',tKh='[Lnu.validator.htmlparser.impl.',sKh='[Z',DKh='[[C',BIh='[[D',sZg=']',oFg='a',rTg='aacute',sTg='aacute;',C6g='abbr',bvg='about:legacy-compat',tTg='abreve;',C2h='abs',uTg='ac;',Cuh='accent',gWh='accent-height',wSh='accentunder',ruh='accept',DXh='accept-charset',cPh='accesskey',bRh='accumulate',wTg='acd;',xTg='acirc',yTg='acirc;',rrg='acronym',kwh='action',aRh='actiontype',svh='active',zXh='actuate',zTg='acute',ATg='acute;',BTg='acy;',hNh='additive',yEg='address',CTg='aelig',DTg='aelig;',ETg='af;',FTg='afr;',bUg='agrave',cUg='agrave;',dUg='alefsym;',eUg='aleph;',ojh='align',w0h='alignment-baseline',EXh='alignmentscope',djh='alink',fUg='alpha;',FQh='alphabetic',l2g='alt',atg='altGlyph',Fug='altGlyphDef',qvg='altGlyphItem',Fsg='altglyph',Eug='altglyphdef',pvg='altglyphitem',Dvh='altimg',hLh='alttext',gUg='amacr;',hUg='amalg;',iUg='amp',jUg='amp;',gPh='amplitude',A2h='and',kUg='and;',mUg='andand;',nUg='andd;',oUg='andslope;',pUg='andv;',qUg='ang;',rUg='ange;',sUg='angle;',tUg='angmsd;',uUg='angmsdaa;',vUg='angmsdab;',xUg='angmsdac;',yUg='angmsdad;',zUg='angmsdae;',AUg='angmsdaf;',BUg='angmsdag;',CUg='angmsdah;',DUg='angrt;',EUg='angrtvb;',FUg='angrtvbd;',aVg='angsph;',cVg='angst;',dVg='angzarr;',krg='animate',svg='animateColor',Evg='animateMotion',zwg='animateTransform',rvg='animatecolor',Dvg='animatemotion',xwg='animatetransform',aug='animation',sug='annotation',kwg='annotation-xml',eVg='aogon;',fVg='aopf;',gVg='ap;',hVg='apE;',iVg='apacir;',jVg='ape;',kVg='apid;',lVg='apos;',A6h='applet',w5h='apply',D6h='approx',nVg='approx;',oVg='approxeq;',BSh='arabic-form',z6h='arccos',prg='arccosh',C6h='arccot',qrg='arccoth',w6h='arccsc',mrg='arccsch',iLh='archive',CXh='arcrole',v6h='arcsec',lrg='arcsech',y6h='arcsin',org='arcsinh',x6h='arctan',nrg='arctanh',i4h='area',B2h='arg',h1h='aria-activedescendant',ySh='aria-atomic',e0h='aria-autocomplete',dPh='aria-busy',uUh='aria-channel',rUh='aria-checked',eWh='aria-controls',vWh='aria-datatype',iZh='aria-describedby',qWh='aria-disabled',xYh='aria-dropeffect',pWh='aria-expanded',ASh='aria-flowto',ePh='aria-grab',fWh='aria-haspopup',zSh='aria-hidden',pUh='aria-invalid',yYh='aria-labelledby',cRh='aria-level',hPh='aria-live',FXh='aria-multiline',f1h='aria-multiselectable',FOh='aria-owns',jWh='aria-posinset',qUh='aria-pressed',lWh='aria-readonly',iWh='aria-relevant',nWh='aria-required',xSh='aria-secret',mWh='aria-selected',tUh='aria-setsize',bPh='aria-sort',zYh='aria-templateid',kWh='aria-valuemax',wWh='aria-valuemin',hWh='aria-valuenow',pVg='aring',qVg='aring;',jrg='article',hvh='ascent',rVg='ascr;',u5h='aside',sVg='ast;',tVg='asymp;',uVg='asympeq;',yih='async',vVg='atilde',wVg='atilde;',uWh='attributeName',sWh='attributeType',tWh='attributename',rWh='attributetype',v5h='audio',yVg='auml',zVg='auml;',sUh='autocomplete',aPh='autofocus',gNh='autoplay',EQh='autosubmit',AVg='awconint;',BVg='awint;',r6g='axis',jLh='azimuth',t1h='b',CVg='bNot;',DVg='backcong;',EVg='backepsilon;',fRh='background',FVg='backprime;',aWg='backsim;',bWg='backsimeq;',eWg='barvee;',fWg='barwed;',gWg='barwedge;',u9g='base',yWh='baseFrequency',eTh='baseProfile',btg='basefont',xWh='basefrequency',pNh='baseline',aYh='baseline-shift',dTh='baseprofile',h7g='bbox',hWg='bbrk;',iWg='bbrktbrk;',jWg='bcong;',kWg='bcy;',E2h='bdo',lWg='bdquo;',mWg='becaus;',nWg='because;',flh='begin',pWg='bemptyv;',qWg='bepsi;',rWg='bernou;',sWg='beta;',tWg='beth;',uWg='between;',nNh='bevelled',vWg='bfr;',oLh='bgcolor',trg='bgsound',i8g='bias',D2h='big',wWg='bigcap;',xWg='bigcirc;',yWg='bigcup;',AWg='bigodot;',BWg='bigoplus;',CWg='bigotimes;',DWg='bigsqcup;',EWg='bigstar;',FWg='bigtriangledown;',aXg='bigtriangleup;',bXg='biguplus;',cXg='bigvee;',dXg='bigwedge;',fXg='bkarow;',gXg='blacklozenge;',hXg='blacksquare;',iXg='blacktriangle;',jXg='blacktriangledown;',kXg='blacktriangleleft;',lXg='blacktriangleright;',mXg='blank;',nXg='blk12;',oXg='blk14;',qXg='blk34;',rXg='block;',tug='blockquote',sXg='bnot;',lDg='body',tXg='bopf;',vwh='border',uXg='bot;',vXg='bottom;',wXg='bowtie;',xXg='boxDL;',yXg='boxDR;',zXg='boxDl;',BXg='boxDr;',CXg='boxH;',DXg='boxHD;',EXg='boxHU;',FXg='boxHd;',aYg='boxHu;',bYg='boxUL;',cYg='boxUR;',dYg='boxUl;',eYg='boxUr;',gYg='boxV;',hYg='boxVH;',iYg='boxVL;',jYg='boxVR;',kYg='boxVh;',lYg='boxVl;',mYg='boxVr;',nYg='boxbox;',oYg='boxdL;',pYg='boxdR;',rYg='boxdl;',sYg='boxdr;',tYg='boxh;',uYg='boxhD;',vYg='boxhU;',wYg='boxhd;',xYg='boxhu;',yYg='boxminus;',zYg='boxplus;',AYg='boxtimes;',CYg='boxuL;',DYg='boxuR;',EYg='boxul;',FYg='boxur;',aZg='boxv;',bZg='boxvH;',cZg='boxvL;',dZg='boxvR;',eZg='boxvh;',fZg='boxvl;',hZg='boxvr;',iZg='bprime;',z1h='br',jZg='breve;',kZg='brvbar',lZg='brvbar;',mZg='bscr;',nZg='bsemi;',oZg='bsim;',pZg='bsime;',qZg='bsol;',uZg='bsolb;',vZg='bull;',wZg='bullet;',xZg='bump;',yZg='bumpE;',zZg='bumpe;',AZg='bumpeq;',E6h='button',j4h='bvar',aUg='by',BZg='cacute;',jNh='calcMode',iNh='calcmode',b7h='canvas',eRh='cap-height',CZg='cap;',DZg='capand;',FZg='capbrcup;',a0g='capcap;',b0g='capcup;',c0g='capdot;',nwg='caption',k4h='card',d0g='caret;',e0g='caron;',Awg='cartesianproduct',f0g='ccaps;',g0g='ccaron;',h0g='ccedil',i0g='ccedil;',k0g='ccirc;',l0g='ccups;',m0g='ccupssm;',n0g='cdot;',o0g='cedil',p0g='cedil;',wrg='ceiling',CSh='cellpadding',DSh='cellspacing',q0g='cemptyv;',r0g='cent',s0g='cent;',a7h='center',t0g='centerdot;',v0g='cfr;',j9g='char',nLh='charoff',qLh='charset',w0g='chcy;',x0g='check;',mLh='checked',y0g='checkmark;',z0g='chi;',A1h='ci',A0g='cir;',B0g='cirE;',C0g='circ;',D0g='circeq;',F6h='circle',E0g='circlearrowleft;',a1g='circlearrowright;',b1g='circledR;',c1g='circledS;',d1g='circledast;',e1g='circledcirc;',f1g='circleddash;',g1g='cire;',h1g='cirfnint;',i1g='cirmid;',j1g='cirscir;',s7g='cite',pkh='class',zxg='class ',bMg='classid',Akh='clear',E8g='clip',jPh='clip-path',iPh='clip-rule',dtg='clipPath',DWh='clipPathUnits',ctg='clippath',CWh='clippathunits',zjh='close',kLh='closure',mMg='clsid:32F66A20-7614-11D4-BD11-00104BD3F987',dOg='clsid:AC159093-1683-4BA2-9DCF-0C350141D7F2',l1g='clubs;',m1g='clubsuit;',B1h='cn',D7g='code',lNh='codebase',kNh='codetype',etg='codomain',a3h='col',aDg='colgroup',n1g='colon;',o1g='colone;',p1g='coloneq;',ekh='color',D0h='color-interpolation',q1h='color-interpolation-filters',BWh='color-profile',AYh='color-rendering',t8g='cols',pLh='colspan',aTh='columnalign',bTh='columnlines',AWh='columnspacing',dRh='columnspan',ESh='columnwidth',uIh='com.google.gwt.core.client.',pIh='com.google.gwt.user.client.',q1g='comma;',urg='command',r1g='commat;',s1g='comp;',rLh='compact',t1g='compfn;',u1g='complement;',dug='complexes',w1g='complexes;',vrg='compose',cug='condition',x1g='cong;',y1g='congdot;',z1g='conint;',bug='conjugate',sLh='content',g0h='contentScriptType',kZh='contentStyleType',BYh='contenteditable',f0h='contentscripttype',jZh='contentstyletype',cTh='contextmenu',mNh='controls',lxh='coords',A1g='copf;',B1g='coprod;',C1g='copy',D1g='copy;',E1g='copysr;',c3h='cos',m4h='cosh',d3h='cot',p4h='coth',F1g='crarr;',b2g='cross;',F2h='csc',l4h='csch',c2g='cscr;',d2g='csub;',e2g='csube;',f2g='csup;',g2g='csupe;',xrg='csymbol',h2g='ctdot;',i2g='cudarrl;',j2g='cudarrr;',k2g='cuepr;',m2g='cuesc;',n2g='cularr;',o2g='cularrp;',p2g='cup;',q2g='cupbrcap;',r2g='cupcap;',s2g='cupcup;',t2g='cupdot;',u2g='cupor;',v2g='curarr;',x2g='curarrm;',q4h='curl',y2g='curlyeqprec;',z2g='curlyeqsucc;',A2g='curlyvee;',B2g='curlywedge;',C2g='curren',D2g='curren;',axh='cursor',E2g='curvearrowleft;',F2g='curvearrowright;',a3g='cuvee;',d3g='cuwed;',e3g='cwconint;',f3g='cwint;',lUg='cx',wUg='cy',g3g='cylcty;',DRg='d',h3g='dArr;',i3g='dHar;',j3g='dagger;',k3g='daleth;',l3g='darr;',m3g='dash;',o3g='dashv;',l$g='data',vLh='datafld',yUh='dataformatas',ftg='datagrid',uLh='datasrc',tvg='datatemplate',wNh='datetime',p3g='dbkarow;',q3g='dblac;',r3g='dcaron;',s3g='dcy;',C1h='dd',t3g='dd;',u3g='ddagger;',v3g='ddarr;',w3g='ddotseq;',xLh='declare',ALh='default',Clh='defer',lwg='definition-src',FWh='definitionURL',EWh='definitionurl',t4h='defs',x3g='deg',z3g='deg;',d7h='degree',e3h='del',A3g='delta;',B3g='demptyv;',qlh='depth',r4h='desc',BLh='descent',zrg='details',avg='determinant',C3g='dfisht;',f3h='dfn',D3g='dfr;',E3g='dharl;',F3g='dharr;',e7h='dialog',a4g='diam;',b4g='diamond;',c4g='diamondsuit;',e4g='diams;',f4g='die;',s4h='diff',EYh='diffuseConstant',DYh='diffuseconstant',g4g='digamma;',w2g='dir',mPh='direction',xNh='disabled',yrg='discard',h4g='disin;',yLh='display',wUh='displaystyle',dFg='div',i4g='div;',uug='divergence',c7h='divide',j4g='divide;',k4g='divideontimes;',zLh='divisor',l4g='divonx;',m4g='djcy;',D1h='dl',n4g='dlcorn;',p4g='dlcrop;',q4g='dollar;',f7h='domain',fxg='domainofapplication',j0h='dominant-baseline',r4g='dopf;',s4g='dot;',t4g='doteq;',u4g='doteqdot;',v4g='dotminus;',w4g='dotplus;',x4g='dotsquare;',y4g='doublebarwedge;',A4g='downarrow;',B4g='downdownarrows;',C4g='downharpoonleft;',D4g='downharpoonright;',nPh='draggable',E4g='drbkarow;',F4g='drcorn;',a5g='drcrop;',b5g='dscr;',c5g='dscy;',d5g='dsol;',f5g='dstrok;',E1h='dt',g5g='dtdot;',h5g='dtri;',i5g='dtrif;',j5g='duarr;',k5g='duhar;',c3g='dur',l5g='dwangle;',bVg='dx',mVg='dy',m5g='dzcy;',n5g='dzigrarr;',o5g='eDDot;',q5g='eDot;',r5g='eacute',s5g='eacute;',t5g='easter;',u5g='ecaron;',v5g='ecir;',w5g='ecirc',x5g='ecirc;',y5g='ecolon;',z5g='ecy;',a$g='edge',sNh='edgeMode',rNh='edgemode',B5g='edot;',C5g='ee;',D5g='efDot;',E5g='efr;',F5g='eg;',a6g='egrave',b6g='egrave;',c6g='egs;',d6g='egsdot;',e6g='el;',lPh='elevation',g6g='elinters;',h6g='ell;',Arg='ellipse',i6g='els;',j6g='elsdot;',F1h='em',k6g='emacr;',x5h='embed',l6g='empty;',gtg='emptyset',m6g='emptyset;',n6g='emptyv;',o6g='emsp13;',p6g='emsp14;',s6g='emsp;',h0h='enable-background',tNh='encoding',tLh='enctype',n3g='end',t6g='eng;',u6g='ensp;',v6g='eogon;',w6g='eopf;',x6g='epar;',y6g='eparsl;',z6g='eplus;',A6g='epsi;',B6g='epsilon;',D6g='epsiv;',b2h='eq',E6g='eqcirc;',F6g='eqcolon;',a7g='eqsim;',b7g='eqslantgtr;',c7g='eqslantless;',vUh='equalcolumns',kPh='equalrows',d7g='equals;',e7g='equest;',f7g='equiv;',g7g='equivDD;',xug='equivalent',i7g='eqvparsl;',j7g='erDot;',k7g='erarr;',l7g='escr;',m7g='esdot;',n7g='esim;',o7g='eta;',p7g='eth',q7g='eth;',vug='eulergamma',r7g='euml',t7g='euml;',u7g='euro;',cvg='eventsource',v7g='excl;',w7g='exist;',h7h='exists',g3h='exp',x7g='expectation;',qNh='exponent',uvg='exponentiale',y7g='exponentiale;',o1h='externalResourcesRequired',n1h='externalresourcesrequired',m_g='face',fug='factorial',htg='factorof',z7g='fallingdotseq;',y5h='false',A7g='fcy;',bsg='feBlend',fwg='feColorMatrix',hxg='feComponentTransfer',gvg='feComposite',Dwg='feConvolveMatrix',Fwg='feDiffuseLighting',bxg='feDisplacementMap',rwg='feDistantLight',dsg='feFlood',Crg='feFuncA',Frg='feFuncB',ksg='feFuncG',msg='feFuncR',pwg='feGaussianBlur',fsg='feImage',hsg='feMerge',evg='feMergeNode',Bvg='feMorphology',ltg='feOffset',zvg='fePointLight',exg='feSpecularLighting',ivg='feSpotLight',j7h='feTile',wvg='feTurbulence',asg='feblend',ewg='fecolormatrix',gxg='fecomponenttransfer',fvg='fecomposite',Cwg='feconvolvematrix',Ewg='fediffuselighting',axg='fedisplacementmap',qwg='fedistantlight',csg='feflood',Brg='fefunca',Erg='fefuncb',jsg='fefuncg',lsg='fefuncr',owg='fegaussianblur',esg='feimage',B7g='female;',gsg='femerge',dvg='femergenode',Avg='femorphology',hmh='fence',ktg='feoffset',yvg='fepointlight',cxg='fespecularlighting',hvg='fespotlight',i7h='fetile',vvg='feturbulence',C7g='ffilig;',E7g='fflig;',F7g='ffllig;',a8g='ffr;',itg='fieldset',k7h='figure',b8g='filig;',w$g='fill',zUh='fill-opacity',rPh='fill-rule',wxh='filter',pPh='filterRes',iTh='filterUnits',oPh='filterres',hTh='filterunits',c8g='flat;',d8g='fllig;',jTh='flood-color',cXh='flood-opacity',z5h='floor',e8g='fltns;',c2h='fn',f8g='fnof;',u4h='font',eug='font-face',Bwg='font-face-format',mwg='font-face-name',Fvg='font-face-src',awg='font-face-uri',fTh='font-family',tPh='font-size',lZh='font-size-adjust',BUh='font-stretch',lRh='font-style',AUh='font-variant',lTh='font-weight',jRh='fontfamily',yNh='fontsize',sPh='fontstyle',kRh='fontweight',m7h='footer',g8g='fopf;',y3g='for',l7h='forall',h8g='forall;',dwg='foreignObject',bwg='foreignobject',j8g='fork;',k8g='forkv;',srg='form',byh='format',l8g='fpartint;',m8g='frac12',n8g='frac12;',o8g='frac13;',p8g='frac14',q8g='frac14;',r8g='frac15;',s8g='frac16;',u8g='frac18;',v8g='frac23;',w8g='frac25;',x8g='frac34',y8g='frac34;',z8g='frac35;',A8g='frac38;',B8g='frac45;',C8g='frac56;',D8g='frac58;',F8g='frac78;',smh='frame',gTh='frameborder',Axg='frameset',CUh='framespacing',a9g='frasl;',b_g='from',b9g='frown;',c9g='fscr;',oWg='fx',zWg='fy',u1h='g',dWg='g1',xVg='g2',d9g='gE;',e9g='gEl;',f9g='gacute;',g9g='gamma;',h9g='gammad;',i9g='gap;',k9g='gbreve;',h3h='gcd',l9g='gcirc;',m9g='gcy;',n9g='gdot;',o9g='ge;',p9g='gel;',i3h='geq',q9g='geq;',r9g='geqq;',s9g='geqslant;',t9g='ges;',v9g='gescc;',w9g='gesdot;',x9g='gesdoto;',y9g='gesdotol;',z9g='gesles;',A9g='gfr;',B9g='gg;',C9g='ggg;',D9g='gimel;',E9g='gjcy;',b$g='gl;',c$g='glE;',d$g='gla;',e$g='glj;',B5h='glyph',gRh='glyph-name',r1h='glyph-orientation-horizontal',p1h='glyph-orientation-vertical',vNh='glyphRef',uNh='glyphref',f$g='gnE;',g$g='gnap;',h$g='gnapprox;',i$g='gne;',j$g='gneq;',k$g='gneqq;',m$g='gnsim;',n$g='gopf;',v4h='grad',l0h='gradientTransform',bXh='gradientUnits',k0h='gradienttransform',aXh='gradientunits',o$g='grave;',hRh='groupalign',p$g='gscr;',q$g='gsim;',r$g='gsime;',s$g='gsiml;',j2h='gt',t$g='gt;',u$g='gtcc;',v$g='gtcir;',x$g='gtdot;',y$g='gtlPar;',z$g='gtquest;',A$g='gtrapprox;',B$g='gtrarr;',C$g='gtrdot;',D$g='gtreqless;',E$g='gtreqqless;',F$g='gtrless;',a_g='gtrsim;',d2h='h1',e2h='h2',f2h='h3',g2h='h4',h2h='h5',i2h='h6',c_g='hArr;',d_g='hairsp;',e_g='half;',f_g='hamilt;',nsg='handler',DLh='hanging',g_g='hardcy;',h_g='harr;',i_g='harrcir;',j_g='harrw;',k_g='hbar;',l_g='hcirc;',Drg='head',n7h='header',ELh='headers',n_g='hearts;',o_g='heartsuit;',xyh='height',p_g='hellip;',q_g='hercon;',r_g='hfr;',mEg='hidden',wPh='hidefocus',x_g='high',C5h='hkern',s_g='hksearow;',t_g='hkswarow;',u_g='hoarr;',v_g='homtht;',w_g='hookleftarrow;',y_g='hookrightarrow;',z_g='hopf;',A_g='horbar;',mTh='horiz-adv-x',bYh='horiz-origin-x',cYh='horiz-origin-y',k2h='hr',cah='href',DNh='hreflang',B_g='hscr;',C_g='hslash;',myh='hspace',D_g='hstrok;',hAg='html',oRh='http-equiv',jKg='http://n.validator.nu/placeholder/',jBg='http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd',wDg='http://www.w3.org/1998/Math/MathML',hrg='http://www.w3.org/1999/xhtml',rQg='http://www.w3.org/1999/xlink',bEg='http://www.w3.org/2000/svg',BPg='http://www.w3.org/2000/xmlns/',Esg='http://www.w3.org/TR/REC-html40/strict.dtd',mvg='http://www.w3.org/TR/html4/loose.dtd',jtg='http://www.w3.org/TR/html4/strict.dtd',Ftg='http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd',wug='http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd',gQg='http://www.w3.org/XML/1998/namespace',E_g='hybull;',F_g='hyphen;',w1h='i',aah='iacute',bah='iacute;',dah='ic;',eah='icirc',fah='icirc;',yah='icon',gah='icy;',kLg='id',E5h='ident',tTh='ideographic',hah='iecy;',iah='iexcl',jah='iexcl;',kah='iff;',lah='ifr;',DIg='iframe',mah='igrave',oah='igrave;',pah='ii;',qah='iiiint;',rah='iiint;',sah='iinfin;',tah='iiota;',uah='ijlig;',vah='imacr;',D5h='image',bZh='image-rendering',wah='image;',hug='imaginary',yug='imaginaryi',xah='imagline;',zah='imagpart;',Aah='imath;',j3h='img',Bah='imof;',Cah='imped;',psg='implies',qYg='in',d4g='in2',Dah='in;',Eah='incare;',tnh='index',Fah='infin;',otg='infinity',abh='infintie;',bbh='inodot;',pGg='input',aQh='inputmode',k3h='ins',l3h='int',cbh='int;',ebh='intcal;',ntg='integers',fbh='integers;',gbh='intercal;',yPh='intercept',kug='interface ',gug='intersect',mtg='interval',hbh='intlarhk;',ibh='intprod;',osg='inverse',jbh='iocy;',kbh='iogon;',lbh='iopf;',mbh='iota;',nbh='iprod;',qbh='iquest',rbh='iquest;',rRh='irrelevant',sbh='iscr;',tbh='isin;',ubh='isinE;',eGg='isindex',vbh='isindot;',wbh='isins;',xbh='isinsv;',ybh='isinv;',Dmh='ismap',zbh='it;',Bbh='itilde;',Cbh='iukcy;',Dbh='iuml',Ebh='iuml;',mIh='java.lang.',CIh='java.util.',Fbh='jcirc;',ach='jcy;',bch='jfr;',cch='jmath;',dch='jopf;',ech='jscr;',gch='jsercy;',hch='jukcy;',iSg='k',fYg='k1',pXg='k2',AXg='k3',eXg='k4',ich='kappa;',jch='kappav;',n3h='kbd',kch='kcedil;',lch='kcy;',EUh='kernelMatrix',nZh='kernelUnitLength',DUh='kernelmatrix',mZh='kernelunitlength',CLh='kerning',vPh='keyPoints',nRh='keySplines',BNh='keyTimes',o7h='keygen',uPh='keypoints',mRh='keysplines',ANh='keytimes',mch='kfr;',nch='kgreen;',och='khcy;',pch='kjcy;',rch='kopf;',sch='kscr;',tch='lAarr;',uch='lArr;',vch='lAtail;',wch='lBarr;',xch='lE;',ych='lEg;',zch='lHar;',wph='label',Ach='lacute;',Cch='laemptyv;',Dch='lagran;',p7h='lambda',Ech='lambda;',fch='lang',Fch='lang;',adh='langd;',bdh='langle;',rOh='language',cdh='lap;',iug='laplacian',ddh='laquo',edh='laquo;',rMh='largeop',fdh='larr;',hdh='larrb;',idh='larrbfs;',jdh='larrfs;',kdh='larrhk;',ldh='larrlp;',mdh='larrpl;',ndh='larrsim;',odh='larrtl;',pdh='lat;',qdh='latail;',sdh='late;',tdh='lbarr;',udh='lbbrk;',vdh='lbrace;',wdh='lbrack;',xdh='lbrke;',ydh='lbrksld;',zdh='lbrkslu;',Adh='lcaron;',Bdh='lcedil;',Ddh='lceil;',p3h='lcm',Edh='lcub;',Fdh='lcy;',aeh='ldca;',beh='ldquo;',ceh='ldquor;',deh='ldrdhar;',eeh='ldrushar;',feh='ldsh;',geh='le;',ieh='leftarrow;',jeh='leftarrowtail;',keh='leftharpoondown;',leh='leftharpoonup;',meh='leftleftarrows;',neh='leftrightarrow;',oeh='leftrightarrows;',peh='leftrightharpoons;',qeh='leftrightsquigarrow;',reh='leftthreetimes;',teh='leg;',q7h='legend',qVh='lengthAdjust',pVh='lengthadjust',q3h='leq',ueh='leq;',veh='leqq;',weh='leqslant;',xeh='les;',yeh='lescc;',zeh='lesdot;',Aeh='lesdoto;',Beh='lesdotor;',Ceh='lesges;',Feh='lessapprox;',afh='lessdot;',bfh='lesseqgtr;',cfh='lesseqqgtr;',dfh='lessgtr;',efh='lesssim;',jYh='letter-spacing',ffh='lfisht;',gfh='lfloor;',hfh='lfr;',ifh='lg;',kfh='lgE;',lfh='lhard;',mfh='lharu;',nfh='lharul;',ofh='lhblk;',m2h='li',kYh='lighting-color',F5h='limit',r0h='limitingConeAngle',q0h='limitingconeangle',w4h='line',twg='linearGradient',swg='lineargradient',hQh='linebreak',mXh='linethickness',Abh='link',qch='list',ptg='listener',rsg='listing',pfh='ljcy;',qfh='ll;',rfh='llarr;',sfh='llcorner;',tfh='llhard;',vfh='lltri;',wfh='lmidot;',xfh='lmoust;',yfh='lmoustache;',n2h='ln',zfh='lnE;',Afh='lnap;',Bfh='lnapprox;',Cfh='lne;',Dfh='lneq;',Efh='lneqq;',agh='lnsim;',bgh='loang;',cgh='loarr;',dgh='lobrk;',bqh='local',o3h='log',qsg='logbase',qOh='longdesc',egh='longleftarrow;',fgh='longleftrightarrow;',ggh='longmapsto;',hgh='longrightarrow;',igh='looparrowleft;',jgh='looparrowright;',qMh='loopend',iQh='loopstart',lgh='lopar;',mgh='lopf;',ngh='loplus;',ogh='lotimes;',e5g='low',pgh='lowast;',qgh='lowbar;',qtg='lowlimit',uEh='lowsrc',rgh='loz;',sgh='lozenge;',tgh='lozf;',ugh='lpar;',wgh='lparlt;',kFh='lquote',xgh='lrarr;',ygh='lrcorner;',zgh='lrhar;',Agh='lrhard;',Bgh='lrm;',Cgh='lrtri;',Dgh='lsaquo;',Egh='lscr;',Fgh='lsh;',bhh='lsim;',chh='lsime;',dhh='lsimg;',FEh='lspace',ehh='lsqb;',fhh='lsquo;',ghh='lsquor;',hhh='lstrok;',o2h='lt',ihh='lt;',jhh='ltcc;',khh='ltcir;',mhh='ltdot;',nhh='lthree;',ohh='ltimes;',phh='ltlarr;',qhh='ltquest;',rhh='ltrPar;',shh='ltri;',thh='ltrie;',uhh='ltrif;',vhh='lurdshar;',xhh='luruhar;',xMg='m',nNg='m:',yhh='mDDot;',zhh='macr',Ahh='macr;',EDh='macros',wsg='maction',Bhh='male;',jvg='maligngroup',zug='malignmark',Chh='malt;',Dhh='maltese;',mOh='manifest',s3h='map',Ehh='map;',Fhh='mapsto;',aih='mapstodown;',cih='mapstoleft;',dih='mapstoup;',jVh='marginheight',CTh='marginwidth',B4h='mark',y7h='marker',DRh='marker-end',CRh='marker-mid',mVh='marker-start',eih='marker;',lVh='markerHeight',ATh='markerUnits',ETh='markerWidth',kVh='markerheight',zTh='markerunits',DTh='markerwidth',vsg='marquee',pbh='mask',tZh='maskContentUnits',eQh='maskUnits',rZh='maskcontentunits',dQh='maskunits',A4h='math',iYh='mathbackground',cQh='mathcolor',oVh='mathematical',wLg='mathplayer',nOh='mathsize',BTh='mathvariant',B7h='matrix',jug='matrixrow',o4g='max',fQh='maxlength',pMh='maxsize',fih='mcomma;',gih='mcy;',hih='mdash;',C4h='mean',iih='measuredangle;',lph='media',w7h='median',cZh='mediummathspace',stg='menclose',E4h='menu',z7h='merror',E0h='message',x4h='meta',rtg='metadata',c6h='meter',jEh='method',ssg='mfenced',jih='mfr;',a6h='mfrac',v7h='mglyph',kih='mho;',p2h='mi',lih='micro',oih='micro;',pih='mid;',qih='midast;',rih='midcir;',sih='middot',tih='middot;',z4g='min',oMh='minsize',e6h='minus',uih='minus;',vih='minusb;',wih='minusd;',xih='minusdu;',gwg='missing-glyph',Bug='mlabeledtr',zih='mlcp;',Aih='mldr;',hwg='mmultiscripts',q2h='mn',Bih='mnplus;',r2h='mo',dbh='mode',Cih='models;',jIh='moduleStartup',A7h='moment',lvg='momentabout',Dih='mopf;',lXh='movablelimits',d6h='mover',Eih='mp;',usg='mpadded',b6h='mpath',ttg='mphantom',kvg='mprescripts',g6h='mroot',F4h='mrow',s2h='ms',Fih='mscr;',s7h='mspace',h6h='msqrt',ajh='mstpos;',u7h='mstyle',y4h='msub',xsg='msubsup',D4h='msup',t7h='mtable',r3h='mtd',i6h='mtext',t3h='mtr',bjh='mu;',cjh='multimap;',oOh='multiple',ejh='mumap;',x7h='munder',Aug='munderover',Bqg='must be positive',fjh='nLeftarrow;',gjh='nLeftrightarrow;',hjh='nRightarrow;',ijh='nVDash;',jjh='nVdash;',kjh='nabla;',ljh='nacute;',pXh='name',mjh='nap;',njh='napos;',pjh='napprox;',Foh='nargs',qjh='natur;',rjh='natural;',uwg='naturalnumbers',sjh='naturals;',w3h='nav',tjh='nbsp',ujh='nbsp;',vjh='ncap;',wjh='ncaron;',xjh='ncedil;',yjh='ncong;',Ajh='ncup;',Bjh='ncy;',Cjh='ndash;',Djh='ne;',Ejh='neArr;',Fjh='nearhk;',akh='nearr;',bkh='nearrow;',u3h='neq',ckh='nequiv;',dkh='nesear;',b5h='nest',fkh='nexist;',gkh='nexists;',hkh='nfr;',ikh='nge;',jkh='ngeq;',kkh='ngsim;',lkh='ngt;',mkh='ngtr;',nkh='nhArr;',okh='nharr;',qkh='nhpar;',rkh='ni;',skh='nis;',tkh='nisd;',ukh='niv;',vkh='njcy;',wkh='nlArr;',xkh='nlarr;',ykh='nldr;',zkh='nle;',Bkh='nleftarrow;',Ckh='nleftrightarrow;',Dkh='nleq;',Ekh='nless;',Fkh='nlsim;',alh='nlt;',blh='nltri;',clh='nltrie;',dlh='nmid;',zFg='nobr',iJg='noembed',tJg='noframes',tDh='nohref',a5h='none',elh='nopf;',lOh='noresize',vtg='noscript',nMh='noshade',v3h='not',glh='not;',Cug='notanumber',kOh='notation',j6h='notin',hlh='notin;',ilh='notinva;',jlh='notinvb;',klh='notinvc;',llh='notni;',mlh='notniva;',nlh='notnivb;',olh='notnivc;',nvg='notprsubset',mug='notsubset',iDh='nowrap',plh='npar;',rlh='nparallel;',slh='npolint;',tlh='npr;',ulh='nprcue;',vlh='nprec;',wlh='nrArr;',xlh='nrarr;',ylh='nrightarrow;',zlh='nrtri;',Alh='nrtrie;',Dlh='nsc;',Elh='nsccue;',Flh='nscr;',amh='nshortmid;',bmh='nshortparallel;',cmh='nsim;',dmh='nsime;',emh='nsimeq;',fmh='nsmid;',gmh='nspar;',imh='nsqsube;',jmh='nsqsupe;',kmh='nsub;',lmh='nsube;',mmh='nsubseteq;',nmh='nsucc;',omh='nsup;',pmh='nsupe;',qmh='nsupseteq;',rmh='ntgl;',tmh='ntilde',umh='ntilde;',vmh='ntlg;',wmh='ntriangleleft;',xmh='ntrianglelefteq;',ymh='ntriangleright;',zmh='ntrianglerighteq;',cKh='nu.validator.htmlparser.common.',lKh='nu.validator.htmlparser.gwt.',lIh='nu.validator.htmlparser.gwt.HtmlParserModule',iKh='nu.validator.htmlparser.impl.',Amh='nu;',rQh='null',Bmh='num;',BRh='numOctaves',Cmh='numero;',ARh='numoctaves',Emh='numsp;',Fmh='nvDash;',anh='nvHarr;',bnh='nvdash;',cnh='nvinfin;',dnh='nvlArr;',enh='nvrArr;',fnh='nwArr;',gnh='nwarhk;',hnh='nwarr;',jnh='nwarrow;',knh='nwnear;',lnh='oS;',mnh='oacute',nnh='oacute;',onh='oast;',FKg='object',qRh='occurrence',pnh='ocir;',qnh='ocirc',rnh='ocirc;',jxg='octype',snh='ocy;',unh='odash;',vnh='odblac;',wnh='odiv;',xnh='odot;',ynh='odsold;',znh='oelig;',Anh='ofcir;',gCh='offset',Bnh='ofr;',Cnh='ogon;',Dnh='ograve',Fnh='ograve;',aoh='ogt;',boh='ohbar;',coh='ohm;',doh='oint;',t2h='ol',eoh='olarr;',foh='olcir;',goh='olcross;',hoh='oline;',ioh='olt;',koh='omacr;',loh='omega;',moh='omicron;',noh='omid;',ooh='ominus;',kIh='onModuleLoadStart',iMh='onabort',pRh='onactivate',hVh='onafterprint',dXh='onafterupdate',m0h='onbefordeactivate',oZh='onbeforeactivate',iVh='onbeforecopy',uTh='onbeforecut',p0h='onbeforeeditfocus',gXh='onbeforepaste',kXh='onbeforeprint',hYh='onbeforeunload',dYh='onbeforeupdate',dMh='onbegin',BBh='onblur',aOh='onbounce',eVh='oncellchange',FNh='onchange',aMh='onclick',iXh='oncontextmenu',aZh='oncontrolselect',CCh='oncopy',uoh='oncut',FYh='ondataavailable',qZh='ondatasetchanged',n0h='ondatasetcomplete',sRh='ondblclick',FUh='ondeactivate',zzh='ondrag',uRh='ondragdrop',zPh='ondragend',sTh='ondragenter',nTh='ondragleave',xRh='ondragover',xTh='ondragstart',qBh='ondrop',inh='onend',gMh='onerror',fXh='onerrorupdate',eYh='onfilterchange',cOh='onfinish',fMh='onfocus',EPh='onfocusin',yRh='onfocusout',dVh='onformchange',wTh='onforminput',AAh='onhelp',hMh='oninput',CPh='oninvalid',DPh='onkeydown',vRh='onkeypress',eMh='onkeyup',nzh='onload',hXh='onlosecapture',xPh='onmessage',qTh='onmousedown',gVh='onmouseenter',bVh='onmouseleave',oTh='onmousemove',zRh='onmouseout',rTh='onmouseover',FPh='onmouseup',fVh='onmousewheel',czh='onmove',APh='onmoveend',yTh='onmovestart',FLh='onpaste',pZh='onpropertychange',x0h='onreadystatechange',iOh='onrepeat',kMh='onreset',ENh='onresize',wRh='onrowenter',bQh='onrowexit',aVh='onrowsdelete',fYh='onrowsinserted',dOh='onscroll',jOh='onselect',jXh='onselectstart',jMh='onstart',fBh='onstop',hOh='onsubmit',bOh='onunload',pAh='onzoom',poh='oopf;',lMh='opacity',qoh='opar;',nah='open',fOh='operator',roh='operp;',soh='oplus;',oxg='optgroup',cMh='optimum',dxg='option',u2h='or',toh='or;',voh='orarr;',woh='ord;',Enh='order',xoh='order;',yoh='orderof;',zoh='ordf',Aoh='ordf;',Boh='ordm',Coh='ordm;',bLh='org.xml.sax.',rCh='orient',pTh='orientation',eAh='origin',Doh='origof;',Eoh='oror;',aph='orslope;',bph='orv;',cph='oscr;',dph='oslash',eph='oslash;',fph='osol;',joh='other',nug='otherwise',gph='otilde',hph='otilde;',iph='otimes;',jph='otimesas;',mph='ouml',nph='ouml;',Cvg='outerproduct',Dqg='output',oph='ovbar;',gOh='overflow',o0h='overline-position',y0h='overline-thickness',ywg='p',CNh='panose-1',pph='par;',qph='para',rph='para;',sph='parallel;',l6h='param',tph='parsim;',uph='parsl;',vph='part;',ovg='partialdiff',heh='path',gSh='pathLength',fSh='pathlength',BMh='pattern',e1h='patternContentUnits',vZh='patternTransform',zVh='patternUnits',d1h='patterncontentunits',uZh='patterntransform',xVh='patternunits',xph='pcy;',yph='percnt;',zph='period;',Aph='permil;',Bph='perp;',Cph='pertenk;',Dph='pfr;',Eph='phi;',Fph='phiv;',aqh='phmmat;',cqh='phone;',v2h='pi',dqh='pi;',k6h='piece',oug='piecewise',seh='ping',eqh='pitchfork;',fqh='piv;',EJg='plaintext',gqh='planck;',hqh='planckh;',iqh='plankv;',uQh='playcount',c5h='plus',jqh='plus;',kqh='plusacir;',lqh='plusb;',nqh='pluscir;',oqh='plusdo;',pqh='plusdu;',qqh='pluse;',rqh='plusmn',sqh='plusmn;',tqh='plussim;',uqh='plustwo;',vqh='pm;',oYh='pointer-events',wqh='pointint;',dIh='points',pQh='pointsAtX',tQh='pointsAtY',nQh='pointsAtZ',oQh='pointsatx',qQh='pointsaty',mQh='pointsatz',ysg='polygon',wtg='polyline',yqh='popf;',yHh='poster',zqh='pound',Aqh='pound;',m6h='power',Bqh='pr;',Cqh='prE;',Dqh='prap;',Eqh='prcue;',y3h='pre',Fqh='pre;',arh='prec;',brh='precapprox;',drh='preccurlyeq;',erh='preceq;',frh='precnapprox;',grh='precneqq;',hrh='precnsim;',irh='precsim;',xtg='prefetch',vXh='preserveAlpha',c1h='preserveAspectRatio',uXh='preservealpha',b1h='preserveaspectratio',jrh='prime;',Eqg='primes',krh='primes;',qYh='primitiveUnits',pYh='primitiveunits',lrh='prnE;',mrh='prnap;',orh='prnsim;',prh='prod;',zsg='product',qrh='profalar;',CMh='profile',rrh='profline;',srh='profsurf;',ytg='progress',oIh='prompt',trh='prop;',urh='propto;',vrh='prsim;',ztg='prsubset',wrh='prurel;',xrh='pscr;',zrh='psi;',Arh='puncsp;',x1h='q',Brh='qfr;',Crh='qint;',Drh='qopf;',Erh='qprime;',Frh='qscr;',ash='quaternions;',bsh='quatint;',csh='quest;',esh='questeq;',fsh='quot',gsh='quot;',Atg='quotient',uSg='r',hsh='rAarr;',ish='rArr;',jsh='rAtail;',ksh='rBarr;',lsh='rHar;',msh='race;',nsh='racute;',wwg='radialGradient',vwg='radialgradient',psh='radic;',iSh='radiogroup',gKh='radius',qsh='raemptyv;',rsh='rang;',ssh='rangd;',tsh='range;',ush='rangle;',vsh='raquo',wsh='raquo;',xsh='rarr;',ysh='rarrap;',Bsh='rarrb;',Csh='rarrbfs;',Dsh='rarrc;',Esh='rarrfs;',Fsh='rarrhk;',ath='rarrlp;',bth='rarrpl;',cth='rarrsim;',dth='rarrtl;',eth='rarrw;',gth='ratail;',hth='ratio;',pug='rationals',ith='rationals;',jth='rbarr;',kth='rbbrk;',lth='rbrace;',mth='rbrack;',nth='rbrke;',oth='rbrksld;',pth='rbrkslu;',rth='rcaron;',sth='rcedil;',tth='rceil;',uth='rcub;',vth='rcy;',wth='rdca;',xth='rdldhar;',yth='rdquo;',zth='rdquor;',Ath='rdsh;',uOh='readonly',f5h='real',Cth='real;',Dth='realine;',Eth='realpart;',n6h='reals',Fth='reals;',h5h='rect',auh='rect;',jfh='refX',Ffh='refY',Eeh='refx',ufh='refy',buh='reg',cuh='reg;',p5g='rel',g5h='reln',z3h='rem',yZh='rendering-intent',yNg='renesis',CKh='repeat',hSh='repeat-max',mSh='repeat-min',FVh='repeat-start',gZh='repeat-template',gUh='repeatCount',yQh='repeatDur',fUh='repeatcount',xQh='repeatdur',fNh='replace',BOh='required',C0h='requiredExtensions',xZh='requiredFeatures',B0h='requiredextensions',wZh='requiredfeatures',EMh='restart',rKh='result',A5g='rev',duh='rfisht;',euh='rfloor;',fuh='rfr;',huh='rhard;',iuh='rharu;',juh='rharul;',kuh='rho;',luh='rhov;',muh='rightarrow;',nuh='rightarrowtail;',ouh='rightharpoondown;',puh='rightharpoonup;',quh='rightleftarrows;',suh='rightleftharpoons;',tuh='rightrightarrows;',uuh='rightsquigarrow;',vuh='rightthreetimes;',wuh='ring;',xuh='risingdotseq;',yuh='rlarr;',zuh='rlhar;',Auh='rlm;',Buh='rmoust;',Duh='rmoustache;',Euh='rnmid;',Fuh='roang;',avh='roarr;',bvh='robrk;',bih='role',i5h='root',cvh='ropar;',dvh='ropf;',evh='roplus;',fLh='rotate',fvh='rotimes;',yOh='rowalign',wOh='rowlines',ahh='rows',nSh='rowspacing',FMh='rowspan',x2h='rp',gvh='rpar;',ivh='rpargt;',jvh='rppolint;',gLh='rquote',kvh='rrarr;',lvh='rsaquo;',mvh='rscr;',nvh='rsh;',eLh='rspace',ovh='rsqb;',pvh='rsquo;',qvh='rsquor;',tZg='rt',rvh='rthree;',tvh='rtimes;',uvh='rtri;',vvh='rtrie;',wvh='rtrif;',xvh='rtriltri;',AGg='ruby',d5h='rule',fth='rules',yvh='ruluhar;',EZg='rx',zvh='rx;',j0g='ry',oOg='s',fPg='s:',Avh='sacute;',l5h='samp',aNh='sandbox',Bvh='sbquo;',Cvh='sc;',Evh='scE;',iwg='scalarproduct',osh='scale',Fvh='scap;',awh='scaron;',bwh='sccue;',cwh='sce;',dwh='scedil;',pJh='scheme',ewh='scirc;',fwh='scnE;',gwh='scnap;',hwh='scnsim;',dsh='scope',zIh='scoped',lwh='scpolint;',hIg='script',eUh='scriptlevel',wXh='scriptminsize',g1h='scriptsizemultiplier',lUh='scrolldelay',wQh='scrolling',mwh='scsim;',nwh='scy;',n5h='sdev',owh='sdot;',pwh='sdotb;',qwh='sdote;',rwh='seArr;',xOh='seamless',swh='searhk;',twh='searr;',uwh='searrow;',B3h='sec',j5h='sech',wwh='sect',xwh='sect;',Bsg='section',vgh='seed',xvg='select',vOh='selected',zQh='selection',Btg='selector',qug='semantics',ywh='semi;',F3h='sep',AQh='separator',lSh='separators',zwh='seswar;',b4h='set',Asg='setdiff',Awh='setminus;',Bwh='setmn;',Cwh='sext;',Dwh='sfr;',Ewh='sfrown;',yrh='shape',eZh='shape-rendering',Fwh='sharp;',bxh='shchcy;',cxh='shcy;',dxh='shortmid;',exh='shortparallel;',vSh='show',fxh='shy',gxh='shy;',hxh='sigma;',ixh='sigmaf;',jxh='sigmav;',kxh='sim;',mxh='simdot;',nxh='sime;',oxh='simeq;',pxh='simg;',qxh='simgE;',rxh='siml;',sxh='simlE;',txh='simne;',uxh='simplus;',vxh='simrarr;',E3h='sin',k5h='sinh',kgh='size',xxh='slarr;',nrh='slope',o6h='small',yxh='smallsetminus;',zxh='smashp;',Axh='smeparsl;',Bxh='smid;',Cxh='smile;',Dxh='smt;',Exh='smte;',Fxh='softcy;',ayh='sol;',cyh='solb;',dyh='solbar;',Dug='solidcolor',eyh='sopf;',Fqg='source',CQh='space',erg='spacer',DMh='spacing',fyh='spades;',gyh='spadesuit;',lhh='span',hyh='spar;',xXh='specification',CZh='specularConstant',AZh='specularExponent',BZh='specularconstant',zZh='specularexponent',Ash='speed',BVh='spreadMethod',AVh='spreadmethod',iyh='sqcap;',jyh='sqcup;',kyh='sqsub;',lyh='sqsube;',nyh='sqsubset;',oyh='sqsubseteq;',pyh='sqsup;',qyh='sqsupe;',ryh='sqsupset;',syh='sqsupseteq;',tyh='squ;',uyh='square;',vyh='squarf;',wyh='squf;',yyh='srarr;',f6g='src',zyh='sscr;',Ayh='ssetmn;',Byh='ssmile;',Cyh='sstarf;',eNh='standby',Dyh='star;',Eyh='starf;',guh='start',kUh='startOffset',jUh='startoffset',iIh='startup',bWh='stdDeviation',aWh='stddeviation',qth='stemh',Bth='stemv',whh='step',iUh='stitchTiles',hUh='stitchtiles',m5h='stop',kSh='stop-color',cWh='stop-opacity',Fyh='straightepsilon;',azh='straightphi;',zOh='stretchy',arg='strike',l1h='strikethrough-position',m1h='strikethrough-thickness',eJh='string',bzh='strns;',AJh='stroke',FZh='stroke-dasharray',u0h='stroke-dashoffset',uYh='stroke-linecap',fZh='stroke-linejoin',v0h='stroke-miterlimit',wYh='stroke-opacity',EVh='stroke-width',brg='strong',BHg='style',A3h='sub',dzh='sub;',ezh='subE;',fzh='subdot;',gzh='sube;',hzh='subedot;',izh='submult;',jzh='subnE;',kzh='subne;',lzh='subplus;',mzh='subrarr;',vYh='subscriptshift',frg='subset',ozh='subset;',pzh='subseteq;',qzh='subseteqq;',rzh='subsetneq;',szh='subsetneqq;',tzh='subsim;',uzh='subsub;',vzh='subsup;',wzh='succ;',xzh='succapprox;',Azh='succcurlyeq;',Bzh='succeq;',Czh='succnapprox;',Dzh='succneqq;',Ezh='succnsim;',Fzh='succsim;',D3h='sum',aAh='sum;',bNh='summary',bAh='sung;',a4h='sup',cAh='sup1',dAh='sup1;',fAh='sup2',gAh='sup2;',hAh='sup3',iAh='sup3;',jAh='sup;',kAh='supE;',lAh='supdot;',mAh='supdsub;',nAh='supe;',oAh='supedot;',EZh='superscriptshift',qAh='suphsub;',rAh='suplarr;',sAh='supmult;',tAh='supnE;',uAh='supne;',vAh='supplus;',wAh='supset;',xAh='supseteq;',yAh='supseteqq;',zAh='supsetneq;',BAh='supsetneqq;',CAh='supsim;',DAh='supsub;',EAh='supsup;',DVh='surfaceScale',CVh='surfacescale',C3h='svg',FAh='swArr;',aBh='swarhk;',bBh='swarr;',cBh='swarrow;',crg='switch',dBh='swnwar;',drg='symbol',vQh='symmetric',tYh='systemLanguage',sYh='systemlanguage',eBh='szlig',gBh='szlig;',tOh='tabindex',cwg='table',dUh='tableValues',cUh='tablevalues',d4h='tan',s5h='tanh',lGh='target',hBh='target;',uMh='targetX',wMh='targetY',tMh='targetx',vMh='targety',iBh='tau;',FBg='tbody',grg='tbreak',jBh='tbrk;',kBh='tcaron;',lBh='tcedil;',mBh='tcy;',fyg='td',nBh='tdot;',oBh='telrec;',sOh='template',Csg='tendsto',Cdh='text',FTh='text-anchor',dZh='text-decoration',mYh='text-rendering',aSh='textLength',Dtg='textPath',qHg='textarea',FRh='textlength',Ctg='textpath',vCg='tfoot',pBh='tfr;',qyg='th',kCg='thead',rBh='there4;',sBh='therefore;',tBh='theta;',uBh='thetasym;',vBh='thetav;',wBh='thickapprox;',lYh='thickmathspace',xBh='thicksim;',oXh='thinmathspace',yBh='thinsp;',zBh='thkap;',ABh='thksim;',CBh='thorn',DBh='thorn;',EBh='tilde;',o5h='time',r6h='times',FBh='times;',aCh='timesb;',bCh='timesbar;',cCh='timesd;',dCh='tint;',fHg='title',u0g='to',eCh='toea;',fCh='top;',hCh='topbot;',iCh='topcir;',jCh='topf;',kCh='topfork;',lCh='tosa;',mCh='tprime;',uBg='tr',nCh='trade;',jQh='transform',rug='transpose',r5h='tref',oCh='triangle;',pCh='triangledown;',qCh='triangleleft;',sCh='trianglelefteq;',tCh='triangleq;',uCh='triangleright;',vCh='trianglerighteq;',wCh='tridot;',xCh='trie;',yCh='triminus;',zCh='triplus;',ACh='trisb;',BCh='tritime;',DCh='trpezium;',q5h='true',ECh='tscr;',FCh='tscy;',aDh='tshcy;',p6h='tspan',bDh='tstrok;',y2h='tt',cDh='twixt;',dDh='twoheadleftarrow;',eDh='twoheadrightarrow;',Bch='type',y1h='u',gZg='u1',BYg='u2',fDh='uArr;',gDh='uHar;',jDh='uacute',kDh='uacute;',lDh='uarr;',kxg='ublic',mDh='ubrcy;',nDh='ubreve;',oDh='ucirc',pDh='ucirc;',qDh='ucy;',rDh='udarr;',sDh='udblac;',uDh='udhar;',vDh='ufisht;',wDh='ufr;',xDh='ugrave',yDh='ugrave;',zDh='uharl;',ADh='uharr;',BDh='uhblk;',z2h='ul',CDh='ulcorn;',DDh='ulcorner;',FDh='ulcrop;',aEh='ultri;',bEh='umacr;',cEh='uml',dEh='uml;',z0h='underline-position',a1h='underline-thickness',sMh='unicode',sVh='unicode-bidi',nXh='unicode-range',s6h='union',tVh='units-per-em',rVh='unselectable',eEh='uogon;',fEh='uopf;',gEh='uparrow;',hEh='updownarrow;',iEh='upharpoonleft;',kEh='upharpoonright;',Dsg='uplimit',lEh='uplus;',mEh='upsi;',nEh='upsih;',oEh='upsilon;',pEh='upuparrows;',qEh='urcorn;',rEh='urcorner;',sEh='urcrop;',tEh='uring;',vEh='urtri;',wEh='uscr;',e4h='use',vFh='usemap',xEh='utdot;',yEh='utilde;',zEh='utri;',AEh='utrif;',BEh='uuarr;',CEh='uuml',DEh='uuml;',EEh='uwangle;',wVh='v-alphabetic',kQh='v-hanging',tXh='v-ideographic',nYh='v-mathematical',aFh='vArr;',bFh='vBar;',cFh='vBarv;',dFh='vDash;',cHh='valign',crh='value',xGh='values',lQh='valuetype',eFh='vangrt;',f4h='var',fFh='varepsilon;',Etg='variance',gFh='varkappa;',hFh='varnothing;',iFh='varphi;',jFh='varpi;',lFh='varpropto;',mFh='varr;',nFh='varrho;',oFh='varsigma;',pFh='vartheta;',qFh='vartriangleleft;',rFh='vartriangleright;',sFh='vcy;',tFh='vdash;',irg='vector',jwg='vectorproduct',uFh='vee;',wFh='veebar;',xFh='veeeq;',yFh='vellip;',zFh='verbar;',AMh='version',eSh='vert-adv-y',rXh='vert-origin-x',sXh='vert-origin-y',AFh='vert;',A0h='verythickmathspace',s0h='verythinmathspace',j1h='veryverythickmathspace',i1h='veryverythinmathspace',BFh='vfr;',u6h='video',t5h='view',zMh='viewBox',dSh='viewTarget',yMh='viewbox',cSh='viewtarget',bSh='visibility',t6h='vkern',xqh='vlink',CFh='vltri;',DFh='vopf;',EFh='vprop;',FFh='vrtri;',bGh='vscr;',nHh='vspace',cGh='vzigzag;',g4h='wbr',dGh='wcirc;',eGh='wedbar;',fGh='wedge;',gGh='wedgeq;',hGh='weierp;',iGh='wfr;',gdh='when',mqh='width',aGh='widths',jGh='wopf;',uVh='word-spacing',kGh='wp;',mGh='wr;',rdh='wrap',nGh='wreath;',vVh='writing-mode',oGh='wscr;',FSg='x',EOh='x-height',v1g='x1',a2g='x2',b0h='xChannelSelector',pGh='xcap;',a0h='xchannelselector',qGh='xcirc;',rGh='xcup;',sGh='xdtri;',tGh='xfr;',uGh='xhArr;',vGh='xharr;',yGh='xi;',zGh='xlArr;',AGh='xlarr;',hRg='xlink',yXh='xlink:actuate',AXh='xlink:arcrole',sSh='xlink:href',rSh='xlink:role',tSh='xlink:show',oUh='xlink:title',qSh='xlink:type',BGh='xmap;',sRg='xml',COh='xml:base',DOh='xml:lang',BQh='xml:space',CQg='xmlns',s1h='xmlns:',nUh='xmlns:xlink',sIg='xmp',CGh='xnis;',DGh='xodot;',EGh='xopf;',FGh='xoplus;',h4h='xor',aHh='xotime;',bHh='xrArr;',dHh='xrarr;',nih='xref',eHh='xscr;',fHh='xsqcup;',gHh='xuplus;',hHh='xutri;',iHh='xvee;',jHh='xwedge;',kTg='y',k1g='y1',F0g='y2',d0h='yChannelSelector',kHh='yacute',lHh='yacute;',mHh='yacy;',c0h='ychannelselector',oHh='ycirc;',pHh='ycy;',qHh='yen',rHh='yen;',sHh='yfr;',tHh='yicy;',uHh='yopf;',vHh='yscr;',lxg='ystem',wHh='yucy;',xHh='yuml',zHh='yuml;',vTg='z',AHh='zacute;',BHh='zcaron;',CHh='zcy;',DHh='zdot;',EHh='zeetrf;',FHh='zeta;',aIh='zfr;',bIh='zhcy;',cIh='zigrarr;',pSh='zoomAndPan',oSh='zoomandpan',eIh='zopf;',fIh='zscr;',gIh='zwj;',hIh='zwnj;',b3g='{',F9g='}',tsg='\u201D cannot be represented as XML 1.0.',eyg='\u201D is not serializable as XML 1.0.',nxg='\u201D without an explicit value seen. The attribute may be dropped by IE7.',rxg='\u201D.';var _,C7h=[0,-9223372036854775808],D7h=[16777216,0],E7h=[4294967295,9223372032559808512];function zdi(a){return (this==null?null:this)===(a==null?null:a)}
+
+
+var inputElements_dataProperties = {};
+var inputElements_status = {};
+
+var inputElements_onchange = {
+    onchange: function(event){
+        __eval__(this.getAttribute('onchange')||'', this)
+    }
+};
+
+var inputElements_size = {
+    get size(){
+        return Number(this.getAttribute('size'));
+    },
+    set size(value){
+        this.setAttribute('size',value);
+    }
+};
+
+var inputElements_focusEvents = {
+    blur: function(){
+        __blur__(this);
+
+        if (this._oldValue != this.value){
+            var event = document.createEvent("HTMLEvents");
+            event.initEvent("change", true, true);
+            this.dispatchEvent( event );
+        }
+    },
+    focus: function(){
+        __focus__(this);
+        this._oldValue = this.value;
+    }
+};
+
+
+/*
+* HTMLInputCommon - convenience class, not DOM
+*/
+var HTMLInputCommon = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLInputCommon.prototype = new HTMLElement;
+__extend__(HTMLInputCommon.prototype, {
+    get form(){
+        var parent = this.parentNode;
+        while(parent.nodeName.toLowerCase() != 'form'){
+            parent = parent.parentNode;
+        }
+        return parent;
+    },
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get access(){
+        return this.getAttribute('access');
+    },
+    set access(value){
+        this.setAttribute('access', value);
+    },
+    get disabled(){
+        return (this.getAttribute('disabled')=='disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled', (value ? 'disabled' :''));
+    }
+});
+
+
+
+
+/*
+* HTMLTypeValueInputs - convenience class, not DOM
+*/
+var HTMLTypeValueInputs = function(ownerDocument) {
+    
+    HTMLInputCommon.apply(this, arguments);
+
+    this._oldValue = "";
+};
+HTMLTypeValueInputs.prototype = new HTMLInputCommon;
+__extend__(HTMLTypeValueInputs.prototype, inputElements_size);
+__extend__(HTMLTypeValueInputs.prototype, inputElements_status);
+__extend__(HTMLTypeValueInputs.prototype, inputElements_dataProperties);
+__extend__(HTMLTypeValueInputs.prototype, {
+    get defaultValue(){
+        return this.getAttribute('defaultValue');
+    },
+    set defaultValue(value){
+        this.setAttribute('defaultValue', value);
+    },
+    get name(){
+        return this.getAttribute('name')||'';
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(type){
+        return this.setAttribute('type', type);
+    },
+    get value(){
+        return this.getAttribute('value')||'';
+    },
+    set value(newValue){
+        this.setAttribute('value',newValue);
+    },
+    setAttribute: function(name, value){
+        //console.log('setting defaultValue (NS)');
+        if(name == 'value' && !this.defaultValue){
+            this.defaultValue = value;
+        }
+        HTMLElement.prototype.setAttribute.apply(this, [name, value]);
+    },
+    setAttributeNS: function(uri, name, value){
+        //console.log('setting defaultValue (NS)');
+        if(name == 'value' && !this.defaultValue){
+            this.defaultValue = value;
+        }
+        HTMLElement.prototype.setAttributeNS.apply(this, [uri, name, value]);
+    }
+});
+
+
+/*
+* HTMLInputAreaCommon - convenience class, not DOM
+*/
+var HTMLInputAreaCommon = function(ownerDocument) {
+    HTMLTypeValueInputs.apply(this, arguments);
+};
+HTMLInputAreaCommon.prototype = new HTMLTypeValueInputs;
+__extend__(HTMLInputAreaCommon.prototype, inputElements_focusEvents);
+__extend__(HTMLInputAreaCommon.prototype, inputElements_onchange);
+__extend__(HTMLInputAreaCommon.prototype, {
+    get readOnly(){
+        return (this.getAttribute('readonly')=='readonly');
+    },
+    set readOnly(value){
+        this.setAttribute('readonly', (value ? 'readonly' :''));
+    },
+    select:function(){
+        __select__(this);
+
+    }
+});
+
+
+/**
+ * HTMLAnchorElement - DOM Level 2
+ */
+HTMLAnchorElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLAnchorElement.prototype = new HTMLElement;
+__extend__(HTMLAnchorElement.prototype, {
+	get accessKey() { 
+	    return this.getAttribute("accesskey")||''; 
+    },
+	set accessKey(val) { 
+	    return this.setAttribute("accesskey",val); 
+    },
+	get charset() { 
+	    return this.getAttribute("charset")||''; 
+    },
+	set charset(val) { 
+	    return this.setAttribute("charset",val); 
+    },
+	get coords() { 
+	    return this.getAttribute("coords")||''; 
+    },
+	set coords(val) { 
+	    return this.setAttribute("coords",val);
+    },
+	get href() { 
+        var location = this.ownerDocument.location+'';
+	    return (location?location.substring(0, location.lastIndexOf('/')):'')+
+            (this.getAttribute("href")||'');
+    },
+	set href(val) { 
+	    return this.setAttribute("href",val);
+    },
+	get hreflang() { 
+	    return this.getAttribute("hreflang")||'';
+    },
+	set hreflang(val) { 
+	    this.setAttribute("hreflang",val);
+    },
+	get name() { 
+	    return this.getAttribute("name")||'';
+    },
+	set name(val) { 
+	    this.setAttribute("name",val);
+    },
+	get rel() { 
+	    return this.getAttribute("rel")||''; 
+    },
+	set rel(val) { 
+	    return this.setAttribute("rel", val); 
+    },
+	get rev() { 
+	    return this.getAttribute("rev")||'';
+    },
+	set rev(val) { 
+	    return this.setAttribute("rev",val);
+    },
+	get shape() { 
+	    return this.getAttribute("shape")||'';
+    },
+	set shape(val) { 
+	    return this.setAttribute("shape",val);
+    },
+	get target() { 
+	    return this.getAttribute("target")||'';
+    },
+	set target(val) { 
+	    return this.setAttribute("target",val);
+    },
+	get type() { 
+	    return this.getAttribute("type")||'';
+    },
+	set type(val) { 
+	    return this.setAttribute("type",val);
+    },
+	blur:function(){
+	    __blur__(this);
+    },
+	focus:function(){
+	    __focus__(this);
+    },
+    toString: function(){
+        return '[object HTMLAnchorElement]';
+    }
+});
+
+/* 
+ * HTMLAreaElement - DOM Level 2
+ */
+HTMLAreaElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLAreaElement.prototype = new HTMLElement;
+__extend__(HTMLAreaElement.prototype, {
+    get accessKey(){
+        return this.getAttribute('accesskey');
+    },
+    set accessKey(value){
+        this.setAttribute('accesskey',value);
+    },
+    get alt(){
+        return this.getAttribute('alt');
+    },
+    set alt(value){
+        this.setAttribute('alt',value);
+    },
+    get coords(){
+        return this.getAttribute('coords');
+    },
+    set coords(value){
+        this.setAttribute('coords',value);
+    },
+    get href(){
+        return this.getAttribute('href');
+    },
+    set href(value){
+        this.setAttribute('href',value);
+    },
+    get noHref(){
+        return this.hasAttribute('href');
+    },
+    get shape(){
+        //TODO
+        return 0;
+    },
+    /*get tabIndex(){
+        return this.getAttribute('tabindex');
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',value);
+    },*/
+    get target(){
+        return this.getAttribute('target');
+    },
+    set target(value){
+        this.setAttribute('target',value);
+    },
+    toString: function(){
+        return '[object HTMLAreaElement]';
+    }
+});
+
+			
+/* 
+* HTMLBaseElement - DOM Level 2
+*/
+HTMLBaseElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLBaseElement.prototype = new HTMLElement;
+__extend__(HTMLBaseElement.prototype, {
+    get href(){
+        return this.getAttribute('href');
+    },
+    set href(value){
+        this.setAttribute('href',value);
+    },
+    get target(){
+        return this.getAttribute('target');
+    },
+    set target(value){
+        this.setAttribute('target',value);
+    }
+});
+
+	
+/* 
+* HTMLQuoteElement - DOM Level 2
+*/
+HTMLQuoteElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+__extend__(HTMLQuoteElement.prototype, HTMLElement.prototype);
+__extend__(HTMLQuoteElement.prototype, {
+    get cite(){
+        return this.getAttribute('cite');
+    },
+    set cite(value){
+        this.setAttribute('cite',value);
+    }
+});
+
+/*
+ * HTMLBodyElement - DOM Level 2
+ */
+HTMLBodyElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLBodyElement.prototype = new HTMLElement;
+__extend__(HTMLBodyElement.prototype, {
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
+    },
+    onunload: function(event){
+        __eval__(this.getAttribute('onunload')||'', this)
+    }
+});
+
+
+/*
+ * HTMLButtonElement - DOM Level 2
+ */
+HTMLButtonElement = function(ownerDocument) {
+    HTMLTypeValueInputs.apply(this, arguments);
+};
+HTMLButtonElement.prototype = new HTMLTypeValueInputs;
+__extend__(HTMLButtonElement.prototype, inputElements_status);
+__extend__(HTMLButtonElement.prototype, {
+    get dataFormatAs(){
+        return this.getAttribute('dataFormatAs');
+    },
+    set dataFormatAs(value){
+        this.setAttribute('dataFormatAs',value);
+    }
+});
+
+
+/* 
+* HTMLCanvasElement - DOM Level 2
+*/
+HTMLCanvasElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLCanvasElement.prototype = new HTMLElement;
+__extend__(HTMLCanvasElement.prototype, {
+
+    // TODO: obviously a big challenge
+
+});
+
+	
+/* 
+* HTMLTableColElement - DOM Level 2
+*/
+HTMLTableColElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableColElement.prototype = new HTMLElement;
+__extend__(HTMLTableColElement.prototype, {
+    get align(){
+        return this.getAttribute('align');
+    },
+    set align(value){
+        this.setAttribute('align', value);
+    },
+    get ch(){
+        return this.getAttribute('ch');
+    },
+    set ch(value){
+        this.setAttribute('ch', value);
+    },
+    get chOff(){
+        return this.getAttribute('ch');
+    },
+    set chOff(value){
+        this.setAttribute('ch', value);
+    },
+    get span(){
+        return this.getAttribute('span');
+    },
+    set span(value){
+        this.setAttribute('span', value);
+    },
+    get vAlign(){
+        return this.getAttribute('valign');
+    },
+    set vAlign(value){
+        this.setAttribute('valign', value);
+    },
+    get width(){
+        return this.getAttribute('width');
+    },
+    set width(value){
+        this.setAttribute('width', value);
+    }
+});
+
+
+/* 
+* HTMLModElement - DOM Level 2
+*/
+HTMLModElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLModElement.prototype = new HTMLElement;
+__extend__(HTMLModElement.prototype, {
+    get cite(){
+        return this.getAttribute('cite');
+    },
+    set cite(value){
+        this.setAttribute('cite', value);
+    },
+    get dateTime(){
+        return this.getAttribute('datetime');
+    },
+    set dateTime(value){
+        this.setAttribute('datetime', value);
+    }
+});
+
+/*
+* HTMLDivElement - DOM Level 2
+*/
+HTMLDivElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLDivElement.prototype = new HTMLElement;
+__extend__(HTMLDivElement.prototype, {
+    get align(){
+        return this.getAttribute('align') || 'left';
+    },
+    set align(value){
+        this.setAttribute('align', value);
+    }
+});
+
+
+/**
+ * HTMLLegendElement - DOM Level 2
+ */
+HTMLLegendElement = function(ownerDocument) {
+    HTMLInputCommon.apply(this, arguments);
+};
+HTMLLegendElement.prototype = new HTMLInputCommon;
+__extend__(HTMLLegendElement.prototype, {
+    get align(){
+        return this.getAttribute('align');
+    },
+    set align(value){
+        this.setAttribute('align',value);
+    }
+});
+
+
+/*
+ * HTMLFieldSetElement - DOM Level 2
+ */
+HTMLFieldSetElement = function(ownerDocument) {
+    HTMLLegendElement.apply(this, arguments);
+};
+HTMLFieldSetElement.prototype = new HTMLLegendElement;
+__extend__(HTMLFieldSetElement.prototype, {
+    get margin(){
+        return this.getAttribute('margin');
+    },
+    set margin(value){
+        this.setAttribute('margin',value);
+    }
+});
+
+/* 
+ * HTMLFormElement - DOM Level 2
+ */
+HTMLFormElement = function(ownerDocument){
+    HTMLElement.apply(this, arguments);
+    //TODO: on __elementPopped__ from the parser
+    //      we need to determine all the forms default 
+    //      values
+};
+HTMLFormElement.prototype = new HTMLElement;
+__extend__(HTMLFormElement.prototype,{
+    get acceptCharset(){ 
+        return this.getAttribute('accept-charset');
+    },
+    set acceptCharset(acceptCharset){
+        this.setAttribute('accept-charset', acceptCharset);
+        
+    },
+    get action(){
+        return this.getAttribute('action');
+        
+    },
+    set action(action){
+        this.setAttribute('action', action);
+        
+    },
+    get elements() {
+        return this.getElementsByTagName("*");
+        
+    },
+    get enctype(){
+        return this.getAttribute('enctype');
+        
+    },
+    set enctype(enctype){
+        this.setAttribute('enctype', enctype);
+        
+    },
+    get length() {
+        return this.elements.length;
+        
+    },
+    get method(){
+        return this.getAttribute('method');
+        
+    },
+    set method(method){
+        this.setAttribute('method', method);
+        
+    },
+	get name() {
+	    return this.getAttribute("name"); 
+	    
+    },
+	set name(val) { 
+	    return this.setAttribute("name",val); 
+	    
+    },
+	get target() { 
+	    return this.getAttribute("target"); 
+	    
+    },
+	set target(val) { 
+	    return this.setAttribute("target",val); 
+	    
+    },
+    toString: function(){
+        return '[object HTMLFormElement]';
+    },
+	submit:function(){
+        //TODO: this needs to perform the form inputs serialization
+        //      and submission
+        //  DONE: see xhr/form.js
+	    var event = __submit__(this);
+	    
+    },
+	reset:function(){
+        //TODO: this needs to reset all values specified in the form
+        //      to those which where set as defaults
+	    __reset__(this);
+	    
+    },
+    onsubmit:HTMLEvents.prototype.onsubmit,
+    onreset: HTMLEvents.prototype.onreset
+});
+
+/** 
+ * HTMLFrameElement - DOM Level 2
+ */
+HTMLFrameElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+    // this is normally a getter but we need to be
+    // able to set it to correctly emulate behavior
+    this.contentDocument = null;
+    this.contentWindow = null;
+};
+HTMLFrameElement.prototype = new HTMLElement;
+__extend__(HTMLFrameElement.prototype, {
+    
+    get frameBorder(){
+        return this.getAttribute('border')||"";
+    },
+    set frameBorder(value){
+        this.setAttribute('border', value);
+    },
+    get longDesc(){
+        return this.getAttribute('longdesc')||"";
+    },
+    set longDesc(value){
+        this.setAttribute('longdesc', value);
+    },
+    get marginHeight(){
+        return this.getAttribute('marginheight')||"";
+    },
+    set marginHeight(value){
+        this.setAttribute('marginheight', value);
+    },
+    get marginWidth(){
+        return this.getAttribute('marginwidth')||"";
+    },
+    set marginWidth(value){
+        this.setAttribute('marginwidth', value);
+    },
+    get name(){
+        return this.getAttribute('name')||"";
+    },
+    set name(value){
+        this.setAttribute('name', value);
+    },
+    get noResize(){
+        return this.getAttribute('noresize')||false;
+    },
+    set noResize(value){
+        this.setAttribute('noresize', value);
+    },
+    get scrolling(){
+        return this.getAttribute('scrolling')||"";
+    },
+    set scrolling(value){
+        this.setAttribute('scrolling', value);
+    },
+    get src(){
+        return this.getAttribute('src')||"";
+    },
+    set src(value){
+        this.setAttribute('src', value);
+    },
+    toString: function(){
+        return '[object HTMLFrameElement]';
+    },
+    onload: HTMLEvents.prototype.onload
+});
+
+/** 
+ * HTMLFrameSetElement - DOM Level 2
+ */
+HTMLFrameSetElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLFrameSetElement.prototype = new HTMLElement;
+__extend__(HTMLFrameSetElement.prototype, {
+    get cols(){
+        return this.getAttribute('cols');
+    },
+    set cols(value){
+        this.setAttribute('cols', value);
+    },
+    get rows(){
+        return this.getAttribute('rows');
+    },
+    set rows(value){
+        this.setAttribute('rows', value);
+    }
+});
+
+/** 
+ * HTMLHeadElement - DOM Level 2
+ */
+HTMLHeadElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLHeadElement.prototype = new HTMLElement;
+__extend__(HTMLHeadElement.prototype, {
+    get profile(){
+        return this.getAttribute('profile');
+    },
+    set profile(value){
+        this.setAttribute('profile', value);
+    },
+    //we override this so we can apply browser behavior specific to head children
+    //like loading scripts
+    appendChild : function(newChild) {
+        var newChild = HTMLElement.prototype.appendChild.apply(this,[newChild]);
+        //TODO: evaluate scripts which are appended to the head
+        //__evalScript__(newChild);
+        return newChild;
+    },
+    insertBefore : function(newChild, refChild) {
+        var newChild = HTMLElement.prototype.insertBefore.apply(this,[newChild]);
+        //TODO: evaluate scripts which are appended to the head
+        //__evalScript__(newChild);
+        return newChild;
+    },
+    toString: function(){
+        return '[object HTMLHeadElement]';
+    },
+});
+
+
+/* 
+ * HTMLIFrameElement - DOM Level 2
+ */
+HTMLIFrameElement = function(ownerDocument) {
+    HTMLFrameElement.apply(this, arguments);
+};
+HTMLIFrameElement.prototype = new HTMLFrameElement;
+__extend__(HTMLIFrameElement.prototype, {
+	get height() { 
+	    return this.getAttribute("height") || ""; 
+    },
+	set height(val) { 
+	    return this.setAttribute("height",val); 
+    },
+	get width() { 
+	    return this.getAttribute("width") || ""; 
+    },
+	set width(val) { 
+	    return this.setAttribute("width",val); 
+    },
+    toString: function(){
+        return '[object HTMLIFrameElement]';
+    }
+});
+	
+/** 
+ * HTMLImageElement - DOM Level 2
+ */
+HTMLImageElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLImageElement.prototype = new HTMLElement;
+__extend__(HTMLImageElement.prototype, {
+    get alt(){
+        return this.getAttribute('alt');
+    },
+    set alt(value){
+        this.setAttribute('alt', value);
+    },
+    get height(){
+        return parseInt(this.getAttribute('height')) || 0;
+    },
+    set height(value){
+        this.setAttribute('height', value);
+    },
+    get isMap(){
+        return this.hasAttribute('map');
+    },
+    set useMap(value){
+        this.setAttribute('map', value);
+    },
+    get longDesc(){
+        return this.getAttribute('longdesc');
+    },
+    set longDesc(value){
+        this.setAttribute('longdesc', value);
+    },
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name', value);
+    },
+    get src(){
+        return this.getAttribute('src');
+    },
+    set src(value){
+        this.setAttribute('src', value);
+
+        var event = document.createEvent();
+        event.initEvent("load");
+        this.dispatchEvent( event, false );
+    },
+    get width(){
+        return parseInt(this.getAttribute('width')) || 0;
+    },
+    set width(value){
+        this.setAttribute('width', value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
+    }
+});
+
+
+/*
+ * html5 4.8.1
+ * http://dev.w3.org/html5/spec/Overview.html#the-img-element
+ */
+Image = function(width, height) {
+    // Not sure if "[global].document" satifies this requirement:
+    // "The element's document must be the active document of the
+    // browsing context of the Window object on which the interface
+    // object of the invoked constructor is found."
+
+    HTMLElement.apply(this, [document]);
+    // Note: firefox will throw an error if the width/height
+    //   is not an integer.  Safari just converts to 0 on error.
+    this.width = parseInt(width) || 0;
+    this.height = parseInt(height) || 0;
+};
+Image.prototype = new HTMLImageElement;
+
+/**
+ * HTMLInputElement - DOM Level 2
+ */
+HTMLInputElement = function(ownerDocument) {
+    HTMLInputAreaCommon.apply(this, arguments);
+};
+HTMLInputElement.prototype = new HTMLInputAreaCommon;
+__extend__(HTMLInputElement.prototype, {
+    get alt(){
+        return this.getAttribute('alt');
+    },
+    set alt(value){
+        this.setAttribute('alt', value);
+    },
+    get checked(){
+        return (this.getAttribute('checked')=='checked');
+    },
+    set checked(value){
+        this.setAttribute('checked', (value ? 'checked' :''));
+    },
+    get defaultChecked(){
+        return this.getAttribute('defaultChecked');
+    },
+    get height(){
+        return this.getAttribute('height');
+    },
+    set height(value){
+        this.setAttribute('height',value);
+    },
+    get maxLength(){
+        return Number(this.getAttribute('maxlength')||'0');
+    },
+    set maxLength(value){
+        this.setAttribute('maxlength', value);
+    },
+    get src(){
+        return this.getAttribute('src');
+    },
+    set src(value){
+        this.setAttribute('src', value);
+    },
+    get useMap(){
+        return this.getAttribute('map');
+    },
+    get width(){
+        return this.getAttribute('width');
+    },
+    set width(value){
+        this.setAttribute('width',value);
+    },
+    click:function(){
+        __click__(this);
+    }
+});
+
+
+
+/** 
+ * HTMLLabelElement - DOM Level 2
+ */
+HTMLLabelElement = function(ownerDocument) {
+    HTMLInputCommon.apply(this, arguments);
+};
+HTMLLabelElement.prototype = new HTMLInputCommon;
+__extend__(HTMLLabelElement.prototype, inputElements_dataProperties);
+__extend__(HTMLLabelElement.prototype, {
+    get htmlFor(){
+        return this.getAttribute('for');
+    },
+    set htmlFor(value){
+        this.setAttribute('for',value);
+    },
+    get dataFormatAs(){
+        return this.getAttribute('dataFormatAs');
+    },
+    set dataFormatAs(value){
+        this.setAttribute('dataFormatAs',value);
+    }
+});
+
+
+/* 
+* HTMLLinkElement - DOM Level 2
+*/
+HTMLLinkElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLLinkElement.prototype = new HTMLElement;
+__extend__(HTMLLinkElement.prototype, {
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get charset(){
+        return this.getAttribute('charset');
+    },
+    set charset(value){
+        this.setAttribute('charset',value);
+    },
+    get href(){
+        return this.getAttribute('href');
+    },
+    set href(value){
+        this.setAttribute('href',value);
+    },
+    get hreflang(){
+        return this.getAttribute('hreflang');
+    },
+    set hreflang(value){
+        this.setAttribute('hreflang',value);
+    },
+    get media(){
+        return this.getAttribute('media');
+    },
+    set media(value){
+        this.setAttribute('media',value);
+    },
+    get rel(){
+        return this.getAttribute('rel');
+    },
+    set rel(value){
+        this.setAttribute('rel',value);
+    },
+    get rev(){
+        return this.getAttribute('rev');
+    },
+    set rev(value){
+        this.setAttribute('rev',value);
+    },
+    get target(){
+        return this.getAttribute('target');
+    },
+    set target(value){
+        this.setAttribute('target',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    onload: function(event){
+        __eval__(this.getAttribute('onload')||'', this)
+    }
+});
+
+
+/** 
+ * HTMLMapElement - DOM Level 2
+ */
+HTMLMapElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLMapElement.prototype = new HTMLElement;
+__extend__(HTMLMapElement.prototype, {
+    get areas(){
+        return this.getElementsByTagName('area');
+    },
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    }
+});
+
+/** 
+ * HTMLMetaElement - DOM Level 2
+ */
+HTMLMetaElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLMetaElement.prototype = new HTMLElement;
+__extend__(HTMLMetaElement.prototype, {
+    get content(){
+        return this.getAttribute('content');
+    },
+    set content(value){
+        this.setAttribute('content',value);
+    },
+    get httpEquiv(){
+        return this.getAttribute('http-equiv');
+    },
+    set httpEquiv(value){
+        this.setAttribute('http-equiv',value);
+    },
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get scheme(){
+        return this.getAttribute('scheme');
+    },
+    set scheme(value){
+        this.setAttribute('scheme',value);
+    }
+});
+
+
+/**
+ * HTMLObjectElement - DOM Level 2
+ */
+HTMLObjectElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLObjectElement.prototype = new HTMLElement;
+__extend__(HTMLObjectElement.prototype, {
+    get code(){
+        return this.getAttribute('code');
+    },
+    set code(value){
+        this.setAttribute('code',value);
+    },
+    get archive(){
+        return this.getAttribute('archive');
+    },
+    set archive(value){
+        this.setAttribute('archive',value);
+    },
+    get codeBase(){
+        return this.getAttribute('codebase');
+    },
+    set codeBase(value){
+        this.setAttribute('codebase',value);
+    },
+    get codeType(){
+        return this.getAttribute('codetype');
+    },
+    set codeType(value){
+        this.setAttribute('codetype',value);
+    },
+    get data(){
+        return this.getAttribute('data');
+    },
+    set data(value){
+        this.setAttribute('data',value);
+    },
+    get declare(){
+        return this.getAttribute('declare');
+    },
+    set declare(value){
+        this.setAttribute('declare',value);
+    },
+    get height(){
+        return this.getAttribute('height');
+    },
+    set height(value){
+        this.setAttribute('height',value);
+    },
+    get standby(){
+        return this.getAttribute('standby');
+    },
+    set standby(value){
+        this.setAttribute('standby',value);
+    },
+    /*get tabIndex(){
+        return this.getAttribute('tabindex');
+    },
+    set tabIndex(value){
+        this.setAttribute('tabindex',value);
+    },*/
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get useMap(){
+        return this.getAttribute('usemap');
+    },
+    set useMap(value){
+        this.setAttribute('usemap',value);
+    },
+    get width(){
+        return this.getAttribute('width');
+    },
+    set width(value){
+        this.setAttribute('width',value);
+    },
+    get contentDocument(){
+        return this.ownerDocument;
+    }
+});
+
+			
+/**
+ * HTMLOptGroupElement - DOM Level 2
+ */
+HTMLOptGroupElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLOptGroupElement.prototype = new HTMLElement;
+__extend__(HTMLOptGroupElement.prototype, {
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get label(){
+        return this.getAttribute('label');
+    },
+    set label(value){
+        this.setAttribute('label',value);
+    },
+    appendChild: function(node){
+        var i, 
+            length,
+            selected = false;
+        //make sure at least one is selected by default
+        if(node.nodeType == Node.ELEMENT_NODE && node.tagName == 'OPTION'){
+            length = this.childNodes.length;
+            for(i=0;i<length;i++){
+                if(this.childNodes[i].nodeType == Node.ELEMENT_NODE && 
+                    this.childNodes[i].tagName == 'OPTION'){
+                    //check if it is selected
+                    if(this.selected){
+                        selected = true;
+                        break;
+                    }
+                }
+            }
+            if(!selected){
+                node.selected = true;
+                this.value = node.value?node.value:'';
+            }
+        }
+        return HTMLElement.prototype.appendChild.apply(this, [node]);
+    }
+});
+	
+/**
+ * HTMLOptionElement - DOM Level 2
+ */
+HTMLOptionElement = function(ownerDocument) {
+    HTMLInputCommon.apply(this, arguments);
+};
+HTMLOptionElement.prototype = new HTMLInputCommon;
+__extend__(HTMLOptionElement.prototype, {
+    get defaultSelected(){
+        return this.getAttribute('defaultSelected');
+    },
+    set defaultSelected(value){
+        this.setAttribute('defaultSelected',value);
+    },
+    get index(){
+        var options = this.parentNode.childNodes,
+            i, index = 0;
+        for(i=0; i<options.length;i++){
+            if(options.nodeType === Node.ELEMENT_NODE && node.tagName === "OPTION"){
+                index++;
+            }
+            if(this == options[i])
+                return index;
+        }
+        return -1;
+    },
+    get label(){
+        return this.getAttribute('label');
+    },
+    set label(value){
+        this.setAttribute('label',value);
+    },
+    get selected(){
+        return (this.getAttribute('selected')=='selected');
+    },
+    set selected(value){
+        //console.log('option set selected %s', value);
+        if(this.defaultSelected===null && this.selected!==null){
+            this.defaultSelected = this.selected+'';
+        }
+        var selectedValue = (value ? 'selected' : '');
+        if (this.getAttribute('selected') == selectedValue) {
+            // prevent inifinite loops (option's selected modifies 
+            // select's value which modifies option's selected)
+            return;
+        }
+        //console.log('option setAttribute selected %s', selectedValue);
+        this.setAttribute('selected', selectedValue);
+
+    },
+    get text(){
+         return ((this.nodeValue === null) ||  (this.nodeValue ===undefined)) ?
+             this.innerHTML :
+             this.nodeValue;
+    },
+    get value(){
+       //console.log('getting value on option %s %s', this.text, this.getAttribute('value'));
+        return ((this.getAttribute('value') === undefined) || (this.getAttribute('value') === null)) ?
+            this.text :
+            this.getAttribute('value');
+    },
+    set value(value){
+       //console.log('setting value on option');
+        this.setAttribute('value',value);
+    }
+});
+
+
+/*
+* HTMLParagraphElement - DOM Level 2
+*/
+HTMLParagraphElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLParagraphElement.prototype = new HTMLElement;
+__extend__(HTMLParagraphElement.prototype, {
+    toString: function(){
+        return '[object HTMLParagraphElement]';
+    }
+});
+
+
+/** 
+ * HTMLParamElement - DOM Level 2
+ */
+HTMLParamElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLParamElement.prototype = new HTMLElement;
+__extend__(HTMLParamElement.prototype, {
+    get name(){
+        return this.getAttribute('name');
+    },
+    set name(value){
+        this.setAttribute('name',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    get value(){
+        return this.getAttribute('value');
+    },
+    set value(value){
+        this.setAttribute('value',value);
+    },
+    get valueType(){
+        return this.getAttribute('valuetype');
+    },
+    set valueType(value){
+        this.setAttribute('valuetype',value);
+    },
+});
+
+		
+/** 
+ * HTMLScriptElement - DOM Level 2
+ */
+HTMLScriptElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLScriptElement.prototype = new HTMLElement;
+__extend__(HTMLScriptElement.prototype, {
+    get text(){
+        // text of script is in a child node of the element
+        // scripts with < operator must be in a CDATA node
+        for (var i=0; i<this.childNodes.length; i++) {
+            if (this.childNodes[i].nodeType == Node.CDATA_SECTION_NODE) {
+                return this.childNodes[i].nodeValue;
+            }
+        } 
+        // otherwise there will be a text node containing the script
+        if (this.childNodes[0] && this.childNodes[0].nodeType == Node.TEXT_NODE) {
+            return this.childNodes[0].nodeValue;
+ 		}
+        return this.nodeValue;
+
+    },
+    set text(value){
+        this.nodeValue = value;
+        Envjs.loadInlineScript(this);
+    },
+    get htmlFor(){
+        return this.getAttribute('for');
+    },
+    set htmlFor(value){
+        this.setAttribute('for',value);
+    },
+    get event(){
+        return this.getAttribute('event');
+    },
+    set event(value){
+        this.setAttribute('event',value);
+    },
+    get charset(){
+        return this.getAttribute('charset');
+    },
+    set charset(value){
+        this.setAttribute('charset',value);
+    },
+    get defer(){
+        return this.getAttribute('defer');
+    },
+    set defer(value){
+        this.setAttribute('defer',value);
+    },
+    get src(){
+        return this.getAttribute('src')||'';
+    },
+    set src(value){
+        this.setAttribute('src',value);
+    },
+    get type(){
+        return this.getAttribute('type')||'';
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    },
+    onload: HTMLEvents.prototype.onload,
+    onerror: HTMLEvents.prototype.onerror
+});
+
+
+/**
+ * HTMLSelectElement - DOM Level 2
+ */
+HTMLSelectElement = function(ownerDocument) {
+    HTMLTypeValueInputs.apply(this, arguments);
+
+    this._oldIndex = -1;
+};
+HTMLSelectElement.prototype = new HTMLTypeValueInputs;
+__extend__(HTMLSelectElement.prototype, inputElements_dataProperties);
+__extend__(HTMLButtonElement.prototype, inputElements_size);
+__extend__(HTMLSelectElement.prototype, inputElements_onchange);
+__extend__(HTMLSelectElement.prototype, inputElements_focusEvents);
+__extend__(HTMLSelectElement.prototype, {
+
+    // over-ride the value setter in HTMLTypeValueInputs
+    set value(newValue) {
+       console.log('select set value %s', newValue);
+        var options = this.options,
+            i, index;
+       //console.log('select options length %s', options.length);
+        for (i=0; i<options.length; i++) {
+            if (options[i].value == newValue) {
+                index = i;
+                break;
+            }
+        }
+       //console.log('options index %s', index);
+        if (index !== undefined) {
+           //console.log('select setAttribute value %s', newValue);
+            this.setAttribute('value', newValue);
+            this.selectedIndex = index;
+        }
+    },
+    get value() {
+        console.log('select get value');
+        var value = this.getAttribute('value'),
+            index;
+        console.log('select getAttribute value %s', value);
+        if (value === undefined || value === null) {
+            index = this.selectedIndex;
+            console.log('select value index %s', index);
+            if (index > -1){
+                 value = this.options[index].value;
+                 console.log('select value %s', value);
+                 return value;
+            }else{
+                console.log('select value ""');
+                return '';
+            }
+        } else {
+            return value;
+        }
+    },
+    get length(){
+        return this.options.length;
+    },
+    get multiple(){
+        return this.getAttribute('multiple');
+    },
+    set multiple(value){
+        this.setAttribute('multiple',value);
+    },
+    get options(){
+        return this.getElementsByTagName('option');
+    },
+    get selectedIndex(){
+       //console.log('select get selectedIndex ');
+        var options = this.options;
+        for(var i=0;i<options.length;i++){
+            if(options[i].selected){
+               //console.log('select get selectedIndex %s', i);
+                return i;
+            }
+        };
+       //console.log('select get selectedIndex %s', -1);
+        return -1;
+    },
+    
+    set selectedIndex(value) {
+        var i,
+            options = this.options;
+        for (i=0; i<options.length; i++) {
+           //console.log('select set selectedIndex %s', Number(value));
+            if(i === Number(value)){
+                options[i].selected = true;
+            }else{
+                options[i].selected = false;
+            }
+           //console.log('select options[i].selected %s',options[i].selected);
+        }
+    },
+    get type(){
+        var type = this.getAttribute('type');
+        return type?type:'select-one';
+    },
+    
+    add : function(){
+        __add__(this);
+    },
+    remove : function(){
+        __remove__(this);
+    }
+});
+
+
+
+/** 
+ * HTMLStyleElement - DOM Level 2
+ */
+HTMLStyleElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLStyleElement.prototype = new HTMLElement;
+__extend__(HTMLStyleElement.prototype, {
+    get disabled(){
+        return this.getAttribute('disabled');
+    },
+    set disabled(value){
+        this.setAttribute('disabled',value);
+    },
+    get media(){
+        return this.getAttribute('media');
+    },
+    set media(value){
+        this.setAttribute('media',value);
+    },
+    get type(){
+        return this.getAttribute('type');
+    },
+    set type(value){
+        this.setAttribute('type',value);
+    }
+});
+
+/** 
+ * HTMLTableElement - DOM Level 2
+ * Implementation Provided by Steven Wood
+ */
+HTMLTableElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableElement.prototype = new HTMLElement;
+__extend__(HTMLTableElement.prototype, {
+    
+        get tFoot() { 
+        //tFoot returns the table footer.
+        return this.getElementsByTagName("tfoot")[0];
+    },
+    
+    createTFoot : function () {
+        var tFoot = this.tFoot;
+       
+        if (!tFoot) {
+            tFoot = document.createElement("tfoot");
+            this.appendChild(tFoot);
+        }
+        
+        return tFoot;
+    },
+    
+    deleteTFoot : function () {
+        var foot = this.tFoot;
+        if (foot) {
+            foot.parentNode.removeChild(foot);
+        }
+    },
+    
+    get tHead() { 
+        //tHead returns the table head.
+        return this.getElementsByTagName("thead")[0];
+    },
+    
+    createTHead : function () {
+        var tHead = this.tHead;
+       
+        if (!tHead) {
+            tHead = document.createElement("thead");
+            this.insertBefore(tHead, this.firstChild);
+        }
+        
+        return tHead;
+    },
+    
+    deleteTHead : function () {
+        var head = this.tHead;
+        if (head) {
+            head.parentNode.removeChild(head);
+        }
+    },
+ 
+    /*appendChild : function (child) {
+        
+        var tagName;
+        if(child&&child.nodeType==Node.ELEMENT_NODE){
+            tagName = child.tagName.toLowerCase();
+            if (tagName === "tr") {
+                // need an implcit <tbody> to contain this...
+                if (!this.currentBody) {
+                    this.currentBody = document.createElement("tbody");
+                
+                    Node.prototype.appendChild.apply(this, [this.currentBody]);
+                }
+              
+                return this.currentBody.appendChild(child); 
+       
+            } else if (tagName === "tbody" || tagName === "tfoot" && this.currentBody) {
+                this.currentBody = child;
+                return Node.prototype.appendChild.apply(this, arguments);  
+                
+            } else {
+                return Node.prototype.appendChild.apply(this, arguments);
+            }
+        }else{
+            //tables can still have text node from white space
+            return Node.prototype.appendChild.apply(this, arguments);
+        }
+    },*/
+     
+    get tBodies() {
+        return new HTMLCollection(this.getElementsByTagName("tbody"));
+        
+    },
+    
+    get rows() {
+        return new HTMLCollection(this.getElementsByTagName("tr"));
+    },
+    
+    insertRow : function (idx) {
+        if (idx === undefined) {
+            throw new Error("Index omitted in call to HTMLTableElement.insertRow ");
+        }
+        
+        var rows = this.rows, 
+            numRows = rows.length,
+            node,
+            inserted, 
+            lastRow;
+        
+        if (idx > numRows) {
+            throw new Error("Index > rows.length in call to HTMLTableElement.insertRow");
+        }
+        
+        var inserted = document.createElement("tr");
+        // If index is -1 or equal to the number of rows, 
+        // the row is appended as the last row. If index is omitted 
+        // or greater than the number of rows, an error will result
+        if (idx === -1 || idx === numRows) {
+            this.appendChild(inserted);
+        } else {
+            rows[idx].parentNode.insertBefore(inserted, rows[idx]);
+        }
+
+        return inserted;
+    },
+    
+    deleteRow : function (idx) {
+        var elem = this.rows[idx];
+        elem.parentNode.removeChild(elem);
+    },
+    
+    get summary() {
+        return this.getAttribute("summary");
+    },
+    
+    set summary(summary) {
+        this.setAttribute("summary", summary);
+    },
+    
+    get align() {
+        return this.getAttribute("align");
+    },
+    
+    set align(align) {
+        this.setAttribute("align", align);
+    },
+    
+     
+    get bgColor() {
+        return this.getAttribute("bgColor");
+    },
+    
+    set bgColor(bgColor) {
+        return this.setAttribute("bgColor", bgColor);
+    },
+   
+    get cellPadding() {
+        return this.getAttribute("cellPadding");
+    },
+    
+    set cellPadding(cellPadding) {
+        return this.setAttribute("cellPadding", cellPadding);
+    },
+    
+    
+    get cellSpacing() {
+        return this.getAttribute("cellSpacing");
+    },
+    
+    set cellSpacing(cellSpacing) {
+        this.setAttribute("cellSpacing", cellSpacing);
+    },
+
+    get frame() {
+        return this.getAttribute("frame");
+    },
+    
+    set frame(frame) { 
+        this.setAttribute("frame", frame);
+    },
+    
+    get rules() {
+        return this.getAttribute("rules");
+    }, 
+    
+    set rules(rules) {
+        this.setAttribute("rules", rules);
+    }, 
+    
+    get width() {
+        return this.getAttribute("width");
+    },
+    
+    set width(width) {
+        this.setAttribute("width", width);
+    }
+    
+});
+	
+/* 
+* HTMLxElement - DOM Level 2
+* - Contributed by Steven Wood
+*/
+HTMLTableSectionElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableSectionElement.prototype = new HTMLElement;
+__extend__(HTMLTableSectionElement.prototype, {    
+    
+    /*appendChild : function (child) {
+    
+        // disallow nesting of these elements.
+        if (child.tagName.match(/TBODY|TFOOT|THEAD/)) {
+            return this.parentNode.appendChild(child);
+        } else {
+            return Node.prototype.appendChild.apply(this, arguments);
+        }
+
+    },*/
+    
+    get align() {
+        return this.getAttribute("align");
+    },
+
+    get ch() {
+        return this.getAttribute("ch");
+    },
+     
+    set ch(ch) {
+        this.setAttribute("ch", ch);
+    },
+    
+    // ch gets or sets the alignment character for cells in a column. 
+    set chOff(chOff) {
+        this.setAttribute("chOff", chOff);
+    },
+     
+    get chOff(chOff) {
+        return this.getAttribute("chOff");
+    },
+     
+    get vAlign () {
+         return this.getAttribute("vAlign");
+    },
+    
+    get rows() {
+        return new HTMLCollection(this.getElementsByTagName("tr"));
+    },
+    
+    insertRow : function (idx) {
+        if (idx === undefined) {
+            throw new Error("Index omitted in call to HTMLTableSectionElement.insertRow ");
+        }
+        
+        var numRows = this.rows.length,
+            node = null;
+        
+        if (idx > numRows) {
+            throw new Error("Index > rows.length in call to HTMLTableSectionElement.insertRow");
+        }
+        
+        var row = document.createElement("tr");
+        // If index is -1 or equal to the number of rows, 
+        // the row is appended as the last row. If index is omitted 
+        // or greater than the number of rows, an error will result
+        if (idx === -1 || idx === numRows) {
+            this.appendChild(row);
+        } else {
+            node = this.firstChild;
+
+            for (var i=0; i<idx; i++) {
+                node = node.nextSibling;
+            }
+        }
+            
+        this.insertBefore(row, node);
+        
+        return row;
+    },
+    
+    deleteRow : function (idx) {
+        var elem = this.rows[idx];
+        this.removeChild(elem);
+    }
+
+});
+
+
+/** 
+ * HTMLTableCellElement - DOM Level 2
+ * Implementation Provided by Steven Wood
+ */
+HTMLTableCellElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableCellElement.prototype = new HTMLElement;
+__extend__(HTMLTableCellElement.prototype, {
+    
+    // TODO :
+    
+});
+
+/**
+ * HTMLTextAreaElement - DOM Level 2
+ */
+HTMLTextAreaElement = function(ownerDocument) {
+    HTMLInputAreaCommon.apply(this, arguments);
+};
+HTMLTextAreaElement.prototype = new HTMLInputAreaCommon;
+__extend__(HTMLTextAreaElement.prototype, {
+    get cols(){
+        return this.getAttribute('cols');
+    },
+    set cols(value){
+        this.setAttribute('cols', value);
+    },
+    get rows(){
+        return this.getAttribute('rows');
+    },
+    set rows(value){
+        this.setAttribute('rows', value);
+    }
+});
+
+
+/** 
+ * HTMLTitleElement - DOM Level 2
+ */
+HTMLTitleElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTitleElement.prototype = new HTMLElement;
+__extend__(HTMLTitleElement.prototype, {
+    get text() {
+        return this.innerText;
+    },
+
+    set text(titleStr) {
+        this.textContent = titleStr; 
+    }
+});
+
+
+
+/** 
+ * HTMLRowElement - DOM Level 2
+ * Implementation Provided by Steven Wood
+ */
+HTMLTableRowElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLTableRowElement.prototype = new HTMLElement;
+__extend__(HTMLTableRowElement.prototype, {
+    
+    /*appendChild : function (child) {
+    
+       var retVal = Node.prototype.appendChild.apply(this, arguments);
+       retVal.cellIndex = this.cells.length -1;
+             
+       return retVal;
+    },*/
+    // align gets or sets the horizontal alignment of data within cells of the row.
+    get align() {
+        return this.getAttribute("align");
+    },
+     
+    get bgColor() {
+        return this.getAttribute("bgcolor");
+    },
+         
+    get cells() {
+        var nl = this.getElementsByTagName("td");
+        return new HTMLCollection(nl);
+    },
+       
+    get ch() {
+        return this.getAttribute("ch");
+    },
+     
+    set ch(ch) {
+        this.setAttribute("ch", ch);
+    },
+    
+    // ch gets or sets the alignment character for cells in a column. 
+    set chOff(chOff) {
+        this.setAttribute("chOff", chOff);
+    },
+     
+    get chOff(chOff) {
+        return this.getAttribute("chOff");
+    },
+   
+    get rowIndex() {
+        var nl = this.parentNode.childNodes;
+        for (var i=0; i<nl.length; i++) {
+            if (nl[i] === this) {
+                return i;
+            }
+        }
+    },
+
+    get sectionRowIndex() {
+        var nl = this.parentNode.getElementsByTagName(this.tagName);
+        for (var i=0; i<nl.length; i++) {
+            if (nl[i] === this) {
+                return i;
+            }
+        }
+    },
+     
+    get vAlign () {
+         return this.getAttribute("vAlign");
+    },
+
+    insertCell : function (idx) {
+        if (idx === undefined) {
+            throw new Error("Index omitted in call to HTMLTableRow.insertCell");
+        }
+        
+        var numCells = this.cells.length,
+            node = null;
+        
+        if (idx > numCells) {
+            throw new Error("Index > rows.length in call to HTMLTableRow.insertCell");
+        }
+        
+        var cell = document.createElement("td");
+
+        if (idx === -1 || idx === numCells) {
+            this.appendChild(cell);
+        } else {
+            
+
+            node = this.firstChild;
+
+            for (var i=0; i<idx; i++) {
+                node = node.nextSibling;
+            }
+        }
+            
+        this.insertBefore(cell, node);
+        cell.cellIndex = idx;
+          
+        return cell;
+    },
+
+    
+    deleteCell : function (idx) {
+        var elem = this.cells[idx];
+        this.removeChild(elem);
+    }
+
+});
+
+
+/** 
+ * HTMLUnknownElement DOM Level 2
+ */
+HTMLUnknownElement = function(ownerDocument) {
+    HTMLElement.apply(this, arguments);
+};
+HTMLUnknownElement.prototype = new HTMLElement;
+__extend__(HTMLUnknownElement.prototype,{
+    toString: function(){
+        return '[object HTMLUnknownElement]';
+    }
+});
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+
+/**
+ * DOM Style Level 2
+ */
+var CSS2Properties,
+    CSSRule,
+    CSSStyleSheet;
+    
+/*
+ * Envjs css.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * @author john resig
+ */
+//from jQuery
+function __setArray__( target, array ) {
+    // Resetting the length to 0, then using the native Array push
+    // is a super-fast way to populate an object with array-like properties
+    target.length = 0;
+    Array.prototype.push.apply( target, array );
+};
+/*
+* CSS2Properties - DOM Level 2 CSS
+*/
+//var __cssproperties__ = 0;
+CSS2Properties = function(element){
+    //console.log('css2properties %s', __cssproperties__++);
+    this.styleIndex = __supportedStyles__();//non-standard
+    this.type = element.tagName;//non-standard
+    __setArray__(this,[]);
+    __cssTextToStyles__(this, element.getAttribute('style')||'');
+};
+__extend__(CSS2Properties.prototype, {
+    get cssText(){
+        var css = '',
+            i;
+        for(i=0;i<this.length;i++){
+            css+=this[i]+": "+this.getPropertyValue(this[i])+';';
+            if(i+1<this.length)
+                css+=" ";
+        }
+        return css;
+    },
+    set cssText(cssText){ 
+        __cssTextToStyles__(this, cssText); 
+    },
+    getPropertyCSSValue : function(name){
+        //?
+    },
+    getPropertyPriority : function(){
+        
+    },
+    getPropertyValue : function(name){
+        var index;
+        if(__toCamelCase__(name) in this.styleIndex){
+            //$info(name +' in style index');
+            return this[__toCamelCase__(name)];
+        }else{
+            index = Array.prototype.indexOf.apply(this, [name]);
+            if(index > -1)
+                return this[index];
+        }
+        //$info(name +' not found');
+        return null;
+    },
+    item : function(index){
+        return this[index];
+    },
+    removeProperty: function(name){
+        this.styleIndex[name] = null;
+        name = __toDashed__(name);
+        var index = Array.prototype.indexOf.apply(this, [name]);
+        if(index > -1){
+            Array.prototype.splice.apply(this, [1,index]);
+        }
+    },
+    setProperty: function(name, value, priority){
+        //$info('setting css property '+name+' : '+value);
+        name = __toCamelCase__(name);
+        if(value && (value+'').match(/^([0-9]*\.)?[0-9]+$/)){
+            value = Number(value);
+            //console.log('converted %s to number %s', name, value);
+        }
+        if(name in this.styleIndex  && value !== undefined){
+            //$info('setting camel case css property ');
+            this.styleIndex[name] = value;
+            //$info('setting dashed name css property ');
+            name = __toDashed__(name);
+            if( Array.prototype.indexOf.apply(this, [name]) === -1 ){
+                Array.prototype.push.apply(this,[name]);
+            }
+        }
+        //$info('finished setting css property '+name+' : '+value);
+    },
+    toString:function(){
+        return '[object CSS2Properties]';
+    }
+});
+
+
+
+var __cssTextToStyles__ = function(css2props, cssText){
+    
+    //console.log('__cssTextToStyles__ %s %s', css2props, cssText);
+    //var styleArray=[];
+    var style, styles = cssText.split(';');
+    for ( var i = 0; i < styles.length; i++ ) {
+        //$log("Adding style property " + styles[i]);
+    	style = styles[i].split(':');
+        //$log(" style  " + style[0]);
+    	if ( style.length == 2 ){
+            //$log(" value  " + style[1]);
+    	    css2props.setProperty( style[0].replace(" ",'','g'), style[1].replace(" ",'','g'));
+    	}
+    }
+};
+
+var __toCamelCase__ = function(name) {
+    //$info('__toCamelCase__'+name);
+    if(name){
+    	return name.replace(/\-(\w)/g, function(all, letter){
+    		return letter.toUpperCase();
+    	});
+    }
+    return name;
+};
+
+var __toDashed__ = function(camelCaseName) {
+    //$info("__toDashed__"+camelCaseName);
+    if(camelCaseName){
+    	return camelCaseName.replace(/[A-Z]/g, function(all) {
+    		return "-" + all.toLowerCase();
+    	});
+    }
+    return camelCaseName;
+};
+
+//Obviously these arent all supported but by commenting out various sections
+//this provides a single location to configure what is exposed as supported.
+var __supportedStyles__ = function(){
+    return {
+        azimuth:                null,
+        background:	            null,
+        backgroundAttachment:	null,
+        backgroundColor:	    null,
+        backgroundImage:	    null,
+        backgroundPosition:	    null,
+        backgroundRepeat:	    null,
+        border:	                null,
+        borderBottom:	        null,
+        borderBottomColor:	    null,
+        borderBottomStyle:	    null,
+        borderBottomWidth:	    null,
+        borderCollapse:	        null,
+        borderColor:	        null,
+        borderLeft:	            null,
+        borderLeftColor:	    null,
+        borderLeftStyle:	    null,
+        borderLeftWidth:	    null,
+        borderRight:	        null,
+        borderRightColor:	    null,
+        borderRightStyle:	    null,
+        borderRightWidth:	    null,
+        borderSpacing:	        null,
+        borderStyle:	        null,
+        borderTop:	            null,
+        borderTopColor:	        null,
+        borderTopStyle:	        null,
+        borderTopWidth:	        null,
+        borderWidth:	        null,
+        bottom:	                null,
+        captionSide:	        null,
+        clear:	                null,
+        clip:	                null,
+        color:	                null,
+        content:	            null,
+        counterIncrement:	    null,
+        counterReset:	        null,
+        cssFloat:	            null,
+        cue:	                null,
+        cueAfter:	            null,
+        cueBefore:	            null,
+        cursor:	                null,
+        direction:	            'ltr',
+        display:	            null,
+        elevation:	            null,
+        emptyCells:	            null,
+        font:	                null,
+        fontFamily:	            null,
+        fontSize:	            "1em",
+        fontSizeAdjust:	null,
+        fontStretch:	null,
+        fontStyle:	null,
+        fontVariant:	null,
+        fontWeight:	null,
+        height:	'',
+        left:	null,
+        letterSpacing:	null,
+        lineHeight:	null,
+        listStyle:	null,
+        listStyleImage:	null,
+        listStylePosition:	null,
+        listStyleType:	null,
+        margin:	null,
+        marginBottom:	"0px",
+        marginLeft:	"0px",
+        marginRight:	"0px",
+        marginTop:	"0px",
+        markerOffset:	null,
+        marks:	null,
+        maxHeight:	null,
+        maxWidth:	null,
+        minHeight:	null,
+        minWidth:	null,
+        opacity:	1,
+        orphans:	null,
+        outline:	null,
+        outlineColor:	null,
+        outlineOffset:	null,
+        outlineStyle:	null,
+        outlineWidth:	null,
+        overflow:	null,
+        overflowX:	null,
+        overflowY:	null,
+        padding:	null,
+        paddingBottom:	"0px",
+        paddingLeft:	"0px",
+        paddingRight:	"0px",
+        paddingTop:	"0px",
+        page:	null,
+        pageBreakAfter:	null,
+        pageBreakBefore:	null,
+        pageBreakInside:	null,
+        pause:	null,
+        pauseAfter:	null,
+        pauseBefore:	null,
+        pitch:	null,
+        pitchRange:	null,
+        position:	null,
+        quotes:	null,
+        richness:	null,
+        right:	null,
+        size:	null,
+        speak:	null,
+        speakHeader:	null,
+        speakNumeral:	null,
+        speakPunctuation:	null,
+        speechRate:	null,
+        stress:	null,
+        tableLayout:	null,
+        textAlign:	null,
+        textDecoration:	null,
+        textIndent:	null,
+        textShadow:	null,
+        textTransform:	null,
+        top:	null,
+        unicodeBidi:	null,
+        verticalAlign:	null,
+        visibility:	null,
+        voiceFamily:	null,
+        volume:	null,
+        whiteSpace:	null,
+        widows:	null,
+        width:	'1px',
+        wordSpacing:	null,
+        zIndex:	1
+    };
+};
+
+var __displayMap__ = {
+		"DIV"      : "block",
+		"P"        : "block",
+		"A"        : "inline",
+		"CODE"     : "inline",
+		"PRE"      : "block",
+		"SPAN"     : "inline",
+		"TABLE"    : "table",
+		"THEAD"    : "table-header-group",
+		"TBODY"    : "table-row-group",
+		"TR"       : "table-row",
+		"TH"       : "table-cell",
+		"TD"       : "table-cell",
+		"UL"       : "block",
+		"LI"       : "list-item"
+};
+var __styleMap__ = __supportedStyles__();
+
+for(var style in __supportedStyles__()){
+    (function(name){
+        if(name === 'width' || name === 'height'){
+            CSS2Properties.prototype.__defineGetter__(name, function(){
+                if(this.display==='none'){
+                    return '0px';
+                }
+                //$info(name+' = '+this.getPropertyValue(name));
+                return this.styleIndex[name];
+            });
+        }else if(name === 'display'){
+            //display will be set to a tagName specific value if ""
+            CSS2Properties.prototype.__defineGetter__(name, function(){
+                var val = this.styleIndex[name];
+                val = val?val:__displayMap__[this.type];
+                //$log(" css2properties.get  " + name + "="+val+" for("+this.__element__.tagName+")");
+                return val;
+            });
+        }else{
+            CSS2Properties.prototype.__defineGetter__(name, function(){
+                //$log(" css2properties.get  " + name + "="+this.styleIndex[name]);
+                return this.styleIndex[name];
+            });
+       }
+       CSS2Properties.prototype.__defineSetter__(name, function(value){
+           //$log(" css2properties.set  " + name +"="+value);
+           this.setProperty(name, value);
+       });
+    })(style);
+};
+
+
+/* 
+* CSSRule - DOM Level 2
+*/
+CSSRule = function(options){
+  var $style, 
+      $selectorText = options.selectorText?options.selectorText:"";
+      $style = new CSS2Properties({
+          cssText:options.cssText?options.cssText:null
+      });
+    return __extend__(this, {
+      get style(){
+          return $style;
+      },
+      get selectorText(){
+          return $selectorText;
+      },
+      set selectorText(selectorText){
+          $selectorText = selectorText;
+      },
+        toString : function(){
+            return "[object CSSRule]";
+        }
+    });
+};
+
+
+/* 
+* CSSStyleSheet - DOM Level 2
+*/
+CSSStyleSheet = function(options){
+    var $cssRules, 
+        $disabled = options.disabled?options.disabled:false,
+        $href = options.href?options.href:null,
+        $parentStyleSheet = options.parentStyleSheet?options.parentStyleSheet:null,
+        $title = options.title?options.title:"",
+        $type = "text/css";
+        
+    function parseStyleSheet(text){
+        //$debug("parsing css");
+        //this is pretty ugly, but text is the entire text of a stylesheet
+        var cssRules = [];
+    	if (!text) text = "";
+    	text = trim(text.replace(/\/\*(\r|\n|.)*\*\//g,""));
+    	// TODO: @import ?
+    	var blocks = text.split("}");
+    	blocks.pop();
+    	var i, len = blocks.length;
+    	var definition_block, properties, selectors;
+    	for (i=0; i<len; i++){
+    		definition_block = blocks[i].split("{");
+    		if(definition_block.length === 2){
+          		selectors = definition_block[0].split(",");
+          		for(var j=0;j<selectors.length;j++){
+          		    cssRules.push(new CSSRule({
+          		        selectorText:selectors[j],
+          		        cssText:definition_block[1]
+          		    }));
+          		}
+          		__setArray__($cssRules, cssRules);
+    		}
+    	}
+    };
+    parseStyleSheet(options.text);
+    return __extend__(this, {
+        get cssRules(){
+            return $cssRules;
+        },
+        get rule(){
+            return $cssRules;
+        },//IE - may be deprecated
+        get href(){
+            return $href;
+        },
+        get parentStyleSheet(){
+            return $parentStyleSheet;
+        },
+        get title(){
+            return $title;
+        },
+        get type(){
+            return $type;
+        },
+        addRule: function(selector, style, index){/*TODO*/},
+        deleteRule: function(index){/*TODO*/},
+        insertRule: function(rule, index){/*TODO*/},
+        //IE - may be deprecated
+        removeRule: function(index){
+            this.deleteRule(index);
+        }
+    });
+};
+
+
+
+/**
+ * @author envjs team
+ */
+$css2properties = [{}];
+
+__extend__(HTMLElement.prototype, {
+    get style(){
+        if ( !this.css2uuid ) {
+            this.css2uuid = $css2properties.length;
+            $css2properties[this.css2uuid] = new CSS2Properties(this);
+        }
+        return $css2properties[this.css2uuid];
+    },
+    setAttribute: function (name, value) {
+        Element.prototype.setAttribute.apply(this,[name, value]);
+        if (name === "style") {
+            __updateCss2Props__(this, value);
+        }
+    }
+});
+
+var __updateCss2Props__ = function(elem, values){
+    //console.log('__updateCss2Props__ %s %s', elem, values);
+    if ( !elem.css2uuid ) {
+        elem.css2uuid = $css2properties.length;
+        $css2properties[elem.css2uuid] = new CSS2Properties(elem);
+    }
+    __cssTextToStyles__($css2properties[elem.css2uuid], values);
+};
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+
+//these are both non-standard globals that
+//provide static namespaces and functions
+//to support the html 5 parser from nu.
+var XMLParser = {},
+    HTMLParser = {};
+
+    
+/*
+ * Envjs parser.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * @author john resig
+ */
+//from jQuery
+function __setArray__( target, array ) {
+    // Resetting the length to 0, then using the native Array push
+    // is a super-fast way to populate an object with array-like properties
+    target.length = 0;
+    Array.prototype.push.apply( target, array );
+};var __defineParser__;
+(function () {
+var $gwt_version = "1.5.1";
+var $wnd = {};
+var $doc = {};
+var $moduleName, $moduleBase;
+var $stats = $wnd.__gwtStatsEvent ? function(a) {$wnd.__gwtStatsEvent(a)} : null;
+var cNh='',qPg='\n',n4h='\n ',Bxg=' which is not a legal XML 1.0 character.',cNg='#mathplayer',zOg='#renesis',rZg='(',vxg=').',iwh='): ',fPh='+//silmaril//dtd html pro v0r11 19970101//',cWg=', ',mih=', Size: ',dNh='-//W3C//DTD HTML 4.0 Frameset//EN',oNh='-//W3C//DTD HTML 4.0 Transitional//EN',zNh='-//W3C//DTD HTML 4.0//EN',eOh='-//W3C//DTD HTML 4.01 Frameset//EN',pOh='-//W3C//DTD HTML 4.01 Transitional//EN',AOh='-//W3C//DTD HTML 4.01//EN',utg='-//W3C//DTD XHTML 1.0 Strict//EN',lug='-//W3C//DTD XHTML 1.1//EN',qPh='-//advasoft ltd//dtd html 3.0 aswedit + extensions//',BPh='-//as//dtd html 3.0 aswedit + extensions//',gQh='-//ietf//dtd html 2.0 level 1//',sQh='-//ietf//dtd html 2.0 level 2//',DQh='-//ietf//dtd html 2.0 strict level 1//',iRh='-//ietf//dtd html 2.0 strict level 2//',tRh='-//ietf//dtd html 2.0 strict//',ERh='-//ietf//dtd html 2.0//',jSh='-//ietf//dtd html 2.1e//',uSh='-//ietf//dtd html 3.0//',FSh='-//ietf//dtd html 3.2 final//',kTh='-//ietf//dtd html 3.2//',vTh='-//ietf//dtd html 3//',bUh='-//ietf//dtd html level 0//',mUh='-//ietf//dtd html level 1//',xUh='-//ietf//dtd html level 2//',cVh='-//ietf//dtd html level 3//',nVh='-//ietf//dtd html strict level 0//',yVh='-//ietf//dtd html strict level 1//',dWh='-//ietf//dtd html strict level 2//',oWh='-//ietf//dtd html strict level 3//',zWh='-//ietf//dtd html strict//',eXh='-//ietf//dtd html//',qXh='-//metrius//dtd metrius presentational//',BXh='-//microsoft//dtd internet explorer 2.0 html strict//',gYh='-//microsoft//dtd internet explorer 2.0 html//',rYh='-//microsoft//dtd internet explorer 2.0 tables//',CYh='-//microsoft//dtd internet explorer 3.0 html strict//',hZh='-//microsoft//dtd internet explorer 3.0 html//',sZh='-//microsoft//dtd internet explorer 3.0 tables//',DZh='-//netscape comm. corp.//dtd html//',i0h='-//netscape comm. corp.//dtd strict html//',t0h="-//o'reilly and associates//dtd html 2.0//",F0h="-//o'reilly and associates//dtd html extended 1.0//",k1h="-//o'reilly and associates//dtd html extended relaxed 1.0//",v1h='-//softquad software//dtd hotmetal pro 6.0::19990601::extensions to html 4.0//',a2h='-//softquad//dtd hotmetal pro 4.0::19971010::extensions to html 4.0//',l2h='-//spyglass//dtd html 2.0 extended//',w2h='-//sq//dtd html 2.0 hotmetal + extensions//',b3h='-//sun microsystems corp.//dtd hotjava html//',m3h='-//sun microsystems corp.//dtd hotjava strict html//',x3h='-//w3c//dtd html 3 1995-03-24//',c4h='-//w3c//dtd html 3.2 draft//',o4h='-//w3c//dtd html 3.2 final//',z4h='-//w3c//dtd html 3.2//',e5h='-//w3c//dtd html 3.2s draft//',p5h='-//w3c//dtd html 4.0 frameset//',A5h='-//w3c//dtd html 4.0 transitional//',Czg='-//w3c//dtd html 4.01 frameset//en',rzg='-//w3c//dtd html 4.01 transitional//en',f6h='-//w3c//dtd html experimental 19960712//',q6h='-//w3c//dtd html experimental 970421//',B6h='-//w3c//dtd w3 html//',gzg='-//w3c//dtd xhtml 1.0 frameset//en',Byg='-//w3c//dtd xhtml 1.0 transitional//en',g7h='-//w3o//dtd w3 html 3.0//',sAg='-//w3o//dtd w3 html strict 3.0//en//',r7h='-//webtechs//dtd mozilla html 2.0//',Cqg='-//webtechs//dtd mozilla html//',DAg='-/w3c/dtd html 4.0 transitional/en',Dxg='.',gyg='0123456789ABCDEF',iBg=':',Aqg=': ',q6g='=',zqg='@',txg='A character reference expanded to a form feed which is not legal XML 1.0 white space.',iyg='AElig',jyg='AElig;',wLh='ALLOW',fKh='ALMOST_STANDARDS_MODE',mMh='ALTER_INFOSET',kyg='AMP',lyg='AMP;',yzh='AUTO',myg='Aacute',nyg='Aacute;',oyg='Abreve;',DIh='AbstractCollection',rJh='AbstractHashMap',tJh='AbstractHashMap$EntrySet',uJh='AbstractHashMap$EntrySetIterator',wJh='AbstractHashMap$MapEntryNull',xJh='AbstractHashMap$MapEntryString',EIh='AbstractList',yJh='AbstractList$IteratorImpl',zJh='AbstractList$ListIteratorImpl',qJh='AbstractMap',vJh='AbstractMapEntry',BJh='AbstractSequentialList',sJh='AbstractSet',pyg='Acirc',ryg='Acirc;',syg='Acy;',ePg='Add not supported on this collection',obh='Add not supported on this list',tyg='Afr;',uyg='Agrave',vyg='Agrave;',wyg='Alpha;',xyg='Amacr;',yyg='And;',zyg='Aogon;',Ayg='Aopf;',Cyg='ApplyFunction;',Dyg='Aring',Eyg='Aring;',vLg='Array types must match',FIh='ArrayList',cJh='ArrayStoreException',Fyg='Ascr;',azg='Assign;',bzg='Atilde',czg='Atilde;',mxg='Attribute \u201C',vKh='AttributeName',uKh='AttributeName;',dzg='Auml',ezg='Auml;',fzg='Backslash;',hzg='Barv;',izg='Barwed;',jzg='Bcy;',kzg='Because;',lzg='Bernoullis;',mzg='Beta;',nzg='Bfr;',ozg='Bopf;',pzg='Breve;',mKh='BrowserTreeBuilder',nKh='BrowserTreeBuilder$ScriptHolder',qzg='Bscr;',szg='Bumpeq;',ixg='CDATA[',tzg='CHcy;',uzg='COPY',vzg='COPY;',wzg='Cacute;',Blh="Can't get element ",xxg="Can't use FATAL here.",xzg='Cap;',yzg='CapitalDifferentialD;',zzg='Cayleys;',Azg='Ccaron;',Bzg='Ccedil',Dzg='Ccedil;',Ezg='Ccirc;',Fzg='Cconint;',aAg='Cdot;',bAg='Cedilla;',cAg='CenterDot;',dAg='Cfr;',uxg='Character reference expands to a control character (',eAg='Chi;',fAg='CircleDot;',gAg='CircleMinus;',iAg='CirclePlus;',jAg='CircleTimes;',fJh='Class',gJh='ClassCastException',kAg='ClockwiseContourIntegral;',lAg='CloseCurlyDoubleQuote;',mAg='CloseCurlyQuote;',kKh='CoalescingTreeBuilder',nAg='Colon;',oAg='Colone;',CJh='Comparators$1',pAg='Congruent;',qAg='Conint;',rAg='ContourIntegral;',tAg='Copf;',uAg='Coproduct;',vAg='CounterClockwiseContourIntegral;',wAg='Cross;',xAg='Cscr;',yAg='Cup;',zAg='CupCap;',AAg='DD;',BAg='DDotrahd;',CAg='DJcy;',EAg='DScy;',FAg='DZcy;',aBg='Dagger;',bBg='Darr;',cBg='Dashv;',dBg='Dcaron;',eBg='Dcy;',fBg='Del;',gBg='Delta;',hBg='Dfr;',kBg='DiacriticalAcute;',lBg='DiacriticalDot;',mBg='DiacriticalDoubleAcute;',nBg='DiacriticalGrave;',oBg='DiacriticalTilde;',pBg='Diamond;',qBg='DifferentialD;',dKh='DoctypeExpectation',eKh='DocumentMode',rBg='Dopf;',sBg='Dot;',tBg='DotDot;',vBg='DotEqual;',wBg='DoubleContourIntegral;',xBg='DoubleDot;',yBg='DoubleDownArrow;',zBg='DoubleLeftArrow;',ABg='DoubleLeftRightArrow;',BBg='DoubleLeftTee;',CBg='DoubleLongLeftArrow;',DBg='DoubleLongLeftRightArrow;',EBg='DoubleLongRightArrow;',aCg='DoubleRightArrow;',bCg='DoubleRightTee;',cCg='DoubleUpArrow;',dCg='DoubleUpDownArrow;',eCg='DoubleVerticalBar;',fCg='DownArrow;',gCg='DownArrowBar;',hCg='DownArrowUpArrow;',iCg='DownBreve;',jCg='DownLeftRightVector;',lCg='DownLeftTeeVector;',mCg='DownLeftVector;',nCg='DownLeftVectorBar;',oCg='DownRightTeeVector;',pCg='DownRightVector;',qCg='DownRightVectorBar;',rCg='DownTee;',sCg='DownTeeArrow;',tCg='Downarrow;',uCg='Dscr;',wCg='Dstrok;',qxg='Duplicate attribute \u201C',xCg='ENG;',yCg='ETH',zCg='ETH;',ACg='Eacute',BCg='Eacute;',CCg='Ecaron;',DCg='Ecirc',ECg='Ecirc;',FCg='Ecy;',bDg='Edot;',cDg='Efr;',dDg='Egrave',eDg='Egrave;',isg='Element name \u201C',fDg='Element;',xKh='ElementName',wKh='ElementName;',gDg='Emacr;',hDg='EmptySmallSquare;',iDg='EmptyVerySmallSquare;',AIh='Enum',jDg='Eogon;',kDg='Eopf;',mDg='Epsilon;',nDg='Equal;',oDg='EqualTilde;',pDg='Equilibrium;',zKh='ErrorReportingTokenizer',qDg='Escr;',rDg='Esim;',sDg='Eta;',tDg='Euml',uDg='Euml;',sIh='Exception',vDg='Exists;',xDg='ExponentialE;',bMh='FATAL',yDg='Fcy;',zDg='Ffr;',ADg='FilledSmallSquare;',BDg='FilledVerySmallSquare;',CDg='Fopf;',DDg='ForAll;',Cxg='Forbidden code point ',EDg='Fouriertrf;',FDg='Fscr;',aEg='GJcy;',cEg='GT',dEg='GT;',eEg='Gamma;',fEg='Gammad;',gEg='Gbreve;',hEg='Gcedil;',iEg='Gcirc;',jEg='Gcy;',kEg='Gdot;',lEg='Gfr;',nEg='Gg;',oEg='Gopf;',pEg='GreaterEqual;',qEg='GreaterEqualLess;',rEg='GreaterFullEqual;',sEg='GreaterGreater;',tEg='GreaterLess;',uEg='GreaterSlantEqual;',vEg='GreaterTilde;',wEg='Gscr;',zEg='Gt;',AEg='HARDcy;',kph='HTML',jwh='HTML401_STRICT',zsh='HTML401_TRANSITIONAL',BEg='Hacek;',DJh='HashMap',CEg='Hat;',DEg='Hcirc;',EEg='Hfr;',FEg='HilbertSpace;',aFg='Hopf;',bFg='HorizontalLine;',cFg='Hscr;',eFg='Hstrok;',AKh='HtmlAttributes',oKh='HtmlParser',pKh='HtmlParser$1',fFg='HumpDownHump;',gFg='HumpEqual;',hFg='IEcy;',iFg='IJlig;',jFg='IOcy;',kFg='Iacute',lFg='Iacute;',mFg='Icirc',nFg='Icirc;',pFg='Icy;',qFg='Idot;',rFg='Ifr;',sFg='Igrave',tFg='Igrave;',hJh='IllegalArgumentException',uFg='Im;',vFg='Imacr;',wFg='ImaginaryI;',xFg='Implies;',Deh='Index: ',bJh='IndexOutOfBoundsException',yFg='Int;',AFg='Integral;',BFg='Intersection;',CFg='InvisibleComma;',DFg='InvisibleTimes;',EFg='Iogon;',FFg='Iopf;',aGg='Iota;',bGg='Iscr;',cGg='Itilde;',dGg='Iukcy;',fGg='Iuml',gGg='Iuml;',vIh='JavaScriptException',wIh='JavaScriptObject$',hGg='Jcirc;',iGg='Jcy;',jGg='Jfr;',kGg='Jopf;',lGg='Jscr;',mGg='Jsercy;',nGg='Jukcy;',oGg='KHcy;',qGg='KJcy;',rGg='Kappa;',sGg='Kcedil;',tGg='Kcy;',uGg='Kfr;',vGg='Kopf;',wGg='Kscr;',xGg='LJcy;',yGg='LT',zGg='LT;',BGg='Lacute;',CGg='Lambda;',DGg='Lang;',EGg='Laplacetrf;',FGg='Larr;',aHg='Lcaron;',bHg='Lcedil;',cHg='Lcy;',dHg='LeftAngleBracket;',eHg='LeftArrow;',gHg='LeftArrowBar;',hHg='LeftArrowRightArrow;',iHg='LeftCeiling;',jHg='LeftDoubleBracket;',kHg='LeftDownTeeVector;',lHg='LeftDownVector;',mHg='LeftDownVectorBar;',nHg='LeftFloor;',oHg='LeftRightArrow;',pHg='LeftRightVector;',rHg='LeftTee;',sHg='LeftTeeArrow;',tHg='LeftTeeVector;',uHg='LeftTriangle;',vHg='LeftTriangleBar;',wHg='LeftTriangleEqual;',xHg='LeftUpDownVector;',yHg='LeftUpTeeVector;',zHg='LeftUpVector;',AHg='LeftUpVectorBar;',CHg='LeftVector;',DHg='LeftVectorBar;',EHg='Leftarrow;',FHg='Leftrightarrow;',aIg='LessEqualGreater;',bIg='LessFullEqual;',cIg='LessGreater;',dIg='LessLess;',eIg='LessSlantEqual;',fIg='LessTilde;',iIg='Lfr;',EJh='LinkedList',FJh='LinkedList$ListIteratorImpl',aKh='LinkedList$Node',jIg='Ll;',kIg='Lleftarrow;',lIg='Lmidot;',BKh='LocatorImpl',mIg='LongLeftArrow;',nIg='LongLeftRightArrow;',oIg='LongRightArrow;',pIg='Longleftarrow;',qIg='Longleftrightarrow;',rIg='Longrightarrow;',tIg='Lopf;',uIg='LowerLeftArrow;',vIg='LowerRightArrow;',wIg='Lscr;',xIg='Lsh;',yIg='Lstrok;',zIg='Lt;',AIg='Map;',BIg='Mcy;',CIg='MediumSpace;',EIg='Mellintrf;',FIg='Mfr;',aJg='MinusPlus;',bJg='Mopf;',cJg='Mscr;',dJg='Mu;',gIg='Must be array types',eJg='NJcy;',hDh='NO_DOCTYPE_ERRORS',fJg='Nacute;',gJg='Ncaron;',hJg='Ncedil;',jJg='Ncy;',kJg='NegativeMediumSpace;',lJg='NegativeThickSpace;',mJg='NegativeThinSpace;',nJg='NegativeVeryThinSpace;',oJg='NestedGreaterGreater;',pJg='NestedLessLess;',qJg='NewLine;',rJg='Nfr;',sxg='No digits after \u201C',sJg='NoBreak;',bKh='NoSuchElementException',uJg='NonBreakingSpace;',vJg='Nopf;',wJg='Not;',xJg='NotCongruent;',yJg='NotCupCap;',zJg='NotDoubleVerticalBar;',AJg='NotElement;',BJg='NotEqual;',CJg='NotExists;',DJg='NotGreater;',FJg='NotGreaterEqual;',aKg='NotGreaterLess;',bKg='NotGreaterTilde;',cKg='NotLeftTriangle;',dKg='NotLeftTriangleEqual;',eKg='NotLess;',fKg='NotLessEqual;',gKg='NotLessGreater;',hKg='NotLessTilde;',iKg='NotPrecedes;',kKg='NotPrecedesSlantEqual;',lKg='NotReverseElement;',mKg='NotRightTriangle;',nKg='NotRightTriangleEqual;',oKg='NotSquareSubsetEqual;',pKg='NotSquareSupersetEqual;',qKg='NotSubsetEqual;',rKg='NotSucceeds;',sKg='NotSucceedsSlantEqual;',tKg='NotSupersetEqual;',vKg='NotTilde;',wKg='NotTildeEqual;',xKg='NotTildeFullEqual;',yKg='NotTildeTilde;',zKg='NotVerticalBar;',AKg='Nscr;',BKg='Ntilde',CKg='Ntilde;',DKg='Nu;',jJh='NullPointerException',EKg='OElig;',aLg='Oacute',bLg='Oacute;',nIh='Object',oJh='Object;',cLg='Ocirc',dLg='Ocirc;',eLg='Ocy;',fLg='Odblac;',gLg='Ofr;',hLg='Ograve',iLg='Ograve;',jLg='Omacr;',lLg='Omega;',mLg='Omicron;',nLg='Oopf;',oLg='OpenCurlyDoubleQuote;',pLg='OpenCurlyQuote;',qLg='Or;',rLg='Oscr;',sLg='Oslash',tLg='Oslash;',uLg='Otilde',xLg='Otilde;',yLg='Otimes;',zLg='Ouml',ALg='Ouml;',BLg='OverBar;',CLg='OverBrace;',DLg='OverBracket;',ELg='OverParenthesis;',qKh='ParseEndListener',FLg='PartialD;',aMg='Pcy;',cMg='Pfr;',dMg='Phi;',eMg='Pi;',fMg='PlusMinus;',gMg='Poincareplane;',hMg='Popf;',iMg='Pr;',jMg='Precedes;',kMg='PrecedesEqual;',lMg='PrecedesSlantEqual;',nMg='PrecedesTilde;',oMg='Prime;',pMg='Product;',qMg='Proportion;',rMg='Proportional;',sMg='Pscr;',tMg='Psi;',lLh='QUIRKS_MODE',uMg='QUOT',vMg='QUOT;',wMg='Qfr;',yMg='Qopf;',zMg='Qscr;',AMg='RBarr;',BMg='REG',CMg='REG;',DMg='Racute;',EMg='Rang;',FMg='Rarr;',aNg='Rarrtl;',bNg='Rcaron;',dNg='Rcedil;',eNg='Rcy;',fNg='Re;',gNg='ReverseElement;',hNg='ReverseEquilibrium;',iNg='ReverseUpEquilibrium;',jNg='Rfr;',kNg='Rho;',lNg='RightAngleBracket;',mNg='RightArrow;',oNg='RightArrowBar;',pNg='RightArrowLeftArrow;',qNg='RightCeiling;',rNg='RightDoubleBracket;',sNg='RightDownTeeVector;',tNg='RightDownVector;',uNg='RightDownVectorBar;',vNg='RightFloor;',wNg='RightTee;',xNg='RightTeeArrow;',zNg='RightTeeVector;',ANg='RightTriangle;',BNg='RightTriangleBar;',CNg='RightTriangleEqual;',DNg='RightUpDownVector;',ENg='RightUpTeeVector;',FNg='RightUpVector;',aOg='RightUpVectorBar;',bOg='RightVector;',cOg='RightVectorBar;',eOg='Rightarrow;',fOg='Ropf;',gOg='RoundImplies;',hOg='Rrightarrow;',iOg='Rscr;',jOg='Rsh;',kOg='RuleDelayed;',tIh='RuntimeException',cLh='SAXException',dLh='SAXParseException',lOg='SHCHcy;',mOg='SHcy;',nOg='SOFTcy;',wGh='STANDARDS_MODE',pOg='Sacute;',dyg='Saw an xmlns attribute.',qOg='Sc;',rOg='Scaron;',sOg='Scedil;',tOg='Scirc;',uOg='Scy;',vOg='Sfr;',wOg='ShortDownArrow;',xOg='ShortLeftArrow;',yOg='ShortRightArrow;',AOg='ShortUpArrow;',BOg='Sigma;',COg='SmallCircle;',DOg='Sopf;',EOg='Sqrt;',FOg='Square;',aPg='SquareIntersection;',bPg='SquareSubset;',cPg='SquareSubsetEqual;',dPg='SquareSuperset;',gPg='SquareSupersetEqual;',hPg='SquareUnion;',iPg='Sscr;',EKh='StackNode',FKh='StackNode;',jPg='Star;',aUh='String',xEg='String index out of range: ',yIh='String;',kJh='StringBuffer',lJh='StringBuilder',mJh='StringIndexOutOfBoundsException',kPg='Sub;',lPg='Subset;',mPg='SubsetEqual;',nPg='Succeeds;',oPg='SucceedsEqual;',pPg='SucceedsSlantEqual;',rPg='SucceedsTilde;',sPg='SuchThat;',tPg='Sum;',uPg='Sup;',vPg='Superset;',wPg='SupersetEqual;',xPg='Supset;',yPg='THORN',zPg='THORN;',APg='TRADE;',CPg='TSHcy;',DPg='TScy;',EPg='Tab;',FPg='Tau;',aQg='Tcaron;',bQg='Tcedil;',cQg='Tcy;',dQg='Tfr;',wxg='The document is not mappable to XML 1.0 due to a trailing hyphen in a comment.',pxg='The document is not mappable to XML 1.0 due to two consecutive hyphens in a comment.',eQg='Therefore;',fQg='Theta;',hQg='ThinSpace;',yxg='This document is not mappable to XML 1.0 without data loss due to ',xMh='This is a searchable index. Insert your search keywords here: ',rIh='Throwable',iQg='Tilde;',jQg='TildeEqual;',kQg='TildeFullEqual;',lQg='TildeTilde;',qIh='Timer',aJh='Timer$1',yKh='Tokenizer',mQg='Topf;',jKh='TreeBuilder',nQg='TripleDot;',oQg='Tscr;',pQg='Tstrok;',hyg='U',byg='U+',ayg='U+0',Fxg='U+00',Exg='U+000',aLh='UTF16Buffer',qQg='Uacute',sQg='Uacute;',tQg='Uarr;',uQg='Uarrocir;',vQg='Ubrcy;',wQg='Ubreve;',xQg='Ucirc',yQg='Ucirc;',zQg='Ucy;',AQg='Udblac;',BQg='Ufr;',DQg='Ugrave',EQg='Ugrave;',FQg='Umacr;',aRg='UnderBar;',bRg='UnderBrace;',cRg='UnderBracket;',dRg='UnderParenthesis;',eRg='Union;',fRg='UnionPlus;',uKg='Unreachable',cyg='Unreachable.',nJh='UnsupportedOperationException',gRg='Uogon;',iRg='Uopf;',jRg='UpArrow;',kRg='UpArrowBar;',lRg='UpArrowDownArrow;',mRg='UpDownArrow;',nRg='UpEquilibrium;',oRg='UpTee;',pRg='UpTeeArrow;',qRg='Uparrow;',rRg='Updownarrow;',tRg='UpperLeftArrow;',uRg='UpperRightArrow;',vRg='Upsi;',wRg='Upsilon;',xRg='Uring;',yRg='Uscr;',zRg='Utilde;',ARg='Uuml',BRg='Uuml;',CRg='VDash;',ERg='Vbar;',FRg='Vcy;',aSg='Vdash;',bSg='Vdashl;',cSg='Vee;',dSg='Verbar;',eSg='Vert;',fSg='VerticalBar;',gSg='VerticalLine;',hSg='VerticalSeparator;',jSg='VerticalTilde;',kSg='VeryThinSpace;',lSg='Vfr;',mSg='Vopf;',nSg='Vscr;',oSg='Vvdash;',pSg='Wcirc;',qSg='Wedge;',rSg='Wfr;',sSg='Wopf;',vSg='Wscr;',wSg='Xfr;',xSg='Xi;',hKh='XmlViolationPolicy',ySg='Xopf;',zSg='Xscr;',ASg='YAcy;',BSg='YIcy;',CSg='YUcy;',DSg='Yacute',ESg='Yacute;',aTg='Ycirc;',bTg='Ycy;',cTg='Yfr;',dTg='Yopf;',eTg='Yscr;',fTg='Yuml;',gTg='ZHcy;',hTg='Zacute;',iTg='Zcaron;',jTg='Zcy;',lTg='Zdot;',mTg='ZeroWidthSpace;',nTg='Zeta;',oTg='Zfr;',pTg='Zopf;',qTg='Zscr;',tSg='[',dJh='[C',iJh='[I',xIh='[Ljava.lang.',tKh='[Lnu.validator.htmlparser.impl.',sKh='[Z',DKh='[[C',BIh='[[D',sZg=']',oFg='a',rTg='aacute',sTg='aacute;',C6g='abbr',bvg='about:legacy-compat',tTg='abreve;',C2h='abs',uTg='ac;',Cuh='accent',gWh='accent-height',wSh='accentunder',ruh='accept',DXh='accept-charset',cPh='accesskey',bRh='accumulate',wTg='acd;',xTg='acirc',yTg='acirc;',rrg='acronym',kwh='action',aRh='actiontype',svh='active',zXh='actuate',zTg='acute',ATg='acute;',BTg='acy;',hNh='additive',yEg='address',CTg='aelig',DTg='aelig;',ETg='af;',FTg='afr;',bUg='agrave',cUg='agrave;',dUg='alefsym;',eUg='aleph;',ojh='align',w0h='alignment-baseline',EXh='alignmentscope',djh='alink',fUg='alpha;',FQh='alphabetic',l2g='alt',atg='altGlyph',Fug='altGlyphDef',qvg='altGlyphItem',Fsg='altglyph',Eug='altglyphdef',pvg='altglyphitem',Dvh='altimg',hLh='alttext',gUg='amacr;',hUg='amalg;',iUg='amp',jUg='amp;',gPh='amplitude',A2h='and',kUg='and;',mUg='andand;',nUg='andd;',oUg='andslope;',pUg='andv;',qUg='ang;',rUg='ange;',sUg='angle;',tUg='angmsd;',uUg='angmsdaa;',vUg='angmsdab;',xUg='angmsdac;',yUg='angmsdad;',zUg='angmsdae;',AUg='angmsdaf;',BUg='angmsdag;',CUg='angmsdah;',DUg='angrt;',EUg='angrtvb;',FUg='angrtvbd;',aVg='angsph;',cVg='angst;',dVg='angzarr;',krg='animate',svg='animateColor',Evg='animateMotion',zwg='animateTransform',rvg='animatecolor',Dvg='animatemotion',xwg='animatetransform',aug='animation',sug='annotation',kwg='annotation-xml',eVg='aogon;',fVg='aopf;',gVg='ap;',hVg='apE;',iVg='apacir;',jVg='ape;',kVg='apid;',lVg='apos;',A6h='applet',w5h='apply',D6h='approx',nVg='approx;',oVg='approxeq;',BSh='arabic-form',z6h='arccos',prg='arccosh',C6h='arccot',qrg='arccoth',w6h='arccsc',mrg='arccsch',iLh='archive',CXh='arcrole',v6h='arcsec',lrg='arcsech',y6h='arcsin',org='arcsinh',x6h='arctan',nrg='arctanh',i4h='area',B2h='arg',h1h='aria-activedescendant',ySh='aria-atomic',e0h='aria-autocomplete',dPh='aria-busy',uUh='aria-channel',rUh='aria-checked',eWh='aria-controls',vWh='aria-datatype',iZh='aria-describedby',qWh='aria-disabled',xYh='aria-dropeffect',pWh='aria-expanded',ASh='aria-flowto',ePh='aria-grab',fWh='aria-haspopup',zSh='aria-hidden',pUh='aria-invalid',yYh='aria-labelledby',cRh='aria-level',hPh='aria-live',FXh='aria-multiline',f1h='aria-multiselectable',FOh='aria-owns',jWh='aria-posinset',qUh='aria-pressed',lWh='aria-readonly',iWh='aria-relevant',nWh='aria-required',xSh='aria-secret',mWh='aria-selected',tUh='aria-setsize',bPh='aria-sort',zYh='aria-templateid',kWh='aria-valuemax',wWh='aria-valuemin',hWh='aria-valuenow',pVg='aring',qVg='aring;',jrg='article',hvh='ascent',rVg='ascr;',u5h='aside',sVg='ast;',tVg='asymp;',uVg='asympeq;',yih='async',vVg='atilde',wVg='atilde;',uWh='attributeName',sWh='attributeType',tWh='attributename',rWh='attributetype',v5h='audio',yVg='auml',zVg='auml;',sUh='autocomplete',aPh='autofocus',gNh='autoplay',EQh='autosubmit',AVg='awconint;',BVg='awint;',r6g='axis',jLh='azimuth',t1h='b',CVg='bNot;',DVg='backcong;',EVg='backepsilon;',fRh='background',FVg='backprime;',aWg='backsim;',bWg='backsimeq;',eWg='barvee;',fWg='barwed;',gWg='barwedge;',u9g='base',yWh='baseFrequency',eTh='baseProfile',btg='basefont',xWh='basefrequency',pNh='baseline',aYh='baseline-shift',dTh='baseprofile',h7g='bbox',hWg='bbrk;',iWg='bbrktbrk;',jWg='bcong;',kWg='bcy;',E2h='bdo',lWg='bdquo;',mWg='becaus;',nWg='because;',flh='begin',pWg='bemptyv;',qWg='bepsi;',rWg='bernou;',sWg='beta;',tWg='beth;',uWg='between;',nNh='bevelled',vWg='bfr;',oLh='bgcolor',trg='bgsound',i8g='bias',D2h='big',wWg='bigcap;',xWg='bigcirc;',yWg='bigcup;',AWg='bigodot;',BWg='bigoplus;',CWg='bigotimes;',DWg='bigsqcup;',EWg='bigstar;',FWg='bigtriangledown;',aXg='bigtriangleup;',bXg='biguplus;',cXg='bigvee;',dXg='bigwedge;',fXg='bkarow;',gXg='blacklozenge;',hXg='blacksquare;',iXg='blacktriangle;',jXg='blacktriangledown;',kXg='blacktriangleleft;',lXg='blacktriangleright;',mXg='blank;',nXg='blk12;',oXg='blk14;',qXg='blk34;',rXg='block;',tug='blockquote',sXg='bnot;',lDg='body',tXg='bopf;',vwh='border',uXg='bot;',vXg='bottom;',wXg='bowtie;',xXg='boxDL;',yXg='boxDR;',zXg='boxDl;',BXg='boxDr;',CXg='boxH;',DXg='boxHD;',EXg='boxHU;',FXg='boxHd;',aYg='boxHu;',bYg='boxUL;',cYg='boxUR;',dYg='boxUl;',eYg='boxUr;',gYg='boxV;',hYg='boxVH;',iYg='boxVL;',jYg='boxVR;',kYg='boxVh;',lYg='boxVl;',mYg='boxVr;',nYg='boxbox;',oYg='boxdL;',pYg='boxdR;',rYg='boxdl;',sYg='boxdr;',tYg='boxh;',uYg='boxhD;',vYg='boxhU;',wYg='boxhd;',xYg='boxhu;',yYg='boxminus;',zYg='boxplus;',AYg='boxtimes;',CYg='boxuL;',DYg='boxuR;',EYg='boxul;',FYg='boxur;',aZg='boxv;',bZg='boxvH;',cZg='boxvL;',dZg='boxvR;',eZg='boxvh;',fZg='boxvl;',hZg='boxvr;',iZg='bprime;',z1h='br',jZg='breve;',kZg='brvbar',lZg='brvbar;',mZg='bscr;',nZg='bsemi;',oZg='bsim;',pZg='bsime;',qZg='bsol;',uZg='bsolb;',vZg='bull;',wZg='bullet;',xZg='bump;',yZg='bumpE;',zZg='bumpe;',AZg='bumpeq;',E6h='button',j4h='bvar',aUg='by',BZg='cacute;',jNh='calcMode',iNh='calcmode',b7h='canvas',eRh='cap-height',CZg='cap;',DZg='capand;',FZg='capbrcup;',a0g='capcap;',b0g='capcup;',c0g='capdot;',nwg='caption',k4h='card',d0g='caret;',e0g='caron;',Awg='cartesianproduct',f0g='ccaps;',g0g='ccaron;',h0g='ccedil',i0g='ccedil;',k0g='ccirc;',l0g='ccups;',m0g='ccupssm;',n0g='cdot;',o0g='cedil',p0g='cedil;',wrg='ceiling',CSh='cellpadding',DSh='cellspacing',q0g='cemptyv;',r0g='cent',s0g='cent;',a7h='center',t0g='centerdot;',v0g='cfr;',j9g='char',nLh='charoff',qLh='charset',w0g='chcy;',x0g='check;',mLh='checked',y0g='checkmark;',z0g='chi;',A1h='ci',A0g='cir;',B0g='cirE;',C0g='circ;',D0g='circeq;',F6h='circle',E0g='circlearrowleft;',a1g='circlearrowright;',b1g='circledR;',c1g='circledS;',d1g='circledast;',e1g='circledcirc;',f1g='circleddash;',g1g='cire;',h1g='cirfnint;',i1g='cirmid;',j1g='cirscir;',s7g='cite',pkh='class',zxg='class ',bMg='classid',Akh='clear',E8g='clip',jPh='clip-path',iPh='clip-rule',dtg='clipPath',DWh='clipPathUnits',ctg='clippath',CWh='clippathunits',zjh='close',kLh='closure',mMg='clsid:32F66A20-7614-11D4-BD11-00104BD3F987',dOg='clsid:AC159093-1683-4BA2-9DCF-0C350141D7F2',l1g='clubs;',m1g='clubsuit;',B1h='cn',D7g='code',lNh='codebase',kNh='codetype',etg='codomain',a3h='col',aDg='colgroup',n1g='colon;',o1g='colone;',p1g='coloneq;',ekh='color',D0h='color-interpolation',q1h='color-interpolation-filters',BWh='color-profile',AYh='color-rendering',t8g='cols',pLh='colspan',aTh='columnalign',bTh='columnlines',AWh='columnspacing',dRh='columnspan',ESh='columnwidth',uIh='com.google.gwt.core.client.',pIh='com.google.gwt.user.client.',q1g='comma;',urg='command',r1g='commat;',s1g='comp;',rLh='compact',t1g='compfn;',u1g='complement;',dug='complexes',w1g='complexes;',vrg='compose',cug='condition',x1g='cong;',y1g='congdot;',z1g='conint;',bug='conjugate',sLh='content',g0h='contentScriptType',kZh='contentStyleType',BYh='contenteditable',f0h='contentscripttype',jZh='contentstyletype',cTh='contextmenu',mNh='controls',lxh='coords',A1g='copf;',B1g='coprod;',C1g='copy',D1g='copy;',E1g='copysr;',c3h='cos',m4h='cosh',d3h='cot',p4h='coth',F1g='crarr;',b2g='cross;',F2h='csc',l4h='csch',c2g='cscr;',d2g='csub;',e2g='csube;',f2g='csup;',g2g='csupe;',xrg='csymbol',h2g='ctdot;',i2g='cudarrl;',j2g='cudarrr;',k2g='cuepr;',m2g='cuesc;',n2g='cularr;',o2g='cularrp;',p2g='cup;',q2g='cupbrcap;',r2g='cupcap;',s2g='cupcup;',t2g='cupdot;',u2g='cupor;',v2g='curarr;',x2g='curarrm;',q4h='curl',y2g='curlyeqprec;',z2g='curlyeqsucc;',A2g='curlyvee;',B2g='curlywedge;',C2g='curren',D2g='curren;',axh='cursor',E2g='curvearrowleft;',F2g='curvearrowright;',a3g='cuvee;',d3g='cuwed;',e3g='cwconint;',f3g='cwint;',lUg='cx',wUg='cy',g3g='cylcty;',DRg='d',h3g='dArr;',i3g='dHar;',j3g='dagger;',k3g='daleth;',l3g='darr;',m3g='dash;',o3g='dashv;',l$g='data',vLh='datafld',yUh='dataformatas',ftg='datagrid',uLh='datasrc',tvg='datatemplate',wNh='datetime',p3g='dbkarow;',q3g='dblac;',r3g='dcaron;',s3g='dcy;',C1h='dd',t3g='dd;',u3g='ddagger;',v3g='ddarr;',w3g='ddotseq;',xLh='declare',ALh='default',Clh='defer',lwg='definition-src',FWh='definitionURL',EWh='definitionurl',t4h='defs',x3g='deg',z3g='deg;',d7h='degree',e3h='del',A3g='delta;',B3g='demptyv;',qlh='depth',r4h='desc',BLh='descent',zrg='details',avg='determinant',C3g='dfisht;',f3h='dfn',D3g='dfr;',E3g='dharl;',F3g='dharr;',e7h='dialog',a4g='diam;',b4g='diamond;',c4g='diamondsuit;',e4g='diams;',f4g='die;',s4h='diff',EYh='diffuseConstant',DYh='diffuseconstant',g4g='digamma;',w2g='dir',mPh='direction',xNh='disabled',yrg='discard',h4g='disin;',yLh='display',wUh='displaystyle',dFg='div',i4g='div;',uug='divergence',c7h='divide',j4g='divide;',k4g='divideontimes;',zLh='divisor',l4g='divonx;',m4g='djcy;',D1h='dl',n4g='dlcorn;',p4g='dlcrop;',q4g='dollar;',f7h='domain',fxg='domainofapplication',j0h='dominant-baseline',r4g='dopf;',s4g='dot;',t4g='doteq;',u4g='doteqdot;',v4g='dotminus;',w4g='dotplus;',x4g='dotsquare;',y4g='doublebarwedge;',A4g='downarrow;',B4g='downdownarrows;',C4g='downharpoonleft;',D4g='downharpoonright;',nPh='draggable',E4g='drbkarow;',F4g='drcorn;',a5g='drcrop;',b5g='dscr;',c5g='dscy;',d5g='dsol;',f5g='dstrok;',E1h='dt',g5g='dtdot;',h5g='dtri;',i5g='dtrif;',j5g='duarr;',k5g='duhar;',c3g='dur',l5g='dwangle;',bVg='dx',mVg='dy',m5g='dzcy;',n5g='dzigrarr;',o5g='eDDot;',q5g='eDot;',r5g='eacute',s5g='eacute;',t5g='easter;',u5g='ecaron;',v5g='ecir;',w5g='ecirc',x5g='ecirc;',y5g='ecolon;',z5g='ecy;',a$g='edge',sNh='edgeMode',rNh='edgemode',B5g='edot;',C5g='ee;',D5g='efDot;',E5g='efr;',F5g='eg;',a6g='egrave',b6g='egrave;',c6g='egs;',d6g='egsdot;',e6g='el;',lPh='elevation',g6g='elinters;',h6g='ell;',Arg='ellipse',i6g='els;',j6g='elsdot;',F1h='em',k6g='emacr;',x5h='embed',l6g='empty;',gtg='emptyset',m6g='emptyset;',n6g='emptyv;',o6g='emsp13;',p6g='emsp14;',s6g='emsp;',h0h='enable-background',tNh='encoding',tLh='enctype',n3g='end',t6g='eng;',u6g='ensp;',v6g='eogon;',w6g='eopf;',x6g='epar;',y6g='eparsl;',z6g='eplus;',A6g='epsi;',B6g='epsilon;',D6g='epsiv;',b2h='eq',E6g='eqcirc;',F6g='eqcolon;',a7g='eqsim;',b7g='eqslantgtr;',c7g='eqslantless;',vUh='equalcolumns',kPh='equalrows',d7g='equals;',e7g='equest;',f7g='equiv;',g7g='equivDD;',xug='equivalent',i7g='eqvparsl;',j7g='erDot;',k7g='erarr;',l7g='escr;',m7g='esdot;',n7g='esim;',o7g='eta;',p7g='eth',q7g='eth;',vug='eulergamma',r7g='euml',t7g='euml;',u7g='euro;',cvg='eventsource',v7g='excl;',w7g='exist;',h7h='exists',g3h='exp',x7g='expectation;',qNh='exponent',uvg='exponentiale',y7g='exponentiale;',o1h='externalResourcesRequired',n1h='externalresourcesrequired',m_g='face',fug='factorial',htg='factorof',z7g='fallingdotseq;',y5h='false',A7g='fcy;',bsg='feBlend',fwg='feColorMatrix',hxg='feComponentTransfer',gvg='feComposite',Dwg='feConvolveMatrix',Fwg='feDiffuseLighting',bxg='feDisplacementMap',rwg='feDistantLight',dsg='feFlood',Crg='feFuncA',Frg='feFuncB',ksg='feFuncG',msg='feFuncR',pwg='feGaussianBlur',fsg='feImage',hsg='feMerge',evg='feMergeNode',Bvg='feMorphology',ltg='feOffset',zvg='fePointLight',exg='feSpecularLighting',ivg='feSpotLight',j7h='feTile',wvg='feTurbulence',asg='feblend',ewg='fecolormatrix',gxg='fecomponenttransfer',fvg='fecomposite',Cwg='feconvolvematrix',Ewg='fediffuselighting',axg='fedisplacementmap',qwg='fedistantlight',csg='feflood',Brg='fefunca',Erg='fefuncb',jsg='fefuncg',lsg='fefuncr',owg='fegaussianblur',esg='feimage',B7g='female;',gsg='femerge',dvg='femergenode',Avg='femorphology',hmh='fence',ktg='feoffset',yvg='fepointlight',cxg='fespecularlighting',hvg='fespotlight',i7h='fetile',vvg='feturbulence',C7g='ffilig;',E7g='fflig;',F7g='ffllig;',a8g='ffr;',itg='fieldset',k7h='figure',b8g='filig;',w$g='fill',zUh='fill-opacity',rPh='fill-rule',wxh='filter',pPh='filterRes',iTh='filterUnits',oPh='filterres',hTh='filterunits',c8g='flat;',d8g='fllig;',jTh='flood-color',cXh='flood-opacity',z5h='floor',e8g='fltns;',c2h='fn',f8g='fnof;',u4h='font',eug='font-face',Bwg='font-face-format',mwg='font-face-name',Fvg='font-face-src',awg='font-face-uri',fTh='font-family',tPh='font-size',lZh='font-size-adjust',BUh='font-stretch',lRh='font-style',AUh='font-variant',lTh='font-weight',jRh='fontfamily',yNh='fontsize',sPh='fontstyle',kRh='fontweight',m7h='footer',g8g='fopf;',y3g='for',l7h='forall',h8g='forall;',dwg='foreignObject',bwg='foreignobject',j8g='fork;',k8g='forkv;',srg='form',byh='format',l8g='fpartint;',m8g='frac12',n8g='frac12;',o8g='frac13;',p8g='frac14',q8g='frac14;',r8g='frac15;',s8g='frac16;',u8g='frac18;',v8g='frac23;',w8g='frac25;',x8g='frac34',y8g='frac34;',z8g='frac35;',A8g='frac38;',B8g='frac45;',C8g='frac56;',D8g='frac58;',F8g='frac78;',smh='frame',gTh='frameborder',Axg='frameset',CUh='framespacing',a9g='frasl;',b_g='from',b9g='frown;',c9g='fscr;',oWg='fx',zWg='fy',u1h='g',dWg='g1',xVg='g2',d9g='gE;',e9g='gEl;',f9g='gacute;',g9g='gamma;',h9g='gammad;',i9g='gap;',k9g='gbreve;',h3h='gcd',l9g='gcirc;',m9g='gcy;',n9g='gdot;',o9g='ge;',p9g='gel;',i3h='geq',q9g='geq;',r9g='geqq;',s9g='geqslant;',t9g='ges;',v9g='gescc;',w9g='gesdot;',x9g='gesdoto;',y9g='gesdotol;',z9g='gesles;',A9g='gfr;',B9g='gg;',C9g='ggg;',D9g='gimel;',E9g='gjcy;',b$g='gl;',c$g='glE;',d$g='gla;',e$g='glj;',B5h='glyph',gRh='glyph-name',r1h='glyph-orientation-horizontal',p1h='glyph-orientation-vertical',vNh='glyphRef',uNh='glyphref',f$g='gnE;',g$g='gnap;',h$g='gnapprox;',i$g='gne;',j$g='gneq;',k$g='gneqq;',m$g='gnsim;',n$g='gopf;',v4h='grad',l0h='gradientTransform',bXh='gradientUnits',k0h='gradienttransform',aXh='gradientunits',o$g='grave;',hRh='groupalign',p$g='gscr;',q$g='gsim;',r$g='gsime;',s$g='gsiml;',j2h='gt',t$g='gt;',u$g='gtcc;',v$g='gtcir;',x$g='gtdot;',y$g='gtlPar;',z$g='gtquest;',A$g='gtrapprox;',B$g='gtrarr;',C$g='gtrdot;',D$g='gtreqless;',E$g='gtreqqless;',F$g='gtrless;',a_g='gtrsim;',d2h='h1',e2h='h2',f2h='h3',g2h='h4',h2h='h5',i2h='h6',c_g='hArr;',d_g='hairsp;',e_g='half;',f_g='hamilt;',nsg='handler',DLh='hanging',g_g='hardcy;',h_g='harr;',i_g='harrcir;',j_g='harrw;',k_g='hbar;',l_g='hcirc;',Drg='head',n7h='header',ELh='headers',n_g='hearts;',o_g='heartsuit;',xyh='height',p_g='hellip;',q_g='hercon;',r_g='hfr;',mEg='hidden',wPh='hidefocus',x_g='high',C5h='hkern',s_g='hksearow;',t_g='hkswarow;',u_g='hoarr;',v_g='homtht;',w_g='hookleftarrow;',y_g='hookrightarrow;',z_g='hopf;',A_g='horbar;',mTh='horiz-adv-x',bYh='horiz-origin-x',cYh='horiz-origin-y',k2h='hr',cah='href',DNh='hreflang',B_g='hscr;',C_g='hslash;',myh='hspace',D_g='hstrok;',hAg='html',oRh='http-equiv',jKg='http://n.validator.nu/placeholder/',jBg='http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd',wDg='http://www.w3.org/1998/Math/MathML',hrg='http://www.w3.org/1999/xhtml',rQg='http://www.w3.org/1999/xlink',bEg='http://www.w3.org/2000/svg',BPg='http://www.w3.org/2000/xmlns/',Esg='http://www.w3.org/TR/REC-html40/strict.dtd',mvg='http://www.w3.org/TR/html4/loose.dtd',jtg='http://www.w3.org/TR/html4/strict.dtd',Ftg='http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd',wug='http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd',gQg='http://www.w3.org/XML/1998/namespace',E_g='hybull;',F_g='hyphen;',w1h='i',aah='iacute',bah='iacute;',dah='ic;',eah='icirc',fah='icirc;',yah='icon',gah='icy;',kLg='id',E5h='ident',tTh='ideographic',hah='iecy;',iah='iexcl',jah='iexcl;',kah='iff;',lah='ifr;',DIg='iframe',mah='igrave',oah='igrave;',pah='ii;',qah='iiiint;',rah='iiint;',sah='iinfin;',tah='iiota;',uah='ijlig;',vah='imacr;',D5h='image',bZh='image-rendering',wah='image;',hug='imaginary',yug='imaginaryi',xah='imagline;',zah='imagpart;',Aah='imath;',j3h='img',Bah='imof;',Cah='imped;',psg='implies',qYg='in',d4g='in2',Dah='in;',Eah='incare;',tnh='index',Fah='infin;',otg='infinity',abh='infintie;',bbh='inodot;',pGg='input',aQh='inputmode',k3h='ins',l3h='int',cbh='int;',ebh='intcal;',ntg='integers',fbh='integers;',gbh='intercal;',yPh='intercept',kug='interface ',gug='intersect',mtg='interval',hbh='intlarhk;',ibh='intprod;',osg='inverse',jbh='iocy;',kbh='iogon;',lbh='iopf;',mbh='iota;',nbh='iprod;',qbh='iquest',rbh='iquest;',rRh='irrelevant',sbh='iscr;',tbh='isin;',ubh='isinE;',eGg='isindex',vbh='isindot;',wbh='isins;',xbh='isinsv;',ybh='isinv;',Dmh='ismap',zbh='it;',Bbh='itilde;',Cbh='iukcy;',Dbh='iuml',Ebh='iuml;',mIh='java.lang.',CIh='java.util.',Fbh='jcirc;',ach='jcy;',bch='jfr;',cch='jmath;',dch='jopf;',ech='jscr;',gch='jsercy;',hch='jukcy;',iSg='k',fYg='k1',pXg='k2',AXg='k3',eXg='k4',ich='kappa;',jch='kappav;',n3h='kbd',kch='kcedil;',lch='kcy;',EUh='kernelMatrix',nZh='kernelUnitLength',DUh='kernelmatrix',mZh='kernelunitlength',CLh='kerning',vPh='keyPoints',nRh='keySplines',BNh='keyTimes',o7h='keygen',uPh='keypoints',mRh='keysplines',ANh='keytimes',mch='kfr;',nch='kgreen;',och='khcy;',pch='kjcy;',rch='kopf;',sch='kscr;',tch='lAarr;',uch='lArr;',vch='lAtail;',wch='lBarr;',xch='lE;',ych='lEg;',zch='lHar;',wph='label',Ach='lacute;',Cch='laemptyv;',Dch='lagran;',p7h='lambda',Ech='lambda;',fch='lang',Fch='lang;',adh='langd;',bdh='langle;',rOh='language',cdh='lap;',iug='laplacian',ddh='laquo',edh='laquo;',rMh='largeop',fdh='larr;',hdh='larrb;',idh='larrbfs;',jdh='larrfs;',kdh='larrhk;',ldh='larrlp;',mdh='larrpl;',ndh='larrsim;',odh='larrtl;',pdh='lat;',qdh='latail;',sdh='late;',tdh='lbarr;',udh='lbbrk;',vdh='lbrace;',wdh='lbrack;',xdh='lbrke;',ydh='lbrksld;',zdh='lbrkslu;',Adh='lcaron;',Bdh='lcedil;',Ddh='lceil;',p3h='lcm',Edh='lcub;',Fdh='lcy;',aeh='ldca;',beh='ldquo;',ceh='ldquor;',deh='ldrdhar;',eeh='ldrushar;',feh='ldsh;',geh='le;',ieh='leftarrow;',jeh='leftarrowtail;',keh='leftharpoondown;',leh='leftharpoonup;',meh='leftleftarrows;',neh='leftrightarrow;',oeh='leftrightarrows;',peh='leftrightharpoons;',qeh='leftrightsquigarrow;',reh='leftthreetimes;',teh='leg;',q7h='legend',qVh='lengthAdjust',pVh='lengthadjust',q3h='leq',ueh='leq;',veh='leqq;',weh='leqslant;',xeh='les;',yeh='lescc;',zeh='lesdot;',Aeh='lesdoto;',Beh='lesdotor;',Ceh='lesges;',Feh='lessapprox;',afh='lessdot;',bfh='lesseqgtr;',cfh='lesseqqgtr;',dfh='lessgtr;',efh='lesssim;',jYh='letter-spacing',ffh='lfisht;',gfh='lfloor;',hfh='lfr;',ifh='lg;',kfh='lgE;',lfh='lhard;',mfh='lharu;',nfh='lharul;',ofh='lhblk;',m2h='li',kYh='lighting-color',F5h='limit',r0h='limitingConeAngle',q0h='limitingconeangle',w4h='line',twg='linearGradient',swg='lineargradient',hQh='linebreak',mXh='linethickness',Abh='link',qch='list',ptg='listener',rsg='listing',pfh='ljcy;',qfh='ll;',rfh='llarr;',sfh='llcorner;',tfh='llhard;',vfh='lltri;',wfh='lmidot;',xfh='lmoust;',yfh='lmoustache;',n2h='ln',zfh='lnE;',Afh='lnap;',Bfh='lnapprox;',Cfh='lne;',Dfh='lneq;',Efh='lneqq;',agh='lnsim;',bgh='loang;',cgh='loarr;',dgh='lobrk;',bqh='local',o3h='log',qsg='logbase',qOh='longdesc',egh='longleftarrow;',fgh='longleftrightarrow;',ggh='longmapsto;',hgh='longrightarrow;',igh='looparrowleft;',jgh='looparrowright;',qMh='loopend',iQh='loopstart',lgh='lopar;',mgh='lopf;',ngh='loplus;',ogh='lotimes;',e5g='low',pgh='lowast;',qgh='lowbar;',qtg='lowlimit',uEh='lowsrc',rgh='loz;',sgh='lozenge;',tgh='lozf;',ugh='lpar;',wgh='lparlt;',kFh='lquote',xgh='lrarr;',ygh='lrcorner;',zgh='lrhar;',Agh='lrhard;',Bgh='lrm;',Cgh='lrtri;',Dgh='lsaquo;',Egh='lscr;',Fgh='lsh;',bhh='lsim;',chh='lsime;',dhh='lsimg;',FEh='lspace',ehh='lsqb;',fhh='lsquo;',ghh='lsquor;',hhh='lstrok;',o2h='lt',ihh='lt;',jhh='ltcc;',khh='ltcir;',mhh='ltdot;',nhh='lthree;',ohh='ltimes;',phh='ltlarr;',qhh='ltquest;',rhh='ltrPar;',shh='ltri;',thh='ltrie;',uhh='ltrif;',vhh='lurdshar;',xhh='luruhar;',xMg='m',nNg='m:',yhh='mDDot;',zhh='macr',Ahh='macr;',EDh='macros',wsg='maction',Bhh='male;',jvg='maligngroup',zug='malignmark',Chh='malt;',Dhh='maltese;',mOh='manifest',s3h='map',Ehh='map;',Fhh='mapsto;',aih='mapstodown;',cih='mapstoleft;',dih='mapstoup;',jVh='marginheight',CTh='marginwidth',B4h='mark',y7h='marker',DRh='marker-end',CRh='marker-mid',mVh='marker-start',eih='marker;',lVh='markerHeight',ATh='markerUnits',ETh='markerWidth',kVh='markerheight',zTh='markerunits',DTh='markerwidth',vsg='marquee',pbh='mask',tZh='maskContentUnits',eQh='maskUnits',rZh='maskcontentunits',dQh='maskunits',A4h='math',iYh='mathbackground',cQh='mathcolor',oVh='mathematical',wLg='mathplayer',nOh='mathsize',BTh='mathvariant',B7h='matrix',jug='matrixrow',o4g='max',fQh='maxlength',pMh='maxsize',fih='mcomma;',gih='mcy;',hih='mdash;',C4h='mean',iih='measuredangle;',lph='media',w7h='median',cZh='mediummathspace',stg='menclose',E4h='menu',z7h='merror',E0h='message',x4h='meta',rtg='metadata',c6h='meter',jEh='method',ssg='mfenced',jih='mfr;',a6h='mfrac',v7h='mglyph',kih='mho;',p2h='mi',lih='micro',oih='micro;',pih='mid;',qih='midast;',rih='midcir;',sih='middot',tih='middot;',z4g='min',oMh='minsize',e6h='minus',uih='minus;',vih='minusb;',wih='minusd;',xih='minusdu;',gwg='missing-glyph',Bug='mlabeledtr',zih='mlcp;',Aih='mldr;',hwg='mmultiscripts',q2h='mn',Bih='mnplus;',r2h='mo',dbh='mode',Cih='models;',jIh='moduleStartup',A7h='moment',lvg='momentabout',Dih='mopf;',lXh='movablelimits',d6h='mover',Eih='mp;',usg='mpadded',b6h='mpath',ttg='mphantom',kvg='mprescripts',g6h='mroot',F4h='mrow',s2h='ms',Fih='mscr;',s7h='mspace',h6h='msqrt',ajh='mstpos;',u7h='mstyle',y4h='msub',xsg='msubsup',D4h='msup',t7h='mtable',r3h='mtd',i6h='mtext',t3h='mtr',bjh='mu;',cjh='multimap;',oOh='multiple',ejh='mumap;',x7h='munder',Aug='munderover',Bqg='must be positive',fjh='nLeftarrow;',gjh='nLeftrightarrow;',hjh='nRightarrow;',ijh='nVDash;',jjh='nVdash;',kjh='nabla;',ljh='nacute;',pXh='name',mjh='nap;',njh='napos;',pjh='napprox;',Foh='nargs',qjh='natur;',rjh='natural;',uwg='naturalnumbers',sjh='naturals;',w3h='nav',tjh='nbsp',ujh='nbsp;',vjh='ncap;',wjh='ncaron;',xjh='ncedil;',yjh='ncong;',Ajh='ncup;',Bjh='ncy;',Cjh='ndash;',Djh='ne;',Ejh='neArr;',Fjh='nearhk;',akh='nearr;',bkh='nearrow;',u3h='neq',ckh='nequiv;',dkh='nesear;',b5h='nest',fkh='nexist;',gkh='nexists;',hkh='nfr;',ikh='nge;',jkh='ngeq;',kkh='ngsim;',lkh='ngt;',mkh='ngtr;',nkh='nhArr;',okh='nharr;',qkh='nhpar;',rkh='ni;',skh='nis;',tkh='nisd;',ukh='niv;',vkh='njcy;',wkh='nlArr;',xkh='nlarr;',ykh='nldr;',zkh='nle;',Bkh='nleftarrow;',Ckh='nleftrightarrow;',Dkh='nleq;',Ekh='nless;',Fkh='nlsim;',alh='nlt;',blh='nltri;',clh='nltrie;',dlh='nmid;',zFg='nobr',iJg='noembed',tJg='noframes',tDh='nohref',a5h='none',elh='nopf;',lOh='noresize',vtg='noscript',nMh='noshade',v3h='not',glh='not;',Cug='notanumber',kOh='notation',j6h='notin',hlh='notin;',ilh='notinva;',jlh='notinvb;',klh='notinvc;',llh='notni;',mlh='notniva;',nlh='notnivb;',olh='notnivc;',nvg='notprsubset',mug='notsubset',iDh='nowrap',plh='npar;',rlh='nparallel;',slh='npolint;',tlh='npr;',ulh='nprcue;',vlh='nprec;',wlh='nrArr;',xlh='nrarr;',ylh='nrightarrow;',zlh='nrtri;',Alh='nrtrie;',Dlh='nsc;',Elh='nsccue;',Flh='nscr;',amh='nshortmid;',bmh='nshortparallel;',cmh='nsim;',dmh='nsime;',emh='nsimeq;',fmh='nsmid;',gmh='nspar;',imh='nsqsube;',jmh='nsqsupe;',kmh='nsub;',lmh='nsube;',mmh='nsubseteq;',nmh='nsucc;',omh='nsup;',pmh='nsupe;',qmh='nsupseteq;',rmh='ntgl;',tmh='ntilde',umh='ntilde;',vmh='ntlg;',wmh='ntriangleleft;',xmh='ntrianglelefteq;',ymh='ntriangleright;',zmh='ntrianglerighteq;',cKh='nu.validator.htmlparser.common.',lKh='nu.validator.htmlparser.gwt.',lIh='nu.validator.htmlparser.gwt.HtmlParserModule',iKh='nu.validator.htmlparser.impl.',Amh='nu;',rQh='null',Bmh='num;',BRh='numOctaves',Cmh='numero;',ARh='numoctaves',Emh='numsp;',Fmh='nvDash;',anh='nvHarr;',bnh='nvdash;',cnh='nvinfin;',dnh='nvlArr;',enh='nvrArr;',fnh='nwArr;',gnh='nwarhk;',hnh='nwarr;',jnh='nwarrow;',knh='nwnear;',lnh='oS;',mnh='oacute',nnh='oacute;',onh='oast;',FKg='object',qRh='occurrence',pnh='ocir;',qnh='ocirc',rnh='ocirc;',jxg='octype',snh='ocy;',unh='odash;',vnh='odblac;',wnh='odiv;',xnh='odot;',ynh='odsold;',znh='oelig;',Anh='ofcir;',gCh='offset',Bnh='ofr;',Cnh='ogon;',Dnh='ograve',Fnh='ograve;',aoh='ogt;',boh='ohbar;',coh='ohm;',doh='oint;',t2h='ol',eoh='olarr;',foh='olcir;',goh='olcross;',hoh='oline;',ioh='olt;',koh='omacr;',loh='omega;',moh='omicron;',noh='omid;',ooh='ominus;',kIh='onModuleLoadStart',iMh='onabort',pRh='onactivate',hVh='onafterprint',dXh='onafterupdate',m0h='onbefordeactivate',oZh='onbeforeactivate',iVh='onbeforecopy',uTh='onbeforecut',p0h='onbeforeeditfocus',gXh='onbeforepaste',kXh='onbeforeprint',hYh='onbeforeunload',dYh='onbeforeupdate',dMh='onbegin',BBh='onblur',aOh='onbounce',eVh='oncellchange',FNh='onchange',aMh='onclick',iXh='oncontextmenu',aZh='oncontrolselect',CCh='oncopy',uoh='oncut',FYh='ondataavailable',qZh='ondatasetchanged',n0h='ondatasetcomplete',sRh='ondblclick',FUh='ondeactivate',zzh='ondrag',uRh='ondragdrop',zPh='ondragend',sTh='ondragenter',nTh='ondragleave',xRh='ondragover',xTh='ondragstart',qBh='ondrop',inh='onend',gMh='onerror',fXh='onerrorupdate',eYh='onfilterchange',cOh='onfinish',fMh='onfocus',EPh='onfocusin',yRh='onfocusout',dVh='onformchange',wTh='onforminput',AAh='onhelp',hMh='oninput',CPh='oninvalid',DPh='onkeydown',vRh='onkeypress',eMh='onkeyup',nzh='onload',hXh='onlosecapture',xPh='onmessage',qTh='onmousedown',gVh='onmouseenter',bVh='onmouseleave',oTh='onmousemove',zRh='onmouseout',rTh='onmouseover',FPh='onmouseup',fVh='onmousewheel',czh='onmove',APh='onmoveend',yTh='onmovestart',FLh='onpaste',pZh='onpropertychange',x0h='onreadystatechange',iOh='onrepeat',kMh='onreset',ENh='onresize',wRh='onrowenter',bQh='onrowexit',aVh='onrowsdelete',fYh='onrowsinserted',dOh='onscroll',jOh='onselect',jXh='onselectstart',jMh='onstart',fBh='onstop',hOh='onsubmit',bOh='onunload',pAh='onzoom',poh='oopf;',lMh='opacity',qoh='opar;',nah='open',fOh='operator',roh='operp;',soh='oplus;',oxg='optgroup',cMh='optimum',dxg='option',u2h='or',toh='or;',voh='orarr;',woh='ord;',Enh='order',xoh='order;',yoh='orderof;',zoh='ordf',Aoh='ordf;',Boh='ordm',Coh='ordm;',bLh='org.xml.sax.',rCh='orient',pTh='orientation',eAh='origin',Doh='origof;',Eoh='oror;',aph='orslope;',bph='orv;',cph='oscr;',dph='oslash',eph='oslash;',fph='osol;',joh='other',nug='otherwise',gph='otilde',hph='otilde;',iph='otimes;',jph='otimesas;',mph='ouml',nph='ouml;',Cvg='outerproduct',Dqg='output',oph='ovbar;',gOh='overflow',o0h='overline-position',y0h='overline-thickness',ywg='p',CNh='panose-1',pph='par;',qph='para',rph='para;',sph='parallel;',l6h='param',tph='parsim;',uph='parsl;',vph='part;',ovg='partialdiff',heh='path',gSh='pathLength',fSh='pathlength',BMh='pattern',e1h='patternContentUnits',vZh='patternTransform',zVh='patternUnits',d1h='patterncontentunits',uZh='patterntransform',xVh='patternunits',xph='pcy;',yph='percnt;',zph='period;',Aph='permil;',Bph='perp;',Cph='pertenk;',Dph='pfr;',Eph='phi;',Fph='phiv;',aqh='phmmat;',cqh='phone;',v2h='pi',dqh='pi;',k6h='piece',oug='piecewise',seh='ping',eqh='pitchfork;',fqh='piv;',EJg='plaintext',gqh='planck;',hqh='planckh;',iqh='plankv;',uQh='playcount',c5h='plus',jqh='plus;',kqh='plusacir;',lqh='plusb;',nqh='pluscir;',oqh='plusdo;',pqh='plusdu;',qqh='pluse;',rqh='plusmn',sqh='plusmn;',tqh='plussim;',uqh='plustwo;',vqh='pm;',oYh='pointer-events',wqh='pointint;',dIh='points',pQh='pointsAtX',tQh='pointsAtY',nQh='pointsAtZ',oQh='pointsatx',qQh='pointsaty',mQh='pointsatz',ysg='polygon',wtg='polyline',yqh='popf;',yHh='poster',zqh='pound',Aqh='pound;',m6h='power',Bqh='pr;',Cqh='prE;',Dqh='prap;',Eqh='prcue;',y3h='pre',Fqh='pre;',arh='prec;',brh='precapprox;',drh='preccurlyeq;',erh='preceq;',frh='precnapprox;',grh='precneqq;',hrh='precnsim;',irh='precsim;',xtg='prefetch',vXh='preserveAlpha',c1h='preserveAspectRatio',uXh='preservealpha',b1h='preserveaspectratio',jrh='prime;',Eqg='primes',krh='primes;',qYh='primitiveUnits',pYh='primitiveunits',lrh='prnE;',mrh='prnap;',orh='prnsim;',prh='prod;',zsg='product',qrh='profalar;',CMh='profile',rrh='profline;',srh='profsurf;',ytg='progress',oIh='prompt',trh='prop;',urh='propto;',vrh='prsim;',ztg='prsubset',wrh='prurel;',xrh='pscr;',zrh='psi;',Arh='puncsp;',x1h='q',Brh='qfr;',Crh='qint;',Drh='qopf;',Erh='qprime;',Frh='qscr;',ash='quaternions;',bsh='quatint;',csh='quest;',esh='questeq;',fsh='quot',gsh='quot;',Atg='quotient',uSg='r',hsh='rAarr;',ish='rArr;',jsh='rAtail;',ksh='rBarr;',lsh='rHar;',msh='race;',nsh='racute;',wwg='radialGradient',vwg='radialgradient',psh='radic;',iSh='radiogroup',gKh='radius',qsh='raemptyv;',rsh='rang;',ssh='rangd;',tsh='range;',ush='rangle;',vsh='raquo',wsh='raquo;',xsh='rarr;',ysh='rarrap;',Bsh='rarrb;',Csh='rarrbfs;',Dsh='rarrc;',Esh='rarrfs;',Fsh='rarrhk;',ath='rarrlp;',bth='rarrpl;',cth='rarrsim;',dth='rarrtl;',eth='rarrw;',gth='ratail;',hth='ratio;',pug='rationals',ith='rationals;',jth='rbarr;',kth='rbbrk;',lth='rbrace;',mth='rbrack;',nth='rbrke;',oth='rbrksld;',pth='rbrkslu;',rth='rcaron;',sth='rcedil;',tth='rceil;',uth='rcub;',vth='rcy;',wth='rdca;',xth='rdldhar;',yth='rdquo;',zth='rdquor;',Ath='rdsh;',uOh='readonly',f5h='real',Cth='real;',Dth='realine;',Eth='realpart;',n6h='reals',Fth='reals;',h5h='rect',auh='rect;',jfh='refX',Ffh='refY',Eeh='refx',ufh='refy',buh='reg',cuh='reg;',p5g='rel',g5h='reln',z3h='rem',yZh='rendering-intent',yNg='renesis',CKh='repeat',hSh='repeat-max',mSh='repeat-min',FVh='repeat-start',gZh='repeat-template',gUh='repeatCount',yQh='repeatDur',fUh='repeatcount',xQh='repeatdur',fNh='replace',BOh='required',C0h='requiredExtensions',xZh='requiredFeatures',B0h='requiredextensions',wZh='requiredfeatures',EMh='restart',rKh='result',A5g='rev',duh='rfisht;',euh='rfloor;',fuh='rfr;',huh='rhard;',iuh='rharu;',juh='rharul;',kuh='rho;',luh='rhov;',muh='rightarrow;',nuh='rightarrowtail;',ouh='rightharpoondown;',puh='rightharpoonup;',quh='rightleftarrows;',suh='rightleftharpoons;',tuh='rightrightarrows;',uuh='rightsquigarrow;',vuh='rightthreetimes;',wuh='ring;',xuh='risingdotseq;',yuh='rlarr;',zuh='rlhar;',Auh='rlm;',Buh='rmoust;',Duh='rmoustache;',Euh='rnmid;',Fuh='roang;',avh='roarr;',bvh='robrk;',bih='role',i5h='root',cvh='ropar;',dvh='ropf;',evh='roplus;',fLh='rotate',fvh='rotimes;',yOh='rowalign',wOh='rowlines',ahh='rows',nSh='rowspacing',FMh='rowspan',x2h='rp',gvh='rpar;',ivh='rpargt;',jvh='rppolint;',gLh='rquote',kvh='rrarr;',lvh='rsaquo;',mvh='rscr;',nvh='rsh;',eLh='rspace',ovh='rsqb;',pvh='rsquo;',qvh='rsquor;',tZg='rt',rvh='rthree;',tvh='rtimes;',uvh='rtri;',vvh='rtrie;',wvh='rtrif;',xvh='rtriltri;',AGg='ruby',d5h='rule',fth='rules',yvh='ruluhar;',EZg='rx',zvh='rx;',j0g='ry',oOg='s',fPg='s:',Avh='sacute;',l5h='samp',aNh='sandbox',Bvh='sbquo;',Cvh='sc;',Evh='scE;',iwg='scalarproduct',osh='scale',Fvh='scap;',awh='scaron;',bwh='sccue;',cwh='sce;',dwh='scedil;',pJh='scheme',ewh='scirc;',fwh='scnE;',gwh='scnap;',hwh='scnsim;',dsh='scope',zIh='scoped',lwh='scpolint;',hIg='script',eUh='scriptlevel',wXh='scriptminsize',g1h='scriptsizemultiplier',lUh='scrolldelay',wQh='scrolling',mwh='scsim;',nwh='scy;',n5h='sdev',owh='sdot;',pwh='sdotb;',qwh='sdote;',rwh='seArr;',xOh='seamless',swh='searhk;',twh='searr;',uwh='searrow;',B3h='sec',j5h='sech',wwh='sect',xwh='sect;',Bsg='section',vgh='seed',xvg='select',vOh='selected',zQh='selection',Btg='selector',qug='semantics',ywh='semi;',F3h='sep',AQh='separator',lSh='separators',zwh='seswar;',b4h='set',Asg='setdiff',Awh='setminus;',Bwh='setmn;',Cwh='sext;',Dwh='sfr;',Ewh='sfrown;',yrh='shape',eZh='shape-rendering',Fwh='sharp;',bxh='shchcy;',cxh='shcy;',dxh='shortmid;',exh='shortparallel;',vSh='show',fxh='shy',gxh='shy;',hxh='sigma;',ixh='sigmaf;',jxh='sigmav;',kxh='sim;',mxh='simdot;',nxh='sime;',oxh='simeq;',pxh='simg;',qxh='simgE;',rxh='siml;',sxh='simlE;',txh='simne;',uxh='simplus;',vxh='simrarr;',E3h='sin',k5h='sinh',kgh='size',xxh='slarr;',nrh='slope',o6h='small',yxh='smallsetminus;',zxh='smashp;',Axh='smeparsl;',Bxh='smid;',Cxh='smile;',Dxh='smt;',Exh='smte;',Fxh='softcy;',ayh='sol;',cyh='solb;',dyh='solbar;',Dug='solidcolor',eyh='sopf;',Fqg='source',CQh='space',erg='spacer',DMh='spacing',fyh='spades;',gyh='spadesuit;',lhh='span',hyh='spar;',xXh='specification',CZh='specularConstant',AZh='specularExponent',BZh='specularconstant',zZh='specularexponent',Ash='speed',BVh='spreadMethod',AVh='spreadmethod',iyh='sqcap;',jyh='sqcup;',kyh='sqsub;',lyh='sqsube;',nyh='sqsubset;',oyh='sqsubseteq;',pyh='sqsup;',qyh='sqsupe;',ryh='sqsupset;',syh='sqsupseteq;',tyh='squ;',uyh='square;',vyh='squarf;',wyh='squf;',yyh='srarr;',f6g='src',zyh='sscr;',Ayh='ssetmn;',Byh='ssmile;',Cyh='sstarf;',eNh='standby',Dyh='star;',Eyh='starf;',guh='start',kUh='startOffset',jUh='startoffset',iIh='startup',bWh='stdDeviation',aWh='stddeviation',qth='stemh',Bth='stemv',whh='step',iUh='stitchTiles',hUh='stitchtiles',m5h='stop',kSh='stop-color',cWh='stop-opacity',Fyh='straightepsilon;',azh='straightphi;',zOh='stretchy',arg='strike',l1h='strikethrough-position',m1h='strikethrough-thickness',eJh='string',bzh='strns;',AJh='stroke',FZh='stroke-dasharray',u0h='stroke-dashoffset',uYh='stroke-linecap',fZh='stroke-linejoin',v0h='stroke-miterlimit',wYh='stroke-opacity',EVh='stroke-width',brg='strong',BHg='style',A3h='sub',dzh='sub;',ezh='subE;',fzh='subdot;',gzh='sube;',hzh='subedot;',izh='submult;',jzh='subnE;',kzh='subne;',lzh='subplus;',mzh='subrarr;',vYh='subscriptshift',frg='subset',ozh='subset;',pzh='subseteq;',qzh='subseteqq;',rzh='subsetneq;',szh='subsetneqq;',tzh='subsim;',uzh='subsub;',vzh='subsup;',wzh='succ;',xzh='succapprox;',Azh='succcurlyeq;',Bzh='succeq;',Czh='succnapprox;',Dzh='succneqq;',Ezh='succnsim;',Fzh='succsim;',D3h='sum',aAh='sum;',bNh='summary',bAh='sung;',a4h='sup',cAh='sup1',dAh='sup1;',fAh='sup2',gAh='sup2;',hAh='sup3',iAh='sup3;',jAh='sup;',kAh='supE;',lAh='supdot;',mAh='supdsub;',nAh='supe;',oAh='supedot;',EZh='superscriptshift',qAh='suphsub;',rAh='suplarr;',sAh='supmult;',tAh='supnE;',uAh='supne;',vAh='supplus;',wAh='supset;',xAh='supseteq;',yAh='supseteqq;',zAh='supsetneq;',BAh='supsetneqq;',CAh='supsim;',DAh='supsub;',EAh='supsup;',DVh='surfaceScale',CVh='surfacescale',C3h='svg',FAh='swArr;',aBh='swarhk;',bBh='swarr;',cBh='swarrow;',crg='switch',dBh='swnwar;',drg='symbol',vQh='symmetric',tYh='systemLanguage',sYh='systemlanguage',eBh='szlig',gBh='szlig;',tOh='tabindex',cwg='table',dUh='tableValues',cUh='tablevalues',d4h='tan',s5h='tanh',lGh='target',hBh='target;',uMh='targetX',wMh='targetY',tMh='targetx',vMh='targety',iBh='tau;',FBg='tbody',grg='tbreak',jBh='tbrk;',kBh='tcaron;',lBh='tcedil;',mBh='tcy;',fyg='td',nBh='tdot;',oBh='telrec;',sOh='template',Csg='tendsto',Cdh='text',FTh='text-anchor',dZh='text-decoration',mYh='text-rendering',aSh='textLength',Dtg='textPath',qHg='textarea',FRh='textlength',Ctg='textpath',vCg='tfoot',pBh='tfr;',qyg='th',kCg='thead',rBh='there4;',sBh='therefore;',tBh='theta;',uBh='thetasym;',vBh='thetav;',wBh='thickapprox;',lYh='thickmathspace',xBh='thicksim;',oXh='thinmathspace',yBh='thinsp;',zBh='thkap;',ABh='thksim;',CBh='thorn',DBh='thorn;',EBh='tilde;',o5h='time',r6h='times',FBh='times;',aCh='timesb;',bCh='timesbar;',cCh='timesd;',dCh='tint;',fHg='title',u0g='to',eCh='toea;',fCh='top;',hCh='topbot;',iCh='topcir;',jCh='topf;',kCh='topfork;',lCh='tosa;',mCh='tprime;',uBg='tr',nCh='trade;',jQh='transform',rug='transpose',r5h='tref',oCh='triangle;',pCh='triangledown;',qCh='triangleleft;',sCh='trianglelefteq;',tCh='triangleq;',uCh='triangleright;',vCh='trianglerighteq;',wCh='tridot;',xCh='trie;',yCh='triminus;',zCh='triplus;',ACh='trisb;',BCh='tritime;',DCh='trpezium;',q5h='true',ECh='tscr;',FCh='tscy;',aDh='tshcy;',p6h='tspan',bDh='tstrok;',y2h='tt',cDh='twixt;',dDh='twoheadleftarrow;',eDh='twoheadrightarrow;',Bch='type',y1h='u',gZg='u1',BYg='u2',fDh='uArr;',gDh='uHar;',jDh='uacute',kDh='uacute;',lDh='uarr;',kxg='ublic',mDh='ubrcy;',nDh='ubreve;',oDh='ucirc',pDh='ucirc;',qDh='ucy;',rDh='udarr;',sDh='udblac;',uDh='udhar;',vDh='ufisht;',wDh='ufr;',xDh='ugrave',yDh='ugrave;',zDh='uharl;',ADh='uharr;',BDh='uhblk;',z2h='ul',CDh='ulcorn;',DDh='ulcorner;',FDh='ulcrop;',aEh='ultri;',bEh='umacr;',cEh='uml',dEh='uml;',z0h='underline-position',a1h='underline-thickness',sMh='unicode',sVh='unicode-bidi',nXh='unicode-range',s6h='union',tVh='units-per-em',rVh='unselectable',eEh='uogon;',fEh='uopf;',gEh='uparrow;',hEh='updownarrow;',iEh='upharpoonleft;',kEh='upharpoonright;',Dsg='uplimit',lEh='uplus;',mEh='upsi;',nEh='upsih;',oEh='upsilon;',pEh='upuparrows;',qEh='urcorn;',rEh='urcorner;',sEh='urcrop;',tEh='uring;',vEh='urtri;',wEh='uscr;',e4h='use',vFh='usemap',xEh='utdot;',yEh='utilde;',zEh='utri;',AEh='utrif;',BEh='uuarr;',CEh='uuml',DEh='uuml;',EEh='uwangle;',wVh='v-alphabetic',kQh='v-hanging',tXh='v-ideographic',nYh='v-mathematical',aFh='vArr;',bFh='vBar;',cFh='vBarv;',dFh='vDash;',cHh='valign',crh='value',xGh='values',lQh='valuetype',eFh='vangrt;',f4h='var',fFh='varepsilon;',Etg='variance',gFh='varkappa;',hFh='varnothing;',iFh='varphi;',jFh='varpi;',lFh='varpropto;',mFh='varr;',nFh='varrho;',oFh='varsigma;',pFh='vartheta;',qFh='vartriangleleft;',rFh='vartriangleright;',sFh='vcy;',tFh='vdash;',irg='vector',jwg='vectorproduct',uFh='vee;',wFh='veebar;',xFh='veeeq;',yFh='vellip;',zFh='verbar;',AMh='version',eSh='vert-adv-y',rXh='vert-origin-x',sXh='vert-origin-y',AFh='vert;',A0h='verythickmathspace',s0h='verythinmathspace',j1h='veryverythickmathspace',i1h='veryverythinmathspace',BFh='vfr;',u6h='video',t5h='view',zMh='viewBox',dSh='viewTarget',yMh='viewbox',cSh='viewtarget',bSh='visibility',t6h='vkern',xqh='vlink',CFh='vltri;',DFh='vopf;',EFh='vprop;',FFh='vrtri;',bGh='vscr;',nHh='vspace',cGh='vzigzag;',g4h='wbr',dGh='wcirc;',eGh='wedbar;',fGh='wedge;',gGh='wedgeq;',hGh='weierp;',iGh='wfr;',gdh='when',mqh='width',aGh='widths',jGh='wopf;',uVh='word-spacing',kGh='wp;',mGh='wr;',rdh='wrap',nGh='wreath;',vVh='writing-mode',oGh='wscr;',FSg='x',EOh='x-height',v1g='x1',a2g='x2',b0h='xChannelSelector',pGh='xcap;',a0h='xchannelselector',qGh='xcirc;',rGh='xcup;',sGh='xdtri;',tGh='xfr;',uGh='xhArr;',vGh='xharr;',yGh='xi;',zGh='xlArr;',AGh='xlarr;',hRg='xlink',yXh='xlink:actuate',AXh='xlink:arcrole',sSh='xlink:href',rSh='xlink:role',tSh='xlink:show',oUh='xlink:title',qSh='xlink:type',BGh='xmap;',sRg='xml',COh='xml:base',DOh='xml:lang',BQh='xml:space',CQg='xmlns',s1h='xmlns:',nUh='xmlns:xlink',sIg='xmp',CGh='xnis;',DGh='xodot;',EGh='xopf;',FGh='xoplus;',h4h='xor',aHh='xotime;',bHh='xrArr;',dHh='xrarr;',nih='xref',eHh='xscr;',fHh='xsqcup;',gHh='xuplus;',hHh='xutri;',iHh='xvee;',jHh='xwedge;',kTg='y',k1g='y1',F0g='y2',d0h='yChannelSelector',kHh='yacute',lHh='yacute;',mHh='yacy;',c0h='ychannelselector',oHh='ycirc;',pHh='ycy;',qHh='yen',rHh='yen;',sHh='yfr;',tHh='yicy;',uHh='yopf;',vHh='yscr;',lxg='ystem',wHh='yucy;',xHh='yuml',zHh='yuml;',vTg='z',AHh='zacute;',BHh='zcaron;',CHh='zcy;',DHh='zdot;',EHh='zeetrf;',FHh='zeta;',aIh='zfr;',bIh='zhcy;',cIh='zigrarr;',pSh='zoomAndPan',oSh='zoomandpan',eIh='zopf;',fIh='zscr;',gIh='zwj;',hIh='zwnj;',b3g='{',F9g='}',tsg='\u201D cannot be represented as XML 1.0.',eyg='\u201D is not serializable as XML 1.0.',nxg='\u201D without an explicit value seen. The attribute may be dropped by IE7.',rxg='\u201D.';var _,C7h=[0,-9223372036854775808],D7h=[16777216,0],E7h=[4294967295,9223372032559808512];
+function zdi(a){return (this==null?null:this)===(a==null?null:a)}
 function Adi(){return k$h}
 function Bdi(){return this.$H||(this.$H=++D8h)}
 function Cdi(){return (this.tM==v0i||this.tI==2?this.gC():F9h).b+zqg+idi(this.tM==v0i||this.tI==2?this.hC():this.$H||(this.$H=++D8h),4)}
@@ -10575,17 +9141,18 @@ function uai(a){if(a>=0){return [a,0]}else{return [a+4294967296,-4294967296]}}
 function jai(){jai=v0i;kai=e9h(dai,53,13,256,0)}
 var kai;function mai(){mai=v0i;Math.log(2);nai=E7h;oai=C7h;tai(-1);tai(1);tai(2);pai=tai(0)}
 var nai,oai,pai;function gbi(){gbi=v0i;obi=fji(new eji());sbi(new bbi())}
-function fbi(a){if(a.b){$wnd.clearInterval(a.c)}else{$wnd.clearTimeout(a.c)}lji(obi,a)}
+function fbi(a){if(a.b){clearInterval(a.c)}else{clearTimeout(a.c)}lji(obi,a)}
 function hbi(a){if(!a.b){lji(obi,a)}rni(a)}
 function ibi(b,a){if(a<=0){throw Fci(new Eci(),Bqg)}fbi(b);b.b=false;b.c=lbi(b,a);gji(obi,b)}
-function lbi(b,a){return $wnd.setTimeout(function(){b.zb()},a)}
+function lbi(b,a){return setTimeout(function(){b.zb()},a)}
 function mbi(){hbi(this)}
 function nbi(){return b$h}
 function abi(){}
 _=abi.prototype=new xdi();_.zb=mbi;_.gC=nbi;_.tI=0;_.b=false;_.c=0;var obi;function dbi(){while((gbi(),obi).b>0){fbi(p9h(iji(obi,0),3))}}
 function ebi(){return a$h}
 function bbi(){}
-_=bbi.prototype=new xdi();_.gC=ebi;_.tI=7;function sbi(a){ybi();if(!tbi){tbi=fji(new eji())}gji(tbi,a)}
+_=bbi.prototype=new xdi();_.gC=ebi;_.tI=7;
+function sbi(a){ybi();if(!tbi){tbi=fji(new eji())}gji(tbi,a)}
 function ubi(){var a;if(tbi){for(a=zhi(new xhi(),tbi);a.a<a.b.bc();){p9h(Chi(a),4);dbi()}}}
 function vbi(){var a,b;b=null;if(tbi){for(a=zhi(new xhi(),tbi);a.a<a.b.bc();){p9h(Chi(a),4);b=null}}return b}
 function xbi(){__gwt_initHandlers(function(){},function(){return vbi()},function(){ubi()})}
@@ -10888,18 +9455,18 @@ _=emi.prototype=new oHi();_.gC=cni;_.tI=0;_.a=null;_.b=null;_.c=false;_.d=null;f
 function imi(){return j_h}
 function fmi(){}
 _=fmi.prototype=new xdi();_.gC=imi;_.tI=34;_.a=null;_.b=null;function Ani(b,a){b.b=tei(new rei());b.a=xki(new hki());b.c=kmi(new emi(),a);b.i=fUi(new dUi(),b.c);b.c.u=(Fli(),bmi);b.i.p=bmi;b.i.e=bmi;b.i.t=bmi;b.i.db=bmi;hXi(b.i,bmi);return b}
-function Cni(i,h,a){i.f=a;g0i(i.c,null);i.e=false;i.d=false;yei(i.b,0);i.h=h.length;i.g=q0i(new p0i(),lfi(h),0,i.h<512?i.h:512);Aki(i.a);zki(i.a,i.g);g0i(i.c,null);iXi(i.i);Dni(i)}
-function Dni(e){var a,b,c,d,f;if(e.d){BWi(e.i);xmi(e.c);e.f.a();return}b=e.b.c;if(b>0){c=e9h(A_h,42,-1,b,1);wei(e.b,0,b,c,0);zki(e.a,q0i(new p0i(),c,0,b));yei(e.b,0)}for(;;){a=p9h(Cki(e.a),21);if(a.c>=a.b){if(a==e.g){if(a.b==e.h){CWi(e.i);e.d=true;break}else{d=a.c+512;a.b=d<e.h?d:e.h;continue}}else{p9h(Eki(e.a),21);continue}}r0i(a,e.e);e.e=false;if(a.c<a.b){e.e=kXi(e.i,a);Ami(e.c);break}else{continue}}f=pni(new oni(),e);ibi(f,1)}
+function Cni(i,h,j,a){i.f=a;g0i(i.c,null);i.e=false;i.d=false;yei(i.b,0);i.h=h.length;i.g=q0i(new p0i(),lfi(h),0,i.h<512?i.h:512);Aki(i.a);zki(i.a,i.g);g0i(i.c,null);iXi(i.i);Dni(i,j)}
+function Dni(g,i){var a,c,d,e,f,h;if(g.d){BWi(g.i);xmi(g.c);g.f.a();return}d=g.b.c;if(d>0){e=e9h(A_h,42,-1,d,1);wei(g.b,0,d,e,0);zki(g.a,q0i(new p0i(),e,0,d));yei(g.b,0)}for(;;){c=p9h(Cki(g.a),21);if(c.c>=c.b){if(c==g.g){if(c.b==g.h){CWi(g.i);g.d=true;break}else{f=c.c+512;c.b=f<g.h?f:g.h;continue}}else{p9h(Eki(g.a),21);continue}}r0i(c,g.e);g.e=false;if(c.c<c.b){g.e=kXi(g.i,c);Ami(g.c);break}else{continue}}if(i){h=pni(new oni(),g);ibi(h,1)}else{try{Dni(g,false)}catch(a){a=gai(a);if(s9h(a,22)){g.d=true}else throw a}}}
 function aoi(h){var a;a=q0i(new p0i(),lfi(h),0,h.length);while(a.c<a.b){r0i(a,this.e);this.e=false;if(a.c<a.b){this.e=kXi(this.i,a);Ami(this.c)}}}
 function boi(){return m_h}
 function nni(){}
 _=nni.prototype=new xdi();_.xb=aoi;_.gC=boi;_.tI=0;_.c=null;_.d=false;_.e=false;_.f=null;_.g=null;_.h=0;_.i=null;function qni(){qni=v0i;gbi()}
 function pni(b,a){qni();b.a=a;return b}
-function rni(c){var a;try{Dni(c.a)}catch(a){a=gai(a);if(s9h(a,22)){c.a.d=true}else throw a}}
+function rni(c){var a;try{Dni(c.a,true)}catch(a){a=gai(a);if(s9h(a,22)){c.a.d=true}else throw a}}
 function sni(){return l_h}
 function oni(){}
 _=oni.prototype=new abi();_.gC=sni;_.tI=35;_.a=null;function wni(c,d){c.write=function(){if(arguments.length==0){return}var b=arguments[0];for(var a=1;a<arguments.length;a++){b+=arguments[a]}d.xb(b)};c.writeln=function(){if(arguments.length==0){d.xb(qPg);return}var b=arguments[0];for(var a=1;a<arguments.length;a++){b+=arguments[a]}b+=qPg;d.xb(b)}}
-function xni(e,a,d,b){var c;if(!d){d=q8h()}yni(a);c=Ani(new nni(),a);wni(a,c);Cni(c,e,doi(new coi(),d))}
+function xni(e,a,f,d,b){var c;if(!d){d=q8h()}yni(a);c=Ani(new nni(),a);wni(a,c);Cni(c,e,f,doi(new coi(),d))}
 function yni(a){while(a.hasChildNodes()){a.removeChild(a.lastChild)}}
 function doi(b,a){b.a=a;return b}
 function goi(){return n_h}
@@ -11021,36 +9588,1913 @@ _=y0i.prototype=new Aci();_.gC=C0i;_.Bb=D0i;_.tS=E0i;_.tI=40;_.a=null;function a
 function b1i(d,c,b,a){d.b=c;d.a=a;if(b){lUi(b);kUi(b)}else{}return d}
 function d1i(){return z_h}
 function F0i(){}
-_=F0i.prototype=new y0i();_.gC=d1i;_.tI=41;function Cbi(){!!$stats&&$stats({moduleName:$moduleName,subSystem:iIh,evtGroup:jIh,millis:(new Date()).getTime(),type:kIh,className:lIh});$wnd.parseHtmlDocument=xni}
-function gwtOnLoad(b,d,c){$moduleName=d;$moduleBase=c;if(b)try{Cbi()}catch(a){b(d)}else{Cbi()}}
+_=F0i.prototype=new y0i();_.gC=d1i;_.tI=41;function Cbi(){!!$stats&&$stats({moduleName:$moduleName,subSystem:iIh,evtGroup:jIh,millis:(new Date()).getTime(),type:kIh,className:lIh});Envjs.parseHtmlDocument=xni}
+__defineParser__=function gwtOnLoad(b,d,c){$moduleName=d;$moduleBase=c;if(b)try{Cbi()}catch(a){b(d)}else{Cbi()}}
 function v0i(){}
-var k$h=jci(mIh,nIh),b$h=jci(pIh,qIh),q$h=jci(mIh,rIh),g$h=jci(mIh,sIh),l$h=jci(mIh,tIh),E9h=jci(uIh,vIh),F9h=jci(uIh,wIh),D_h=ici(xIh,yIh),f$h=jci(mIh,AIh),dai=ici(cNh,BIh),s$h=jci(CIh,DIh),A$h=jci(CIh,EIh),F$h=jci(CIh,FIh),a$h=jci(pIh,aJh),i$h=jci(mIh,bJh),c$h=jci(mIh,cJh),A_h=ici(cNh,dJh),e$h=jci(mIh,fJh),d$h=jci(mIh,gJh),h$h=jci(mIh,hJh),B_h=ici(cNh,iJh),j$h=jci(mIh,jJh),p$h=jci(mIh,aUh),m$h=jci(mIh,kJh),n$h=jci(mIh,lJh),o$h=jci(mIh,mJh),r$h=jci(mIh,nJh),C_h=ici(xIh,oJh),C$h=jci(CIh,qJh),x$h=jci(CIh,rJh),E$h=jci(CIh,sJh),u$h=jci(CIh,tJh),t$h=jci(CIh,uJh),B$h=jci(CIh,vJh),v$h=jci(CIh,wJh),w$h=jci(CIh,xJh),y$h=jci(CIh,yJh),z$h=jci(CIh,zJh),D$h=jci(CIh,BJh),a_h=jci(CIh,CJh),b_h=jci(CIh,DJh),e_h=jci(CIh,EJh),c_h=jci(CIh,FJh),d_h=jci(CIh,aKh),f_h=jci(CIh,bKh),g_h=kci(cKh,dKh),h_h=kci(cKh,eKh),i_h=kci(cKh,hKh),w_h=jci(iKh,jKh),p_h=jci(iKh,kKh),k_h=jci(lKh,mKh),j_h=jci(lKh,nKh),m_h=jci(lKh,oKh),l_h=jci(lKh,pKh),n_h=jci(lKh,qKh),bai=ici(cNh,sKh),E_h=ici(tKh,uKh),o_h=jci(iKh,vKh),F_h=ici(tKh,wKh),q_h=jci(iKh,xKh),v_h=jci(iKh,yKh),r_h=jci(iKh,zKh),s_h=jci(iKh,AKh),t_h=jci(iKh,BKh),cai=ici(cNh,DKh),u_h=jci(iKh,EKh),aai=ici(tKh,FKh),x_h=jci(iKh,aLh),y_h=jci(bLh,cLh),z_h=jci(bLh,dLh);if (nu_validator_htmlparser_HtmlParser) {  var __gwt_initHandlers = nu_validator_htmlparser_HtmlParser.__gwt_initHandlers;  nu_validator_htmlparser_HtmlParser.onScriptLoad(gwtOnLoad);}})();/**
- * @author thatcher
+var k$h=jci(mIh,nIh),b$h=jci(pIh,qIh),q$h=jci(mIh,rIh),g$h=jci(mIh,sIh),l$h=jci(mIh,tIh),E9h=jci(uIh,vIh),F9h=jci(uIh,wIh),D_h=ici(xIh,yIh),f$h=jci(mIh,AIh),dai=ici(cNh,BIh),s$h=jci(CIh,DIh),A$h=jci(CIh,EIh),F$h=jci(CIh,FIh),a$h=jci(pIh,aJh),i$h=jci(mIh,bJh),c$h=jci(mIh,cJh),A_h=ici(cNh,dJh),e$h=jci(mIh,fJh),d$h=jci(mIh,gJh),h$h=jci(mIh,hJh),B_h=ici(cNh,iJh),j$h=jci(mIh,jJh),p$h=jci(mIh,aUh),m$h=jci(mIh,kJh),n$h=jci(mIh,lJh),o$h=jci(mIh,mJh),r$h=jci(mIh,nJh),C_h=ici(xIh,oJh),C$h=jci(CIh,qJh),x$h=jci(CIh,rJh),E$h=jci(CIh,sJh),u$h=jci(CIh,tJh),t$h=jci(CIh,uJh),B$h=jci(CIh,vJh),v$h=jci(CIh,wJh),w$h=jci(CIh,xJh),y$h=jci(CIh,yJh),z$h=jci(CIh,zJh),D$h=jci(CIh,BJh),a_h=jci(CIh,CJh),b_h=jci(CIh,DJh),e_h=jci(CIh,EJh),c_h=jci(CIh,FJh),d_h=jci(CIh,aKh),f_h=jci(CIh,bKh),g_h=kci(cKh,dKh),h_h=kci(cKh,eKh),i_h=kci(cKh,hKh),w_h=jci(iKh,jKh),p_h=jci(iKh,kKh),k_h=jci(lKh,mKh),j_h=jci(lKh,nKh),m_h=jci(lKh,oKh),l_h=jci(lKh,pKh),n_h=jci(lKh,qKh),bai=ici(cNh,sKh),E_h=ici(tKh,uKh),o_h=jci(iKh,vKh),F_h=ici(tKh,wKh),q_h=jci(iKh,xKh),v_h=jci(iKh,yKh),r_h=jci(iKh,zKh),s_h=jci(iKh,AKh),t_h=jci(iKh,BKh),cai=ici(cNh,DKh),u_h=jci(iKh,EKh),aai=ici(tKh,FKh),x_h=jci(iKh,aLh),y_h=jci(bLh,cLh),z_h=jci(bLh,dLh);if (true) {  var __gwt_initHandlers = function(){};  }})();
+/**
+* DOMParser
+*/
+
+__defineParser__(function(e){
+    console.log('Error loading html 5 parser implementation');
+}, 'nu_validator_htmlparser_HtmlParser', '');
+
+/*DOMParser = function(principle, documentURI, baseURI){};
+__extend__(DOMParser.prototype,{
+    parseFromString: function(xmlstring, mimetype){
+        //console.log('DOMParser.parseFromString %s', mimetype);
+        var xmldoc = new Document(new DOMImplementation());
+        return XMLParser.parseDocument(xmlstring, xmldoc, mimetype);
+    }
+});*/
+
+XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
+    //console.log('XMLParser.parseDocument');
+    var tmpdoc = new Document(new DOMImplementation()),
+        parent,
+        importedNode,
+        tmpNode;
+        
+    if(mimetype && mimetype == 'text/xml'){
+        //console.log('mimetype: text/xml');
+        tmpdoc.baseURI = 'http://envjs.com/xml';
+        xmlstring = '<html><head></head><body>'+
+            '<envjs_1234567890 xmlns="envjs_1234567890">'
+                +xmlstring+
+            '</envjs_1234567890>'+
+        '</body></html>';
+        Envjs.parseHtmlDocument(xmlstring, tmpdoc, false, null, null);  
+        parent = tmpdoc.getElementsByTagName('envjs_1234567890')[0];
+    }else{
+        Envjs.parseHtmlDocument(xmlstring, tmpdoc, false, null, null);  
+        parent = tmpdoc.documentElement;
+    }
+    
+    while(xmldoc.firstChild != null){
+        tmpNode = xmldoc.removeChild( xmldoc.firstChild );
+        delete tmpNode;
+    }
+    while(parent.firstChild != null){
+        tmpNode  = parent.removeChild( parent.firstChild );
+        importedNode = xmldoc.importNode( tmpNode, true);
+        xmldoc.appendChild( importedNode );
+        delete tmpNode;
+    }
+    delete tmpdoc,
+           xmlstring;
+    return xmldoc;
+};
+
+var __fragmentCache__ = {length:0},
+    __cachable__ = 255;
+
+HTMLParser.parseDocument = function(htmlstring, htmldoc){
+    //console.log('HTMLParser.parseDocument %s', htmldoc.async);
+    htmldoc.parsing = true;
+    Envjs.parseHtmlDocument(htmlstring, htmldoc, htmldoc.async, null, null);  
+    //Envjs.wait(-1);
+    return htmldoc;
+};
+HTMLParser.parseFragment = function(htmlstring, element){
+    //console.log('HTMLParser.parseFragment')
+    // fragment is allowed to be an element as well
+    var tmpdoc,
+        parent,
+        importedNode,
+        tmpNode,
+        length,
+        i,
+        docstring;
+    //console.log('parsing fragment: %s', htmlstring);
+    //console.log('__fragmentCache__.length %s', __fragmentCache__.length)
+    if( htmlstring.length > __cachable__ && htmlstring in __fragmentCache__){
+        tmpdoc = __fragmentCache__[htmlstring];
+    }else{
+        //console.log('parsing html fragment \n%s', htmlstring);
+        tmpdoc = new HTMLDocument(new DOMImplementation());
+        //preserves leading white space
+        docstring = '<html><head></head><body>'+
+            '<envjs_1234567890 xmlns="envjs_1234567890">'
+                +htmlstring+
+            '</envjs_1234567890>'+
+        '</body></html>';
+        Envjs.parseHtmlDocument(docstring,tmpdoc, false, null,null);
+        if(htmlstring.length > __cachable__ ){
+            tmpdoc.normalizeDocument();
+            __fragmentCache__[htmlstring] = tmpdoc;
+            __fragmentCache__.length += htmlstring.length;
+            tmpdoc.cached = true;
+        }else{
+            tmpdoc.cached = false;
+        }
+    }
+    
+    //parent is envjs_1234567890 element
+    parent = tmpdoc.body.childNodes[0];
+    while(element.firstChild != null){
+        //zap the elements children so we can import
+        tmpNode = element.removeChild( element.firstChild );
+        delete tmpNode;
+    }
+    if(tmpdoc.cached){
+        length = parent.childNodes.length;
+        for(i=0;i<length;i++){
+            importedNode = element.importNode( parent.childNodes[i], true );
+            element.appendChild( importedNode );  
+        }
+    }else{
+        while(parent.firstChild != null){
+            tmpNode  = parent.removeChild( parent.firstChild );
+            importedNode = element.importNode( tmpNode, true);
+            element.appendChild( importedNode );
+            delete tmpNode;
+        }
+        delete tmpdoc;
+        delete htmlstring;
+    }
+    
+    // console.log('finished fragment: %s', element.outerHTML);
+    return element;
+};
+
+var __clearFragmentCache__ = function(){
+    __fragmentCache__ = {};
+}
+
+
+/**
+ * @name Document
+ * @w3c:domlevel 2 
+ * @uri http://www.w3.org/TR/2000/REC-DOM-Level-2-Events-20001113/events.html
+ */
+__extend__(Document.prototype, {
+    loadXML : function(xmlString) {
+        //console.log('Parser::Document.loadXML');
+        // create Document
+        if(this === document){
+            //$debug("Setting internal window.document");
+            document = this;
+        }
+        // populate Document
+        try {
+            // make sure this document object is empty before we try to load ...
+            this.attributes      = new NamedNodeMap(this, this);
+            this._namespaces     = new NamespaceNodeMap(this, this);
+            this._readonly = false;
+
+            XMLParser.parseDocument(xmlString, this);
+            
+            Envjs.wait(-1);
+        } catch (e) {
+            //$error(e);
+        }
+        return this;
+    }
+});
+
+__extend__(HTMLDocument.prototype,{
+
+    open : function(){ 
+        //console.log('opening doc for write.'); 
+        this._open = true;  
+        this._writebuffer = [];
+    },
+    close : function(){
+        //console.log('closing doc.'); 
+        if(this._open){
+            HTMLParser.parseDocument(this._writebuffer.join('\n'), this);
+            this._open = false;
+            this._writebuffer = null;
+            //console.log('finished writing doc.');
+        }
+    },
+    write: function(htmlstring){ 
+        //console.log('writing doc.'); 
+        if(this._open)
+            this._writebuffer = [htmlstring];
+    },
+    writeln: function(htmlstring){ 
+        if(this.open)
+            this._writebuffer.push(htmlstring); 
+    }
+    
+});
+
+var __elementPopped__ = function(ns, name, node){
+    //console.log('popped html element %s %s %s', ns, name, node);
+    var doc = node.ownerDocument,
+        okay,
+        event;
+    switch(doc.parsing){
+        case false:
+            //innerHTML so dont do loading patterns for parsing
+            //console.log('element popped (implies innerHTML) not in parsing mode %s', node.nodeName);
+            break;
+        case true:
+            switch(doc+''){
+                case '[object XMLDocument]':
+                    break;
+                case '[object HTMLDocument]':
+                    switch(node.namespaceURI){
+                        case "http://n.validator.nu/placeholder/":
+                            //console.log('got script during parsing %s', node.textContent);
+                            break;
+                        case null:
+                        case "":
+                        case "http://www.w3.org/1999/xhtml":
+                            switch(name.toLowerCase()){
+                                case 'script':
+                                    try{
+                                        okay = Envjs.loadLocalScript(node, null);
+                                        // console.log('loaded script? %s %s', node.uuid, okay);
+                                        // only fire event if we actually had something to load
+                                        if (node.src && node.src.length > 0){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent( okay ? "load" : "error", false, false );
+                                            node.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    }
+                                    break;
+                                case 'frame':
+                                case 'iframe':
+                                    node.contentWindow = { };
+                                    node.contentDocument = new HTMLDocument(new DOMImplementation(), node.contentWindow);
+                                    node.contentWindow.document = node.contentDocument;
+                                    try{
+                                        Window;
+                                    }catch(e){
+                                        node.contentDocument.addEventListener('DOMContentLoaded', function(){
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        });
+                                    }
+                                    try{
+                                        if (node.src && node.src.length > 0){
+                                            //console.log("getting content document for (i)frame from %s", node.src);
+                                            Envjs.loadFrame(node, Envjs.uri(node.src));
+                                            event = node.contentDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }else{
+                                            //I dont like this being here:
+                                            //TODO: better  mix-in strategy so the try/catch isnt required
+                                            try{
+                                                if(Window){
+                                                    Envjs.loadFrame(node);
+                                                    //console.log('src/html/document.js: triggering frame load');
+                                                    event = node.contentDocument.createEvent('HTMLEvents');
+                                                    event.initEvent("load", false, false);
+                                                    node.dispatchEvent( event, false );
+                                                }
+                                            }catch(e){}
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %e', node, e.toString());
+                                    }
+                                    /*try{
+                                        if (node.src && node.src.length > 0){
+                                            //console.log("getting content document for (i)frame from %s", node.src);
+                                            Envjs.loadFrame(node, Envjs.uri(node.src));
+                                            event = node.ownerDocument.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            node.dispatchEvent( event, false );
+                                        }else{
+                                            //console.log('src/parser/htmldocument: triggering frame load (no src)');
+                                        }
+                                    }catch(e){
+                                        console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                    }*/
+                                    break;
+                                case 'link':
+                                    if (node.href && node.href.length > 0){
+                                        // don't actually load anything, so we're "done" immediately:
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        node.dispatchEvent( event, false );
+                                    }
+                                    break;
+                                case 'img':
+                                    if (node.src && node.src.length > 0){
+                                        // don't actually load anything, so we're "done" immediately:
+                                        event = doc.createEvent('HTMLEvents');
+                                        event.initEvent("load", false, false);
+                                        node.dispatchEvent( event, false );
+                                    }
+                                    break;
+                                case 'html':
+                                    //console.log('html popped');
+                                    doc.parsing = false;
+                                    //DOMContentLoaded event
+                                    try{
+                                        if(doc.createEvent){
+                                            event = doc.createEvent('Events');
+                                            event.initEvent("DOMContentLoaded", false, false);
+                                            doc.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('%s', e);
+                                    }
+                                    try{
+                                        if(doc.createEvent){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            doc.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('%s', e);
+                                    }
+                                    
+                                    try{
+                                        if(doc.parentWindow){
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            doc.parentWindow.dispatchEvent( event, false );
+                                        }
+                                    }catch(e){
+                                        console.log('%s', e);
+                                    }
+                                    try{
+                                        if(doc === window.document){
+                                            //console.log('triggering window.load')
+                                            event = doc.createEvent('HTMLEvents');
+                                            event.initEvent("load", false, false);
+                                            try{
+                                                window.dispatchEvent( event, false );
+                                            }catch(e){
+                                                console.log('%s', e);
+                                            }
+                                        }
+                                    }catch(e){
+                                        //console.log('%s', e);
+                                        //swallow
+                                    }
+                                default:
+                                    if(node.getAttribute('onload')){
+                                        //console.log('%s onload', node);
+                                        node.onload();
+                                    }
+                                    break;
+                            }//switch on name
+                        default:
+                            break;
+                    }//switch on ns
+                    break;
+                default: 
+                    console.log('element popped: %s %s', ns, name, node.ownerDocument+'');
+            }//switch on doc type
+        default:
+            break;
+    }//switch on parsing
+};
+
+__extend__(HTMLElement.prototype,{
+    set innerHTML(html){
+        HTMLParser.parseFragment(html, this);
+    }
+});
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
  */
 
-Html5Parser();
-
-})($w,$document);
+})();
 /*
-*	outro.js
-*/
-    
+ * Envjs xhr.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ * 
+ * Parts of the implementation originally written by Yehuda Katz.
+ * 
+ * This file simply provides the global definitions we need to 
+ * be able to correctly implement to core browser (XML)HTTPRequest 
+ * interfaces.
+ */
+var Location,
+    XMLHttpRequest;
 
-    };// close function definition begun in 'intro.js'
+/*
+ * Envjs xhr.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
 
 
-    // turn "original" JS interpreter global object into the
-    // "root" window object
-    Envjs.window(this,    // object to "window-ify"
-                 Envjs,   // our scope for globals
-                 this,    // a root window's parent is itself
-                 null,    // "opener" for new window
-                 this,    // "top" for new window
-                 true     // identify this as the original (not reloadable) win
-                );
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * @author john resig
+ */
+//from jQuery
+function __setArray__( target, array ) {
+    // Resetting the length to 0, then using the native Array push
+    // is a super-fast way to populate an object with array-like properties
+    target.length = 0;
+    Array.prototype.push.apply( target, array );
+};
+/**
+ * @author ariel flesler
+ *    http://flesler.blogspot.com/2008/11/fast-trim-function-for-javascript.html 
+ * @param {Object} str
+ */
+function __trim__( str ){
+    return (str || "").replace( /^\s+|\s+$/g, "" );
     
-    
-} catch(e){
-    Envjs.error("ERROR LOADING ENV : " + e + "\nLINE SOURCE:\n" +
-        Envjs.lineSource(e));
+};
+
+/**
+ * @todo: document
+ */
+__extend__(Document.prototype,{
+    load: function(url){
+        if(this.documentURI == 'about:html'){
+            this.location.assign(url);
+        }else if(this.documentURI == url){
+            this.location.reload(false);
+        }else{
+            this.location.replace(url);
+        }
+    },
+    get location(){
+        return new Location(this.documentURI, this);
+    },
+    set location(url){
+        //very important or you will go into an infinite
+        //loop when creating a xml document
+        if(url)
+            this.location.replace(url);
+    }
+});
+
+
+HTMLFormElement.prototype.submit = function(){
+    var event = __submit__(this),
+        serialized,
+        xhr,
+        method,
+        action;
+    if(!event.cancelled){
+        serialized = __formSerialize__(this);
+        xhr = new XMLHttpRequest();
+        method = this.method !== ""?this.method:"GET";
+        action = this.action !== ""?this.action:this.ownerDocument.baseURI;
+        xhr.open(method, action, false);
+        xhr.send(data, false);
+        if(xhr.readyState === 4){
+            __exchangeHTMLDocument__(this.ownerDocument, xhr.responseText, url);
+        }
+    }   
 }
+/**
+ * Form Submissions
+ * 
+ * This code is borrow largely from jquery.params and jquery.form.js
+ * 
+ * formToArray() gathers form element data into an array of objects that can
+ * be passed to any of the following ajax functions: $.get, $.post, or load.
+ * Each object in the array has both a 'name' and 'value' property.  An example of
+ * an array for a simple login form might be:
+ *
+ * [ { name: 'username', value: 'jresig' }, { name: 'password', value: 'secret' } ]
+ *
+ * It is this array that is passed to pre-submit callback functions provided to the
+ * ajaxSubmit() and ajaxForm() methods.
+ *
+ * The semantic argument can be used to force form serialization in semantic order.
+ * This is normally true anyway, unless the form contains input elements of type='image'.
+ * If your form must be submitted with name/value pairs in semantic order and your form
+ * contains an input of type='image" then pass true for this arg, otherwise pass false
+ * (or nothing) to avoid the overhead for this logic.
+ *
+ *
+ * @name formToArray
+ * @param semantic true if serialization must maintain strict semantic ordering of elements (slower)
+ * @type Array<Object>
+ */
+var __formToArray__ = function(form, semantic) {
+    var array = [],
+        elements = semantic ? form.getElementsByTagName('*') : form.elements,
+        element,
+        i,j,imax, jmax,
+        name,
+        value;
+        
+    if (!elements) 
+        return array;
+    
+    imax = elements.length;
+    for(i=0; i < imax; i++) {
+        element = elements[i];
+        name = element.name;
+        if (!name) 
+            continue;
+
+        if (semantic && form.clk && element.type == "image") {
+            // handle image inputs on the fly when semantic == true
+            if(!element.disabled && form.clk == element)
+                array.push({
+                    name: name+'.x', 
+                    value: form.clk_x
+                },{
+                    name: name+'.y', 
+                    value: form.clk_y
+                });
+            continue;
+        }
+
+        value = __fieldValue__(element, true);
+        if (value && value.constructor == Array) {
+            jmax = value.length;
+            for(j=0; j < jmax; j++){
+                array.push({name: name, value: value[j]});
+            }
+        } else if (value !== null && typeof value != 'undefined'){
+            array.push({name: name, value: value});
+        }
+    }
+
+    if (!semantic && form.clk) {
+        // input type=='image' are not found in elements array! handle them here
+        elements = form.getElementsByTagName("input");
+        imax = imax=elements.length;
+        for(i=0; i < imax; i++) {
+            element = elements[i];
+            name = element.name;
+            if(name && !element.disabled && element.type == "image" && form.clk == input)
+                array.push(
+                    {name: name+'.x', value: form.clk_x}, 
+                    {name: name+'.y', value: form.clk_y});
+        }
+    }
+    return array;
+};
+
+
+/**
+ * Serializes form data into a 'submittable' string. This method will return a string
+ * in the format: name1=value1&amp;name2=value2
+ *
+ * The semantic argument can be used to force form serialization in semantic order.
+ * If your form must be submitted with name/value pairs in semantic order then pass
+ * true for this arg, otherwise pass false (or nothing) to avoid the overhead for
+ * this logic (which can be significant for very large forms).
+ *
+ *
+ * @name formSerialize
+ * @param semantic true if serialization must maintain strict semantic ordering of elements (slower)
+ * @type String
+ */
+var __formSerialize__ = function(form, semantic) {
+    //hand off to param for proper encoding
+    return __param__(__formToArray__(form, semantic));
+};
+
+
+/**
+ * Serializes all field elements inputs Array into a query string.
+ * This method will return a string in the format: name1=value1&amp;name2=value2
+ *
+ * The successful argument controls whether or not serialization is limited to
+ * 'successful' controls (per http://www.w3.org/TR/html4/interact/forms.html#successful-controls).
+ * The default value of the successful argument is true.
+ *
+ *
+ * @name fieldSerialize
+ * @param successful true if only successful controls should be serialized (default is true)
+ * @type String
+ */
+var __fieldSerialize__ = function(inputs, successful) {
+    var array = [],
+        input,
+        name,
+        value,
+        i,j, imax, jmax;
+        
+    imax = inputs.length;
+    for(i=0; i<imax; i++){
+        input = inputs[i];
+        name = input.name;
+        if (!name) 
+            return;
+        value = __fieldValue__(input, successful);
+        if (value && value.constructor == Array) {
+            jmax = value.length;
+            for (j=0; j < max; j++){
+                array.push({
+                    name: name, 
+                    value: value[j]
+                });
+            }
+        }else if (value !== null && typeof value != 'undefined'){
+            array.push({
+                name: input.name, 
+                value: value
+            });
+        }
+    };
+    //hand off  for proper encoding
+    return __param__(array);
+};
+
+
+/**
+ * Returns the value(s) of the element in the matched set.  For example, consider the following form:
+ *
+ *
+ * The successful argument controls whether or not the field element must be 'successful'
+ * (per http://www.w3.org/TR/html4/interact/forms.html#successful-controls).
+ * The default value of the successful argument is true.  If this value is false the value(s)
+ * for each element is returned.
+ *
+ * Note: This method *always* returns an array.  If no valid value can be determined the
+ *       array will be empty, otherwise it will contain one or more values.
+ *
+ *
+ * @name fieldValue
+ * @param Boolean successful true if only the values for successful controls 
+ *        should be returned (default is true)
+ * @type Array<String>
+ */
+var __fieldValues__ = function(inputs, successful) {
+    var i, 
+        imax = inputs.length,
+        element,
+        values = [],
+        value;
+    for (i=0; i < imax; i++) {
+        element = inputs[i];
+        value = __fieldValue__(element, successful);
+        if (value === null || typeof value == 'undefined' || 
+            (value.constructor == Array && !value.length))
+            continue;
+        value.constructor == Array ? 
+            Array.prototype.push(values, value) : 
+            values.push(value);
+    }
+    return values;
+};
+
+/**
+ * Returns the value of the field element.
+ *
+ * The successful argument controls whether or not the field element must be 'successful'
+ * (per http://www.w3.org/TR/html4/interact/forms.html#successful-controls).
+ * The default value of the successful argument is true.  If the given element is not
+ * successful and the successful arg is not false then the returned value will be null.
+ *
+ * Note: If the successful flag is true (default) but the element is not successful, the return will be null
+ * Note: The value returned for a successful select-multiple element will always be an array.
+ * Note: If the element has no value the return value will be undefined.
+ *
+ * @name fieldValue
+ * @param Element el The DOM element for which the value will be returned
+ * @param Boolean successful true if value returned must be for a successful controls (default is true)
+ * @type String or Array<String> or null or undefined
+ */
+var __fieldValue__ = function(element, successful) {
+    var name = element.name, 
+        type = element.type, 
+        tag = element.tagName.toLowerCase(),
+        index,
+        array,
+        options,
+        option,
+        one,
+        i, imax,
+        value;
+    if (typeof successful == 'undefined') successful = true;
+
+    if (successful && (!name || element.disabled || type == 'reset' || type == 'button' ||
+             (type == 'checkbox' || type == 'radio') &&  !element.checked || 
+             (type == 'submit' || type == 'image') && 
+             element.form && element.form.clk != element || tag == 'select' && 
+             element.selectedIndex == -1))
+            return null;
+
+    if (tag == 'select') {
+        index = element.selectedIndex;
+        if (index < 0) 
+            return null;
+        array = [];
+        options = element.options;
+        one = (type == 'select-one');
+        imax = (one ? index+1 : options.length);
+        i = (one ? index : 0);
+        for( i; i < imax; i++) {
+            option = options[i];
+            if (option.selected) {
+                value = option.value;
+                if (one) 
+                    return value;
+                array.push(value);
+            }
+        }
+        return array;
+    }
+    return element.value;
+};
+
+
+/**
+ * Clears the form data.  Takes the following actions on the form's input fields:
+ *  - input text fields will have their 'value' property set to the empty string
+ *  - select elements will have their 'selectedIndex' property set to -1
+ *  - checkbox and radio inputs will have their 'checked' property set to false
+ *  - inputs of type submit, button, reset, and hidden will *not* be effected
+ *  - button elements will *not* be effected
+ *
+ *
+ * @name clearForm
+ */
+var __clearForm__ = function(form) {
+    var i, 
+        j, jmax,
+        elements,
+        resetable = ['input','select','textarea'];
+    for(i=0; i<resetable.lenth; i++){
+        elements = form.getElementsByTagName(resetable[i]);
+        jmax = elements.length;
+        for(j=0;j<jmax;j++){
+            __clearField__(elements[j]);
+        }
+    }
+};
+
+/**
+ * Clears the selected form element.  Takes the following actions on the element:
+ *  - input text fields will have their 'value' property set to the empty string
+ *  - select elements will have their 'selectedIndex' property set to -1
+ *  - checkbox and radio inputs will have their 'checked' property set to false
+ *  - inputs of type submit, button, reset, and hidden will *not* be effected
+ *  - button elements will *not* be effected
+ *
+ * @name clearFields
+ */
+var __clearField__ = function(element) {
+    var type = element.type, 
+        tag = element.tagName.toLowerCase();
+    if (type == 'text' || type == 'password' || tag == 'textarea')
+        element.value = '';
+    else if (type == 'checkbox' || type == 'radio')
+        element.checked = false;
+    else if (tag == 'select')
+        element.selectedIndex = -1;
+};
+
+
+// Serialize an array of key/values into a query string
+var __param__= function( array ) {
+    var serialized = [];
+
+    // Serialize the key/values
+    for(i=0; i<array.length; i++){
+        serialized[ serialized.length ] = 
+            encodeURIComponent(array[i].name) + '=' + 
+            encodeURIComponent(array[i].value);
+    }
+
+    // Return the resulting serialization
+    return serialized.join("&").replace(/%20/g, "+");
+};
+ 
+/**
+ * @todo: document
+ */
+var HASH     = new RegExp('(\\#.*)'),
+    HOSTNAME = new RegExp('\/\/([^\:\/]+)'),
+    PATHNAME = new RegExp('(\/[^\\?\\#]*)'),
+    PORT     = new RegExp('\:(\\d+)\/'),
+    PROTOCOL = new RegExp('(^\\w*\:)'),
+    SEARCH   = new RegExp('(\\?[^\\#]*)');
+        
+
+Location = function(url, doc, history){
+    //console.log('Location url %s', url);
+    var $url = url
+        $document = doc?doc:null,
+        $history = history?history:null;
+    
+    return {
+        get hash(){
+            var m = HASH.exec($url);
+            return m&&m.length>1?m[1]:"";
+        },
+        set hash(hash){
+            $url = this.protocol + this.host + this.pathname + 
+                this.search + (hash.indexOf('#')===0?hash:"#"+hash);
+            if($history){
+                $history.add( $url, 'hash');
+            }
+        },
+        get host(){
+            return this.hostname + (this.port !== ""?":"+this.port:"");
+        },
+        set host(host){
+            $url = this.protocol + host + this.pathname + 
+                this.search + this.hash;
+            if($history){
+                $history.add( $url, 'host');
+            }
+            this.assign($url);
+        },
+        get hostname(){
+            var m = HOSTNAME.exec(this.href);
+            return m&&m.length>1?m[1]:"";
+        },
+        set hostname(hostname){
+            $url = this.protocol + hostname + ((this.port==="")?"":(":"+this.port)) +
+                 this.pathname + this.search + this.hash;
+            if($history){
+                $history.add( $url, 'hostname');
+            }
+            this.assign($url);
+        },
+        get href(){
+            return $url;
+        },
+        set href(url){
+            $url = url;  
+            if($history){
+                $history.add( $url, 'href');
+            }
+            this.assign($url);
+        },
+        get pathname(){
+            var m = this.href;
+            m = PATHNAME.exec(m.substring(m.indexOf(this.hostname)));
+            return m&&m.length>1?m[1]:"/";
+        },
+        set pathname(pathname){
+            $url = this.protocol + this.host + pathname + 
+                this.search + this.hash;
+            if($history){
+                $history.add( $url, 'pathname');
+            }
+            this.assign($url);
+        },
+        get port(){
+            var m = PORT.exec(this.href);
+            return m&&m.length>1?m[1]:"";
+        },
+        set port(port){
+            $url = this.protocol + this.hostname + ":"+port + this.pathname + 
+                this.search + this.hash;
+            if($history){
+                $history.add( $url, 'port');
+            }
+            this.assign($url);
+        },
+        get protocol(){
+            return this.href && PROTOCOL.exec(this.href)[0];
+        },
+        set protocol(protocol){
+            $url = protocol + this.host + this.pathname + 
+                this.search + this.hash;
+            if($history){
+                $history.add( $url, 'protocol');
+            }
+            this.assign($url);
+        },
+        get search(){
+            var m = SEARCH.exec(this.href);
+            return m&&m.length>1?m[1]:"";
+        },
+        set search(search){
+            $url = this.protocol + this.host + this.pathname + 
+                search + this.hash;
+            if($history){
+                $history.add( $url, 'search');
+            }
+            this.assign($url);
+        },
+        toString: function(){
+            return $url;
+        },
+        assign: function(url){
+            var _this = this,
+                xhr;
+            
+            //console.log('assigning %s',url);
+            $url = url;
+            //we can only assign if this Location is associated with a document
+            if($document){
+                //console.log("fetching %s (async? %s)", url, $document.async);
+                xhr = new XMLHttpRequest();
+                xhr.open("GET", url, false);//$document.async);
+                
+                if($document.toString()=="[object HTMLDocument]"){
+                    //tell the xhr to not parse the document as XML
+                    //console.log("loading html document");
+                    xhr.onreadystatechange = function(){
+                        //console.log("readyState %s", xhr.readyState);
+                        if(xhr.readyState === 4){
+                            $document.baseURI = new Location(url, $document);
+                            //console.log('new document baseURI %s', $document.baseURI);
+                            __exchangeHTMLDocument__($document, xhr.responseText, url);
+                        }    
+                    };
+                    xhr.send(null, false);
+                }else{
+                    //Treat as an XMLDocument
+                    xhr.onreadystatechange = function(){
+                        if(xhr.readyState === 4){
+                            $document = xhr.responseXML;
+                            $document.baseURI = $url;
+                            if($document.createEvent){
+                                event = $document.createEvent('Events');
+                                event.initEvent("DOMContentLoaded");
+                                $document.dispatchEvent( event, false );
+                            }
+                        }
+                    };
+                    xhr.send();
+                }
+                
+            };
+            
+        },
+        reload: function(forceget){
+            //for now we have no caching so just proxy to assign
+            //console.log('reloading %s',$url);
+            this.assign($url);
+        },
+        replace: function(url){
+            this.assign(url);
+        }
+    }
+};
+
+var __exchangeHTMLDocument__ = function(doc, text, url){
+    var html, head, title, body, event;
+    try{
+        doc.baseURI = url;
+        HTMLParser.parseDocument(text, doc);
+        Envjs.wait();
+    }catch(e){
+        console.log('parsererror %s', e);
+        try{
+            console.log('document \n %s', doc.documentElement.outerHTML);
+        }catch(ee){}
+        doc = new HTMLDocument(new DOMImplementation(), doc.ownerWindow);
+        html =    doc.createElement('html');
+        head =    doc.createElement('head');
+        title =   doc.createElement('title');
+        body =    doc.createElement('body');
+        title.appendChild(doc.createTextNode("Error"));
+        body.appendChild(doc.createTextNode(e+''));
+        head.appendChild(title);
+        html.appendChild(head);
+        html.appendChild(body);
+        doc.appendChild(html);
+        //console.log('default error document \n %s', doc.documentElement.outerHTML);
+        
+        //DOMContentLoaded event
+        if(doc.createEvent){
+            event = doc.createEvent('Events');
+            event.initEvent("DOMContentLoaded", false, false);
+            doc.dispatchEvent( event, false );
+            
+            event = doc.createEvent('HTMLEvents');
+            event.initEvent("load", false, false);
+            doc.dispatchEvent( event, false );
+        }
+        
+        //finally fire the window.onload event
+        //TODO: this belongs in window.js which is a event
+        //      event handler for DOMContentLoaded on document
+        
+        try{
+            if(doc === window.document){
+                console.log('triggering window.load')
+                event = doc.createEvent('HTMLEvents');
+                event.initEvent("load", false, false);
+                window.dispatchEvent( event, false );
+            }
+        }catch(e){
+            //console.log('window load event failed %s', e);
+            //swallow
+        }
+    }
+};
+/**
+ * 
+ * @class XMLHttpRequest
+ * @author Originally implemented by Yehuda Katz
+ * 
+ */
+
+// this implementation can be used without requiring a DOMParser
+// assuming you dont try to use it to get xml/html documents
+var domparser;
+
+XMLHttpRequest = function(){
+	this.headers = {};
+	this.responseHeaders = {};
+    this.aborted = false;//non-standard
+};
+
+// defined by the standard: http://www.w3.org/TR/XMLHttpRequest/#xmlhttprequest
+// but not provided by Firefox.  Safari and others do define it.
+XMLHttpRequest.UNSENT = 0;
+XMLHttpRequest.OPEN = 1;
+XMLHttpRequest.HEADERS_RECEIVED = 2;
+XMLHttpRequest.LOADING = 3;
+XMLHttpRequest.DONE = 4;
+
+XMLHttpRequest.prototype = {
+	open: function(method, url, async, user, password){ 
+        //console.log('openning xhr %s %s %s', method, url, async);
+		this.readyState = 1;
+		this.async = (async === false)?false:true;
+		this.method = method || "GET";
+		this.url = Envjs.uri(url);
+		this.onreadystatechange();
+	},
+	setRequestHeader: function(header, value){
+		this.headers[header] = value;
+	},
+	send: function(data, parsedoc/*non-standard*/){
+		var _this = this;
+        parsedoc = (parsedoc === undefined)?true:!!parsedoc;
+		function makeRequest(){
+            Envjs.connection(_this, function(){
+                if (!_this.aborted){
+                    var doc = null,
+                        domparser;
+                    // try to parse the document if we havent explicitly set a 
+                    // flag saying not to and if we can assure the text at least
+                    // starts with valid xml
+                    if ( parsedoc && _this.responseText.match(/^\s*</) ) {
+                        domparser = domparser||new DOMParser();
+                        try {
+                            //console.log("parsing response text into xml document");
+                            doc = domparser.parseFromString(_this.responseText+"", 'text/xml');
+                        } catch(e) {
+                            //Envjs.error('response XML does not appear to be well formed xml', e);
+                            console.warn('parseerror \n%s', e);
+                            doc = document.implementation.createDocument('','error',null);
+                            doc.appendChild(doc.createTextNode(e+''));
+                        } 
+                    }else{
+                        //Envjs.warn('response XML does not appear to be xml');
+                    }
+                    _this.__defineGetter__("responseXML", function(){
+                        return doc;
+                    });
+                }
+			}, data);
+
+            if (!_this.aborted){
+                _this.onreadystatechange();
+            }
+		};
+
+		if (this.async){
+            //TODO: what we really need to do here is rejoin the 
+            //      current thread and call onreadystatechange via
+            //      setTimeout so the callback is essentially applied
+            //      at the end of the current callstack
+            //console.log('requesting async: %s', this.url);
+			Envjs.runAsync(makeRequest);
+		}else{
+            //console.log('requesting sync: %s', this.url);
+			makeRequest();
+		}
+	},
+	abort: function(){
+        this.aborted = true;
+	},
+	onreadystatechange: function(){
+		//Instance specific
+	},
+	getResponseHeader: function(header){
+      //$debug('GETTING RESPONSE HEADER '+header);
+	  var rHeader, returnedHeaders;
+		if (this.readyState < 3){
+			throw new Error("INVALID_STATE_ERR");
+		} else {
+			returnedHeaders = [];
+			for (rHeader in this.responseHeaders) {
+				if (rHeader.match(new RegExp(header, "i")))
+					returnedHeaders.push(this.responseHeaders[rHeader]);
+			}
+            
+			if (returnedHeaders.length){ 
+                //$debug('GOT RESPONSE HEADER '+returnedHeaders.join(", "));
+                return returnedHeaders.join(", "); 
+            }
+		}
+        return null;
+	},
+	getAllResponseHeaders: function(){
+	  var header, returnedHeaders = [];
+		if (this.readyState < 3){
+			throw new Error("INVALID_STATE_ERR");
+		} else {
+			for (header in this.responseHeaders){
+				returnedHeaders.push( header + ": " + this.responseHeaders[header] );
+			}
+		}return returnedHeaders.join("\r\n");
+	},
+	async: true,
+	readyState: 0,
+	responseText: "",
+	status: 0,
+    statusText: ""
+};
+
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
+
+/**
+ * @todo: document
+ */
+var Window,
+    Screen,
+    History,
+    Navigator;
+
+
+/*
+ * Envjs window.1.2.0.10 
+ * Pure JavaScript Browser Environment
+ * By John Resig <http://ejohn.org/> and the Envjs Team
+ * Copyright 2008-2010 John Resig, under the MIT License
+ */
+
+(function(){
+
+
+
+
+
+/**
+ * @author john resig
+ */
+// Helper method for extending one object with another.  
+function __extend__(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+        if ( g || s ) {
+            if ( g ) a.__defineGetter__(i, g);
+            if ( s ) a.__defineSetter__(i, s);
+        } else
+            a[i] = b[i];
+    } return a;
+};
+/**
+ * @todo: document
+ */
+
+__extend__(HTMLFrameElement.prototype,{
+
+    get contentDocument(){
+        return this.contentWindow?
+            this.contentWindow.document:
+            null;
+    },
+    set src(value){
+        var event;
+        this.setAttribute('src', value);
+        if (this.parentNode && value && value.length > 0){
+            //console.log('loading frame %s', value);
+            Envjs.loadFrame(this, Envjs.uri(value));
+            
+            //console.log('event frame load %s', value);
+            event = this.ownerDocument.createEvent('HTMLEvents');
+            event.initEvent("load", false, false);
+            this.dispatchEvent( event, false );
+        }
+    }
+    
+});
+
+/*
+*	history.js
+*
+*/
+
+History = function(owner){
+	var $current = 0,
+        $history = [null],
+        $owner = owner;
+	
+    return {
+		get length(){ 
+            return $history.length;
+        },
+		back : function(count){
+			if(count){
+				go(-count);
+			}else{
+                go(-1);
+            }
+		},
+        get current(){
+            return this.item($current);
+        },
+        get previous(){
+            return this.item($current-1);
+        },
+		forward : function(count){
+			if(count){
+				go(count);
+			}else{go(1);}
+		},
+		go : function(target){
+			if(typeof target == "number"){
+				target = $current + target;
+				if(target > -1 && target < $history.length){
+					if($history[target].type == "hash"){
+                        if($owner.location){
+						    $owner.location.hash = $history[target].value;
+                        }
+					}else{
+                        if($owner.location){
+						    $owner.location = $history[target].value;
+                        }
+					}
+					$current = target;
+				}
+			}else{
+				//TODO: walk through the history and find the 'best match'?
+			}
+		},
+        item: function(index){
+            if(index < history.length)
+                return $history[index];
+            else
+                return null;
+        },
+        
+        add: function(newLocation, type){
+            //not a standard interface, we expose it to simplify 
+            //history state modifications
+            if(newLocation !== $history[$current]){
+                $history.slice(0, $current);
+                $history.push({
+                    type: type||"href",
+                    value: value
+                });
+            }
+        }
+	};
+};
+
+
+	
+
+/*
+ *	navigator.js
+ *  Browser Navigator    
+ */
+Navigator = function(){
+
+	return {
+		get appCodeName(){
+			return Envjs.appCodeName;
+		},
+		get appName(){
+			return Envjs.appName;
+		},
+		get appVersion(){
+			return Envjs.version +" ("+ 
+			    this.platform +"; "+
+			    "U; "+//?
+			    Envjs.os_name+" "+Envjs.os_arch+" "+Envjs.os_version+"; "+
+			    (Envjs.lang?Envjs.lang:"en-US")+"; "+
+			    "rv:"+Envjs.revision+
+			  ")";
+		},
+		get cookieEnabled(){
+			return true;
+		},
+		get mimeTypes(){
+			return [];
+		},
+		get platform(){
+			return Envjs.platform;
+		},
+		get plugins(){
+			return [];
+		},
+		get userAgent(){
+			return this.appCodeName + "/" + this.appVersion + " " + this.appName;
+		},
+		javaEnabled : function(){
+			return Envjs.javaEnabled;	
+		}
+	};
+};
+
+
+/**
+ * Screen
+ * @param {Object} __window__
+ */
+
+Screen = function(__window__){
+
+    var $availHeight  = 600,
+        $availWidth   = 800,
+        $colorDepth   = 16,
+        $pixelDepth   = 24,
+        $height       = 600,
+        $width        = 800;
+        $top          = 0;
+        $left         = 0;
+        $availTop     = 0;
+        $availLeft    = 0;
+        
+    __extend__( __window__, {
+        moveBy : function(dx,dy){
+            //TODO - modify $locals to reflect change
+        },
+        moveTo : function(x,y) {
+            //TODO - modify $locals to reflect change
+        },
+        /*print : function(){
+            //TODO - good global to modify to ensure print is not misused
+        };*/
+        resizeBy : function(dw, dh){
+            __window__resizeTo($width + dw, $height + dh);
+        },
+        resizeTo : function(width, height){
+            $width = (width <= $availWidth) ? width : $availWidth;
+            $height = (height <= $availHeight) ? height : $availHeight;
+        },
+        scroll : function(x,y){
+            //TODO - modify $locals to reflect change
+        },
+        scrollBy : function(dx, dy){
+            //TODO - modify $locals to reflect change
+        },
+        scrollTo : function(x,y){
+            //TODO - modify $locals to reflect change
+        }
+    });   
+    
+    return {
+        get top(){
+            return $top;
+        },
+        get left(){
+            return $left;
+        },
+        get availTop(){
+            return $availTop;
+        },
+        get availLeft(){
+            return $availleft;
+        },
+        get availHeight(){
+            return $availHeight;
+        },
+        get availWidth(){
+            return $availWidth;
+        },
+        get colorDepth(){
+            return $colorDepth;
+        },
+        get pixelDepth(){
+            return $pixelDepth;
+        },
+        get height(){
+            return $height;
+        },
+        get width(){
+            return $width;
+        }
+    };
+};
+
+/*
+ * Copyright (c) 2010 Nick Galbreath
+ * http://code.google.com/p/stringencoders/source/browse/#svn/trunk/javascript
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+/* base64 encode/decode compatible with window.btoa/atob
+ *
+ * window.atob/btoa is a Firefox extension to convert binary data (the "b")
+ * to base64 (ascii, the "a").
+ *
+ * It is also found in Safari and Chrome.  It is not available in IE.
+ *
+ * if (!window.btoa) window.btoa = base64.encode
+ * if (!window.atob) window.atob = base64.decode
+ *
+ * The original spec's for atob/btoa are a bit lacking
+ * https://developer.mozilla.org/en/DOM/window.atob
+ * https://developer.mozilla.org/en/DOM/window.btoa
+ *
+ * window.btoa and base64.encode takes a string where charCodeAt is [0,255]
+ * If any character is not [0,255], then an DOMException(5) is thrown.
+ *
+ * window.atob and base64.decode take a base64-encoded string
+ * If the input length is not a multiple of 4, or contains invalid characters
+ *   then an DOMException(5) is thrown.
+ */
+var base64 = {};
+base64.PADCHAR = '=';
+base64.ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+base64.makeDOMException = function() {
+    // sadly in FF,Safari,Chrome you can't make a DOMException
+    var e, tmp;
+    try {
+	e = new DOMException(DOMException.INVALID_CHARACTER_ERR);
+    } catch (tmp) {
+	// not available, just passback a duck-typed equiv
+	//  Firefox 3.6 has a much more complicated Error object
+	//   but this should suffice
+	e = {
+	    code: 5,
+	    toString: function() { return "Error: INVALID_CHARACTER_ERR: DOM Exception 5"; }
+	};
+    }
+    return e;
+}
+
+base64.getbyte64 = function(s,i) {
+    // This is oddly fast, except on Chrome/V8.
+    //  Minimal or no improvement in performance by using a
+    //   object with properties mapping chars to value (eg. 'A': 0)
+    var idx = base64.ALPHA.indexOf(s.charAt(i));
+    if (idx == -1) {
+	throw base64.makeDOMException();
+    }
+    return idx;
+}
+
+base64.decode = function(s) {
+    // convert to string
+    s = "" + s;
+    var getbyte64 = base64.getbyte64;
+    var pads, i, b10;
+    var imax = s.length
+    if (imax == 0) {
+        return s;
+    }
+
+    if (imax % 4 != 0) {
+	throw base64.makeDOMException();
+    }
+
+    pads = 0
+    if (s.charAt(imax -1) == base64.PADCHAR) {
+        pads = 1;
+        if (s.charAt(imax -2) == base64.PADCHAR) {
+            pads = 2;
+        }
+        // either way, we want to ignore this last block
+        imax -= 4;
+    }
+
+    var x = [];
+    for (i = 0; i < imax; i += 4) {
+        b10 = (getbyte64(s,i) << 18) | (getbyte64(s,i+1) << 12) |
+            (getbyte64(s,i+2) << 6) | getbyte64(s,i+3);
+        x.push(String.fromCharCode(b10 >> 16, (b10 >> 8) & 0xff, b10 & 0xff));
+    }
+
+    switch (pads) {
+    case 1:
+        b10 = (getbyte64(s,i) << 18) | (getbyte64(s,i+1) << 12) | (getbyte64(s,i+2) << 6)
+        x.push(String.fromCharCode(b10 >> 16, (b10 >> 8) & 0xff));
+        break;
+    case 2:
+        b10 = (getbyte64(s,i) << 18) | (getbyte64(s,i+1) << 12);
+        x.push(String.fromCharCode(b10 >> 16));
+        break;
+    }
+    return x.join('');
+}
+
+base64.getbyte = function(s,i) {
+    var x = s.charCodeAt(i);
+    if (x > 255) {
+        throw base64.makeDOMException();
+    }
+    return x;
+}
+
+base64.encode = function(s) {
+    if (arguments.length != 1) {
+	throw new SyntaxError("Not enough arguments");
+    }
+    var padchar = base64.PADCHAR;
+    var alpha   = base64.ALPHA;
+    var getbyte = base64.getbyte;
+
+    var i, b10;
+    var x = [];
+
+    // convert to string
+    s = "" + s;
+
+    var imax = s.length - s.length % 3;
+
+    if (s.length == 0) {
+        return s;
+    }
+    for (i = 0; i < imax; i += 3) {
+        b10 = (getbyte(s,i) << 16) | (getbyte(s,i+1) << 8) | getbyte(s,i+2);
+        x.push(alpha.charAt(b10 >> 18));
+        x.push(alpha.charAt((b10 >> 12) & 0x3F));
+        x.push(alpha.charAt((b10 >> 6) & 0x3f));
+        x.push(alpha.charAt(b10 & 0x3f));
+    }
+    switch (s.length - imax) {
+    case 1:
+        b10 = getbyte(s,i) << 16;
+        x.push(alpha.charAt(b10 >> 18) + alpha.charAt((b10 >> 12) & 0x3F) +
+               padchar + padchar);
+        break;
+    case 2:
+        b10 = (getbyte(s,i) << 16) | (getbyte(s,i+1) << 8);
+        x.push(alpha.charAt(b10 >> 18) + alpha.charAt((b10 >> 12) & 0x3F) +
+               alpha.charAt((b10 >> 6) & 0x3f) + padchar);
+        break;
+    }
+    return x.join('');
+}
+//These descriptions of window properties are taken loosely David Flanagan's
+//'JavaScript - The Definitive Guide' (O'Reilly)
+
+/**
+ * Window
+ * @param {Object} scope
+ * @param {Object} parent
+ * @param {Object} opener
+ */
+Window = function(scope, parent, opener){
+    
+    // the window property is identical to the self property and to this obj
+    //var proxy = new Envjs.proxy(scope, parent);
+    //scope.__proxy__ = proxy;
+    scope.__defineGetter__('window', function(){
+        return scope;
+    });
+    
+    var $uuid = new Date().getTime()+'-'+Math.floor(Math.random()*1000000000000000); 
+    __windows__[$uuid] = scope;
+    //console.log('opening window %s', $uuid);
+    
+    // every window has one-and-only-one .document property which is always
+    // an [object HTMLDocument].  also, only window.document objects are
+    // html documents, all other documents created by the window.document are
+    // [object XMLDocument]
+    var $htmlImplementation =  new DOMImplementation();
+    $htmlImplementation.namespaceAware = true;
+    $htmlImplementation.errorChecking = false;
+    
+    // read only reference to the Document object
+    var $document = new HTMLDocument($htmlImplementation, scope);
+    
+    // A read-only reference to the Window object that contains this window
+    // or frame.  If the window is a top-level window, parent refers to
+    // the window itself.  If this window is a frame, this property refers
+    // to the window or frame that contains it.
+    var $parent = parent;
+    
+    /**> $cookies - see cookie.js <*/
+    // read only boolean specifies whether the window has been closed
+    var $closed = false;
+    
+    // a read/write string that specifies the default message that 
+    // appears in the status line 
+    var $defaultStatus = "Done";
+    
+    // IE only, refers to the most recent event object - this maybe be 
+    // removed after review
+    var $event = null;
+    
+    // a read-only reference to the History object
+    var $history = new History();
+    
+    // a read-only reference to the Location object.  the location object does 
+    // expose read/write properties
+    var $location = new Location('about:blank', $document, $history);
+    
+    // The name of window/frame. Set directly, when using open(), or in frameset.
+    // May be used when specifying the target attribute of links
+    var $name = null;
+    
+    // a read-only reference to the Navigator object
+    var $navigator = new Navigator();
+    
+    // a read/write reference to the Window object that contained the script 
+    // that called open() to open this browser window.  This property is valid 
+    // only for top-level window objects.
+    var $opener = opener?opener:null;
+    
+    // read-only properties that specify the height and width, in pixels
+    var $innerHeight = 600, $innerWidth = 800;
+    
+    // Read-only properties that specify the total height and width, in pixels, 
+    // of the browser window. These dimensions include the height and width of 
+    // the menu bar, toolbars, scrollbars, window borders and so on.  These 
+    // properties are not supported by IE and IE offers no alternative 
+    // properties;
+    var $outerHeight = $innerHeight, 
+        $outerWidth = $innerWidth;
+    
+    // Read-only properties that specify the number of pixels that the current 
+    // document has been scrolled to the right and down.  These are not 
+    // supported by IE.
+    var $pageXOffset = 0, $pageYOffset = 0;
+    
+    // a read-only reference to the Screen object that specifies information  
+    // about the screen: the number of available pixels and the number of 
+    // available colors.
+    var $screen = new Screen(scope);
+   
+    // read only properties that specify the coordinates of the upper-left 
+    // corner of the screen.
+    var $screenX = 1, 
+        $screenY = 1;
+    var $screenLeft = $screenX, 
+        $screenTop = $screenY;
+    
+    // a read/write string that specifies the current status line.
+    var $status = '';
+    
+    __extend__(scope, EventTarget.prototype);
+
+    return __extend__( scope, {
+        get closed(){
+            return $closed;
+        },
+        get defaultStatus(){
+            return $defaultStatus;
+        },
+        set defaultStatus(defaultStatus){
+            $defaultStatus = defaultStatus;
+        },
+        get document(){ 
+            return $document;
+        },
+        set document(doc){ 
+            $document = doc;
+        },
+        /*
+        deprecated ie specific property probably not good to support
+        get event(){
+            return $event;
+        },
+        */
+        get frames(){
+        return new HTMLCollection($document.getElementsByTagName('frame'));
+        },
+        get length(){
+            // should be frames.length,
+            return this.frames.length;
+        },
+        get history(){
+            return $history;
+        },
+        get innerHeight(){
+            return $innerHeight;
+        },
+        get innerWidth(){
+            return $innerWidth;
+        },
+        get clientHeight(){
+            return $innerHeight;
+        },
+        get clientWidth(){
+            return $innerWidth;
+        },
+        get location(){
+            return $location;
+        },
+        set location(uri){
+            uri = Envjs.uri(uri);
+            //new Window(this, this.parent, this.opener);
+            if($location.href == uri){
+                $location.reload();
+            }else if($location.href == 'about:blank'){
+                $location.assign(uri);
+            }else{
+                $location.replace(uri);
+            }
+        },
+        get name(){
+            return $name;
+        },
+        set name(newName){ 
+            $name = newName; 
+        },
+        get navigator(){
+            return $navigator;
+        }, 
+        get opener(){
+            return $opener;
+        },
+        get outerHeight(){
+            return $outerHeight;
+        },
+        get outerWidth(){
+            return $outerWidth;
+        },
+        get pageXOffest(){
+            return $pageXOffset;
+        },
+        get pageYOffset(){
+            return $pageYOffset;
+        },
+        get parent(){
+            return $parent;
+        },
+        get screen(){
+            return $screen;
+        },
+        get screenLeft(){
+            return $screenLeft;
+        },
+        get screenTop(){
+            return $screenTop;
+        },
+        get screenX(){
+            return $screenX;
+        },
+        get screenY(){
+            return $screenY;
+        },
+        get self(){
+            return scope;
+        },
+        get status(){
+            return $status;
+        },
+        set status(status){
+            $status = status;
+        },
+        // a read-only reference to the top-level window that contains this window.
+        // If this window is a top-level window it is simply a reference to itself.  
+        // If this window is a frame, the top property refers to the top-level 
+        // window that contains the frame.
+        get top(){
+            return __top__(scope)
+        },
+        get window(){
+            return this;
+        },
+        toString : function(){
+            return '[Window]';
+        },
+        getComputedStyle : function(element, pseudoElement){
+            if(CSS2Properties){
+                return element?
+                    element.style:new CSS2Properties({cssText:""});
+            }
+        },
+        open: function(url, name, features, replace){
+            if (features)
+                console.log("'features argument not yet implemented");
+            var _window = Envjs.proxy({}),
+                open;
+            if(replace && name){
+                for(open in __windows__){
+                    if(open.name === name)
+                        _window = open;
+                }
+            }
+            new Window(_window, _window, this);
+            if(name)
+                _window.name = name;
+            _window.document.async = false;
+            _window.location.assign(Envjs.uri(url));
+            return _window;
+        },
+        close: function(){
+            //console.log('closing window %s', __windows__[$uuid]);
+            try{
+                delete __windows__[$uuid];
+                delete scope;
+                delete this;
+            }catch(e){
+                console.log('%s',e)
+            }
+        },
+        alert : function(message){
+            Envjs.alert(message);
+        },
+        confirm : function(question){
+            Envjs.confirm(question);
+        },
+        prompt : function(message, defaultMsg){
+            Envjs.prompt(message, defaultMsg);
+        },
+        btoa: function(binary){
+            return base64.encode(binary);
+        },
+        atob: function(ascii){
+            return base64.decode(ascii);
+        },
+        onload: function(){},
+        onunload: function(){},
+        get guid(){
+            return $uuid;
+        }
+    });
+
+};
+
+var __top__ = function(_scope){
+    var _parent = _scope.parent;
+    while(_scope && _parent && _scope !== _parent){
+        if(_parent === _parent.parent)break;
+        _parent = _parent.parent;
+        //console.log('scope %s _parent %s', scope, _parent);
+    }
+    return _parent || null;
+}
+
+var __windows__ = {};
+
+//finally pre-supply the window with the window-like environment
+//console.log('Default Window');
+new Window(__this__, __this__);
+console.log('[ %s ]',window.navigator.userAgent);
+
+/**
+ * 
+ * @param {Object} event
+ */
+__extend__(Envjs.defaultEventBehaviors,{
+
+    'submit': function(event){
+        var target = event.target;
+        while(target.nodeName != 'FORM'){
+            target = target.parentNode;
+        }
+        if(target.nodeName == 'FORM'){
+            target.submit
+        }   
+    },
+    'click': function(event){
+        console.log('handling event target default behavior for click');
+    }
+
+});
+/**
+ * @author john resig & the envjs team
+ * @uri http://www.envjs.com/
+ * @copyright 2008-2010
+ * @license MIT
+ */
+
+})();
