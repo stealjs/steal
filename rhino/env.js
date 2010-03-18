@@ -11468,7 +11468,7 @@ var __windows__ = {};
 //finally pre-supply the window with the window-like environment
 //console.log('Default Window');
 new Window(__this__, __this__);
-console.log('[ %s ]',window.navigator.userAgent);
+//console.log('[ %s ]',window.navigator.userAgent);
 
 /**
  * 

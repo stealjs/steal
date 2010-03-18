@@ -82,8 +82,8 @@ rhinoLoader(function(){
       .render(data.application_name+".html",  "page.ejs")
       .render(funcunit_html_name,  "funcunit/html.ejs")
       .render("qunit.html",  "qunit/html.ejs")
+      .render("settings.js", "settings.ejs")
       .push("test").folder()
-        .render("settings.js", "settings.ejs")
         .push("qunit").folder()
           .render("qunit.js", "qunit/qunit.ejs")
           .push("tests").folder()
@@ -101,8 +101,6 @@ rhinoLoader(function(){
       .push("scripts").folder()
         .render("compress.js", "compress_script.ejs")
         .render("doc.js","docs_script.ejs")
-        .render("qunit.js", "qunit/run.ejs")
-        .render("funcunit.js", "funcunit/run.ejs")
-        .render("test_and_email.js", "funcunit/test_and_email.ejs")
+        .render("test.js", "funcunit/run.ejs")
 })();
 

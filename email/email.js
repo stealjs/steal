@@ -1,5 +1,6 @@
 importPackage(javax.mail);
-Emailer = {
+if(typeof steal == 'undefined') steal = {};
+steal.Emailer = {
     _msg: null,
     setup: function(options) {
         var props = new java.util.Properties(), session;
