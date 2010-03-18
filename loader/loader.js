@@ -32,12 +32,6 @@ Steal.Loader.prototype = {
 
 		var url = Envjs.uri(src.match(/([^\?#]*)/)[1], base);
         
-        if(isView){
-        	// FIXME assumes view paths start one folder deep from root
-            url = url.replace(/file:\/\//,"../");
-            url = Envjs.uri(url, base);
-        }
-        
         if(url.match(/^file\:/)) {
             url = url.replace("file:/","").replace("\\", "/");
             text = readFile("/"+url);
