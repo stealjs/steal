@@ -34,7 +34,7 @@ for %%a in (",''=") do ( call set ARGS=%%ARGS:%%~a%% )
 ::remove the spaces
 for /f "tokens=1*" %%A in ("%ARGS%") do SET ARGS=%%A
 SET ARGS=%ARGS%]
-java -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+java -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
 
 GOTO END
 
