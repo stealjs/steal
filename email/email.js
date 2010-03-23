@@ -23,10 +23,8 @@ steal.Emailer = {
         this._msg = new javax.mail.internet.MimeMessage(session);
         var from = new javax.mail.internet.InternetAddress(options.from);
         this._msg.setFrom(from);
-		var to;
 		for(var i=0; i<options.to.length; i++){
-        	to = javax.mail.internet.InternetAddress.parse(options.to[i]);
-        	this._msg.setRecipients(javax.mail.Message.RecipientType.TO, to);
+        	this._msg.addRecipients(javax.mail.Message.RecipientType.TO, options.to[i]);
 		}
         this._msg.setSubject(options.subject)
     },

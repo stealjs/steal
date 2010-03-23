@@ -68,7 +68,7 @@ _S = {
 			throw "not "+v+" "+message
 	},
 	open : function(src){
-		load("steal/rhino/env.js")
+		load("funcunit/dist/selenium/rhino_env/env.js")
 		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2});
 	}
 }
