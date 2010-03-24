@@ -167,7 +167,7 @@ steal.fn = steal.prototype = {
      * @hide
      */
     run : function(){
-        steal.current = this;
+        steal.current = this;		
 		var isProduction = (steal.options.env == "production");
 		if(this.func){
             //run function and continue to next steald
@@ -176,13 +176,12 @@ steal.fn = steal.prototype = {
 			//insert();
         }else if(this.type){
 			isProduction ? true : insert(this.path, "text/" + this.type);
-			
         }else{
 			if(isProduction){
 				 return;
 			}
             steal.setPath(this.dir);
-              this.skipInsert ? insert() : insert(this.path);
+              this.skipInsert ? insert() : insert(this.path);			  
         }
     },
     /**
@@ -576,7 +575,7 @@ extend(steal,
 		steals = steals.concat(current_steals);
         // take the last one
 		var next = steals.pop();
-        
+				
         // if there are no more
         if(!next) {
             first_wave_done = true;
@@ -796,9 +795,12 @@ steal.resources = steal.applier(function(i){
  * @param {String} view_path view you want to load.
  */
 steal.views = function(){
-	for(var i=0; i< arguments.length; i++){	
-		steal.view(arguments[i])
-    }
+	// Only includes views for compression and docs (when running in rhino)
+	if (browser.rhino) {
+		for (var i = 0; i < arguments.length; i++) {
+			steal.view(arguments[i])
+		}
+	}
 	return steal;
 };
 
@@ -850,6 +852,7 @@ var insert = function(src, type, onlyInsert){
     document.write(
         (src? scriptTag : '') + (onlyInsert ? "" : call_end())
     );
+	
 
 };
 
