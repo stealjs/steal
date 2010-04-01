@@ -1,6 +1,6 @@
 /*
  * JavaScriptMVC - steal
- * (c) 2008 Jupiter ITS
+ * (c) 2010 Jupiter ITS
  * 
  * 
  * This file does the following:
