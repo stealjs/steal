@@ -35,7 +35,7 @@ var oldsteal = window.steal;
  * Steal is used to:
  * <ul>
  *  <li> easily load and compress your application's JavaScript files.  </li>
- *  <li> switch to a different environment [development, test, compress, production]</li>
+ *  <li> switch to a different environment [development, production]</li>
  * </ul>
  * <h2>Examples</h2>
  * @codestart
@@ -43,22 +43,23 @@ var oldsteal = window.steal;
  * steal.plugins('controller','view')   //steals plugins and dependancies
  * steal.models('task')                 //steals files in models folder
  * steal.controller('task')             //steals files in controllers folder
- * steal(function(){                    //runs function after prior steals have finished
- *   steal.views('views/task/init')     //loads a processed view file
+ * steal.then(function(){                    //runs function after prior steals have finished
+ *     ...
  * })
+ * steal.views('views/task/init')     //loads and caches a view file
  * @codeend
  * Includes are performed relative to the including file. 
  * Files are steald last-in-first-out after the current file has been loaded and run.
  * <h2>Concat and Compress</h2>
  * In your terminal simply run:
  * @codestart no-highlight
- * js apps\APP_NAME\compress.js
+ * steal\js APP_NAME\scripts\compress.js
  * @codeend
- * This will generate a production.js bundle in apps\APP_NAME\production.js
+ * This will generate a production.js bundle in APP_NAME\production.js
  * <h2>Run in production</h2>
  * Switch to the production mode by changing development to production:
  * @codestart no-highlight
- * &lt;script src="<i>PATH/TO/</i>steal/steal.js?APP_NAME,production" type="text/javascript">
+ * &lt;script src="<i>PATH/TO/</i>steal/steal.js?steal[app]=APP_NAME&steal[env]=production type="text/javascript">
  * &lt;/script>
  * @codeend
  * Your application will now only load steal.js and production.js, greatly speeding up load time.
@@ -334,7 +335,7 @@ File.prototype =
     /**
      * Is the file on the same domain as our page.
      */
-    is_cross_domain : function(){
+    isCrossDomain : function(){
         if(this.isLocalAbsolute()) return false;
         return this.domain() != new File(window.location.href).domain();
     },
@@ -364,7 +365,7 @@ File.prototype =
         return path;
     },
 	isCurrentCrossDomain : function(){
-		return new File(steal.getAbsolutePath()).is_cross_domain();
+		return new File(steal.getAbsolutePath()).isCrossDomain();
 	}
 };
 /**
