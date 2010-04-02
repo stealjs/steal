@@ -7,7 +7,6 @@ _S = {
 				//this[n] = null;
 				delete win[n];
 			}
-				
 		}
 		this.testNamespace();
 	},
@@ -56,7 +55,7 @@ _S = {
 		var win = this.getWindow();
 		for(var n in win) {
 			if(n !== "_S")
-				throw "Namespace Pollution"
+				throw "Namespace Pollution";
 		}
 	},
 	equals : function(a, b, message){
@@ -68,7 +67,7 @@ _S = {
 			throw "not "+v+" "+message
 	},
 	open : function(src){
-		load("funcunit/dist/selenium/rhino_env/env.js")
+		load("steal/rhino/env.js");
 		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2});
 	}
 }

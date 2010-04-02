@@ -5,7 +5,7 @@
  * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-var Envjs = function(){
+Envjs = function(){
     var i,
         name
         override = function(){
@@ -337,7 +337,7 @@ Envjs.loadFrame = function(frame, url){
  * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
+__context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 
 Envjs.platform       = "Rhino";
 Envjs.revision       = "1.7.0.rc2";
@@ -832,8 +832,8 @@ Envjs.proxy = function(scope, parent){
 /**
  * @author envjs team
  */
-var Console,
-    console;
+/*var Console, // Make these global to avoid namespace pollution in tests.
+    console;*/
 
 /*
  * Envjs console.1.2.0.10 
@@ -1109,7 +1109,7 @@ function appendNode(node, html)
  * be able to correctly implement to core browser DOM interfaces."
  */
 
-var Attr,
+/*var Attr, // Make these global to avoid namespace pollution in tests.
     CDATASection,
     CharacterData,
     Comment,
@@ -1130,7 +1130,7 @@ var Attr,
     Text,
     Range,
     XMLSerializer,
-    DOMParser;
+    DOMParser;*/
 
 
 
@@ -4298,7 +4298,7 @@ __extend__(XMLSerializer.prototype, {
  * This file simply provides the global definitions we need to 
  * be able to correctly implement to core browser DOM Event interfaces.
  */
-var Event,
+/*var Event, // Make these global to avoid namespace pollution in tests.
     MouseEvent,
     UIEvent,
     KeyboardEvent,
@@ -4308,7 +4308,7 @@ var Event,
     EventException,
     //nonstandard but very useful for implementing mutation events 
     //among other things like general profiling
-    Aspect;
+    Aspect;*/
 /*
  * Envjs event.1.2.0.10 
  * Pure JavaScript Browser Environment
@@ -5154,10 +5154,10 @@ EventException.UNSPECIFIED_EVENT_TYPE_ERR = 0;
  * 
  * requires Envjs.wait, Envjs.sleep, Envjs.WAIT_INTERVAL
  */
-var setTimeout,
+/*var setTimeout, // Make these global to avoid namespace pollution in tests.
     clearTimeout,
     setInterval,
-    clearInterval;
+    clearInterval;*/
     
 /*
  * Envjs timer.1.2.0.10 
@@ -5418,7 +5418,7 @@ Envjs.wait = function(wait) {
  * This file simply provides the global definitions we need to 
  * be able to correctly implement to core browser DOM HTML interfaces.
  */
-var HTMLDocument,
+/*var HTMLDocument, // Make these global to avoid namespace pollution in tests.
     HTMLElement,
     HTMLCollection,
     HTMLAnchorElement,
@@ -5457,7 +5457,7 @@ var HTMLDocument,
     HTMLTableRowElement,
     HTMLTextAreaElement,
     HTMLTitleElement,
-    HTMLUnknownElement;
+    HTMLUnknownElement;*/
     
 /*
  * Envjs html.1.2.0.10 
@@ -8570,9 +8570,9 @@ __extend__(HTMLUnknownElement.prototype,{
 /**
  * DOM Style Level 2
  */
-var CSS2Properties,
+/*var CSS2Properties, // Make these global to avoid namespace pollution in tests.
     CSSRule,
-    CSSStyleSheet;
+    CSSStyleSheet;*/
     
 /*
  * Envjs css.1.2.0.10 
@@ -9045,8 +9045,8 @@ var __updateCss2Props__ = function(elem, values){
 //these are both non-standard globals that
 //provide static namespaces and functions
 //to support the html 5 parser from nu.
-var XMLParser = {},
-    HTMLParser = {};
+XMLParser = {}; // Make these global to avoid namespace pollution in tests.
+HTMLParser = {};
 
     
 /*
@@ -9977,8 +9977,8 @@ __extend__(HTMLElement.prototype,{
  * be able to correctly implement to core browser (XML)HTTPRequest 
  * interfaces.
  */
-var Location,
-    XMLHttpRequest;
+/*var Location, // Make these global to avoid namespace pollution in tests.
+    XMLHttpRequest;*/
 
 /*
  * Envjs xhr.1.2.0.10 
@@ -10740,10 +10740,10 @@ XMLHttpRequest.prototype = {
 /**
  * @todo: document
  */
-var Window,
+/*var Window, // Make these global to avoid namespace pollution in tests.
     Screen,
     History,
-    Navigator;
+    Navigator;*/
 
 
 /*
