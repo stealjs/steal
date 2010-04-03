@@ -147,12 +147,14 @@ steal.fn = steal.prototype = {
             extend( this, options)
 			this.path = options.src;
             this.type = options.type;
+			this.options = options;
         } else { //something we are going to steal and run
             
             if(typeof options == 'string' ){
                 this.path = /\.js$/ig.test(options) ? options : options+'.js'
             }else {
-				extend( this, options)
+				extend( this, options);
+				this.options = options;
             }
             this.originalPath = this.path;
             //get actual path
@@ -170,19 +172,26 @@ steal.fn = steal.prototype = {
     run : function(){
         steal.current = this;		
 		var isProduction = (steal.options.env == "production");
+		
+		var options = extend({
+			type: "text/javascript",
+			compress: "true",
+			"package": "production.js"
+		}, extend({src: this.path}, this.options));
+		
 		if(this.func){
             //run function and continue to next steald
             this.func();
             steal.end();
 			//insert();
         }else if(this.type){
-			isProduction ? true : insert(this.path, "text/" + this.type);
+			isProduction ? true : insert(options);
         }else{
 			if(isProduction){
 				 return;
 			}
             steal.setPath(this.dir);
-              this.skipInsert ? insert() : insert(this.path);			  
+              this.skipInsert ? insert() : insert(options);			  
         }
     },
     /**
@@ -808,7 +817,7 @@ steal.views = function(){
 
 steal.view = function(path){
     var type = path.match(/\.\w+$/gi)[0].replace(".","");
-	steal({src: path, type: type, compress: "false"});    
+	steal({src: path, type: "text/"+type, compress: "false"});    
 	return steal;
 };
 
@@ -818,43 +827,39 @@ var script_tag = function(){
     return start;
 };
 
-var insert = function(src, type, onlyInsert){
+var insert = function(options){
     // source we need to know how to get to steal, then load 
     // relative to path to steal
-	
-	
-	if(src){
-        var id = src.replace(/[\/\.]/g,"_")
-		var src_file = new File(src);
-        if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
-            src = steal.root.join(src);
-		
-    }
-	var text = "", writeSrc = true;
-	if(type && type != 'test/javascript' && !browser.rhino){
-		text = steal.request(src);
-		if(!text)
-			throw "you got nothing at "+src;
-		writeSrc = false
-	}
 
-    var scriptTag = '<script type="'+((typeof type!='undefined')?(type+'" '):'text/javascript" ');
-	if(writeSrc)
-		scriptTag += src?('src="'+src+'" '):'';
-    scriptTag += src?('id="'+id+'" '):'';
-    scriptTag += 'compress="'+((typeof steal.current['compress']!='undefined')?
-        (steal.current['compress']+'" '):'true" ');
-    scriptTag += 'package="'+((typeof steal.current['package']!='undefined')?
-        (steal.current['package']+'">'):'production.js">');    
-	if(text)
-		scriptTag += text;
-    scriptTag += '</script>'; 
+    options = extend({
+		id: options.src && options.src.replace(/[\/\.]/g, "_")
+	}, options);
+		
+	if(options.src){
+		var src_file = new File(options.src);
+        if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
+            options.src = steal.root.join(options.src);
+    }
+	
+	var text = "";
+	if(options.type && options.type != 'text/javascript' && !browser.rhino){
+		text = steal.request(options.src);
+		if(!text)
+			throw "you got nothing at "+options.src;
+		options.text = text;
+		delete options.src;
+	}
+	
+	var scriptTag = '<script ';
+	for(var attr in options){
+		scriptTag += attr + "='" + options[attr] + "' ";
+	}
+	scriptTag += '></script>';
 
     document.write(
-        (src? scriptTag : '') + (onlyInsert ? "" : call_end())
+        (options.src? scriptTag : '') + (options.onlyInsert ? "" : call_end())
     );
 	
-
 };
 
 var call_end = function(src){
