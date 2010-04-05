@@ -49,7 +49,7 @@ if(_args[1] == "-email" || _args[1] == "-mail"){
 		runCommand("sh", "-c", "nohup ./steal/js <%= path %>/scripts/test.js -unit >> <%= path %>/test.log")
 	}
 	
-	var log = readFile('<%= path %>/test.log');
+	log = readFile('<%= path %>/test.log');
 	steal.Emailer.setup(EmailerDefaults);
 	steal.Emailer.send(log)
 }
