@@ -29,6 +29,9 @@ _S = {
 	        java.lang.Thread.currentThread().sleep(300);
 	    }
 	},
+	sleep : function(duration) {
+        java.lang.Thread.currentThread().sleep(duration);		
+	},
 	print : function(){
 		var win =this.getWindow();
 		for(var n in win) print(n);
