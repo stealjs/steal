@@ -1,13 +1,12 @@
 // load('steal/generate/test/run.js')
 
+load('steal/test/helpers.js')
+_S.clear();
+
 /**
  * Tests generating a very basic plugin and then tries to load it
  * (one level deep first then two levels deep)
  */
-
-load('steal/test/helpers.js')
-_S.clear();
-
 print("-- generate cnu plugin --");
 _args = ['cnu']; load('steal/generate/plugin');_S.clear();
 _S.open('cnu/cnu.html')
@@ -20,6 +19,9 @@ _S.open('cnu/widget/widget.html')
 if(typeof steal == 'undefined') throw "didn't load steal"
 _S.clear();
 
+/**
+ * Tests generating a very basic controller and model
+ */
 print("-- generate controller --");
 _args = ['Cnu.Controllers.Todos']; load('steal/generate/controller');_S.clear();
 _args = ['Cnu.Models.Todo']; load('steal/generate/model');_S.clear();
