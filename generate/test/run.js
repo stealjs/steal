@@ -24,20 +24,58 @@ _S.clear();
  */
 print("-- generate controller --");
 _args = ['Cnu.Controllers.Todos']; load('steal/generate/controller');_S.clear();
+print("-- generate model --");
 _args = ['Cnu.Models.Todo']; load('steal/generate/model');_S.clear();
 load('steal/file/file.js');
 cnuContent = readFile('cnu/cnu.js').
     replace(".models()", ".models('todo')").
     replace(".controllers()", ".controllers('todos')");
 new steal.File('cnu/cnu.js').save( cnuContent );
-/*print("-- unit test --");
-_args = ['Truth']; load('jmvc/generate/unit_test');clearEverything();
-print("-- functional test --");
-_args = ['TruthFunctional']; load('jmvc/generate/functional_test');clearEverything();*/
+
 print("-- generate page --")
 _args = ['cnugen','cnu']; load('steal/generate/page');_S.clear();
 
 _S.open('cnu/cnugen.html')
 if(typeof Cnu.Controllers.TodosController == 'undefined') throw "didn't load Cnu.Controllers.TodosController"
 if(typeof Cnu.Models.Todo == 'undefined') throw "didn't load Cnu.Models.Todo"
+
+
+/**
+ * Tests generating a unit and functional tests
+ */
+_S.clear();
+print("-- generate unit test --");
+_args = ['cnu','cnu_unit']; load('steal/generate/unit_test');_S.clear();
+print("-- generate functional test --");
+_args = ['cnu','cnu_functional']; load('steal/generate/functional_test');_S.clear();
+
+_S.clear();
+load('steal/file/file.js');
+cnuQunitContent = readFile('cnu/test/qunit/qunit.js').
+    replace(".then(\"tests/basic\")", ".then(\"tests/cnu_unit_test\")");
+new steal.File('cnu/test/qunit/qunit.js').save( cnuQunitContent );
+
+cnuFuncunitContent = readFile('cnu/test/funcunit/funcunit.js').
+    replace(".then(\"tests/basic\")", ".then(\"tests/cnu_functional_test\")");
+new steal.File('cnu/test/funcunit/funcunit.js').save( cnuFuncunitContent );
+
+_S.clear();
+//now see if unit and functional run
+print("-- Run unit tests for cnu --");
+_args = ['-unit']; load('cnu/scripts/test.js');
+
+_S.sleep(300);
+
+_S.clear();
+load('steal/file/file.js');
+cnuSettings = readFile('cnu/settings.js').
+    replace("quitOnDone: true", "quitOnDone: false");
+new steal.File('cnu/settings.js').save( cnuSettings );
+
+_S.clear();
+print("-- Run functional tests for cnu --");
+_args = ['-functional']; load('cnu/scripts/test.js');_S.clear();
+
+_S.sleep(300);
+
 _S.clear();
