@@ -13,7 +13,7 @@ rhinoLoader(function(){
 (function(){
 
 	var stealloc = steal.File.cwd();
-	var steal_folders = stealloc.split(/\/|\\/);
+	var stealloc_folders = stealloc.split(/\/|\\/);
 	
 	var loc = _args[1]
 	var loc_folders = loc.split(/\/|\\/);
@@ -24,7 +24,7 @@ rhinoLoader(function(){
 	
 	if (loc_folders[i] == "..") {
 		while(loc_folders[i] == "..") {
-			loc_folders[i] = steal_folders.pop();
+			loc_folders[i] = stealloc_folders.pop();
 			i++;
 		}
 	} else
@@ -32,20 +32,21 @@ rhinoLoader(function(){
 	    	loc_folders[i] = ".."
 	
 	loc_folders.pop();
-	loc_folders.push("steal");
-	loc_folders.push("steal.js");
+	loc_folders.push('..')
+	
+	var	path_to_steal = loc_folders.join("/");
 	
 	var data = {
 		path_to_steal: loc_folders.join("/"),
 		application_name: _args[0],
 		current_path: steal.File.cwdURL(),
-		path: _args[0]
+		path: _args[1]
 	}
 	
 	//test/tests/engine.html -> ../../steal/steal.js
 	
-	var page_path = _args[1];
-	new Generate(page_path, data, "../generate/templates/")
+	var app_root = _args[1];
+	new Generate(app_root, data, "../generate/templates/")
      .render(data.application_name+".html",  "page.ejs")
      .postGenerationMessage();
 	
