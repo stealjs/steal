@@ -7,13 +7,13 @@ if (_args.length < 2) {
 
 load('steal/rhino/loader.js')
 rhinoLoader(function(){
-	steal.plugins('view','util/generator');
+	steal.plugins('steal/ejs','steal/file','steal/generate');
 });
 
 (function(){
 
-	var steal = steal.File.cwd();
-	var steal_folders = steal.split(/\/|\\/);
+	var stealloc = steal.File.cwd();
+	var steal_folders = stealloc.split(/\/|\\/);
 	
 	var loc = _args[1]
 	var loc_folders = loc.split(/\/|\\/);
@@ -37,12 +37,17 @@ rhinoLoader(function(){
 	
 	var data = {
 		path_to_steal: loc_folders.join("/"),
-		application_name: _args[0]
+		application_name: _args[0],
+		path: _args[0]
 	}
 	
 	//test/tests/engine.html -> ../../steal/steal.js
 	
-	Generate.render(loc, "../generate/templates/page.ejs", data);
-	Generate.postGenerationMessage();
+	var page_path = _args[1];
+	new Generate(page_path, data, "../generate/templates/")
+     .render(data.application_name+".html",  "page.ejs")
+	
+	/*Generate.render(loc, "../generate/templates/page.ejs", data);
+	Generate.postGenerationMessage();*/
 
 })();
