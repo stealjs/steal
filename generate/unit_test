@@ -1,31 +1,30 @@
-if (!_args[0]) {
-	print("Usage: js steal/generate/unit_test TestName")
-	quit();
-}else if(/_/.test(_args[0])){
-	print("Usage: js steal/generate/unit_test TestName")
+if (_args.length < 1) {
+	print("USAGE : steal/js steal/generate/unit_test AppName TestName")
+	print("EX    : steal/js steal/generate/unit_test cookbook recipe");
+	print("      > cookbook/test/qunit/tests/recipe_tests.js")
+	print();
 	quit();
 }
 
-load('steal/rhino/loader.js')
+load('steal/rhino/loader.js');
 rhinoLoader(function(){
-	steal.plugins('view','util/generator');
+	steal.plugins('steal/ejs','steal/file','steal/generate');
 });
 
 (function(){
 	//clear name
-	var name =  _args[0];
+	var appName = _args[0];
+	var testName =  _args[1];
 	var data = {
-		path: jQuery.String.underscore(name),
-		name: name
+		path: appName,
+		application_name: appName,
+		name: testName
 	};
-	Generate.folder("test/unit");
-
-	Generate.render("test/unit/" + data.path + "_test.js", "../generate/templates/unit_test.ejs", data);
-
-	Generate.postGenerationMessage();
-
-
+	new Generate(appName, data, "../generate/templates/")
+	 .render("test/qunit/tests/" + data.name + "_test.js", "qunit/basic.ejs")
+	 .postGenerationMessage();
 })();
+
 
 
 
