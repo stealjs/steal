@@ -7,6 +7,7 @@
 load('steal/test/helpers.js')
 _S.clear();
 
+print("-- Compress basic page --");
 load("steal/compress/compress.js")
 new steal.Compress('steal/compress/test/basicpage.html','steal/compress/test');
 _S.clear();
@@ -17,7 +18,7 @@ _S.equals(BasicSource, 6, "Basic source not right number")
 _S.clear();
 _S.remove('steal/compress/test/basicproduction.js')
 
-
+print("-- Compress page using steal --");
 load("steal/compress/compress.js")
 new steal.Compress('steal/compress/test/stealpage.html','steal/compress/test');
 _S.clear();
@@ -28,7 +29,7 @@ _S.clear();
 
 _S.remove('steal/compress/test/production.js')
 
-print("-- Foreign characters --");
+print("-- Compress page with foreign characters --");
 load("steal/compress/compress.js");
 new steal.Compress('steal/compress/test/foreign.html','steal/compress/test');
 _S.clear();
