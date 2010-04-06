@@ -38,6 +38,7 @@ rhinoLoader(function(){
 	var data = {
 		path_to_steal: loc_folders.join("/"),
 		application_name: _args[0],
+		current_path: steal.File.cwdURL(),
 		path: _args[0]
 	}
 	
@@ -46,6 +47,7 @@ rhinoLoader(function(){
 	var page_path = _args[1];
 	new Generate(page_path, data, "../generate/templates/")
      .render(data.application_name+".html",  "page.ejs")
+     .postGenerationMessage();
 	
 	/*Generate.render(loc, "../generate/templates/page.ejs", data);
 	Generate.postGenerationMessage();*/

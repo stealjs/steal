@@ -1,17 +1,35 @@
-if (!_args[0]) {
+/*if (!_args[0]) {
 	print("Usage: js steal/generate/controller YourController")
 	quit();
 }else if(/_/.test(_args[0])){
 	print("Usage: js steal/generate/controller YourController")
 	quit();
+}*/
+if (_args.length < 1) {
+	print("USAGE : steal/js steal/generate/controller YourController")
+	print("EX    : steal/js steal/generate/model Cookbook.Controllers.Recipe");
+	print("      > cookbook/controller/recipe.js")
+	print();
+	quit();
 }
 
-load('steal/rhino/loader.js')
+/*load('steal/rhino/loader.js')
 rhinoLoader(function(){
 	steal.plugins('view','util/generator');
+});*/
+load('steal/rhino/loader.js');
+rhinoLoader(function(){
+	steal.plugins('steal/ejs','steal/file','steal/generate','steal/inflector');
 });
 
+
 (function(){
+	$controllerName = _args[0];
+	load("steal/generate/parts/convert.js")
+	load("steal/generate/parts/controller.js")
+	new Generate().postGenerationMessage();
+})();
+/*(function(){
 	//clear name
 	var name =  _args[0].replace(/controller/i, '');
 	var data = {
@@ -26,7 +44,7 @@ rhinoLoader(function(){
 	Generate.postGenerationMessage();
 
 
-})();
+})();*/
 
 
 
