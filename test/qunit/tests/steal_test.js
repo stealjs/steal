@@ -69,3 +69,30 @@ test("steal's File.protocol()", function(){
 	result = new steal.File('file:///a/b/c').protocol();
     equals(result, "file:", "file:///a/b/c protocol should be file:.");	
 })
+
+test("steal's File.join(url)", function(){
+	result = new steal.File("http://abc.com").join("/a/b/c");
+    equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");	
+	
+	result = new steal.File("http://abc.com/").join("/a/b/c");
+    equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	
+	result = new steal.File("http://abc.com/").join("a/b/c");
+    equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	
+	result = new steal.File("http://abc.com").join("a/b/c");
+    equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");	
+	
+	result = new steal.File("a/b/c").join("d/e");
+    equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");	
+	
+	result = new steal.File("a/b/c/").join("d/e");
+    equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+	
+	result = new steal.File("a/b/c/").join("/d/e");
+    equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+	
+	result = new steal.File("a/b/c").join("/d/e");
+    equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");			
+})
+
