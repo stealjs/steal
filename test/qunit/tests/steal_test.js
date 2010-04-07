@@ -38,3 +38,20 @@ test("steal's dir()", function(){
     equals("../a/b/c", new steal.File("../a/b/c/cookbook.html").dir(), "../a/b/c dir is correct.")
     equals("http://127.0.0.1:3007", new steal.File("http://127.0.0.1:3007/cookbook.html").dir(), "http://127.0.0.1:3007 dir is correct.")
 })
+
+test("steal's File.clean()", function(){
+	result = new steal.File('http://abc.com#action').clean();
+    equals(result, "http://abc.com", "http://abc.com#action is correctly cleaned.");
+	
+	result = new steal.File('http://abc.com#action&q=param').clean();
+    equals(result, "http://abc.com", "http://abc.com#action&q=param is correctly cleaned.");
+	
+	result = new steal.File('http://abc.com/#action&q=param').clean();
+    equals(result, "http://abc.com/", "http://abc.com/#action&q=param is correctly cleaned.");	
+	
+	result = new steal.File('a/b/#action&q=param').clean();
+    equals(result, "a/b/", "a/b/#action&q=param is correctly cleaned.");	
+	
+	result = new steal.File('a/b#action&q=param').clean();
+    equals(result, "a/b", "a/b#action&q=param is correctly cleaned.");	
+})
