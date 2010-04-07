@@ -45,7 +45,7 @@ File.prototype = {
 var out = [];
 for(var i = 0 ; i < steal.total.length; i++){
     if(typeof steal.total[i].func == "function"){
-        out.push("\n("+steal.total[i].options.toString()+")();\n");
+        out.push("\n("+steal.total[i].options.toString()+")(jQuery);\n");
     }
 }
 new File(path).save(out.join(""));
