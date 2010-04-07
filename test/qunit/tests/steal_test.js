@@ -114,6 +114,37 @@ test("steal's File.relative()", function(){
 	ok(!result, "/a/b/c is NOT relative.")
 })
 
+test("steal's File.isLocalAbsolute()", function(){
+	result = new steal.File("/a/b/c").isLocalAbsolute();
+	ok(result, "/a/b/c is absolute.")
+	
+	result = new steal.File("a/b/c").isLocalAbsolute();
+	ok(!result, "a/b/c is NOT absolute.")	
+})
+
+test("steal's File.isDomainAbsolute()", function(){
+	result = new steal.File("http://abc.com/d/e").isDomainAbsolute();
+	ok(result, "http://abc.com/d/e domain is absolute.")
+	
+	result = new steal.File("http://abc.com/d/e/").isDomainAbsolute();
+	ok(result, "http://abc.com/d/e/ domain is absolute.")
+	
+	result = new steal.File("https://abc.com/d/e").isDomainAbsolute();
+	ok(result, "https://abc.com/d/e domain is absolute.")
+	
+	result = new steal.File("https://abc.com/d/e/").isDomainAbsolute();
+	ok(result, "https://abc.com/d/e/ domain is absolute.")
+	
+	result = new steal.File("file://a/b/c/d/e").isDomainAbsolute();
+	ok(result, "file://a/b/c/d/e domain is absolute.")
+	
+	result = new steal.File("file://a/b/c/d/e/").isDomainAbsolute();
+	ok(result, "file://a/b/c/d/e/ domain is absolute.")
+	
+	result = new steal.File("file:///a/b/c/d/e").isDomainAbsolute();
+	ok(result, "file:///a/b/c/d/e domain is absolute.")
+})
+
 test("steal's File.afterDomain()", function(){
 	result = new steal.File("http://abc.com/d/e").afterDomain();
     equals(result, "/d/e", "/d/e is the correct after domain result.");
