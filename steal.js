@@ -278,7 +278,7 @@ File.prototype =
         return new File(url).joinFrom(this.path);
     },
     /**
-     * Returns the path of this file referenced form another url.
+     * Returns the path of this file referenced from another url.
      * @codestart
      * new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
      * @codeend
@@ -318,7 +318,7 @@ File.prototype =
     /**
      * Joins the file to the current working directory.
      */
-    join_current: function(){
+    joinCurrent: function(){
         return this.joinFrom(steal.getPath());
     },
     /**
@@ -645,7 +645,7 @@ extend(steal,
         var arg;
         for(var i=0; i < arguments.length; i++){
             arg = arguments[i];
-            var current = new File(arg+".css").join_current();
+            var current = new File(arg+".css").joinCurrent();
             steal.create_link( steal.root.join(current)  );
         }
     },

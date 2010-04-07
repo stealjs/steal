@@ -96,3 +96,13 @@ test("steal's File.join(url)", function(){
     equals(result, "/d/e", "/d/e was joined successfuly.");			
 })
 
+test("steal's File.joinCurrent()", function(){
+	steal.setPath("http://abc.com");
+	result = new steal.File("d/e").joinCurrent();
+    equals(result, "http://abc.com/d/e", "http://abc.com/d/e was joined successfuly.");
+		
+	steal.setPath("/a/b/c");
+	result = new steal.File("d/e").joinCurrent();
+    equals(result, "/a/b/c/d/e", "/a/b/c/d/e was joined successfuly.");		
+})
+
