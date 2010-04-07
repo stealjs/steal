@@ -290,7 +290,7 @@ File.prototype =
         if(this.isDomainAbsolute()){
             var u = new File(url);
             if(this.domain() && this.domain() == u.domain() ) 
-                return this.after_domain();
+                return this.afterDomain();
             else if(this.domain() == u.domain()) { // we are from a file
                 return this.to_reference_from_same_domain(url);
             }else
@@ -328,7 +328,7 @@ File.prototype =
     /**
      * Returns the part of the path that is after the domain part
      */
-    after_domain: function(){    return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
+    afterDomain: function(){    return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
     /**
      * 
      * @param {Object} url

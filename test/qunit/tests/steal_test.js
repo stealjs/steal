@@ -106,3 +106,16 @@ test("steal's File.joinCurrent()", function(){
     equals(result, "/a/b/c/d/e", "/a/b/c/d/e was joined successfuly.");		
 })
 
+test("steal's File.relative()", function(){
+	result = new steal.File("a/b/c").relative();
+	ok(result, "a/b/c is relative.")
+	
+	result = new steal.File("/a/b/c").relative();
+	ok(!result, "/a/b/c is NOT relative.")
+})
+
+test("steal's File.afterDomain()", function(){
+	result = new steal.File("http://abc.com/d/e").afterDomain();
+    equals(result, "/d/e", "/d/e is the correct after domain result.");
+})
+
