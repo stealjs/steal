@@ -90,9 +90,9 @@ test("steal's File.join(url)", function(){
     equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
 	
 	result = new steal.File("a/b/c/").join("/d/e");
-    equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+    equals(result, "/d/e", "/d/e was joined successfuly.");
 	
 	result = new steal.File("a/b/c").join("/d/e");
-    equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");			
+    equals(result, "/d/e", "/d/e was joined successfuly.");			
 })
 
