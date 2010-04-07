@@ -6,17 +6,15 @@
  * This file does the following:
  * 
  * -Checks if the file has already been loaded, if it has, calls steal.end
- * -Defines the MVC namespace.
  * -Defines File
  * -Inspects the DOM for the script tag that steald steal.js, with it extracts:
  *     * the location of steal
  *     * the location of the application directory
  *     * the application's name
- *     * the environment (development, compress, test, production)
+ *     * the environment (development, production)
  * -Defines steal
  * -Loads more files depending on environment
- *     * Development/Compress -> load the application file
- *     * Test -> Load the test plugin, the application file, and the application's test file
+ *     * Development -> load the application file
  *     * Production -> Load the application's production file.
  */
 
@@ -40,10 +38,11 @@ var oldsteal = window.steal;
  * <h2>Examples</h2>
  * @codestart
  * steal('../../someFolder/somefile');  //steals a JS file relative to the current file
- * steal.plugins('controller','view')   //steals plugins and dependancies
+ * steal.plugins('controller','view')   //steals plugins and dependencies
  * steal.models('task')                 //steals files in models folder
  * steal.controller('task')             //steals files in controllers folder
- * steal.then(function(){                    //runs function after prior steals have finished
+ * steal.then('//path/to/task')         //steals files with paths relative to project's root
+ * steal.then(function(){               //runs function after prior steals have finished
  *     ...
  * })
  * steal.views('views/task/init')     //loads and caches a view file
@@ -59,7 +58,7 @@ var oldsteal = window.steal;
  * <h2>Run in production</h2>
  * Switch to the production mode by changing development to production:
  * @codestart no-highlight
- * &lt;script src="<i>PATH/TO/</i>steal/steal.js?steal[app]=APP_NAME&steal[env]=production type="text/javascript">
+ * &lt;script src="<i>PATH/TO/</i>steal/steal.js?steal[app]=APP_NAME&steal[env]=production" type="text/javascript">
  * &lt;/script>
  * @codeend
  * Your application will now only load steal.js and production.js, greatly speeding up load time.
@@ -125,9 +124,10 @@ steal.fn = steal.prototype = {
      *     <td>An Object with the following properties:
      *         <ul>
      *             <li>path {String} - relative path to a JavaScript file.  </li>
-     *             <li>process {optional:Function} - Function that will process steal in compress mode</li>
+     *             <li>type {optional:String} - Script type (defaults to text/javascript)</li>
      *             <li>skipInsert {optional:Boolean} - Include not added as script tag</li>
-     *             <li>compress {optional:Boolean} - false if you don't want to compress script</li>
+     *             <li>compress {optional:String} - "false" if you don't want to compress script</li>
+     *             <li>package {optional:String} - Script package name (defaults to production.js)</li>             
      *         </ul>
      *     </td></tr>
      *     <tr><td>Function</td><td>A function to run after all the prior steals have finished loading</td></tr>
