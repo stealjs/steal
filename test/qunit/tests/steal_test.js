@@ -119,3 +119,16 @@ test("steal's File.afterDomain()", function(){
     equals(result, "/d/e", "/d/e is the correct after domain result.");
 })
 
+test("steal's File.toReferenceFromSameDomain()", function(){
+	result = new steal.File("http://abc.com/d/e").toReferenceFromSameDomain("http://abc.com/d/e/f/g/h");
+    equals(result, "../../../", "../../../ is the correct reference from same domain result.");	
+	
+	result = new steal.File("http://abc.com/d/e/x/y").toReferenceFromSameDomain("http://abc.com/d/e/f/g/h");
+    equals(result, "../../../x/y", "../../../x/y is the correct reference from same domain result.");
+	
+	result = new steal.File("a/b/c/x/y").toReferenceFromSameDomain("a/b/c/d/e");
+    equals(result, "../../x/y", "../../x/y is the correct reference from same domain result.");			
+	
+	result = new steal.File("a/b/c/d/e").toReferenceFromSameDomain("a/b/c/d/e");
+    equals(result, "", "'' is the correct reference from same domain result.");	
+})

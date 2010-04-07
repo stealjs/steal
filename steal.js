@@ -292,7 +292,7 @@ File.prototype =
             if(this.domain() && this.domain() == u.domain() ) 
                 return this.afterDomain();
             else if(this.domain() == u.domain()) { // we are from a file
-                return this.to_reference_from_same_domain(url);
+                return this.toReferenceFromSameDomain(url);
             }else
                 return this.path;
         }else if(url == steal.pageDir && !expand){
@@ -330,10 +330,14 @@ File.prototype =
      */
     afterDomain: function(){    return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
     /**
-     * 
+     * Returns the relative path between two paths with common folders.
+     * @codestart
+     * new steal.File('a/b/c/x/y').toReferenceFromSameDomain('a/b/c/d/e')//-> ../../x/y
+     * @codeend
      * @param {Object} url
+     * @return {String} 
      */
-    to_reference_from_same_domain: function(url){
+    toReferenceFromSameDomain: function(url){
         var parts = this.path.split('/'), other_parts = url.split('/'), result = '';
         while(parts.length > 0 && other_parts.length >0 && parts[0] == other_parts[0]){
             parts.shift(); other_parts.shift();
