@@ -55,3 +55,17 @@ test("steal's File.clean()", function(){
 	result = new steal.File('a/b#action&q=param').clean();
     equals(result, "a/b", "a/b#action&q=param is correctly cleaned.");	
 })
+
+test("steal's File.protocol()", function(){
+	result = new steal.File('http://abc.com').protocol();
+    equals(result, "http:", "http://abc.com protocol should be http:.");
+	
+	result = new steal.File('https://abc.com').protocol();
+    equals(result, "https:", "https://abc.com protocol should be https:.");	
+	
+	result = new steal.File('file://a/b/c').protocol();
+    equals(result, "file:", "file://a/b/c protocol should be file:.");	
+	
+	result = new steal.File('file:///a/b/c').protocol();
+    equals(result, "file:", "file:///a/b/c protocol should be file:.");	
+})
