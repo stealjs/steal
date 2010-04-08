@@ -163,3 +163,25 @@ test("steal's File.toReferenceFromSameDomain()", function(){
 	result = new steal.File("a/b/c/d/e").toReferenceFromSameDomain("a/b/c/d/e");
     equals(result, "", "'' is the correct reference from same domain result.");	
 })
+
+test("steal's File.normalize()", function(){
+	steal.setPath("/a/b/c");
+	result = new steal.File("d/e").normalize();
+    equals(result, "/a/b/c/d/e", "/a/b/c/d/e was normalized successfuly.");
+	
+	steal.setPath("/a/b/c");
+	result = new steal.File("//d/e").normalize();
+    equals(result, "d/e", "d/e was normalized successfuly.");	
+	
+	steal.setPath("/a/b/c");
+	result = new steal.File("/d/e").normalize();
+    equals(result, "/d/e", "/d/e was normalized successfuly.");	
+	
+	steal.setPath("http://abc.com");
+	result = new steal.File("d/e").normalize();
+    equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
+	
+	steal.setPath("http://abc.com");
+	result = new steal.File("/d/e").normalize();
+    equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");	
+})
