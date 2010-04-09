@@ -37,13 +37,17 @@ var oldsteal = window.steal;
  * </ul>
  * <h2>Examples</h2>
  * @codestart
- * steal('../../someFolder/somefile')   //steals a JS file relative to the current file
- *  .plugins('controller','view')       //steals plugins and dependencies
- *  .models('task')                     //steals files in models folder
- *  .controller('task')                 //steals files in controllers folder
- *  .then('//path/to/file')             //steals files with paths relative to project's root
+ * steal('../../someFolder/somefile')     //steals a JS file relative to the current file
+ *  .plugins('jquery/controller',         //steals plugins and dependencies
+ *           'jquery/controller/view',
+ *           'jquery/view',
+ *           'jquery/model')
+ *  .models('recipe')                     //steals files in the plugin's models folder
+ *  .controllers('recipe')                //steals files in the plugin's controllers folder
+ *  .resources('i18n')                    //steals files in the plugin's resources folder
+ *  .then('//path/to/file')               //steals files with paths relative to project's root
  *  .views('//cookbook/views/recipe/show.ejs') //loads and caches a view file
- *  .then(function(){                   //runs function after prior steals have finished
+ *  .then(function(){                     //runs function after prior steals have finished
  *     ...
  * })
  * @codeend
