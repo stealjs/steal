@@ -718,7 +718,7 @@ steal.app = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
 steal.plugin = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
 /**
  * @function plugins
- * Loads a list of plugins relative to the project root
+ * Loads a list of plugins given a path relative to the project's root.
  * @param {String} plugin_location location of a plugin, ex: jquery/dom/history.
  * @return {steal} a new steal object
  * @codestart 
@@ -735,7 +735,7 @@ steal.plugins = steal.callOnArgs(steal.plugin);
 
 /**
  * @function controllers
- * Includes controllers giving the relative path from the plugin's <b>controllers</b> directory.
+ * Includes controllers given the relative path from the plugin's <b>controllers</b> directory.
  * <br>
  * Will add the suffix _controller.js to each name passed in.
  * <br>
@@ -761,7 +761,7 @@ steal.controllers = steal.applier(function(i){
 
 /**
  * @function models
- * Includes models giving the relative path from the plugin's <b>models</b> directory.
+ * Includes models given the relative path from the plugin's <b>models</b> directory.
  * <br>
  * <br>
  * Example:
@@ -785,7 +785,7 @@ steal.models = steal.applier(function(i){
  
 /**
  * @function resources
- * Includes resources giving the relative path from the plugin's <b>resources</b> directory.
+ * Includes resources given the relative path from the plugin's <b>resources</b> directory.
  * <br>
  * <br>
  * Example:
@@ -808,7 +808,7 @@ steal.resources = steal.applier(function(i){
 
 /**
  * @function views
- * Includes views giving the view's absolute path from the project root directory.
+ * Includes views given the view's absolute path from the project's root directory.
  * <br>
  * <br>
  * Example:
