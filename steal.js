@@ -732,7 +732,7 @@ steal.plugins = steal.callOnArgs(steal.plugin);
 
 /**
  * @function controllers
- * Includes controllers giving the relative path from the plugin's controllers directory.
+ * Includes controllers giving the relative path from the plugin's <b>controllers</b> directory.
  * <br>
  * Will add the suffix _controller.js to each name passed in.
  * <br>
@@ -758,7 +758,7 @@ steal.controllers = steal.applier(function(i){
 
 /**
  * @function models
- * Includes models giving the relative path from the plugin's models directory.
+ * Includes models giving the relative path from the plugin's <b>models</b> directory.
  * <br>
  * <br>
  * Example:
@@ -782,8 +782,18 @@ steal.models = steal.applier(function(i){
  
 /**
  * @function resources
- * Includes a list of files in the <b>/resources</b> directory.
- * @param {String} resource_path resource you want to load.
+ * Includes resources giving the relative path from the plugin's <b>resources</b> directory.
+ * <br>
+ * <br>
+ * Example:
+ * <br>
+ * If you want to include PLUGIN_NAME/resource/i18n.js
+ * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
+ * @codestart 
+ *  steal.resources('i18n')
+ * @codeend
+ * @param {String} resource_name The name of the resource file you want to load.
+ * @return {steal} a new steal object   
  */
 steal.resources = steal.applier(function(i){
     if (i.match(/^\/\//)) {
@@ -795,8 +805,19 @@ steal.resources = steal.applier(function(i){
 
 /**
  * @function views
- * Includes a list of files in the <b>/views</b> directory.
- * @param {String} view_path view you want to load.
+ * Includes views giving the view's absolute path from the project root directory.
+ * <br>
+ * <br>
+ * Example:
+ * <br>
+ * If you want to include PLUGIN_NAME/views/recipe/show.ejs and list.ejs
+ * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
+ * @codestart 
+ *  steal.views('//PLUGIN_NAME/views/recipe/show.ejs',
+ *              '//PLUGIN_NAME/views/recipe/list.ejs')
+ * @codeend
+ * @param {String} view_path The view's abolute path.
+ * @return {steal} a new steal object    
  */
 steal.views = function(){
 	// Only includes views for compression and docs (when running in rhino)
