@@ -58,6 +58,26 @@ var oldsteal = window.steal;
  * steal\js APP_NAME\scripts\compress.js
  * @codeend
  * This will generate a production.js bundle in APP_NAME\production.js
+ * @codestart no-highlight
+ * steal\js APP_NAME\scripts\compress.js
+ * @codeend
+ * This will generate a production.js bundle in APP_NAME\production.js
+ * <h2>Compressing non-JMVC javascript applications.</h2>
+ * You can compress and package non-jmvc javascript applications by declaring your scripts
+ * this way in your html page:
+ * @codestart no-highlight
+ * &lt;script src="file1.js" type="text/javascript" compress="true" package="production.js">&lt;/script>
+ * &lt;script src="file2.js" type="text/javascript" compress="true" package="production.js">&lt;/script>		
+ * @codeend
+ * and then running either:
+ * @codestart no-highlight
+ * steal/js steal/compress.js path\to\non\jmvc\app\PAGE.html [OUTPUT_FOLDER]
+ * @codeend 
+ * or: 
+ * @codestart no-highlight
+ * steal/js steal/compress.js http://hostname/path/to/non/jmvc/app/PAGE.html [OUTPUT_FOLDER]
+ * @codeend  
+ * This will compress file1.js and file2.js into a file package named production.js an put it in OUTPUT_FOLDER.
  * <h2>Run in production</h2>
  * Switch to the production mode by changing development to production:
  * @codestart no-highlight
