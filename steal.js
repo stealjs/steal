@@ -137,9 +137,10 @@ steal.fn = steal.prototype = {
     init : function(options){
         this.id = (++id)
 		if(typeof options == 'function'){
-            var path = steal.getPath();
+            var path = steal.getCurrent();
+			this.path = path;
             this.func = function(){
-                steal.setPath(path);
+                steal.setCurrent(path);
                 options(window.jQuery); //should return what was steald before 'then'
             };
             this.options = options;
@@ -190,7 +191,7 @@ steal.fn = steal.prototype = {
 			if(isProduction){
 				 return;
 			}
-            steal.setPath(this.dir);
+            steal.setCurrent(this.path);
               this.skipInsert ? insert() : insert(options);			  
         }
     },
@@ -199,7 +200,7 @@ steal.fn = steal.prototype = {
      * @hide
      */
     runNow : function(){
-        steal.setPath(this.dir);
+        steal.setCurrent(this.path);
         
         return browser.rhino ? load(this.path) : 
                     steal.insert_head( steal.root.join(this.path) );
@@ -319,7 +320,7 @@ File.prototype =
      * Joins the file to the current working directory.
      */
     joinCurrent: function(){
-        return this.joinFrom(steal.getPath());
+        return this.joinFrom(steal.getCurrentFolder());
     },
     /**
      * Returns true if the file is relative
@@ -360,7 +361,7 @@ File.prototype =
      * This should probably folded under joinFrom
      */
     normalize: function(){
-        var current_path = steal.getPath();
+        var current_path = steal.getCurrentFolder();
         //if you are cross domain from the page, and providing a path that doesn't have an domain
         var path = this.path;
         if (this.isCurrentCrossDomain() && !this.isDomainAbsolute()) {
@@ -527,22 +528,27 @@ extend(steal,
         if(steal.options.startFile) steal.start();
     },
     /**
-     * Sets the current directory.
-     * @param {String} p the new directory which relative paths reference
-     */
-    setPath: function(p) {
-        cwd = p;
-    },
-    /**
      * Gets the current directory your relative steals will reference.
      * @return {String} the path of the current directory.
      */
-    getPath: function() { 
-        return cwd;
+    getCurrentFolder: function() {
+		var fwd = new File(cwd);
+        return fwd.dir();
     },
+    /**
+     * Sets the current directory.
+     * @param {String} p the new directory which relative paths reference
+     */
+	setCurrent: function(p){
+		cwd = p
+	},
+	getCurrent: function(){
+		return cwd;
+	},
     getAbsolutePath: function(){
-        var fwd = new File(cwd);
-        return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : cwd;
+		var dir = this.getCurrentFolder(), 
+			fwd = new File(this.getCurrentFolder());
+        return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : dir;
     },
     // Adds an steal to the pending list of steals.
     add: function(newInclude){
@@ -669,15 +675,15 @@ extend(steal,
     },
     resetApp : function(f){
         return function(name){
-            var current_path = steal.getPath();
-            steal.setPath("");
+            var current_path = steal.getCurrent();
+            steal.setCurrent("");
             if(name.path){
                 name.path = f(name.path)
             }else{
                 name = f(name)
             }
             steal(name);
-            steal.setPath(current_path);
+            steal.setCurrent(current_path);
             return steal;
         }
     },

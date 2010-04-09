@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations under the License.
  *
  ******************************************************************************/
-
+steal.then(function(){
 // prevent re-definition of the OpenAjax object
 if(!window["OpenAjax"]){
 	/**
@@ -198,3 +198,4 @@ if(!window["OpenAjax"]){
 
 }
 OpenAjax.hub.registerLibrary("JavaScriptMVC", "http://JavaScriptMVC.com", "1.5", {});
+});
