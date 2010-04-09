@@ -787,7 +787,7 @@ steal.models = steal.applier(function(i){
  * <br>
  * Example:
  * <br>
- * If you want to include PLUGIN_NAME/resource/i18n.js
+ * If you want to include PLUGIN_NAME/resources/i18n.js
  * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
  * @codestart 
  *  steal.resources('i18n')
