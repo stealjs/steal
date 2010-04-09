@@ -37,8 +37,7 @@ var oldsteal = window.steal;
  * </ul>
  * <h2>Examples</h2>
  * @codestart
- * steal('../../someFolder/somefile')     //steals a JS file relative to the current file
- *  .plugins('jquery/controller',         //steals plugins and dependencies
+ * steal.plugins('jquery/controller',     //steals plugins and dependencies
  *           'jquery/controller/view',
  *           'jquery/view',
  *           'jquery/model')
