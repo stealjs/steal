@@ -758,8 +758,19 @@ steal.controllers = steal.applier(function(i){
 
 /**
  * @function models
- * Includes files in the /models directory.
- * @param {String} model_name the name of the model file you want to load.
+ * Includes models giving the relative path from the plugin's models directory.
+ * <br>
+ * <br>
+ * Example:
+ * <br>
+ * If you want to include PLUGIN_NAME/models/recipe.js and ingredient.js,
+ * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
+ * @codestart 
+ *  steal.models('recipe',
+ *               'ingredient')
+ * @codeend
+ * @param {String} model_name The name of the model file you want to load.
+ * @return {steal} a new steal object   
  */
 steal.models = steal.applier(function(i){
     if (i.match(/^\/\//)) {
