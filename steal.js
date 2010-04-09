@@ -732,8 +732,21 @@ steal.plugins = steal.callOnArgs(steal.plugin);
 
 /**
  * @function controllers
- * Includes controllers from the controllers directory.  Will add _controller.js to each name passed in.
+ * Includes controllers giving the relative path from the plugin's controllers directory.
+ * <br>
+ * Will add the suffix _controller.js to each name passed in.
+ * <br>
+ * <br>
+ * Example:
+ * <br>
+ * If you want to include PLUGIN_NAME/controllers/recipe_controller.js and ingredient_controller.js,
+ * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
+ * @codestart 
+ *  steal.controllers('recipe',
+ *                    'ingredient')
+ * @codeend
  * @param {String} controller_name A controller to steal.  "_controller.js" is added to the name provided.
+ * @return {steal} a new steal object    
  */
 steal.controllers = steal.applier(function(i){
     if (i.match(/^\/\//)) {
