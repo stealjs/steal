@@ -432,10 +432,10 @@ steal.options = {
 // variables used while including
 var first = true ,                                 //If we haven't steald a file yet
     first_wave_done = false,                       //If all files have been steald 
-    steald_paths = [],                           //a list of all steald paths
+    steald_paths = [],                             //a list of all steald paths
     cwd = '',                                      //where we are currently including
-    steals=[],                                   //    
-    current_steals=[],                           //steals that are pending to be steald
+    steals=[],                                     //    
+    current_steals=[],                             //steals that are pending to be steald
     total = [];                                    //
 
 
@@ -630,42 +630,6 @@ extend(steal,
         if(func) func.func();
     },
     /**
-     * Includes CSS from the stylesheets directory.
-     * @param {String} css the css file's name to load, steal will add .css.
-     */
-    css: function(){
-        var arg;
-        for(var i=0; i < arguments.length; i++){
-            arg = arguments[i];
-            steal.css_rel('../../stylesheets/'+arg);
-        }
-    },
-    /**
-     * Creates css links from the given relative path.
-     * @hide
-     * @param {String} relative URL(s) to stylesheets
-     */
-    css_rel: function(){
-        var arg;
-        for(var i=0; i < arguments.length; i++){
-            arg = arguments[i];
-            var current = new File(arg+".css").joinCurrent();
-            steal.create_link( steal.root.join(current)  );
-        }
-    },
-    /**
-     * Creates a css link and appends it to head.
-     * @hide
-     * @param {Object} location
-     */
-    create_link: function(location){
-        var link = document.createElement('link');
-        link.rel = "stylesheet";
-        link.href =  location;
-        link.type = 'text/css';
-        head().appendChild(link);
-    },
-    /**
      * Synchronously requests a file.
      * @param {String} path path of file you want to load
      * @param {optional:String} content_type optional content type
@@ -745,24 +709,20 @@ steal.app = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
 steal.plugin = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
 /**
  * @function plugins
- * Loads a list of plugins in /steal/plugins
- * @param {String} plugin_location location of a plugin, ex: dom/history.
+ * Loads a list of plugins relative to the project root
+ * @param {String} plugin_location location of a plugin, ex: jquery/dom/history.
+ * @return {steal} a new steal object
+ * @codestart 
+ *  steal.plugins('jquery/controller',
+ *                'jquery/controller/view',
+ *                'jquery/view',
+ *                'jquery/model',
+ *                'steal/openajax')
+ * @codeend 
  */
 steal.apps = steal.callOnArgs(steal.app);
 steal.plugins = steal.callOnArgs(steal.plugin);
-steal.engine = steal.resetApp(function(p){
-    var parts = p.split("/");
-    if(!parts[1])parts[1] = parts[0];
-    return 'engines/'+ parts[0]+'/apps/'+parts[1]+"/init.js"
-});
-/**
- * @function engines
- * Includes engines by name.  Engines are entire MVC stacks in the engines directory.
- * @param {String} engine_name If there are no '/'s, steal will load 
- *     'engines/<i>engine_name</i>/apps/<i>engine_name</i>/init.js'; if engine_name looks like: 'engine/part' it will load
- *     'engines/<i>engine</i>/apps/<i>part</i>/init.js'.
- */
-steal.engines = steal.callOnArgs(steal.engine);
+
 
 /**
  * @function controllers
