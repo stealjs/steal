@@ -37,15 +37,15 @@ var oldsteal = window.steal;
  * </ul>
  * <h2>Examples</h2>
  * @codestart
- * steal('../../someFolder/somefile');  //steals a JS file relative to the current file
- * steal.plugins('controller','view')   //steals plugins and dependencies
- * steal.models('task')                 //steals files in models folder
- * steal.controller('task')             //steals files in controllers folder
- * steal.then('//path/to/task')         //steals files with paths relative to project's root
- * steal.then(function(){               //runs function after prior steals have finished
+ * steal('../../someFolder/somefile')   //steals a JS file relative to the current file
+ *  .plugins('controller','view')       //steals plugins and dependencies
+ *  .models('task')                     //steals files in models folder
+ *  .controller('task')                 //steals files in controllers folder
+ *  .then('//path/to/file')             //steals files with paths relative to project's root
+ *  .views('//cookbook/views/recipe/show.ejs') //loads and caches a view file
+ *  .then(function(){                   //runs function after prior steals have finished
  *     ...
  * })
- * steal.views('views/task/init')     //loads and caches a view file
  * @codeend
  * Includes are performed relative to the including file. 
  * Files are steald last-in-first-out after the current file has been loaded and run.
