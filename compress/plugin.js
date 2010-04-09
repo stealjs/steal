@@ -42,11 +42,18 @@ File.prototype = {
 };
 
 
-var out = [];
-for(var i = 0 ; i < steal.total.length; i++){
+var out = [], str, i;
+for(i = 0 ; i < steal.total.length; i++){
     if(typeof steal.total[i].func == "function"){
-        out.push("\n("+steal.total[i].options.toString()+")(jQuery);\n");
-    }
+		filePath = steal.total[i].path;
+		if (filePath.indexOf("jquery.js") == -1) {
+			file = readFile(filePath);
+			match = file.match(/\.then\(\s*function\s*\([^\)]*\)\{([\s\S]*)\}\s*\)\s*;*\s*/im)
+			str = "// "+filePath+"\n\n"
+			str += "(function($){\n"+match[1]+"\n})(jQuery);\n\n"
+			out.push(str);
+		}
+	}
 }
 new File(path).save(out.join(""));
 
