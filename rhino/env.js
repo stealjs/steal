@@ -5,7 +5,7 @@
  * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-var Envjs = function(){
+Envjs = function(){
     var i,
         name
         override = function(){
