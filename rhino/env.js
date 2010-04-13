@@ -5,7 +5,7 @@
  * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-Envjs = function(){
+var Envjs = function(){
     var i,
         name
         override = function(){
@@ -337,7 +337,7 @@ Envjs.loadFrame = function(frame, url){
  * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-__context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
+var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 
 Envjs.platform       = "Rhino";
 Envjs.revision       = "1.7.0.rc2";
@@ -396,6 +396,9 @@ Envjs.loadInlineScript = function(script){
             script.text,
             'eval('+script.text.substring(0,16)+'...):'+new Date().getTime()
         );
+    }
+	if(Envjs.afterInlineScriptLoad){
+         Envjs.afterInlineScriptLoad(script)
     }
     //console.log('evaluated at scope %s \n%s', 
     //    script.ownerDocument.ownerWindow.guid, script.text);
@@ -832,8 +835,8 @@ Envjs.proxy = function(scope, parent){
 /**
  * @author envjs team
  */
-/*var Console, // Make these global to avoid namespace pollution in tests.
-    console;*/
+var Console,
+    console;
 
 /*
  * Envjs console.1.2.0.10 
@@ -1109,7 +1112,7 @@ function appendNode(node, html)
  * be able to correctly implement to core browser DOM interfaces."
  */
 
-/*var Attr, // Make these global to avoid namespace pollution in tests.
+var Attr,
     CDATASection,
     CharacterData,
     Comment,
@@ -1130,7 +1133,7 @@ function appendNode(node, html)
     Text,
     Range,
     XMLSerializer,
-    DOMParser;*/
+    DOMParser;
 
 
 
@@ -4298,7 +4301,7 @@ __extend__(XMLSerializer.prototype, {
  * This file simply provides the global definitions we need to 
  * be able to correctly implement to core browser DOM Event interfaces.
  */
-/*var Event, // Make these global to avoid namespace pollution in tests.
+var Event,
     MouseEvent,
     UIEvent,
     KeyboardEvent,
@@ -4308,7 +4311,7 @@ __extend__(XMLSerializer.prototype, {
     EventException,
     //nonstandard but very useful for implementing mutation events 
     //among other things like general profiling
-    Aspect;*/
+    Aspect;
 /*
  * Envjs event.1.2.0.10 
  * Pure JavaScript Browser Environment
@@ -5154,10 +5157,10 @@ EventException.UNSPECIFIED_EVENT_TYPE_ERR = 0;
  * 
  * requires Envjs.wait, Envjs.sleep, Envjs.WAIT_INTERVAL
  */
-/*var setTimeout, // Make these global to avoid namespace pollution in tests.
+var setTimeout,
     clearTimeout,
     setInterval,
-    clearInterval;*/
+    clearInterval;
     
 /*
  * Envjs timer.1.2.0.10 
@@ -5418,7 +5421,7 @@ Envjs.wait = function(wait) {
  * This file simply provides the global definitions we need to 
  * be able to correctly implement to core browser DOM HTML interfaces.
  */
-/*var HTMLDocument, // Make these global to avoid namespace pollution in tests.
+var HTMLDocument,
     HTMLElement,
     HTMLCollection,
     HTMLAnchorElement,
@@ -5457,7 +5460,7 @@ Envjs.wait = function(wait) {
     HTMLTableRowElement,
     HTMLTextAreaElement,
     HTMLTitleElement,
-    HTMLUnknownElement;*/
+    HTMLUnknownElement;
     
 /*
  * Envjs html.1.2.0.10 
@@ -8570,9 +8573,9 @@ __extend__(HTMLUnknownElement.prototype,{
 /**
  * DOM Style Level 2
  */
-/*var CSS2Properties, // Make these global to avoid namespace pollution in tests.
+var CSS2Properties,
     CSSRule,
-    CSSStyleSheet;*/
+    CSSStyleSheet;
     
 /*
  * Envjs css.1.2.0.10 
@@ -9045,8 +9048,8 @@ var __updateCss2Props__ = function(elem, values){
 //these are both non-standard globals that
 //provide static namespaces and functions
 //to support the html 5 parser from nu.
-XMLParser = {}; // Make these global to avoid namespace pollution in tests.
-HTMLParser = {};
+var XMLParser = {},
+    HTMLParser = {};
 
     
 /*
@@ -9977,8 +9980,8 @@ __extend__(HTMLElement.prototype,{
  * be able to correctly implement to core browser (XML)HTTPRequest 
  * interfaces.
  */
-/*var Location, // Make these global to avoid namespace pollution in tests.
-    XMLHttpRequest;*/
+var Location,
+    XMLHttpRequest;
 
 /*
  * Envjs xhr.1.2.0.10 
@@ -10740,10 +10743,10 @@ XMLHttpRequest.prototype = {
 /**
  * @todo: document
  */
-/*var Window, // Make these global to avoid namespace pollution in tests.
+var Window,
     Screen,
     History,
-    Navigator;*/
+    Navigator;
 
 
 /*
@@ -11468,7 +11471,7 @@ var __windows__ = {};
 //finally pre-supply the window with the window-like environment
 //console.log('Default Window');
 new Window(__this__, __this__);
-//console.log('[ %s ]',window.navigator.userAgent);
+console.log('[ %s ]',window.navigator.userAgent);
 
 /**
  * 
