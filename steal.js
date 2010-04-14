@@ -668,6 +668,43 @@ extend(steal,
         if(func) func.func();
     },
     /**
+     * Includes CSS from the stylesheets directory.
+     * @hide
+     * @param {String} css the css file's name to load, steal will add .css.
+     */
+    css: function(){
+        var arg;
+        for(var i=0; i < arguments.length; i++){
+            arg = arguments[i];
+            steal.css_rel('../../stylesheets/'+arg);
+        }
+    },
+    /**
+     * Creates css links from the given relative path.
+     * @hide
+     * @param {String} relative URL(s) to stylesheets
+     */
+    css_rel: function(){
+        var arg;
+        for(var i=0; i < arguments.length; i++){
+            arg = arguments[i];
+            var current = new File(arg+".css").join_current();
+            steal.create_link( steal.root.join(current)  );
+        }
+    },
+    /**
+     * Creates a css link and appends it to head.
+     * @hide
+     * @param {Object} location
+     */
+    create_link: function(location){
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href =  location;
+        link.type = 'text/css';
+        head().appendChild(link);
+    },	
+    /**
      * Synchronously requests a file.
      * @param {String} path path of file you want to load
      * @param {optional:String} content_type optional content type
