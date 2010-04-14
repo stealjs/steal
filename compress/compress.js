@@ -2,15 +2,42 @@
 load('steal/file/file.js');
 load('steal/loader/loader.js');
 (function(Steal){
-	
-	Steal.Compress = function(url, outputFolder){ 
-	   if (arguments.length == 0 || arguments.length > 2) {
-	      print("USAGE: compress <URL> [<OUTPUT_FOLDER>]");
+	var options ={
+        "-o" : {
+            params: 1
+        }
+    }
+	Steal.Compress = function(args){ 
+	   //set options
+       this.options = {};
+       var i =0;
+       while(i< args.length){
+           if(args[i].indexOf('-') == 0){
+               var opt = options[args[i]], 
+                   optName = args[i].substr(1), 
+                   vals;
+               vals = args.splice(i,  1 +  ( (opt && opt.params) || 0 ))
+               vals.shift();
+               if(vals.length <= 1){
+                   this.options[optName] = vals[0] || true ;
+               }else{
+                   this.options[optName] = vals;
+               }
+           }else{
+               i++
+           }
+       }
+       
+       if (args.length == 0) {
+	      print("USAGE: compress <URL> [<OUTPUT_FOLDER>] [<OPTIONS>]");
+          print("options: -a        compress all scripts");
 	      quit();
 	   }
-	   this.url = url;
-	   this.outputFolder = outputFolder || "";
-	   if(this.outputFolder.match(/\\$/) == null && this.outputFolder != '') this.outputFolder += "/";
+	   this.url = args[0];
+	   this.outputFolder = args[1] || 
+           (args[0].match(/https?:\/\//) ?  "" : args[0].substr(0, args[0].lastIndexOf('/'))  );
+
+       if(this.outputFolder.match(/\\$/) == null && this.outputFolder != '') this.outputFolder += "/";
 	   delete steal;
 	   this.loader = new Steal.Loader(this.url)
 	   this.init();
@@ -28,19 +55,23 @@ load('steal/loader/loader.js');
 	       var self= this;
 		    this.compressString = this["closureCompressor"]();    
 			var currentPackage = [];
-		   print("\nPackaging ....")
+            if(this.options.o){
+                print('package everything')
+                this.packages[this.options.o || 'production.js'] = currentPackage;
+            }
+		   print("\nScripts ....")
 		   this.loader.each(this, function(script, text, i){
 		   		var name =  script.src ? script.src.replace(/\?.*$/,"").replace(/^(\.\.\/)+/,"") : text
 				if(script.src)
 					print("   " + name  );
 				
 				var p = script.getAttribute('package');
-				if(p && !this.packages[p]) 
+                if(p && !this.packages[p]) 
 						this.packages[p] = [];
 				if(p){
 					currentPackage = this.packages[p];
 				}
-				if(script.getAttribute('compress') == "true"){
+				if(script.getAttribute('compress') == "true" || this.options.o){
 	                text =  this.compressString(text, /jquery.js/.test(name));
 	            }
 				currentPackage.push(text);

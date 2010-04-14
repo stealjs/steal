@@ -475,7 +475,9 @@ extend(steal,
      * @hide
      */
     setScriptOptions : function(){
-        var scripts = document.getElementsByTagName("script"), scriptOptions;
+        var scripts = document.getElementsByTagName("script"), 
+            scriptOptions, 
+            commaSplit;
         for(var i=0; i<scripts.length; i++) {
             var src = scripts[i].src;
             if(src && src.match(/steal\.js/)){  //if script has steal.js
@@ -489,9 +491,16 @@ extend(steal,
         }
         
         if(scriptOptions){
-            scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function(whoe, prop, val){ 
-                steal.options[prop] = val;
-            })
+            if(scriptOptions.indexOf('=') > -1){
+                scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function(whoe, prop, val){ 
+                    steal.options[prop] = val;
+                })
+            }else{
+                commaSplit = scriptOptions.split(",")
+                steal.options.startFile = commaSplit[0];
+                steal.options.env = commaSplit[1];
+            }
+            
         }
         
     },

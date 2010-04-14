@@ -13,7 +13,7 @@ Steal.Loader.prototype = {
         load('steal/rhino/env.js');
 		Envjs(this.url, {scriptTypes: this.scriptTypes, fireLoad: false, logLevel: 2,
             afterScriptLoad: {".*": function(script){ 
-					self.scripts.push(script);
+                    self.scripts.push(script);
                 }
             },
             onLoadUnknownTypeScript: function(script){
@@ -44,8 +44,11 @@ Steal.Loader.prototype = {
         return text;
     },
 	each : function(ths, func){
-		var scripts = document.getElementsByTagName('script')
-		//print(scripts.length)
+        var scripts = document.getElementsByTagName('script')
+		
+        //if(this.scripts.length >= scripts.length){
+        //    scripts = this.scripts;
+        //}
 		for(var i = 0 ; i < scripts.length; i++){
 			func.call(ths,scripts[i], this.getScriptContent(scripts[i]), i)
 		}
