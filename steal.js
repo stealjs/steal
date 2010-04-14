@@ -688,7 +688,7 @@ extend(steal,
         var arg;
         for(var i=0; i < arguments.length; i++){
             arg = arguments[i];
-            var current = new File(arg+".css").join_current();
+            var current = new File(arg+".css").joinCurrent();
             steal.create_link( steal.root.join(current)  );
         }
     },
