@@ -23,7 +23,7 @@ rhinoLoader(function(){
 	
 	md.appPath =  md.path.replace(/\/models$/,"");
 	
-	
+	print(md.appPath)
 	//clear name
 	
 	
