@@ -9892,7 +9892,10 @@ var __elementPopped__ = function(ns, name, node){
                                     //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
-                                    try{
+                                    if(Envjs.fireLoad ===false){
+										return;
+									}
+									try{
                                         if(doc.createEvent){
                                             event = doc.createEvent('Events');
                                             event.initEvent("DOMContentLoaded", false, false);
@@ -9902,7 +9905,8 @@ var __elementPopped__ = function(ns, name, node){
                                         console.log('%s', e);
                                     }
                                     try{
-                                        if(doc.createEvent){
+                                        //print(Envjs.fireLoad)
+										if(doc.createEvent){
                                             event = doc.createEvent('HTMLEvents');
                                             event.initEvent("load", false, false);
                                             doc.dispatchEvent( event, false );
