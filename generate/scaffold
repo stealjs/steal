@@ -33,6 +33,10 @@ rhinoLoader(function(){
 		.push("controllers").folder()
 			.render(md.underscore+"_controller.js","scaffold/controller.ejs")
 			.pop()
+		.push("scripts").folder()
+			.render("qunit.js","qunit/run.ejs")
+			.render("funcunit.js","funcunit/run.ejs")
+			.pop()
 		.push("views").folder()
 			.push(md.underscore).folder()
 				.render("edit.ejs","scaffold/edit.ejs")
@@ -43,8 +47,7 @@ rhinoLoader(function(){
 			.pop()
 		.push("test").folder()
 			.push("funcunit").folder()
-				.render(md.underscore+"_controller_test.js","scaffold/functional_test.ejs")
-	
+				.render(md.underscore+"_controller_test.js","scaffold/functional_test.ejs")	
 	
 	
 	load("steal/generate/parts/model.js")
