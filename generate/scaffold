@@ -43,6 +43,7 @@ rhinoLoader(function(){
 			.pop()
 		.push("test").folder()
 			.push("funcunit").folder()
+			  .push("tests").folder()
 				.render(md.underscore+"_controller_test.js","scaffold/functional_test.ejs")	
 	
 	

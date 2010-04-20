@@ -20,7 +20,7 @@
 		new Generate(app, md, "../generate/templates/", false)
 			.push('fixtures').folder()
 				.render(md.plural+".json.get","fixture.ejs")
-		    .pop().push('test').push('qunit').folder()
+		    .pop().push('test').push('qunit').folder().push('tests').folder()
 				.render(md.underscore+"_test.js","model_unit_test.ejs")
 	}
 })()

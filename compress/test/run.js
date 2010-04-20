@@ -34,7 +34,7 @@ load("steal/compress/compress.js");
 new steal.Compress(['steal/compress/test/foreign.html','steal/compress/test']);
 _S.clear();
 
-load("steal/compress/test/foreignproduction.js")
+//load("steal/compress/test/foreignproduction.js")
 //check that srcs are equal
 f1 = readFile('foreign.js').replace(/\r/,"");
 f2 = readFile('foreignproduction.js');
