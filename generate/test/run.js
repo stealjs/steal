@@ -8,6 +8,7 @@ _S.clear();
  * (one level deep first then two levels deep)
  */
 print("-- generate cnu plugin --");
+
 _args = ['cnu']; load('steal/generate/plugin');_S.clear();
 _S.open('cnu/cnu.html')
 if(typeof steal == 'undefined') throw "didn't load steal"
@@ -62,7 +63,7 @@ new steal.File('cnu/test/funcunit/funcunit.js').save( cnuFuncunitContent );
 _S.clear();
 //now see if unit and functional run
 print("-- Run unit tests for cnu --");
-_args = ['-unit']; load('cnu/scripts/test.js');
+load('cnu/scripts/qunit.js');
 
 _S.sleep(300);
 
@@ -74,7 +75,7 @@ new steal.File('cnu/settings.js').save( cnuSettings );
 
 _S.clear();
 print("-- Run functional tests for cnu --");
-_args = ['-functional']; load('cnu/scripts/test.js');_S.clear();
+load('cnu/scripts/funcunit.js');_S.clear();
 
 _S.sleep(300);
 

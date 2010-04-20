@@ -4,16 +4,11 @@ if (!_args[0]) {
 	print("Usage: steal/js steal/generate/app path");
 	quit();
 }
-
 load('steal/rhino/loader.js');
 
-
 rhinoLoader(function(){
-	steal.plugins('steal/ejs','steal/file','steal/generate');
+    steal.plugins('steal/ejs','steal/file','steal/generate');
 });
-
-;
-
 
 (function(){
 
@@ -101,6 +96,8 @@ rhinoLoader(function(){
       .push("scripts").folder()
         .render("compress.js", "compress_script.ejs")
         .render("doc.js","docs_script.ejs")
-        .render("test.js", "funcunit/run.ejs")
+        .render("qunit.js","qunit/run.ejs")
+        .render("funcunit.js","funcunit/run.ejs")
+        .pop()
 })();
 

@@ -337,7 +337,10 @@ Envjs.loadFrame = function(frame, url){
  * Copyright 2008-2010 John Resig, under the MIT License
  */
 
-var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var __context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();*/
+__context__ = Packages.org.mozilla.javascript.Context.getCurrentContext();
 
 Envjs.platform       = "Rhino";
 Envjs.revision       = "1.7.0.rc2";
@@ -835,8 +838,11 @@ Envjs.proxy = function(scope, parent){
 /**
  * @author envjs team
  */
-var Console,
-    console;
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var Console,
+    console;*/
 
 /*
  * Envjs console.1.2.0.10 
@@ -1112,7 +1118,9 @@ function appendNode(node, html)
  * be able to correctly implement to core browser DOM interfaces."
  */
 
-var Attr,
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var Attr,
     CDATASection,
     CharacterData,
     Comment,
@@ -1133,7 +1141,7 @@ var Attr,
     Text,
     Range,
     XMLSerializer,
-    DOMParser;
+    DOMParser;*/
 
 
 
@@ -4301,7 +4309,10 @@ __extend__(XMLSerializer.prototype, {
  * This file simply provides the global definitions we need to 
  * be able to correctly implement to core browser DOM Event interfaces.
  */
-var Event,
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var Event,
     MouseEvent,
     UIEvent,
     KeyboardEvent,
@@ -4311,7 +4322,7 @@ var Event,
     EventException,
     //nonstandard but very useful for implementing mutation events 
     //among other things like general profiling
-    Aspect;
+    Aspect;*/
 /*
  * Envjs event.1.2.0.10 
  * Pure JavaScript Browser Environment
@@ -5157,10 +5168,13 @@ EventException.UNSPECIFIED_EVENT_TYPE_ERR = 0;
  * 
  * requires Envjs.wait, Envjs.sleep, Envjs.WAIT_INTERVAL
  */
-var setTimeout,
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var setTimeout,
     clearTimeout,
     setInterval,
-    clearInterval;
+    clearInterval;*/
     
 /*
  * Envjs timer.1.2.0.10 
@@ -5421,7 +5435,10 @@ Envjs.wait = function(wait) {
  * This file simply provides the global definitions we need to 
  * be able to correctly implement to core browser DOM HTML interfaces.
  */
-var HTMLDocument,
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var HTMLDocument,
     HTMLElement,
     HTMLCollection,
     HTMLAnchorElement,
@@ -5460,7 +5477,7 @@ var HTMLDocument,
     HTMLTableRowElement,
     HTMLTextAreaElement,
     HTMLTitleElement,
-    HTMLUnknownElement;
+    HTMLUnknownElement;*/
     
 /*
  * Envjs html.1.2.0.10 
@@ -8573,9 +8590,12 @@ __extend__(HTMLUnknownElement.prototype,{
 /**
  * DOM Style Level 2
  */
-var CSS2Properties,
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var CSS2Properties,
     CSSRule,
-    CSSStyleSheet;
+    CSSStyleSheet;*/
     
 /*
  * Envjs css.1.2.0.10 
@@ -9048,8 +9068,13 @@ var __updateCss2Props__ = function(elem, values){
 //these are both non-standard globals that
 //provide static namespaces and functions
 //to support the html 5 parser from nu.
-var XMLParser = {},
-    HTMLParser = {};
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var XMLParser = {},
+    HTMLParser = {};*/
+XMLParser = {};
+HTMLParser = {};	
 
     
 /*
@@ -9892,10 +9917,10 @@ var __elementPopped__ = function(ns, name, node){
                                     //console.log('html popped');
                                     doc.parsing = false;
                                     //DOMContentLoaded event
-                                    if(Envjs.fireLoad ===false){
-										return;
-									}
-									try{
+                                    try {
+                                        if(Envjs.fireLoad === false) {
+                                           return;
+                                        }
                                         if(doc.createEvent){
                                             event = doc.createEvent('Events');
                                             event.initEvent("DOMContentLoaded", false, false);
@@ -9905,8 +9930,7 @@ var __elementPopped__ = function(ns, name, node){
                                         console.log('%s', e);
                                     }
                                     try{
-                                        //print(Envjs.fireLoad)
-										if(doc.createEvent){
+                                        if(doc.createEvent){
                                             event = doc.createEvent('HTMLEvents');
                                             event.initEvent("load", false, false);
                                             doc.dispatchEvent( event, false );
@@ -9984,8 +10008,11 @@ __extend__(HTMLElement.prototype,{
  * be able to correctly implement to core browser (XML)HTTPRequest 
  * interfaces.
  */
-var Location,
-    XMLHttpRequest;
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var Location,
+    XMLHttpRequest;*/
 
 /*
  * Envjs xhr.1.2.0.10 
@@ -10747,10 +10774,13 @@ XMLHttpRequest.prototype = {
 /**
  * @todo: document
  */
-var Window,
+
+// Make these variables global to avoid
+// namespace pollution when running big_test.js
+/*var Window,
     Screen,
     History,
-    Navigator;
+    Navigator;*/
 
 
 /*

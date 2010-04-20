@@ -9,7 +9,7 @@ _S.clear();
 
 print("-- Compress basic page --");
 load("steal/compress/compress.js")
-new steal.Compress('steal/compress/test/basicpage.html','steal/compress/test');
+new steal.Compress(['steal/compress/test/basicpage.html','steal/compress/test']);
 _S.clear();
 
 load("steal/compress/test/basicproduction.js")
@@ -20,7 +20,7 @@ _S.remove('steal/compress/test/basicproduction.js')
 
 print("-- Compress page using steal --");
 load("steal/compress/compress.js")
-new steal.Compress('steal/compress/test/stealpage.html','steal/compress/test');
+new steal.Compress(['steal/compress/test/stealpage.html','steal/compress/test']);
 _S.clear();
 
 _S.open('steal/compress/test/stealprodpage.html')
@@ -31,7 +31,7 @@ _S.remove('steal/compress/test/production.js')
 
 print("-- Compress page with foreign characters --");
 load("steal/compress/compress.js");
-new steal.Compress('steal/compress/test/foreign.html','steal/compress/test');
+new steal.Compress(['steal/compress/test/foreign.html','steal/compress/test']);
 _S.clear();
 
 load("steal/compress/test/foreignproduction.js")

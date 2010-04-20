@@ -99,6 +99,8 @@ rhinoLoader(function(){
       .push("scripts").folder()
         .render("compress.js", "compress_script.ejs")
         .render("doc.js","docs_script.ejs")
+        .render("qunit.js","qunit/run.ejs")
+        .render("funcunit.js","funcunit/run.ejs")        
         .pop()
       .folder("controllers")
       .folder("models")
