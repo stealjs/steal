@@ -7,5 +7,5 @@
 load('steal/test/helpers.js')
 _S.clear();
 
-_S.open("steal/test/qunit/qunit.html");
-//_S.wait("window.jQuery.Test.Unit.complete");
+load('funcunit/funcunit.js')
+Funcunit.runTest('steal/test/qunit/qunit.html')
