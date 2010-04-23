@@ -280,7 +280,9 @@ File.prototype =
      */
     dir: function(){
         var last = this.clean().lastIndexOf('/');
-        return last != -1 ? this.clean().substring(0,last) : ''; //this.clean();
+        var dir = (last != -1) ? this.clean().substring(0,last) : ''; //this.clean();
+        var parts = dir != '' && dir.match( /^(https?:\/|file:\/)$/ );
+        return parts && parts[1] ? this.clean() : dir;
     },
     /**
      * Returns the domain for the current path.

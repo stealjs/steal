@@ -97,13 +97,13 @@ test("steal's File.join(url)", function(){
 })
 
 test("steal's File.joinCurrent()", function(){
-	steal.setPath("http://abc.com");
+	steal.setCurrent("http://abc.com");
 	result = new steal.File("d/e").joinCurrent();
-    equals(result, "http://abc.com/d/e", "http://abc.com/d/e was joined successfuly.");
-		
-	steal.setPath("/a/b/c");
-	result = new steal.File("d/e").joinCurrent();
-    equals(result, "/a/b/c/d/e", "/a/b/c/d/e was joined successfuly.");		
+    equals(result, "http://abc.com/d/e", "http://abc.com/d/e was joined successfuly.");		
+	
+	steal.setCurrent("/a/b/");
+	result = new steal.File("c/d").joinCurrent();
+    equals(result, "/a/b/c/d", "/a/b/c/d was joined successfuly.");		
 })
 
 test("steal's File.relative()", function(){
@@ -165,23 +165,23 @@ test("steal's File.toReferenceFromSameDomain()", function(){
 })
 
 test("steal's File.normalize()", function(){
-	steal.setPath("/a/b/c");
-	result = new steal.File("d/e").normalize();
-    equals(result, "/a/b/c/d/e", "/a/b/c/d/e was normalized successfuly.");
+	steal.setCurrent("/a/b/");
+	result = new steal.File("c/d").normalize();
+    equals(result, "/a/b/c/d", "/a/b/c/d was normalized successfuly.");
 	
-	steal.setPath("/a/b/c");
+	steal.setCurrent("/a/b/c");
 	result = new steal.File("//d/e").normalize();
     equals(result, "d/e", "d/e was normalized successfuly.");	
 	
-	steal.setPath("/a/b/c");
+	steal.setCurrent("/a/b/c");
 	result = new steal.File("/d/e").normalize();
     equals(result, "/d/e", "/d/e was normalized successfuly.");	
 	
-	steal.setPath("http://abc.com");
+	steal.setCurrent("http://abc.com");
 	result = new steal.File("d/e").normalize();
     equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
 	
-	steal.setPath("http://abc.com");
+	steal.setCurrent("http://abc.com");
 	result = new steal.File("/d/e").normalize();
     equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");	
 })
