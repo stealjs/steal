@@ -84,7 +84,6 @@ rhinoLoader(function(){
       .render("funcunit.html",  "funcunit/html.ejs")
       .render("qunit.html",  "qunit/html.ejs")
 	  //.render("docs.html",  "docs.ejs")
-      .render("settings.js", "settings.ejs")
       .push("test").folder()
         .push("qunit").folder()
           .render("qunit.js", "qunit/qunit.ejs")

@@ -1,4 +1,8 @@
-load('<%= path %>/settings.js')
+load('settings.js')
 load('funcunit/funcunit.js')
 
+//Funcunit.redirectOutputTo('<%= path %>/funcunit.log')
+
 Funcunit.runTest('<%= path %>/funcunit.html')
+
+//Funcunit.emailFile('<%= path %>/funcunit.log')
