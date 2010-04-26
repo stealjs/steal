@@ -53,11 +53,11 @@ _args = ['cnu','cnu_functional']; load('steal/generate/functional_test');_S.clea
 _S.clear();
 load('steal/file/file.js');
 cnuQunitContent = readFile('cnu/test/qunit/qunit.js').
-    replace(".then(\"tests/basic\")", ".then(\"tests/cnu_unit_test\")");
+    replace(".then(\"basic\")", ".then(\"cnu_unit_test\")");
 new steal.File('cnu/test/qunit/qunit.js').save( cnuQunitContent );
 
 cnuFuncunitContent = readFile('cnu/test/funcunit/funcunit.js').
-    replace(".then(\"tests/basic\")", ".then(\"cnu_functional_test\")");
+    replace(".then(\"basic\")", ".then(\"cnu_functional_test\")");
 new steal.File('cnu/test/funcunit/funcunit.js').save( cnuFuncunitContent );
 
 _S.clear();
