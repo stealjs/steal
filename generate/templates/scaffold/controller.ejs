@@ -51,7 +51,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
      */
     '.edit click' : function(el){
         var <%= underscore %> = el.parents().model();
-        $( "."+<%= underscore %>.identity() ).html(this.view('edit', <%= underscore %>))
+        <%= underscore %>.elements().html(this.view('edit', <%= underscore %>))
     },
     /**
      * Removes the edit interface.
@@ -78,7 +78,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
      * Shows a <%= underscore %>'s information.
      */
     show: function(<%= underscore %>){
-        $("."+<%= underscore %>.identity()).html(this.view('show',<%= underscore %>))
+        <%= underscore %>.elements().html(this.view('show',<%= underscore %>))
     },
     /**
      *  Handle's clicking on a <%= underscore %>'s destroy link.
