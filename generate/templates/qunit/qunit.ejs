@@ -1,4 +1,3 @@
 steal
-  .plugins("funcunit/qunit")
+  .plugins("funcunit/qunit", "<%= path %>")
   .then("basic_test")
-  .apps("<%= path %>")

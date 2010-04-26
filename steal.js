@@ -782,7 +782,6 @@ extend(steal,
     then : steal,
     total: total
 });
-steal.app = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
 steal.plugin = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
 /**
  * @function plugins
@@ -797,7 +796,6 @@ steal.plugin = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
  *                'steal/openajax')
  * @codeend 
  */
-steal.apps = steal.callOnArgs(steal.app);
 steal.plugins = steal.callOnArgs(steal.plugin);
 
 
