@@ -69,9 +69,6 @@ _S.sleep(300);
 
 _S.clear();
 load('steal/file/file.js');
-cnuSettings = readFile('cnu/settings.js').
-    replace("quitOnDone: true", "quitOnDone: false");
-new steal.File('cnu/settings.js').save( cnuSettings );
 
 _S.clear();
 print("-- Run functional tests for cnu --");
