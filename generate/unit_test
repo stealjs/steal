@@ -21,7 +21,7 @@ rhinoLoader(function(){
 		name: testName
 	};
 	new Generate(appName, data, "../generate/templates/")
-	 .render("test/qunit/tests/" + data.name + "_test.js", "qunit/basic.ejs")
+	 .render("test/qunit/" + data.name + "_test.js", "qunit/basic.ejs")
 	 .postGenerationMessage();
 })();
 
