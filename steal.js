@@ -354,7 +354,7 @@ File.prototype =
     /**
      * Returns the part of the path that is after the domain part
      */
-    afterDomain: function(){    return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
+    afterDomain: function(){    return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];},
     /**
      * Returns the relative path between two paths with common folders.
      * @codestart
