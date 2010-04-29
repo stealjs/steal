@@ -72,7 +72,7 @@ load('steal/loader/loader.js');
 					currentPackage = this.packages[p];
 				}
 				if(script.getAttribute('compress') == "true" || this.options.o){
-	                text =  this.compressString(text, /jquery.js/.test(name));
+	                text =  this.compressString(text, true);
 	            }
 				currentPackage.push(text);
 		   })
