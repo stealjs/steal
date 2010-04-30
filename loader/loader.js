@@ -30,10 +30,14 @@ Steal.Loader.prototype = {
     	var text = "";
         var base = "" + window.location;
 
-		var url = Envjs.uri(src.match(/([^\?#]*)/)[1], base);
+        var url = src.match(/([^\?#]*)/)[1];
+
+		if (url.match(/^\/\//))
+		    url = steal.root.join( url.substr(2) ); //can steal be removed?
+		url = Envjs.uri(url, base);
         
         if(url.match(/^file\:/)) {
-            url = url.replace("file:/","").replace("\\", "/");
+            url = url.replace("file:/","");
             text = readFile("/"+url);
         }
         
