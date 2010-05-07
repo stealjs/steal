@@ -1,0 +1,26 @@
+if(_args < 1){
+  print("Usage: steal/js steal/scripts/get url name")
+  print("")
+  print("Examples:")
+  print("steal\\js steal\\scripts\\get http://github.com/pinhook/phui/ phui")
+  print("steal\\js steal\\scripts\\get http://jabbify.googlecode.com/svn/trunk/jabbify/ jabbify")
+  print("steal\\js steal\\scripts\\get http://github.com/moschel/gittest/ testing v1.0.0")
+  quit();
+}
+
+load('steal/file/file.js');
+load('steal/json/json.js');
+load('steal/get/getter.js');
+load('steal/get/github.js');
+load("steal/prompt/prompt.js");
+load('steal/get/installer.js');
+
+
+
+if(_args[0].indexOf("github.com") != -1) {
+	e = new Installer(_args[0], _args[1], GithubGetter, _args[2]);
+} else {
+	e = new Installer(_args[0], _args[1], Getter);
+}
+
+e.install_using_http();
