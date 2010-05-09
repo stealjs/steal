@@ -24,7 +24,26 @@
         fin.close();
         fout.close();
 	}
-
+	var addDir = function(dirObj, out, replacePath) {
+	    var files = dirObj.listFiles();
+	    var tmpBuf = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
+	
+	    for (var i = 0; i < files.length; i++) {
+	      if (files[i].isDirectory()) {
+	        addDir(files[i], out, replacePath);
+	        continue;
+	      }
+	      var inarr = new java.io.FileInputStream(files[i].getAbsolutePath());
+		  var zipPath = files[i].getPath().replace(replacePath, "")
+	      out.putNextEntry(new java.util.zip.ZipEntry(zipPath));
+	      var len;
+	      while ((len = inarr.read(tmpBuf)) > 0) {
+	        out.write(tmpBuf, 0, len);
+	      }
+	      out.closeEntry();
+	      inarr.close();
+	    }
+	  }
 extend(S.File.prototype, {	
 	/**
 	 * Removes hash and params
@@ -142,14 +161,23 @@ extend(S.File.prototype, {
         var exists = (new java.io.File(this.path)).exists();
         return exists;
     },
-    copyTo: function(dest){
+    copyTo: function(dest, ignore){
         var me = new java.io.File(this.path)
 		var you = new java.io.File(dest);
-		
 	    if (me.isDirectory()) {
 	        var children = me.list();
 	        for (var i=0; i<children.length; i++) {
-	            copy(new java.io.File(me, children[i]), new java.io.File(you, children[i])  )
+				var newMe = new java.io.File(me, children[i]);
+				var newYou = new java.io.File(you, children[i]);
+				if (ignore.indexOf(""+newYou.getName()) != -1) {
+					continue;
+				}
+				if (newMe.isDirectory()) {
+					newYou.mkdir();
+					new steal.File(newMe.path).copyTo(newYou.path, ignore)
+				} else {
+					copy(newMe, newYou)
+				}
 	        }
 			return;
 	    }
@@ -189,7 +217,27 @@ extend(S.File.prototype, {
 	remove: function(){
         var file = new java.io.File( this.path );
         file["delete"]();
-    }
+    },
+	removeDir: function(){
+        var me = new java.io.File(this.path)
+    	if( me.exists() ) {
+			var files = me.listFiles();
+			for(var i=0; i<files.length; i++) {
+				if(files[i].isDirectory()) {
+           			new steal.File(files[i]).removeDir();
+         		} else {
+           			files[i]["delete"]();
+         		}
+      		}
+    	}
+		me["delete"]()
+	},
+	zipDir: function(name, replacePath) {
+    	var dirObj = new java.io.File(this.path);
+    	var out = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(name));
+    	addDir(dirObj, out, replacePath);
+    	out.close();
+  }
 });
 
 S.File.cwdURL = function(){
