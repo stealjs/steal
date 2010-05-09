@@ -1,2 +1,2 @@
-_args = ["install","http://github.com/pinhook/steal/","steal"];
-load("steal/plugin")
+_args = ["http://github.com/pinhook/steal/","steal"];
+load("steal/scripts/get")
