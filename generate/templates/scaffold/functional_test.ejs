@@ -2,7 +2,7 @@ module("<%= underscore %>")
 
 test("<%= plural %> present", function(){
 
-        S.open("<%= appName %>.html");
+        S.open("//<%= appPath %>/<%= appName %>.html");
 		S('.<%= underscore %>').exists(function(){
 			ok(true, "<%= plural %> present");
 	    });

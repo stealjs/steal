@@ -48,7 +48,7 @@ for(i = 0 ; i < steal.total.length; i++){
 		filePath = steal.total[i].path;
 		if (filePath.indexOf("jquery.js") == -1) {
 			file = readFile(filePath);
-			match = file.match(/\.then\(\s*function\s*\([^\)]*\)\{([\s\S]*)\}\s*\)\s*;*\s*/im)
+			match = file.match(/\.then\(\s*function\s*\([^\)]*\)\s*\{([\s\S]*)\}\s*\)\s*;*\s*/im)
 			str = "// "+filePath+"\n\n"
 			str += "(function($){\n"+match[1]+"\n})(jQuery);\n\n"
 			out.push(str);
