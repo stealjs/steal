@@ -13,7 +13,7 @@ GithubGetter = function(urls_to_fetch, level, cwd, ignore, tag){
     this.cwd = cwd || ".";
 	this.orig_cwd = this.cwd
     this.quite =false
-    this.ignore = ignore;
+    this.ignore = [".git", ".gitignore", "dist"];
 	
 	// parse from URL
 	var split = urls_to_fetch.split("/")
@@ -66,10 +66,12 @@ GithubGetter.prototype.download = function(link){
 	var rawUrl = this.urls_to_fetch[0]+"raw/"+this.branch+"/"+link.replace(this.urls_to_fetch[0], "")
     var bn = new steal.File(link).basename();
     var f = new steal.File(this.cwd).join(bn);
-    if(f.match(this.ignore)){
-        print("   I "+f);
-        return;
-    }
+	for(var i=0; i<this.ignore.length; i++){
+	    if(f.match(this.ignore[i])){
+	        print("   I "+f);
+	        return;
+	    }
+	}
     
     var oldsrc = readFile(f);
 	
@@ -78,8 +80,11 @@ GithubGetter.prototype.download = function(link){
     var p = "   "
     if(oldsrc){
 		var trim = /\s+$/gm
-        if (oldsrc.replace(trim, '') == newsrc.replace(trim, '')) {
-        	print(p+"Nochange "+f);
+		var jar = false
+		if(/\.jar$/.test(f)) jar = true
+		if(jar) print(f)
+        if ((!jar && oldsrc.replace(trim, '') == newsrc.replace(trim, ''))
+			|| (jar && oldsrc == newsrc)) {
 			return;
 		}
         print(p+"Update "+f);
