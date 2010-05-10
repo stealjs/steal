@@ -13,7 +13,7 @@ GithubGetter = function(urls_to_fetch, level, cwd, ignore, tag){
     this.cwd = cwd || ".";
 	this.orig_cwd = this.cwd
     this.quite =false
-    this.ignore = [".git", ".gitignore", "dist"];
+    this.ignore = [".gitignore", "dist"];
 	
 	// parse from URL
 	var split = urls_to_fetch.split("/")
@@ -82,7 +82,6 @@ GithubGetter.prototype.download = function(link){
 		var trim = /\s+$/gm
 		var jar = false
 		if(/\.jar$/.test(f)) jar = true
-		if(jar) print(f)
         if ((!jar && oldsrc.replace(trim, '') == newsrc.replace(trim, ''))
 			|| (jar && oldsrc == newsrc)) {
 			return;

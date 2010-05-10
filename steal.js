@@ -526,6 +526,10 @@ extend(steal,
         if(steal.options.app){
             steal.options.startFile = steal.options.app+"/"+steal.options.app.match(/[^\/]+$/)[0]+".js"
         }
+		if(steal.options.ignoreControllers){
+			steal.controllers = function(){return steal;}
+			steal.controller = function(){return steal;}
+		}
         
         
         if(!steal.options.production && steal.options.startFile){
