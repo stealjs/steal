@@ -73,15 +73,22 @@ GithubGetter.prototype.download = function(link){
     
     var oldsrc = readFile(f);
 	
-    new steal.File(f).download_from( rawUrl, true );
+    new steal.File("tmp").download_from( rawUrl, true );
     var newsrc = readFile(f);
     var p = "   "
     if(oldsrc){
-        if(oldsrc == newsrc) return;
-        print(p+"U "+f);
+		var trim = /\s+$/gm
+        if (oldsrc.replace(trim, '') == newsrc.replace(trim, '')) {
+        	print(p+"Nochange "+f);
+			return;
+		}
+        print(p+"Update "+f);
+    	new steal.File("tmp").copyTo(f);
     }else{
-        print(p+"A "+f);
+        print(p+"Adding "+f);
+    	new steal.File("tmp").copyTo(f);
     }
+    new steal.File("tmp").remove();
 }
 GithubGetter.prototype.fetch_dir = function(url){
     this.level++;
