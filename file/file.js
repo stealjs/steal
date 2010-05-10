@@ -34,7 +34,8 @@
 	        continue;
 	      }
 	      var inarr = new java.io.FileInputStream(files[i].getAbsolutePath());
-		  var zipPath = files[i].getPath().replace(replacePath, "")
+		  var zipPath = files[i].getPath().replace(replacePath, "").replace("\\", "/")
+		  print(zipPath)
 	      out.putNextEntry(new java.util.zip.ZipEntry(zipPath));
 	      var len;
 	      while ((len = inarr.read(tmpBuf)) > 0) {

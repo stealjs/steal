@@ -1,9 +1,9 @@
 /**
  * @tag controllers, home
  * Displays a table of <%= plural %>.  Lets the user 
- * ["<%=name%>Controller.prototype.form submit" create], 
- * ["<%=name%>Controller.prototype.&#46;edit click" edit],
- * or ["<%=name%>Controller.prototype.&#46;destroy click" destroy] <%= plural %>.
+ * ["<%=name.replace("Models","Controllers")%>Controller.prototype.form submit" create], 
+ * ["<%=name.replace("Models","Controllers")%>Controller.prototype.&#46;edit click" edit],
+ * or ["<%=name.replace("Models","Controllers")%>Controller.prototype.&#46;destroy click" destroy] <%= plural %>.
  */
 jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
 /* @Static */
