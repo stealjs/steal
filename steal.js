@@ -156,7 +156,6 @@ steal = function(){
 		readystatechange : eventSupported("readystatechange","script"),
 		error: eventSupported("readystatechange","script")
 	}
-	//console.log(steal.support.load, steal.support.readystatechange, steal.support.error)
 })();
 
 var id = 0;
@@ -1008,21 +1007,6 @@ var head = function(){
     de.insertBefore(head, de.firstChild);
     return head;
 };
-/*
-steal.loaded = 0;
-steal.setScriptOptions();
-(function(){
-	var script = document.createElement('script');
-	var appendTo = document.body || document.getElementsByTagName("head")[0];
-	script.src = steal.root.join('steal/test.js'); 
-	script.type = "text/javascript"
-	
-	script.onload =  script.onreadystatechange =function(){
-		order('append load');
-	}
-	appendTo.appendChild(script);
-	document.write("<script type='text/javascript'>order('something');steal.write = steal.loaded++;steal.init()</script>")
-})();*/
 
 steal.init();
 })();
