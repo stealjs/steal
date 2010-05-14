@@ -44,7 +44,9 @@ load('steal/loader/loader.js');
 	   steal = Steal;
 	};
 	Steal.removeRemoveSteal = function(text){
-	  return String(java.lang.String(text).replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end",""))
+		  return String(java.lang.String(text)
+		  				.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end","")
+		  				.replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\w+)[\n\s\r]*\([^\)]*\)",""))
 	}
 	Steal.Compress.prototype = {
 	   
