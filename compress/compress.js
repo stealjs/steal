@@ -43,13 +43,18 @@ load('steal/loader/loader.js');
 	   this.init();
 	   steal = Steal;
 	};
+	Steal.removeRemoveSteal = function(text){
+		  return String(java.lang.String(text)
+		  				.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end","")
+		  				.replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\w+)[\n\s\r]*\([^\)]*\)",""))
+	}
 	Steal.Compress.prototype = {
 	   
 	    scripts:[],
 	    scriptTypes: {"text/javascript" : true,"text/envjs" : true},
 	    packages: {},
 	    compressString: undefined,
-	
+		
 	    init: function(){
 	       //read arguments in ...
 	       var self= this;
@@ -62,6 +67,12 @@ load('steal/loader/loader.js');
 		   print("\nScripts ....")
 		   this.loader.each(this, function(script, text, i){
 		   		var name =  script.src ? script.src.replace(/\?.*$/,"").replace(/^(\.\.\/)+/,"") : text
+				if(script.getAttribute('ignore') == "true"){
+					print('   ignore '+script.src);
+					return;
+				}
+				
+				
 				if(script.src)
 					print("   " + name  );
 				
@@ -71,6 +82,7 @@ load('steal/loader/loader.js');
 				if(p){
 					currentPackage = this.packages[p];
 				}
+				text = Steal.removeRemoveSteal(text);
 				if(script.getAttribute('compress') == "true" || this.options.o){
 	                text =  this.compressString(text, true);
 	            }

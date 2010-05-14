@@ -15,13 +15,23 @@
 			var order_num = 0;
 			order = function(o){
 				var p  = document.createElement('p');
-				p.style.backgroundColor = o == order_num ? '#ddffdd' : '#ffdddd'
-				p.innerHTML = ''+o+'='+(order_num++)+': '+steal.getPath()+', '+steal.current.path;
+				if (typeof o == 'number') {
+					p.style.backgroundColor = o == order_num ? '#ddffdd' : '#ffdddd'
+					p.innerHTML = '' + o + '=' + (order_num++) + ': ' + steal.getCurrent() + ', ' + steal.current.path;
+				}else{
+					p.innerHTML = o
+				}
+				document.body.appendChild(p)
+			}
+			window.onload = function(){
+				var p  = document.createElement('p');
+				p.style.backgroundColor =  '#ffdddd'
+				p.innerHTML = 'load'
 				document.body.appendChild(p)
 			}
 		</script>
 		<script type='text/javascript' 
-                src='steal.js?steal[app]=steal/test/one&steal[env]=development'>   
+                src='../steal.js?steal[app]=steal/test/one&steal[env]=development'>   
         </script>	
 	</body>
 </html>
