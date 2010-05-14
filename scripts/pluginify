@@ -40,7 +40,9 @@ File.prototype = {
                 out.close();
     }
 };
-
+removeRemoveSteal = function(text){
+  return String(java.lang.String(text).replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end",""))
+}
 
 var out = [], str, i;
 for(i = 0 ; i < steal.total.length; i++){
@@ -50,7 +52,7 @@ for(i = 0 ; i < steal.total.length; i++){
 			file = readFile(filePath);
 			match = file.match(/\.then\(\s*function\s*\([^\)]*\)\s*\{([\s\S]*)\}\s*\)\s*;*\s*/im)
 			str = "// "+filePath+"\n\n"
-			str += "(function($){\n"+match[1]+"\n})(jQuery);\n\n"
+			str += "(function($){\n"+removeRemoveSteal(match[1])+"\n})(jQuery);\n\n"
 			out.push(str);
 		}
 	}

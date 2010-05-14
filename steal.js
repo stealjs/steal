@@ -20,9 +20,14 @@
 
 //put everything in function to keep space clean
 (function(){
-    
+
 if(typeof steal != 'undefined' && steal.nodeType)
     throw("Include is defined as function or an element's id!");
+
+
+
+
+
 
 var oldsteal = window.steal;
 
@@ -132,6 +137,28 @@ steal = function(){
 
     return steal;
 };
+
+(function(){
+	var eventSupported = function( eventName, tag ) { 
+		var el = document.createElement(tag); 
+		eventName = "on" + eventName; 
+
+		var isSupported = (eventName in el); 
+		if ( !isSupported ) { 
+			el.setAttribute(eventName, "return;"); 
+			isSupported = typeof el[eventName] === "function"; 
+		} 
+		el = null; 
+		return isSupported; 
+	};
+	steal.support = {
+		load : eventSupported("load","script"),
+		readystatechange : eventSupported("readystatechange","script"),
+		error: eventSupported("readystatechange","script")
+	}
+	//console.log(steal.support.load, steal.support.readystatechange, steal.support.error)
+})();
+
 var id = 0;
 /* @prototype */
 steal.fn = steal.prototype = {
@@ -541,7 +568,16 @@ extend(steal,
         
         //start loading stuff
         //steal.plugins('jquery'); //always load jQuery
-        
+        var current_path = steal.getCurrent();
+		steal({
+			path: 'steal/development/development.js',
+			ignore: true
+		})
+	    steal.setCurrent(current_path);
+
+           
+		
+		
         //if you have a startFile load it
         if(steal.options.startFile){
             first = false; //makes it so we call close after
@@ -628,7 +664,9 @@ extend(steal,
     },
     // Called after every file is loaded.  Gets the next file and steals it.
     end: function(src){
-        // add steals that were just added to the end of the list
+		//prevents warning of bad includes
+		clearTimeout(steal.timer)
+		// add steals that were just added to the end of the list
 		var got = current_steals.length;
 		steals = steals.concat(current_steals);
         // take the last one
@@ -908,7 +946,7 @@ steal.view = function(path){
 	steal({src: path, type: "text/"+type, compress: "false"});    
 	return steal;
 };
-
+steal.timer = null; //tracks the last script
 var script_tag = function(){
     var start = document.createElement('script');
     start.type = 'text/javascript';
@@ -937,23 +975,30 @@ var insert = function(options){
 		options.text = text;
 		delete options.src;
 	}
+
 	
 	var scriptTag = '<script ';
 	for(var attr in options){
 		scriptTag += attr + "='" + options[attr] + "' ";
 	}
+	if(steal.support.load && !steal.browser.rhino){
+		scriptTag += "onLoad='steal.end()' "
+	}
 	scriptTag += '></script>';
-
+	if(steal.browser.rhino){ //it's this way so rhino knows to put a steal.end
+		scriptTag +='<script type="text/javascript">steal.end()</script>'
+	}
+	if(!steal.support.load){
+		scriptTag += '<script type="text/javascript" src="'+steal.root.join('steal/end.js')+'"></script>'
+	}
+	steal.timer = setTimeout(function(){
+		throw "steal.js Could not load "+options.src+".  Are you sure you have the right path?"
+	},5000)
     document.write(
-        (options.src? scriptTag : '') + (options.onlyInsert ? "" : call_end())
+        (options.src? scriptTag : '') 
     );
-	
 };
 
-var call_end = function(src){
-    return !browser.msie ? '<script type="text/javascript">steal.end();</script>' : 
-    '<script type="text/javascript" src="'+steal.root.join('steal/end.js')+'"></script>'
-}
 
 var head = function(){
     var d = document, de = d.documentElement;
@@ -963,8 +1008,21 @@ var head = function(){
     de.insertBefore(head, de.firstChild);
     return head;
 };
-
-
+/*
+steal.loaded = 0;
+steal.setScriptOptions();
+(function(){
+	var script = document.createElement('script');
+	var appendTo = document.body || document.getElementsByTagName("head")[0];
+	script.src = steal.root.join('steal/test.js'); 
+	script.type = "text/javascript"
+	
+	script.onload =  script.onreadystatechange =function(){
+		order('append load');
+	}
+	appendTo.appendChild(script);
+	document.write("<script type='text/javascript'>order('something');steal.write = steal.loaded++;steal.init()</script>")
+})();*/
 
 steal.init();
 })();
