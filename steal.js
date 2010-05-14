@@ -570,7 +570,7 @@ extend(steal,
         //steal.plugins('jquery'); //always load jQuery
         var current_path = steal.getCurrent();
 		steal({
-			path: 'steal/development/development.js',
+			path: 'steal/dev/dev.js',
 			ignore: true
 		})
 	    steal.setCurrent(current_path);
