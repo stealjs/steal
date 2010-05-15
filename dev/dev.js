@@ -24,12 +24,12 @@ steal.dev = {
 		}
 	},
 	warn : function(out){
-		if(window.console.log){
+		if(window.console && console.log){
 			console.log("steal.js WARNING: "+out)
 		}
 	},
 	log : function(out){
-		if(window.console.log){
+		if(window.console && console.log){
 			console.log("steal.js INFO: "+out)
 		}
 	}

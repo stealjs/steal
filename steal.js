@@ -190,7 +190,7 @@ steal.fn = steal.prototype = {
 			this.path = path;
             this.func = function(){
                 steal.setCurrent(path);
-                options(window.jQuery); //should return what was steald before 'then'
+                options(steal.send || window.jQuery || steal); //should return what was steald before 'then'
             };
             this.options = options;
         } else if(options.type) { 

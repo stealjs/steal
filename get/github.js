@@ -82,7 +82,8 @@ GithubGetter.prototype.download = function(link){
 		var trim = /\s+$/gm
 		var jar = false
 		if(/\.jar$/.test(f)) jar = true
-        if ((!jar && oldsrc.replace(trim, '') == newsrc.replace(trim, ''))
+        print(rawUrl)
+		if ((!jar && oldsrc.replace(trim, '') == newsrc.replace(trim, ''))
 			|| (jar && oldsrc == newsrc)) {
 			return;
 		}

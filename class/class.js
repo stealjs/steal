@@ -1,4 +1,4 @@
-//jQuery.Class 
+//@documentjs-ignore
 // This is a modified version of John Resig's class
 // It provides class level inheritence and callbacks.
 
