@@ -525,7 +525,11 @@ extend(steal,
                 })
             }else{
                 commaSplit = scriptOptions.split(",")
-                steal.options.startFile = commaSplit[0];
+                if(commaSplit[0]&& commaSplit[0].lastIndexOf('.js') ){
+					steal.options.startFile = commaSplit[0];
+				}else if(commaSplit[0]){
+					steal.options.app = commaSplit[0];
+				}
                 steal.options.env = commaSplit[1];
             }
             
