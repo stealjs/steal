@@ -76,7 +76,7 @@ GithubGetter.prototype.download = function(link){
     var oldsrc = readFile(f);
 	
     new steal.File("tmp").download_from( rawUrl, true );
-    var newsrc = readFile(f);
+    var newsrc = readFile("tmp");
     var p = "   "
     if(oldsrc){
 		var trim = /\s+$/gm
