@@ -5,7 +5,7 @@
  * ["<%=name.replace("Models","Controllers")%>.prototype.&#46;edit click" edit],
  * or ["<%=name.replace("Models","Controllers")%>.prototype.&#46;destroy click" destroy] <%= plural %>.
  */
-jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
+jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>Controller',
 /* @Static */
 {
     onDocument: true
@@ -17,7 +17,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
      */
     load: function(){
         if(!$("#<%= underscore %>").length) 
-            $(document.body).append($(document.createElement('div')).attr('id','<%= underscore %>'))
+            $(document.body).append($('<div/>').attr('id','<%= underscore %>'))
         <%= name %>.findAll({}, this.callback('list'));
     },
     /**
@@ -85,7 +85,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
      */
     '.destroy click' : function(el){
         if(confirm("Are you sure you want to destroy?"))
-            el.parents().model().destroy();
+            el.closest('.<%= underscore %>').model().destroy();
     },
     /**
      *  Listens for <%= plural %> being destroyed and removes them from being displayed.
