@@ -14,7 +14,7 @@ steal.dev = {
     },
 	isHappyName : function(name){
 		//make sure names are close to the current path
-		var path = steal.current.path.replace(/(_controller)?\.[^$]+$/,"").split('/')
+		var path = steal.current.path.replace(/\.[^$]+$/,"").split('/')
 		//make sure parts in name match
 		var parts = name.split('.')
 		for(var i =0; i < parts.length && path.length; i++){

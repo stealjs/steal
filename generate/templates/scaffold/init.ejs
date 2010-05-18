@@ -1,4 +1,4 @@
-<h2><%=name%>s</h2>
+<h2><%=plural%></h2>
 <table cellspacing='0px'>
     <thead>
     <tr>
@@ -13,7 +13,7 @@
         <%%= view('views/<%= underscore %>/list',{<%=plural%>: <%=plural%>})%>
     </tbody>
 </table>
-<h2>New <%= name %></h2>
+<h2>New <%= underscore %></h2>
 <form>
     <%% for(var attr in <%= name%>.attributes){ %>
         <%% if(attr == 'id') continue;%>

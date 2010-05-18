@@ -50,7 +50,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>Controller',
      * @param {jQuery} el The <%= underscore %>'s edit link element.
      */
     '.edit click' : function(el){
-        var <%= underscore %> = el.parents().model();
+        var <%= underscore %> = el.closest('.<%= underscore %>').model();
         <%= underscore %>.elements().html(this.view('edit', <%= underscore %>))
     },
     /**
@@ -58,7 +58,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>Controller',
      * @param {jQuery} el The <%= underscore %>'s cancel link element.
      */
     '.cancel click': function(el){
-        this.show(el.parents().model());
+        this.show(el.closest('.<%= underscore %>').model());
     },
     /**
      * Updates the <%= underscore %> from the edit values.
