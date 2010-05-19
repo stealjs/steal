@@ -34,3 +34,23 @@ steal.dev = {
 		}
 	}
 }
+
+//stuff for jmvc
+
+/**
+ * @Constructor jQuery
+ * @init blah
+ */
+
+//
+/**
+ * @Constructor jQuery.fn
+ * @init blah
+ */
+//
+/**
+ * @class jQuery.event.special
+ */
+// as fasf sa
+
+
