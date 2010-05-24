@@ -35,12 +35,20 @@ var oldsteal = window.steal;
 /**
  * @class steal
  * @tag core
- * Steal is used to:
- * <ul>
- *  <li> easily load and compress your application's JavaScript files.  </li>
- *  <li> switch to a different environment [development, production]</li>
- * </ul>
- * <h2>Examples</h2>
+ * <p>Steal does JavaScript dependency management and compression super easy.</p>
+ * <p>This page details the use of the steal script (<code>steal/steal.js</code>), 
+ * which is the primary tool used to load files into your page.  Here's a quick example:</p>
+ * 
+ * <h3>Example</h3>
+ * <p>Load the steal script and tell it the first file to load:</p>
+ * </p>
+ * @codestart html
+&lt;script type='text/javascript'
+ *        src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>'>&lt;/script>
+ * @codeend
+
+ * <p>In the file (<code>myapp/myapp.js</code>), 
+ * 'steal' all other files that you need like:</p>
  * @codestart
  * steal.plugins('jquery/controller',     //steals plugins and dependencies
  *           'jquery/controller/view',
@@ -55,6 +63,65 @@ var oldsteal = window.steal;
  *     ...
  * })
  * @codeend
+<p>Finally compress your page's JavaScript with:</p>
+@codestart
+> js steal/compress.js path/to/mypage.html
+@codeend
+ * <h2>Use</h2>
+Use of steal.js is typically broken into 3 parts:
+<ul>
+	<li>The steal script tag</li>
+	<li>"Stealing" scripts</li>
+	<li>Compressing a page</li>
+</ul>
+It should be noted that you can compress pages that don't use steal.js.  
+
+<h3>The Steal Script Tag</h3>
+<p>Besides loading steal.js into your page, the steal script tag 
+is used to set various [steal.static.options options] that configure how the application
+will run.  The most important options is <code>steal.options.startFile</code>.</p>
+
+<p><code>steal.options.startFile</code> contains the path to the first file steal
+loads.  You can set the startFile by providing a path in the source of your script 
+tag like:</p>
+@codestart
+&lt;script type='text/javascript'
+ *        src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>'>&lt;/script>
+@codeend
+<p>It's important to note that the path to <code>myapp/myapp.js</code> 
+is relative to the 'steal' folder's parent folder.  This
+is typically called the JavaScriptMVC root folder or just root folder if you're cool.</p>
+<p>And since JavaScriptMVC likes folder structures like:</p>
+@codestart text
+\myapp
+    \myapp.js
+\steal
+    \steal.js
+@codeend
+<p>If your path doesn't end with <code>.js</code>, JavaScriptMVC assumes you are loading an 
+application and will add <code>/myapp.js</code> on for you.  This means that this does the same thing too:</p>
+@codestart
+&lt;script type='text/javascript'
+ *        src='path/to/steal.js?<u><b>myapp</b></u>'>&lt;/script>
+@codeend
+<div class='whisper'>Steal, and everything else in JavaScriptMVC, provide these little shortcuts
+when you are doing things 'right'.  In this case, you save 9 characters 
+(<code>/myapp.js</code>) by organizing your app the way, JavaScriptMVC expects.</div>
+</div>
+<p>The next most important option is <code>steal.options.env</code>.  This is a flag you can
+use to provide different behavior depending on which mode your app is running in.  The most common
+modes are:</p>
+<ul>
+	<li><code>development</code> - Loads all files individually, logs errors, performs slower.</li>
+	<li><code>production</code> - Loads a single production.js file in place of the startFile.</li>
+</ul>
+<p>
+
+</p>
+
+ * <h2>How it works</h2>
+ * 
+ * 
  * Includes are performed relative to the including file. 
  * Files are steald last-in-first-out after the current file has been loaded and run.
  * <h2>Concat and Compress</h2>
