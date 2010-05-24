@@ -801,6 +801,8 @@ extend(steal,
 		// add steals that were just added to the end of the list
 		var got = current_steals.length;
 		steals = steals.concat(current_steals);
+		if (!steals.length) return;
+		
         // take the last one
 		var next = steals.pop();
 				
@@ -1064,7 +1066,7 @@ steal.resources = steal.applier(function(i){
  */
 steal.views = function(){
 	// Only includes views for compression and docs (when running in rhino)
-	if (browser.rhino) {
+	if (browser.rhino || steal.options.env == "production") {
 		for (var i = 0; i < arguments.length; i++) {
 			steal.view(arguments[i])
 		}
