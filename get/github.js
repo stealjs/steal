@@ -78,19 +78,20 @@ GithubGetter.prototype.download = function(link){
     new steal.File("tmp").download_from( rawUrl, true );
     var newsrc = readFile("tmp");
     var p = "   "
+    var pstar = "***"
     if(oldsrc){
 		var trim = /\s+$/gm
 		var jar = false
 		if(/\.jar$/.test(f)) jar = true
-        print(rawUrl)
+        print(p+"Checking "+rawUrl.replace("http://github.com/pinhook/steal/raw/master/", ""))
 		if ((!jar && oldsrc.replace(trim, '') == newsrc.replace(trim, ''))
 			|| (jar && oldsrc == newsrc)) {
 			return;
 		}
-        print(p+"Update "+f);
+        print(pstar+"Update "+f);
     	new steal.File("tmp").copyTo(f);
     }else{
-        print(p+"Adding "+f);
+        print(pstar+"Adding "+f);
     	new steal.File("tmp").copyTo(f);
     }
     new steal.File("tmp").remove();
