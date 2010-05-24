@@ -40,7 +40,7 @@ var oldsteal = window.steal;
  * which is the primary tool used to load files into your page.  Here's a quick example:</p>
  * 
  * <h3>Example</h3>
- * <p>Load the steal script and tell it the first file to load:</p>
+ * <p>Loads the steal script and tells it the first file to load:</p>
  * </p>
  * @codestart html
 &lt;script type='text/javascript'
@@ -70,55 +70,69 @@ var oldsteal = window.steal;
  * <h2>Use</h2>
 Use of steal.js is typically broken into 3 parts:
 <ul>
-	<li>The steal script tag</li>
+	<li>Loading steal.js and setting [steal.static.options]</li>
 	<li>"Stealing" scripts</li>
 	<li>Compressing a page</li>
 </ul>
-It should be noted that you can compress pages that don't use steal.js.  
-
-<h3>The Steal Script Tag</h3>
-<p>Besides loading steal.js into your page, the steal script tag 
-is used to set various [steal.static.options options] that configure how the application
-will run.  The most important options is <code>steal.options.startFile</code>.</p>
-
-<p><code>steal.options.startFile</code> contains the path to the first file steal
-loads.  You can set the startFile by providing a path in the source of your script 
-tag like:</p>
-@codestart
-&lt;script type='text/javascript'
- *        src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>'>&lt;/script>
-@codeend
-<p>It's important to note that the path to <code>myapp/myapp.js</code> 
-is relative to the 'steal' folder's parent folder.  This
-is typically called the JavaScriptMVC root folder or just root folder if you're cool.</p>
-<p>And since JavaScriptMVC likes folder structures like:</p>
-@codestart text
-\myapp
-    \myapp.js
-\steal
-    \steal.js
-@codeend
-<p>If your path doesn't end with <code>.js</code>, JavaScriptMVC assumes you are loading an 
-application and will add <code>/myapp.js</code> on for you.  This means that this does the same thing too:</p>
-@codestart
-&lt;script type='text/javascript'
- *        src='path/to/steal.js?<u><b>myapp</b></u>'>&lt;/script>
-@codeend
-<div class='whisper'>Steal, and everything else in JavaScriptMVC, provide these little shortcuts
-when you are doing things 'right'.  In this case, you save 9 characters 
-(<code>/myapp.js</code>) by organizing your app the way, JavaScriptMVC expects.</div>
+<div class='whisper'>
+NOTE: You can compress pages that don't use steal.js.  
 </div>
-<p>The next most important option is <code>steal.options.env</code>.  This is a flag you can
-use to provide different behavior depending on which mode your app is running in.  The most common
-modes are:</p>
+
+<h3>Loading <code>steal.js</code> and Setting <code>steal.options</code></h3>
+
+<p>[steal.static.options] is used to configure where and how steal starts loading scripts.
+	There are are a lot of options and a lot of ways to set them.  This is covered in 
+	the [steal.static.options] documentation.  Here we'll focus on what 95% of what people do -
+	setting the startFile and the env with the steal.js script tag.  This looks like:
+</p>
+@codestart html
+&lt;script type='text/javascript'
+       src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>,<u><b>development</b></u>'>
+&lt;/script>
+@codeend
+This sets ...
+@codestart
+steal.options.startFile = 'myapp/myapp.js'
+steal.options.env = 'development'
+@codeend
+
+... and results in steal loading 
+<code>myapp/myapp.js</code>.
+The <code>myapp.js</code> file is commonly referred to as the <b>"application file"</b>.</p>
+<p>
+	If <code>development</code> changes to <code>production</code>
+	steal will load <code>myapp/production.js</code>.
+</p>
+<div class='whisper'>
+	TIP: If startFile doesn't end with <code>.js</code> (ex: myapp), steal assumes
+	you are using JavaScriptMVC's folder pattern and will load:
+	<code>myapp/myapp.js<code> just to save you 9 characters.
+</div>
+<h3>Stealing Scripts</h3>
+In your files, use the steal function and its helpers
+ to load dependencies then describe your functionality.
+Typically, most of the 'stealing' is done in your application file.  Loading 
+jQuery and jQuery.UI from google, a local helpers.js 
+and then adding tabs might look something like this:
+@codestart
+steal("http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js",
+      "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.0/jquery-ui.js",
+      'helpers')
+.then(function(){
+    $("#tabs").tabs();
+});
+@codeend
+There's a few things to notice:
 <ul>
-	<li><code>development</code> - Loads all files individually, logs errors, performs slower.</li>
-	<li><code>production</code> - Loads a single production.js file in place of the startFile.</li>
+	<li>the steal function can take multiple arguments</li>
+	<li>steal can load cross domain</li>
+	<li>steal loads relative to the current file</li>
+	<li>steal adds .js if not present</li>
+	<li>steal is chainable (most function return steal)</li>
 </ul>
 <p>
-
+	steal
 </p>
-
  * <h2>How it works</h2>
  * 
  * 
@@ -532,8 +546,56 @@ steal.pageDir = new File(window.location.href).dir();
      *     <tr><td>startFile</td><td>null</td><td>This is the first file to load.  It is typically determined from the first script option parameter 
      *     in the inclue script. </td></tr>
      * </table>
- * 
- * 
+<ul>
+	<li><code>steal.options.startFile</code> - the first file steal loads.  This file
+	loads all other scripts needed by your application.</li>
+	<li><code>steal.options.env</code> - the environment (development or production)
+		that determines if steal loads your all your script files or a single
+		compressed file.
+	</li>
+</ul>
+<p><code>steal.options</code> can be configured by:</p>
+<ul>
+	<li>The steal.js script tag in your page (most common pattern).</li>
+	<li>An existing steal object in the window object</li>
+	<li><code>window.location.hash</code></li>
+</ul>
+<p>
+	The steal.js script tag is by far the most common approach. 
+	For the other methods,
+	check out [steal.static.options] documentation.
+    To load <code>myapp/myapp.js</code> in development mode, your 
+    script tag would look like:
+</p>
+
+@codestart
+&lt;script type='text/javascript'
+        src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>,<u><b>development</b></u>'>
+&lt;/script>
+@codeend
+<div class='whisper'>
+Typically you want this script tag right before the closing body tag (<code>&lt;/body></code>) of your page.
+</div>
+<p>Note that the path to <code>myapp/myapp.js</code> 
+is relative to the 'steal' folder's parent folder.  This
+is typically called the JavaScriptMVC root folder or just root folder if you're cool.</p>
+<p>And since JavaScriptMVC likes folder structures like:</p>
+@codestart text
+\myapp
+    \myapp.js
+\steal
+    \steal.js
+@codeend
+<p>If your path doesn't end with <code>.js</code>, JavaScriptMVC assumes you are loading an 
+application and will add <code>/myapp.js</code> on for you.  This means that this does the same thing too:</p>
+@codestart
+&lt;script type='text/javascript'
+ *        src='path/to/steal.js?<u><b>myapp</b></u>'>&lt;/script>
+@codeend
+<div class='whisper'>Steal, and everything else in JavaScriptMVC, provide these little shortcuts
+when you are doing things 'right'.  In this case, you save 9 characters 
+(<code>/myapp.js</code>) by organizing your app the way, JavaScriptMVC expects.</div>
+</div>
  */
 steal.options = {
     loadProduction: true,
