@@ -1,12 +1,22 @@
 // usage: 
-// steal\js steal\compress\plugin.js funcunit/functional funcunit/dist/funcunit.js
-// steal\js steal\compress\plugin.js jquery/controller
+// js steal\scripts\pluginify.js funcunit/functional -destination funcunit/dist/funcunit.js
+// js steal\scripts\pluginify.js jquery/controller
+// js steal\scripts\pluginify.js jquery/event/drag -exclude jquery/lang/vector/vector.js -exclude jquery/event/livehack/livehack.js
 
-var plugin = _args[0]
-var path = _args[1] || plugin+".js";
+var plugin = _args[0],
+	destination = plugin+".js", 
+	exclude = [];
+	
+for(var i=1; i<_args.length; i+=2){
+	if(_args[i] == "-destination")
+		destination = _args[i+1];
+	if(_args[i] == "-exclude")
+		exclude.push(_args[i+1]);
+}
+exclude.push("jquery.js")
 
 rhinoLoader = {
-     callback : function(){steal.plugins(plugin.replace(/\./,"/"));}
+	callback : function(){steal.plugins(plugin.replace(/\./,"/"));}
 };
 
 (function(){
@@ -50,7 +60,8 @@ var out = [], str, i;
 for(i = 0 ; i < steal.total.length; i++){
     if(typeof steal.total[i].func == "function"){
 		filePath = steal.total[i].path;
-		if (filePath.indexOf("jquery.js") == -1) {
+		if (exclude.indexOf(filePath) == -1) {
+			print("including "+filePath)
 			file = readFile(filePath);
 			match = file.match(/\.then\(\s*function\s*\([^\)]*\)\s*\{([\s\S]*)\}\s*\)\s*;*\s*/im)
 			str = "// "+filePath+"\n\n"
@@ -59,6 +70,8 @@ for(i = 0 ; i < steal.total.length; i++){
 		}
 	}
 }
-new File(path).save(out.join(""));
+print("saving to "+destination)
+new File(destination).save(out.join(""));
+print("pluginified "+plugin)
 
 //grab every script except jquery
