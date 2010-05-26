@@ -1,7 +1,9 @@
 // usage: 
 // js steal\scripts\pluginify.js funcunit/functional -destination funcunit/dist/funcunit.js
 // js steal\scripts\pluginify.js jquery/controller
-// js steal\scripts\pluginify.js jquery/event/drag -exclude jquery/lang/vector/vector.js -exclude jquery/event/livehack/livehack.js
+// js steal\scripts\pluginify.js jquery/event/drag -exclude ["jquery/lang/vector/vector.js","jquery/event/livehack/livehack.js"]
+
+load('steal/rhino/options/options.js')
 
 var plugin = _args[0],
 	destination = plugin+".js", 
@@ -10,8 +12,9 @@ var plugin = _args[0],
 for(var i=1; i<_args.length; i+=2){
 	if(_args[i] == "-destination")
 		destination = _args[i+1];
-	if(_args[i] == "-exclude")
-		exclude.push(_args[i+1]);
+	if(_args[i] == "-exclude"){
+		exclude = options.getArray(_args[i+1])
+	}
 }
 exclude.push("jquery.js")
 
