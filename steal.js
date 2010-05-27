@@ -1080,7 +1080,18 @@ steal.view = function(path){
 	steal({src: path, type: "text/"+type, compress: "false"});    
 	return steal;
 };
-steal.timer = null; //tracks the last script
+steal.timers = []; //tracks the last script
+
+steal.ct = function(el){ //for clear timer
+	clearTimeout(steal.timers.shift());
+}
+steal.loadErrorTimer = function(options){
+	var count = ++steal.timerCount;
+	steal.timers.push(setTimeout(function(){
+		throw "steal.js Could not load "+options.src+".  Are you sure you have the right path?"
+	},5000));
+	return "onLoad='steal.ct(this)' "
+}
 var script_tag = function(){
     var start = document.createElement('script');
     start.type = 'text/javascript';
@@ -1105,29 +1116,26 @@ var insert = function(options){
 	if(options.type && options.type != 'text/javascript' && !browser.rhino){
 		text = steal.request(options.src);
 		if(!text)
-			throw "you got nothing at "+options.src;
+			throw "steal.js there is nothing at "+options.src;
 		options.text = text;
 		delete options.src;
 	}
 
-	
 	var scriptTag = '<script ';
 	for(var attr in options){
 		scriptTag += attr + "='" + options[attr] + "' ";
 	}
 	if(steal.support.load && !steal.browser.rhino){
-		scriptTag += "onLoad='steal.end()' "
+		scriptTag += steal.loadErrorTimer(options)
 	}
 	scriptTag += '></script>';
-	if(steal.browser.rhino){ //it's this way so rhino knows to put a steal.end
+	if(steal.support.load){
 		scriptTag +='<script type="text/javascript">steal.end()</script>'
 	}
-	if(!steal.support.load){
+	else
+	{
 		scriptTag += '<script type="text/javascript" src="'+steal.root.join('steal/end.js')+'"></script>'
 	}
-	steal.timer = setTimeout(function(){
-		throw "steal.js Could not load "+options.src+".  Are you sure you have the right path?"
-	},5000)
     document.write(
         (options.src? scriptTag : '') 
     );
