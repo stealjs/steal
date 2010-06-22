@@ -1080,17 +1080,18 @@ steal.view = function(path){
 	steal({src: path, type: "text/"+type, compress: "false"});    
 	return steal;
 };
-steal.timers = []; //tracks the last script
+steal.timers = {}; //tracks the last script
 
-steal.ct = function(el){ //for clear timer
-	clearTimeout(steal.timers.shift());
+steal.ct = function(id){ //for clear timer
+	clearTimeout(steal.timers[id]);
+	delete steal.timers[id]
 }
 steal.loadErrorTimer = function(options){
 	var count = ++steal.timerCount;
-	steal.timers.push(setTimeout(function(){
+	steal.timers[count]=setTimeout(function(){
 		throw "steal.js Could not load "+options.src+".  Are you sure you have the right path?"
-	},5000));
-	return "onLoad='steal.ct(this)' "
+	},5000);
+	return "onLoad='steal.ct("+count+")' "
 }
 var script_tag = function(){
     var start = document.createElement('script');
