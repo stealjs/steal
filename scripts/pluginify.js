@@ -7,13 +7,17 @@ load('steal/rhino/options/options.js')
 
 var plugin = _args[0],
 	destination = plugin+".js", 
-	exclude = [];
+	exclude = [],
+	includeJQ = true;
 	
 for(var i=1; i<_args.length; i+=2){
 	if(_args[i] == "-destination")
 		destination = _args[i+1];
 	if(_args[i] == "-exclude"){
 		exclude = options.getArray(_args[i+1])
+	}
+	if(_args[i] == "-noJQuery"){
+		includeJQ = false;
 	}
 }
 exclude.push("jquery.js")
@@ -68,7 +72,7 @@ for(i = 0 ; i < steal.total.length; i++){
 			file = readFile(filePath);
 			match = file.match(/\.then\(\s*function\s*\([^\)]*\)\s*\{([\s\S]*)\}\s*\)\s*;*\s*/im)
 			str = "// "+filePath+"\n\n"
-			str += "(function($){\n"+removeRemoveSteal(match[1])+"\n})(jQuery);\n\n"
+			str += "(function($){\n"+removeRemoveSteal(match[1])+"\n})("+(includeJQ? "jQuery": "")+");\n\n"
 			out.push(str);
 		}
 	}
