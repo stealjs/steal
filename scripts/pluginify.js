@@ -60,7 +60,7 @@ File.prototype = {
 removeRemoveSteal = function(text){
 	  return String(java.lang.String(text)
 	  				.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end","")
-	  				.replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\w+)[\n\s\r]*\([^\)]*\)",""))
+	  				.replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*\(.*\)",""))
 }
 
 var out = [], str, i;
