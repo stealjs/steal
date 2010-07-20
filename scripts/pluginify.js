@@ -8,19 +8,30 @@ load('steal/rhino/options/options.js')
 var plugin = _args[0],
 	destination = plugin+".js", 
 	exclude = [],
-	includeJQ = true;
+	includeJQ = true,
+	packageJQ = false;
 	
-for(var i=1; i<_args.length; i+=2){
-	if(_args[i] == "-destination")
-		destination = _args[i+1];
+for(var i=1; i<_args.length; i){
+	if (_args[i] == "-destination") {
+		destination = _args[i + 1];
+		i+=2;
+	}
 	if(_args[i] == "-exclude"){
 		exclude = options.getArray(_args[i+1])
+		i+=2;
 	}
 	if(_args[i] == "-noJQuery"){
 		includeJQ = false;
+		i++;
+	}
+	if(_args[i] == "-packageJQuery"){
+		packageJQ = true;
+		i++;
 	}
 }
-exclude.push("jquery.js")
+if (!packageJQ) {
+	exclude.push("jquery.js")
+}
 
 rhinoLoader = {
 	callback : function(){steal.plugins(plugin.replace(/\./,"/"));}
@@ -80,5 +91,3 @@ for(i = 0 ; i < steal.total.length; i++){
 print("saving to "+destination)
 new File(destination).save(out.join(""));
 print("pluginified "+plugin)
-
-//grab every script except jquery
