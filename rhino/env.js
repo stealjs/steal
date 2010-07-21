@@ -11523,7 +11523,7 @@ __extend__(Envjs.defaultEventBehaviors,{
         }   
     },
     'click': function(event){
-        console.log('handling event target default behavior for click');
+        //console.log('handling event target default behavior for click');
     }
 
 });
