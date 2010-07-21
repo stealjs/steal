@@ -488,7 +488,7 @@ Envjs.uri = function(path, base){
             .replace('file:/', 'file:///');
     }else if(base){
         baseURI = base.substring(0, base.lastIndexOf('/'));
-        if(baseURI.length > 0){
+        if(baseURI.length > 0 && path.indexOf("..") == -1){
             absolutepath = baseURI + '/' + path;
         }else{
             absolutepath = (new java.net.URL(new java.net.URL(base), path)+'')
