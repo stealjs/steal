@@ -21,15 +21,24 @@
 //put everything in function to keep space clean
 (function(){
 
-if(typeof steal != 'undefined' && steal.nodeType)
-	throw("Include is defined as function or an element's id!");
+if(typeof steal != 'undefined' && steal.nodeType){
+	throw("steal is defined an element's id!");
+}
 
-
-
-
-
-
-var oldsteal = window.steal;
+	// keep a reference to the old steal
+var oldsteal = window.steal,
+	// returns the document head (creates one if necessary)
+	head = function(){
+		var d = document, 
+			de = d.documentElement,
+			heads = d.getElementsByTagName("head");
+		if (heads.length > 0) {
+			return heads[0];
+		}
+		var head = d.createElement('head');
+		de.insertBefore(head, de.firstChild);
+		return head;
+	};
 
 
 /**
@@ -302,13 +311,12 @@ steal.fn = steal.prototype = {
 	 */
 	run : function(){
 		steal.current = this;		
-		var isProduction = (steal.options.env == "production");
-		
-		var options = extend({
-			type: "text/javascript",
-			compress: "true",
-			"package": "production.js"
-		}, extend({src: this.path}, this.options));
+		var isProduction = (steal.options.env == "production"),
+			options = extend({
+				type: "text/javascript",
+				compress: "true",
+				"package": "production.js"
+			}, extend({src: this.path}, this.options));
 		
 		if(this.func){
 			//run function and continue to next steald
@@ -333,7 +341,7 @@ steal.fn = steal.prototype = {
 		steal.setCurrent(this.path);
 		
 		return browser.rhino ? load(this.path) : 
-					steal.insert_head( steal.root.join(this.path) );
+					steal.insertHead( steal.root.join(this.path) );
 	}
 	
 }
@@ -341,9 +349,8 @@ steal.fn.init.prototype = steal.fn;
 
 
 var extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;},
-	getLastPart = function(p){ return p.match(/[^\/]+$/)[0]};
-steal.extend = extend;
-var browser = {
+	getLastPart = function(p){ return p.match(/[^\/]+$/)[0]},
+	browser = {
 		msie:     !!(window.attachEvent && !window.opera),
 		opera:  !!window.opera,
 		safari: navigator.userAgent.indexOf('AppleWebKit/') > -1,
@@ -351,15 +358,16 @@ var browser = {
 		mobilesafari: !!navigator.userAgent.match(/Apple.*Mobile.*Safari/),
 		rhino : navigator.userAgent.match(/Rhino/) && true
 	}
-	steal.browser = browser;
-var random = ""+parseInt(Math.random()*100)
+	steal.browser = browser,
+	random = ""+parseInt(Math.random()*100),
+	factory = function(){ return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();};
 
 
 steal.root = null;
 steal.pageDir = null;
+steal.extend = extend;
 
 
-var factory = function(){ return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();};
 
 
 
@@ -643,12 +651,15 @@ extend(steal,
 		for(var i=0; i<scripts.length; i++) {
 			var src = scripts[i].src;
 			if(src && src.match(/steal\.js/)){  //if script has steal.js
-				var mvc_root = new File( new File(src).joinFrom( steal.pageDir ) ).dir();
-				var loc = mvc_root.match(/\.\.$/) ?  mvc_root+'/..' : mvc_root.replace(/steal$/,'');
-				if(loc.match(/.+\/$/)) loc = loc.replace(/\/$/, '');
-
+				var mvc_root = new File( new File(src).joinFrom( steal.pageDir ) ).dir(),
+					loc = mvc_root.match(/\.\.$/) ?  mvc_root+'/..' : mvc_root.replace(/steal$/,'');
+				if (loc.match(/.+\/$/)) {
+					loc = loc.replace(/\/$/, '');
+				}
 				steal.root = new File(loc);
-				if(src.indexOf('?') != -1) scriptOptions = src.split('?')[1];
+				if (src.indexOf('?') != -1) {
+					scriptOptions = src.split('?')[1];
+				}
 			}
 		
 		}
@@ -792,9 +803,10 @@ extend(steal,
 	},
 	//
 	should_add : function(inc){
-		var path = inc.absolute || inc.path;
-		for(var i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
-		for(var i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
+		var path = inc.absolute || inc.path,
+			i;
+		for(i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
+		for(i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
 		return true;
 	},
 	done : function(){
@@ -895,16 +907,16 @@ extend(steal,
 	 * @return {String} text of file
 	 */
 	request: function(path, content_type){
-	   var contentType = content_type || "application/x-www-form-urlencoded; charset="+steal.options.encoding
-	   var request = factory();
-	   request.open("GET", path, false);
-	   request.setRequestHeader('Content-type', contentType)
-	   if(request.overrideMimeType) request.overrideMimeType(contentType);
-
-	   try{request.send(null);}
-	   catch(e){return null;}
-	   if ( request.status == 500 || request.status == 404 || request.status == 2 ||(request.status == 0 && request.responseText == '') ) return null;
-	   return request.responseText;
+		var contentType = content_type || "application/x-www-form-urlencoded; charset="+steal.options.encoding,
+			request = factory();
+		request.open("GET", path, false);
+		request.setRequestHeader('Content-type', contentType)
+		if(request.overrideMimeType) request.overrideMimeType(contentType);
+		
+		try{request.send(null);}
+		catch(e){return null;}
+		if ( request.status == 500 || request.status == 404 || request.status == 2 ||(request.status == 0 && request.responseText == '') ) return null;
+		return request.responseText;
 	},
 	/**
 	 * Inserts a script tag in head with the encoding.
@@ -912,7 +924,7 @@ extend(steal,
 	 * @param {Object} src
 	 * @param {Object} encode
 	 */
-	insert_head: function(src, encode, type, text, id){
+	insertHead: function(src, encode, type, text, id){
 		encode = encode || "UTF-8";
 		var script= script_tag();
 		src && (script.src= src);
@@ -974,8 +986,7 @@ steal.plugin = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
  *  steal.plugins('jquery/controller',
  *                'jquery/controller/view',
  *                'jquery/view',
- *                'jquery/model',
- *                'steal/openajax')
+ *                'jquery/model')
  * @codeend 
  */
 steal.plugins = steal.callOnArgs(steal.plugin);
@@ -1112,14 +1123,16 @@ var insert = function(options){
 	options = extend({
 		id: options.src && options.src.replace(/[\/\.]/g, "_")
 	}, options);
-	var start= options.src
+	var start= options.src,
+		text = "",
+		scriptTag = '<script ';
 	if(options.src){
 		var src_file = new File(options.src);
 		if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
 			options.src = steal.root.join(options.src);
 	}
 
-	var text = "";
+
 	if(options.type && options.type != 'text/javascript' && !browser.rhino){
 		text = steal.request(options.src);
 		if(!text)
@@ -1128,7 +1141,6 @@ var insert = function(options){
 		delete options.src;
 	}
 
-	var scriptTag = '<script ';
 	for(var attr in options){
 		scriptTag += attr + "='" + options[attr] + "' ";
 	}
@@ -1149,14 +1161,7 @@ var insert = function(options){
 };
 
 
-var head = function(){
-	var d = document, de = d.documentElement;
-	var heads = d.getElementsByTagName("head");
-	if(heads.length > 0 ) return heads[0];
-	var head = d.createElement('head');
-	de.insertBefore(head, de.firstChild);
-	return head;
-};
+
 
 steal.init();
 })();

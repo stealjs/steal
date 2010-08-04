@@ -3,18 +3,28 @@
 /**
  * Tests compressing a very basic page and one that is using steal
  */
+load('steal/rhino/steal.js')
+steal('//steal/test/test', function(s){
+	
+	//lets see if we can clear everything
+	s.test.clear();
+	
+	load('steal/rhino/steal.js')
+	steal("//steal/compress/compress")
+	
+	steal.compress("steal/compress/test/basicpage.html",{
+		output : 'steal/compress/test'
+	})
+	
+	s.test.clear();
+	
+	load("steal/compress/test/basicproduction.js")
+	s.test.equals(BasicSource, 6, "Basic source not right number")
 
-load('steal/test/helpers.js')
-_S.clear();
-
-print("-- Compress basic page --");
-load("steal/compress/compress.js")
-new steal.Compress(['steal/compress/test/basicpage.html','steal/compress/test']);
-_S.clear();
-
-load("steal/compress/test/basicproduction.js")
-_S.equals(BasicSource, 6, "Basic source not right number")
-
+	
+	
+});
+/*
 _S.clear();
 _S.remove('steal/compress/test/basicproduction.js')
 
@@ -44,4 +54,4 @@ if(f1 !=  f2){
 }
 
 _S.clear();
-_S.remove('steal/compress/test/foreignproduction.js')
+_S.remove('steal/compress/test/foreignproduction.js')*/

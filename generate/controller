@@ -6,20 +6,16 @@ if (_args.length < 1) {
 	quit();
 }
 
+load('steal/rhino/steal.js');
 
-load('steal/rhino/loader.js');
-rhinoLoader(function(){
-	steal.plugins('steal/ejs','steal/file','steal/generate','steal/inflector');
+steal(	'//steal/generate/generate',
+		'//steal/generate/system',	
+function(steal){
+	var md = steal.generate.convert(_args[0]);
+	
+	md.appPath =  md.path.replace(/\/controllers$/,"");
+
+	steal.generate("steal/generate/templates/controller",md.appPath,md)
+	
 });
-
-
-(function(){
-	$controllerName = _args[0];
-	load("steal/generate/parts/convert.js")
-	load("steal/generate/parts/controller.js")
-	new Generate().postGenerationMessage();
-})();
-
-
-
 

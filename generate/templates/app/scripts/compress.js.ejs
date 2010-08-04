@@ -1,0 +1,6 @@
+//steal/js <%= path %>/scripts/compress.js
+
+load("steal/rhino/steal.js");
+steal('//steal/compress/compress',function(){
+	steal.compress('<%= path %>/<%= application_name %>.html',{to: '<%= path %>'})
+})

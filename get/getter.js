@@ -4,81 +4,102 @@
      and is licensed MIT: (http://www.opensource.org/licenses/mit-license.php)
  */
 
-
-
-
-Getter = function(urls_to_fetch, level, cwd, ignore){
-    this.urls_to_fetch = [urls_to_fetch];
-    this.level = level || 1
-    this.cwd = cwd || "."
-    this.quite =false
-    this.ignore = ignore;
+steal(function(steal){
+	
+	
+steal.get.getter = function(url, where, options , level){
+    if(url){
+		this.init.apply(this, arguments)
+	}
 }
-Getter.prototype = {
+steal.get.getter.prototype = {
+	init : function(url, where, options, level){
+
+		this.url = url + ( /\/$/.test(url) ? "" : "/" );
+	    this.level = level || -1
+	    this.cwd = where || "."
+	    this.quite = options.quite
+	    this.ignore = options.ignore;
+	},
     ls: function(){
-        var links = [];
-        var rhf = this;
-        this.urls_to_fetch.forEach(function(url){
-            if(url.match( /^svn:\/\/.*/ ) ){
-              print('not supported')
-          
-            }else{
-                links.concat( rhf.links("", readUrl( url)	) );
-            }
-        });
+        var links = [],
+			rhf = this;
+        
+		
+        if(this.url.match( /^svn:\/\/.*/ ) ){
+          print('not supported')
+        }else{
+            links.concat( rhf.links("", readUrl( this.url)	) );
+        }
+        
+		
         return links;
         //store and return flatten
     },
+	//gets the links from a page
     links: function(base_url, contents){
-        var links = []
-        var anchors = contents.match(/href\s*=\s*\"*[^\">]*/ig);
-        var ignore = this.ignore;
-        anchors.forEach(function(link){
+        var links = [],
+			anchors = contents.match(/href\s*=\s*\"*[^\">]*/ig),
+			ignore = this.ignore;
+        
+		anchors.forEach(function(link){
             link = link.replace(/href="/i, "");
-            print
-            if(link.match(/svnindex.xsl$/) || link.match(  /^(\w*:|)\/\//) || link.match(/^\./) ){
-                
-            }else
+ 
+            if( !link.test(/svnindex.xsl$/) && ! link.test(  /^(\w*:|)\/\//) && ! link.test(/^\./) ){
                 links.push( (new steal.File(base_url)).join(link) );
-        } )
+            }
+                
+        })
+		
         return links;
     },
+	//pushes a directory to go into and check
     push_d: function(dir){
         this.cwd = (new steal.File(this.cwd)).join(dir);
         new steal.File( this.cwd ).mkdir()
     },
+	//pops up to the parent directory
     pop_d: function(){
         this.cwd = new steal.File(this.cwd).dir();
     },
+	//downloads content from a url
     download : function(link){
         //var text = readUrl( link);
         
-        var bn = new steal.File(link).basename();
-        var f = new steal.File(this.cwd).join(bn);
-        if(f.match(this.ignore)){
+        var bn = new steal.File(link).basename(),
+			f = new steal.File(this.cwd).join(bn),
+			oldsrc,
+			newsrc,
+			p = "   ";
+        
+		if(f.match(this.ignore)){
             print("   I "+f);
             return;
         }
         
-        var oldsrc = readFile(f);
+        oldsrc = readFile(f);
         new steal.File(f).download_from( link, true );
-        var newsrc = readFile(f);
-        var p = "   "
+        newsrc = readFile(f);
+
         if(oldsrc){
-            if(oldsrc == newsrc) return;
+            if(oldsrc == newsrc) {
+				return;
+			} 
             print(p+"U "+f);
         }else{
             print(p+"A "+f);
         }
     },
+	//gets the url or the directory
     fetch : function(links ){
         var auto_fetch = !links;
-        links = links || this.urls_to_fetch
+        links = links || [this.url]
         var rhf = this;
         links.forEach(function(link){
             link.match(/\/$/) || auto_fetch ? rhf.fetch_dir(link) : rhf.download(link);
         })
     },
+	//gets a directory
     fetch_dir : function(url){
         this.level++;
         if(this.level > 0) this.push_d(  new steal.File(url).basename() );
@@ -90,3 +111,5 @@ Getter.prototype = {
     }
     
 }
+	
+})

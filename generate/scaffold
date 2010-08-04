@@ -1,95 +1,23 @@
 if (_args.length < 1) {
 	print("USAGE : steal/js steal/generate/scaffold FullName Type")
 	print("TYPES : JsonRest\n")
-	print("EX    : steal/js steal/generate/scaffold Cashnet.Models.Customer");
+	print("EX    : js steal/generate/scaffold Cashnet.Models.Customer");
 	print("      > cashnet/models/customer.js ....")
 	print();
 	quit();
 }
 
+load('steal/rhino/steal.js');
 
-load('steal/rhino/loader.js');
-rhinoLoader(function(){
-	steal.plugins('steal/ejs','steal/file','steal/generate','steal/inflector');
-});
-
-(function(){
-	$modelName = _args[0];
-	$modelType = _args[1];
-	load("steal/generate/parts/convert.js")
-	var md = $convert($modelName);
+steal(	'//steal/generate/generate',
+		'//steal/generate/system',	
+function(steal){
+	var md = steal.generate.convert(_args[0]);
 	
-	md.type = $modelType
+	md.type = _args[1]
 	
 	md.appPath =  md.path.replace(/\/models$/,"");
-	
-	print(md.appPath)
-	//clear name
-	
-	
-	
-	new Generate(md.appPath, md, "../generate/templates/")
-		.folder()
-		.push("controllers").folder()
-			.render(md.underscore+"_controller.js","scaffold/controller.ejs")
-			.pop()
-		.push("views").folder()
-			.push(md.underscore).folder()
-				.render("edit.ejs","scaffold/edit.ejs")
-				.render("init.ejs","scaffold/init.ejs")
-				.render("list.ejs","scaffold/list.ejs")
-				.render("show.ejs","scaffold/show.ejs")
-				.pop()
-			.pop()
-		.push("test").folder()
-			.push("funcunit").folder()
-			.render(md.underscore+"_controller_test.js","scaffold/functional_test.ejs")	
-	
-	
-	load("steal/generate/parts/model.js")
-	
-	return;
 
-	//create controller stuff
-	Generate.folder("controllers");
-	Generate.render("controllers/" + data.underscore+"_controller.js", "../generate/templates/scaffold/controller.ejs", data);
-	//Generate.render("test/functional/" + data.underscore + "_test.js", "../generate/templates/scaffold/functional_test.ejs", data);
-	Generate.folder("views/" + data.underscore);
-	//create views for things
-	Generate.render("views/" + data.underscore+"/edit.ejs", "../generate/templates/scaffold/edit.ejs", data);
-	Generate.render("views/" + data.underscore+"/init.ejs", "../generate/templates/scaffold/init.ejs", data);
-	Generate.render("views/" + data.underscore+"/list.ejs", "../generate/templates/scaffold/list.ejs", data);
-	Generate.render("views/" + data.underscore+"/show.ejs", "../generate/templates/scaffold/show.ejs", data);
-	//functional test
-	Generate.render("test/functional/" + data.underscore+"_controller_test.js", "../generate/templates/scaffold/functional_test.ejs", data);
+	steal.generate("steal/generate/templates/scaffold",md.appPath,md)
 	
-	//model stuff
-	$modelName = _args[0];
-	$modelType = _args[1];
-	load("steal/generate/parts/convert.js")
-	load("steal/generate/parts/model.js")
-	
-	Generate.postGenerationMessage();
-	
-})();
-
-/*
-var controller_name = MVC.String.pluralize(_args[1])
-var data = {
-	class_name: controller_name,
-	name: MVC.String.classize(controller_name) + 'Controller',
-	scaffold: true
-};
-
-render_to("controllers/" + controller_name + "_controller.js", "../rhino/command/templates/controller.ejs", data);
-render_to("test/functional/" + controller_name + "_controller_test.js", "../rhino/command/templates/controller_test.ejs", data);
-create_folder("views/" + controller_name);
-
-data = {
-	class_name: _args[1],
-	name: MVC.String.classize(_args[1]),
-	type: MVC.String.classize(_args[0])
-};
-
-render_to("models/" + _args[1] + ".js", "../rhino/command/templates/model.ejs", data);
-print_post_generation_message();*/
+});

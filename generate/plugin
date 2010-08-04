@@ -1,96 +1,20 @@
 // _args = ['thing']; load('steal/generate/app')
 
 if (!_args[0]) {
-	print("Usage: steal/js steal/generate/app path");
+	print("Usage: steal/js steal/generate/plugin path");
 	quit();
 }
-load('steal/rhino/loader.js');
+load('steal/rhino/steal.js');
 
-rhinoLoader(function(){
-    steal.plugins('steal/ejs','steal/file','steal/generate');
-});
-
-(function(){
-
-	var stealloc = steal.File.cwd();
-	var stealloc_folders = stealloc.split(/\/|\\/);
-	
-	var loc = _args[0]
-	var loc_folders = loc.split(/\/|\\/);
-	
-	//for each .. in loc folders, replace with steal folder
-	
-	var i = 0;
-	
-	if (loc_folders[i] == "..") {
-		while(loc_folders[i] == "..") {
-			loc_folders[i] = stealloc_folders.pop();
-			i++;
-		}
-	} else
-	    for(i=0; i < loc_folders.length - 1; i++)
-	    	loc_folders[i] = ".."
-	
-	loc_folders.pop();
-	loc_folders.push('..')
-	
-	var	path_to_steal = loc_folders.join("/");
-
-	// if browser exists, returns the path, otherwise null
-	var get_browser_location = function(browser_name){
-		var runtime = java.lang.Runtime.getRuntime();
-		var process = runtime.exec(["sh","-c","which "+browser_name]);
-		var is = process.getInputStream();
-		var isr = new java.io.InputStreamReader(is);
-		var br = new java.io.BufferedReader(isr);
-		var line=br.readLine();
-		return line;
-	}
-    // am i non-windows?
-    var windows = true;
-    var firefox_location = "*firefox";
-	if(java.lang.System.getProperty("os.name").indexOf("Windows") == -1){
-		windows = false;
-		// does current browser config have a path?
-		var path = get_browser_location("firefox");
-		if(path) firefox_location = "*firefox "+path;
-	}
-	
-	var application_name = _args[0].match(/[^\/]*$/)[0];
-	var funcunit_html_name = "funcunit.html";
-	if(application_name == "funcunit") funcunit_html_name = "funcunit_test.html"
-	
-	var data = {
+steal('//steal/generate/generate',function(steal){
+	var	data = steal.extend({
 		path: _args[0], 
-		application_name: application_name,
+		application_name: _args[0].match(/[^\/]*$/)[0],
 		current_path: steal.File.cwdURL(),
-		windows: windows,
-		firefox_location: firefox_location,
-		path_to_steal : path_to_steal, 
-		funcunit_html_name: funcunit_html_name
-	};
+		path_to_steal : new steal.File(_args[0]).pathToRoot()
+	}, steal.system)
 	
-	var app_root = _args[0];
-	new Generate(app_root, data, "../generate/templates/")
-      .folder()
-      .render(data.application_name+".js",  "application.ejs")
-      .render(data.application_name+".html",  "page.ejs")
-      .render(funcunit_html_name,  "funcunit/html.ejs")
-      .render("qunit.html",  "qunit/html.ejs")
-      .push("test").folder()
-        .push("qunit").folder()
-          .render("qunit.js", "qunit/qunit.ejs")
-          .render("basic_test.js", "qunit/basic.ejs")
-          .pop()
-        .push("funcunit").folder()
-          .render("funcunit.js", "funcunit/funcunit.ejs")
-          .render("basic_test.js", "funcunit/basic.ejs")
-          .pop()
-        .pop()
-      .folder("docs")
-      .push("scripts").folder()
-        .render("compress.js", "compress_script.ejs")
-        .render("doc.js","docs_script.ejs")
-        .pop()
+	steal.generate("steal/generate/templates/plugin",_args[0],data)
+	
 })();
 

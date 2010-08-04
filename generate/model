@@ -7,15 +7,20 @@ if (_args.length < 1) {
 	quit();
 }
 
-load('steal/rhino/loader.js');
-rhinoLoader(function(){
-	steal.plugins('steal/ejs','steal/file','steal/generate','steal/inflector');
-});
 
-(function(){
-	$modelName = _args[0];
-	$modelType = _args[1];
-	load("steal/generate/parts/convert.js")
-	load("steal/generate/parts/model.js")
-	new Generate().postGenerationMessage();
-})();
+
+load('steal/rhino/steal.js');
+
+steal(	'//steal/generate/generate',
+		'//steal/generate/system',
+		'//steal/generate/inflector'	,	
+function(steal){
+	var md = steal.generate.convert(_args[0]);
+	
+	md.type = _args[1]
+	
+	md.appPath =  md.path.replace(/\/models$/,"");
+
+	steal.generate("steal/generate/templates/model",md.appPath,md)
+	
+});
