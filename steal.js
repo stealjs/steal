@@ -43,7 +43,7 @@ var oldsteal = window.steal,
 
 /**
  * @class steal
- * @tag core
+ * @parent stealtools
  * <p>Steal does JavaScript dependency management and compression super easy.</p>
  * <p>This page details the use of the steal script (<code>steal/steal.js</code>), 
  * which is the primary tool used to load files into your page.  Here's a quick example:</p>

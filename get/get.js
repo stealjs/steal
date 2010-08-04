@@ -2,11 +2,16 @@
 
 steal("//steal/get/json","//steal/rhino/prompt",function(steal){
 /**
- * Downloads and installs a plugin from a url
- * @param {String} url
- * @param {Object} options
+ * @parent stealtools
+ * Downloads and installs a plugin from a url.
+ * 
+ * 
+ * 
+ * @param {String} url the path to a svn or github repo.
+ * @param {Object} options configure the download
+ * 
  */
-var get = steal.get =  function(url, options){
+var get = (steal.get =  function(url, options){
 	options = steal.opts(options,{name: 1});
 	var getter = url.indexOf("github.com") != -1 ? get.github : get.getter,
 		name = options.name
@@ -37,9 +42,9 @@ var get = steal.get =  function(url, options){
 	print("\n  "+name+" plugin downloaded.");	
 	runInstallScript(name);
 	
-},
+}),
 /**
- * @ignore
+ * @hide
  * looks for a url elsewhere
  * @param {Object} name
  */

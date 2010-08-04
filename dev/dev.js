@@ -1,3 +1,9 @@
+/**
+ * @class steal.dev
+ * @parent stealtools
+ * Provides helper functions for development that get removed when put in production mode.
+ * This is under development.
+ */
 steal.dev = {
 	regexps : {
         colons : /::/,
@@ -23,11 +29,19 @@ steal.dev = {
 			}
 		}
 	},
+	/**
+	 * 
+	 * @param {Object} out
+	 */
 	warn : function(out){
 		if(window.console && console.log){
 			console.log("steal.js WARNING: "+out)
 		}
 	},
+	/**
+	 * 
+	 * @param {Object} out
+	 */
 	log : function(out){
 		if(window.console && console.log){
 			console.log("steal.js INFO: "+out)

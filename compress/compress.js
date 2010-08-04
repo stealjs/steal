@@ -2,6 +2,7 @@ steal('//steal/compress/scripts', function(steal){
 	var opts = {};
 	
 	/**
+	 * @parent stealtools
 	 * compresses an application
 	 * @param {String} url an html page to compress
 	 * @param {Object} options
