@@ -49,7 +49,8 @@ steal.scripts = function(url, scriptProcessors){
 		},
 		getScriptContent : function(script){
 			return scriptProcessors[script.type] && scriptProcessors[script.type](script);
-		}
+		},
+		steal : newSteal
 	}
 }
 /**
@@ -91,20 +92,21 @@ steal.extend(steal.scripts,{
 	},
 	
 	'text/ejs': function(script){
-		var text = this.loadScriptText(script.src);
+		var text = loadScriptText(script.src);
 		var id = script.getAttribute("id");
 		return $.View.registerScript("ejs", id, text);
 	},
 	'text/micro': function(script){
-		var text = this.loadScriptText(script.src);
+		var text = loadScriptText(script.src);
 		var id = script.getAttribute("id");
 		return $.View.registerScript("micro", id, text);
 	},
 	'text/jaml': function(script){
-		var text = this.loadScriptText(script.src);
+		var text = oadScriptText(script.src);
 		var id = script.getAttribute("id");
 		return $.View.registerScript("jaml", id, text);
-	}
+	},
+	loadScriptText : loadScriptText
 });
 
 

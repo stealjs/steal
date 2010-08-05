@@ -20,6 +20,15 @@
 	steal.isArray = function(arr){
   	  return Object.prototype.toString.call(arr) === "[object Array]"
     }
+	steal.inArray = function(item, arr){
+		var len = arr.length;
+		for(var i =0; i < len; i++){
+			if(arr[i] == item){
+				return i;
+			}
+		}
+		return -1;
+	}
 	if(oldSteal){
 		steal._steal = oldSteal;
 	}
@@ -63,9 +72,10 @@
 		for(var i =0; i < args.length;i++){
 			if ( args[i].indexOf('-') == 0 &&  (def = options[args[i].substr(1)])  ) {
 				latest = def.name;
+				opts[latest] = true;
 				//opts[latest] = []
 			}else{
-				if(opts[latest] === undefined){
+				if(opts[latest] === true){
 					opts[latest] = args[i]
 				}else{
 					if(!steal.isArray(opts[latest]) ){
