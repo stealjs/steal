@@ -4,7 +4,7 @@
 		return (function(){return this}).call(null,0);
 	},
 	oldSteal = oldWindow().steal;
-	steal = function(){
+	var steal = (oldWindow().steal = function(){
 		for(var i=0; i < arguments.length; i++){
 			var inc = arguments[i];
 			if(typeof inc == 'string'){
@@ -13,7 +13,7 @@
 				inc(steal)
 			}
 		}
-	}
+	});
 	
 	steal.extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;};
 	
@@ -29,6 +29,7 @@
 		}
 		return -1;
 	}
+	steal.win = oldWindow;
 	if(oldSteal){
 		steal._steal = oldSteal;
 	}
@@ -89,7 +90,16 @@
 		
 		return opts;
 	}
-	
+	steal.clear = function(){
+		var win = steal.win();
+		for(var n in win){
+			if(n != "_S"){
+				//this[n] = null;
+				delete win[n];
+			}
+		}
+		return steal;
+	}
 	
 })()
 

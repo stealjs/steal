@@ -18,11 +18,11 @@ steal.scripts = function(url, scriptProcessors){
 	for(name in scriptProcessors){
 		types[name] = true;
 	}
-	var oldSteal = window.steal, 
+	var oldSteal = window.steal || steal, 
 		newSteal;
 	delete window.steal;
 	//load the page
-	load('steal/rhino/env.js')
+	load('steal/rhino/env.js'); //reload every time
 	Envjs(url, {scriptTypes: types, fireLoad: false, logLevel: 2,
         afterScriptLoad: {".*": function(script){ 
                 scripts.push(script);
