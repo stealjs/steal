@@ -112,7 +112,7 @@ generate = (steal.generate = function(path, where, data){
 		
 		if(type == 'file'){
 			//if it's ejs, draw it where it belongs
-			if(/\.gitignore/.test(name)){
+			if(/\.ignore/.test(name)){
 				//do nothing
 			}else if(/\.ejs$/.test(name)){
 				var put = where + "/"+convert.replace(/\.ejs$/,"");
