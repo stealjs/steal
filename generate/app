@@ -18,5 +18,6 @@ steal('//steal/generate/generate','//steal/generate/system',function(steal){
 	
 	steal.generate("steal/generate/templates/app",path,data)
 	
+	
 });
 
