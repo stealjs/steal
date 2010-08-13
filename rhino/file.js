@@ -53,8 +53,10 @@ extend(steal.File.prototype, {
      * Returns everything before the last /
      */
 	dir: function(){
-		var last = this.clean().lastIndexOf('/');
-		return last != -1 ? this.clean().substring(0,last) : ''; //this.clean();
+		var last = this.clean().lastIndexOf('/'),
+			dir = (last != -1) ? this.clean().substring(0,last) : '',
+			parts = dir != '' && dir.match( /^(https?:\/|file:\/)$/ );
+		return parts && parts[1] ? this.clean() : dir;
 	},
     /**
      * Returns the domain for the current path.
@@ -90,7 +92,7 @@ extend(steal.File.prototype, {
 			if(this.domain() && this.domain() == u.domain() ) 
 				return this.after_domain();
 			else if(this.domain() == u.domain()) { // we are from a file
-				return this.to_reference_from_same_domain(url);
+				return this.toReferenceFromSameDomain(url);
 			}else
 				return this.path;
 		}else if(this.isLocalAbsolute()){
@@ -123,7 +125,7 @@ extend(steal.File.prototype, {
 	 * 
 	 * @param {Object} url
 	 */
-    to_reference_from_same_domain: function(url){
+    toReferenceFromSameDomain: function(url){
 		var parts = this.path.split('/'), other_parts = url.split('/'), result = '';
 		while(parts.length > 0 && other_parts.length >0 && parts[0] == other_parts[0]){
 			parts.shift(); other_parts.shift();

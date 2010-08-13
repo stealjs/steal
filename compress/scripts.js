@@ -41,8 +41,13 @@ steal.scripts = function(url, scriptProcessors){
 	window.steal._steal = newSteal;
 	
 	return {
-		each : function(func, ths){
-	        var scripts = document.getElementsByTagName('script');
+		each : function(type , func, ths){
+			if(typeof type == 'function'){
+				ths = func;
+				func = type;
+				type = 'script'
+			}
+	        var scripts = document.getElementsByTagName(type);
 			for(var i = 0 ; i < scripts.length; i++){
 				func.call(ths,scripts[i], this.getScriptContent(scripts[i]), i)
 			}
@@ -90,7 +95,14 @@ steal.extend(steal.scripts,{
 			return script.text
 		}
 	},
-	
+	'text/css' : function(script){
+		if (script.href) {
+			return loadScriptText(script.href, script);
+		}
+		else {
+			return script.text
+		}
+	},
 	'text/ejs': function(script){
 		var text = loadScriptText(script.src);
 		var id = script.getAttribute("id");
