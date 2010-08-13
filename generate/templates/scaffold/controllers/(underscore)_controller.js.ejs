@@ -5,7 +5,7 @@
  * ["<%=name.replace("Models","Controllers")%>.prototype.&#46;edit click" edit],
  * or ["<%=name.replace("Models","Controllers")%>.prototype.&#46;destroy click" destroy] <%= plural %>.
  */
-jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
+$.Controller.extend('<%=name.replace("Models","Controllers")%>',
 /* @Static */
 {
     onDocument: true
@@ -43,7 +43,7 @@ jQuery.Controller.extend('<%=name.replace("Models","Controllers")%>',
      */
     "<%= underscore %>.created subscribe": function(called, <%= underscore %>){
 		$("#<%= underscore %> tbody").append( this.view("list", {<%= plural %>:[<%= underscore %>]}) )
-        jQuery("#<%= underscore %> form input[type!=submit]").val(""); //clear old vals
+        $("#<%= underscore %> form input[type!=submit]").val(""); //clear old vals
     },
     /**
      * Creates and places the edit interface.
