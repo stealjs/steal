@@ -45,7 +45,7 @@ steal.get.getter.prototype = {
 		anchors.forEach(function(link){
             link = link.replace(/href="/i, "");
  
-            if( !link.test(/svnindex.xsl$/) && ! link.test(  /^(\w*:|)\/\//) && ! link.test(/^\./) ){
+            if( !/svnindex.xsl$/.test(link) && ! /^(\w*:|)\/\//.test( link ) && ! /^\./.test(link) ){
                 links.push( (new steal.File(base_url)).join(link) );
             }
                 

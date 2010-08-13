@@ -13,7 +13,7 @@ steal("//steal/get/json","//steal/rhino/prompt",function(steal){
  */
 var get = (steal.get =  function(url, options){
 	options = steal.opts(options,{name: 1});
-	var getter = url.indexOf("github.com") != -1 ? get.github : get.getter,
+	var getter,
 		name = options.name
 	
 	if(! url.match(/^http/)){
@@ -24,6 +24,7 @@ var get = (steal.get =  function(url, options){
 		print("There is no plugin named "+name);
 		return;
 	}
+	getter = url.indexOf("github.com") != -1 ? get.github : get.getter;
 	if(!name){
 		name = guessName(url);
 	}
@@ -52,7 +53,7 @@ pluginList  = function(name){
 	print("  Looking for plugin ...")
 		
 	var plugin_list_source = 
-		readUrl("http://github.com/pinhook/steal/blob/master/get/gets.json");
+		readUrl("http://github.com/pinhook/steal/raw/master/get/gets.json");
 	var plugin_list;
 	eval("plugin_list = "+plugin_list_source);
 	if(plugin_list[name]) {
