@@ -1,4 +1,4 @@
-steal('//steal/compress/scripts', function(steal){
+steal(function(steal){
 	var opts = {};
 	
 	/**
