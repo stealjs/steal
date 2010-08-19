@@ -7,8 +7,9 @@ test("steal's domain()", function(){
 })
 
 test("steal's joinFrom()", function(){
-	var result = new steal.File('a/b.c').joinFrom('/d/e');
-    equals(result, "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
+	var result;
+    equals(
+		steal.File('a/b.c').joinFrom('/d/e'), "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
 	
 	result = new steal.File('a/b.c').joinFrom('d/e');
     equals(result, "d/e/a/b.c", "d/e/a/b.c is correctly joined.");	

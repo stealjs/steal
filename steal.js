@@ -283,26 +283,21 @@ steal.fn = steal.prototype = {
 				options(steal.send || window.jQuery || steal); //should return what was steald before 'then'
 			};
 			this.options = options;
-		} else if(options.type) { 
-			extend( this, options)
-			this.path = options.src;
-			this.type = options.type;
-			this.options = options;
-		} else { //something we are going to steal and run
-			
-			if(typeof options == 'string' ){
-				this.path = /\.js$/ig.test(options) ? options : options+'.js'
-			}else {
-				extend( this, options);
-				this.options = options;
-			}
-			this.originalPath = this.path;
-			//get actual path
-			var pathFile = new File(this.path);
-			this.path = pathFile.normalize();
-			this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
-			this.dir = new File(this.path).dir();
+			return;
 		}
+		if(typeof options == 'string') { 
+			options = {path: /\.js$/ig.test(options) ? options : options+'.js'}
+		}
+		extend(this, options)
+		this.options = options; //TODO: needed?
+		
+		this.originalPath = this.path;
+		//get actual path
+		var pathFile = new File(this.path);
+		this.path = pathFile.normalize();
+		this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
+		this.dir = new File(this.path).dir();
+
 		
 	},
 	/**
@@ -712,8 +707,10 @@ extend(steal,
 			steal.options.production = steal.root.join(  new File(steal.options.startFile).dir()+ '/production')
 
 		}
-		if(steal.options.production)
+		if(steal.options.production){
 			steal.options.production = steal.options.production+(steal.options.production.indexOf('.js') == -1 ? '.js' : '' );
+		}
+			
 		
 		//start loading stuff
 		//steal.plugins('jquery'); //always load jQuery
@@ -732,23 +729,17 @@ extend(steal,
 			first = false; //makes it so we call close after
 			steal(steal.options.startFile);
 		}
-		if(steal.options.env == 'test')  {
-			steal.plugins('test');
-			if(steal.options.documentLocation) 
-				steal.plugins('dom/fixtures/overwrite');
-			if(steal.options.startFile){ //load test file in same directory
-				 steal( new File(steal.options.startFile).dir()+"/test/unit.js");
-			}
-		}
+		
 
 		if(steal.options.env == 'production' && steal.options.loadProduction){
 			steal.end()
 			document.write('<script type="text/javascript" src="'+steal.options.production+'"></script>' );
-			return
 		}
 			
 			
-		if(steal.options.startFile) steal.start();
+		if(steal.options.startFile){
+			steal.start();
+		}
 	},
 	/**
 	 * Gets the current directory your relative steals will reference.
@@ -864,44 +855,46 @@ extend(steal,
 		if(func) func.func();
 	},
 	/**
-	 * Includes CSS from the stylesheets directory.
-	 * @hide
-	 * @param {String} css the css file's name to load, steal will add .css.
+	 * Creates css links from the given relative path.
+	 * @param {String} relative URL(s) to stylesheets
+	 * @return {steal} steal for chaining
 	 */
 	css: function(){
-		var arg;
-		for(var i=0; i < arguments.length; i++){
-			arg = arguments[i];
-			steal.css_rel('../../stylesheets/'+arg);
+		//if production, 
+		if(steal.options.env == 'production'){
+			if(steal.loadedProductionCSS){
+				return;
+			}else{
+				steal.createLink( steal.options.production.replace(".js",".css")  );
+				loadedProductionCSS = true;
+				return;
+			}
 		}
-	},
-	/**
-	 * Creates css links from the given relative path.
-	 * @hide
-	 * @param {String} relative URL(s) to stylesheets
-	 */
-	css_rel: function(){
-		var arg;
+		var current;
 		for(var i=0; i < arguments.length; i++){
-			arg = arguments[i];
-			var current = new File(arg+".css").joinCurrent();
-			steal.create_link( steal.root.join(current)  );
+			current = new File(arguments[i]+".css").joinCurrent();
+			steal.createLink( steal.root.join(current)  );
 		}
+		return this;
 	},
 	/**
 	 * Creates a css link and appends it to head.
 	 * @hide
 	 * @param {Object} location
+	 * @return {HTMLLinkElement}
 	 */
-	create_link: function(location){
+	createLink: function(location, options){
+		options = options || {};
 		var link = document.createElement('link');
-		link.rel = "stylesheet";
+		link.rel = options.rel || "stylesheet";
 		link.href =  location;
-		link.type = 'text/css';
+		link.type = options.type || 'text/css';
 		head().appendChild(link);
+		return link;
 	},	
 	/**
-	 * Synchronously requests a file.
+	 * @hide
+	 * Synchronously requests a file.  This is here to read a file for other types.	 * 
 	 * @param {String} path path of file you want to load
 	 * @param {optional:String} content_type optional content type
 	 * @return {String} text of file
@@ -1094,7 +1087,7 @@ steal.views = function(){
 steal.timerCount = 0;
 steal.view = function(path){
 	var type = path.match(/\.\w+$/gi)[0].replace(".","");
-	steal({src: path, type: "text/"+type, compress: "false"});    
+	steal({path: path, type: "text/"+type, compress: "false"});    
 	return steal;
 };
 steal.timers = {}; //tracks the last script
@@ -1110,22 +1103,28 @@ steal.loadErrorTimer = function(options){
 	},5000);
 	return "onLoad='steal.ct("+count+")' "
 }
+steal.cleanId = function(id){
+	return id.replace(/[\/\.]/g, "_")
+}
+//for integration with other build types
+steal.build || (steal.build = {types: {}});
 var script_tag = function(){
 	var start = document.createElement('script');
 	start.type = 'text/javascript';
 	return start;
 };
-
+steal.loadedProductionCSS = false;
 var insert = function(options){
 	// source we need to know how to get to steal, then load 
 	// relative to path to steal
 
 	options = extend({
-		id: options.src && options.src.replace(/[\/\.]/g, "_")
+		id: options.src && steal.cleanId(options.src)
 	}, options);
 	var start= options.src,
 		text = "",
-		scriptTag = '<script ';
+		scriptTag = '<script ',
+		bodyText;
 	if(options.src){
 		var src_file = new File(options.src);
 		if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
@@ -1133,30 +1132,40 @@ var insert = function(options){
 	}
 
 
-	if(options.type && options.type != 'text/javascript' && !browser.rhino){
+	if(options.type && options.process){
+		text = steal.request(options.src);
+		if(!text)
+			throw "steal.js there is nothing at "+options.src;
+		bodyText = options.process(text);
+		options.type = 'text/javascript'
+		delete options.process;
+		delete options.src;
+		
+	}else if(options.type && options.type != 'text/javascript' && !browser.rhino){
 		text = steal.request(options.src);
 		if(!text)
 			throw "steal.js there is nothing at "+options.src;
 		options.text = text;
 		delete options.src;
 	}
-
+	
 	for(var attr in options){
 		scriptTag += attr + "='" + options[attr] + "' ";
 	}
-	if(steal.support.load && !steal.browser.rhino){
+	if(steal.support.load && !steal.browser.rhino && !bodyText){
 		scriptTag += steal.loadErrorTimer(options)
 	}
-	scriptTag += '></script>';
+	scriptTag += '>'+(bodyText ||'')+'</script>';
 	if(steal.support.load){
-		scriptTag +='<script type="text/javascript">steal.end()</script>'
+		scriptTag +='<script type="text/javascript"'+ 
+			'>steal.end()</script>'
 	}
 	else
 	{
 		scriptTag += '<script type="text/javascript" src="'+steal.root.join('steal/end.js')+'"></script>'
 	}
 	document.write(
-		(options.src? scriptTag : '') 
+		(options.src || bodyText ? scriptTag : '') 
 	);
 };
 

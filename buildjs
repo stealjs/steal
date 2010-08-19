@@ -1,0 +1,5 @@
+load("steal/rhino/steal.js");
+steal.plugins('steal/build','steal/build/scripts','steal/build/styles',function(){
+	var url = _args.shift()
+	steal.build(url,_args)
+})

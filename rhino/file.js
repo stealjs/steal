@@ -4,6 +4,9 @@
 	
 	if(!steal.File){
 		steal.File = function(path){
+			if(this.constructor != steal.File){
+				return new steal.File(path)
+			}
 			this.path = path;
 		}
 	}
@@ -88,20 +91,22 @@ extend(steal.File.prototype, {
      */
 	joinFrom: function( url, expand){
 		if(this.isDomainAbsolute()){
-			var u = new steal.File(url);
+			var u = new File(url);
 			if(this.domain() && this.domain() == u.domain() ) 
-				return this.after_domain();
+				return this.afterDomain();
 			else if(this.domain() == u.domain()) { // we are from a file
 				return this.toReferenceFromSameDomain(url);
 			}else
 				return this.path;
+		}else if(url == steal.pageDir && !expand){
+			return this.path;
 		}else if(this.isLocalAbsolute()){
-            var u = new steal.File(url);
-            if(!u.domain()) return this.path;
-            return u.protocol()+"//"+u.domain() + this.path;
-        }
-        else{
-            
+			var u = new File(url);
+			if(!u.domain()) return this.path;
+			return u.protocol()+"//"+u.domain() + this.path;
+		}
+		else{
+			
 			if(url == '') return this.path.replace(/\/$/,'');
 			var urls = url.split('/'), paths = this.path.split('/'), path = paths[0];
 			if(url.match(/\/$/) ) urls.pop();

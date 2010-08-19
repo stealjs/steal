@@ -1,39 +1,29 @@
-steal('//steal/compress/scripts', function(steal){
-	var opts = {};
+steal(function(steal){
 	
 	/**
-	 * @parent stealtools
-	 * compresses an application
-	 * @param {String} url an html page to compress
+	 * Builds JavaScripts
+	 * @param {Object} opener
 	 * @param {Object} options
 	 */
-	steal.compress = function(url, options){
-		options = steal.opts(options || {}, {
-			//compress everything, regardless of what you find
-			all : 1,
-			//compress to someplace
-			to: 1
-		})
+	var scripts = (steal.build.builders.scripts = function(opener, options){
+		print("\nBUILDING SCRIPTS --------------- ");
 		
-		
-		//out is the folder packages will be sent to
-		options.out = options.out || (url.match(/https?:\/\//) ?  "" : url.substr(0, url.lastIndexOf('/'))  );
-		if (options.out.match(/\\$/) == null && options.out != '') {
-			options.out += "/";
-		}
-		print("Putting packages in "+options.out)
-		var compressor = steal.compress.compressors[options.compressor || "localClosure"](),
+		var compressor = scripts.compressors[options.compressor || "localClosure"](),
 			packages = {},
-			currentPackage = [];
+			currentPackage = [],
+			cssPackage;
+		
 		
 		if(options.all){
-			packages[options.to || 'production.js'] = currentPackage;
+			packages['production.js'] = currentPackage;
 		}
 		
-		steal.scripts(url).each(function(script, text, i){
+		opener.each("script", function(script, text, i){
 			
 			if(script.getAttribute('ignore') == "true"){
-				print('   ignoring '+script.src);
+				if(script.src){
+					print('   ignoring '+script.src);
+				}
 				return;
 			}
 			
@@ -48,35 +38,38 @@ steal('//steal/compress/scripts', function(steal){
 				currentPackage = packages[pack];
 			}
 			
-			text = steal.compress.clean(text);
+			text = scripts.clean(text);
 			if(script.getAttribute('compress') == "true" || options.all){
 				text =  compressor(text, true);
 			}
 			currentPackage.push(text);
-		});
-		
-		//now we should have all scripts sorted by whatever package they should be put in
-		print();
+		})
+		print("")
 		for(var p in packages){
 			if(packages[p].length){
 				var compressed = packages[p].join(";\n");
-				new steal.File(options.out + p).save(compressed);           
-				print("Package " + (/*++idx*/ p) + ": " + options.out + p);
+				new steal.File(options.to + p).save(compressed);           
+				print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
-		
+	})
+	//removes  dev comments from text
+	scripts.clean = function(text){
+		return String(java.lang.String(text)
+					.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end","")
+					.replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\w+)[\n\s\r]*\([^\)]*\)",""))
 	}
 	
-	steal.extend(steal.compress, {
-		compressors : {
-			// needs shrinksafe.jar at steal/compress/shrinksafe
+	//various compressors
+	scripts.compressors =  {
+			// needs shrinksafe.jar at steal/build/javascripts/shrinksafe.jar
 			shrinksafe: function(){
 				print("steal.compress - Using ShrinkSafe")
 				// importPackages/Class doesn't really work
 				var URLClassLoader = Packages.java.net.URLClassLoader,
 					URL = java.net.URL,
 					File = java.io.File,
-					ss  = new File("steal/compress/shrinksafe.jar"),
+					ss  = new File("steal/build/javascripts/shrinksafe.jar"),
 					ssurl = ss.toURL(),
 					urls = java.lang.reflect.Array.newInstance(URL,1)
 				urls[0] = new URL(ssurl);
@@ -124,10 +117,10 @@ steal('//steal/compress/scripts', function(steal){
 					var outBaos = new java.io.ByteArrayOutputStream(),
 						output = new java.io.PrintStream(outBaos);
 					if(quiet){
-						runCommand("java", "-jar", "steal/compress/compiler.jar", "--compilation_level",
+						runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level",
 							"SIMPLE_OPTIMIZATIONS", "--warning_level","QUIET",  "--js", filename, {output: output});
 					}else{
-						runCommand("java", "-jar", "steal/compress/compiler.jar", "--compilation_level",
+						runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level",
 							"SIMPLE_OPTIMIZATIONS", "--js", filename, {output: output});
 					}
 					tmpFile.remove();
@@ -135,20 +128,5 @@ steal('//steal/compress/scripts', function(steal){
 					return outBaos.toString();
 				}
 			}
-		},
-		//cleans out any steal removes or steal.dev.log calls
-		clean : function(text){
-			return String(java.lang.String(text)
-						.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end","")
-						.replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\w+)[\n\s\r]*\([^\)]*\)",""))
 		}
-	})	
 })
-
-
-
-
-
-
-
-

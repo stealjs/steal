@@ -13,8 +13,19 @@
 				inc(steal)
 			}
 		}
+		return steal;
 	});
-	
+	steal.plugins = function(){
+		for(var i=0; i < arguments.length; i++){
+			var inc = arguments[i];
+			if(typeof inc == 'string'){
+				load(inc+"/"+inc.match(/\w+$/)[0]+".js")
+			}else{
+				inc(steal)
+			}
+		}
+		return steal;
+	}
 	steal.extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;};
 	
 	steal.isArray = function(arr){
