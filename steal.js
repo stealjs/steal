@@ -863,11 +863,11 @@ extend(steal,
 		//if production, 
 		if(steal.options.env == 'production'){
 			if(steal.loadedProductionCSS){
-				return;
+				return steal;
 			}else{
 				steal.createLink( steal.options.production.replace(".js",".css")  );
 				loadedProductionCSS = true;
-				return;
+				return steal;
 			}
 		}
 		var current;

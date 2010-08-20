@@ -105,7 +105,7 @@ steal(function(steal){
 		delete window.steal;
 		//load the page
 		load('steal/rhino/env.js'); //reload every time
-		Envjs(url, {scriptTypes: types, fireLoad: false, logLevel: 2,
+		Envjs(url, {scriptTypes: {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2,
 	        afterScriptLoad: {".*": function(script){ 
 	                scripts.push(script);
 	            }
