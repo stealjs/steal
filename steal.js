@@ -80,7 +80,7 @@ Use of steal.js is broken into 5 parts:
 	<li>Loading steal.js </li> 
 	<li>Loading your 'application' file.</li>
 	<li>"Stealing" scripts</li>
-	<li>Compressing a page</li>
+	<li>Building (Concatenating+Compressing) the app</li>
 	<li>Switching to the production build</li>
 </ul>
 
@@ -115,7 +115,6 @@ There are a lot of ways to configure steal to load your app file, but we've made
 This sets ...
 @codestart
 steal.options.startFile = 'myapp/myapp.js'
-steal.options.env = 'development'
 @codeend
 
 ... and results in steal loading 
@@ -148,47 +147,29 @@ There's a few things to notice:
 	<li>steal adds .js if not present</li>
 	<li>steal is chainable (most function return steal)</li>
 </ul>
+<h3>Building the app</h3>
+<p>Building the app means combining and compressing your apps JavaScript and CSS into a single file.
+A lot more details can be found on building in the 
+[steal.build steal.build documentation].  But, if you used JavaScriptMVC's app or plugin
+generator, you can build
+your app's JS and CSS with:
 <p>
-	steal
-</p>
- * <h2>How it works</h2>
- * 
- * 
- * Includes are performed relative to the including file. 
- * Files are steald last-in-first-out after the current file has been loaded and run.
- * <h2>Concat and Compress</h2>
- * In your terminal simply run:
- * @codestart no-highlight
- * steal\js APP_NAME\scripts\compress.js
- * @codeend
- * This will generate a production.js bundle in APP_NAME\production.js
- * @codestart no-highlight
- * steal\js APP_NAME\scripts\compress.js
- * @codeend
- * This will generate a production.js bundle in APP_NAME\production.js
- * <h2>Compressing non-JMVC javascript applications.</h2>
- * You can compress and package non-jmvc javascript applications by declaring your scripts
- * this way in your html page:
- * @codestart no-highlight
- * &lt;script src="file1.js" type="text/javascript" compress="true" package="production.js">&lt;/script>
- * &lt;script src="file2.js" type="text/javascript" compress="true" package="production.js">&lt;/script>		
- * @codeend
- * and then running either:
- * @codestart no-highlight
- * steal/js steal/compress.js path\to\non\jmvc\app\PAGE.html [OUTPUT_FOLDER]
- * @codeend 
- * or: 
- * @codestart no-highlight
- * steal/js steal/compress.js http://hostname/path/to/non/jmvc/app/PAGE.html [OUTPUT_FOLDER]
- * @codeend  
- * This will compress file1.js and file2.js into a file package named production.js an put it in OUTPUT_FOLDER.
- * <h2>Run in production</h2>
- * Switch to the production mode by changing development to production:
- * @codestart no-highlight
- * &lt;script src="<i>PATH/TO/</i>steal/steal.js?steal[app]=APP_NAME&steal[env]=production" type="text/javascript">
- * &lt;/script>
- * @codeend
- * Your application will now only load steal.js and production.js, greatly speeding up load time.
+@codestart no-highlight
+js myapp\scripts\compress.js
+@codeend
+<p>Or if you are using steal without JavaScriptMVC:</p>
+@codestart no-highlight
+js steal/buildjs pages/myapp.html -to public/myapp
+@codeend
+<p>This creates <code>public/myapp/production.js</code> and <code>public/myapp/production.css</code>.
+
+<h3>Switching to the production build</h3>
+<p>To use the production files, load steal.production.js instead of steal.js in your html file:</p>
+@codestart html
+&lt;script type='text/javascript'
+	src='../public/steal/<u><b>steal.production.js</b></u>?myapp/myapp.js'>
+&lt;/script>
+@codeend
  * <h2>Script Load Order</h2>
  * The load order for your scripts follows a consistent last-in first-out order across all browsers. 
  * This is the same way the following document.write would work in msie, Firefox, or Safari:

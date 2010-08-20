@@ -1,11 +1,31 @@
+
 steal(function(steal){
 	var opts = {},
 		window = (function(){return this}).call(null,0);
 	
 	/**
+	 * 
 	 * @parent stealtools
+	 * 
 	 * builds an html pages JavaScript and CSS files by compressing and concatenating them into
 	 * a single or several files.
+	 *  
+	 * <h2>Compressing steal.js javascript applications.</h2>
+	 * You can compress and package steal.js javascript applications by declaring your scripts
+	 * this way in your html page:
+	 * @codestart no-highlight
+	 * &lt;script src="file1.js" type="text/javascript" compress="true" package="production.js">&lt;/script>
+	 * &lt;script src="file2.js" type="text/javascript" compress="true" package="production.js">&lt;/script>		
+	 * @codeend
+	 * and then running either:
+	 * @codestart no-highlight
+	 * steal/js steal/buildjs path\to\non\jmvc\app\PAGE.html -to [OUTPUT_FOLDER]
+	 * @codeend 
+	 * or: 
+	 * @codestart no-highlight
+	 * steal/js steal/buildjs http://hostname/path/to/non/jmvc/app/PAGE.html -to [OUTPUT_FOLDER]
+	 * @codeend  
+	 * This will compress file1.js and file2.js into a file package named production.js an put it in OUTPUT_FOLDER.
 	 * @param {String} url an html page to compress
 	 * @param {Object} options
 	 */
