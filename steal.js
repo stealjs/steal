@@ -44,59 +44,72 @@ var oldsteal = window.steal,
 /**
  * @class steal
  * @parent stealtools
- * <p>Steal does JavaScript dependency management and compression super easy.</p>
- * <p>This page details the use of the steal script (<code>steal/steal.js</code>), 
- * which is the primary tool used to load files into your page.  Here's a quick example:</p>
+ * <p>Steal makes JavaScript dependency management and resource loading easy.</p>
+ * <p>This page details the steal script (<code>steal/steal.js</code>), 
+ * and steal function which are used to load files into your page.  
+ * For documentation of other Steal projects, read [stealtools Steal Tools].</p>
+ * <h3>Quick Overview</h3>
  * 
- * <h3>Example</h3>
- * <p>Loads the steal script and tells it the first file to load:</p>
+ * <p>To start using steal, add the steal script to your page, and tell it the first
+ * file to load:</p>
  * </p>
  * @codestart html
 &lt;script type='text/javascript'
- *        src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>'>&lt;/script>
+ *        src='public/steal/steal.js?<u><b>myapp/myapp.js</b></u>'>&lt;/script>
  * @codeend
 
- * <p>In the file (<code>myapp/myapp.js</code>), 
+ * <p>In the file (<code>public/myapp/myapp.js</code>), 
  * 'steal' all other files that you need like:</p>
  * @codestart
- * steal.plugins('jquery/controller',     //steals plugins and dependencies
- *           'jquery/controller/view',
- *           'jquery/view',
- *           'jquery/model')
- *  .models('recipe')                     //steals files in the plugin's models folder
- *  .controllers('recipe')                //steals files in the plugin's controllers folder
- *  .resources('i18n')                    //steals files in the plugin's resources folder
- *  .then('//path/to/file')               //steals files with paths relative to project's root
- *  .views('//cookbook/views/recipe/show.ejs') //loads and caches a view file
- *  .then(function(){                     //runs function after prior steals have finished
- *     ...
- * })
+ * steal("anotherFile")             //loads myapp/anotherFiles.js
+ *      .css('style')               //      myapp/style.css
+ *      .plugins('jquery/view',     //      jquery/view/view.js
+ *               'steal/less')      //      steal/less/less.js
+ *      .then(function(){           //called when all prior files have completed
+ *        steal.less('myapp')       //loads myapp/myapp.less
+ *      })
+ *      .views('//myapp/show.ejs')  //loads myapp/show.ejs
  * @codeend
-<p>Finally compress your page's JavaScript with:</p>
+<p>Finally compress your page's JavaScript and CSS with:</p>
 @codestart
-> js steal/compress.js path/to/mypage.html
+> js steal/buildjs path/to/mypage.html
 @codeend
  * <h2>Use</h2>
-Use of steal.js is typically broken into 3 parts:
+Use of steal.js is broken into 5 parts:
 <ul>
-	<li>Loading steal.js and setting [steal.static.options]</li>
+	<li>Loading steal.js </li> 
+	<li>Loading your 'application' file.</li>
 	<li>"Stealing" scripts</li>
 	<li>Compressing a page</li>
+	<li>Switching to the production build</li>
 </ul>
-<div class='whisper'>
-NOTE: You can compress pages that don't use steal.js.  
-</div>
 
-<h3>Loading <code>steal.js</code> and Setting <code>steal.options</code></h3>
 
-<p>[steal.static.options] is used to configure where and how steal starts loading scripts.
-	There are are a lot of options and a lot of ways to set them.  This is covered in 
-	the [steal.static.options] documentation.  Here we'll focus on what 95% of what people do -
-	setting the startFile and the env with the steal.js script tag.  This looks like:
+<h3>Loading <code>steal.js</code></h3>
+<p>First, you need to [download download JavaScriptMVC] (or steal standalone) and unzip it into a
+   public folder on your server.  For this example, lets assume you have the steal script in
+	<code>public/steal/steal.js</code>.   
+</p>
+<p>Next, you need to load the <code>steal.js</code> script in your html page.  We suggest 
+	[http://developer.yahoo.com/performance/rules.html#js_bottom bottom loading] your scripts.
+	For example, if your page is in <code>pages/myapp.html</code>, you can get steal like:
 </p>
 @codestart html
 &lt;script type='text/javascript'
-	   src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>,<u><b>development</b></u>'>
+	src='../public/steal/steal.js'>
+&lt;/script>
+@codeend
+<h3>Loading your 'application' file</h3>
+<p>The first file your application loads
+is referred to as an "application" file.  It loads all the files and resources
+that your application needs.  For this example, we'll put our application file in:
+<code>public/myapp/myapp.js</code>
+</p>
+<p>You have to tell steal where to find it by configuring [steal.static.options].
+There are a lot of ways to configure steal to load your app file, but we've made it really easy:</p>
+@codestart html
+&lt;script type='text/javascript'
+	src='../public/steal/steal.js?<u><b>myapp/myapp.js</b></u>'>
 &lt;/script>
 @codeend
 This sets ...
@@ -106,12 +119,8 @@ steal.options.env = 'development'
 @codeend
 
 ... and results in steal loading 
-<code>myapp/myapp.js</code>.
-The <code>myapp.js</code> file is commonly referred to as the <b>"application file"</b>.</p>
-<p>
-	If <code>development</code> changes to <code>production</code>
-	steal will load <code>myapp/production.js</code>.
-</p>
+<code>public/myapp/myapp.js</code>.</p>
+
 <div class='whisper'>
 	TIP: If startFile doesn't end with <code>.js</code> (ex: myapp), steal assumes
 	you are using JavaScriptMVC's folder pattern and will load:

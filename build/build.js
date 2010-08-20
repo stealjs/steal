@@ -1,5 +1,6 @@
 steal(function(steal){
-	var opts = {};
+	var opts = {},
+		window = (function(){return this}).call(null,0);
 	
 	/**
 	 * @parent stealtools
@@ -90,7 +91,7 @@ steal(function(steal){
 		loadScriptText : loadScriptText
 	}
 	
-	var window = steal.win();
+	
 	steal.build.open = function(url ){
 		scriptProcessors = steal.extend({}, steal.build.types);
 		var types = {}, 

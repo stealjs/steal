@@ -1,7 +1,7 @@
 steal(function(steal){
 	
 	/**
-	 * Builds JavaScripts
+	 * Builds and compresses CSS files.
 	 * @param {Object} opener
 	 * @param {Object} options
 	 */

@@ -1,6 +1,12 @@
+/**
+ * @add steal static
+ */
 steal({path: "coffee-script.js",ignore: true},function(){
 	
-	
+	/**
+	 * @function coffee
+	 * Requires a coffee script.
+	 */
 	steal.coffee = function(){
 		//if production, 
 		if(steal.options.env == 'production'){

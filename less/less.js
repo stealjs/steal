@@ -1,6 +1,15 @@
+/**
+ * @add steal static
+ */
 steal({path: "less_engine.js",ignore: true},function(){
 	
-	
+	/**
+	 * @function less
+	 * Lets you build and compile less scripts.
+	 * @codestart
+	 * steal.less('less');
+	 * @codeend
+	 */
 	steal.less = function(){
 		//if production, 
 		if(steal.options.env == 'production'){
