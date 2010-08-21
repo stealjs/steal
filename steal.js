@@ -628,18 +628,21 @@ extend(steal,
 	/**
 	 * Sets options from script
 	 * @hide
-	 */
-	setScriptOptions : function(){
+	 */	
+	 setScriptOptions : function(){
 		var scripts = document.getElementsByTagName("script"), 
 			scriptOptions, 
 			commaSplit;
 		for(var i=0; i<scripts.length; i++) {
 			var src = scripts[i].src;
-			if(src && src.match(/steal\.js/)){  //if script has steal.js
+			if(src && src.match(/steal\.js|steal\.production\.js/)){  //if script has steal.js
 				var mvc_root = new File( new File(src).joinFrom( steal.pageDir ) ).dir(),
 					loc = mvc_root.match(/\.\.$/) ?  mvc_root+'/..' : mvc_root.replace(/steal$/,'');
 				if (loc.match(/.+\/$/)) {
 					loc = loc.replace(/\/$/, '');
+				}
+				if(src.match(/steal\.production\.js/)){
+					steal.options.env = "production";
 				}
 				steal.root = new File(loc);
 				if (src.indexOf('?') != -1) {
@@ -661,7 +664,9 @@ extend(steal,
 				}else if(commaSplit[0]){
 					steal.options.app = commaSplit[0];
 				}
-				steal.options.env = commaSplit[1];
+				if(steal.options.env != "production"){
+					steal.options.env = commaSplit[1];
+				}
 			}
 			
 		}
