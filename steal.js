@@ -42,7 +42,7 @@ var oldsteal = window.steal,
 
 
 /**
- * @class steal
+ * @constructor steal
  * @parent stealtools
  * <p>Steal makes JavaScript dependency management and resource loading easy.</p>
  * <p>This page details the steal script (<code>steal/steal.js</code>), 
@@ -141,7 +141,11 @@ steal("http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js",
 @codeend
 There's a few things to notice:
 <ul>
-	<li>the steal function can take multiple arguments</li>
+	<li>the steal function can take multiple arguments.  Each argument 
+	can be a string, object, or function.  Learn more about what can be passed to 
+	steal in the [steal.prototype.init] documentation. 
+	
+	</li>
 	<li>steal can load cross domain</li>
 	<li>steal loads relative to the current file</li>
 	<li>steal adds .js if not present</li>
@@ -170,6 +174,21 @@ js steal/buildjs pages/myapp.html -to public/myapp
 	src='../public/steal/<u><b>steal.production.js</b></u>?myapp/myapp.js'>
 &lt;/script>
 @codeend
+<h2>Steal helpers</h2>
+There are a number of steal helper functions that can be used to load files in a particular location
+or of a type other than JavaScript:
+<ul>
+	<li>[steal.static.coffee] - loads  
+		[http://jashkenas.github.com/coffee-script/ CoffeeScript] scripts.</li>
+	<li>[steal.static.controllers] - loads controllers relative to the current path.</li>
+	<li>[steal.static.css] - loads a css file.</li>
+	<li>[steal.static.less] - loads [http://lesscss.org/ Less] style sheets.</li>
+	<li>[steal.static.models] - loads models relative to the current path.</li>
+	<li>[steal.static.plugins] - loads JavaScript files relative to steal's root folder.</li>
+	<li>[steal.static.resources] - loads a script in a relative resources folder.</li>
+	<li>[steal.static.views] - loads a client side template to be compiled into the production build.</li>
+</ul>
+
  * <h2>Script Load Order</h2>
  * The load order for your scripts follows a consistent last-in first-out order across all browsers. 
  * This is the same way the following document.write would work in msie, Firefox, or Safari:
@@ -209,6 +228,37 @@ js steal/buildjs pages/myapp.html -to public/myapp
 					<td class="right">6.js</td>
 				</tr>
 	</tbody></table>
+	@init 
+	Loads files or runs functions after all previous files and functions have been loaded.
+	@param {String|Object|Function+} resource Each argument represents a resource or function.
+	Arguments can be a String, Option, or Function.
+	<table class='options'>
+	  <tr>
+	      <th>Type</th><th>Description</th>
+	  </tr>
+	  <tr><td>String</td>
+	  		<td>A path to a JavaScript file.  The path can optionally end in '.js'.<br/>  
+	  		Paths are typically assumed to be relative to the current JavaScript file. But paths, that start
+	  		with: 
+	  		<ul>
+	  			<li><code>http(s)://</code> are absolutely referenced.</li>
+	  			<li><code>/</code> are referenced from the current domain.</li>
+	  			<li><code>//</code> are referenced from the ROOT folder.</li>
+	  		
+	  		</td></tr>
+	  <tr><td>Object</td>
+	  <td>An Object with the following properties:
+	      <ul>
+	          <li>path {String} - relative path to a JavaScript file.  </li>
+	          <li>type {optional:String} - Script type (defaults to text/javascript)</li>
+	          <li>skipInsert {optional:Boolean} - Include not added as script tag</li>
+	          <li>compress {optional:String} - "false" if you don't want to compress script</li>
+	          <li>package {optional:String} - Script package name (defaults to production.js)</li>             
+	      </ul>
+	  </td></tr>
+	  <tr><td>Function</td><td>A function to run after all the prior steals have finished loading</td></tr>
+	</table>
+	@return {steal} returns itself for chaining.
  */
 steal = function(){
 	for(var i=0; i < arguments.length; i++) 
@@ -239,37 +289,16 @@ steal = function(){
 })();
 
 var id = 0;
-/* @prototype */
+
 steal.fn = steal.prototype = {
-	/**
-	 * Queues a file to be loaded or an steal callback to be run.  This takes the same arguments as [steal].
-	 * @param {String|Object|Function} options 
-	 * <table class='options'>
-	 *     <tr>
-	 *         <th>Type</th><th>Description</th>
-	 *     </tr>
-	 *     <tr><td>String</td><td>A relative path to a JavaScript file.  The path can optionally end in '.js'</td></tr>
-	 *     <tr><td>Object</td>
-	 *     <td>An Object with the following properties:
-	 *         <ul>
-	 *             <li>path {String} - relative path to a JavaScript file.  </li>
-	 *             <li>type {optional:String} - Script type (defaults to text/javascript)</li>
-	 *             <li>skipInsert {optional:Boolean} - Include not added as script tag</li>
-	 *             <li>compress {optional:String} - "false" if you don't want to compress script</li>
-	 *             <li>package {optional:String} - Script package name (defaults to production.js)</li>             
-	 *         </ul>
-	 *     </td></tr>
-	 *     <tr><td>Function</td><td>A function to run after all the prior steals have finished loading</td></tr>
-	 * </table>
-	 * @return {steal} a new steal object
-	 */
+	
 	init : function(options){
 		this.id = (++id)
 		if(typeof options == 'function'){
 			var path = steal.getCurrent();
 			this.path = path;
 			this.func = function(){
-				steal.setCurrent(path);
+				steal.curDir(path);
 				options(steal.send || window.jQuery || steal); //should return what was steald before 'then'
 			};
 			this.options = options;
@@ -314,7 +343,7 @@ steal.fn = steal.prototype = {
 			if(isProduction){
 				 return;
 			}
-			steal.setCurrent(this.path);
+			steal.curDir(this.path);
 			  this.skipInsert ? insert() : insert(options);			  
 		}
 	},
@@ -323,7 +352,7 @@ steal.fn = steal.prototype = {
 	 * @hide
 	 */
 	runNow : function(){
-		steal.setCurrent(this.path);
+		steal.curDir(this.path);
 		
 		return browser.rhino ? load(this.path) : 
 					steal.insertHead( steal.root.join(this.path) );
@@ -445,7 +474,7 @@ File.prototype =
 	 * Joins the file to the current working directory.
 	 */
 	joinCurrent: function(){
-		return this.joinFrom(steal.getCurrentFolder());
+		return this.joinFrom(steal.curDir());
 	},
 	/**
 	 * Returns true if the file is relative
@@ -487,7 +516,7 @@ File.prototype =
 	 */
 	normalize: function(){
 		
-		var current_path = steal.getCurrentFolder();
+		var current_path = steal.curDir();
 		//if you are cross domain from the page, and providing a path that doesn't have an domain
 		var path = this.path;
 		
@@ -520,6 +549,7 @@ File.prototype =
 //break
 /**
  * @attribute pageDir
+ * @hide
  * The current page's folder's path.
  */
 steal.pageDir = new File(window.location.href).dir();
@@ -714,7 +744,7 @@ extend(steal,
 			path: 'steal/dev/dev.js',
 			ignore: true
 		})
-		steal.setCurrent(current_path);
+		steal.curDir(current_path);
 
 		   
 		
@@ -737,26 +767,26 @@ extend(steal,
 		}
 	},
 	/**
-	 * Gets the current directory your relative steals will reference.
-	 * @return {String} the path of the current directory.
+	 * Gets or sets the current directory your relative steals will reference.
+	 * @param {String} [path] the new current directory path
+	 * @return {String|steal} the path of the current directory or steal for chaining.
 	 */
-	getCurrentFolder: function() {
-		var fwd = new File(cwd);
-		return fwd.dir();
-	},
-	/**
-	 * Sets the current directory.
-	 * @param {String} p the new directory which relative paths reference
-	 */
-	setCurrent: function(p){
-		cwd = p
+	curDir: function(path) {
+		if(path != undefined){
+			cwd = path;
+			return steal;
+		}else{
+			var fwd = new File(cwd);
+			return fwd.dir();
+		}
+		
 	},
 	getCurrent: function(){
 		return cwd;
 	},
 	getAbsolutePath: function(){
-		var dir = this.getCurrentFolder(), 
-			fwd = new File(this.getCurrentFolder());
+		var dir = this.curDir(), 
+			fwd = new File(this.curDir());
 		return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : dir;
 	},
 	// Adds an steal to the pending list of steals.
@@ -850,8 +880,12 @@ extend(steal,
 		if(func) func.func();
 	},
 	/**
-	 * Creates css links from the given relative path.
-	 * @param {String} relative URL(s) to stylesheets
+	 * Loads css files from the given relative path.
+	 * @codestart
+	 * steal.css('mystyles') //loads mystyles.css
+	 * @codeend
+	 * Styles loaded in this way will be compressed into a single style.
+	 * @param {String+} relative URL(s) to stylesheets
 	 * @return {steal} steal for chaining
 	 */
 	css: function(){
@@ -929,14 +963,14 @@ extend(steal,
 	resetApp : function(f){
 		return function(name){
 			var current_path = steal.getCurrent();
-			steal.setCurrent("");
+			steal.curDir("");
 			if(name.path){
 				name.path = f(name.path)
 			}else{
 				name = f(name)
 			}
 			steal(name);
-			steal.setCurrent(current_path);
+			steal.curDir(current_path);
 			return steal;
 		}
 	},
@@ -982,21 +1016,21 @@ steal.plugins = steal.callOnArgs(steal.plugin);
 
 /**
  * @function controllers
- * Includes controllers given the relative path from the plugin's <b>controllers</b> directory.
+ * Loads controller files from the current file's <b>controllers</b> directory.
  * <br>
- * Will add the suffix _controller.js to each name passed in.
+ * <code>steal.controllers</code> adds the suffix <code>_controller.js</code> to each name passed in.
  * <br>
  * <br>
  * Example:
  * <br>
- * If you want to include PLUGIN_NAME/controllers/recipe_controller.js and ingredient_controller.js,
- * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
+ * If you want to load controllers/recipe_controller.js and controllers/ingredient_controller.js,
+ * write:
  * @codestart 
  *  steal.controllers('recipe',
  *                    'ingredient')
  * @codeend
- * @param {String} controller_name A controller to steal.  "_controller.js" is added to the name provided.
- * @return {steal} a new steal object    
+ * @param {String+} controller the name of of the {NAME}_controller.js file to load.
+ * @return {steal} the steal function for chaining.    
  */
 steal.controllers = steal.applier(function(i){
 	if (i.match(/^\/\//)) {
