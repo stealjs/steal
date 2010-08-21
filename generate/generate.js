@@ -146,7 +146,7 @@ steal.extend(generate,{
         lowerUpper : /([a-z\d])([A-Z])/g,
         dash : /([a-z\d])([A-Z])/g
 	},
-	underscore: function(s){
+	underscore: function( s ) {
         var regs = this.regexps;
         return s.replace(regs.colons, '/').
                  replace(regs.words,'$1_$2').
@@ -154,7 +154,7 @@ steal.extend(generate,{
                  replace(regs.dash,'_').toLowerCase()
     },
 	//converts a name to a bunch of useful things
-	convert: function(name){
+	convert: function( name ) {
 	    var className = name.match(/[^\.]*$/)[0] //Customer
 	    var appName = name.split(".")[0] //Customer
 		return {

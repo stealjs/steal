@@ -44,7 +44,7 @@ steal({path: "coffee-script.js",ignore: true},function(){
 		//@steal-remove-start
 		var current, path;
 		for(var i=0; i < arguments.length; i++){
-			steal({path: arguments[0]+".coffee", type: "text/coffee", process : function(text){
+			steal({path: arguments[0]+".coffee", type: "text/coffee", process: function(text ) {
 				return CoffeeScript.compile(text)
 			}})
 		}

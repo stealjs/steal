@@ -2,7 +2,7 @@ steal(function(steal){
 	
 steal.test =  {
 	//clears every property fromt he window, returns steal (might return old stuff)
-	clear : function(){
+	clear: function() {
 		var win = this.getWindow();
 		for(var n in win){
 			if(n != "_S"){
@@ -13,10 +13,10 @@ steal.test =  {
 		this.testNamespace();
 		return steal;
 	},
-	getWindow : function(){
+	getWindow: function() {
 		return (function(){return this}).call(null,0)
 	},
-	wait : function(name){
+	wait: function( name ) {
 		var checkExists = function(name){
 	        var parts = name.split(".");
 	        var cur = this;
@@ -32,14 +32,14 @@ steal.test =  {
 	        java.lang.Thread.currentThread().sleep(300);
 	    }
 	},
-	sleep : function(duration) {
+	sleep: function( duration ){
         java.lang.Thread.currentThread().sleep(duration);		
 	},
-	print : function(){
+	print: function() {
 		var win =this.getWindow();
 		for(var n in win) print(n);
 	},
-	deleteDir : function(dir){
+	deleteDir: function( dir ) {
 		if (dir.isDirectory()) {
 	        var children = dir.list();
 	        for (var i=0; i<children.length; i++) {
@@ -52,28 +52,28 @@ steal.test =  {
 	    // The directory is now empty so delete it
 	    return dir['delete']();
 	},
-	remove : function(){
+	remove: function() {
 		for(var i=0; i < arguments.length; i++){
 			this.deleteDir(new java.io.File(arguments[i]) )
 		}
 	},
-	testNamespace : function(){
+	testNamespace: function() {
 		var win = this.getWindow();
 		for(var n in win) {
 			if(n !== "_S")
 				throw "Namespace Pollution";
 		}
 	},
-	equals : function(a, b, message){
+	equals: function( a, b, message ) {
 		if(a !== b)
 			throw ""+a+"!="+b+":"+message
 	},
-	ok : function(v, message){
+	ok: function( v, message ) {
 		if(!v){
 			throw "not "+v+" "+message
 		}
 	},
-	open : function(src){
+	open: function( src ) {
 		load("steal/rhino/env.js");
 		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2});
 	}

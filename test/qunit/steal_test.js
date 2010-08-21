@@ -31,6 +31,12 @@ test("steal's joinFrom()", function(){
 	
 	result = new steal.File('a/b.c').joinFrom('../d/e');
     equals(result, "../d/e/a/b.c", "../d/e/a/b.c is correctly joined.");		
+	
+	result = new steal.File('a/b.c').joinFrom('');
+    equals(result, "a/b.c", "a/b.c is correctly joined.");
+	
+	result = new steal.File('/a/b.c').joinFrom('');
+    equals(result, "/a/b.c", "/a/b.c is correctly joined.");
 })
 
 test("steal's dir()", function(){
@@ -98,11 +104,11 @@ test("steal's File.join(url)", function(){
 })
 
 test("steal's File.joinCurrent()", function(){
-	steal.setCurrent("http://abc.com");
+	steal.curDir("http://abc.com");
 	result = new steal.File("d/e").joinCurrent();
     equals(result, "http://abc.com/d/e", "http://abc.com/d/e was joined successfuly.");		
 	
-	steal.setCurrent("/a/b/");
+	steal.curDir("/a/b/");
 	result = new steal.File("c/d").joinCurrent();
     equals(result, "/a/b/c/d", "/a/b/c/d was joined successfuly.");		
 })
@@ -124,26 +130,29 @@ test("steal's File.isLocalAbsolute()", function(){
 })
 
 test("steal's File.isDomainAbsolute()", function(){
-	result = new steal.File("http://abc.com/d/e").isDomainAbsolute();
+	var result = new steal.File("http://abc.com/d/e").protocol();
 	ok(result, "http://abc.com/d/e domain is absolute.")
 	
-	result = new steal.File("http://abc.com/d/e/").isDomainAbsolute();
+	result = new steal.File("http://abc.com/d/e/").protocol();
 	ok(result, "http://abc.com/d/e/ domain is absolute.")
 	
-	result = new steal.File("https://abc.com/d/e").isDomainAbsolute();
+	result = new steal.File("https://abc.com/d/e").protocol();
 	ok(result, "https://abc.com/d/e domain is absolute.")
 	
-	result = new steal.File("https://abc.com/d/e/").isDomainAbsolute();
+	result = new steal.File("https://abc.com/d/e/").protocol();
 	ok(result, "https://abc.com/d/e/ domain is absolute.")
 	
-	result = new steal.File("file://a/b/c/d/e").isDomainAbsolute();
+	result = new steal.File("file://a/b/c/d/e").protocol();
 	ok(result, "file://a/b/c/d/e domain is absolute.")
 	
-	result = new steal.File("file://a/b/c/d/e/").isDomainAbsolute();
+	result = new steal.File("file://a/b/c/d/e/").protocol();
 	ok(result, "file://a/b/c/d/e/ domain is absolute.")
 	
-	result = new steal.File("file:///a/b/c/d/e").isDomainAbsolute();
-	ok(result, "file:///a/b/c/d/e domain is absolute.")
+	result = new steal.File("file:///a/b/c/d/e").protocol();
+	ok(result, "file:///a/b/c/d/e domain is absolute.");
+	
+	result = new steal.File("/a/b/c/d/e").protocol();
+	ok(!result, "/a/b/c/d/e domain is absolute.");
 })
 
 test("steal's File.afterDomain()", function(){
@@ -166,23 +175,23 @@ test("steal's File.toReferenceFromSameDomain()", function(){
 })
 
 test("steal's File.normalize()", function(){
-	steal.setCurrent("/a/b/");
+	steal.curDir("/a/b/");
 	result = new steal.File("c/d").normalize();
     equals(result, "/a/b/c/d", "/a/b/c/d was normalized successfuly.");
 	
-	steal.setCurrent("/a/b/c");
+	steal.curDir("/a/b/c");
 	result = new steal.File("//d/e").normalize();
     equals(result, "d/e", "d/e was normalized successfuly.");	
 	
-	steal.setCurrent("/a/b/c");
+	steal.curDir("/a/b/c");
 	result = new steal.File("/d/e").normalize();
     equals(result, "/d/e", "/d/e was normalized successfuly.");	
 	
-	steal.setCurrent("http://abc.com");
+	steal.curDir("http://abc.com");
 	result = new steal.File("d/e").normalize();
     equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
 	
-	steal.setCurrent("http://abc.com");
+	steal.curDir("http://abc.com");
 	result = new steal.File("/d/e").normalize();
     equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");	
 })

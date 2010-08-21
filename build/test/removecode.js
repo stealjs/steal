@@ -6,6 +6,6 @@ removeRemoveSteal = function(text){
 //@steal-remove-start
 print( removeRemoveSteal(readFile("steal/compress/test/removecode.js")) )
 //@steal-remove-end
-steal = {dev : {log : function(){},isHappyName : function(){}}}
+steal = {dev : {log: function(){},isHappyName: function(){}}}
 steal.dev.log()
 var foo = bar;

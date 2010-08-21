@@ -288,12 +288,10 @@ steal = function(){
 	}
 })();
 
-var id = 0;
 
 steal.fn = steal.prototype = {
-	
-	init : function(options){
-		this.id = (++id)
+	// sets up a steal instance and records the current path, etc
+	init: function( options ) {
 		if(typeof options == 'function'){
 			var path = steal.getCurrent();
 			this.path = path;
@@ -312,18 +310,16 @@ steal.fn = steal.prototype = {
 		
 		this.originalPath = this.path;
 		//get actual path
-		var pathFile = new File(this.path);
+		var pathFile = File(this.path);
 		this.path = pathFile.normalize();
 		this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
-		this.dir = new File(this.path).dir();
-
-		
+		this.dir = File(this.path).dir();
 	},
 	/**
 	 * Adds a script tag to the dom, loading and running the steal's JavaScript file.
 	 * @hide
 	 */
-	run : function(){
+	run: function() {
 		steal.current = this;		
 		var isProduction = (steal.options.env == "production"),
 			options = extend({
@@ -351,7 +347,7 @@ steal.fn = steal.prototype = {
 	 * Loads the steal code immediately.  This is typically used after DOM has loaded.
 	 * @hide
 	 */
-	runNow : function(){
+	runNow: function() {
 		steal.curDir(this.path);
 		
 		return browser.rhino ? load(this.path) : 
@@ -362,8 +358,8 @@ steal.fn = steal.prototype = {
 steal.fn.init.prototype = steal.fn;
 
 
-var extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;},
-	getLastPart = function(p){ return p.match(/[^\/]+$/)[0]},
+var extend = function( d, s){ for (var p in s) d[p] = s[p]; return d;},
+	getLastPart = function( p){ return p.match(/[^\/]+$/)[0]},
 	browser = {
 		msie:     !!(window.attachEvent && !window.opera),
 		opera:  !!window.opera,
@@ -371,8 +367,7 @@ var extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;},
 		firefox:  navigator.userAgent.indexOf('Gecko') > -1 && navigator.userAgent.indexOf('KHTML') == -1,
 		mobilesafari: !!navigator.userAgent.match(/Apple.*Mobile.*Safari/),
 		rhino : navigator.userAgent.match(/Rhino/) && true
-	}
-	steal.browser = browser,
+	},
 	random = ""+parseInt(Math.random()*100),
 	factory = function(){ return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();};
 
@@ -380,7 +375,7 @@ var extend = function(d, s) { for (var p in s) d[p] = s[p]; return d;},
 steal.root = null;
 steal.pageDir = null;
 steal.extend = extend;
-
+steal.browser = browser;
 
 
 
@@ -392,76 +387,100 @@ steal.extend = extend;
  * Takes a path
  * @param {String} path 
  */
-steal.File = function(path){ this.path = path; };
+steal.File = function( path){ 
+	if(this.constructor != steal.File){
+		return new steal.File(path)
+	}
+	this.path = path;
+};
 var File = steal.File;
-File.prototype = 
+extend(File.prototype,
 /* @prototype */
 {
 	/**
 	 * Removes hash and params
 	 * @return {String}
 	 */
-	clean: function(){
+	clean: function() {
 		return this.path.match(/([^\?#]*)/)[1];
 	},
 	/**
 	 * Returns everything before the last /
 	 */
-	dir: function(){
-		var last = this.clean().lastIndexOf('/');
-		var dir = (last != -1) ? this.clean().substring(0,last) : ''; //this.clean();
-		var parts = dir != '' && dir.match( /^(https?:\/|file:\/)$/ );
+	dir: function() {
+		var last = this.clean().lastIndexOf('/'),
+			dir = (last != -1) ? this.clean().substring(0,last) : '',
+			parts = dir != '' && dir.match( /^(https?:\/|file:\/)$/ );
 		return parts && parts[1] ? this.clean() : dir;
 	},
 	/**
 	 * Returns the domain for the current path.
 	 * Returns null if the domain is a file.
 	 */
-	domain: function(){ 
-		if(this.path.indexOf('file:') == 0 ) return null;
+	domain: function() { 
+		if(this.path.indexOf('file:') == 0 ) {
+			return null;
+		}
 		var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
 		return http ? http[1] : null;
 	},
-	protocol : function(){
-		  return this.path.match( /^(https?:|file:)/ )[1]
-	},
 	/**
 	 * Joins url onto path
-	 * @param {Object} url
+	 * @param {String} url
 	 */
-	join: function(url){
-		return new File(url).joinFrom(this.path);
+	join: function( url ) {
+		return File(url).joinFrom(this.path);
 	},
 	/**
-	 * Returns the path of this file referenced from another url.
+	 * Returns the path of this file referenced from another url or path.
 	 * @codestart
 	 * new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
 	 * @codeend
-	 * @param {Object} url
-	 * @param {Object} expand
+	 * @param {String} url
+	 * @param {Boolean} expand if the path should be expanded
 	 * @return {String} 
 	 */
-	joinFrom: function( url, expand){
-		if(this.isDomainAbsolute()){
-			var u = new File(url);
+	joinFrom: function( url, expand ){
+		if(this.protocol()){  //if we are absolutely referenced
+			
+			var u = File(url);
+			
+			//try to shorten the path as much as possible:
 			if(this.domain() && this.domain() == u.domain() ) 
 				return this.afterDomain();
 			else if(this.domain() == u.domain()) { // we are from a file
 				return this.toReferenceFromSameDomain(url);
-			}else
+			}else{
 				return this.path;
-		}else if(url == steal.pageDir && !expand){
-			return this.path;
-		}else if(this.isLocalAbsolute()){
-			var u = new File(url);
-			if(!u.domain()) return this.path;
-			return u.protocol()+"//"+u.domain() + this.path;
-		}
-		else{
+			}
+				
+		}else if( url == steal.pageDir && !expand ){
 			
-			if(url == '') return this.path.replace(/\/$/,'');
-			var urls = url.split('/'), paths = this.path.split('/'), path = paths[0];
-			if(url.match(/\/$/) ) urls.pop();
+			return this.path;
+			
+		}else if( this.isLocalAbsolute() ){ // we are a path like /page.js
+			
+			var u = File(url);
+			if( !u.domain() ) {
+				return this.path;
+			}
+			
+			return u.protocol()+"//"+u.domain() + this.path;
+
+		}
+		else{ //we have 2 relative paths, remove folders with every ../
+			
+			if(url == ''){
+				return this.path.replace(/\/$/,'');
+			} 
+			var urls = url.split('/'), 
+				paths = this.path.split('/'), 
+				path = paths[0];
+			
+			if(url.match(/\/$/) ) {
+				urls.pop();
+			}
+			
 			while(path == '..' && paths.length > 0){
 				paths.shift();
 				urls.pop();
@@ -473,17 +492,17 @@ File.prototype =
 	/**
 	 * Joins the file to the current working directory.
 	 */
-	joinCurrent: function(){
+	joinCurrent: function() {
 		return this.joinFrom(steal.curDir());
 	},
 	/**
 	 * Returns true if the file is relative
 	 */
-	relative: function(){        return this.path.match(/^(https?:|file:|\/)/) == null;},
+	relative: function() {        return this.path.match(/^(https?:|file:|\/)/) == null;},
 	/**
 	 * Returns the part of the path that is after the domain part
 	 */
-	afterDomain: function(){    return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];},
+	afterDomain: function() {    return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];},
 	/**
 	 * Returns the relative path between two paths with common folders.
 	 * @codestart
@@ -492,7 +511,7 @@ File.prototype =
 	 * @param {Object} url
 	 * @return {String} 
 	 */
-	toReferenceFromSameDomain: function(url){
+	toReferenceFromSameDomain: function( url ) {
 		var parts = this.path.split('/'), other_parts = url.split('/'), result = '';
 		while(parts.length > 0 && other_parts.length >0 && parts[0] == other_parts[0]){
 			parts.shift(); other_parts.shift();
@@ -503,44 +522,39 @@ File.prototype =
 	/**
 	 * Is the file on the same domain as our page.
 	 */
-	isCrossDomain : function(){
+	isCrossDomain: function() {
 		if(this.isLocalAbsolute()) return false;
-		return this.domain() != new File(window.location.href).domain();
+		return this.domain() != File(window.location.href).domain();
 	},
-	isLocalAbsolute : function(){    return this.path.indexOf('/') === 0},
-	isDomainAbsolute : function(){return this.path.match(/^(https?:|file:)/) != null},
+	isLocalAbsolute: function() {    return this.path.indexOf('/') === 0},
+	protocol: function() {
+		var match = this.path.match(/^(https?:|file:)/)
+		return match && match[0];
+	},
 	/**
 	 * For a given path, a given working directory, and file location, update the path so 
-	 * it points to the right location.
-	 * This should probably folded under joinFrom
+	 * it points to a location relative to steal's root.
 	 */
-	normalize: function(){
+	normalize: function() {
 		
-		var current_path = steal.curDir();
+		var current = steal.curDir(),
 		//if you are cross domain from the page, and providing a path that doesn't have an domain
-		var path = this.path;
+			path = this.path;
 		
-		if (/^\/\//.test(this.path)) {
+		if (/^\/\//.test(this.path)) { //if path is rooted from steal's root 
 			
 			path = this.path.substr(2);
-		}else if (this.isCurrentCrossDomain() && !this.isDomainAbsolute()) {
-			//if the path starts with /
 			
-			path = this.isLocalAbsolute() ? 
-				current_path.split('/').slice(0, 3).join('/') + path :
-				this.joinFrom(current_path);
+		}else if(this.relative() 
+				|| (steal.isCurrentCrossDomain()  //if current file is on another domain and
+				 	&& !this.protocol() )) { 	 	//this file doesn't have a protocol
+
+			path = this.joinFrom(current);								
 				
-		} else if (current_path != '' && this.relative()) {
-			
-			path = this.joinFrom(current_path + (current_path.lastIndexOf('/') === current_path.length - 1 ? '' : '/'));
-		
-		} 
+		}
 		return path;
-	},
-	isCurrentCrossDomain : function(){
-		return new File(steal.getAbsolutePath()).isCrossDomain();
 	}
-};
+});
 /**
  *  @add steal
  */
@@ -552,7 +566,7 @@ File.prototype =
  * @hide
  * The current page's folder's path.
  */
-steal.pageDir = new File(window.location.href).dir();
+steal.pageDir = File(window.location.href).dir();
 
 //find steal
 
@@ -659,22 +673,26 @@ extend(steal,
 	 * Sets options from script
 	 * @hide
 	 */	
-	 setScriptOptions : function(){
+	 setScriptOptions: function() {
 		var scripts = document.getElementsByTagName("script"), 
 			scriptOptions, 
-			commaSplit;
+			commaSplit,
+			stealReg = /steal\.(production\.)?js/;
+		
+		//find the steal script and setup initial paths.
 		for(var i=0; i<scripts.length; i++) {
 			var src = scripts[i].src;
-			if(src && src.match(/steal\.js|steal\.production\.js/)){  //if script has steal.js
-				var mvc_root = new File( new File(src).joinFrom( steal.pageDir ) ).dir(),
-					loc = mvc_root.match(/\.\.$/) ?  mvc_root+'/..' : mvc_root.replace(/steal$/,'');
-				if (loc.match(/.+\/$/)) {
-					loc = loc.replace(/\/$/, '');
-				}
-				if(src.match(/steal\.production\.js/)){
+			if(src && stealReg.test(src)){  //if script has steal.js
+				var mvc_root = File( File(src).joinFrom( steal.pageDir ) ).dir(),
+					loc = /\.\.$/.test(mvc_root) ? 
+						mvc_root+'/..' : mvc_root.replace(/steal$/,'');
+				
+				/.+\/$/.test(loc) && (loc = loc.replace(/\/$/, ''))
+				
+				if(/steal\.production\.js/.test(src)){
 					steal.options.env = "production";
 				}
-				steal.root = new File(loc);
+				steal.root = File(loc);
 				if (src.indexOf('?') != -1) {
 					scriptOptions = src.split('?')[1];
 				}
@@ -682,12 +700,15 @@ extend(steal,
 		
 		}
 		
+		//if there is stuff after ?
 		if(scriptOptions){
+			// if it looks like steal[xyz]=bar, add those to the options
 			if(scriptOptions.indexOf('=') > -1){
-				scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function(whoe, prop, val){ 
+				scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val){ 
 					steal.options[prop] = val;
 				})
 			}else{
+				//set with comma style
 				commaSplit = scriptOptions.split(",")
 				if(commaSplit[0]&& commaSplit[0].lastIndexOf('.js' )> 0 ){
 					steal.options.startFile = commaSplit[0];
@@ -702,11 +723,11 @@ extend(steal,
 		}
 		
 	},
-	setOldIncludeOptions : function(){
+	setOldIncludeOptions: function() {
 		extend(steal.options, oldsteal);
 	},
-	setHashOptions : function(){
-		window.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function(whoe, prop, val){ 
+	setHashOptions: function() {
+		window.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function( whoe, prop, val){ 
 			steal.options[prop] = val;
 		})
 	},
@@ -714,7 +735,7 @@ extend(steal,
 	 * Starts including files, sets options.
 	 * @hide
 	 */
-	init: function(){
+	init: function() {
 		this.setScriptOptions();
 		this.setOldIncludeOptions();
 		this.setHashOptions();
@@ -729,7 +750,7 @@ extend(steal,
 		
 		
 		if(!steal.options.production && steal.options.startFile){
-			steal.options.production = steal.root.join(  new File(steal.options.startFile).dir()+ '/production')
+			steal.options.production = steal.root.join(  File(steal.options.startFile).dir()+ '/production')
 
 		}
 		if(steal.options.production){
@@ -771,26 +792,31 @@ extend(steal,
 	 * @param {String} [path] the new current directory path
 	 * @return {String|steal} the path of the current directory or steal for chaining.
 	 */
-	curDir: function(path) {
+	curDir: function( path ) {
 		if(path != undefined){
 			cwd = path;
 			return steal;
 		}else{
-			var fwd = new File(cwd);
-			return fwd.dir();
+			var dir = File(cwd).dir()
+			//make sure it has a /
+			return dir ? dir + (dir.lastIndexOf('/') === dir.length - 1 ? '' : '/') : dir;
 		}
 		
 	},
-	getCurrent: function(){
+	//is the current folder cross domain from our folder?
+	isCurrentCrossDomain: function() {
+		return File(steal.getAbsolutePath()).isCrossDomain();
+	},
+	getCurrent: function() {
 		return cwd;
 	},
-	getAbsolutePath: function(){
+	getAbsolutePath: function() {
 		var dir = this.curDir(), 
-			fwd = new File(this.curDir());
+			fwd = File(this.curDir());
 		return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : dir;
 	},
 	// Adds an steal to the pending list of steals.
-	add: function(newInclude){
+	add: function( newInclude ) {
 		//If steal is a function, add to list, and unshift
 		if(typeof newInclude.func == 'function'){
 			steal.functions.push(newInclude); //add to the list of functions
@@ -818,18 +844,18 @@ extend(steal,
 		}
 	},
 	//
-	should_add : function(inc){
+	should_add: function( inc ) {
 		var path = inc.absolute || inc.path,
 			i;
 		for(i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
 		for(i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
 		return true;
 	},
-	done : function(){
+	done: function() {
 		if (typeof steal.options.done == "function") steal.options.done(total);
 	},
 	// Called after every file is loaded.  Gets the next file and steals it.
-	end: function(src){
+	end: function( src ) {
 		//prevents warning of bad includes
 		clearTimeout(steal.timer)
 		// add steals that were just added to the end of the list
@@ -853,7 +879,7 @@ extend(steal,
 		
 	},
 	//steal.end_of_production is written at the end of the production script to call this function
-	end_of_production: function(){ first_wave_done = true;steal.done(); },
+	end_of_production: function() { first_wave_done = true;steal.done(); },
 	
 	/**
 	 * Starts loading files.  This is useful when steal is being used without providing an initial file or app to load.
@@ -869,13 +895,13 @@ extend(steal,
 	 * @codeend
 	 * The above code loads steal, then uses steal to load the plugin controller.
 	 */
-	start: function(){
+	start: function() {
 		steal.start_called = true;
 		steal.end();
 	},
-	start_called : false,
+	start_called: false,
 	functions: [],
-	next_function : function(){
+	next_function: function() {
 		var func = steal.functions.pop();
 		if(func) func.func();
 	},
@@ -888,7 +914,7 @@ extend(steal,
 	 * @param {String+} relative URL(s) to stylesheets
 	 * @return {steal} steal for chaining
 	 */
-	css: function(){
+	css: function() {
 		//if production, 
 		if(steal.options.env == 'production'){
 			if(steal.loadedProductionCSS){
@@ -901,7 +927,7 @@ extend(steal,
 		}
 		var current;
 		for(var i=0; i < arguments.length; i++){
-			current = new File(arguments[i]+".css").joinCurrent();
+			current = File(arguments[i]+".css").joinCurrent();
 			steal.createLink( steal.root.join(current)  );
 		}
 		return this;
@@ -912,7 +938,7 @@ extend(steal,
 	 * @param {Object} location
 	 * @return {HTMLLinkElement}
 	 */
-	createLink: function(location, options){
+	createLink: function( location, options ) {
 		options = options || {};
 		var link = document.createElement('link');
 		link.rel = options.rel || "stylesheet";
@@ -928,7 +954,7 @@ extend(steal,
 	 * @param {optional:String} content_type optional content type
 	 * @return {String} text of file
 	 */
-	request: function(path, content_type){
+	request: function( path, content_type ) {
 		var contentType = content_type || "application/x-www-form-urlencoded; charset="+steal.options.encoding,
 			request = factory();
 		request.open("GET", path, false);
@@ -946,7 +972,7 @@ extend(steal,
 	 * @param {Object} src
 	 * @param {Object} encode
 	 */
-	insertHead: function(src, encode, type, text, id){
+	insertHead: function( src, encode, type, text, id ){
 		encode = encode || "UTF-8";
 		var script= script_tag();
 		src && (script.src= src);
@@ -956,15 +982,15 @@ extend(steal,
 		text && (script.text = text);
 		head().appendChild(script);
 	},
-	write : function(src, encode){
+	write: function( src, encode ){
 		encode = encode || "UTF-8";
 		document.write('<script type="text/javascript" src="'+src+'" encode="+encode+"></script>');
 	},
-	resetApp : function(f){
-		return function(name){
+	resetApp: function( f ){
+		return function( name ){
 			var current_path = steal.getCurrent();
 			steal.curDir("");
-			if(name.path){
+			if( name.path ){
 				name.path = f(name.path)
 			}else{
 				name = f(name)
@@ -974,7 +1000,7 @@ extend(steal,
 			return steal;
 		}
 	},
-	callOnArgs : function(f){
+	callOnArgs: function( f ){
 		return function(){
 			for(var i=0; i < arguments.length; i++) f(arguments[i]);
 			return steal;
@@ -983,7 +1009,7 @@ extend(steal,
 	},
 	// Returns a function that applies a function to a list of arguments.  Then steals those
 	// arguments.
-	applier: function(f){
+	applier: function( f ){
 		return function(){
 			for (var i = 0; i < arguments.length; i++) {
 				arguments[i] = f(arguments[i]);
@@ -992,149 +1018,155 @@ extend(steal,
 			return steal;
 		}
 	},
-	log : function(){
+	log: function() {
 		$('#log').append(jQuery.makeArray(arguments).join(", ")+"<br/>")
 	},
-	then : steal,
+	then: steal,
 	total: total
 });
-steal.plugin = steal.resetApp(function(p){return p+'/'+getLastPart(p)})
-/**
- * @function plugins
- * Loads a list of plugins given a path relative to the project's root.
- * @param {String} plugin_location location of a plugin, ex: jquery/dom/history.
- * @return {steal} a new steal object
- * @codestart 
- *  steal.plugins('jquery/controller',
- *                'jquery/controller/view',
- *                'jquery/view',
- *                'jquery/model')
- * @codeend 
- */
-steal.plugins = steal.callOnArgs(steal.plugin);
+steal.plugin= steal.resetApp(function( p ){return p+'/'+getLastPart(p)});
 
 
-/**
- * @function controllers
- * Loads controller files from the current file's <b>controllers</b> directory.
- * <br>
- * <code>steal.controllers</code> adds the suffix <code>_controller.js</code> to each name passed in.
- * <br>
- * <br>
- * Example:
- * <br>
- * If you want to load controllers/recipe_controller.js and controllers/ingredient_controller.js,
- * write:
- * @codestart 
- *  steal.controllers('recipe',
- *                    'ingredient')
- * @codeend
- * @param {String+} controller the name of of the {NAME}_controller.js file to load.
- * @return {steal} the steal function for chaining.    
- */
-steal.controllers = steal.applier(function(i){
-	if (i.match(/^\/\//)) {
-		i = steal.root.join( i.substr(2) )
-		return i;
-	}
-	return 'controllers/'+i+'_controller';
-});
+extend(steal, {
+	
+	/**
+	 * @function plugins
+	 * Loads a list of plugins given a path relative to the project's root.
+	 * @param {String} plugin_location location of a plugin, ex: jquery/dom/history.
+	 * @return {steal} a new steal object
+	 * @codestart 
+	 *  steal.plugins('jquery/controller',
+	 *                'jquery/controller/view',
+	 *                'jquery/view',
+	 *                'jquery/model')
+	 * @codeend 
+	 */
+	plugins: steal.callOnArgs(steal.plugin),
 
-/**
- * @function models
- * Includes models given the relative path from the plugin's <b>models</b> directory.
- * <br>
- * <br>
- * Example:
- * <br>
- * If you want to include PLUGIN_NAME/models/recipe.js and ingredient.js,
- * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
- * @codestart 
- *  steal.models('recipe',
- *               'ingredient')
- * @codeend
- * @param {String} model_name The name of the model file you want to load.
- * @return {steal} a new steal object   
- */
-steal.models = steal.applier(function(i){
-	if (i.match(/^\/\//)) {
-		i = steal.root.join( i.substr(2) )
-		return i;
-	}
-	return 'models/'+i;
-});
- 
-/**
- * @function resources
- * Includes resources given the relative path from the plugin's <b>resources</b> directory.
- * <br>
- * <br>
- * Example:
- * <br>
- * If you want to include PLUGIN_NAME/resources/i18n.js
- * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
- * @codestart 
- *  steal.resources('i18n')
- * @codeend
- * @param {String} resource_name The name of the resource file you want to load.
- * @return {steal} a new steal object   
- */
-steal.resources = steal.applier(function(i){
-	if (i.match(/^\/\//)) {
-		i = steal.root.join( i.substr(2) )
-		return i;
-	}
-	return 'resources/'+i;
-});
 
-/**
- * @function views
- * Includes views given the view's absolute path from the project's root directory.
- * <br>
- * <br>
- * Example:
- * <br>
- * If you want to include PLUGIN_NAME/views/recipe/show.ejs and list.ejs
- * edit PLUGIN_NAME/PLUGIN_NAME.js file like this:
- * @codestart 
- *  steal.views('//PLUGIN_NAME/views/recipe/show.ejs',
- *              '//PLUGIN_NAME/views/recipe/list.ejs')
- * @codeend
- * @param {String} view_path The view's abolute path.
- * @return {steal} a new steal object    
- */
-steal.views = function(){
-	// Only includes views for compression and docs (when running in rhino)
-	if (browser.rhino || steal.options.env == "production") {
-		for (var i = 0; i < arguments.length; i++) {
-			steal.view(arguments[i])
+	/**
+	 * @function controllers
+	 * Loads controllers from the current file's <b>controllers</b> directory.
+	 * <br>
+	 * <code>steal.controllers</code> adds the suffix <code>_controller.js</code> to each name passed in.
+	 * <br>
+	 * <br>
+	 * Example:
+	 * <br>
+	 * If you want to load controllers/recipe_controller.js and controllers/ingredient_controller.js,
+	 * write:
+	 * @codestart 
+	 *  steal.controllers('recipe',
+	 *                    'ingredient')
+	 * @codeend
+	 * @param {String+} controller the name of of the {NAME}_controller.js file to load. You can pass multiple controller names.
+	 * @return {steal} the steal function for chaining.    
+	 */
+	controllers: steal.applier(function( i ){
+		if (i.match(/^\/\//)) {
+			i = steal.root.join( i.substr(2) )
+			return i;
 		}
+		return 'controllers/'+i+'_controller';
+	}),
+
+	/**
+	 * @function models
+	 * Loads models  from the current file's <b>models</b> directory.
+	 * <br>
+	 * <br>
+	 * Example:
+	 * <br>
+	 * If you want to include models/recipe.js and models/ingredient.js,
+	 * write:
+	 * @codestart 
+	 *  steal.models('recipe',
+	 *               'ingredient')
+	 * @codeend
+	 * @param {String+} model The name of the model file you want to load.  You can pass multiple model names.
+	 * @return {steal} the steal function for chaining.
+	 */
+	models: steal.applier(function( i ){
+		if (i.match(/^\/\//)) {
+			i = steal.root.join( i.substr(2) )
+			return i;
+		}
+		return 'models/'+i;
+	}),
+ 
+	/**
+	 * @function resources
+	 * Loads resources from the current file's <b>resources</b> directory.
+	 * <br>
+	 * <br>
+	 * Example:
+	 * <br>
+	 * If you want to load resources/i18n.js, write:
+	 * @codestart 
+	 *  steal.resources('i18n')
+	 * @codeend
+	 * @param {String+} resource The name of the resource file you want to load.  You can pass multiple model names.
+	 * @return {steal} the steal function for chaining.
+	 */
+	resources: steal.applier(function( i ){
+		if (i.match(/^\/\//)) {
+			i = steal.root.join( i.substr(2) )
+			return i;
+		}
+		return 'resources/'+i;
+	}),
+
+	/**
+	 * @function views
+	 * Loads views to be added to the production build.  Paths must be given from steal's ROOT folder.
+	 * <br>
+	 * <br>
+	 * Example:
+	 * <br>
+	 * The following loads, coookbook/views/recipe/show.ejs and coookbook/views/recipe/list.ejs:
+	 * @codestart 
+	 *  steal.views('//coookbook/views/recipe/show.ejs',
+	 *              '//coookbook/views/recipe/list.ejs')
+	 * @codeend
+	 * @param {String} path The view's path rooted from steal's root folder.
+	 * @return {steal} the steal function for chaining.   
+	 */
+	views: function() {
+		// Only includes views for compression and docs (when running in rhino)
+		if (browser.rhino || steal.options.env == "production") {
+			for (var i = 0; i < arguments.length; i++) {
+				steal.view(arguments[i])
+			}
+		}
+		return steal;
+	},
+
+	timerCount: 0,
+	view: function( path ) {
+		var type = path.match(/\.\w+$/gi)[0].replace(".","");
+		steal({path: path, type: "text/"+type, compress: "false"});    
+		return steal;
+	},
+	timers: {}, //tracks the last script
+
+	ct: function( id ) { //for clear timer
+		clearTimeout(steal.timers[id]);
+		delete steal.timers[id]
+	},
+	loadErrorTimer: function( options ) {
+		var count = ++steal.timerCount;
+		steal.timers[count]=setTimeout(function(){
+			throw "steal.js Could not load "+options.src+".  Are you sure you have the right path?"
+		},5000);
+		return "onLoad='steal.ct("+count+")' "
+	},
+	cleanId: function( id ) {
+		return id.replace(/[\/\.]/g, "_")
 	}
-	return steal;
-};
 
-steal.timerCount = 0;
-steal.view = function(path){
-	var type = path.match(/\.\w+$/gi)[0].replace(".","");
-	steal({path: path, type: "text/"+type, compress: "false"});    
-	return steal;
-};
-steal.timers = {}; //tracks the last script
 
-steal.ct = function(id){ //for clear timer
-	clearTimeout(steal.timers[id]);
-	delete steal.timers[id]
-}
-steal.loadErrorTimer = function(options){
-	var count = ++steal.timerCount;
-	steal.timers[count]=setTimeout(function(){
-		throw "steal.js Could not load "+options.src+".  Are you sure you have the right path?"
-	},5000);
-	return "onLoad='steal.ct("+count+")' "
-}
-steal.cleanId = function(id){
-	return id.replace(/[\/\.]/g, "_")
-}
+
+})
 //for integration with other build types
 steal.build || (steal.build = {types: {}});
 var script_tag = function(){
@@ -1143,7 +1175,7 @@ var script_tag = function(){
 	return start;
 };
 steal.loadedProductionCSS = false;
-var insert = function(options){
+var insert = function( options ) {
 	// source we need to know how to get to steal, then load 
 	// relative to path to steal
 
@@ -1155,8 +1187,8 @@ var insert = function(options){
 		scriptTag = '<script ',
 		bodyText;
 	if(options.src){
-		var src_file = new File(options.src);
-		if(!src_file.isLocalAbsolute() && !src_file.isDomainAbsolute())
+		var src_file = File(options.src);
+		if(!src_file.isLocalAbsolute() && !src_file.protocol())
 			options.src = steal.root.join(options.src);
 	}
 
@@ -1166,7 +1198,7 @@ var insert = function(options){
 		if(!text)
 			throw "steal.js there is nothing at "+options.src;
 		bodyText = options.process(text);
-		options.type = 'text/javascript'
+		options.type = 'text/javascript';
 		delete options.process;
 		delete options.src;
 		

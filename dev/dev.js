@@ -11,14 +11,14 @@ steal.dev = {
         lowerUpper : /([a-z\d])([A-Z])/g,
         dash : /([a-z\d])([A-Z])/g
     },
-    underscore : function(s){
+    underscore: function( s ) {
         var regs = this.regexps;
         return s.replace(regs.colons, '/').
                  replace(regs.words,'$1_$2').
                  replace(regs.lowerUpper,'$1_$2').
                  replace(regs.dash,'_').toLowerCase()
     },
-	isHappyName : function(name){
+	isHappyName: function( name ) {
 		//make sure names are close to the current path
 		var path = steal.current.path.replace(/\.[^$]+$/,"").split('/')
 		//make sure parts in name match
@@ -35,18 +35,22 @@ steal.dev = {
 	 * 
 	 * @param {Object} out
 	 */
-	warn : function(out){
+	warn: function( out ) {
 		if(window.console && console.log){
 			console.log("steal.js WARNING: "+out)
+		}else if(window.opera && window.opera.postError){
+			opera.postError("steal.js WARNING: "+out)
 		}
 	},
 	/**
 	 * 
 	 * @param {Object} out
 	 */
-	log : function(out){
+	log: function( out ) {
 		if(window.console && console.log){
 			console.log("steal.js INFO: "+out)
+		}else if(window.opera && window.opera.postError){
+			opera.postError("steal.js INFO: "+out)
 		}
 	}
 }

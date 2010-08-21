@@ -77,7 +77,7 @@ steal(function(steal){
 	
 	// types conversion
 	steal.build.types = {
-		'text/javascript': function(script){
+		'text/javascript': function( script ) {
 			if (script.src) {
 				return loadScriptText(script.src, script);
 			}
@@ -85,7 +85,7 @@ steal(function(steal){
 				return script.text
 			}
 		},
-		'text/css' : function(script){
+		'text/css' : function( script ) {
 			if (script.href) {
 				return loadScriptText(script.href, script);
 			}
@@ -93,17 +93,17 @@ steal(function(steal){
 				return script.text
 			}
 		},
-		'text/ejs': function(script){
+		'text/ejs': function( script ) {
 			var text = loadScriptText(script.src);
 			var id = script.getAttribute("id");
 			return $.View.registerScript("ejs", id, text);
 		},
-		'text/micro': function(script){
+		'text/micro': function( script ) {
 			var text = loadScriptText(script.src);
 			var id = script.getAttribute("id");
 			return $.View.registerScript("micro", id, text);
 		},
-		'text/jaml': function(script){
+		'text/jaml': function( script ) {
 			var text = loadScriptText(script.src);
 			var id = script.getAttribute("id");
 			return $.View.registerScript("jaml", id, text);
@@ -127,14 +127,14 @@ steal(function(steal){
 		//load the page
 		load('steal/rhino/env.js'); //reload every time
 		Envjs(url, {scriptTypes: {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2,
-	        afterScriptLoad: {".*": function(script){ 
+	        afterScriptLoad: {".*": function( script ) { 
 	                scripts.push(script);
 	            }
 	        },
-	        onLoadUnknownTypeScript: function(script){
+	        onLoadUnknownTypeScript: function( script ) {
 	            self.scripts.push(script);   
 	        },
-			afterInlineScriptLoad : function(script){
+			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);   
 	        }
 	    }); 
@@ -149,7 +149,7 @@ steal(function(steal){
 		
 		
 		return {
-			each : function(type , func, ths){
+			each: function( type , func, ths ) {
 				if(typeof type == 'function'){
 					ths = func;
 					func = type;
@@ -160,7 +160,7 @@ steal(function(steal){
 					func.call(ths,scripts[i], this.getScriptContent(scripts[i]), i)
 				}
 			},
-			getScriptContent : function(script){
+			getScriptContent: function( script ) {
 				return steal.build.types[script.type] && steal.build.types[script.type](script, loadScriptText);
 			},
 			steal : newSteal,

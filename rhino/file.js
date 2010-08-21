@@ -49,13 +49,13 @@ extend(steal.File.prototype, {
 	 * Removes hash and params
 	 * @return {String}
 	 */
-    clean: function(){
+    clean: function() {
 		return this.path.match(/([^\?#]*)/)[1];
 	},
     /**
      * Returns everything before the last /
      */
-	dir: function(){
+	dir: function() {
 		var last = this.clean().lastIndexOf('/'),
 			dir = (last != -1) ? this.clean().substring(0,last) : '',
 			parts = dir != '' && dir.match( /^(https?:\/|file:\/)$/ );
@@ -65,19 +65,19 @@ extend(steal.File.prototype, {
      * Returns the domain for the current path.
      * Returns null if the domain is a file.
      */
-	domain: function(){ 
+	domain: function() { 
 		if(this.path.indexOf('file:') == 0 ) return null;
 		var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
 		return http ? http[1] : null;
 	},
-    protocol : function(){
+    protocol: function() {
           return this.path.match( /^(https?:|file:)/ )[1]
     },
     /**
      * Joins url onto path
      * @param {Object} url
      */
-	join: function(url){
+	join: function( url ) {
 		return new steal.File(url).joinFrom(this.path);
 	},
     /**
@@ -89,7 +89,7 @@ extend(steal.File.prototype, {
      * @param {Object} expand
      * @return {String} 
      */
-	joinFrom: function( url, expand){
+	joinFrom: function( url, expand ) {
 		if(this.isDomainAbsolute()){
 			var u = new File(url);
 			if(this.domain() && this.domain() == u.domain() ) 
@@ -121,16 +121,16 @@ extend(steal.File.prototype, {
     /**
      * Returns true if the file is relative
      */
-	relative: function(){		return this.path.match(/^(https?:|file:|\/)/) == null;},
+	relative: function() {		return this.path.match(/^(https?:|file:|\/)/) == null;},
     /**
      * Returns the part of the path that is after the domain part
      */
-	after_domain: function(){	return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
+	after_domain: function() {	return this.path.match(/(?:https?:\/\/[^\/]*)(.*)/)[1];},
 	/**
 	 * 
 	 * @param {Object} url
 	 */
-    toReferenceFromSameDomain: function(url){
+    toReferenceFromSameDomain: function( url ) {
 		var parts = this.path.split('/'), other_parts = url.split('/'), result = '';
 		while(parts.length > 0 && other_parts.length >0 && parts[0] == other_parts[0]){
 			parts.shift(); other_parts.shift();
@@ -141,31 +141,31 @@ extend(steal.File.prototype, {
     /**
      * Is the file on the same domain as our page.
      */
-	is_cross_domain : function(){
+	is_cross_domain: function() {
 		if(this.isLocalAbsolute()) return false;
 		return this.domain() != new steal.File(location.href).domain();
 	},
-	isLocalAbsolute : function(){	return this.path.indexOf('/') === 0},
-	isDomainAbsolute : function(){return this.path.match(/^(https?:|file:)/) != null},
+	isLocalAbsolute: function() {	return this.path.indexOf('/') === 0},
+	isDomainAbsolute: function() {return this.path.match(/^(https?:|file:)/) != null},
     /**
      * For a given path, a given working directory, and file location, update the path so 
      * it points to the right location.
      */
 
 	
-	mkdir: function(){
+	mkdir: function() {
         var out = new java.io.File( this.path )
         out.mkdir();
     },
-    mkdirs: function(){
+    mkdirs: function() {
         var out = new java.io.File( this.path )
         out.mkdirs();
     },
-    exists: function(){
+    exists: function() {
         var exists = (new java.io.File(this.path)).exists();
         return exists;
     },
-    copyTo: function(dest, ignore){
+    copyTo: function( dest, ignore ) {
         var me = new java.io.File(this.path)
 		var you = new java.io.File(dest);
 	    if (me.isDirectory()) {
@@ -187,7 +187,7 @@ extend(steal.File.prototype, {
 	    }
 		copy(me, you)
     },
-    save: function(src, encoding){
+    save: function( src, encoding ) {
           var fout = new java.io.FileOutputStream(new java.io.File( this.path ));
     
           var out     = new java.io.OutputStreamWriter(fout, "UTF-8");
@@ -198,7 +198,7 @@ extend(steal.File.prototype, {
         		out.flush();
         		out.close();
     },
-    download_from: function(address){
+    download_from: function( address ) {
        var input = 
            new java.io.BufferedInputStream(
                new java.net.URL(address).openStream()
@@ -215,14 +215,14 @@ extend(steal.File.prototype, {
         }
         bout.close();
     },
-    basename: function(){
+    basename: function() {
         return this.path.match(/\/?([^\/]*)\/?$/)[1];
     },
-	remove: function(){
+	remove: function() {
         var file = new java.io.File( this.path );
         file["delete"]();
     },
-	removeDir: function(){
+	removeDir: function() {
         var me = new java.io.File(this.path)
     	if( me.exists() ) {
 			var files = me.listFiles();
@@ -236,13 +236,13 @@ extend(steal.File.prototype, {
     	}
 		me["delete"]()
 	},
-	zipDir: function(name, replacePath) {
+	zipDir: function( name, replacePath ) {
     	var dirObj = new java.io.File(this.path);
     	var out = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(name));
     	addDir(dirObj, out, replacePath);
     	out.close();
   	},
-	contents : function(func, current){
+	contents: function( func, current ) {
 		var me = new java.io.File(this.path),
 			listOfFiles = me.listFiles();
 		
@@ -259,7 +259,7 @@ extend(steal.File.prototype, {
 	/**
 	 * Returns the path too the root jmvc folder
 	 */
-	pathToRoot : function(isFile){
+	pathToRoot: function( isFile ) {
 		var rootFolders = steal.File.cwd().split(/\/|\\/),
 			myFolders = this.path.split(/\/|\\/),
 			i = 0;

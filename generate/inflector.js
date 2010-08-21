@@ -68,7 +68,7 @@ steal.Inflector = {
     "equipment"
     ]
   },
-  pluralize: function(word) {
+  pluralize: function( word ) {
     for (var i = 0; i < steal.Inflector.Inflections.uncountable.length; i++) {
       var uncountable = steal.Inflector.Inflections.uncountable[i];
       if (word.toLowerCase() == uncountable) {
@@ -90,7 +90,7 @@ steal.Inflector = {
       }
     }
   },
-  singularize: function(word) {
+  singularize: function( word ) {
     for (var i = 0; i < steal.Inflector.Inflections.uncountable.length; i++) {
       var uncountable = steal.Inflector.Inflections.uncountable[i];
       if (word.toLowerCase() == uncountable) {

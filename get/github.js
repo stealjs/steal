@@ -14,7 +14,7 @@ steal.get.github = function(url, where, options , level){
 
 steal.get.github.prototype = new steal.get.getter();
 steal.extend(steal.get.github.prototype,{
-	init : function(url, where, options, level){
+	init: function( url, where, options, level ) {
 
 		steal.get.getter.prototype.init.apply(this,arguments);
 		this.orig_cwd = this.cwd;
@@ -28,7 +28,7 @@ steal.extend(steal.get.github.prototype,{
 		this.project = split[4];
 		this.branch = options.tag || "master";
 	},
-	get_latest_commit: function(){
+	get_latest_commit: function() {
 	    // http://github.com/api/v2/json/commits/list/pinhook/steal/master
 		var latestCommitUrl = "http://github.com/api/v2/json/commits/list/"+this.username+"/"+this.project+"/"+this.branch,
 			commitsText = readUrl(latestCommitUrl)
@@ -36,7 +36,7 @@ steal.extend(steal.get.github.prototype,{
 		var commitId = c.commits[0].tree
 		return commitId;
 	},
-	ls_top: function(link){
+	ls_top: function( link ) {
 		var id = this.get_latest_commit(),
 			browseUrl = "http://github.com/api/v2/json/tree/show/"+this.username+"/"+this.project+"/"+id,
 			browseText = readUrl(browseUrl)
@@ -55,7 +55,7 @@ steal.extend(steal.get.github.prototype,{
 		return urls;
 	},
 	//links are relative
-	links: function(base_url, contents){
+	links: function( base_url, contents ) {
 	    var links = [], 
 			newLink,
 			anchors = contents.match(/href\s*=\s*\"*[^\">]*/ig),
@@ -69,7 +69,7 @@ steal.extend(steal.get.github.prototype,{
 	    })
 	    return links;
 	},
-	download: function(link){
+	download: function( link ) {
 		// get real download link
 		// http://github.com/pinhook/funcunit/qunit/qunit.js  -->
 		// http://github.com/pinhook/steal/raw/master/test/qunit/qunit.js
@@ -109,7 +109,7 @@ steal.extend(steal.get.github.prototype,{
 	    }
 	    tmp.remove();
 	},
-	fetch_dir: function(url){
+	fetch_dir: function( url ) {
 		this.level++;
 	    if (this.level > 0) {
 			this.push_d(new steal.File(url).basename());
