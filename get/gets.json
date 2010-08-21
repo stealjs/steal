@@ -1,3 +1,8 @@
 {
-  "mustache" : "http://github.com/tdreyno/mustache-javascriptmvc"
+  "mustache" : "http://github.com/tdreyno/mustache-javascriptmvc",
+  "steal" : "http://github.com/pinhook/steal",
+  "jquery" : "http://github.com/pinhook/javascriptmvc",
+  "funcunit" : "http://github.com/pinhook/funcunit",
+  "phui" : "http://github.com/pinhook/phui",
+  "documentjs" : "http://github.com/pinhook/documentjs"
 }

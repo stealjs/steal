@@ -92,7 +92,14 @@ js steal/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
 
 <h2>The Generator Function</h2>
 <p>Renders a folders contents with EJS and data and then copies it to another folder.</p>
-
+@codestart
+steal.generate(
+  "path/to/my_template_folder",
+  "render/templates/here", 
+  {
+    data: "to be used"
+  })
+@codeend
  * @param {String} path the folder to get templates from
  * @param {String} where where to put the results of the rendered templates
  * @param {Object} data data to render the templates with

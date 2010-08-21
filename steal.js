@@ -648,10 +648,6 @@ steal.options = {
 	debug: true
 }
 
-
-
-
-
 // variables used while including
 var first = true ,                                 //If we haven't steald a file yet
 	first_wave_done = false,                       //If all files have been steald 
@@ -660,12 +656,6 @@ var first = true ,                                 //If we haven't steald a file
 	steals=[],                                     //    
 	current_steals=[],                             //steals that are pending to be steald
 	total = [];                                    //
-
-
-
-
-
-
 
 extend(steal,
 {

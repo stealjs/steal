@@ -2,7 +2,13 @@
  * @class steal.dev
  * @parent stealtools
  * Provides helper functions for development that get removed when put in production mode.
- * This is under development.
+ * This means you can leave <code>steal.dev.log("hello world")</code> in your code and it
+ * will get removed in prodution.
+ * <h3>Examples</h3>
+ * @codestart
+ * steal.dev.log("Something is happening");
+ * steal.dev.warn("Something bad is happening");
+ * @codeend
  */
 steal.dev = {
 	regexps : {
@@ -32,8 +38,11 @@ steal.dev = {
 		}
 	},
 	/**
-	 * 
-	 * @param {Object} out
+	 * Adds a warning message to the console.
+	 * @codestart
+	 * steal.dev.warn("something evil");
+	 * @codeend
+	 * @param {String} out the message
 	 */
 	warn: function( out ) {
 		if(window.console && console.log){
@@ -43,8 +52,11 @@ steal.dev = {
 		}
 	},
 	/**
-	 * 
-	 * @param {Object} out
+	 * Adds a message to the console.
+	 * @codestart
+	 * steal.dev.log("hi");
+	 * @codeend
+	 * @param {String} out the message
 	 */
 	log: function( out ) {
 		if(window.console && console.log){
