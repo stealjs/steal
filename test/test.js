@@ -75,7 +75,7 @@ steal.test =  {
 	},
 	open : function(src){
 		load("steal/rhino/env.js");
-		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2});
+		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: true, logLevel: 2});
 	}
 }
 	
