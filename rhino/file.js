@@ -173,7 +173,7 @@ extend(steal.File.prototype, {
 	        for (var i=0; i<children.length; i++) {
 				var newMe = new java.io.File(me, children[i]);
 				var newYou = new java.io.File(you, children[i]);
-				if (ignore.indexOf(""+newYou.getName()) != -1) {
+				if (ignore && ignore.indexOf(""+newYou.getName()) != -1) {
 					continue;
 				}
 				if (newMe.isDirectory()) {
