@@ -13,7 +13,7 @@ steal.get.getter = function(url, where, options , level){
 	}
 }
 steal.get.getter.prototype = {
-	init : function(url, where, options, level){
+	init: function( url, where, options, level ) {
 
 		this.url = url + ( /\/$/.test(url) ? "" : "/" );
 	    this.level = level || -1
@@ -21,7 +21,7 @@ steal.get.getter.prototype = {
 	    this.quite = options.quite
 	    this.ignore = options.ignore;
 	},
-    ls: function(){
+    ls: function() {
         var links = [],
 			rhf = this;
         
@@ -37,7 +37,7 @@ steal.get.getter.prototype = {
         //store and return flatten
     },
 	//gets the links from a page
-    links: function(base_url, contents){
+    links: function( base_url, contents ) {
         var links = [],
 			anchors = contents.match(/href\s*=\s*\"*[^\">]*/ig),
 			ignore = this.ignore;
@@ -54,16 +54,16 @@ steal.get.getter.prototype = {
         return links;
     },
 	//pushes a directory to go into and check
-    push_d: function(dir){
+    push_d: function( dir ) {
         this.cwd = (new steal.File(this.cwd)).join(dir);
         new steal.File( this.cwd ).mkdir()
     },
 	//pops up to the parent directory
-    pop_d: function(){
+    pop_d: function() {
         this.cwd = new steal.File(this.cwd).dir();
     },
 	//downloads content from a url
-    download : function(link){
+    download: function( link ) {
         //var text = readUrl( link);
         
         var bn = new steal.File(link).basename(),
@@ -91,7 +91,7 @@ steal.get.getter.prototype = {
         }
     },
 	//gets the url or the directory
-    fetch : function(links ){
+    fetch: function( links ){
         var auto_fetch = !links;
         links = links || [this.url]
         var rhf = this;
@@ -100,7 +100,7 @@ steal.get.getter.prototype = {
         })
     },
 	//gets a directory
-    fetch_dir : function(url){
+    fetch_dir: function( url ) {
         this.level++;
         if(this.level > 0) this.push_d(  new steal.File(url).basename() );
         

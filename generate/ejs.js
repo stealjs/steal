@@ -90,13 +90,13 @@ vEJS.prototype = {
 	 * @param {Object} extra_helpers an object with additonal view helpers
 	 * @return {String} returns the result of the string
 	 */
-    render : function(object, extra_helpers){
+    render: function( object, extra_helpers ) {
         object = object || {};
         this._extra_helpers = extra_helpers;
 		var v = new vEJS.Helpers(object, extra_helpers || {});
 		return this.template.process.call(object, object,v);
 	},
-    update : function(element, options){
+    update: function( element, options ) {
         if(typeof element == 'string'){
 			element = document.getElementById(element)
 		}
@@ -120,14 +120,14 @@ vEJS.prototype = {
 			element.innerHTML = this.render(options)
 		}
     },
-	out : function(){
+	out: function() {
 		return this.template.out;
 	},
     /**
      * Sets options on this view to be rendered with.
      * @param {Object} options
      */
-	set_options : function(options){
+	set_options: function( options ) {
         this.type = options.type || vEJS.type;
 		this.cache = options.cache != null ? options.cache : vEJS.cache;
 		this.text = options.text || null;
@@ -174,7 +174,7 @@ vEJS.Scanner.to_text = function(input){
 };
 
 vEJS.Scanner.prototype = {
-  scan: function(block) {
+  scan: function( block ) {
      scanline = this.scanline;
 	 regex = this.SplitRegexp;
 	 if (! this.source == '')
@@ -186,7 +186,7 @@ vEJS.Scanner.prototype = {
 		 }
 	 }
   },
-  scanline: function(line, regex, block) {
+  scanline: function( line, regex, block ) {
 	 this.lines++;
 	 var line_split = rsplit(line, regex);
  	 for(var i=0; i<line_split.length; i++) {
@@ -215,7 +215,7 @@ vEJS.Buffer = function(pre_cmd, post_cmd) {
 };
 vEJS.Buffer.prototype = {
 	
-  push: function(cmd) {
+  push: function( cmd ) {
 	this.line.push(cmd);
   },
 
@@ -273,7 +273,7 @@ vEJS.Compiler = function(source, left) {
 	this.out = '';
 };
 vEJS.Compiler.prototype = {
-  compile: function(options, name) {
+  compile: function( options, name ) {
   	options = options || {};
 	this.out = '';
 	var put_cmd = "___ViewO.push(";
@@ -414,12 +414,12 @@ vEJS.Helpers = function(data, extras){
 };
 /* @prototype*/
 vEJS.Helpers.prototype = {
-	view: function(options, data, helpers){
+	view: function( options, data, helpers ) {
         if(!helpers) helpers = this._extras
 		if(!data) data = this._data;
 		return new vEJS(options).render(data, helpers);
 	},
-	to_text: function(input, null_text) {
+	to_text: function( input, null_text ) {
 	    if(input == null || input === undefined) return null_text || '';
 	    if(input instanceof Date) return input.toDateString();
 		if(input.toString) return input.toString().replace(/\n/g, '<br />').replace(/''/g, "'");

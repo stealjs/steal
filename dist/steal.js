@@ -282,7 +282,7 @@ steal.fn = steal.prototype = {
 	 * </table>
 	 * @return {steal} a new steal object
 	 */
-	init : function(options){
+	init: function(options){
 		this.id = (++id)
 		if(typeof options == 'function'){
 			var path = steal.getCurrent();
@@ -313,7 +313,7 @@ steal.fn = steal.prototype = {
 	 * Adds a script tag to the dom, loading and running the steal's JavaScript file.
 	 * @hide
 	 */
-	run : function(){
+	run: function() {
 		steal.current = this;		
 		var isProduction = (steal.options.env == "production"),
 			options = extend({
@@ -341,7 +341,7 @@ steal.fn = steal.prototype = {
 	 * Loads the steal code immediately.  This is typically used after DOM has loaded.
 	 * @hide
 	 */
-	runNow : function(){
+	runNow: function() {
 		steal.setCurrent(this.path);
 		
 		return browser.rhino ? load(this.path) : 
@@ -391,13 +391,13 @@ File.prototype =
 	 * Removes hash and params
 	 * @return {String}
 	 */
-	clean: function(){
+	clean: function() {
 		return this.path.match(/([^\?#]*)/)[1];
 	},
 	/**
 	 * Returns everything before the last /
 	 */
-	dir: function(){
+	dir: function() {
 		var last = this.clean().lastIndexOf('/');
 		var dir = (last != -1) ? this.clean().substring(0,last) : ''; //this.clean();
 		var parts = dir != '' && dir.match( /^(https?:\/|file:\/)$/ );
@@ -407,12 +407,12 @@ File.prototype =
 	 * Returns the domain for the current path.
 	 * Returns null if the domain is a file.
 	 */
-	domain: function(){ 
+	domain: function() { 
 		if(this.path.indexOf('file:') == 0 ) return null;
 		var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
 		return http ? http[1] : null;
 	},
-	protocol : function(){
+	protocol: function() {
 		  return this.path.match( /^(https?:|file:)/ )[1]
 	},
 	/**
@@ -463,17 +463,17 @@ File.prototype =
 	/**
 	 * Joins the file to the current working directory.
 	 */
-	joinCurrent: function(){
+	joinCurrent: function() {
 		return this.joinFrom(steal.getCurrentFolder());
 	},
 	/**
 	 * Returns true if the file is relative
 	 */
-	relative: function(){        return this.path.match(/^(https?:|file:|\/)/) == null;},
+	relative: function() {        return this.path.match(/^(https?:|file:|\/)/) == null;},
 	/**
 	 * Returns the part of the path that is after the domain part
 	 */
-	afterDomain: function(){    return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];},
+	afterDomain: function() {    return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];},
 	/**
 	 * Returns the relative path between two paths with common folders.
 	 * @codestart
@@ -493,18 +493,18 @@ File.prototype =
 	/**
 	 * Is the file on the same domain as our page.
 	 */
-	isCrossDomain : function(){
+	isCrossDomain: function() {
 		if(this.isLocalAbsolute()) return false;
 		return this.domain() != new File(window.location.href).domain();
 	},
-	isLocalAbsolute : function(){    return this.path.indexOf('/') === 0},
-	isDomainAbsolute : function(){return this.path.match(/^(https?:|file:)/) != null},
+	isLocalAbsolute: function() {    return this.path.indexOf('/') === 0},
+	isDomainAbsolute: function() {return this.path.match(/^(https?:|file:)/) != null},
 	/**
 	 * For a given path, a given working directory, and file location, update the path so 
 	 * it points to the right location.
 	 * This should probably folded under joinFrom
 	 */
-	normalize: function(){
+	normalize: function() {
 		
 		var current_path = steal.getCurrentFolder();
 		//if you are cross domain from the page, and providing a path that doesn't have an domain
@@ -527,7 +527,7 @@ File.prototype =
 		} 
 		return path;
 	},
-	isCurrentCrossDomain : function(){
+	isCurrentCrossDomain: function() {
 		return new File(steal.getAbsolutePath()).isCrossDomain();
 	}
 };
@@ -648,7 +648,7 @@ extend(steal,
 	 * Sets options from script
 	 * @hide
 	 */
-	setScriptOptions : function(){
+	setScriptOptions: function() {
 		var scripts = document.getElementsByTagName("script"), 
 			scriptOptions, 
 			commaSplit;
@@ -691,10 +691,10 @@ extend(steal,
 		}
 		
 	},
-	setOldIncludeOptions : function(){
+	setOldIncludeOptions: function() {
 		extend(steal.options, oldsteal);
 	},
-	setHashOptions : function(){
+	setHashOptions: function() {
 		window.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function(whoe, prop, val){ 
 			steal.options[prop] = val;
 		})
@@ -703,7 +703,7 @@ extend(steal,
 	 * Starts including files, sets options.
 	 * @hide
 	 */
-	init: function(){
+	init: function() {
 		this.setScriptOptions();
 		this.setOldIncludeOptions();
 		this.setHashOptions();
@@ -770,10 +770,10 @@ extend(steal,
 	setCurrent: function(p){
 		cwd = p
 	},
-	getCurrent: function(){
+	getCurrent: function() {
 		return cwd;
 	},
-	getAbsolutePath: function(){
+	getAbsolutePath: function() {
 		var dir = this.getCurrentFolder(), 
 			fwd = new File(this.getCurrentFolder());
 		return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : dir;
@@ -807,14 +807,14 @@ extend(steal,
 		}
 	},
 	//
-	should_add : function(inc){
+	should_add: function(inc){
 		var path = inc.absolute || inc.path,
 			i;
 		for(i = 0; i < total.length; i++) if(total[i].absolute == path) return false;
 		for(i = 0; i < current_steals.length; i++) if(current_steals[i].absolute == path) return false;
 		return true;
 	},
-	done : function(){
+	done: function() {
 		if (typeof steal.options.done == "function") steal.options.done(total);
 	},
 	// Called after every file is loaded.  Gets the next file and steals it.
@@ -842,7 +842,7 @@ extend(steal,
 		
 	},
 	//steal.end_of_production is written at the end of the production script to call this function
-	end_of_production: function(){ first_wave_done = true;steal.done(); },
+	end_of_production: function() { first_wave_done = true;steal.done(); },
 	
 	/**
 	 * Starts loading files.  This is useful when steal is being used without providing an initial file or app to load.
@@ -858,13 +858,13 @@ extend(steal,
 	 * @codeend
 	 * The above code loads steal, then uses steal to load the plugin controller.
 	 */
-	start: function(){
+	start: function() {
 		steal.start_called = true;
 		steal.end();
 	},
 	start_called : false,
 	functions: [],
-	next_function : function(){
+	next_function: function() {
 		var func = steal.functions.pop();
 		if(func) func.func();
 	},
@@ -873,7 +873,7 @@ extend(steal,
 	 * @param {String} relative URL(s) to stylesheets
 	 * @return {steal} steal for chaining
 	 */
-	css: function(){
+	css: function() {
 		//if production, 
 		if(steal.options.env == 'production'){
 			if(steal.loadedProductionCSS){
@@ -941,11 +941,11 @@ extend(steal,
 		text && (script.text = text);
 		head().appendChild(script);
 	},
-	write : function(src, encode){
+	write: function(src, encode){
 		encode = encode || "UTF-8";
 		document.write('<script type="text/javascript" src="'+src+'" encode="+encode+"></script>');
 	},
-	resetApp : function(f){
+	resetApp: function(f){
 		return function(name){
 			var current_path = steal.getCurrent();
 			steal.setCurrent("");
@@ -959,7 +959,7 @@ extend(steal,
 			return steal;
 		}
 	},
-	callOnArgs : function(f){
+	callOnArgs: function(f){
 		return function(){
 			for(var i=0; i < arguments.length; i++) f(arguments[i]);
 			return steal;
@@ -977,7 +977,7 @@ extend(steal,
 			return steal;
 		}
 	},
-	log : function(){
+	log: function() {
 		$('#log').append(jQuery.makeArray(arguments).join(", ")+"<br/>")
 	},
 	then : steal,

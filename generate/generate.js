@@ -92,7 +92,14 @@ js steal/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
 
 <h2>The Generator Function</h2>
 <p>Renders a folders contents with EJS and data and then copies it to another folder.</p>
-
+@codestart
+steal.generate(
+  "path/to/my_template_folder",
+  "render/templates/here", 
+  {
+    data: "to be used"
+  })
+@codeend
  * @param {String} path the folder to get templates from
  * @param {String} where where to put the results of the rendered templates
  * @param {Object} data data to render the templates with
@@ -146,7 +153,7 @@ steal.extend(generate,{
         lowerUpper : /([a-z\d])([A-Z])/g,
         dash : /([a-z\d])([A-Z])/g
 	},
-	underscore: function(s){
+	underscore: function( s ) {
         var regs = this.regexps;
         return s.replace(regs.colons, '/').
                  replace(regs.words,'$1_$2').
@@ -154,7 +161,7 @@ steal.extend(generate,{
                  replace(regs.dash,'_').toLowerCase()
     },
 	//converts a name to a bunch of useful things
-	convert: function(name){
+	convert: function( name ) {
 	    var className = name.match(/[^\.]*$/)[0] //Customer
 	    var appName = name.split(".")[0] //Customer
 		return {
