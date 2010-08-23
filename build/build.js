@@ -151,6 +151,11 @@ steal(function(steal){
 			var id = script.getAttribute("id");
 			return $.View.registerScript("jaml", id, text);
 		},
+		'text/tmpl': function( script ) {
+			var text = loadScriptText(script.src);
+			var id = script.getAttribute("id");
+			return $.View.registerScript("tmpl", id, text);
+		},
 		loadScriptText : loadScriptText
 	}
 	
