@@ -2,6 +2,7 @@
 
 steal.plugins('steal/build').then('//steal/clean/beautify','//steal/rhino/prompt', function(steal){
 	/**
+	 * @parent stealtools
 	 * Beautifies source code [http://jsbeautifier.org/ JS Beautify].
 	 * @codestart text
 	 * ./js steal/cleanjs myapp/myapp.html
