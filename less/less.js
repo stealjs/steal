@@ -10,15 +10,15 @@ steal({path: "less_engine.js",ignore: true},function(){
 	 * <p>Less is an extension of CSS that adds variables, mixins, and quite a bit more.
 	 * You can write css like:
 	 * </p>
-@codestart css
-@@brand_color: #4D926F;
-#header {
-  color: @@brand_color;
-}
-h2 {
-  color: @@brand_color;
-}
-@codeend
+	 * @codestart css
+	 * @@brand_color: #4D926F;
+	 * #header {
+	 *   color: @@brand_color;
+	 * }
+	 * h2 {
+	 *   color: @@brand_color;
+	 * }
+	 * @codeend
 	 * <h2>Use</h2>
 	 * <p>First, create a less file like:</p>
 	 * @codestart css

@@ -1,10 +1,21 @@
-steal("//steal/generate/ejs", '//steal/generate/inflector', function(steal){
+steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/prompt',function(steal){
 
 var render = function(from, to, data){
 	var text = readFile(from);
 	
 	var res = new steal.EJS({ text : text, name: from }).render(data);
-	new steal.File(to).save(res);
+	var file = steal.File(to);
+	//check if we are overwriting
+	if(data.force 
+		|| !file.exists() 
+		|| readFile(to) == res 
+		|| steal.prompt.yesno("Overwrite "+to+"? [Yn]") ){
+		steal.File(to).save(res);
+		return true;
+	}else{
+		return false;
+	}
+	
 },
 	
 /**
@@ -14,95 +25,95 @@ var render = function(from, to, data){
  * The steal project is packaged with code generators for JavaScriptMVC, but you can build 
  * your own very easily.
  * <h2>Packaged Generators</h3>
-<ul>
-<li><code>app</code> - creates a JavaScriptMVC application structure.
-@codestart text
-js steal/generate/app <i>path/to/app</i> [OPTIONS]
-@codeend
-<dl>
-	<dt>path/to/app</dt>
-	<dd>The lowercase path you want your application in. Keep application names short because they 
-		are used as namespaces.  The last part of the path will be taken to be your application's name.
-	</dd>
-</dl>
-</li>
-<li style='padding-top: 10px;'><code>controller</code> - creates a JavaScriptMVC [jQuery.Controller].
-@codestart text
-js steal/generate/controller <i>App.Controllers.Name</i> [OPTIONS]
-@codeend
-<dl>
-	<dt>App.Controllers.Name</dt>
-	<dd>The namespaced name of your controller.  For example, if your controller is named
-		<code>Cookbook.Controllers.Recipe</code>, the generator will create 
-		<code>cookbook/controllers/recipe_controller.js</code>. 
-	</dd>
-</dl>
-</li>
-
-<li style='padding-top: 10px;'><code>model</code> - creates a JavaScriptMVC [jQuery.Model].
-@codestart text
-js steal/generate/model <i>App.Models.Name</i> [TYPE] [OPTIONS]
-@codeend
-<dl>
-	<dt>App.Models.Name</dt>
-	<dd>The namespaced name of your model.  For example, if your model is named
-		<code>Cookbook.Models.Recipe</code>, the generator will create 
-		<code>cookbook/models/recipe.js</code>. 
-	</dd>
-</dl>
-</li>
-
-<li style='padding-top: 10px;'><code>page</code> - creates a page that loads steal.js and an application.
-@codestart text
-js steal/generate/model <i>path/to/app</i> <i>path/to/page.html</i>
-@codeend
-<dl>
-	<dt>path/to/app</dt>
-	<dd>The path to your apps folder. 
-	</dd>
-	<dt>path/to/page.html</dt>
-	<dd>The path to the page you want to create. 
-	</dd>
-</dl>
-</li>
-
-<li style='padding-top: 10px;'><code>plugin</code> - creates a JavaScriptMVC plugin file and folder structure.
-@codestart text
-js steal/generate/plugin <i>path/to/plugin</i> [OPTIONS]
-@codeend
-<dl>
-	<dt>path/to/plugin</dt>
-	<dd>The path to where you want your plugin.  This also should be the namespace and name of
-	whatever JavaScript object created.  Check out phui for examples.
-	</dd>
-</dl>
-</li>
-<li style='padding-top: 10px;'><code>scaffold</code> - creates the controllers, models, and fixtures used
-to provide basic CRUD functionality..
-@codestart text
-js steal/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
-@codeend
-<dl>
-	<dt>App.Models.ModelName</dt>
-	<dd>The model resource you want to add CRUD functionality to.
-	</dd>
-</dl>
-</li>
-</ul>
-
-<h2>The Generator Function</h2>
-<p>Renders a folders contents with EJS and data and then copies it to another folder.</p>
-@codestart
-steal.generate(
-  "path/to/my_template_folder",
-  "render/templates/here", 
-  {
-    data: "to be used"
-  })
-@codeend
+ * <ul>
+ * <li><code>app</code> - creates a JavaScriptMVC application structure.
+ * @codestart text
+ * js steal/generate/app <i>path/to/app</i> [OPTIONS]
+ * @codeend
+ * <dl>
+ * 	<dt>path/to/app</dt>
+ * 	<dd>The lowercase path you want your application in. Keep application names short because they 
+ * 		are used as namespaces.  The last part of the path will be taken to be your application's name.
+ * 	</dd>
+ * </dl>
+ * </li>
+ * <li style='padding-top: 10px;'><code>controller</code> - creates a JavaScriptMVC [jQuery.Controller].
+ * @codestart text
+ * js steal/generate/controller <i>App.Controllers.Name</i> [OPTIONS]
+ * @codeend
+ * <dl>
+ * 	<dt>App.Controllers.Name</dt>
+ * 	<dd>The namespaced name of your controller.  For example, if your controller is named
+ * 		<code>Cookbook.Controllers.Recipe</code>, the generator will create 
+ * 		<code>cookbook/controllers/recipe_controller.js</code>. 
+ * 	</dd>
+ * </dl>
+ * </li>
+ * 
+ * <li style='padding-top: 10px;'><code>model</code> - creates a JavaScriptMVC [jQuery.Model].
+ * @codestart text
+ * js steal/generate/model <i>App.Models.Name</i> [TYPE] [OPTIONS]
+ * @codeend
+ * <dl>
+ * 	<dt>App.Models.Name</dt>
+ * 	<dd>The namespaced name of your model.  For example, if your model is named
+ * 		<code>Cookbook.Models.Recipe</code>, the generator will create 
+ * 		<code>cookbook/models/recipe.js</code>. 
+ * 	</dd>
+ * </dl>
+ * </li>
+ * 
+ * <li style='padding-top: 10px;'><code>page</code> - creates a page that loads steal.js and an application.
+ * @codestart text
+ * js steal/generate/model <i>path/to/app</i> <i>path/to/page.html</i>
+ * @codeend
+ * <dl>
+ * 	<dt>path/to/app</dt>
+ * 	<dd>The path to your apps folder. 
+ * 	</dd>
+ * 	<dt>path/to/page.html</dt>
+ * 	<dd>The path to the page you want to create. 
+ * 	</dd>
+ * </dl>
+ * </li>
+ * 
+ * <li style='padding-top: 10px;'><code>plugin</code> - creates a JavaScriptMVC plugin file and folder structure.
+ * @codestart text
+ * js steal/generate/plugin <i>path/to/plugin</i> [OPTIONS]
+ * @codeend
+ * <dl>
+ * 	<dt>path/to/plugin</dt>
+ * 	<dd>The path to where you want your plugin.  This also should be the namespace and name of
+ * 	whatever JavaScript object created.  Check out phui for examples.
+ * 	</dd>
+ * </dl>
+ * </li>
+ * <li style='padding-top: 10px;'><code>scaffold</code> - creates the controllers, models, and fixtures used
+ * to provide basic CRUD functionality..
+ * @codestart text
+ * js steal/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
+ * @codeend
+ * <dl>
+ * 	<dt>App.Models.ModelName</dt>
+ * 	<dd>The model resource you want to add CRUD functionality to.
+ * 	</dd>
+ * </dl>
+ * </li>
+ * </ul>
+ * 
+ * <h2>The Generator Function</h2>
+ * <p>Renders a folders contents with EJS and data and then copies it to another folder.</p>
+ * @codestart
+ * steal.generate(
+ *   "path/to/my_template_folder",
+ *   "render/templates/here", 
+ *   {
+ *     data: "to be used"
+ *   })
+ * @codeend
  * @param {String} path the folder to get templates from
  * @param {String} where where to put the results of the rendered templates
- * @param {Object} data data to render the templates with
+ * @param {Object} data data to render the templates with.  If force is true, it will overwrite everything
  */
 generate = (steal.generate = function(path, where, data){
 	//get all files in a folder
@@ -123,8 +134,12 @@ generate = (steal.generate = function(path, where, data){
 				//do nothing
 			}else if(/\.ejs$/.test(name)){
 				var put = where + "/"+convert.replace(/\.ejs$/,"");
-				print('      ' +put )
-				render(path+"/"+loc, put, data);
+				
+
+				
+				if(render(path+"/"+loc, put, data)){
+					print('      ' +put )
+				}
 				
 			}else if(/\.link$/.test(name)){
 				var copy = readFile(path+"/"+loc) 					

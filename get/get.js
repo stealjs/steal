@@ -39,13 +39,13 @@ steal("//steal/get/json","//steal/rhino/prompt",function(steal){
  * @param {String} url the path to a svn or github repo or a name of a recognized plugin.
  * @param {Object} options configure the download.  
  * <table class='options'>
-	  <tr>
-	      <th>Name</th><th>Description</th>
-	  </tr>
-	  <tr><td>name</td>
-	  		<td>The name of the folder to put the download in.</td></tr>
-
-	</table>
+ * 	  <tr>
+ * 	      <th>Name</th><th>Description</th>
+ * 	  </tr>
+ * 	  <tr><td>name</td>
+ * 	  		<td>The name of the folder to put the download in.</td></tr>
+ * 
+ * 	</table>
  * 
  */
 var get = (steal.get =  function(url, options){

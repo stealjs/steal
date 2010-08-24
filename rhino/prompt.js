@@ -18,7 +18,7 @@ steal(function(steal){
 	steal.prompt.yesno = function(question){
 	    var response = "";
 	    while(! response.match(/^\s*[yn]\s*$/i)){
-	        response = prompt(question)
+	        response = steal.prompt(question)
 	    }
 	    return response.match(/[yn]/i)[0].toLowerCase() == "y";
 	}

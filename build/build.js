@@ -62,15 +62,15 @@ steal(function(steal){
 	 * @param {String} url an html page to compress
 	 * @param {Object} options An object literal with the following optional values:
 	 * <table class='options'>
-	  <tr>
-	      <th>Name</th><th>Description</th>
-	  </tr>
-	  <tr><td>to</td>
-	  		<td>The folder to put the production.js and production.css files.</td></tr>
-	  <tr><td>all</td>
-		  <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
-		  scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
-	</table>
+	 * 	  <tr>
+	 * 	      <th>Name</th><th>Description</th>
+	 * 	  </tr>
+	 * 	  <tr><td>to</td>
+	 * 	  		<td>The folder to put the production.js and production.css files.</td></tr>
+	 * 	  <tr><td>all</td>
+	 * 		  <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
+	 * 		  scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
+	 * 	</table>
 	 */
 	steal.build = function(url, options){
 		options = steal.opts(options || {}, {

@@ -58,5 +58,11 @@ Steal [steal.get get] is a simple JavaScript version of [http://rubygems.org/ ru
 @codestart text
 js steal/getjs http://github.com/pinhook/phui/
 @codeend
+<h3>Code Cleaner</h3>
+Steal [steal.clean clean] cleans your code and checks it against JSLint. 
+
+@codestart text
+js steal/clean path/to/page.html
+@codeend
  */
 //blah

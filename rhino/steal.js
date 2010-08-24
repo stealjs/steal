@@ -31,6 +31,7 @@
 	steal.isArray = function(arr){
   	  return Object.prototype.toString.call(arr) === "[object Array]"
     }
+	steal.then = steal;
 	steal.inArray = function(item, arr){
 		var len = arr.length;
 		for(var i =0; i < len; i++){
