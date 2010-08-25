@@ -90,7 +90,7 @@ pluginList  = function(name){
 	print("  Looking for plugin ...")
 		
 	var plugin_list_source = 
-		readUrl("http://github.com/pinhook/steal/raw/master/get/gets.json");
+		readUrl("http://github.com/jupiterjs/steal/raw/master/get/gets.json");
 	var plugin_list;
 	eval("plugin_list = "+plugin_list_source);
 	if(plugin_list[name]) {

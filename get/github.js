@@ -29,7 +29,7 @@ steal.extend(steal.get.github.prototype,{
 		this.branch = options.tag || "master";
 	},
 	get_latest_commit: function() {
-	    // http://github.com/api/v2/json/commits/list/pinhook/steal/master
+	    // http://github.com/api/v2/json/commits/list/jupiterjs/steal/master
 		var latestCommitUrl = "http://github.com/api/v2/json/commits/list/"+this.username+"/"+this.project+"/"+this.branch,
 			commitsText = readUrl(latestCommitUrl)
 		eval("var c = "+commitsText);
@@ -71,8 +71,8 @@ steal.extend(steal.get.github.prototype,{
 	},
 	download: function( link ) {
 		// get real download link
-		// http://github.com/pinhook/funcunit/qunit/qunit.js  -->
-		// http://github.com/pinhook/steal/raw/master/test/qunit/qunit.js
+		// http://github.com/jupiterjs/funcunit/qunit/qunit.js  -->
+		// http://github.com/jupiterjs/steal/raw/master/test/qunit/qunit.js
 		var rawUrl = this.url+"raw/"+this.branch+"/"+link.replace(this.url, ""),
 			bn = new steal.File(link).basename(),
 			f = new steal.File(this.cwd).join(bn);
@@ -118,8 +118,8 @@ steal.extend(steal.get.github.prototype,{
 			this.fetch(this.ls_top())
 		} else{
 			// change to the raw url
-			// http://github.com/pinhook/javascriptmvc/
-			// http://github.com/pinhook/javascriptmvc/tree/master/controller?raw=true
+			// http://github.com/jupiterjs/javascriptmvc/
+			// http://github.com/jupiterjs/javascriptmvc/tree/master/controller?raw=true
 			var rawUrl = this.url+"tree/"+this.branch+"/"+url.replace(this.url, "")+"?raw=true",
 				contents = readUrl(rawUrl)
 	        this.fetch(this.links(url, contents));
