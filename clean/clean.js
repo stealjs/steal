@@ -1,6 +1,34 @@
 // lets you know if your JS sucks and will try to clean it for you
 
-steal.plugins('steal/build').then('//steal/clean/beautify','//steal/rhino/prompt', function(steal){
+steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint','//steal/rhino/prompt', function(steal){
+	var lintAndPrint = function(out, src){
+		JSLINT(out,{forin: true, browser: true, windows: true});
+		if(JSLINT.errors.length){
+			//var lines = out.split('\n'), line, error;
+			for(var i = 0; i < JSLINT.errors.length; i++){
+				error = JSLINT.errors[i];
+				if(!error.evidence){
+					break;
+				}
+				line = error.evidence.replace(/\t/g,"     ");
+				print("  "+error.reason)
+				print("    "+error.line+":"+error.character+"  "+
+					line.substring(Math.max(error.character-25, 0), 
+					   Math.min(error.character+25, line.length)).replace(/^\s+/,"")
+					
+					)
+				print(" ")
+			}
+		}
+		var data  = JSLINT.data();
+		if(data.globals.length){
+			print("  GLOBALS \n    "+data.globals.join("\n    "))
+		}
+		
+		return JSLINT.errors.length > 0 
+	}
+	
+	
 	/**
 	 * @parent stealtools
 	 * Beautifies source code [http://jsbeautifier.org/ JS Beautify].
@@ -51,13 +79,29 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/rhino/prompt
 				}else{
 					var out = js_beautify(text, options);
 					if(out == text){
-						print("C "+path)
+						print("C "+path);
+						if(options.jslint){
+							var errors = lintAndPrint(out);
+							if(errors){
+								print("quiting because of JSLint Errors");
+								quit();
+							}
+						}
+						
 					}else{
 						if(steal.prompt.yesno("B "+path+" Overwrite? [Yn]")){
 							if(options.print){
 								print(out)
 							}else{
 								steal.File(path).save( out  )
+							}
+							
+							if(options.jslint){
+								var errors = lintAndPrint(out);
+								if(errors){
+									print("quiting because of JSLint Errors");
+									quit();
+								}
 							}
 						}
 	

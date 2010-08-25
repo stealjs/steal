@@ -8,6 +8,8 @@
  * })
  */
 
+/*jslint evil: true */
+
 //put everything in function to keep space clean
 (function() {
 
@@ -28,6 +30,11 @@
 			var head = d.createElement('head');
 			de.insertBefore(head, de.firstChild);
 			return head;
+		},
+		scriptTag = function() {
+			var start = document.createElement('script');
+			start.type = 'text/javascript';
+			return start;
 		};
 
 
@@ -67,26 +74,26 @@
 	 * <h2>Use</h2>
 	 * Use of steal.js is broken into 5 parts:
 	 * <ul>
-	 * 	<li>Loading steal.js </li> 
-	 * 	<li>Loading your 'application' file.</li>
-	 * 	<li>"Stealing" scripts</li>
-	 * 	<li>Building (Concatenating+Compressing) the app</li>
-	 * 	<li>Switching to the production build</li>
+	 * <li>Loading steal.js </li> 
+	 *  <li>Loading your 'application' file.</li>
+	 *    <li>"Stealing" scripts</li>
+	 *    <li>Building (Concatenating+Compressing) the app</li>
+	 *    <li>Switching to the production build</li>
 	 * </ul>
 	 * 
 	 * 
 	 * <h3>Loading <code>steal.js</code></h3>
 	 * <p>First, you need to [download download JavaScriptMVC] (or steal standalone) and unzip it into a
 	 *    public folder on your server.  For this example, lets assume you have the steal script in
-	 * 	<code>public/steal/steal.js</code>.   
+	 *    <code>public/steal/steal.js</code>.   
 	 * </p>
 	 * <p>Next, you need to load the <code>steal.js</code> script in your html page.  We suggest 
-	 * 	[http://developer.yahoo.com/performance/rules.html#js_bottom bottom loading] your scripts.
-	 * 	For example, if your page is in <code>pages/myapp.html</code>, you can get steal like:
+	 *    [http://developer.yahoo.com/performance/rules.html#js_bottom bottom loading] your scripts.
+	 *    For example, if your page is in <code>pages/myapp.html</code>, you can get steal like:
 	 * </p>
 	 * @codestart html
 	 * &lt;script type='text/javascript'
-	 * 	 src='../public/steal/steal.js'>
+	 *     src='../public/steal/steal.js'>
 	 * &lt;/script>
 	 * @codeend
 	 * <h3>Loading your 'application' file</h3>
@@ -99,7 +106,7 @@
 	 * There are a lot of ways to configure steal to load your app file, but we've made it really easy:</p>
 	 * @codestart html
 	 * &lt;script type='text/javascript'
-	 * 	 src='../public/steal/steal.js?<u><b>myapp/myapp.js</b></u>'>
+	 *     src='../public/steal/steal.js?<u><b>myapp/myapp.js</b></u>'>
 	 * &lt;/script>
 	 * @codeend
 	 * This sets ...
@@ -111,9 +118,9 @@
 	 * <code>public/myapp/myapp.js</code>.</p>
 	 * 
 	 * <div class='whisper'>
-	 * 	TIP: If startFile doesn't end with <code>.js</code> (ex: myapp), steal assumes
-	 * 	you are using JavaScriptMVC's folder pattern and will load:
-	 * 	<code>myapp/myapp.js<code> just to save you 9 characters.
+	 *    TIP: If startFile doesn't end with <code>.js</code> (ex: myapp), steal assumes
+	 *    you are using JavaScriptMVC's folder pattern and will load:
+	 *    <code>myapp/myapp.js<code> just to save you 9 characters.
 	 * </div>
 	 * <h3>Stealing Scripts</h3>
 	 * In your files, use the steal function and its helpers
@@ -131,15 +138,15 @@
 	 * @codeend
 	 * There's a few things to notice:
 	 * <ul>
-	 * 	<li>the steal function can take multiple arguments.  Each argument 
-	 * 	can be a string, object, or function.  Learn more about what can be passed to 
-	 * 	steal in the [steal.prototype.init] documentation. 
-	 * 	
-	 * 	</li>
-	 * 	<li>steal can load cross domain</li>
-	 * 	<li>steal loads relative to the current file</li>
-	 * 	<li>steal adds .js if not present</li>
-	 * 	<li>steal is chainable (most function return steal)</li>
+	 *    <li>the steal function can take multiple arguments.  Each argument 
+	 *    can be a string, object, or function.  Learn more about what can be passed to 
+	 *    steal in the [steal.prototype.init] documentation. 
+	 *    
+	 *    </li>
+	 *    <li>steal can load cross domain</li>
+	 *    <li>steal loads relative to the current file</li>
+	 *    <li>steal adds .js if not present</li>
+	 *    <li>steal is chainable (most function return steal)</li>
 	 * </ul>
 	 * <h3>Building the app</h3>
 	 * <p>Building the app means combining and compressing your apps JavaScript and CSS into a single file.
@@ -168,15 +175,15 @@
 	 * There are a number of steal helper functions that can be used to load files in a particular location
 	 * or of a type other than JavaScript:
 	 * <ul>
-	 * 	<li>[steal.static.coffee] - loads  
-	 * 		[http://jashkenas.github.com/coffee-script/ CoffeeScript] scripts.</li>
-	 * 	<li>[steal.static.controllers] - loads controllers relative to the current path.</li>
-	 * 	<li>[steal.static.css] - loads a css file.</li>
-	 * 	<li>[steal.static.less] - loads [http://lesscss.org/ Less] style sheets.</li>
-	 * 	<li>[steal.static.models] - loads models relative to the current path.</li>
-	 * 	<li>[steal.static.plugins] - loads JavaScript files relative to steal's root folder.</li>
-	 * 	<li>[steal.static.resources] - loads a script in a relative resources folder.</li>
-	 * 	<li>[steal.static.views] - loads a client side template to be compiled into the production build.</li>
+	 *    <li>[steal.static.coffee] - loads  
+	 *     [http://jashkenas.github.com/coffee-script/ CoffeeScript] scripts.</li>
+	 *    <li>[steal.static.controllers] - loads controllers relative to the current path.</li>
+	 *    <li>[steal.static.css] - loads a css file.</li>
+	 *    <li>[steal.static.less] - loads [http://lesscss.org/ Less] style sheets.</li>
+	 *    <li>[steal.static.models] - loads models relative to the current path.</li>
+	 *    <li>[steal.static.plugins] - loads JavaScript files relative to steal's root folder.</li>
+	 *    <li>[steal.static.resources] - loads a script in a relative resources folder.</li>
+	 *    <li>[steal.static.views] - loads a client side template to be compiled into the production build.</li>
 	 * </ul>
 	 * 
 	 * <h2>Script Load Order</h2>
@@ -188,73 +195,72 @@
 	 * An example helps illustrate this.<br/>
 	 * <img src='http://wiki.javascriptmvc.com/images/last_in_first_out.png'/>
 	 * <table class="options">
-	 * 				<tr class="top">
-	 * 					<th>Load Order</th>
-	 * 					<th class="right">File</th>
-	 * 				</tr>
-	 * 				<tbody>
-	 * 				<tr>
-	 * 					<td>1</td>
-	 * 					<td class="right">1.js</td>
-	 * 				</tr>
-	 * 				<tr>
-	 * 					<td>2</td>
-	 * 					<td class="right">3.js</td>
-	 * 				</tr>
-	 * 				<tr>
-	 * 					<td>3</td>
-	 * 					<td class="right">4.js</td>
-	 * 				</tr>
-	 * 				<tr>
-	 * 					<td>4</td>
-	 * 					<td class="right">2.js</td>
-	 * 				</tr>
-	 * 				<tr>
-	 * 					<td>5</td>
-	 * 					<td class="right">5.js</td>
-	 * 				</tr>
-	 * 				<tr class="bottom">
-	 * 					<td>6</td>
-	 * 					<td class="right">6.js</td>
-	 * 				</tr>
-	 * 	</tbody></table>
-	 * 	@init 
-	 * 	Loads files or runs functions after all previous files and functions have been loaded.
-	 * 	@param {String|Object|Function+} resource Each argument represents a resource or function.
-	 * 	Arguments can be a String, Option, or Function.
-	 * 	<table class='options'>
-	 * 	  <tr>
-	 * 	      <th>Type</th><th>Description</th>
-	 * 	  </tr>
-	 * 	  <tr><td>String</td>
-	 * 	  		<td>A path to a JavaScript file.  The path can optionally end in '.js'.<br/>  
-	 * 	  		Paths are typically assumed to be relative to the current JavaScript file. But paths, that start
-	 * 	  		with: 
-	 * 	  		<ul>
-	 * 	  			<li><code>http(s)://</code> are absolutely referenced.</li>
-	 * 	  			<li><code>/</code> are referenced from the current domain.</li>
-	 * 	  			<li><code>//</code> are referenced from the ROOT folder.</li>
-	 * 	  		
-	 * 	  		</td></tr>
-	 * 	  <tr><td>Object</td>
-	 * 	  <td>An Object with the following properties:
-	 * 	      <ul>
-	 * 	          <li>path {String} - relative path to a JavaScript file.  </li>
-	 * 	          <li>type {optional:String} - Script type (defaults to text/javascript)</li>
-	 * 	          <li>skipInsert {optional:Boolean} - Include not added as script tag</li>
-	 * 	          <li>compress {optional:String} - "false" if you don't want to compress script</li>
-	 * 	          <li>package {optional:String} - Script package name (defaults to production.js)</li>             
-	 * 	      </ul>
-	 * 	  </td></tr>
-	 * 	  <tr><td>Function</td><td>A function to run after all the prior steals have finished loading</td></tr>
-	 * 	</table>
-	 * 	@return {steal} returns itself for chaining.
+	 *     <tr class="top">
+	 *     <th>Load Order</th>
+	 *     <th class="right">File</th>
+	 *     </tr>
+	 *     <tbody>
+	 *     <tr>
+	 *     <td>1</td>
+	 *     <td class="right">1.js</td>
+	 *     </tr>
+	 *     <tr>
+	 *     <td>2</td>
+	 *     <td class="right">3.js</td>
+	 *     </tr>
+	 *     <tr>
+	 *     <td>3</td>
+	 *     <td class="right">4.js</td>
+	 *     </tr>
+	 *     <tr>
+	 *     <td>4</td>
+	 *     <td class="right">2.js</td>
+	 *     </tr>
+	 *     <tr>
+	 *     <td>5</td>
+	 *     <td class="right">5.js</td>
+	 *     </tr>
+	 *     <tr class="bottom">
+	 *     <td>6</td>
+	 *     <td class="right">6.js</td>
+	 *     </tr>
+	 *    </tbody></table>
+	 *    @init 
+	 *    Loads files or runs functions after all previous files and functions have been loaded.
+	 *    @param {String|Object|Function+} resource Each argument represents a resource or function.
+	 *    Arguments can be a String, Option, or Function.
+	 *    <table class='options'>
+	 *      <tr>
+	 *          <th>Type</th><th>Description</th>
+	 *      </tr>
+	 *      <tr><td>String</td>
+	 *     <td>A path to a JavaScript file.  The path can optionally end in '.js'.<br/>  
+	 *     Paths are typically assumed to be relative to the current JavaScript file. But paths, that start
+	 *     with: 
+	 *     <ul>
+	 *     <li><code>http(s)://</code> are absolutely referenced.</li>
+	 *     <li><code>/</code> are referenced from the current domain.</li>
+	 *     <li><code>//</code> are referenced from the ROOT folder.</li>
+	 *     
+	 *     </td></tr>
+	 *      <tr><td>Object</td>
+	 *      <td>An Object with the following properties:
+	 *          <ul>
+	 *              <li>path {String} - relative path to a JavaScript file.  </li>
+	 *              <li>type {optional:String} - Script type (defaults to text/javascript)</li>
+	 *              <li>skipInsert {optional:Boolean} - Include not added as script tag</li>
+	 *              <li>compress {optional:String} - "false" if you don't want to compress script</li>
+	 *              <li>package {optional:String} - Script package name (defaults to production.js)</li>             
+	 *          </ul>
+	 *      </td></tr>
+	 *      <tr><td>Function</td><td>A function to run after all the prior steals have finished loading</td></tr>
+	 *    </table>
+	 *    @return {steal} returns itself for chaining.
 	 */
 	steal = function() {
-		for ( var i = 0; i < arguments.length; i++ )
-		steal.add(new steal.fn.init(arguments[i]));
-
-
+		for ( var i = 0; i < arguments.length; i++ ) {
+			steal.add(new steal.fn.init(arguments[i]));
+		}
 		return steal;
 	};
 
@@ -275,7 +281,7 @@
 			load: eventSupported("load", "script"),
 			readystatechange: eventSupported("readystatechange", "script"),
 			error: eventSupported("readystatechange", "script")
-		}
+		};
 	})();
 
 
@@ -295,9 +301,9 @@
 			if ( typeof options == 'string' ) {
 				options = {
 					path: /\.js$/ig.test(options) ? options : options + '.js'
-				}
+				};
 			}
-			extend(this, options)
+			extend(this, options);
 			this.options = options; //TODO: needed?
 			this.originalPath = this.path;
 			//get actual path
@@ -326,15 +332,15 @@
 				this.func();
 				steal.end();
 				//insert();
-			} else if ( this.type ) {
-				isProduction ? true : insert(options);
-			} else {
-				if ( isProduction ) {
-					return;
+			} else if (!isProduction ) {
+				if ( this.type ) {
+					insert(options);
+				} else {
+					steal.curDir(this.path);
+					insert(this.skipInsert ? undefined : options);
 				}
-				steal.curDir(this.path);
-				this.skipInsert ? insert() : insert(options);
 			}
+
 		},
 		/**
 		 * Loads the steal code immediately.  This is typically used after DOM has loaded.
@@ -346,16 +352,18 @@
 			return browser.rhino ? load(this.path) : steal.insertHead(steal.root.join(this.path));
 		}
 
-	}
+	};
 	steal.fn.init.prototype = steal.fn;
 
 
 	var extend = function( d, s ) {
-		for ( var p in s ) d[p] = s[p];
+		for ( var p in s ) {
+			d[p] = s[p];
+		}
 		return d;
 	},
 		getLastPart = function( p ) {
-			return p.match(/[^\/]+$/)[0]
+			return p.match(/[^\/]+$/)[0];
 		},
 		browser = {
 			msie: !! (window.attachEvent && !window.opera),
@@ -365,7 +373,6 @@
 			mobilesafari: !! navigator.userAgent.match(/Apple.*Mobile.*Safari/),
 			rhino: navigator.userAgent.match(/Rhino/) && true
 		},
-		random = "" + parseInt(Math.random() * 100),
 		factory = function() {
 			return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 		};
@@ -388,7 +395,7 @@
 	 */
 	steal.File = function( path ) {
 		if ( this.constructor != steal.File ) {
-			return new steal.File(path)
+			return new steal.File(path);
 		}
 		this.path = path;
 	};
@@ -407,7 +414,7 @@
 		dir: function() {
 			var last = this.clean().lastIndexOf('/'),
 				dir = (last != -1) ? this.clean().substring(0, last) : '',
-				parts = dir != '' && dir.match(/^(https?:\/|file:\/)$/);
+				parts = dir !== '' && dir.match(/^(https?:\/|file:\/)$/);
 			return parts && parts[1] ? this.clean() : dir;
 		},
 		/**
@@ -415,7 +422,7 @@
 		 * Returns null if the domain is a file.
 		 */
 		domain: function() {
-			if ( this.path.indexOf('file:') == 0 ) {
+			if ( this.path.indexOf('file:') === 0 ) {
 				return null;
 			}
 			var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
@@ -438,11 +445,12 @@
 		 * @return {String} 
 		 */
 		joinFrom: function( url, expand ) {
+			var u = File(url);
 			if ( this.protocol() ) { //if we are absolutely referenced
-				var u = File(url);
-
 				//try to shorten the path as much as possible:
-				if ( this.domain() && this.domain() == u.domain() ) return this.afterDomain();
+				if ( this.domain() && this.domain() == u.domain() ) {
+					return this.afterDomain();
+				}
 				else if ( this.domain() == u.domain() ) { // we are from a file
 					return this.toReferenceFromSameDomain(url);
 				} else {
@@ -454,7 +462,6 @@
 				return this.path;
 
 			} else if ( this.isLocalAbsolute() ) { // we are a path like /page.js
-				var u = File(url);
 				if (!u.domain() ) {
 					return this.path;
 				}
@@ -463,7 +470,7 @@
 
 			}
 			else { //we have 2 relative paths, remove folders with every ../
-				if ( url == '' ) {
+				if ( url === '' ) {
 					return this.path.replace(/\/$/, '');
 				}
 				var urls = url.split('/'),
@@ -492,7 +499,7 @@
 		 * Returns true if the file is relative
 		 */
 		relative: function() {
-			return this.path.match(/^(https?:|file:|\/)/) == null;
+			return this.path.match(/^(https?:|file:|\/)/) === null;
 		},
 		/**
 		 * Returns the part of the path that is after the domain part
@@ -516,21 +523,22 @@
 				parts.shift();
 				other_parts.shift();
 			}
-			for ( var i = 0; i < other_parts.length; i++ ) result += '../';
+			for ( var i = 0; i < other_parts.length; i++ ) {
+				result += '../';
+			}
 			return result + parts.join('/');
 		},
 		/**
 		 * Is the file on the same domain as our page.
 		 */
 		isCrossDomain: function() {
-			if ( this.isLocalAbsolute() ) return false;
-			return this.domain() != File(window.location.href).domain();
+			return this.isLocalAbsolute() ? false : this.domain() != File(window.location.href).domain();
 		},
 		isLocalAbsolute: function() {
-			return this.path.indexOf('/') === 0
+			return this.path.indexOf('/') === 0;
 		},
 		protocol: function() {
-			var match = this.path.match(/^(https?:|file:)/)
+			var match = this.path.match(/^(https?:|file:)/);
 			return match && match[0];
 		},
 		/**
@@ -546,8 +554,8 @@
 			if (/^\/\//.test(this.path) ) { //if path is rooted from steal's root 
 				path = this.path.substr(2);
 
-			} else if ( this.relative() || (steal.isCurrentCrossDomain() //if current file is on another domain and
-			&& !this.protocol()) ) { //this file doesn't have a protocol
+			} else if ( this.relative() || (steal.isCurrentCrossDomain() && //if current file is on another domain and
+			!this.protocol()) ) { //this file doesn't have a protocol
 				path = this.joinFrom(current);
 
 			}
@@ -586,30 +594,30 @@
 	 *     in the inclue script. </td></tr>
 	 * </table>
 	 * <ul>
-	 * 	<li><code>steal.options.startFile</code> - the first file steal loads.  This file
-	 * 	loads all other scripts needed by your application.</li>
-	 * 	<li><code>steal.options.env</code> - the environment (development or production)
-	 * 		that determines if steal loads your all your script files or a single
-	 * 		compressed file.
-	 * 	</li>
+	 *    <li><code>steal.options.startFile</code> - the first file steal loads.  This file
+	 *    loads all other scripts needed by your application.</li>
+	 *    <li><code>steal.options.env</code> - the environment (development or production)
+	 *     that determines if steal loads your all your script files or a single
+	 *     compressed file.
+	 *    </li>
 	 * </ul>
 	 * <p><code>steal.options</code> can be configured by:</p>
 	 * <ul>
-	 * 	<li>The steal.js script tag in your page (most common pattern).</li>
-	 * 	<li>An existing steal object in the window object</li>
-	 * 	<li><code>window.location.hash</code></li>
+	 *    <li>The steal.js script tag in your page (most common pattern).</li>
+	 *    <li>An existing steal object in the window object</li>
+	 *    <li><code>window.location.hash</code></li>
 	 * </ul>
 	 * <p>
-	 * 	The steal.js script tag is by far the most common approach. 
-	 * 	For the other methods,
-	 * 	check out [steal.static.options] documentation.
-	 * 	To load <code>myapp/myapp.js</code> in development mode, your 
-	 * 	script tag would look like:
+	 *    The steal.js script tag is by far the most common approach. 
+	 *    For the other methods,
+	 *    check out [steal.static.options] documentation.
+	 *    To load <code>myapp/myapp.js</code> in development mode, your 
+	 *    script tag would look like:
 	 * </p>
 	 * 
 	 * @codestart
 	 * &lt;script type='text/javascript'
-	 * 		src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>,<u><b>development</b></u>'>
+	 *     src='path/to/steal.js?<u><b>myapp/myapp.js</b></u>,<u><b>development</b></u>'>
 	 * &lt;/script>
 	 * @codeend
 	 * <div class='whisper'>
@@ -621,9 +629,9 @@
 	 * <p>And since JavaScriptMVC likes folder structures like:</p>
 	 * @codestart text
 	 * \myapp
-	 * 	\myapp.js
+	 *    \myapp.js
 	 * \steal
-	 * 	\steal.js
+	 *    \steal.js
 	 * @codeend
 	 * <p>If your path doesn't end with <code>.js</code>, JavaScriptMVC assumes you are loading an 
 	 * application and will add <code>/myapp.js</code> on for you.  This means that this does the same thing too:</p>
@@ -643,14 +651,12 @@
 		encoding: "utf-8",
 		cacheInclude: true,
 		debug: true
-	}
+	};
 
 	// variables used while including
 	var first = true,
 		//If we haven't steald a file yet
 		first_wave_done = false,
-		//If all files have been steald 
-		steald_paths = [],
 		//a list of all steald paths
 		cwd = '',
 		//where we are currently including
@@ -675,7 +681,9 @@
 					var mvc_root = File(File(src).joinFrom(steal.pageDir)).dir(),
 						loc = /\.\.$/.test(mvc_root) ? mvc_root + '/..' : mvc_root.replace(/steal$/, '');
 
-					/.+\/$/.test(loc) && (loc = loc.replace(/\/$/, ''))
+					if (/.+\/$/.test(loc) ) {
+						loc = loc.replace(/\/$/, '');
+					}
 
 					if (/steal\.production\.js/.test(src) ) {
 						steal.options.env = "production";
@@ -694,10 +702,10 @@
 				if ( scriptOptions.indexOf('=') > -1 ) {
 					scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
 						steal.options[prop] = val;
-					})
+					});
 				} else {
 					//set with comma style
-					commaSplit = scriptOptions.split(",")
+					commaSplit = scriptOptions.split(",");
 					if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
 						steal.options.startFile = commaSplit[0];
 					} else if ( commaSplit[0] ) {
@@ -717,7 +725,7 @@
 		setHashOptions: function() {
 			window.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function( whoe, prop, val ) {
 				steal.options[prop] = val;
-			})
+			});
 		},
 		/**
 		 * Starts including files, sets options.
@@ -729,20 +737,19 @@
 			this.setHashOptions();
 			//clean up any options
 			if ( steal.options.app ) {
-				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js"
+				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
 			}
 			if ( steal.options.ignoreControllers ) {
 				steal.controllers = function() {
 					return steal;
-				}
+				};
 				steal.controller = function() {
 					return steal;
-				}
+				};
 			}
 
-
 			if (!steal.options.production && steal.options.startFile ) {
-				steal.options.production = steal.root.join(File(steal.options.startFile).dir() + '/production')
+				steal.options.production = steal.root.join(File(steal.options.startFile).dir() + '/production');
 
 			}
 			if ( steal.options.production ) {
@@ -756,7 +763,7 @@
 			steal({
 				path: 'steal/dev/dev.js',
 				ignore: true
-			})
+			});
 			steal.curDir(current_path);
 
 
@@ -770,7 +777,7 @@
 
 
 			if ( steal.options.env == 'production' && steal.options.loadProduction ) {
-				steal.end()
+				steal.end();
 				document.write('<script type="text/javascript" src="' + steal.options.production + '"></script>');
 			}
 
@@ -785,11 +792,11 @@
 		 * @return {String|steal} the path of the current directory or steal for chaining.
 		 */
 		curDir: function( path ) {
-			if ( path != undefined ) {
+			if ( path !== undefined ) {
 				cwd = path;
 				return steal;
 			} else {
-				var dir = File(cwd).dir()
+				var dir = File(cwd).dir();
 				//make sure it has a /
 				return dir ? dir + (dir.lastIndexOf('/') === dir.length - 1 ? '' : '/') : dir;
 			}
@@ -818,7 +825,7 @@
 
 			//if we have already performed loads, insert new steals in head
 			//now we should check if it has already been steald or added earlier in this file
-			if ( steal.should_add(newInclude) ) {
+			if ( steal.shouldAdd(newInclude) ) {
 				if ( first_wave_done ) {
 					return newInclude.runNow();
 				}
@@ -833,25 +840,36 @@
 				current_steals.unshift(newInclude);
 			}
 		},
-		//
-		should_add: function( inc ) {
+		//this should probably be kept as a hash.
+		shouldAdd: function( inc ) {
 			var path = inc.absolute || inc.path,
 				i;
-			for ( i = 0; i < total.length; i++ ) if ( total[i].absolute == path ) return false;
-			for ( i = 0; i < current_steals.length; i++ ) if ( current_steals[i].absolute == path ) return false;
+			for ( i = 0; i < total.length; i++ ) {
+				if ( total[i].absolute == path ) {
+					return false;
+				}
+			}
+			for ( i = 0; i < current_steals.length; i++ ) {
+				if ( current_steals[i].absolute == path ) {
+					return false;
+				}
+			}
 			return true;
 		},
 		done: function() {
-			if ( typeof steal.options.done == "function" ) steal.options.done(total);
+			if ( typeof steal.options.done == "function" ) {
+				steal.options.done(total);
+			}
 		},
 		// Called after every file is loaded.  Gets the next file and steals it.
 		end: function( src ) {
 			//prevents warning of bad includes
-			clearTimeout(steal.timer)
+			clearTimeout(steal.timer);
 			// add steals that were just added to the end of the list
-			var got = current_steals.length;
 			steals = steals.concat(current_steals);
-			if (!steals.length ) return;
+			if (!steals.length ) {
+				return;
+			}
 
 			// take the last one
 			var next = steals.pop();
@@ -896,7 +914,9 @@
 		functions: [],
 		next_function: function() {
 			var func = steal.functions.pop();
-			if ( func ) func.func();
+			if ( func ) {
+				func.func();
+			}
 		},
 		/**
 		 * Loads css files from the given relative path.
@@ -914,7 +934,7 @@
 					return steal;
 				} else {
 					steal.createLink(steal.options.production.replace(".js", ".css"));
-					loadedProductionCSS = true;
+					steal.loadedProductionCSS = true;
 					return steal;
 				}
 			}
@@ -948,11 +968,13 @@
 		 * @return {String} text of file
 		 */
 		request: function( path, content_type ) {
-			var contentType = content_type || "application/x-www-form-urlencoded; charset=" + steal.options.encoding,
+			var contentType = (content_type || "application/x-www-form-urlencoded; charset=" + steal.options.encoding),
 				request = factory();
 			request.open("GET", path, false);
-			request.setRequestHeader('Content-type', contentType)
-			if ( request.overrideMimeType ) request.overrideMimeType(contentType);
+			request.setRequestHeader('Content-type', contentType);
+			if ( request.overrideMimeType ) {
+				request.overrideMimeType(contentType);
+			}
 
 			try {
 				request.send(null);
@@ -960,7 +982,9 @@
 			catch (e) {
 				return null;
 			}
-			if ( request.status == 500 || request.status == 404 || request.status == 2 || (request.status == 0 && request.responseText == '') ) return null;
+			if ( request.status === 500 || request.status === 404 || request.status === 2 || (request.status === 0 && request.responseText === '') ) {
+				return null;
+			}
 			return request.responseText;
 		},
 		/**
@@ -971,12 +995,18 @@
 		 */
 		insertHead: function( src, encode, type, text, id ) {
 			encode = encode || "UTF-8";
-			var script = script_tag();
-			src && (script.src = src);
+			var script = scriptTag();
+			if ( src ) {
+				script.src = src;
+			}
+			if ( id ) {
+				script.id = id;
+			}
 			script.charset = encode;
-			script.type = type || "text/javascript"
-			id && (script.id = id);
-			text && (script.text = text);
+			script.type = type || "text/javascript";
+			if ( text ) {
+				script.text = text;
+			}
 			head().appendChild(script);
 		},
 		write: function( src, encode ) {
@@ -988,41 +1018,41 @@
 				var current_path = steal.getCurrent();
 				steal.curDir("");
 				if ( name.path ) {
-					name.path = f(name.path)
+					name.path = f(name.path);
 				} else {
-					name = f(name)
+					name = f(name);
 				}
 				steal(name);
 				steal.curDir(current_path);
 				return steal;
-			}
+			};
 		},
 		callOnArgs: function( f ) {
 			return function() {
-				for ( var i = 0; i < arguments.length; i++ ) f(arguments[i]);
+				for ( var i = 0; i < arguments.length; i++ ) {
+					f(arguments[i]);
+				}
 				return steal;
-			}
+			};
 
 		},
 		// Returns a function that applies a function to a list of arguments.  Then steals those
 		// arguments.
 		applier: function( f ) {
 			return function() {
+				var args = [];
 				for ( var i = 0; i < arguments.length; i++ ) {
-					arguments[i] = f(arguments[i]);
+					args[i] = f(arguments[i]);
 				}
-				steal.apply(null, arguments);
+				steal.apply(null, args);
 				return steal;
-			}
-		},
-		log: function() {
-			$('#log').append(jQuery.makeArray(arguments).join(", ") + "<br/>")
+			};
 		},
 		then: steal,
 		total: total
 	});
 	steal.plugin = steal.resetApp(function( p ) {
-		return p + '/' + getLastPart(p)
+		return p + '/' + getLastPart(p);
 	});
 
 
@@ -1063,7 +1093,7 @@
 		 */
 		controllers: steal.applier(function( i ) {
 			if ( i.match(/^\/\//) ) {
-				i = steal.root.join(i.substr(2))
+				i = steal.root.join(i.substr(2));
 				return i;
 			}
 			return 'controllers/' + i + '_controller';
@@ -1087,7 +1117,7 @@
 		 */
 		models: steal.applier(function( i ) {
 			if ( i.match(/^\/\//) ) {
-				i = steal.root.join(i.substr(2))
+				i = steal.root.join(i.substr(2));
 				return i;
 			}
 			return 'models/' + i;
@@ -1109,7 +1139,7 @@
 		 */
 		resources: steal.applier(function( i ) {
 			if ( i.match(/^\/\//) ) {
-				i = steal.root.join(i.substr(2))
+				i = steal.root.join(i.substr(2));
 				return i;
 			}
 			return 'resources/' + i;
@@ -1134,7 +1164,7 @@
 			// Only includes views for compression and docs (when running in rhino)
 			if ( browser.rhino || steal.options.env == "production" ) {
 				for ( var i = 0; i < arguments.length; i++ ) {
-					steal.view(arguments[i])
+					steal.view(arguments[i]);
 				}
 			}
 			return steal;
@@ -1154,31 +1184,26 @@
 		//tracks the last script
 		ct: function( id ) { //for clear timer
 			clearTimeout(steal.timers[id]);
-			delete steal.timers[id]
+			delete steal.timers[id];
 		},
 		loadErrorTimer: function( options ) {
 			var count = ++steal.timerCount;
 			steal.timers[count] = setTimeout(function() {
-				throw "steal.js Could not load " + options.src + ".  Are you sure you have the right path?"
+				throw "steal.js Could not load " + options.src + ".  Are you sure you have the right path?";
 			}, 5000);
-			return "onLoad='steal.ct(" + count + ")' "
+			return "onLoad='steal.ct(" + count + ")' ";
 		},
 		cleanId: function( id ) {
-			return id.replace(/[\/\.]/g, "_")
+			return id.replace(/[\/\.]/g, "_");
 		}
-
-
-
-	})
-	//for integration with other build types
-	steal.build || (steal.build = {
-		types: {}
 	});
-	var script_tag = function() {
-		var start = document.createElement('script');
-		start.type = 'text/javascript';
-		return start;
-	};
+	//for integration with other build types
+	if (!steal.build ) {
+		steal.build = {
+			types: {}
+		};
+	}
+
 	steal.loadedProductionCSS = false;
 	var insert = function( options ) {
 		// source we need to know how to get to steal, then load 
@@ -1186,19 +1211,22 @@
 		options = extend({
 			id: options.src && steal.cleanId(options.src)
 		}, options);
-		var start = options.src,
-			text = "",
+		var text = "",
 			scriptTag = '<script ',
 			bodyText;
 		if ( options.src ) {
 			var src_file = File(options.src);
-			if (!src_file.isLocalAbsolute() && !src_file.protocol() ) options.src = steal.root.join(options.src);
+			if (!src_file.isLocalAbsolute() && !src_file.protocol() ) {
+				options.src = steal.root.join(options.src);
+			}
 		}
 
 
 		if ( options.type && options.process ) {
 			text = steal.request(options.src);
-			if (!text ) throw "steal.js there is nothing at " + options.src;
+			if (!text ) {
+				throw "steal.js there is nothing at " + options.src;
+			}
 			bodyText = options.process(text);
 			options.type = 'text/javascript';
 			delete options.process;
@@ -1206,7 +1234,9 @@
 
 		} else if ( options.type && options.type != 'text/javascript' && !browser.rhino ) {
 			text = steal.request(options.src);
-			if (!text ) throw "steal.js there is nothing at " + options.src;
+			if (!text ) {
+				throw "steal.js there is nothing at " + options.src;
+			}
 			options.text = text;
 			delete options.src;
 		}
@@ -1215,14 +1245,14 @@
 			scriptTag += attr + "='" + options[attr] + "' ";
 		}
 		if ( steal.support.load && !steal.browser.rhino && !bodyText ) {
-			scriptTag += steal.loadErrorTimer(options)
+			scriptTag += steal.loadErrorTimer(options);
 		}
 		scriptTag += '>' + (bodyText || '') + '</script>';
 		if ( steal.support.load ) {
-			scriptTag += '<script type="text/javascript"' + '>steal.end()</script>'
+			scriptTag += '<script type="text/javascript"' + '>steal.end()</script>';
 		}
 		else {
-			scriptTag += '<script type="text/javascript" src="' + steal.root.join('steal/end.js') + '"></script>'
+			scriptTag += '<script type="text/javascript" src="' + steal.root.join('steal/end.js') + '"></script>';
 		}
 		document.write((options.src || bodyText ? scriptTag : ''));
 	};
