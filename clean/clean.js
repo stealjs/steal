@@ -2,7 +2,7 @@
 
 steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint','//steal/rhino/prompt', function(steal){
 	var lintAndPrint = function(out, src){
-		JSLINT(out,{forin: true, browser: true, windows: true});
+		JSLINT(out,{forin: true, browser: true, windows: true, rhino: true});
 		if(JSLINT.errors.length){
 			//var lines = out.split('\n'), line, error;
 			for(var i = 0; i < JSLINT.errors.length; i++){
@@ -20,11 +20,23 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 				print(" ")
 			}
 		}
-		var data  = JSLINT.data();
-		if(data.globals.length){
-			print("  GLOBALS \n    "+data.globals.join("\n    "))
-		}
 		
+		var data  = JSLINT.data();
+		//if(data.globals){
+		//	print("  GLOBALS \n    "+data.globals.join("\n    "))
+		//}
+		if(data.unused){
+			print("  UNUSED    ");
+			for(var i =0; i < data.unused.length; i++){
+				print("    "+data.unused[i].line+" : "+data.unused[i].name)
+			}
+		}
+		if(data.implieds){
+			print("  implied    ");
+			for(var i =0; i < data.implieds.length; i++){
+				print("    "+data.implieds[i].line+" : "+data.implieds[i].name)
+			}
+		}
 		return JSLINT.errors.length > 0 
 	}
 	
@@ -49,7 +61,8 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 				all : 1,
 				//folder to build to, defaults to the folder the page is in
 				to: 1,
-				print : 1
+				print : 1,
+				jslint :1
 			}) )
 		
 		//if it ends with js, just rewwrite
@@ -63,7 +76,13 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 			}else{
 				steal.File(url).save( out  )
 			}
-			
+			if(options.jslint){
+				var errors = lintAndPrint(out);
+				if(errors){
+					print("quiting because of JSLint Errors");
+					quit();
+				}
+			}
 		}else{
 			var folder = steal.File(url).dir(),
 				clean = /\/\/@steal-clean/
