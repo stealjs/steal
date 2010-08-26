@@ -22,13 +22,25 @@ var render = function(from, to, data){
  * @plugin steal/generate
  * @parent stealtools
  * The Generate plugin makes building code generators crazy easy.
- * The steal project is packaged with code generators for JavaScriptMVC, but you can build 
- * your own very easily.
- * <h2>Packaged Generators</h3>
+ * StealJS comes with its own app generator.  JavaScriptMVC has more complex generators.
+ * <h2>Steal Generators</h2>
+ * <ul>
+ * <li><code>app</code> - creates an application structure, build and clean scripts.
+ * @codestart text
+ * js steal/generate/app <i>path/to/app</i> [OPTIONS]
+ * @codeend
+ * <dl>
+ * 	<dt>path/to/app</dt>
+ * 	<dd>The lowercase path you want your application in. 
+ * 	</dd>
+ * </dl>
+ * </li>
+ * </ul>
+ * <h2>JavaScriptMVC Generators</h3>
  * <ul>
  * <li><code>app</code> - creates a JavaScriptMVC application structure.
  * @codestart text
- * js steal/generate/app <i>path/to/app</i> [OPTIONS]
+ * js jquery/generate/app <i>path/to/app</i> [OPTIONS]
  * @codeend
  * <dl>
  * 	<dt>path/to/app</dt>
@@ -39,7 +51,7 @@ var render = function(from, to, data){
  * </li>
  * <li style='padding-top: 10px;'><code>controller</code> - creates a JavaScriptMVC [jQuery.Controller].
  * @codestart text
- * js steal/generate/controller <i>App.Controllers.Name</i> [OPTIONS]
+ * js jquery/generate/controller <i>App.Controllers.Name</i> [OPTIONS]
  * @codeend
  * <dl>
  * 	<dt>App.Controllers.Name</dt>
@@ -52,7 +64,7 @@ var render = function(from, to, data){
  * 
  * <li style='padding-top: 10px;'><code>model</code> - creates a JavaScriptMVC [jQuery.Model].
  * @codestart text
- * js steal/generate/model <i>App.Models.Name</i> [TYPE] [OPTIONS]
+ * js jquery/generate/model <i>App.Models.Name</i> [TYPE] [OPTIONS]
  * @codeend
  * <dl>
  * 	<dt>App.Models.Name</dt>
@@ -65,7 +77,7 @@ var render = function(from, to, data){
  * 
  * <li style='padding-top: 10px;'><code>page</code> - creates a page that loads steal.js and an application.
  * @codestart text
- * js steal/generate/model <i>path/to/app</i> <i>path/to/page.html</i>
+ * js jquery/generate/model <i>path/to/app</i> <i>path/to/page.html</i>
  * @codeend
  * <dl>
  * 	<dt>path/to/app</dt>
@@ -79,7 +91,7 @@ var render = function(from, to, data){
  * 
  * <li style='padding-top: 10px;'><code>plugin</code> - creates a JavaScriptMVC plugin file and folder structure.
  * @codestart text
- * js steal/generate/plugin <i>path/to/plugin</i> [OPTIONS]
+ * js jquery/generate/plugin <i>path/to/plugin</i> [OPTIONS]
  * @codeend
  * <dl>
  * 	<dt>path/to/plugin</dt>
@@ -91,7 +103,7 @@ var render = function(from, to, data){
  * <li style='padding-top: 10px;'><code>scaffold</code> - creates the controllers, models, and fixtures used
  * to provide basic CRUD functionality..
  * @codestart text
- * js steal/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
+ * js jquery/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
  * @codeend
  * <dl>
  * 	<dt>App.Models.ModelName</dt>
