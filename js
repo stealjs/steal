@@ -5,13 +5,19 @@
 
 if [ $# -eq 0 ]
 then
-  java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main
+  java -cp steal/rhino/js.jar:funcunit/dist/selenium/selenium/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main
   exit 127
 fi
 if [ $1 = "-selenium" ]
 then
-  java -jar steal/rhino/selenium-server.jar
+  java -jar funcunit/dist/selenium/selenium/selenium-server.jar
   exit 127
+fi
+CP=funcunit/dist/selenium/selenium/selenium-java-client-driver.jar:steal/rhino/js.jar
+if [ $1 = "-mail" ]
+then
+	CP=steal/rhino/mail.jar:funcunit/dist/selenium/selenium/selenium-java-client-driver.jar:steal/rhino/js.jar
+	shift
 fi
 
 if [ $1 = "-h" -o $1 = "-?" -o $1 = "--help" ]
@@ -47,4 +53,4 @@ do
   fi
 done
 ARGS=$ARGS]
-java -cp steal/rhino/js.jar:steal/rhino/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -e 'load('"'"$1"'"')'
+java -Xss1024k -cp $CP org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -opt -1 -e 'load('"'"$1"'"')'

@@ -7,12 +7,14 @@ A.  How to get (and contribute) JMVC
   1.  Start a new project in git.
   
   2.  Fork ....
-           http://github.com/pinhook/steal     and 
-           http://github.com/pinhook/javascriptmvc
+           http://github.com/jupiterjs/steal     and 
+           http://github.com/jupiterjs/javascriptmvc
   
-  3.  Add steal and javascriptmvc as submodules of your project...
+  3.  Add steal, javascriptmvc, funcunit, and documentjs as submodules of your project...
            git submodule add git@github.com:_YOU_/steal.git steal
            git submodule add git@github.com:_YOU_/javascriptmvc.git jquery
+           git submodule add git@github.com:_YOU_/funcunit.git funcunit
+           git submodule add git@github.com:_YOU_/documentjs.git documentjs
            
       * Notice javascriptmvc is under the jquery folder
   
