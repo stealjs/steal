@@ -4,7 +4,7 @@ steal.plugins('steal/build','steal/build/scripts','steal/build/styles','steal/bu
 	var urls = [];
 	while(_args.length){
 		if( _args[0].indexOf('-') != 0 ) {
-			urls.push(_args[0].shift())
+			urls.push(_args.shift())
 		}else{
 			break;
 		}
