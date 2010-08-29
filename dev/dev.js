@@ -26,12 +26,12 @@ steal.dev = {
 	},
 	isHappyName: function( name ) {
 		//make sure names are close to the current path
-		var path = steal.current.path.replace(/\.[^$]+$/, "").split('/')
+		var path = steal.cur().path.replace(/\.[^$]+$/, "").split('/')
 		//make sure parts in name match
 		var parts = name.split('.')
 		for ( var i = 0; i < parts.length && path.length; i++ ) {
 			if ( parts[i].toLowerCase() != path[i] && this.underscore(parts[i]) != path[i] && this.underscore(parts[i]) != path[i].replace(/_controller/, "") ) {
-				this.warn("Are you sure " + name + " belongs in " + steal.current.path)
+				this.warn("Are you sure " + name + " belongs in " + steal.cur().path)
 			}
 		}
 	},
