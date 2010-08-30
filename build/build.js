@@ -187,14 +187,16 @@ steal(function( steal ) {
 	 * the content for a certain tag slightly easier.
 	 * 
 	 */
-	steal.build.open = function( url ) {
+	steal.build.open = function( url , stealData ) {
 		var scripts = [],
 
 		// save and remove the old steal
 			oldSteal = window.steal || steal,
 			newSteal;
 		delete window.steal;
-		
+		if(stealData){
+			window.steal = stealData;
+		}
 		// get envjs
 		load('steal/rhino/env.js'); //reload every time
 		

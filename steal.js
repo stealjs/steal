@@ -299,17 +299,32 @@
 				return;
 			}
 			if ( typeof options == 'string' ) {
-				options = {
-					path: /\.js$/ig.test(options) ? options : options + '.js'
-				};
+				if(/\.js$/i.test(options)){
+					options = {path: options}
+				}else{
+					options = {path: options+ '.js'}
+				}
 			}
 			extend(this, options);
+			
 			this.options = options; //TODO: needed?
 			this.originalPath = this.path;
 			//get actual path
+			//if( this.path.match(/^\/\//) ){
+			//	this.path = steal.root.join(this.path.substr(2));
+			//}
+			
+			
 			var pathFile = File(this.path);
+			
 			this.path = pathFile.normalize();
-			this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
+			if (this.originalPath.match(/^\/\//)) {
+				this.absolute = steal.root.join(this.originalPath.substr(2));
+			}
+			else {
+				this.absolute = pathFile.relative() ? pathFile.joinFrom(steal.getAbsolutePath(), true) : this.path;
+			}
+			
 			this.dir = File(this.path).dir();
 		},
 		/**
@@ -317,7 +332,10 @@
 		 * @hide
 		 */
 		run: function() {
-			steal.current = this;
+			//set next to current so other includes will be added to it
+			steal.cur(this);
+			//only load if actually pulled, this helps us mark only once
+			this.dependencies = [];
 			var isProduction = (steal.options.env == "production"),
 				options = extend({
 					type: "text/javascript",
@@ -328,17 +346,21 @@
 				}, this.options));
 
 			if ( this.func ) {
+				//console.log("run FUNCTION")
 				//run function and continue to next steald
 				this.func();
 				steal.end();
 				//insert();
-			} else if (!isProduction ) {
+			} else if (!isProduction || this.force ) { //force is for packaging
+				//console.log("run INSERT",this.path)
 				if ( this.type ) {
 					insert(options);
 				} else {
 					steal.curDir(this.path);
 					insert(this.skipInsert ? undefined : options);
 				}
+			}else{
+				//console.log("run VIRTUAL ",this.path)
 			}
 
 		},
@@ -659,6 +681,8 @@
 		first_wave_done = false,
 		//a list of all steald paths
 		cwd = '',
+		//  the current steal
+		cur = null,
 		//where we are currently including
 		steals = [],
 		//    
@@ -747,39 +771,46 @@
 					return steal;
 				};
 			}
-
+			//calculate production location;
 			if (!steal.options.production && steal.options.startFile ) {
-				steal.options.production = steal.root.join(File(steal.options.startFile).dir() + '/production');
-
+				steal.options.production = "//"+File(steal.options.startFile).dir() + '/production';
 			}
 			if ( steal.options.production ) {
 				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
 			}
-
-
-			//start loading stuff
-			//steal.plugins('jquery'); //always load jQuery
-			var current_path = steal.getCurrent();
-			steal({
-				path: 'steal/dev/dev.js',
-				ignore: true
-			});
-			steal.curDir(current_path);
-
-
-
-
-			//if you have a startFile load it
-			if ( steal.options.startFile ) {
-				first = false; //makes it so we call close after
-				steal(steal.options.startFile);
+			//we only load things with force = true
+			if(steal.options.env == 'production' && steal.options.loadProduction ){
+				if ( steal.options.production ) {
+					first = false; //makes it so we call close after
+					//steal(steal.options.startFile);
+					steal({
+						path : steal.options.production,
+						force: true
+					});
+				}
+				
+			}else{
+				
+				var current_path = steal.getCurrent();
+				steal({
+					path: 'steal/dev/dev.js',
+					ignore: true
+				});
+				steal.curDir(current_path);
+	
+	
+	
+	
+				//if you have a startFile load it
+				if ( steal.options.startFile ) {
+					first = false; //makes it so we call close after
+					//steal(steal.options.startFile);
+					steal._start =new steal.fn.init(steal.options.startFile);
+					steal.add(steal._start);
+				}
+				
 			}
 
-
-			if ( steal.options.env == 'production' && steal.options.loadProduction ) {
-				steal.end();
-				document.write('<script type="text/javascript" src="' + steal.options.production + '"></script>');
-			}
 
 
 			if ( steal.options.startFile ) {
@@ -802,6 +833,13 @@
 			}
 
 		},
+		cur : function(steal){
+			if(steal !== undefined){
+				return cur = steal;
+			}else{
+				return cur;
+			}
+		},
 		//is the current folder cross domain from our folder?
 		isCurrentCrossDomain: function() {
 			return File(steal.getAbsolutePath()).isCrossDomain();
@@ -819,10 +857,15 @@
 			//If steal is a function, add to list, and unshift
 			if ( typeof newInclude.func == 'function' ) {
 				steal.functions.push(newInclude); //add to the list of functions
+				//console.log("add","FUNCTION")
 				current_steals.unshift(newInclude); //add to the front
 				return;
 			}
-
+			var cur = steal.cur();
+			if(cur){
+				cur.dependencies.push(newInclude);
+			}
+			
 			//if we have already performed loads, insert new steals in head
 			//now we should check if it has already been steald or added earlier in this file
 			if ( steal.shouldAdd(newInclude) ) {
@@ -837,6 +880,7 @@
 						break;
 					}
 				}
+				//console.log("add FILE",newInclude.path)
 				current_steals.unshift(newInclude);
 			}
 		},
@@ -863,6 +907,8 @@
 		},
 		// Called after every file is loaded.  Gets the next file and steals it.
 		end: function( src ) {
+			//console.log("steal.end",steals.slice(0).reverse().map(function(i){return i.func ? "FUNC" : i.path}),"adding",
+			//	current_steals.slice(0).reverse().map(function(i){return i.func ? "FUNC" : i.path}))
 			//prevents warning of bad includes
 			clearTimeout(steal.timer);
 			// add steals that were just added to the end of the list
@@ -873,7 +919,7 @@
 
 			// take the last one
 			var next = steals.pop();
-
+			
 			// if there are no more
 			if (!next ) {
 				first_wave_done = true;
@@ -883,6 +929,7 @@
 				total.push(next);
 				current_steals = [];
 				next.run();
+				
 			}
 
 		},
@@ -1042,7 +1089,12 @@
 			return function() {
 				var args = [];
 				for ( var i = 0; i < arguments.length; i++ ) {
-					args[i] = f(arguments[i]);
+					if(typeof arguments[i] == "function"){
+						args[i] = arguments[i];
+					}else{
+						args[i] = f(arguments[i]);
+					}
+					
 				}
 				steal.apply(null, args);
 				return steal;
@@ -1054,7 +1106,19 @@
 	steal.plugin = steal.resetApp(function( p ) {
 		return p + '/' + getLastPart(p);
 	});
-
+	steal.packs = function(){
+		for ( var i = 0; i < arguments.length; i++ ) {
+			if(typeof arguments[i] == "function"){
+				steal(arguments[i]);
+			}else{
+				steal({
+					force: true,
+					path: "//packages/"+arguments[i]+".js"
+				});
+			}
+		}
+		return this;
+	}
 
 	extend(steal, {
 
