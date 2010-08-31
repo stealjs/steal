@@ -350,7 +350,6 @@
 				//run function and continue to next steald
 				this.func();
 				steal.end();
-				//insert();
 			} else if (!isProduction || this.force ) { //force is for packaging
 				//console.log("run INSERT",this.path)
 				if ( this.type ) {
@@ -361,6 +360,9 @@
 				}
 			}else{
 				//console.log("run VIRTUAL ",this.path)
+				if (!this.type){
+					steal.curDir(this.path);
+				}
 			}
 
 		},
