@@ -309,12 +309,8 @@
 			
 			this.options = options; //TODO: needed?
 			this.originalPath = this.path;
+			
 			//get actual path
-			//if( this.path.match(/^\/\//) ){
-			//	this.path = steal.root.join(this.path.substr(2));
-			//}
-			
-			
 			var pathFile = File(this.path);
 			
 			this.path = pathFile.normalize();

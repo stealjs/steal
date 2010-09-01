@@ -100,7 +100,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 	}
 	//@steal-remove-start
 	steal.build.types['text/less'] =  function(script, loadScriptText){
-		var text =  loadScriptText(script.href, script),
+		var text =   script.text || loadScriptText(script.href, script),
 			styles;
 		new (less.Parser)({
 	                optimization: less.optimization,

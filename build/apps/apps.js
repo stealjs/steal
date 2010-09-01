@@ -4,10 +4,24 @@ steal(function( steal ) {
 	var addDependencies = function(steel, files,app){
 		//add self to files
 		if(!files[steel.path]){
-			print(" compressing "+steel.path);
+			
 			var source = readFile(steel.path);
+			if(steel.type && steal.build.types[steel.type]){
+				
+				source = steal.build.types[steel.type]({
+					text: source,
+					id: steal.cleanId(steel.path)
+				});
+				print(" converting "+steel.path+" ");
+			}else{
+				print(" compressing "+steel.path+" ");
+				
+			}
 			source = steal.build.builders.scripts.clean(source);
 			source =  ""+steal.build.compressor(source , true);
+			//need to convert to other types.
+			
+			
 			files[steel.path] = {
 				path : steel.path,
 				apps : [],
@@ -156,7 +170,7 @@ steal(function( steal ) {
 			//go through files, put in src, and track
 			for(var i =0; i < ordered.length; i++){
 				var f = ordered[i];
-				src.push(";/* "+f.path+" */\n"+ f.source +";\n");
+				src.push("/* "+f.path+" */\n"+ f.source);
 				print("  "+f.order+":"+f.path);
 				paths.push(f.path)
 			}
@@ -164,7 +178,7 @@ steal(function( steal ) {
 			//the final source, includes a steal of all the files in this source
 			var source = "steal('//"+paths.join("'\n,'//")+
 				"');\nsteal.end();\n"
-				+src.join(";\nsteal.end();\n"),
+				+src.join(";steal.end();\n"),
 				
 				//the path to save
 				saveFile = pack.apps.length == 1 ? 

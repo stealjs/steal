@@ -10,8 +10,11 @@ steal(function( steal ) {
 	 * 
 	 * @parent stealtools
 	 * 
-	 * Builds an html page's JavaScript and CSS files by compressing and concatenating them into
+	 * <p>Builds an html page's JavaScript and CSS files by compressing and concatenating them into
 	 * a single or several files.
+	 * </p>
+	 * <p>Steal can also build multiple applications at the same time and separate 
+	 * 	shared dependencies into standalone cache-able scripts.</p>
 	 * <h2>How it works</h2>
 	 * <p><code>Steal.build</code> opens a page in Envjs to extract all scripts and styles
 	 * from the page.  It compresses the resources into production.js and production.css
@@ -62,6 +65,21 @@ steal(function( steal ) {
 	 * <h5>Unending timeouts or intervals before onload</h5>
 	 * <p>Envjs won't quit running until all timeouts or intervals have completed.  If you have a reoccuring
 	 * 'process', consider starting it on document ready or onload.</p>
+	 * <h2>Building With Shared Dependencies</h2>
+	 * <p>
+	 * If you are using steal in a setting with multiple pages loading similar
+	 * functionality, it's typically a good idea to build the shared functionality in
+	 * its own script.  This way when a user switches pages, they don't have to load
+	 * that functionality again.
+	 * </p>
+	 * <p>
+	 * To do this, use the buildjs script with the names of your apps:
+	 * </p>
+	 * @codestart
+	 * ./js steal/buildjs myco/search myco/searchresults music
+	 * @codeend
+	 * <h2>steal.build function</h2>
+	 * Takes a url, extracts
 	 * @param {String} url an html page to compress
 	 * @param {Object} options An object literal with the following optional values:
 	 * <table class='options'>
@@ -154,23 +172,23 @@ steal(function( steal ) {
 			}
 		},
 		'text/ejs': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
+			var text = script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
 			return jQuery.View.registerScript("ejs", id, text);
 		},
 		'text/micro': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
+			var text = script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
 			return jQuery.View.registerScript("micro", id, text);
 		},
 		'text/jaml': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
+			var text =  script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
 			return jQuery.View.registerScript("jaml", id, text);
 		},
 		'text/tmpl': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
+			var text =  script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
 			return jQuery.View.registerScript("tmpl", id, text);
 		},
 		loadScriptText: loadScriptText
