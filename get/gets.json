@@ -5,4 +5,6 @@
   "funcunit" : "http://github.com/jupiterjs/funcunit",
   "phui" : "http://github.com/jupiterjs/phui",
   "documentjs" : "http://github.com/jupiterjs/documentjs"
+  "ss/statemachine" : "http://github.com/secondstory/secondstoryjs-statemachine",
+  "ss/router" : "http://github.com/secondstory/secondstoryjs-router"
 }
