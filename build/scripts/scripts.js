@@ -77,8 +77,7 @@ steal(function( steal ) {
 	});
 	// removes  dev comments from text
 	scripts.clean = function( text ) {
-		text = text.replace(/steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\w+)[\n\s\r]*\([^\)]*\)/g, "")
-		return String(java.lang.String(text).replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", ""));
+		return String(java.lang.String(text).replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", "").replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\\w+)[\n\s\r]*\\([^\\)]*\\)", ""));
 	};
 
 	//various compressors
