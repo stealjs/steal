@@ -2,7 +2,7 @@
 
 steal("//steal/get/json","//steal/rhino/prompt",function(steal){
 /**
- * @parent stealtools
+ * @parent stealjs
  * Downloads and installs a plugin from a url.  Normally this is run from the steal/getjs script.
  * 
  * <p>The following copies the mustache-javascript repo to a local mustache folder.</p>

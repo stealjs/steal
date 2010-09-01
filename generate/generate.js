@@ -20,7 +20,7 @@ var render = function(from, to, data){
 	
 /**
  * @plugin steal/generate
- * @parent stealtools
+ * @parent stealjs
  * The Generate plugin makes building code generators crazy easy.
  * StealJS comes with its own app generator.  JavaScriptMVC has more complex generators.
  * <h2>Steal Generators</h2>

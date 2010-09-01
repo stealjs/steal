@@ -114,11 +114,11 @@
 
 	/**
 	 * @constructor steal
-	 * @parent stealtools
+	 * @parent stealjs
 	 * <p>Steal makes JavaScript dependency management and resource loading easy.</p>
 	 * <p>This page details the steal script (<code>steal/steal.js</code>), 
 	 * and steal function which are used to load files into your page.  
-	 * For documentation of other Steal projects, read [stealtools Steal Tools].</p>
+	 * For documentation of other Steal projects, read [stealjs StealJS].</p>
 	 * <h3>Quick Overview</h3>
 	 * 
 	 * <p>To start using steal, add the steal script to your page, and tell it the first
@@ -811,6 +811,10 @@
 		 */
 		init: function() {
 			this.setScriptOptions();
+			//force into development mode to prevent errors
+			if(steal.browser.rhino){
+				steal.options.env = 'development';
+			}
 			this.setOldIncludeOptions();
 			this.setHashOptions();
 			//clean up any options

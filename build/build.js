@@ -8,7 +8,7 @@ steal(function( steal ) {
 
 	/**
 	 * 
-	 * @parent stealtools
+	 * @parent stealjs
 	 * 
 	 * <p>Builds an html page's JavaScript and CSS files by compressing and concatenating them into
 	 * a single or several files.

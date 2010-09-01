@@ -43,7 +43,7 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 	
 	
 	/**
-	 * @parent stealtools
+	 * @parent stealjs
 	 * <p>Beautifies source code with [http://jsbeautifier.org/ JS Beautify]
 	 * and checks it for trouble spots with 
 	 * [http://www.jslint.com/ JSLint].
