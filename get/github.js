@@ -19,9 +19,9 @@ steal.extend(steal.get.github.prototype,{
 		steal.get.getter.prototype.init.apply(this,arguments);
 		this.orig_cwd = this.cwd;
 		if(this.ignore){
-			this.ignore.push(".gitignore", "dist")
+			this.ignore.push(".gitignore", ".gitmodules", "dist")
 		}else{
-			this.ignore = [".gitignore", "dist"]
+			this.ignore = [".gitignore", ".gitmodules", "dist"]
 		}
 		var split = url.split("/")
 		this.username = split[3];
