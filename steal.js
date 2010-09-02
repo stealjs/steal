@@ -1021,7 +1021,9 @@
 				if ( steal.loadedProductionCSS ) {
 					return steal;
 				} else {
-					steal.createLink(steal.options.production.replace(".js", ".css"));
+					var productionCssPath = steal.File(steal.options.production.replace(".js", ".css")).normalize();
+					productionCssPath = steal.root.join(productionCssPath);
+					steal.createLink(productionCssPath);
 					steal.loadedProductionCSS = true;
 					return steal;
 				}
