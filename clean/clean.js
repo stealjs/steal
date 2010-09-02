@@ -75,6 +75,11 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 	 * <h2>The clean script</h2>
 	 * When you generate a JavaScriptMVC application, it comes with
 	 * a steal script.  You can modify the options in this file.</p>
+	 * <h2>Ignoring Files</h2>
+	 * To ignore a file from your application, mark it as clean with a comment like:
+	 * @codestart
+	 * //@steal-clean
+	 * @codeend
 	 * <h2>The steal.clean function</h2>
 	 * <p>Takes a relative path to a file on the filesystem;
 	 * checks if it is a html page or a single js file; runs 
