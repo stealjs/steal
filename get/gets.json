@@ -6,5 +6,6 @@
   "phui" : "http://github.com/jupiterjs/phui",
   "documentjs" : "http://github.com/jupiterjs/documentjs",
   "ss/state_machine" : "http://github.com/secondstory/secondstoryjs-statemachine",
-  "ss/router" : "http://github.com/secondstory/secondstoryjs-router"
+  "ss/router" : "http://github.com/secondstory/secondstoryjs-router",
+  "ss/model/html5_store" : "http://github.com/secondstory/secondstoryjs-html5storage"
 }
