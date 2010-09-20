@@ -1,14 +1,20 @@
+//used to build a page's script
+/*global steal : false, Envjs : false, jQuery : false*/
 
-steal(function(steal){
-	var opts = {},
-		window = (function(){return this}).call(null,0);
-	
+steal(function( steal ) {
+	var window = (function() {
+		return this;
+	}).call(null, 0);
+
 	/**
 	 * 
-	 * @parent stealtools
+	 * @parent stealjs
 	 * 
-	 * Builds an html page's JavaScript and CSS files by compressing and concatenating them into
+	 * <p>Builds an html page's JavaScript and CSS files by compressing and concatenating them into
 	 * a single or several files.
+	 * </p>
+	 * <p>Steal can also build multiple applications at the same time and separate 
+	 * 	shared dependencies into standalone cache-able scripts.</p>
 	 * <h2>How it works</h2>
 	 * <p><code>Steal.build</code> opens a page in Envjs to extract all scripts and styles
 	 * from the page.  It compresses the resources into production.js and production.css
@@ -59,169 +65,217 @@ steal(function(steal){
 	 * <h5>Unending timeouts or intervals before onload</h5>
 	 * <p>Envjs won't quit running until all timeouts or intervals have completed.  If you have a reoccuring
 	 * 'process', consider starting it on document ready or onload.</p>
+	 * <h2>Building With Shared Dependencies</h2>
+	 * <p>
+	 * If you are using steal in a setting with multiple pages loading similar
+	 * functionality, it's typically a good idea to build the shared functionality in
+	 * its own script.  This way when a user switches pages, they don't have to load
+	 * that functionality again.
+	 * </p>
+	 * <p>
+	 * To do this, use the buildjs script with the names of your apps:
+	 * </p>
+	 * @codestart
+	 * ./js steal/buildjs myco/search myco/searchresults music
+	 * @codeend
+	 * <h2>steal.build function</h2>
+	 * Takes a url, extracts
 	 * @param {String} url an html page to compress
 	 * @param {Object} options An object literal with the following optional values:
 	 * <table class='options'>
-	 * 	  <tr>
-	 * 	      <th>Name</th><th>Description</th>
-	 * 	  </tr>
-	 * 	  <tr><td>to</td>
-	 * 	  		<td>The folder to put the production.js and production.css files.</td></tr>
-	 * 	  <tr><td>all</td>
-	 * 		  <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
-	 * 		  scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
-	 * 	</table>
+	 *       <tr>
+	 *           <th>Name</th><th>Description</th>
+	 *       </tr>
+	 *       <tr><td>to</td>
+	 *           <td>The folder to put the production.js and production.css files.</td></tr>
+	 *       <tr><td>all</td>
+	 *       <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
+	 *           scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
+	 *     </table>
 	 */
-	steal.build = function(url, options){
+	steal.build = function( url, options ) {
+		
+		//convert options (which might be an array) into an object
 		options = steal.opts(options || {}, {
 			//compress everything, regardless of what you find
-			all : 1,
+			all: 1,
 			//folder to build to, defaults to the folder the page is in
 			to: 1
-		})
+		});
+
+		// to is the folder packages will be put in
+		options.to = options.to || (url.match(/https?:\/\//) ? 
+					"" : 
+					url.substr(0, url.lastIndexOf('/')));
 		
-		
-		//out is the folder packages will be sent to
-		options.to = options.to || (url.match(/https?:\/\//) ?  "" : url.substr(0, url.lastIndexOf('/'))  );
-		if (options.to.match(/\\$/) == null && options.to != '') {
+		// make sure to ends with /
+		if ( options.to.match(/\\$/) === null && options.to !== '' ) {
 			options.to += "/";
 		}
+
+		print("Building to " + options.to);
+
+		var opener = steal.build.open(url);
 		
-		print("Building to "+options.to);
-		
-		var opener = steal.build.open(url)
-		for(var builder in steal.build.builders){
-			steal.build.builders[builder](opener, options)
+		// iterates through the types of builders.  For now
+		// there are just scripts and styles builders
+		for ( var builder in steal.build.builders ) {
+			steal.build.builders[builder](opener, options);
 		}
-	}
+	};
+	
+	// a place for the builders
 	steal.build.builders = {}; //builders
 	
-	var loadScriptText = function(src){
+	// a helper function that gets the src of a script and returns
+	// the content for that script
+	var loadScriptText = function( src ) {
 		var text = "",
 			base = "" + window.location,
 			url = src.match(/([^\?#]*)/)[1];
-	
-		if (url.match(/^\/\//)){
-			url = steal.root.join( url.substr(2) ); //can steal be removed?
+
+		if ( url.match(/^\/\//) ) {
+			url = steal.root.join(url.substr(2)); //can steal be removed?
 		}
 		url = Envjs.uri(url, base);
-	    
-	    if(url.match(/^file\:/)) {
-	        url = url.replace("file:/","");
-	        text = readFile("/"+url);
-	    }
-	    
-	    if(url.match(/^http\:/)) {
-	        text = readUrl(url);
-	    }
-	
-	    return text;
+
+		if ( url.match(/^file\:/) ) {
+			url = url.replace("file:/", "");
+			text = readFile("/" + url);
+		}
+
+		if ( url.match(/^http\:/) ) {
+			text = readUrl(url);
+		}
+
+		return text;
 	};
-	
+
 	// types conversion
+	// the idea is for each type to return JavaScript (or css) that
+	// should be in its place
 	steal.build.types = {
 		'text/javascript': function( script ) {
-			if (script.src) {
+			if ( script.src ) {
 				return loadScriptText(script.src, script);
 			}
 			else {
-				return script.text
+				return script.text;
 			}
 		},
-		'text/css' : function( script ) {
-			if (script.href) {
+		'text/css': function( script ) {
+			if ( script.href ) {
 				return loadScriptText(script.href, script);
 			}
 			else {
-				return script.text
+				return script.text;
 			}
 		},
 		'text/ejs': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
-			return $.View.registerScript("ejs", id, text);
+			var text = script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
+			return jQuery.View.registerScript("ejs", id, text);
 		},
 		'text/micro': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
-			return $.View.registerScript("micro", id, text);
+			var text = script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
+			return jQuery.View.registerScript("micro", id, text);
 		},
 		'text/jaml': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
-			return $.View.registerScript("jaml", id, text);
+			var text =  script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
+			return jQuery.View.registerScript("jaml", id, text);
 		},
 		'text/tmpl': function( script ) {
-			var text = loadScriptText(script.src);
-			var id = script.getAttribute("id");
-			return $.View.registerScript("tmpl", id, text);
+			var text =  script.text || loadScriptText(script.src),
+				id = script.id || script.getAttribute("id");
+			return jQuery.View.registerScript("tmpl", id, text);
 		},
-		loadScriptText : loadScriptText
-	}
-	
-	
-	steal.build.open = function(url ){
-		scriptProcessors = steal.extend({}, steal.build.types);
-		var types = {}, 
-			name,
-			scripts = [];
-			
-		for(name in scriptProcessors){
-			types[name] = true;
-		}
-		var oldSteal = window.steal || steal, 
+		loadScriptText: loadScriptText
+	};
+
+	/**
+	 * @function open
+	 * Opens a page by:
+	 *   temporarily deleting the rhino steal
+	 *   opening the page with Envjs
+	 *   setting back rhino steal, saving envjs's steal as steal._steal;
+	 * @param {String} url the html page to open
+	 * @return {Object} an object with properties that makes extracting 
+	 * the content for a certain tag slightly easier.
+	 * 
+	 */
+	steal.build.open = function( url , stealData ) {
+		var scripts = [],
+
+		// save and remove the old steal
+			oldSteal = window.steal || steal,
 			newSteal;
 		delete window.steal;
-		//load the page
+		if(stealData){
+			window.steal = stealData;
+		}
+		// get envjs
 		load('steal/rhino/env.js'); //reload every time
-		Envjs(url, {scriptTypes: {"text/javascript" : true,"text/envjs" : true}, fireLoad: false, logLevel: 2,
-	        afterScriptLoad: {".*": function( script ) { 
-	                scripts.push(script);
-	            }
-	        },
-	        onLoadUnknownTypeScript: function( script ) {
-	            self.scripts.push(script);   
-	        },
+		
+		// open the url
+		Envjs(url, {
+			scriptTypes: {
+				"text/javascript": true,
+				"text/envjs": true
+			},
+			fireLoad: false,
+			logLevel: 2,
+			afterScriptLoad: {
+				".*": function( script ) {
+					scripts.push(script);
+				}
+			},
+			onLoadUnknownTypeScript: function( script ) {
+				scripts.push(script);
+			},
 			afterInlineScriptLoad: function( script ) {
-				scripts.push(script);   
-	        }
-	    }); 
-		//set back steal
+				scripts.push(script);
+			}
+		});
+		
+		// set back steal
 		newSteal = window.steal;
 		window.steal = oldSteal;
 		window.steal._steal = newSteal;
-		//check if newSteal added any build types
-		for(var buildType in newSteal.build.types){
+		
+		
+		// check if newSteal added any build types (used to convert less to css for example).
+		for ( var buildType in newSteal.build.types ) {
 			oldSteal.build.types[buildType] = newSteal.build.types[buildType];
 		}
-		
-		
+
+		// return the helper
 		return {
-			each: function( type , func, ths ) {
-				if(typeof type == 'function'){
-					ths = func;
+			/**
+			 * @hide
+			 * Gets all elements of a type, extracts their converted content, and calls a callback function with  
+			 * each element and its converted content.
+			 * @param {Object} [type] the tag to get
+			 * @param {Object} func a function to call back with the element and its content
+			 */
+			each: function( type, func ) {
+				if ( typeof type == 'function' ) {
 					func = type;
-					type = 'script'
+					type = 'script';
 				}
-		        var scripts = document.getElementsByTagName(type);
-				for(var i = 0 ; i < scripts.length; i++){
-					func.call(ths,scripts[i], this.getScriptContent(scripts[i]), i)
+				var scripts = document.getElementsByTagName(type);
+				for ( var i = 0; i < scripts.length; i++ ) {
+					func(scripts[i], this.getScriptContent(scripts[i]), i);
 				}
 			},
 			getScriptContent: function( script ) {
 				return steal.build.types[script.type] && steal.build.types[script.type](script, loadScriptText);
 			},
-			steal : newSteal,
-			url : url
-		}
-	}
-	
-})
+			// the 
+			steal: newSteal,
+			url: url
+		};
+	};
 
-
-
-
-
-
-
-
+});

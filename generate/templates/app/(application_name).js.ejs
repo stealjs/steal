@@ -1,21 +1,10 @@
-steal.plugins(	
-	'jquery/controller',			// a widget factory
-	'jquery/controller/subscribe',  // subscribe to OpenAjax.hub
-	'jquery/view/ejs',				// client side templates
-	'jquery/model/store',			// a data store
-	'jquery/model',					// Ajax wrappers
-	'jquery/dom/fixture',			// simulated Ajax requests
-	'jquery/dom/form_params')		// form data helper
-	
-.css('<%= application_name %>')  // loads styles
-
-.resources()                        // 3rd party script's (like jQueryUI), in resources folder
-
-.models()                           // loads files in models folder 
-
-.controllers()                      // loads files in controllers folder
-
-.views()                            // adds views to be added to build
-
-
+steal( 'resources/example' )				// Loads 'resources/example.js'
+	.css( '<%= application_name %>' )			// Loads '<%= application_name %>.css'
+	.plugins(
+		'steal/less',
+		'steal/coffee' )					// Loads 'steal/less/less.js' and 'steal/coffee/coffee.js'
+	.then(function(){						// Adds a function to be called back once all prior files have been loaded and run 
+		steal.coffee('resources/example')	// Loads 'resources/example.coffee'
+			.less('resources/example');		// Loads 'resources/example.less'
+	});
 	 

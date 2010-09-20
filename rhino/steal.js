@@ -40,7 +40,10 @@
 			}
 		}
 		return -1;
-	}
+	};
+	steal.cleanId = function( id ) {
+		return id.replace(/[\/\.]/g, "_");
+	};
 	steal.win = oldWindow;
 	if(oldSteal){
 		steal._steal = oldSteal;

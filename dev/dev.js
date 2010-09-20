@@ -1,6 +1,6 @@
 /**
  * @class steal.dev
- * @parent stealtools
+ * @parent stealjs
  * Provides helper functions for development that get removed when put in production mode.
  * This means you can leave <code>steal.dev.log("hello world")</code> in your code and it
  * will get removed in prodution.
@@ -26,12 +26,12 @@ steal.dev = {
 	},
 	isHappyName: function( name ) {
 		//make sure names are close to the current path
-		var path = steal.current.path.replace(/\.[^$]+$/, "").split('/')
+		var path = steal.cur().path.replace(/\.[^$]+$/, "").split('/')
 		//make sure parts in name match
 		var parts = name.split('.')
 		for ( var i = 0; i < parts.length && path.length; i++ ) {
 			if ( parts[i].toLowerCase() != path[i] && this.underscore(parts[i]) != path[i] && this.underscore(parts[i]) != path[i].replace(/_controller/, "") ) {
-				this.warn("Are you sure " + name + " belongs in " + steal.current.path)
+				this.warn("Are you sure " + name + " belongs in " + steal.cur().path)
 			}
 		}
 	},
