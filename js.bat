@@ -12,16 +12,16 @@ if "%1"=="-?" GOTO PRINT_HELP
 if "%1"=="--help" GOTO PRINT_HELP
 
 if "%1"=="-d" (
-	java -classpath funcunit/dist/selenium/selenium/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
+	java -classpath funcunit/java/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
 	GOTO END
 )
 if "%1"=="-selenium" (
 	java -jar funcunit\java\selenium-server.jar
 	GOTO END
 )
-SET CP=funcunit/dist/selenium/selenium/selenium-java-client-driver.jar;steal\rhino\js.jar
+SET CP=funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
 if "%1"=="-mail" (
-	SET CP=steal/rhino/mail.jar;funcunit/dist/selenium/selenium/selenium-java-client-driver.jar;steal\rhino\js.jar
+	SET CP=steal/rhino/mail.jar;funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
 	SHIFT /0
 )
 SET ARGS=[
@@ -29,10 +29,12 @@ SET FILENAME=%1
 SET FILENAME=%FILENAME:\=/%
 ::haven't seen any way to loop through all args yet, so for now this goes through arg 2-7
 for /f "tokens=2,3,4,5,6,7 delims= " %%a in ("%*") do SET ARGS=!ARGS!'%%a','%%b','%%c','%%d','%%e','%%f'
-::remove the commas
-for %%a in (",''=") do ( call set ARGS=%%ARGS:%%~a%% )
+::remove the empty args
+:: for %%a in (",''=") do ( call set ARGS=%%ARGS:%%~a%% )
+SET ARGS=%ARGS:,''=%
 ::remove the spaces
-for /f "tokens=1*" %%A in ("%ARGS%") do SET ARGS=%%A
+:: for /f "tokens=1*" %%A in ("%ARGS%") do SET ARGS=%%A
+SET ARGS=%ARGS: =%
 SET ARGS=%ARGS%]
 set ARGS=%ARGS:\=/%
 java -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
