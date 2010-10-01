@@ -1,3 +1,3 @@
-steal(function(){
+steal(function() {
 	order(3)
 });

@@ -3,7 +3,7 @@ steal(function( steal ) {
 	// recursively goes through steals and their dependencies.
 	var addDependencies = function( steel, files, app ) {
 		//add self to files
-		if ( !files[steel.path] ) {
+		if (!files[steel.path] ) {
 
 			var source = readFile(steel.path);
 			if ( steel.type && steal.build.types[steel.type] ) {
@@ -20,7 +20,6 @@ steal(function( steal ) {
 			source = steal.build.builders.scripts.clean(source);
 			source = "" + steal.build.compressor(source, true);
 			//need to convert to other types.
-
 
 			files[steel.path] = {
 				path: steel.path,
@@ -64,7 +63,6 @@ steal(function( steal ) {
 		},
 		getMostShared = function( files ) {
 			var shared = []; // count
-
 			for ( var fileName in files ) {
 				var file = files[fileName];
 				if ( file.packaged ) {
@@ -74,7 +72,6 @@ steal(function( steal ) {
 					shared[file.apps.length] = {};
 				}
 				var level = shared[file.apps.length]; //how many apps it is shared in (5?)
-
 
 				var appsName = file.apps.sort().join();
 
@@ -105,7 +102,6 @@ steal(function( steal ) {
 				}
 			}
 			//mark files 
-
 			for ( var i = 0; i < most.files.length; i++ ) {
 				var f = most.files[i];
 				f.packaged = true;
