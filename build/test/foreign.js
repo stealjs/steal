@@ -1,2 +1,2 @@
-a="Miércoles";
-b="Atenção";
+a = "Miércoles";
+b = "Atenção";

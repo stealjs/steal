@@ -1,5 +1,4 @@
 // load('steal/test/run.js')
-
 /**
  * Steal qunit tests
  */

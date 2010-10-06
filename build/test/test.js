@@ -1,3 +1,3 @@
-steal('basicsource').then(function(){
+steal('basicsource').then(function() {
 	BasicSource++;
 })

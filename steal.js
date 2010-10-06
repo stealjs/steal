@@ -505,7 +505,10 @@
 			return http ? http[1] : null;
 		},
 		/**
-		 * Joins url onto path
+		 * Joins a url onto a path.  One way of understanding this is that your File object represents your current location, and calling join() is analogous to "cd" on a command line.
+		 * @codestart
+new steal.File("d/e").join("../a/b/c"); // Yields the path "d/a/b/c"
+@codeend
 		 * @param {String} url
 		 */
 		join: function( url ) {

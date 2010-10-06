@@ -94,7 +94,7 @@ steal(function( steal ) {
 	 *     </table>
 	 */
 	steal.build = function( url, options ) {
-		
+
 		//convert options (which might be an array) into an object
 		options = steal.opts(options || {}, {
 			//compress everything, regardless of what you find
@@ -104,10 +104,8 @@ steal(function( steal ) {
 		});
 
 		// to is the folder packages will be put in
-		options.to = options.to || (url.match(/https?:\/\//) ? 
-					"" : 
-					url.substr(0, url.lastIndexOf('/')));
-		
+		options.to = options.to || (url.match(/https?:\/\//) ? "" : url.substr(0, url.lastIndexOf('/')));
+
 		// make sure to ends with /
 		if ( options.to.match(/\\$/) === null && options.to !== '' ) {
 			options.to += "/";
@@ -116,17 +114,16 @@ steal(function( steal ) {
 		print("Building to " + options.to);
 
 		var opener = steal.build.open(url);
-		
+
 		// iterates through the types of builders.  For now
 		// there are just scripts and styles builders
 		for ( var builder in steal.build.builders ) {
 			steal.build.builders[builder](opener, options);
 		}
 	};
-	
+
 	// a place for the builders
 	steal.build.builders = {}; //builders
-	
 	// a helper function that gets the src of a script and returns
 	// the content for that script
 	var loadScriptText = function( src ) {
@@ -182,12 +179,12 @@ steal(function( steal ) {
 			return jQuery.View.registerScript("micro", id, text);
 		},
 		'text/jaml': function( script ) {
-			var text =  script.text || loadScriptText(script.src),
+			var text = script.text || loadScriptText(script.src),
 				id = script.id || script.getAttribute("id");
 			return jQuery.View.registerScript("jaml", id, text);
 		},
 		'text/tmpl': function( script ) {
-			var text =  script.text || loadScriptText(script.src),
+			var text = script.text || loadScriptText(script.src),
 				id = script.id || script.getAttribute("id");
 			return jQuery.View.registerScript("tmpl", id, text);
 		},
@@ -205,19 +202,18 @@ steal(function( steal ) {
 	 * the content for a certain tag slightly easier.
 	 * 
 	 */
-	steal.build.open = function( url , stealData ) {
+	steal.build.open = function( url, stealData ) {
 		var scripts = [],
 
-		// save and remove the old steal
+			// save and remove the old steal
 			oldSteal = window.steal || steal,
 			newSteal;
 		delete window.steal;
-		if(stealData){
+		if ( stealData ) {
 			window.steal = stealData;
 		}
 		// get envjs
 		load('steal/rhino/env.js'); //reload every time
-		
 		// open the url
 		Envjs(url, {
 			scriptTypes: {
@@ -238,13 +234,13 @@ steal(function( steal ) {
 				scripts.push(script);
 			}
 		});
-		
+
 		// set back steal
 		newSteal = window.steal;
 		window.steal = oldSteal;
 		window.steal._steal = newSteal;
-		
-		
+
+
 		// check if newSteal added any build types (used to convert less to css for example).
 		if(newSteal && newSteal.build && newSteal.build.types){
 			for ( var buildType in newSteal.build.types ) {
