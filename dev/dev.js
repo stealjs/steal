@@ -67,14 +67,14 @@ steal.dev = {
 
 //stuff for jmvc
 /**
- * @Constructor jQuery
- * @init blah
+ * @class jQuery
+ * @constructor blah
  */
 
 //
 /**
- * @Constructor jQuery.fn
- * @init blah
+ * @class jQuery.fn
+ * @constructor blah
  */
 //
 /**

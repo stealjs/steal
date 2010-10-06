@@ -246,9 +246,12 @@ steal(function( steal ) {
 		
 		
 		// check if newSteal added any build types (used to convert less to css for example).
-		for ( var buildType in newSteal.build.types ) {
-			oldSteal.build.types[buildType] = newSteal.build.types[buildType];
+		if(newSteal && newSteal.build && newSteal.build.types){
+			for ( var buildType in newSteal.build.types ) {
+				oldSteal.build.types[buildType] = newSteal.build.types[buildType];
+			}
 		}
+		
 
 		// return the helper
 		return {

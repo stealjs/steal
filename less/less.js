@@ -1,5 +1,5 @@
 /**
- * @add steal static
+ * @add steal.static
  */
 steal({path: "less_engine.js",ignore: true},function(){
 	

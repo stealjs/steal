@@ -1,5 +1,5 @@
 /**
- * @add steal static
+ * @add steal.static
  */
 steal({path: "coffee-script.js",ignore: true},function(){
 	

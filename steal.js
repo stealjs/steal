@@ -113,7 +113,7 @@
 		};
 
 	/**
-	 * @constructor steal
+	 * @class steal
 	 * @parent stealjs
 	 * <p>Steal makes JavaScript dependency management and resource loading easy.</p>
 	 * <p>This page details the steal script (<code>steal/steal.js</code>), 
@@ -463,7 +463,7 @@
 
 
 	/**
-	 * @Constructor
+	 * @class
 	 * Used for getting information out of a path
 	 * @init
 	 * Takes a path
