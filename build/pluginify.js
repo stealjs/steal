@@ -55,6 +55,7 @@ steal.plugins('steal/build', 'steal/build/scripts', function() {
 			if ( typeof pageSteal.total[i].func == "function" ) {
 				filePath = pageSteal.total[i].path;
 				if (!inExclude(filePath) ) {
+					print("packaging "+filePath)
 					file = readFile(filePath);
 					match = file.match(/\.then\(\s*function\s*\([^\)]*\)\s*\{([\s\S]*)\}\s*\)\s*;*\s*/im);
 					str = "// " + filePath + "\n\n";

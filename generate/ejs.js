@@ -1,5 +1,5 @@
 //@documentjs-ignore
-steal(function( steal ) {
+steal.then(function( steal ) {
 
 
 	var rsplit = function( string, regex ) {
