@@ -265,12 +265,16 @@
 			return listOfFiles;
 		},
 		/**
-		 * Returns the path too the root jmvc folder
+		 * Returns the path to the root jmvc folder
 		 */
 		pathToRoot: function( isFile ) {
-			var rootFolders = steal.File.cwd().split(/\/|\\/),
-				myFolders = this.path.split(/\/|\\/),
-				i = 0;
+			var root = steal.File.getRoot(),
+				rootFolders = root.split(/\/|\\/),
+				targetDir = rootFolders[rootFolders.length-1]
+				i = 0,
+				adjustedPath = (targetDir? this.path.replace(new RegExp(".*"+targetDir+"\/?"),""): 
+					this.path),
+				myFolders = adjustedPath.split(/\/|\\/);
 
 			//for each .. in loc folders, replace with steal folder
 			if ( myFolders[i] == ".." ) {
@@ -292,6 +296,25 @@
 		}
 	});
 
+	/**
+	 * If there's a CMD system variable (like "documentjs/document.bat"), 
+	 * assumes the root is the folder one below the scripts folder.
+	 * 
+	 * Otherwise, assumes the current directory IS the root jmvc folder (framework)
+	 * 
+	 */
+	steal.File.getRoot = function() {
+		var cwd = steal.File.cwd(),
+			cmd = ""+java.lang.System.getProperty("cmd"),
+			root = cwd,
+			relativeRoot;
+		
+		if(cmd) {
+			relativeRoot = cmd.replace(/\/?[^\/]*\/[^\/]*$/, "")
+			root = cwd+'/'+relativeRoot;
+		} 
+		return root;
+	}
 	steal.File.cwdURL = function() {
 		return new java.io.File("").toURL().toString();
 	}
