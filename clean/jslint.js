@@ -1023,6 +1023,9 @@ var JSLINT = (function () {
             if (option.widget) {
                 combine(predefined, widget);
             }
+			if(option.predefined){
+				combine(predefined, option.predefined);
+			}
         }
     }
 

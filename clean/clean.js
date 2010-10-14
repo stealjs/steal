@@ -2,8 +2,10 @@
 // using with jslint: js steal/cleanjs path/to/file -jslint
 
 steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint','//steal/rhino/prompt', function(steal){
-	var lintAndPrint = function(out, src){
-		JSLINT(out,{forin: true, browser: true, windows: true, rhino: true});
+	var lintAndPrint = function(out, predefined){
+		
+
+		JSLINT(out,{forin: true, browser: true, windows: true, rhino: true, predefined : predefined});
 		if(JSLINT.errors.length){
 			//var lines = out.split('\n'), line, error;
 			for(var i = 0; i < JSLINT.errors.length; i++){
@@ -12,7 +14,7 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 					break;
 				}
 				line = error.evidence.replace(/\t/g,"     ");
-				print("  "+error.reason)
+
 				print("    "+error.line+":"+error.character+"  "+
 					line.substring(Math.max(error.character-25, 0), 
 					   Math.min(error.character+25, line.length)).replace(/^\s+/,"")
@@ -101,11 +103,11 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 				//folder to build to, defaults to the folder the page is in
 				to: 1,
 				print : 1,
-				jslint :1
+				jslint :1,
+				predefined: 1
 			}) )
 		
 		//if it ends with js, just rewwrite
-		
 		if(/\.js/.test(url)){
 			var text = readFile(url);
 			print('Beautifying '+url)
@@ -116,7 +118,7 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 				steal.File(url).save( out  )
 			}
 			if(options.jslint){
-				var errors = lintAndPrint(out);
+				var errors = lintAndPrint(out, options.predefined || {});
 				if(errors){
 					print("quiting because of JSLint Errors");
 					quit();
@@ -132,14 +134,14 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 					return;
 				}
 				var path = steal.File(script.src).joinFrom(folder).replace(/\?.*/,"")
-				if(clean.test(text) || (!options.jquery && path == "jquery/jquery.js")){
+				if(clean.test(text) || (options.ignore && options.ignore.test(path) ) ){
 					print("I "+path)
 				}else{
 					var out = js_beautify(text, options);
 					if(out == text){
 						print("C "+path);
 						if(options.jslint){
-							var errors = lintAndPrint(out);
+							var errors = lintAndPrint(out, options.predefined || {});
 							if(errors){
 								print("quiting because of JSLint Errors");
 								quit();
@@ -155,7 +157,7 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 							}
 							
 							if(options.jslint){
-								var errors = lintAndPrint(out);
+								var errors = lintAndPrint(out, options.predefined || {});
 								if(errors){
 									print("quiting because of JSLint Errors");
 									quit();

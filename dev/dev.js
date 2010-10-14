@@ -1,3 +1,4 @@
+/*global  window: false, console: true, opera: true */
 /**
  * @class steal.dev
  * @parent stealjs
@@ -22,16 +23,17 @@ steal.dev = {
 		return s.replace(regs.colons, '/').
 		replace(regs.words, '$1_$2').
 		replace(regs.lowerUpper, '$1_$2').
-		replace(regs.dash, '_').toLowerCase()
+		replace(regs.dash, '_').toLowerCase();
 	},
 	isHappyName: function( name ) {
 		//make sure names are close to the current path
-		var path = steal.cur().path.replace(/\.[^$]+$/, "").split('/')
-		//make sure parts in name match
-		var parts = name.split('.')
+		var path = steal.cur().path.replace(/\.[^$]+$/, "").split('/'),
+			//make sure parts in name match
+			parts = name.split('.');
+
 		for ( var i = 0; i < parts.length && path.length; i++ ) {
 			if ( parts[i].toLowerCase() != path[i] && this.underscore(parts[i]) != path[i] && this.underscore(parts[i]) != path[i].replace(/_controller/, "") ) {
-				this.warn("Are you sure " + name + " belongs in " + steal.cur().path)
+				this.warn("Are you sure " + name + " belongs in " + steal.cur().path);
 			}
 		}
 	},
@@ -44,9 +46,9 @@ steal.dev = {
 	 */
 	warn: function( out ) {
 		if ( window.console && console.log ) {
-			console.log("steal.js WARNING: " + out)
+			console.log("steal.js WARNING: " + out);
 		} else if ( window.opera && window.opera.postError ) {
-			opera.postError("steal.js WARNING: " + out)
+			opera.postError("steal.js WARNING: " + out);
 		}
 	},
 	/**
@@ -58,12 +60,12 @@ steal.dev = {
 	 */
 	log: function( out ) {
 		if ( window.console && console.log ) {
-			console.log("steal.js INFO: " + out)
+			console.log("steal.js INFO: " + out);
 		} else if ( window.opera && window.opera.postError ) {
-			opera.postError("steal.js INFO: " + out)
+			opera.postError("steal.js INFO: " + out);
 		}
 	}
-}
+};
 
 //stuff for jmvc
 /**

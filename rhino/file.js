@@ -253,11 +253,13 @@
 			out.close();
 		},
 		contents: function( func, current ) {
+			
 			var me = new java.io.File(this.path),
 				listOfFiles = me.listFiles();
-
+				
 			if ( listOfFiles == null ) {
-				print("there is nothing in " + this.path)
+				//print("there is nothing in " + this.path)
+				return;
 			}
 			for ( var i = 0; i < listOfFiles.length; i++ ) {
 				func(listOfFiles[i].getName(), listOfFiles[i].isFile() ? "file" : "directory", current)

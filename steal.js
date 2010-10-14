@@ -476,7 +476,9 @@
 		this.path = path;
 	};
 	var File = steal.File;
-	extend(File.prototype, /* @prototype */ {
+	extend(File.prototype,
+	/* @prototype */
+	{
 		/**
 		 * Removes hash and params
 		 * @return {String}
@@ -507,8 +509,8 @@
 		/**
 		 * Joins a url onto a path.  One way of understanding this is that your File object represents your current location, and calling join() is analogous to "cd" on a command line.
 		 * @codestart
-new steal.File("d/e").join("../a/b/c"); // Yields the path "d/a/b/c"
-@codeend
+		 * new steal.File("d/e").join("../a/b/c"); // Yields the path "d/a/b/c"
+		 * @codeend
 		 * @param {String} url
 		 */
 		join: function( url ) {
@@ -815,7 +817,7 @@ new steal.File("d/e").join("../a/b/c"); // Yields the path "d/a/b/c"
 		init: function() {
 			this.setScriptOptions();
 			//force into development mode to prevent errors
-			if(steal.browser.rhino){
+			if ( steal.browser.rhino ) {
 				steal.options.env = 'development';
 			}
 			this.setOldIncludeOptions();
