@@ -1285,6 +1285,9 @@
 		timerCount: 0,
 		view: function( path ) {
 			var type = path.match(/\.\w+$/gi)[0].replace(".", "");
+			if( path.indexOf("//") !== 0 ){
+				path = "views/"+path;
+			}
 			steal({
 				path: path,
 				type: "text/" + type,
