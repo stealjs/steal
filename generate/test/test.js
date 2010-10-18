@@ -57,3 +57,5 @@ _S.clear();
 _S.open('cnu/cnugen.html')
 if(typeof Cnu.Controllers.Todos == 'undefined') throw "didn't load Cnu.Controllers.Todos"
 if(typeof Cnu.Models.Todo == 'undefined') throw "didn't load Cnu.Models.Todo"
+
+steal.File("cnu").removeDir();
