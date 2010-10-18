@@ -14,6 +14,7 @@ steal.plugins('steal/build', 'steal/build/scripts', function() {
 	steal.pluginify = function( plugin, opts ) {
 
 		var jq = true,
+			othervar,
 			opts = steal.opts(opts, {
 				"destination": 1,
 				"exclude": -1,
@@ -26,6 +27,7 @@ steal.plugins('steal/build', 'steal/build/scripts', function() {
 
 		if ( opts.nojquery ) {
 			jq = false;
+			othervar = opts.nojquery;
 		}
 		
 		if (!opts.packagejquery ) {
@@ -59,7 +61,7 @@ steal.plugins('steal/build', 'steal/build/scripts', function() {
 					file = readFile(filePath);
 					match = file.match(/\.then\(\s*function\s*\([^\)]*\)\s*\{([\s\S]*)\}\s*\)\s*;*\s*/im);
 					str = "// " + filePath + "\n\n";
-					str += "(function($){\n" + steal.build.builders.scripts.clean(match[1]) + "\n})(" + (jq ? "jQuery" : "") + ");\n\n";
+					str += "(function($){\n" + steal.build.builders.scripts.clean(match[1]) + "\n})(" + (jq ? "jQuery" : othervar || "") + ");\n\n";
 					out.push(str);
 				}
 			}
