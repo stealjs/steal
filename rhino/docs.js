@@ -56,7 +56,7 @@ Steal [steal.get get] is a simple JavaScript version of [http://rubygems.org/ ru
 </ul>
 
 @codestart text
-js steal/getjs http://github.com/jupiterjs/phui/
+js steal/getjs http://github.com/jupiterjs/mxui/
 @codeend
 <h3>Code Cleaner</h3>
 Steal [steal.clean clean] cleans your code and checks it against JSLint. 

@@ -96,7 +96,7 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 		 * <dl>
 		 * <dt>path/to/plugin</dt>
 		 * <dd>The path to where you want your plugin.  This also should be the namespace and name of
-		 * whatever JavaScript object created.  Check out phui for examples.
+		 * whatever JavaScript object created.  Check out mxui for examples.
 		 * </dd>
 		 * </dl>
 		 * </li>

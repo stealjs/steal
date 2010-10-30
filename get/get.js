@@ -24,7 +24,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 	 *  <li><code>steal</code> - script loader, and more.</li>
 	 *  <li><code>jquery</code> - jQuery 1.4.3 and the MVC components.</li>
 	 *  <li><code>funcunit</code> - Functional testing platform.</li>
-	 *  <li><code>phui</code> - UI widgets.</li>
+	 *  <li><code>mxui</code> - UI widgets.</li>
 	 *  <li><code>documentjs</code> - documentation engine.</li>
 	 * </ul>
 	 * <p>You can install these just by writing</p>

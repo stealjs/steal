@@ -3,7 +3,7 @@
   "steal" : "http://github.com/jupiterjs/steal",
   "jquery" : "http://github.com/jupiterjs/jquerymx",
   "funcunit" : "http://github.com/jupiterjs/funcunit",
-  "phui" : "http://github.com/jupiterjs/phui",
+  "mxui" : "http://github.com/jupiterjs/mxui",
   "documentjs" : "http://github.com/jupiterjs/documentjs",
   "ss/state_machine" : "http://github.com/secondstory/secondstoryjs-statemachine",
   "ss/router" : "http://github.com/secondstory/secondstoryjs-router"
