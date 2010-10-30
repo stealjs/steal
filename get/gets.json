@@ -1,7 +1,7 @@
 {
   "mustache" : "http://github.com/tdreyno/mustache-javascriptmvc",
   "steal" : "http://github.com/jupiterjs/steal",
-  "jquery" : "http://github.com/jupiterjs/javascriptmvc",
+  "jquery" : "http://github.com/jupiterjs/jquerymx",
   "funcunit" : "http://github.com/jupiterjs/funcunit",
   "phui" : "http://github.com/jupiterjs/phui",
   "documentjs" : "http://github.com/jupiterjs/documentjs",

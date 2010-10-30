@@ -117,8 +117,8 @@ steal(function( steal ) {
 				this.fetch(this.ls_top());
 			} else {
 				// change to the raw url
-				// http://github.com/jupiterjs/javascriptmvc/
-				// http://github.com/jupiterjs/javascriptmvc/tree/master/controller?raw=true
+				// http://github.com/jupiterjs/jquerymx/
+				// http://github.com/jupiterjs/jquerymx/tree/master/controller?raw=true
 				var rawUrl = this.url + "tree/" + this.branch + "/" + url.replace(this.url, "") + "?raw=true",
 					contents = readUrl(rawUrl);
 					
