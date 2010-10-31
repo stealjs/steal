@@ -5,7 +5,7 @@ steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint
 	var lintAndPrint = function(out, predefined){
 		
 
-		JSLINT(out,{forin: true, browser: true, windows: true, rhino: true, predefined : predefined});
+		JSLINT(out,{devel: true, forin: true, browser: true, windows: true, rhino: true, predefined : predefined});
 		if(JSLINT.errors.length){
 			//var lines = out.split('\n'), line, error;
 			for(var i = 0; i < JSLINT.errors.length; i++){
