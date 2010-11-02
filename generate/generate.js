@@ -150,7 +150,7 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 
 
 							if ( render(path + "/" + loc, put, data) ) {
-								print('      ' + put);
+								steal.print('      ' + put);
 							}
 
 						} else if (/\.link$/.test(name) ) {
@@ -164,7 +164,7 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 					} else {
 
 						//create file
-						print('      ' + where + "/" + convert);
+						steal.print('      ' + where + "/" + convert);
 						new steal.File(where + "/" + convert).mkdirs();
 
 						//recurse in new folder

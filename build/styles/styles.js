@@ -6,7 +6,7 @@ steal(function( steal ) {
 	 * @param {Object} options
 	 */
 	var styles = (steal.build.builders.styles = function( opener, options ) {
-		print("\nBUILDING STYLES --------------- ");
+		steal.print("\nBUILDING STYLES --------------- ");
 		//where we are putting stuff
 		var folder = options.to.substr(0, options.to.length - 1),
 			//where the page is
@@ -14,10 +14,10 @@ steal(function( steal ) {
 			currentPackage = [];
 
 		opener.each('link', function( link, text, i ) {
-			print(link.type)
+			steal.print(link.type)
 			//let people know we are adding it
 			if ( link.href && steal.build.types[link.type] ) {
-				print(link.href)
+				steal.print(link.href)
 
 				var loc = steal.File(pageFolder).join(link.href),
 					converted = convert(text, loc, folder)
@@ -28,12 +28,12 @@ steal(function( steal ) {
 			}
 
 		});
-		print("")
+		steal.print("")
 		if ( currentPackage.length ) {
-			print("STYLE BUNDLE > " + folder + "/production.css\n")
+			steal.print("STYLE BUNDLE > " + folder + "/production.css\n")
 			steal.File(folder + "/production.css").save(currentPackage.join(''));
 		} else {
-			print("no styles\n")
+			steal.print("no styles\n")
 		}
 
 
@@ -55,7 +55,7 @@ steal(function( steal ) {
 				var imagePath = steal.File(part).joinFrom(cssLoc),
 					fin = steal.File(imagePath).toReferenceFromSameDomain(prodLocation);
 				//print("  -> "+imagePath);
-				print("  " + part + " > " + fin);
+				steal.print("  " + part + " > " + fin);
 				return "url(" + fin + ")";
 			});
 		return newCSss;

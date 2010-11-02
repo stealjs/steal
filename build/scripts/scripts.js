@@ -6,7 +6,7 @@ steal(function( steal ) {
 	 * @param {Object} options options passed to the build script
 	 */
 	var scripts = (steal.build.builders.scripts = function( opener, options ) {
-		print("\nBUILDING SCRIPTS --------------- ");
+		steal.print("\nBUILDING SCRIPTS --------------- ");
 
 		// get the compressor
 		var compressor = scripts.compressors[options.compressor || "localClosure"](),
@@ -28,14 +28,14 @@ steal(function( steal ) {
 			// if we should ignore it, ignore it
 			if ( script.getAttribute('ignore') == "true" ) {
 				if ( script.src ) {
-					print('   ignoring ' + script.src);
+					steal.print('   ignoring ' + script.src);
 				}
 				return;
 			}
 
 			// if it has a src, let people know we are compressing it
 			if ( script.src ) {
-				print("   " + script.src.replace(/\?.*$/, "").replace(/^(\.\.\/)+/, ""));
+				steal.print("   " + script.src.replace(/\?.*$/, "").replace(/^(\.\.\/)+/, ""));
 			}
 
 			// get the package, this will be production.js
@@ -62,7 +62,7 @@ steal(function( steal ) {
 			currentPackage.push(text);
 		});
 
-		print("");
+		steal.print("");
 
 		// go through all the packages
 		for ( var p in packages ) {
@@ -71,7 +71,7 @@ steal(function( steal ) {
 				var compressed = packages[p].join(";\n");
 				//save them
 				new steal.File(options.to + p).save(compressed);
-				print("SCRIPT BUNDLE > " + options.to + p);
+				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
 	});
@@ -84,7 +84,7 @@ steal(function( steal ) {
 	scripts.compressors = {
 		// needs shrinksafe.jar at steal/build/javascripts/shrinksafe.jar
 		shrinksafe: function() {
-			print("steal.compress - Using ShrinkSafe");
+			steal.print("steal.compress - Using ShrinkSafe");
 			// importPackages/Class doesn't really work
 			var URLClassLoader = Packages.java.net.URLClassLoader,
 				URL = java.net.URL,
@@ -114,7 +114,7 @@ steal(function( steal ) {
 			};
 		},
 		closureService: function() {
-			print("steal.compress - Using Google Closure Service");
+			steal.print("steal.compress - Using Google Closure Service");
 
 			return function( src ) {
 				var xhr = new XMLHttpRequest();
@@ -127,7 +127,7 @@ steal(function( steal ) {
 		},
 		localClosure: function() {
 			//was unable to use SS import method, so create a temp file
-			print("steal.compress - Using Google Closure app");
+			steal.print("steal.compress - Using Google Closure app");
 			return function( src, quiet ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					filename = "tmp" + rnd + ".js",

@@ -4,7 +4,9 @@
  */
 load('steal/rhino/steal.js')
 steal('//steal/test/test', function( s ) {
-
+	
+	print("==========================  steal/build =============================")
+	
 	//lets see if we can clear everything
 	s.test.clear();
 

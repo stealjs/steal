@@ -299,7 +299,7 @@
 	 *     <td class="right">6.js</td>
 	 *     </tr>
 	 *    </tbody></table>
-	 *    @init 
+	 *    @constructor 
 	 *    Loads files or runs functions after all previous files and functions have been loaded.
 	 *    @param {String|Object|Function+} resource Each argument represents a resource or function.
 	 *    Arguments can be a String, Option, or Function.
@@ -465,7 +465,7 @@
 	/**
 	 * @class
 	 * Used for getting information out of a path
-	 * @init
+	 * @constructor
 	 * Takes a path
 	 * @param {String} path 
 	 */

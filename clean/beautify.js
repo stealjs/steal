@@ -35,7 +35,7 @@
 
 
 
-function js_beautify(js_source_text, options) {
+js_beautify = function(js_source_text, options) {
     var input, output, token_text, last_type, last_text, last_last_text, last_word, flags, flag_store, indent_string;
     var whitespace, wordchar, punct, parser_pos, line_starters, digits;
     var prefix, token_type, do_block_just_closed, in_statement_expression = false, expression_has_word = false;

@@ -122,7 +122,13 @@
 		}
 		return steal;
 	}
+	// a way to turn off printing (mostly for testing purposes)
+	steal.print = function(){
 
+		if(typeof STEALPRINT == "undefined" || STEALPRINT !== false){
+			print.apply(null, arguments)
+		}
+	}
 })()
 
 
