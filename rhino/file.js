@@ -35,7 +35,7 @@
 			}
 			var inarr = new java.io.FileInputStream(files[i].getAbsolutePath());
 			var zipPath = files[i].getPath().replace(replacePath, "").replace("\\", "/")
-			if (/^\.git/.test(zipPath) ) continue;
+			if (/\.git|\.zip/.test(zipPath) ) continue;
 			print(zipPath)
 			out.putNextEntry(new java.util.zip.ZipEntry(zipPath));
 			var len;
