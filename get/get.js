@@ -58,7 +58,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			url = pluginList(name);
 		}
 		if (!url ) {
-			print("There is no plugin named " + name);
+			steal.print("There is no plugin named " + name);
 			return;
 		}
 		getter = url.indexOf("github.com") !== -1 ? get.github : get.getter;
@@ -78,7 +78,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 
 		fetcher.fetch();
 
-		print("\n  " + name + " plugin downloaded.");
+		steal.print("\n  " + name + " plugin downloaded.");
 		runInstallScript(name);
 
 		}),
@@ -88,7 +88,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 		 * @param {Object} name
 		 */
 		pluginList = function( name ) {
-			print("  Looking for plugin ...");
+			steal.print("  Looking for plugin ...");
 
 			var plugin_list_source =
 				readUrl("https://github.com/jupiterjs/steal/raw/master/get/gets.json");
@@ -97,7 +97,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			if ( plugin_list[name] ) {
 				return plugin_list[name];
 			}
-			print("  Looking in gets.json for your own plugin list")
+			steal.print("  Looking in gets.json for your own plugin list")
 			
 			plugin_list_source = readFile("gets.json");
 			if(plugin_list_source){
@@ -115,7 +115,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			return name;
 		},
 		installDependencies = function( url, name ) {
-			print("  Checking dependencies ...");
+			steal.print("  Checking dependencies ...");
 			var depend_url = url + (url.lastIndexOf("/") === url.length - 1 ? "" : "/") + "dependencies.json",
 				depend_text, dependencies;
 			try {
@@ -123,35 +123,35 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			} catch (e) {}
 
 			if (!depend_text ) {
-				print("  No dependancies");
+				steal.print("  No dependancies");
 				return;
 			}
 
 			try {
 				dependencies = JSONparse(depend_text);
 			} catch (e) {
-				print("  No or mailformed dependencies");
+				steal.print("  No or mailformed dependencies");
 				return;
 			}
 
 
 			for ( var plug_name in dependencies ) {
 				if ( steal.prompt.yesno("Install dependancy " + plug_name + "? (yN):") ) {
-					print("Installing " + plug_name + "...");
+					steal.print("Installing " + plug_name + "...");
 					steal.get(dependencies[plug_name], {
 						name: plug_name
 					});
 				}
 			}
 
-			print("  Installed all dependencies for " + name);
+			steal.print("  Installed all dependencies for " + name);
 		},
 		runInstallScript = function( name ) {
 			if ( readFile(name + "/install.js") ) {
 
 				var res = steal.prompt.yesno("\n  " + name + " has an install script." + "\n    WARNING! Install scripts may be evil.  " + "\n    You can run it manually after reading the file by running:" + "\n      js " + name + "/install.js" + "\n\n  Would you like to run it now? (yN):");
 				if ( res ) {
-					print("  running ...");
+					steal.print("  running ...");
 					load(name + "/install.js");
 				}
 			}
