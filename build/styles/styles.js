@@ -31,7 +31,7 @@ steal(function( steal ) {
 		steal.print("")
 		if ( currentPackage.length ) {
 			steal.print("STYLE BUNDLE > " + folder + "/production.css\n")
-			steal.File(folder + "/production.css").save(currentPackage.join(''));
+			steal.File(folder + "/production.css").save(currentPackage.join('\n'));
 		} else {
 			steal.print("no styles\n")
 		}
@@ -43,7 +43,7 @@ steal(function( steal ) {
 	var convert = function( css, cssLocation, prodLocation ) {
 		//how do we go from prod to css
 		var cssLoc = new steal.File(cssLocation).dir(),
-			newCSss = css.replace(/url\(([^\)]*)\)/g, function( whole, part ) {
+			newCSss = css.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
 
 				//check if url is relative
 				if (!isRelative(part) ) {
@@ -61,7 +61,8 @@ steal(function( steal ) {
 		return newCSss;
 	},
 		isRelative = function( part ) {
-			return !/^(http:\/\/|https:\/\/|\/\.\/|\.\.\/)/.test(part)
+			// http://, https://, / 
+			return !/^(http:\/\/|https:\/\/|\/)/.test(part)
 		}
 
 		var comments = /\/\*.*?\*\//g,
@@ -73,7 +74,11 @@ steal(function( steal ) {
 
 	steal.cssMin = function( css ) {
 		//remove comments
-		return css.replace(comments, "").replace(newLines, "").replace(space, " ").replace(spaceChars, '$1').replace(lastSemi, '}')
+		return css.replace(comments, "")
+			.replace(newLines, "")
+			.replace(space, " ")
+			.replace(spaceChars, '$1')
+			.replace(lastSemi, '}')
 	}
 
 });
