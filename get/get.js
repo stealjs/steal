@@ -41,8 +41,9 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 	 * 	      <th>Name</th><th>Description</th>
 	 * 	  </tr>
 	 * 	  <tr><td>name</td>
-	 * 	  		<td>The name of the folder to put the download in.</td></tr>
-	 * 
+	 * 	  	  <td>The name of the folder to put the download in.</td></tr>
+	 *    <tr><td>ignore</td>
+	 * 	  	  <td>An array of regexps that if the filename matches, these will be ignored.</td></tr>
 	 * 	</table>
 	 * 
 	 */
@@ -90,16 +91,20 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			print("  Looking for plugin ...");
 
 			var plugin_list_source =
-				readUrl("http://github.com/jupiterjs/steal/raw/master/get/gets.json");
+				readUrl("https://github.com/jupiterjs/steal/raw/master/get/gets.json");
 			var plugin_list;
 			eval("plugin_list = " + plugin_list_source);
 			if ( plugin_list[name] ) {
 				return plugin_list[name];
 			}
+			print("  Looking in gets.json for your own plugin list")
+			
 			plugin_list_source = readFile("gets.json");
-
-			eval("plugin_list = " + plugin_list_source);
-			return plugin_list[name];
+			if(plugin_list_source){
+				eval("plugin_list = " + plugin_list_source);
+				return plugin_list[name];
+			}
+			
 		},
 		//gets teh name from the url
 		guessName = function( url ) {

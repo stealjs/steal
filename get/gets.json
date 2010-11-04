@@ -6,5 +6,6 @@
   "mxui" : "http://github.com/jupiterjs/mxui",
   "documentjs" : "http://github.com/jupiterjs/documentjs",
   "ss/state_machine" : "http://github.com/secondstory/secondstoryjs-statemachine",
-  "ss/router" : "http://github.com/secondstory/secondstoryjs-router"
+  "ss/router" : "http://github.com/secondstory/secondstoryjs-router",
+  "srchr" : "https://github.com/jupiterjs/srchr/tree/master/srchr/"
 }

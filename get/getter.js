@@ -20,7 +20,13 @@ steal(function( steal ) {
 			this.level = level || -1;
 			this.cwd = where || ".";
 			this.quite = options.quite;
-			this.ignore = options.ignore;
+			this.ignore = 
+				(options.ignore && 
+					(steal.isArray(options.ignore) ? 
+						options.ignore : 
+						[options.ignore] )) 
+				|| [];
+			this.ignore.push(/\.jar$/);
 		},
 		ls: function() {
 			var links = [],
@@ -28,7 +34,7 @@ steal(function( steal ) {
 
 
 			if ( this.url.match(/^svn:\/\/.*/) ) {
-				print('not supported');
+				steal.print('not supported');
 			} else {
 				links.concat(rhf.links("", readUrl(this.url)));
 			}
@@ -65,27 +71,33 @@ steal(function( steal ) {
 		},
 		//downloads content from a url
 		download: function( link ) {
+			
 			//var text = readUrl( link);
 			var bn = new steal.File(link).basename(),
 				f = new steal.File(this.cwd).join(bn),
 				oldsrc, newsrc, p = "   ";
 
-			if ( f.match(this.ignore) ) {
-				print("   I " + f);
-				return;
+			for ( var i = 0; i < this.ignore.length; i++ ) {
+				if ( f.match(this.ignore[i]) ) {
+					steal.print("   I " + f);
+					return;
+				}
 			}
 
 			oldsrc = readFile(f);
+			
 			new steal.File(f).download_from(link, true);
+			
+			
 			newsrc = readFile(f);
 
 			if ( oldsrc ) {
 				if ( oldsrc == newsrc ) {
 					return;
 				}
-				print(p + "U " + f);
+				steal.print(p + "U " + f);
 			} else {
-				print(p + "A " + f);
+				steal.print(p + "A " + f);
 			}
 		},
 		//gets the url or the directory
@@ -94,6 +106,7 @@ steal(function( steal ) {
 			links = links || [this.url];
 			var rhf = this;
 			links.forEach(function( link ) {
+				//steal.print("FETCH  "+link+"\n")
 				link.match(/\/$/) || auto_fetch ? rhf.fetch_dir(link) : rhf.download(link);
 			});
 		},

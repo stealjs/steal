@@ -15,25 +15,32 @@ steal(function( steal ) {
 	steal.get.github.prototype = new steal.get.getter();
 	steal.extend(steal.get.github.prototype, {
 		init: function( url, where, options, level ) {
-
+			// not the best way of doing this, but ok for now.
+			arguments[0] = url = url.replace("http:","https:");
 			steal.get.getter.prototype.init.apply(this, arguments);
 			this.orig_cwd = this.cwd;
-			if ( this.ignore ) {
-				this.ignore.push(".gitignore", "dist");
-			} else {
-				this.ignore = [".gitignore", "dist"];
-			}
+			
+			this.ignore.push(".gitignore", "dist");
+
 			var split = url.split("/");
 			this.username = split[3];
 			this.project = split[4];
 			this.branch = options.tag || "master";
+			
+			//we probably gave something like : http://github.com/secondstory/secondstoryjs-router instead
+			// of http://github.com/secondstory/secondstoryjs-router/tree/master/
+			if(! url.match(/\/tree\//) ){
+				this.url = this.url+"tree/master/"
+			}
+			
 		},
 		get_latest_commit: function() {
 			// http://github.com/api/v2/json/commits/list/jupiterjs/steal/master
-			var latestCommitUrl = "http://github.com/api/v2/json/commits/list/" + this.username + "/" + this.project + "/" + this.branch,
+			// https://github.com/api/v2/json/commits/list/jupiterjs/steal/master
+			var latestCommitUrl = "https://github.com/api/v2/json/commits/list/" + this.username + "/" + this.project + "/" + this.branch,
 				commitsText = readUrl(latestCommitUrl);
-				eval("var c = " + commitsText);
-			var commitId = c.commits[0].tree;
+				eval("var c = " + commitsText),
+				commitId = c.commits[0].tree;
 			return commitId;
 		},
 		ls_top: function( link ) {
@@ -54,43 +61,51 @@ steal(function( steal ) {
 			}
 			return urls;
 		},
-		//links are relative
+		//returns a bunch of links to folders
 		links: function( base_url, contents ) {
 			var links = [],
-				newLink, anchors = contents.match(/href\s*=\s*\"*[^\">]*/ig),
+				newLink, 
+				anchors = contents.match(/href\s*=\s*\"*[^\">]*/ig),
 				ignore = this.ignore,
 				self = this,
-				base = self.url + self.cwd.replace(self.orig_cwd + "/", "");
+				base = this.url + this.cwd.replace(this.orig_cwd + "/", "");
 			
 			anchors.forEach(function( link ) {
 				link = link.replace(/href="/i, "");
-				newLink = base + (/\/$/.test(base) ? "" : "/") + link;
+				newLink = base_url + (/\/$/.test(base_url) ? "" : "/") + link;
 				links.push(newLink);
 			});
 			return links;
 		},
 		download: function( link ) {
 			// get real download link
-			// http://github.com/jupiterjs/funcunit/qunit/qunit.js  -->
-			// http://github.com/jupiterjs/steal/raw/master/test/qunit/qunit.js
-			var rawUrl = this.url + "raw/" + this.branch + "/" + link.replace(this.url, ""),
+			// https://github.com/jupiterjs/srchr/tree/master/srchr/disabler/disabler.html  -->
+			// https://github.com/jupiterjs/srchr/raw/master/srchr/disabler/disabler.html
+			var rawUrl = link.replace("/tree/","/raw/"),
 				bn = new steal.File(link).basename(),
 				f = new steal.File(this.cwd).join(bn);
 
 			for ( var i = 0; i < this.ignore.length; i++ ) {
 				if ( f.match(this.ignore[i]) ) {
-					print("   I " + f);
+					steal.print("   I " + f);
 					return;
 				}
 			}
 
 			var oldsrc = readFile(f),
-				tmp = new steal.File("tmp");
-
-			tmp.download_from(rawUrl, true);
-			var newsrc = readFile("tmp");
-			var p = "   ",
+				tmp = new steal.File("tmp"),
+				newsrc = readFile("tmp"),
+				p = "   ",
 				pstar = "   ";
+			try{
+				tmp.download_from(rawUrl, true);
+			}catch(e){
+				steal.print(pstar+"Error "+f);
+				return;
+			}
+			
+			
+			
 				if ( oldsrc ) {
 					var trim = /\s+$/gm,
 						jar = /\.jar$/.test(f);
@@ -100,29 +115,38 @@ steal(function( steal ) {
 							tmp.remove();
 							return;
 						}
-						print(pstar + "U " + f);
+						steal.print(pstar + "U " + f);
 					tmp.copyTo(f);
 				} else {
-					print(pstar + "A " + f);
+					steal.print(pstar + "A " + f);
 					tmp.copyTo(f);
 				}
 				tmp.remove();
 		},
 		fetch_dir: function( url ) {
+
 			this.level++;
 			if ( this.level > 0 ) {
 				this.push_d(new steal.File(url).basename());
 			}
-			if ( this.level === 0 ) {
+			if ( /\/tree\/\w+\/$/.test(url) ) { //if the root of the repo
 				this.fetch(this.ls_top());
 			} else {
 				// change to the raw url
 				// http://github.com/jupiterjs/jquerymx/
 				// http://github.com/jupiterjs/jquerymx/tree/master/controller?raw=true
-				var rawUrl = this.url + "tree/" + this.branch + "/" + url.replace(this.url, "") + "?raw=true",
-					contents = readUrl(rawUrl);
-					
-					this.fetch(this.links(url, contents));
+				var rawUrl, 
+					contents;
+
+				if(url.match(/\/tree\/\w/)){
+					rawUrl  = url+"?raw=true"
+				}else{
+					rawUrl = this.url + "tree/" + this.branch + "/" + url.replace(this.url, "") + "?raw=true"
+				}
+		
+				contents = readUrl(rawUrl);
+				
+				this.fetch(this.links(url, contents));
 			}
 			if ( this.level > 0 ) {
 				this.pop_d();
