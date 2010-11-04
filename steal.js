@@ -194,7 +194,7 @@
 	 * <div class='whisper'>
 	 *    TIP: If startFile doesn't end with <code>.js</code> (ex: myapp), steal assumes
 	 *    you are using JavaScriptMVC's folder pattern and will load:
-	 *    <code>myapp/myapp.js<code> just to save you 9 characters.
+	 *    <code>myapp/myapp.js</code> just to save you 9 characters.
 	 * </div>
 	 * <h3>Stealing Scripts</h3>
 	 * In your files, use the steal function and its helpers
