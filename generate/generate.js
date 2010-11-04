@@ -142,7 +142,7 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 
 					if ( type === 'file' ) {
 						//if it's ejs, draw it where it belongs
-						if (/\.ignore/.test(name) ) {
+						if (/\.ignore|\.svn/.test(name) ) {
 							//do nothing
 						} else if (/\.ejs$/.test(name) ) {
 							var put = where + "/" + convert.replace(/\.ejs$/, "");
