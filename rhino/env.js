@@ -6722,6 +6722,18 @@ $timers.lock = function(fn){
     Envjs.sync(fn)();
 };
 
+Envjs.clear = function(){
+    $timers.lock(function(){
+		for(var i=0; i<$timers.length; i++) {
+			if ( !$timers[i] ) {
+				continue;
+			}
+            $timers[i].stop();
+            delete $timers[i];
+        }
+    });
+}
+
 //private internal class
 var Timer = function(fn, interval){
     this.fn = fn;
@@ -23945,6 +23957,9 @@ var __elementPopped__ = function(ns, name, node){
                                     doc.parsing = false;
                                     //DOMContentLoaded event
                                     try{
+										if ( Envjs.killTimersAfterLoad === true ) {
+											Envjs.clear();
+										}
 										if ( Envjs.fireLoad === false ) {
 											return;
 										}

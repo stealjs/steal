@@ -243,7 +243,8 @@ steal(function( steal ) {
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
 			},
-			dontPrintUserAgent: true
+			dontPrintUserAgent: true,
+			killTimersAfterLoad: true
 		});
 
 		// set back steal
