@@ -7,6 +7,7 @@ rhinoLoader = function( func, fireLoad ) {
 			"text/envjs": true
 		},
 		fireLoad: fireLoad,
-		logLevel: 2
+		logLevel: 2,
+		dontPrintUserAgent: true
 	});
 }
