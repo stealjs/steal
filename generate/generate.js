@@ -142,7 +142,7 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 
 					if ( type === 'file' ) {
 						//if it's ejs, draw it where it belongs
-						if (/\.ignore|\.svn/.test(name) ) {
+						if (/\.ignore/.test(name) ) {
 							//do nothing
 						} else if (/\.ejs$/.test(name) ) {
 							var put = where + "/" + convert.replace(/\.ejs$/, "");
@@ -158,10 +158,8 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 							//if points to a file, copy that one file; otherwise copy the folder
 							steal.generate(copy, where + "/" + convert.replace(/\.link$/, ""), data);
 
-
-
 						}
-					} else {
+					} else if(!/^\.\w+$/.test(name)){
 
 						//create file
 						steal.print('      ' + where + "/" + convert);
