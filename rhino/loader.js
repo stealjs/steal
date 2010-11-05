@@ -8,6 +8,7 @@ rhinoLoader = function( func, fireLoad ) {
 		},
 		fireLoad: fireLoad,
 		logLevel: 2,
-		dontPrintUserAgent: true
+		dontPrintUserAgent: true,
+		killTimersAfterLoad: true
 	});
 }
