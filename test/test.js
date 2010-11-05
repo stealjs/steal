@@ -1,11 +1,14 @@
+// this is test helpers for steal
 steal(function(steal){
 	
+var assertions = [],
+	module = "";
 steal.test =  {
 	//clears every property fromt he window, returns steal (might return old stuff)
 	clear: function() {
 		var win = this.getWindow();
 		for(var n in win){
-			if(n != "_S"){
+			if(n != "_S" && n != "STEALPRINT"){
 				//this[n] = null;
 				delete win[n];
 			}
@@ -60,22 +63,37 @@ steal.test =  {
 	testNamespace: function() {
 		var win = this.getWindow();
 		for(var n in win) {
-			if(n !== "_S")
-				throw "Namespace Pollution";
+			if(n !== "_S" && n !== "STEALPRINT")
+				throw "Namespace Pollution "+n;
 		}
 	},
 	equals: function( a, b, message ) {
 		if(a !== b)
 			throw ""+a+"!="+b+":"+message
+		else{
+			assertions.push(message)
+		}
 	},
 	ok: function( v, message ) {
 		if(!v){
 			throw "not "+v+" "+message
 		}
+		else{
+			assertions.push(message)
+		}
 	},
 	open: function( src ) {
 		load("steal/rhino/env.js");
 		Envjs(src, {scriptTypes : {"text/javascript" : true,"text/envjs" : true}, fireLoad: true, logLevel: 2});
+	},
+	test : function(name, test){
+		assertions = []
+		test(steal.test);
+		print("  -- "+name+" "+assertions.length)
+	},
+	module : function(name ){
+		module = name;
+		print("==========  "+name+"  =========")
 	}
 }
 	

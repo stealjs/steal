@@ -35,8 +35,7 @@
 
 
 
-function js_beautify(js_source_text, options) {
-
+js_beautify = function(js_source_text, options) {
     var input, output, token_text, last_type, last_text, last_last_text, last_word, flags, flag_store, indent_string;
     var whitespace, wordchar, punct, parser_pos, line_starters, digits;
     var prefix, token_type, do_block_just_closed, in_statement_expression = false, expression_has_word = false;
@@ -1042,6 +1041,7 @@ function js_beautify(js_source_text, options) {
             var lines = token_text.split(/\x0a|\x0d\x0a/);
 
             if (/^\/\*\*/.test(token_text)) {
+            	
                 // javadoc: reformat and reindent
                 print_newline();
                 output.push(lines[0]);
@@ -1050,7 +1050,7 @@ function js_beautify(js_source_text, options) {
                     output.push(' ');
                     output.push(lines[i].replace(/^\s\s*|\s\s*$/, ''));
                 }
-
+                
             } else {
                 // simple block comment: leave intact
                 if (lines.length > 1) {
@@ -1059,7 +1059,7 @@ function js_beautify(js_source_text, options) {
                     trim_output();
                 } else {
                     // single-line /* comment */ stays where it is
-                    print_single_space();
+                	print_single_space();
                 }
                 for (i = 0; i < lines.length; i++) {
                     output.push(lines[i]);
@@ -1071,9 +1071,16 @@ function js_beautify(js_source_text, options) {
             break;
 
         case 'TK_INLINE_COMMENT':
-
+        	// Slightly misleading name, this deals with this style comment:  /* foo */ - JCK  
+        	
             print_single_space();
+            
+            // Give the comment its own line - JCK
+            print_newline();
             print_token();
+            print_newline();
+            
+            
             if (is_expression(flags.mode)) {
                 print_single_space();
             } else {
@@ -1082,8 +1089,9 @@ function js_beautify(js_source_text, options) {
             break;
 
         case 'TK_COMMENT':
-
-            // print_newline();
+        	
+            //print_newline();
+            
             if (wanted_newline) {
                 print_newline();
             } else {

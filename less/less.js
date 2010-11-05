@@ -1,5 +1,5 @@
 /**
- * @add steal static
+ * @add steal.static
  */
 steal({path: "less_engine.js",ignore: true},function(){
 	
@@ -48,7 +48,9 @@ steal({path: "less_engine.js",ignore: true},function(){
 			if(steal.loadedProductionCSS){
 				return steal;
 			}else{
-				steal.createLink( steal.options.production.replace(".js",".css")  );
+				var productionCssPath = steal.File( steal.options.production.replace(".js", ".css") ).normalize();
+				productionCssPath = steal.root.join( productionCssPath );
+				steal.createLink( productionCssPath );
 				loadedProductionCSS = true;
 				return steal;
 			}
@@ -100,7 +102,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 	}
 	//@steal-remove-start
 	steal.build.types['text/less'] =  function(script, loadScriptText){
-		var text =  loadScriptText(script.href, script),
+		var text =   script.text || loadScriptText(script.href, script),
 			styles;
 		new (less.Parser)({
 	                optimization: less.optimization,

@@ -3,3 +3,7 @@
 .back {
 	width: 200px; height: 200px;
 }
+
+.background2b{
+	background-image : url(/foo/bar.PNG)
+}

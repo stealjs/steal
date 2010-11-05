@@ -1,8 +1,8 @@
 /*
-@page stealtools Steal Tools
+@page stealjs StealJS
 @tag core
-<h1>Steal Tools</h1>
-<p>The Steal project is a collection of comamnd and client based JavaScript utilities
+<h1>StealJS</h1>
+<p>The StealJS project is a collection of comamnd and client based JavaScript utilities
 that make building, packaging, sharing and consuming JavaScript applications easy.</p>
 
 <h2>Tools</h2>
@@ -56,7 +56,7 @@ Steal [steal.get get] is a simple JavaScript version of [http://rubygems.org/ ru
 </ul>
 
 @codestart text
-js steal/getjs http://github.com/jupiterjs/phui/
+js steal/getjs http://github.com/jupiterjs/mxui/
 @codeend
 <h3>Code Cleaner</h3>
 Steal [steal.clean clean] cleans your code and checks it against JSLint. 

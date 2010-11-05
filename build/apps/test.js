@@ -1,4 +1,3 @@
 // load("steal/build/apps/test.js")
-
-_args = ['phui/combobox','phui/modal'];
+_args = ['cookbook', 'mxui/combobox', 'mxui/modal'];
 load("steal/buildjs");

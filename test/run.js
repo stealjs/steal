@@ -1,12 +1,13 @@
-// load('steal/test/run.js')
+// loads all of steal's command line tests
 
-/**
- * Steal qunit tests
- */
+load('steal/build/test/run.js');
 
-load('steal/test/helpers.js')
-_S.clear();
+load('steal/build/styles/test/styles_test.js');
 
-load('settings.js')
-load('funcunit/funcunit.js')
-Funcunit.runTest('steal/test/qunit/qunit.html')
+load('steal/get/test/get_test.js');
+
+load('steal/clean/test/clean_test.js');
+
+load('steal/generate/test/run.js');
+
+// TODO test get!

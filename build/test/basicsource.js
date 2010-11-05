@@ -1,6 +1,5 @@
 BasicSource = 5;
-(function(hereIsAVeryLongName){
+(function( hereIsAVeryLongName ) {
 	hereIsAVeryLongName++;
 	BasicSource = hereIsAVeryLongName;
 })(BasicSource)
-
