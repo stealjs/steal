@@ -227,7 +227,8 @@ steal(function( steal ) {
 		Envjs(url, {
 			scriptTypes: {
 				"text/javascript": true,
-				"text/envjs": true
+				"text/envjs": true,
+				"": true
 			},
 			fireLoad: false,
 			logLevel: 2,
@@ -241,7 +242,9 @@ steal(function( steal ) {
 			},
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
-			}
+			},
+			dontPrintUserAgent: true,
+			killTimersAfterLoad: true
 		});
 
 		// set back steal
