@@ -8,7 +8,7 @@ test("domain", function() {
 
 test("joinFrom", function() {
 	var result;
-	/*equals(
+	equals(
 	steal.File('a/b.c').joinFrom('/d/e'), "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
 
 	result = new steal.File('a/b.c').joinFrom('d/e');
@@ -36,7 +36,7 @@ test("joinFrom", function() {
 	equals(result, "a/b.c", "a/b.c is correctly joined.");
 
 	result = new steal.File('/a/b.c').joinFrom('');
-	equals(result, "/a/b.c", "/a/b.c is correctly joined.");*/
+	equals(result, "/a/b.c", "/a/b.c is correctly joined.");
 	
 	
 	result = new steal.File('../../up.js').joinFrom('cookbook/')
