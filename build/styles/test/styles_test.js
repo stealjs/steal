@@ -19,10 +19,13 @@ steal('//steal/test/test', function( s ) {
 				steal.build('steal/build/styles/test/page.html',
 					{to: 'steal/build/styles/test'});
 			});
-			
+		
+		var prod = readFile('steal/build/styles/test/production.css').replace(/\r|\n|\s/g,""),
+			expected = readFile('steal/build/styles/test/productionCompare.css').replace(/\r|\n|\s/g,"");
+		
 		s.test.equals(
-			readFile('steal/build/styles/test/production.css'),
-			readFile('steal/build/styles/test/productionCompare.css'),
+			prod,
+			expected,
 			"css out right");
 			
 		s.test.clear();
