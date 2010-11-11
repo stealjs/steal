@@ -223,6 +223,7 @@ steal(function( steal ) {
 		}
 		// get envjs
 		load('steal/rhino/env.js'); //reload every time
+		var success = true;
 		// open the url
 		Envjs(url, {
 			scriptTypes: {
@@ -241,8 +242,14 @@ steal(function( steal ) {
 			},
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
+			}, 
+			onScriptLoadError: function(script) {
+				success = false;
 			}
 		});
+		if (!success) {
+			java.lang.System.exit(-1);
+		}
 
 		// set back steal
 		newSteal = window.steal;

@@ -58,3 +58,4 @@ echo js apps/[NAME]/compress.js	Compress your application and generate documenta
 
 :END
 
+exit %errorlevel%
