@@ -37,7 +37,7 @@ SET ARGS=%ARGS:,''=%
 SET ARGS=%ARGS: =%
 SET ARGS=%ARGS%]
 set ARGS=%ARGS:\=/%
-java -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+java -Xmx228m -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
 
 GOTO END
 
