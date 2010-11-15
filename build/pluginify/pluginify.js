@@ -143,29 +143,40 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 		
 	},
 	//moves across a comment
-	comment = function(p){
-		if(p.next().value == "*"){
+	comment = function(p){ //we don't really need this anymore
+		var n =p.next()
+		if(n.value == "*" && n.value != 'string'){
 			p.until(["*","/"])
 		}
 	},
 	//gets the next bracket
 	nextBracket = function(p){
-		var count = 1, token;
+		var count = 1, token, last, prev;
 		while(token = p.moveNext()){
-			switch(token.value){
-				case "{": 
-					count++;
-					break;
-				case "}" :
-					count--;
-					if(count == 0){
-						return token;
-					}
-					break;
-				case "/" : 
-					comment(p);
-					break;
+			//print(token.value)
+			if(token.type == 'operator'){
+				switch(token.value){
+					case "{": 
+						
+						count++;
+						//print("  +"+count+" "+prev+" "+last)
+						break;
+					case "}" :
+						
+						count--;
+						//print("  -"+count+" "+prev+" "+last)
+						if(count === 0){
+							return token;
+						}
+						break;
+					case "/" : 
+						comment(p);
+						break;
+				}
 			}
+			
+			prev = last;
+			last = (token.value)
 		}
 	}
 });

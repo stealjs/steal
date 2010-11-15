@@ -18,7 +18,11 @@ steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
 		t.equals(secondFunc, readFile('steal/build/pluginify/test/secondFunc.js'))
 		
 	})
-	
+	s.test.test("getFunctions2", function(t){
+		var js = readFile('jquery/view/micro/micro.js');
+		var firstFunc = steal.build.pluginify.getFunction(js, 0);
+		//print(firstFunc);
+	})
 	s.test.test("parse", function(t){
 		var js = readFile('jquery/class/class.js');
 		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
