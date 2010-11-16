@@ -243,16 +243,12 @@ steal(function( steal ) {
 			},
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
-<<<<<<< HEAD
 			}, 
 			onScriptLoadError: function(script) {
 				success = false;
-			}
-=======
 			},
 			dontPrintUserAgent: true,
 			killTimersAfterLoad: true
->>>>>>> 91ef893af0ae5f931c2b76f6bbee871cb486de02
 		});
 		if (!success) {
 			java.lang.System.exit(-1);
