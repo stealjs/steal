@@ -20,7 +20,8 @@ steal.build.parse = function(str){
 				return tokens[tokenNum];
 			},
 			until: function(){
-				var token, matchCounts = [];
+				var token, 
+					matchCounts = [];
 				for(var i =0; i < arguments.length;i++){
 					matchCounts[i] =0;
 					if(typeof arguments[i] == "string"){
@@ -29,9 +30,10 @@ steal.build.parse = function(str){
 				}
 				while (token = moveNext() ) {
 					for(var i =0; i< arguments.length; i++){
-						if(token.value == arguments[i][matchCounts[i]]){
+						if( token.type !== "string" && 
+							token.value === arguments[i][matchCounts[i]]){
 							matchCounts[i] = matchCounts[i]+1;
-							if(matchCounts[i] == arguments[i].length){
+							if(matchCounts[i] === arguments[i].length){
 								return token;
 							}
 						}else{

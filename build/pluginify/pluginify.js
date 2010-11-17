@@ -98,15 +98,17 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 
 		while (token = p.moveNext() ) {
 			//print(token.value)
-			switch(token.value){
-				case "/" : 
-					comment(p)
-					break;
-				case "steal" : 
-					stealPull(p, content, function(func){
-						funcs.push(func)
-					});
-					break;
+			if(token.type !== "string"){
+				switch(token.value){
+					case "/" : 
+						comment(p)
+						break;
+					case "steal" : 
+						stealPull(p, content, function(func){
+							funcs.push(func)
+						});
+						break;
+				}
 			}
 		}
 		return funcs[ith||0];
