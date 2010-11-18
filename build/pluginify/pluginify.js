@@ -59,7 +59,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				var content = steal.build.pluginify.content(steals[i], opts.global ? opts.global : "jQuery" );
 				if(content){
 					print("  > "+steals[i].path)
-					out.push(content);
+					out.push(steal.build.builders.scripts.clean(content));
 				}
 			}
 		}
