@@ -67,6 +67,10 @@ steal({path: "less_engine.js",ignore: true},function(){
 				})
 			}else{
 				var src = steal.request(path);
+				if(!src){
+					steal.dev.warn("steal/less : There's no content at "+path+", or you're on the filesystem and it's in another folder.");
+					return steal;
+				}
 				//get and insert stype
 				new (less.Parser)({
 	                optimization: less.optimization,
