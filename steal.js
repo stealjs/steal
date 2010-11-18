@@ -675,18 +675,19 @@
 	 * @attribute options
 	 * Options that deal with steal
 	 * <table class='options'>
-	 *     <tr>
-	 *         <th>Option</th><th>Default</th><th>Description</th>
-	 *     </tr>
-	 *     <tr><td>env</td><td>development</td><td>Which environment is currently running</td></tr>
-	 *     <tr><td>encoding</td><td>utf-8</td><td>What encoding to use for script loading</td></tr>
-	 *     <tr><td>cacheInclude</td><td>true</td><td>true if you want to let browser determine if it should cache script; false will always load script</td></tr>
-	 *     <tr><td>debug</td><td>true</td><td>turns on debug support</td></tr>
-	 *     <tr><td>done</td><td>null</td><td>If a function is present, calls function when all steals have been loaded</td></tr>
-	 *     <tr><td>documentLocation</td><td>null</td><td>If present, ajax request will reference this instead of the current window location.  
-	 *     Set this in run_unit, to force unit tests to use a real server for ajax requests. </td></tr>
-	 *     <tr><td>startFile</td><td>null</td><td>This is the first file to load.  It is typically determined from the first script option parameter 
-	 *     in the inclue script. </td></tr>
+	 * <tr>
+	 *     <th>Option</th><th>Default</th><th>Description</th>
+	 * </tr>
+	 * <tr><td>env</td><td>development</td><td>Which environment is currently running</td></tr>
+	 * <tr><td>encoding</td><td>utf-8</td><td>What encoding to use for script loading</td></tr>
+	 * <tr><td>cacheInclude</td><td>true</td><td>true if you want to let browser determine if it should cache script; false will always load script</td></tr>
+	 * 
+	 * <tr><td>done</td><td>null</td><td>If a function is present, calls function when all steals have been loaded</td></tr>
+	 * <tr><td>documentLocation</td><td>null</td><td>If present, ajax request will reference this instead of the current window location.  
+	 * Set this in run_unit, to force unit tests to use a real server for ajax requests. </td></tr>
+	 * <tr><td>logLevel</td><td>0</td><td>0 - Log everything<br/>1 - Log Warnings<br/>2 - Log Nothing</td></tr>
+	 * <tr><td>startFile</td><td>null</td><td>This is the first file to load.  It is typically determined from the first script option parameter 
+	 * in the inclue script. </td></tr>
 	 * </table>
 	 * <ul>
 	 *    <li><code>steal.options.startFile</code> - the first file steal loads.  This file
@@ -745,7 +746,7 @@
 		production: null,
 		encoding: "utf-8",
 		cacheInclude: true,
-		debug: true
+		logLevel: 0
 	};
 
 	// variables used while including

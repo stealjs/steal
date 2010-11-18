@@ -39,6 +39,8 @@ steal.dev = {
 		
 		
 	},
+
+	logLevel : 0,
 	/**
 	 * Adds a warning message to the console.
 	 * @codestart
@@ -47,11 +49,14 @@ steal.dev = {
 	 * @param {String} out the message
 	 */
 	warn: function( out ) {
-		if ( window.console && console.log ) {
-			console.log("steal.js WARNING: " + out);
-		} else if ( window.opera && window.opera.postError ) {
-			opera.postError("steal.js WARNING: " + out);
+		if(steal.options.logLevel < 2){
+			if ( window.console && console.log ) {
+				console.log("steal.js WARNING: " + out);
+			} else if ( window.opera && window.opera.postError ) {
+				opera.postError("steal.js WARNING: " + out);
+			}
 		}
+		
 	},
 	/**
 	 * Adds a message to the console.
@@ -61,10 +66,13 @@ steal.dev = {
 	 * @param {String} out the message
 	 */
 	log: function( out ) {
-		if ( window.console && console.log ) {
-			console.log("steal.js INFO: " + out);
-		} else if ( window.opera && window.opera.postError ) {
-			opera.postError("steal.js INFO: " + out);
+		if (steal.options.logLevel < 1) {
+			if (window.console && console.log) {
+				console.log("steal.js INFO: " + out);
+			}
+			else if (window.opera && window.opera.postError) {
+				opera.postError("steal.js INFO: " + out);
+			}
 		}
 	}
 };
