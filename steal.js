@@ -809,7 +809,7 @@
 					} else if ( commaSplit[0] ) {
 						steal.options.app = commaSplit[0];
 					}
-					if ( steal.options.env != "production" ) {
+					if ( commaSplit[1] && steal.options.env != "production" ) {
 						steal.options.env = commaSplit[1];
 					}
 				}
