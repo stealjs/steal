@@ -938,14 +938,16 @@
 				current_steals.unshift(newInclude); //add to the front
 				return;
 			}
-			var cur = steal.cur();
-			if ( cur ) {
-				cur.dependencies.push(newInclude);
-			}
+			var cur = steal.cur(), 
+				existing = steal.exists(newInclude);
 
+			
 			//if we have already performed loads, insert new steals in head
 			//now we should check if it has already been steald or added earlier in this file
-			if ( steal.shouldAdd(newInclude) ) {
+			if ( !existing ) {
+				if ( cur ) {
+					cur.dependencies.push(newInclude);
+				}
 				if ( first_wave_done ) {
 					return newInclude.runNow();
 				}
@@ -959,23 +961,26 @@
 				}
 				//console.log("add FILE",newInclude.path)
 				current_steals.unshift(newInclude);
+			}else{
+				cur.dependencies.push(existing);
 			}
 		},
 		//this should probably be kept as a hash.
-		shouldAdd: function( inc ) {
+		//returns the steal if the steal already exists
+		exists: function( inc ) {
 			var path = inc.absolute || inc.path,
 				i;
 			for ( i = 0; i < total.length; i++ ) {
 				if ( total[i].absolute == path ) {
-					return false;
+					return total[i];
 				}
 			}
 			for ( i = 0; i < current_steals.length; i++ ) {
 				if ( current_steals[i].absolute == path ) {
-					return false;
+					return current_steals[i];
 				}
 			}
-			return true;
+			return;
 		},
 		done: function() {
 			if ( typeof steal.options.done == "function" ) {
