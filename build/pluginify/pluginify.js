@@ -35,7 +35,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 		opts.exclude.push("steal/")
 		rhinoLoader = {
 			callback: function( s ) {
-				s.plugin(plugin);
+				s.plugins(plugin);
 			}
 		};
 

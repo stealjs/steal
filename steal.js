@@ -1171,7 +1171,7 @@
 		then: steal,
 		total: total
 	});
-	steal.plugin = steal.resetApp(function( p ) {
+	var stealPlugin = steal.resetApp(function( p ) {
 		return p + '/' + getLastPart(p);
 	});
 	steal.packs = function() {
@@ -1217,7 +1217,7 @@
 		 * @return {steal} a new steal object
 		 * 
 		 */
-		plugins: steal.callOnArgs(steal.plugin),
+		plugins: steal.callOnArgs(stealPlugin),
 
 
 		/**
