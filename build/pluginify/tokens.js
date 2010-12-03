@@ -32,17 +32,25 @@ String.prototype.tokens = function (prefix, suffix) {
     var str;                    // The string value.
 
     var result = [];            // An array to hold the results.
-
+	var prereg = true;
     var make = function (type, value) {
 
 // Make a token object.
-
-        return {
+		
+		//prereg = i &&
+        //            (('(,=:[!&|?{};'.indexOf(i.charAt(i.length - 1)) >= 0) ||
+         //           i === 'return')
+		//print(type+":"+value+"-")
+        prereg = (type == 'operator' || type === 'name') &&
+				 (value === 'return' ||   ('(,=:[!&|?{};'.indexOf(value.charAt(value.length - 1)) >= 0 ) )
+		//print(type+" : "+value+" - "+prereg)
+		return {
             type: type,
             value: value,
             from: from,
             to: i
         };
+		
     };
 	var has = function(thIs, before){
 		var j = i+1;
@@ -58,6 +66,7 @@ String.prototype.tokens = function (prefix, suffix) {
             j += 1;
         }
 	}
+	
 // Begin tokenization. If the source string is empty, return nothing.
 
     if (!this) {
@@ -165,6 +174,8 @@ String.prototype.tokens = function (prefix, suffix) {
             if (c >= 'a' && c <= 'z') {
                 str += c;
                 i += 1;
+				print(this.substr(i-20,20))
+				print(this.substr(i,20))				
                 make('number', str).error("Bad number");
             }
 
@@ -271,8 +282,9 @@ String.prototype.tokens = function (prefix, suffix) {
                 i += 1;
             }
 // regexp
-		} else if (c === '/' && has.call(this, "/", /[\n\r;]/)) { // what about /2
-            i += 1;
+		} else if (c === '/' && has.call(this, "/", /[\n\r]/) && prereg) { // what about /2
+            //print('matcing regexp')
+			i += 1;
 			var str = c;
             for (;;) {
                 c = this.charAt(i);

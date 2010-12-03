@@ -8,6 +8,7 @@ steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
 	s.test.module("steal/build/pluginify")
 	
 	s.test.test("getFunctions", function(t){
+		
 		var js = readFile('steal/build/pluginify/test/test_steals.js');
 		var firstFunc = steal.build.pluginify.getFunction(js, 0);
 		
@@ -19,6 +20,7 @@ steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
 		
 	})
 	s.test.test("getFunctions2", function(t){
+		
 		var js = readFile('jquery/view/micro/micro.js');
 		var firstFunc = steal.build.pluginify.getFunction(js, 0);
 		//print(firstFunc);
@@ -41,6 +43,10 @@ steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
 		
 		var js = readFile('jquery/lang/json/json.js');
 		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		js = readFile('steal/build/pluginify/test/weirdRegexps.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
 	})	
 
 });
