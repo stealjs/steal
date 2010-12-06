@@ -82,15 +82,18 @@ steal.test =  {
 			assertions.push(message)
 		}
 	},
-	open: function( src ) {
+	open: function( src , fireLoad ) {
 		load("steal/rhino/env.js");
+		if(typeof Envjs == 'undefined'){
+			print("I DON'T GET IT")
+		}
 		Envjs(src, {
 			scriptTypes : {
 				"text/javascript" : true,
 				"text/envjs" : true,
 				"": true
 			}, 
-			fireLoad: true, 
+			fireLoad: fireLoad !== undefined ? fireLoad : true, 
 			logLevel: 2,
 			dontPrintUserAgent: true
 		});
