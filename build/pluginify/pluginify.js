@@ -32,7 +32,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 			//othervar = opts.nojquery;
 			opts.exclude.push('jquery.js');
 		}
-		opts.exclude.push("steal/")
+		opts.exclude.push("steal/dev/")
 		rhinoLoader = {
 			callback: function( s ) {
 				s.plugins(plugin);
