@@ -20,13 +20,10 @@
 	 * @param {Object} transformPath if true, this will take relative paths and add the basePath to it, it will 
 	 * also fix the slashes for your OS
 	 */
-	runCommand = function(cmd, transformPath){
+	runCommand = function(shell, shellCmd, cmd){
 		var fileRegex = /([^\s]|\/)+\.\w+/g // anything with a slash, no space, and a period
-		cmd = cmd.replace(fileRegex, pathFromRoot)
-		if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1)
-			oldRunCommand("cmd", "/C", cmd)
-		else
-			oldRunCommand("sh", "-c", cmd)
+		cmd = cmd.replace(fileRegex, pathFromRoot);
+		oldRunCommand(shell, shellCmd, cmd);
 	}
 		
 	load = function( path ) {
