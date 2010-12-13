@@ -23,7 +23,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				"nojquery": 0,
 				"global" : 0
 			}),
-			destination = opts.destination || plugin + ".js";
+			destination = opts.destination || plugin+"/"+plugin.replace("/",".") + ".js";
 
 		opts.exclude = !opts.exclude ? [] : (steal.isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 
