@@ -8,7 +8,7 @@
 		basePath = java.lang.System.getProperty("basepath");
 	
 	var pathFromRoot = function(path){
-		if (!/^\/\//.test(path) && !/^\w\:\\/.test(path) && basePath) {
+		if (!/^\/\//.test(path) && !/^\w\:\\/.test(path) && !/^http/.test(path) && basePath) {
 			path = basePath + "../" + path
 		}
 		return path;
