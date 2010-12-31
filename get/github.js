@@ -11,6 +11,16 @@ steal(function( steal ) {
 			this.init.apply(this, arguments);
 		}
 	};
+	
+	steal.get.github.dependenciesUrl = function( url ) {
+		if(!/https/.test(url)) { // github requires https
+			url = url.replace(/http/, 'https');
+		}
+		var depUrl = url + 
+			(url.lastIndexOf("/") === url.length - 1 ? "" : "/") + 
+			"raw/master/dependencies.json";
+		return depUrl;
+	};
 
 	steal.get.github.prototype = new steal.get.getter();
 	steal.extend(steal.get.github.prototype, {
