@@ -281,6 +281,13 @@ steal(function( steal ) {
 				}
 			},
 			getScriptContent: function( script ) {
+				if ( script.src ) {
+					return loadScriptText(script.src, script);
+				}
+				else {
+					return script.text;
+				}
+				
 				return steal.build.types[script.type] && steal.build.types[script.type](script, loadScriptText);
 			},
 			// the 
