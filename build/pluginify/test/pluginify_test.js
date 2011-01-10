@@ -47,6 +47,8 @@ steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
 		js = readFile('steal/build/pluginify/test/weirdRegexps.js');
 		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
 		
-	})	
-
+	});
+	
+	s.test.test("pluginify with views")	
+	
 });

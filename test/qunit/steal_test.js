@@ -108,11 +108,11 @@ test("File.join", function() {
 })
 
 test("File.joinCurrent", function() {
-	steal.curDir("http://abc.com");
+	steal.File.cur("http://abc.com");
 	result = new steal.File("d/e").joinCurrent();
 	equals(result, "http://abc.com/d/e", "http://abc.com/d/e was joined successfuly.");
 
-	steal.curDir("/a/b/");
+	steal.File.cur("/a/b/");
 	result = new steal.File("c/d").joinCurrent();
 	equals(result, "/a/b/c/d", "/a/b/c/d was joined successfuly.");
 })
@@ -179,23 +179,23 @@ test("File.toReferenceFromSameDomain()", function() {
 })
 
 test("File.normalize", function() {
-	steal.curDir("/a/b/");
+	steal.File.cur("/a/b/");
 	result = new steal.File("c/d").normalize();
 	equals(result, "/a/b/c/d", "/a/b/c/d was normalized successfuly.");
 
-	steal.curDir("/a/b/c");
+	steal.File.cur("/a/b/c");
 	result = new steal.File("//d/e").normalize();
 	equals(result, "d/e", "d/e was normalized successfuly.");
 
-	steal.curDir("/a/b/c");
+	steal.File.cur("/a/b/c");
 	result = new steal.File("/d/e").normalize();
 	equals(result, "/d/e", "/d/e was normalized successfuly.");
 
-	steal.curDir("http://abc.com");
+	steal.File.cur("http://abc.com");
 	result = new steal.File("d/e").normalize();
 	equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
 
-	steal.curDir("http://abc.com");
+	steal.File.cur("http://abc.com");
 	result = new steal.File("/d/e").normalize();
 	equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
 });
@@ -204,4 +204,59 @@ test("css", function(){
 	document.getElementById("qunit-test-area").innerHTML = ("<div id='makeBlue'>Blue</div><div id='makeGreen'>Green</div>");
 	equals(document.getElementById("makeBlue").clientWidth, 100, "relative in loaded");
 	equals(document.getElementById("makeGreen").clientWidth, 50, "relative up loaded")
+})
+
+test("when",3, function(){
+	var count = 0,
+		ob1 = {
+			loaded : function(){},
+			path: "ob1"
+		},
+		ob2 = {
+			loaded : function(){},
+			path: "ob2"
+		},
+		ob3 = {
+			complete : function(){
+				count++;
+				equals(count, 1, "complete called once");
+				when(ob2,"loaded", ob4,"complete");
+			},
+			path: "ob3"
+		},
+		when = steal.when,
+		ob4 = {
+			complete : function(){
+				count++;
+				equals(count, 2, "complete called again")
+				
+				
+				when(ob3,"complete",ob5,"complete")
+			},
+			path: "ob4"
+		},
+		ob5 = {
+			complete : function(){
+				count++;
+				equals(count,3, "complete called on another 'finished' complete");
+				start();
+			},
+			path: "ob5"
+		}
+		
+	when(ob1,"loaded",ob3,"complete");
+	when(ob2,"loaded",ob3,"complete");
+	
+	ob1.loaded();
+	ob2.loaded();
+	stop();
+	
+	
+	
+});
+test("loadtwice", function(){
+	same(ORDERNUM,['func'])
+})
+test("packages", function(){
+	same(packagesStolen,["0","1","uses"],"defined works right")
 })
