@@ -71,6 +71,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 			var compressor = steal.build.builders.scripts.compressors[compressorName]()
 			output = compressor(output);
 		}
+
 		print("--> " + destination);
 		new steal.File(destination).save(output);
 		//print("pluginified " + plugin)
