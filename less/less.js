@@ -113,7 +113,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 			styles;
 		new (less.Parser)({
 	                optimization: less.optimization,
-	                paths: [script.href.replace(/[\w\.-]+$/, '')]
+	                paths: []
 	            }).parse(text, function (e, root) {
 					styles = root.toCSS();
 				});
