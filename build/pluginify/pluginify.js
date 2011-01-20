@@ -21,7 +21,8 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				"destination": 1,
 				"exclude": -1,
 				"nojquery": 0,
-				"global" : 0
+				"global" : 0,
+				"compress" : 0
 			}),
 			destination = opts.destination || plugin+"/"+plugin.replace("/",".") + ".js";
 
@@ -63,8 +64,16 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				}
 			}
 		}
+
+		var output = out.join(";\n");
+		if(opts.compress) {
+			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
+			var compressor = steal.build.builders.scripts.compressors[compressorName]()
+			output = compressor(output);
+		}
+
 		print("--> " + destination);
-		new steal.File(destination).save(out.join(";\n"));
+		new steal.File(destination).save(output);
 		//print("pluginified " + plugin)
 	};
 	
