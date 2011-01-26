@@ -57,3 +57,5 @@ echo js steal/generate/model [TYPE] [NAME]	Generates a Model file
 echo js apps/[NAME]/compress.js	Compress your application and generate documentation
 
 :END
+
+exit %errorlevel%
