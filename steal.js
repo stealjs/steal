@@ -103,12 +103,9 @@
 				scriptTag += steal.loadErrorTimer(options);
 			}
 			scriptTag += '>' + (bodyText || '') + '</script>';
-			if ( steal.support.load ) {
-				scriptTag += '<script type="text/javascript"' + '>steal.end()</script>';
-			}
-			else {
-				scriptTag += '<script type="text/javascript" src="' + steal.root.join('steal/end.js') + '"></script>';
-			}
+
+			scriptTag += '<script type="text/javascript" src="' + steal.root.join('steal/end.js') + '"></script>';
+
 			document.write((options.src || bodyText ? scriptTag : ''));
 		};
 
