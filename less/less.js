@@ -72,8 +72,9 @@ steal({path: "less_engine.js",ignore: true},function(){
 					return steal;
 				}
 				// less needs the full path with http:// or file://
-				var newPath = location.href.replace(/[\w\.-]+$/, '')+
-					path.replace(/[\w\.-]+$/, '');
+				var endPath = path.replace(/[\w\.-]+$/, ''),
+					newPath = /^\//.test(endPath)? endPath: 
+						location.href.replace(/[\w\.-]+$/, '')+endPath;
 				//get and insert stype
 				new (less.Parser)({
 	                optimization: less.optimization,
