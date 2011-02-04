@@ -13,6 +13,12 @@ steal(function( steal ) {
 		}
 	};
 	
+	steal.get.getter.dependenciesUrl = function( url ) {
+		var depUrl = url + 
+			(url.lastIndexOf("/") === url.length - 1 ? "" : "/") + "dependencies.json";
+		return depUrl;
+	};
+	
 	steal.get.getter.prototype = {
 		init: function( url, where, options, level ) {
 

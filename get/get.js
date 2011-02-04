@@ -51,7 +51,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 		options = steal.opts(options, {
 			name: 1
 		});
-		var getter, name = options.name;
+		var getter, name = options.name, dependenciesUrl;
 
 		if (!url.match(/^http/) ) {
 			name = url;
@@ -68,9 +68,9 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 		//make the folder for this plugin
 		new steal.File(name).mkdirs();
 
-		installDependencies(url, name);
+		dependenciesUrl = getter.dependenciesUrl(url);
 
-
+		installDependencies(dependenciesUrl, name);
 
 		//get contents
 		var fetcher = new getter(url, name, options);
@@ -114,14 +114,16 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			}
 			return name;
 		},
-		installDependencies = function( url, name ) {
+		// works for 
+		// https://github.com/jupiterjs/funcunit/raw/master/dependencies.json
+		installDependencies = function( depend_url, name ) {
 			steal.print("  Checking dependencies ...");
-			var depend_url = url + (url.lastIndexOf("/") === url.length - 1 ? "" : "/") + "dependencies.json",
-				depend_text, dependencies;
+			var depend_text, dependencies;
+			
 			try {
 				depend_text = readUrl(depend_url);
 			} catch (e) {}
-
+			
 			if (!depend_text ) {
 				steal.print("  No dependancies");
 				return;
@@ -134,9 +136,8 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 				return;
 			}
 
-
 			for ( var plug_name in dependencies ) {
-				if ( steal.prompt.yesno("Install dependancy " + plug_name + "? (yN):") ) {
+				if ( steal.prompt.yesno("Install dependency " + plug_name + "? (yN):") ) {
 					steal.print("Installing " + plug_name + "...");
 					steal.get(dependencies[plug_name], {
 						name: plug_name

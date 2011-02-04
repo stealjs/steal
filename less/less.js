@@ -71,10 +71,13 @@ steal({path: "less_engine.js",ignore: true},function(){
 					steal.dev.warn("steal/less : There's no content at "+path+", or you're on the filesystem and it's in another folder.");
 					return steal;
 				}
+				// less needs the full path with http:// or file://
+				var newPath = location.href.replace(/[\w\.-]+$/, '')+
+					path.replace(/[\w\.-]+$/, '');
 				//get and insert stype
 				new (less.Parser)({
 	                optimization: less.optimization,
-	                paths: [path.replace(/[\w\.-]+$/, '')]
+	                paths: [newPath]
 	            }).parse(src, function (e, root) {
 	                var styles = root.toCSS(),
 						css  = document.createElement('style');
@@ -110,7 +113,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 			styles;
 		new (less.Parser)({
 	                optimization: less.optimization,
-	                paths: [script.href.replace(/[\w\.-]+$/, '')]
+	                paths: []
 	            }).parse(text, function (e, root) {
 					styles = root.toCSS();
 				});
@@ -118,4 +121,3 @@ steal({path: "less_engine.js",ignore: true},function(){
 	}
 	//@steal-remove-end
 })
-
