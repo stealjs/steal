@@ -466,7 +466,17 @@
 
 		return steal;
 	};
-	steal.map = map;
+	steal.dependencies = map;
+	steal.mappings = {};
+	steal.map = function(mappings, path){
+		if(typeof mappings == "string"){
+			steal.mappings[mappings] = path;
+		} else { // its an object
+			for(var key in mappings){
+				steal.mappings[key] = mappings[key];
+			}
+		}
+	}
 	steal.fn = steal.prototype = {
 		
 		make: function(options){
@@ -1260,8 +1270,21 @@
 		then: steal,
 		total: total
 	});
+	var appendMapping = function(p){
+		// go through mappings
+		for(var map in steal.mappings){
+			// first x characters of map match first x characters of p
+			if(p.indexOf(map) == 0){
+				return p.replace(map, steal.mappings[map]);
+			}
+		}
+		return p;
+	}
 	var stealPlugin = function( p ) {
-		return steal("//"+p + '/' + getLastPart(p));
+		var prefix = appendMapping(p);
+		var firstPath = /^(http|\/)/.test(prefix) ? "": "//";
+		var path = firstPath + prefix + '/' + getLastPart(prefix);
+		return steal(path);
 	};
 	steal.packs = function() {
 		for ( var i = 0; i < arguments.length; i++ ) {
