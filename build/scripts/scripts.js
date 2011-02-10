@@ -18,29 +18,28 @@ steal(function( steal ) {
 			currentPackage = [];
 
 		// compress all scripts by default
-		if ( options.all ) {
+		if ( true/*options.all*/ ) {
 			packages['production.js'] = currentPackage;
 		}
 
-		// for each script we find
-		opener.each("script", function( script, text, i ) {
+		// for each steal we find
+		opener.each("script", function( stl, text, i ) {
 
 			// if we should ignore it, ignore it
-			if ( script.getAttribute('ignore') == "true" ) {
-				if ( script.src ) {
-					steal.print('   ignoring ' + script.src);
+			if ( stl.ignore  ) {
+				if ( stl.path ) {
+					steal.print('   ignoring ' + stl.path);
 				}
 				return;
 			}
 
 			// if it has a src, let people know we are compressing it
-			if ( script.src ) {
-				steal.print("   " + script.src.replace(/\?.*$/, "").replace(/^(\.\.\/)+/, ""));
+			if ( stl.path ) {
+				steal.print("   " + stl.path);
 			}
 
 			// get the package, this will be production.js
-			var pack = script.getAttribute('package');
-
+			var pack = stl['pack'];
 
 			if ( pack ) {
 				//if we don't have it, create it and set it to the current package
@@ -54,12 +53,12 @@ steal(function( steal ) {
 			text = scripts.clean(text);
 
 			// if we should compress the script, compress it
-			if ( script.getAttribute('compress') == "true" || options.all ) {
+			if ( stl.compress || options.all ) {
 				text = compressor(text, true);
 			}
 
 			// put the result in the package
-			currentPackage.push(text);
+			currentPackage.push(text+";\nsteal.defined('//"+stl.path+"');");
 		});
 
 		steal.print("");
@@ -68,7 +67,7 @@ steal(function( steal ) {
 		for ( var p in packages ) {
 			if ( packages[p].length ) {
 				//join them
-				var compressed = packages[p].join(";\n");
+				var compressed = packages[p].join("\n");
 				//save them
 				new steal.File(options.to + p).save(compressed);
 				steal.print("SCRIPT BUNDLE > " + options.to + p);

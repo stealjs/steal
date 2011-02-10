@@ -113,20 +113,26 @@ steal(function( steal ) {
 
 		steal.print("Building to " + options.to);
 
-		var opener = steal.build.open(url);
+		var opener = steal.build.open(url, function(opener){
+			// iterates through the types of builders.  For now
+			// there are just scripts and styles builders
+			for ( var builder in steal.build.builders ) {
+				steal.build.builders[builder](opener, options);
+			}
+		});
 
-		// iterates through the types of builders.  For now
-		// there are just scripts and styles builders
-		for ( var builder in steal.build.builders ) {
-			steal.build.builders[builder](opener, options);
-		}
+		
+		
 	};
 
 	// a place for the builders
 	steal.build.builders = {}; //builders
 	// a helper function that gets the src of a script and returns
 	// the content for that script
-	var loadScriptText = function( src ) {
+	
+	
+	
+	steal.build.loadScriptText = function( src ) {
 		var text = "",
 			base = "" + window.location,
 			url = src.match(/([^\?#]*)/)[1];
@@ -135,7 +141,7 @@ steal(function( steal ) {
 			url = steal.root.join(url.substr(2)); //can steal be removed?
 		}
 		url = Envjs.uri(url, base);
-
+		//print(src+"\n"+url)
 		if ( url.match(/^file\:/) ) {
 			url = url.replace("file:/", "");
 			text = readFile("/" + url);
@@ -146,154 +152,8 @@ steal(function( steal ) {
 		}
 
 		return text;
-	},
-		checkText = function(text, id){
-			if(!text){
-				print("\n!! There is nothing at "+id+"!!")
-			}
-		};
+	};
 	
-	// types conversion
-	// the idea is for each type to return JavaScript (or css) that
-	// should be in its place
-	steal.build.types = {
-		'text/javascript': function( script ) {
-			if ( script.src ) {
-				return loadScriptText(script.src, script);
-			}
-			else {
-				return script.text;
-			}
-		},
-		'text/css': function( script ) {
-			if ( script.href ) {
-				return loadScriptText(script.href, script);
-			}
-			else {
-				return script.text;
-			}
-		},
-		'text/ejs': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("ejs", id, text);
-		},
-		'text/micro': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("micro", id, text);
-		},
-		'text/jaml': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("jaml", id, text);
-		},
-		'text/tmpl': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("tmpl", id, text);
-		},
-		loadScriptText: loadScriptText
-	};
+	
 
-	/**
-	 * @function open
-	 * Opens a page by:
-	 *   temporarily deleting the rhino steal
-	 *   opening the page with Envjs
-	 *   setting back rhino steal, saving envjs's steal as steal._steal;
-	 * @param {String} url the html page to open
-	 * @return {Object} an object with properties that makes extracting 
-	 * the content for a certain tag slightly easier.
-	 * 
-	 */
-	steal.build.open = function( url, stealData ) {
-		var scripts = [],
-
-			// save and remove the old steal
-			oldSteal = window.steal || steal,
-			newSteal;
-		delete window.steal;
-		if ( stealData ) {
-			window.steal = stealData;
-		}
-		// get envjs
-		load('steal/rhino/env.js'); //reload every time
-		// open the url
-		Envjs(url, {
-			scriptTypes: {
-				"text/javascript": true,
-				"text/envjs": true,
-				"": true
-			},
-			fireLoad: false,
-			logLevel: 2,
-			afterScriptLoad: {
-				".*": function( script ) {
-					scripts.push(script);
-				}
-			},
-			onLoadUnknownTypeScript: function( script ) {
-				scripts.push(script);
-			},
-			afterInlineScriptLoad: function( script ) {
-				scripts.push(script);
-			},
-			dontPrintUserAgent: true,
-			killTimersAfterLoad: true
-		});
-
-		// set back steal
-		newSteal = window.steal;
-		window.steal = oldSteal;
-		window.steal._steal = newSteal;
-
-
-		// check if newSteal added any build types (used to convert less to css for example).
-		if(newSteal && newSteal.build && newSteal.build.types){
-			for ( var buildType in newSteal.build.types ) {
-				oldSteal.build.types[buildType] = newSteal.build.types[buildType];
-			}
-		}
-		
-
-		// return the helper
-		return {
-			/**
-			 * @hide
-			 * Gets all elements of a type, extracts their converted content, and calls a callback function with  
-			 * each element and its converted content.
-			 * @param {Object} [type] the tag to get
-			 * @param {Object} func a function to call back with the element and its content
-			 */
-			each: function( type, func ) {
-				if ( typeof type == 'function' ) {
-					func = type;
-					type = 'script';
-				}
-				var scripts = document.getElementsByTagName(type);
-				for ( var i = 0; i < scripts.length; i++ ) {
-					func(scripts[i], this.getScriptContent(scripts[i]), i);
-				}
-			},
-			getScriptContent: function( script ) {
-				if ( script.src ) {
-					return loadScriptText(script.src, script);
-				}
-				else {
-					return script.text;
-				}
-				
-				return steal.build.types[script.type] && steal.build.types[script.type](script, loadScriptText);
-			},
-			// the 
-			steal: newSteal,
-			url: url
-		};
-	};
-
-});
+}).then('//steal/build/open','//steal/build/types');

@@ -202,7 +202,7 @@ Envjs.exchangeHTMLDocument = function(doc, text, url, frame) {
         if(frame){
             event = doc.createEvent('HTMLEvents');
             event.initEvent('load', false, false);
-            frame.dispatchEvent( event, false );
+            frame.( event, false );
         }
     } catch (e) {
         console.log('parsererror %s', e);
@@ -314,7 +314,7 @@ Envjs.eval = function(context, source, name){};
  * @param {Object} script
  * @param {Object} parser
  */
-Envjs.loadLocalScript = function(script){
+Envjs.loadLocalScript = function(script, cb){
     //console.log("loading script type %s \n source %s", script.type, script.src||script.text.substring(0,32));
     var types,
         src,
@@ -379,14 +379,18 @@ Envjs.loadLocalScript = function(script){
         xhr.onreadystatechange = function(){
             //console.log("readyState %s", xhr.readyState);
             if(xhr.readyState === 4){
-                Envjs.eval(
-                    script.ownerDocument.ownerWindow,
-                    xhr.responseText,
-                    filename
-                );
+                if(cb){
+                	cb(xhr.responseText)
+                }else{
+	                Envjs.eval(
+	                    script.ownerDocument.ownerWindow,
+	                    xhr.responseText,
+	                    filename
+	                );
+                }
             }
         };
-        xhr.send(null, false);
+        xhr.send(null, cb ? true : false);
     } catch(e) {
         console.log("could not load script %s \n %s", filename, e );
         Envjs.onScriptLoadError(script, e);
@@ -3050,7 +3054,7 @@ __extend__(Node.prototype, {
             newChild.previousSibling = prevNode;
             newChild.nextSibling     = refChild;
         }
-
+		Envjs.loadScripts(newChild, this);
         return newChild;
     },
     replaceChild : function(newChild, oldChild) {
@@ -3240,6 +3244,7 @@ __extend__(Node.prototype, {
                 this.firstChild = newChild;
             }
        }
+       Envjs.loadScripts(newChild, this);
        return newChild;
     },
     hasChildNodes : function() {
@@ -6182,7 +6187,6 @@ function __removeEventListener__(target, type, fn, phase){
 
 var __eventuuid__ = 0;
 function __dispatchEvent__(target, event, bubbles){
-
     if (!event.uuid) {
         event.uuid = __eventuuid__++;
     }
@@ -25348,6 +25352,63 @@ Window = function(scope, parent, opener){
     });
 
 };
+var scriptQueue = [];
+
+Envjs.loadScripts = function(newChild, parent){
+		if(!parent.ownerDocument){
+			return;
+		}
+		
+		//make sure parent is in the document
+		
+		var contains = parent.ownerDocument.contains(parent)
+		if(!contains){
+			return;
+		}
+		if (newChild.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+             for (var ind = 0; ind < newChild.childNodes.length; ind++) {
+                loadScript(newChild.childNodes[ind])
+             }
+        }else {
+            loadScript(newChild);
+        }
+}
+var loadScript = function(script){
+	if(script.nodeName.toLowerCase() !== "script" || !script.src || script.type != 'text/javascript'){
+		return;
+	}
+	var details = {
+		script : script,
+		text : null
+	}
+	scriptQueue.push(details);
+
+	Envjs.loadLocalScript(script, function(source){
+         details.text = source;
+         runNext();
+    })
+},
+runNext = function(){
+  var i=0;
+  while(current = scriptQueue[i]){
+    if(!current.text){
+      return;
+    }else{
+      scriptQueue.shift();
+      //RUN current
+      // print('Running '+current.script.src);
+      Envjs.eval(
+                    current.script.ownerDocument.ownerWindow,
+                    current.text,
+                    current.script.src
+                );
+      var event = current.script.ownerDocument.createEvent('HTMLEvents');
+      event.initEvent("load", false, false);
+      current.script.dispatchEvent( event, false );
+    }
+  }
+
+}
 
 
 //finally pre-supply the window with the window-like environment
