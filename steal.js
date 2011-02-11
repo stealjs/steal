@@ -666,6 +666,13 @@
 			}
 			
 			this.loading = true;
+			
+			// ejs and other types don't get inserted in the page
+			if (this.type && this.type != 'text/javascript') {
+				this.loaded();
+				return;
+			}
+			
 			if(this.func){
 				//console.log(this.path, this);
 				this.func();

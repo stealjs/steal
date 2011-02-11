@@ -24,14 +24,12 @@ steal(function(s){
 			for(var i =0; i < steals.length; i++){
 				if(!touched[steals[i].path]){
 					CB( steals[i] );
+					touched[steals[i].path] = true;
 				}
 				
 			}
 			for(var i =0; i < steals.length; i++){
-				if (!touched[steals[i].path]) {
-					touched[steals[i].path] = true;
-					breadth(steals[i], CB)
-				}
+				breadth(steals[i], CB)
 			}
 		},
 		window = (function() {
@@ -119,6 +117,7 @@ steal(function(s){
 						filter = 'script';
 					};
 					breadth(init, function(stealer){
+//						console.log("func: "+stealer.path)
 						func(stealer, steal.build.types[stealer.type] && steal.build.types[stealer.type](stealer, loadScriptText))
 					});
 				},
