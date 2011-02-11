@@ -24,7 +24,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				"global" : 0,
 				"compress" : 0
 			}),
-			destination = opts.destination || plugin+"/"+plugin.replace("/",".") + ".js";
+			destination = opts.destination || plugin+"/"+plugin.replace(/\//g,".") + ".js";
 
 		opts.exclude = !opts.exclude ? [] : (steal.isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 
@@ -42,7 +42,8 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 
 		steal.win().build_in_progress = true;
 
-		var pageSteal = steal.build.open("steal/rhino/empty.html").steal,
+		var opener = steal.build.open("steal/rhino/empty.html"),
+			pageSteal = opener.steal,
 			out = [],
 			str, i, inExclude = function( path ) {
 				for ( var i = 0; i < opts.exclude.length; i++ ) {
@@ -53,11 +54,11 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				return false;
 			},
 			steals = pageSteal.total;
-
+		
 		for ( i = 0; i < steals.length; i++ ) {
 			if(!inExclude(steals[i].path)){
 				
-				var content = steal.build.pluginify.content(steals[i], opts.global ? opts.global : "jQuery" );
+				var content = steal.build.pluginify.content(steals[i], opts.global ? opts.global : "jQuery" , opener);
 				if(content){
 					print("  > "+steals[i].path)
 					out.push(steal.build.builders.scripts.clean(content));
@@ -82,7 +83,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 	var funcCount = {};
 	
 	//gets content from a steal
-	s.build.pluginify.content = function(steal, param){
+	s.build.pluginify.content = function(steal, param, opener){
 		if(steal.func){
 			// if it's a function, go to the file it's in ... pull out the content
 			var index = funcCount[steal.path] || 0,
@@ -92,6 +93,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 			 return "("+s.build.pluginify.getFunction(contents, index)+")("+param+")";
 		}else{
 			var content = readFile(steal.path);
+			//if(steal.type && opener.)
 			if( /steal[.\(]/.test(content) ){
 				return;
 			}
