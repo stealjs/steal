@@ -1,6 +1,5 @@
-//@steal-clean
 //
-// LESS - Leaner CSS v1.0.34
+// LESS - Leaner CSS v1.0.40
 // http://lesscss.org
 // 
 // Copyright (c) 2010, Alexis Sellier
@@ -198,6 +197,7 @@ less.Parser = function Parser(env) {
         paths: env && env.paths || [],  // Search paths, when importing
         queue: [],                      // Files which haven't been imported yet
         files: {},                      // Holds the imported parse trees
+        mime:  env && env.mime,         // MIME type of .less files
         push: function (path, callback) {
             var that = this;
             this.queue.push(path);
@@ -212,7 +212,7 @@ less.Parser = function Parser(env) {
                 callback(root);
 
                 if (that.queue.length === 0) { finish() }       // Call `finish` if we're done importing
-            });
+            }, env);
         }
     };
 
@@ -246,19 +246,10 @@ less.Parser = function Parser(env) {
             match = input.charAt(i) === tok ? tok : null;
             length = 1;
             sync ();
-
-        //  1. We move to the next chunk, if necessary.
-        //  2. Set the `lastIndex` to be relative
-        //     to the current chunk, and try to match in it.
-        //  3. Make sure we matched at `index`. Because we use
-        //     the /g flag, the match could be anywhere in the
-        //     chunk. We have to make sure it's at our previous
-        //     index, which we stored in [2].
-        //
         } else {
             sync ();
 
-            if (match = tok.exec(chunks[j])) { // 3.
+            if (match = tok.exec(chunks[j])) {
                 length = match[0].length;
             } else {
                 return null;
@@ -383,7 +374,13 @@ less.Parser = function Parser(env) {
                         chunk.push(c);
                     }
                 }
-                if (level > 0) { throw new(Error)("Missing closing '}'") }
+                if (level > 0) {
+                    throw {
+                        type: 'Syntax',
+                        message: "Missing closing `}`",
+                        filename: env.filename
+                    };
+                }
 
                 return chunks.map(function (c) { return c.join('') });;
             })([[]]);
@@ -659,11 +656,26 @@ less.Parser = function Parser(env) {
                     var value;
 
                     if (input.charAt(i) !== 'u' || !$(/^url\(/)) return;
-                    value = $(this.entities.quoted) || $(this.entities.variable) || $(/^[-\w%@$\/.&=:;#+?]+/) || "";
+                    value = $(this.entities.quoted)  || $(this.entities.variable) ||
+                            $(this.entities.dataURI) || $(/^[-\w%@$\/.&=:;#+?]+/) || "";
                     if (! $(')')) throw new(Error)("missing closing ) for url()");
 
-                    return new(tree.URL)((value.value || value instanceof tree.Variable)
+                    return new(tree.URL)((value.value || value.data || value instanceof tree.Variable)
                                         ? value : new(tree.Anonymous)(value), imports.paths);
+                },
+
+                dataURI: function () {
+                    var obj;
+
+                    if ($(/^data:/)) {
+                        obj         = {};
+                        obj.mime    = $(/^[^\/]+\/[^,;)]+/)     || '';
+                        obj.charset = $(/^;\s*charset=[^,;)]+/) || '';
+                        obj.base64  = $(/^;\s*base64/)          || '';
+                        obj.data    = $(/^,\s*[^)]+/);
+
+                        if (obj.data) { return obj }
+                    }
                 },
 
                 //
@@ -775,7 +787,7 @@ less.Parser = function Parser(env) {
 
                     if (s !== '.' && s !== '#') { return }
 
-                    while (e = $(/^[#.][\w-]+/)) {
+                    while (e = $(/^[#.](?:[\w-]|\\(?:[a-fA-F0-9]{1,6} ?|[^a-fA-F0-9]))+/)) {
                         elements.push(new(tree.Element)(c, e));
                         c = $('>');
                     }
@@ -811,7 +823,7 @@ less.Parser = function Parser(env) {
                     if ((input.charAt(i) !== '.' && input.charAt(i) !== '#') ||
                         peek(/^[^{]*(;|})/)) return;
 
-                    if (match = $(/^([#.][\w-]+)\s*\(/)) {
+                    if (match = $(/^([#.](?:[\w-]|\\(?:[a-fA-F0-9]{1,6} ?|[^a-fA-F0-9]))+)\s*\(/)) {
                         name = match[1];
 
                         while (param = $(this.entities.variable) || $(this.entities.literal)
@@ -892,7 +904,7 @@ less.Parser = function Parser(env) {
                 var e, t;
 
                 c = $(this.combinator);
-                e = $(/^[.#:]?[\w-]+/) || $('*') || $(this.attribute) || $(/^\([^)@]+\)/);
+                e = $(/^(?:[.#]?|:*)(?:[\w-]|\\(?:[a-fA-F0-9]{1,6} ?|[^a-fA-F0-9]))+/) || $('*') || $(this.attribute) || $(/^\([^)@]+\)/);
 
                 if (e) { return new(tree.Element)(c, e) }
             },
@@ -1002,7 +1014,7 @@ less.Parser = function Parser(env) {
                 }
             },
             rule: function () {
-                var value, c = input.charAt(i), important;
+                var name, value, c = input.charAt(i), important;
                 save();
 
                 if (c === '.' || c === '#' || c === '&') { return }
@@ -1059,7 +1071,7 @@ less.Parser = function Parser(env) {
                 if (value = $(this['import'])) {
                     return value;
                 } else if (name = $(/^@media|@page/)) {
-                    types = $(/^[^{]+/).trim();
+                    types = ($(/^[^{]+/) || '').trim();
                     if (rules = $(this.block)) {
                         return new(tree.Directive)(name + " " + types, rules);
                     }
@@ -1184,14 +1196,14 @@ if (typeof(window) !== 'undefined') {
     //
     // Used by `@import` directives
     //
-    less.Parser.importer = function (path, paths, callback) {
+    less.Parser.importer = function (path, paths, callback, env) {
         if (path.charAt(0) !== '/' && paths.length > 0) {
             path = paths[0] + path;
         }
         // We pass `true` as 3rd argument, to force the reload of the import.
         // This is so we can get the syntax tree as opposed to just the CSS output,
         // as we need this to evaluate the current stylesheet.
-        loadStyleSheet({ href: path, title: path }, callback, true);
+        loadStyleSheet({ href: path, title: path, type: env.mime }, callback, true);
     };
 }
 
@@ -1269,6 +1281,20 @@ tree.functions = {
         hsl.l = clamp(hsl.l);
         return hsla(hsl);
     },
+    fadein: function (color, amount) {
+        var hsl = color.toHSL();
+
+        hsl.a += amount.value / 100;
+        hsl.a = clamp(hsl.a);
+        return hsla(hsl);
+    },
+    fadeout: function (color, amount) {
+        var hsl = color.toHSL();
+
+        hsl.a -= amount.value / 100;
+        hsl.a = clamp(hsl.a);
+        return hsla(hsl);
+    },
     spin: function (color, amount) {
         var hsl = color.toHSL();
         var hue = (hsl.h + amount.value) % 360;
@@ -1276,6 +1302,26 @@ tree.functions = {
         hsl.h = hue < 0 ? 360 + hue : hue;
 
         return hsla(hsl);
+    },
+    //
+    // Copyright (c) 2006-2009 Hampton Catlin, Nathan Weizenbaum, and Chris Eppstein
+    // http://sass-lang.com
+    //
+    mix: function (color1, color2, weight) {
+        var p = weight.value / 100.0;
+        var w = p * 2 - 1;
+        var a = color1.toHSL().a - color2.toHSL().a;
+
+        var w1 = (((w * a == -1) ? w : (w + a) / (1 + w * a)) + 1) / 2.0;
+        var w2 = 1 - w1;
+
+        var rgb = [color1.rgb[0] * w1 + color2.rgb[0] * w2,
+                   color1.rgb[1] * w1 + color2.rgb[1] * w2,
+                   color1.rgb[2] * w1 + color2.rgb[2] * w2];
+
+        var alpha = color1.alpha * p + color2.alpha * (1 - p);
+
+        return new(tree.Color)(rgb, alpha);
     },
     greyscale: function (color) {
         return this.desaturate(color, new(tree.Dimension)(100));
@@ -2128,19 +2174,24 @@ tree.Selector.prototype.toCSS = function (env) {
 (function (tree) {
 
 tree.URL = function (val, paths) {
-    // Add the base path if the URL is relative and we are in the browser
-    if (!/^(?:http:\/)?\//.test(val.value) && paths.length > 0 && typeof(window) !== 'undefined') {
-        val.value = [paths[0], val.value].join('/').replace('//', '/');
+    if (val.data) {
+        this.attrs = val;
+    } else {
+        // Add the base path if the URL is relative and we are in the browser
+        if (!/^(?:https?:\/|file:\/)?\//.test(val.value) && paths.length > 0 && typeof(window) !== 'undefined') {
+            val.value = paths[0] + (val.value.charAt(0) === '/' ? val.value.slice(1) : val.value);
+        }
+        this.value = val;
+        this.paths = paths;
     }
-    this.value = val;
-    this.paths = paths;
 };
 tree.URL.prototype = {
     toCSS: function () {
-        return "url(" + this.value.toCSS() + ")";
+        return "url(" + (this.attrs ? 'data:' + this.attrs.mime + this.attrs.charset + this.attrs.base64 + this.attrs.data
+                                    : this.value.toCSS()) + ")";
     },
     eval: function (ctx) {
-        return new(tree.URL)(this.value.eval(ctx), this.paths);
+        return this.attrs ? this : new(tree.URL)(this.value.eval(ctx), this.paths);
     }
 };
 
@@ -2203,7 +2254,12 @@ var isFileProtocol = (location.protocol === 'file:'    ||
                       location.protocol === 'chrome:'  ||
                       location.protocol === 'resource:');
 
-less.env =  'production';
+less.env = less.env || (location.hostname == '127.0.0.1' ||
+                        location.hostname == '0.0.0.0'   ||
+                        location.hostname == 'localhost' ||
+                        location.port.length > 0         ||
+                        isFileProtocol                   ? 'development'
+                                                         : 'production');
 
 // Load styles asynchronously (default: false)
 //
@@ -2305,13 +2361,19 @@ function loadStyleSheets(callback, reload) {
 }
 
 function loadStyleSheet(sheet, callback, reload, remaining) {
+    var url       = window.location.href.replace(/[#?].*$/, '');
     var href      = sheet.href.replace(/\?.*$/, '');
     var css       = cache && cache.getItem(href);
     var timestamp = cache && cache.getItem(href + ':timestamp');
     var styles    = { css: css, timestamp: timestamp };
 
-    xhr(sheet.href, function (data, lastModified) {
-        if (!reload && styles &&
+    // Stylesheets in IE don't always return the full path
+    if (! /^(https?|file):/.test(href)) {
+        href = url.slice(0, url.lastIndexOf('/') + 1) + href;
+    }
+
+    xhr(sheet.href, sheet.type, function (data, lastModified) {
+        if (!reload && styles && lastModified &&
            (new(Date)(lastModified).valueOf() ===
             new(Date)(styles.timestamp).valueOf())) {
             // Use local copy
@@ -2319,21 +2381,26 @@ function loadStyleSheet(sheet, callback, reload, remaining) {
             callback(null, sheet, { local: true, remaining: remaining });
         } else {
             // Use remote copy (re-parse)
-            new(less.Parser)({
-                optimization: less.optimization,
-                paths: [href.replace(/[\w\.-]+$/, '')]
-            }).parse(data, function (e, root) {
-                if (e) { return error(e, href) }
-                try {
-                    callback(root, sheet, { local: false, lastModified: lastModified, remaining: remaining });
-                    removeNode(document.getElementById('less-error-message:' + extractId(href)));
-                } catch (e) {
-                    error(e, href);
-                }
-            });
+            try {
+                new(less.Parser)({
+                    optimization: less.optimization,
+                    paths: [href.replace(/[\w\.-]+$/, '')],
+                    mime: sheet.type
+                }).parse(data, function (e, root) {
+                    if (e) { return error(e, href) }
+                    try {
+                        callback(root, sheet, { local: false, lastModified: lastModified, remaining: remaining });
+                        removeNode(document.getElementById('less-error-message:' + extractId(href)));
+                    } catch (e) {
+                        error(e, href);
+                    }
+                });
+            } catch (e) {
+                error(e, href);
+            }
         }
     }, function (status, url) {
-        throw new(Error)("Couldn't load " + url+ " (" + status + ")");
+        throw new(Error)("Couldn't load " + url + " (" + status + ")");
     });
 }
 
@@ -2359,7 +2426,7 @@ function createCSS(styles, sheet, lastModified) {
     if ((css = document.getElementById(id)) === null) {
         css = document.createElement('style');
         css.type = 'text/css';
-        css.media = sheet.media;
+        css.media = sheet.media || 'screen';
         css.id = id;
         document.getElementsByTagName('head')[0].appendChild(css);
     }
@@ -2390,7 +2457,7 @@ function createCSS(styles, sheet, lastModified) {
     }
 }
 
-function xhr(url, callback, errback) {
+function xhr(url, type, callback, errback) {
     var xhr = getXMLHttpRequest();
     var async = isFileProtocol ? false : less.async;
 
@@ -2398,13 +2465,14 @@ function xhr(url, callback, errback) {
         xhr.overrideMimeType('text/css');
     }
     xhr.open('GET', url, async);
+    xhr.setRequestHeader('Accept', type || 'text/x-less, text/css; q=0.9, */*; q=0.5');
     xhr.send(null);
 
     if (isFileProtocol) {
         if (xhr.status === 0) {
             callback(xhr.responseText);
         } else {
-            errback(xhr.status);
+            errback(xhr.status, url);
         }
     } else if (async) {
         xhr.onreadystatechange = function () {
@@ -2450,42 +2518,57 @@ function log(str) {
 function error(e, href) {
     var id = 'less-error-message:' + extractId(href);
 
-    if (! e.extract) { throw e }
+    var template = ['<ul>',
+                        '<li><label>[-1]</label><pre class="ctx">{0}</pre></li>',
+                        '<li><label>[0]</label><pre>{current}</pre></li>',
+                        '<li><label>[1]</label><pre class="ctx">{2}</pre></li>',
+                    '</ul>'].join('\n');
 
-    var template = ['<div>',
-                        '<pre class="ctx"><span>[-1]</span>{0}</pre>',
-                        '<pre><span>[0]</span>{current}</pre>',
-                        '<pre class="ctx"><span>[1]</span>{2}</pre>',
-                    '</div>'].join('\n');
+    var elem = document.createElement('div'), timer, content;
 
-    var elem = document.createElement('div'), timer;
-    elem.id = id;
+    elem.id        = id;
     elem.className = "less-error-message";
-    elem.innerHTML = '<h3>' + (e.message || 'There is an error in your .less file') + '</h3>' +
-                     '<p><a href="' + href   + '">' + href + "</a> "                +
-                     'on line '     + e.line + ', column ' + (e.column + 1)         + ':</p>' +
-                     template.replace(/\[(-?\d)\]/g, function (_, i) {
-                         return (parseInt(e.line) + parseInt(i)) || '';
-                     }).replace(/\{(\d)\}/g, function (_, i) {
-                         return e.extract[parseInt(i)] || '';
-                     }).replace(/\{current\}/, e.extract[1].slice(0, e.column)      +
-                                               '<span class="error">'               +
-                                               e.extract[1].slice(e.column)         +
-                                               '</span>');
+
+    content = '<h3>'  + (e.message || 'There is an error in your .less file') +
+              '</h3>' + '<p><a href="' + href   + '">' + href + "</a> ";
+
+    if (e.extract) {
+        content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':</p>' +
+            template.replace(/\[(-?\d)\]/g, function (_, i) {
+                return (parseInt(e.line) + parseInt(i)) || '';
+            }).replace(/\{(\d)\}/g, function (_, i) {
+                return e.extract[parseInt(i)] || '';
+            }).replace(/\{current\}/, e.extract[1].slice(0, e.column) + '<span class="error">' +
+                                      e.extract[1].slice(e.column)    + '</span>');
+    }
+    elem.innerHTML = content;
+
     // CSS for error messages
     createCSS([
-        '.less-error-message span {',
+        '.less-error-message ul, .less-error-message li {',
+            'list-style-type: none;',
             'margin-right: 15px;',
+            'padding: 4px 0;',
+            'margin: 0;',
+        '}',
+        '.less-error-message label {',
+            'font-size: 12px;',
+            'margin-right: 15px;',
+            'padding: 4px 0;',
+            'color: #cc7777;',
         '}',
         '.less-error-message pre {',
             'color: #ee4444;',
             'padding: 4px 0;',
             'margin: 0;',
+            'display: inline-block;',
         '}',
         '.less-error-message pre.ctx {',
-            'color: #dd7777;',
+            'color: #dd4444;',
         '}',
         '.less-error-message h3 {',
+            'font-size: 20px;',
+            'font-weight: bold;',
             'padding: 15px 0 5px 0;',
             'margin: 0;',
         '}',
@@ -2512,7 +2595,7 @@ function error(e, href) {
         "margin-bottom: 15px"
     ].join(';');
 
-    /*if (less.env == 'development') {
+    if (less.env == 'development') {
         timer = setInterval(function () {
             if (document.body) {
                 if (document.getElementById(id)) {
@@ -2523,7 +2606,7 @@ function error(e, href) {
                 clearInterval(timer);
             }
         }, 10);
-    }*/
+    }
 }
 
 })(window);
