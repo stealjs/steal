@@ -10,8 +10,6 @@ steal(function(){
 		var text = loadScriptText(steal.absolute, steal),
 			id = steal.id;
 			checkText(text, id);
-		print(id)
-		print(text)
 		return jQuery.View.registerScript("ejs", id, text);
 	};
 	
