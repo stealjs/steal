@@ -549,7 +549,8 @@
 						steal.root.join(options.path.substr(2)) :
 						( pathFile.relative() ? pathFile.joinFrom(File.cur().getAbsolutePath(), true) : normalized ),
 				dir : steal.File(normalized).dir(),
-				pathFromPage : !pathFile.isLocalAbsolute() && !pathFile.protocol() ? steal.root.join(normalized) : normalized
+				pathFromPage : !pathFile.isLocalAbsolute() && !pathFile.protocol() ? steal.root.join(normalized) : normalized,
+				id: steal.cleanId(normalized)
 			})
 
 			var self = this;

@@ -5,6 +5,14 @@ steal(function(){
 		if(!text){
 			print("\n!! There is nothing at "+id+"!!")
 		}
+	},
+	getViewText = function( steal, type ){
+		var text = loadScriptText(steal.absolute, steal),
+			id = steal.id;
+			checkText(text, id);
+		print(id)
+		print(text)
+		return jQuery.View.registerScript("ejs", id, text);
 	};
 	
 	// types conversion
@@ -13,7 +21,7 @@ steal(function(){
 	steal.build.types = {
 		'text/javascript': function( stl ) {
 			
-			return loadScriptText(stl.pathFromPage, stl);
+			return loadScriptText(stl.absolute, stl);
 
 		},
 		'text/css': function( script ) {
@@ -24,29 +32,17 @@ steal(function(){
 				return script.text;
 			}
 		},
-		'text/ejs': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("ejs", id, text);
+		'text/ejs': function( steal ) {
+			return getViewText(steal, "ejs");
 		},
 		'text/micro': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("micro", id, text);
+			return getViewText(steal, "micro");
 		},
 		'text/jaml': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("jaml", id, text);
+			return getViewText(steal, "jaml");
 		},
 		'text/tmpl': function( script ) {
-			var text = script.text || loadScriptText(script.src),
-				id = script.id || script.getAttribute("id");
-				checkText(text, script.src || id);
-			return jQuery.View.registerScript("tmpl", id, text);
+			return getViewText(steal, "tmpl");
 		},
 		loadScriptText: loadScriptText
 	};
