@@ -98,7 +98,7 @@
 					onload && onload(script);
 					
 				};
-			
+			//src should be relative to steal
 			if (!srcFile.isLocalAbsolute() && !srcFile.protocol() ) {
 				src = steal.root.join(src);
 			}
@@ -125,7 +125,6 @@
 			
 				script[ STR_ONLOAD ] = callback;
 			}
-			
 			// Set source
 			script.src = src;
 			for ( var attr in attrs ) {
@@ -187,8 +186,9 @@
 			if(ob1[func1].called){
 				// call ob2 right away.
 				setTimeout(function(){
+					//print("calling")
 					ob2[func2](ob1)
-				},0)
+				},1)
 			}else{
 				// push the callee to be called later
 				f1.callbacks.push({
@@ -466,22 +466,31 @@
 
 		return steal;
 	};
-	steal.map = map;
+	steal.dependencies = map;
+	steal.mappings = {};
+	steal.map = function(mappings, path){
+		if(typeof mappings == "string"){
+			steal.mappings[mappings] = path;
+		} else { // its an object
+			for(var key in mappings){
+				steal.mappings[key] = mappings[key];
+			}
+		}
+	}
 	steal.fn = steal.prototype = {
 		
-		make : function(options){
+		make: function(options){
 			//we should check the map, but screw it for now
 			var stel = new steal.fn.init(options)
 			
 			if(stel.kind === "file" && stel.path){
 				if(!map[stel.path]){
+					//print("  Adding  "+stel.path)
 					map[stel.path] = stel;
 					
 					stel.completeTimeout = setTimeout(function(){
 						throw "steal.js : "+stel.path+" not completed"
 					},5000)
-				}else{
-					
 				}
 				stel = map[stel.path];
 			}
@@ -491,11 +500,12 @@
 		init: function( options) {
 
 			this.dependencies = [];
-			if(!options){ //global cur ...
+			if(!options){ //global init cur ...
 				var self = this;
 				this.kind="file";
 				setTimeout(function(){
-					self.loaded()
+					this.pack = "production.js"
+					self.loaded();
 				},0);
 				return;
 			}
@@ -521,6 +531,7 @@
 					path: /\.js$/i.test(options) ? options : options + '.js'
 				};
 			}
+			this.type = options.type || "text/javascript"
 			this.kind = 'file'
 			var pathFile = steal.File(options.path),
 				normalized = pathFile.normalize();
@@ -537,13 +548,17 @@
 					options.path.match(/^\/\//) ? 
 						steal.root.join(options.path.substr(2)) :
 						( pathFile.relative() ? pathFile.joinFrom(File.cur().getAbsolutePath(), true) : normalized ),
-				dir : steal.File(normalized).dir()
+				dir : steal.File(normalized).dir(),
+				pathFromPage : !pathFile.isLocalAbsolute() && !pathFile.protocol() ? steal.root.join(normalized) : normalized,
+				id: steal.cleanId(normalized)
 			})
+
 			var self = this;
 			
 		},
 		complete : function(){
 			clearTimeout(this.completeTimeout)
+			//console.log("completed "+this.path, this === init)
 			/*console.log("      COMPLETED  ",this.path+" "+(this.func ? "f()" : ""),
 					mapA(this.complete.callbacks,function(item){
 				return item.obj.path+
@@ -581,7 +596,6 @@
 			}
 			
 			if(!myqueue.length){
-				//console.log("    LOADEDe ",this.path);
 				this.complete();
 				return;
 			}
@@ -594,15 +608,18 @@
 			//now go through what you stole and hook everything up
 			each(myqueue, function(i, item){
 				stel = steal.fn.make( item );
+				self.dependencies.push(stel)
 				if(stel.kind === 'file'){
 					set.push(stel);
-					if(start.kind === 'file'){ //we are the first files ...
+					if(start ===self){ //we are the first files ...
 						initial.push(stel)
 					}else{
+						//stel.dependencies.push(start);
 						when(start,"complete",stel,"load") //blah blah
 					}
 				}else{
 					each(set,function(){
+						//stel.dependencies.push(this);
 						when(this,"complete", stel, "load") // if already complete .. call load
 					})
 					set = [stel];
@@ -615,9 +632,10 @@
 			
 			//tell last set, or last function to call complete ...
 			if(set.length){
-				// need to check for already complete ones?
-				//console.log("hooking up")
-				each(set, function(){ when(this,"complete",self,"complete")})
+
+				each(set, function(){ 
+					when(this,"complete",self,"complete")
+				})
 			}else{
 				when(stel,"complete",self,"complete")
 			}
@@ -626,36 +644,39 @@
 					typeof item == 'function' ? "f()" :
 					item.path+(item.func ? " f()" : "") )
 			}
-			//load initial
-			//console.log("    LOADED  ",this.path);//,"\n     set  ",mapA(set,thing),
-			//			"\n     queue  ", mapA(myqueue,thing), 
-			//			"\n     initial  ",mapA(initial,thing))
+
 			var frag = document.createDocumentFragment(),
 				headEl = head();
-			
 			each(initial, function(){
 				var el = this.load(true);
 				//console.log(">>>>>",el&&el.src, this.path);
 				if(el){
-					
 					frag.appendChild(el)
 				}
 			});
-			//console.log(frag)
 			headEl.insertBefore( frag, headEl.firstChild );
 		},
 		/**
 		 * When the script loads, 
 		 */
 		load: function(returnScript) {
+			//console.log("  LOAD ", this.path,this.func ? " f()" : "", this.loading)
 			if(this.loading){
 				return;
 			}
-			//console.log("  LOAD  ", this.path,this.func ? "  f()" : "")
+			
 			this.loading = true;
+			
+			// ejs and other types don't get inserted in the page
+			if (this.type && this.type != 'text/javascript') {
+				this.loaded();
+				return;
+			}
+			
 			if(this.func){
+				//console.log(this.path, this);
 				this.func();
-				this.complete();
+				this.loaded();
 			}else{
 				var self = this;
 				//console.log(returnScript,"------------")
@@ -664,42 +685,6 @@
 					self.loaded();
 				}, returnScript);
 			}
-			
-			
-			//set next to current so other includes will be added to it
-			//steal.cur(this);
-			//only load if actually pulled, this helps us mark only once
-			
-			
-			/*this.dependencies = [];
-			var isProduction = (steal.options.env == "production"),
-				options = extend({
-					type: "text/javascript",
-					compress: "true",
-					"package": "production.js"
-				}, extend({
-					src: this.path
-				}, this.options));
-
-			if ( this.func ) {
-				//console.log("run FUNCTION")
-				//run function and continue to next steald
-				this.func();
-				steal.end();
-			} else if (!isProduction || this.force ) { //force is for packaging
-				//console.log("run INSERT",this.path)
-				if ( this.type ) {
-					insert(options);
-				} else {
-					steal.cur().dir(this.path);
-					insert(this.skipInsert ? undefined : options);
-				}
-			} else {
-				//console.log("run VIRTUAL ",this.path)
-				if (!this.type ) {
-					steal.cur().dir(this.path);
-				}
-			}*/
 
 		}
 
@@ -1095,9 +1080,9 @@
 		init: function() {
 			this.setScriptOptions();
 			//force into development mode to prevent errors
-			if ( steal.browser.rhino ) {
-				steal.options.env = 'development';
-			}
+			//if ( steal.browser.rhino ) {
+			//	steal.options.env = 'development';
+			//}
 			this.setOldIncludeOptions();
 			this.setHashOptions();
 			//clean up any options
@@ -1166,15 +1151,18 @@
 				return cur;
 			}
 		},
-		defined : function(name){
+		defined: function(name){
 			//get other steals
 			//basically create each one ... mark it as loading
 			//  load each one
 			var stel = steal.fn.make( name );
 			stel.loading = true;
+			//console.log("  DEF     "+stel.path)
 			var myqueue = queue.slice(0);
 			queue = [];
+			//an array to say each has 'loaded'
 			defines.push(function(){
+				//print("  loaded with "+stel.path+" queue "+myqueue.length)
 				stel.loaded(myqueue)
 			});
 			return steal;
@@ -1290,8 +1278,21 @@
 		then: steal,
 		total: total
 	});
+	var appendMapping = function(p){
+		// go through mappings
+		for(var map in steal.mappings){
+			// first x characters of map match first x characters of p
+			if(p.indexOf(map) == 0){
+				return p.replace(map, steal.mappings[map]);
+			}
+		}
+		return p;
+	}
 	var stealPlugin = function( p ) {
-		return steal("//"+p + '/' + getLastPart(p));
+		var prefix = appendMapping(p);
+		var firstPath = /^(http|\/)/.test(prefix) ? "": "//";
+		var path = firstPath + prefix + '/' + getLastPart(prefix);
+		return steal(path);
 	};
 	steal.packs = function() {
 		for ( var i = 0; i < arguments.length; i++ ) {
@@ -1482,12 +1483,12 @@
 	});
 	steal.windowloaded = function(){};
 	steal.bothloaded = function(){
-		//console.log('both loaded')
-	}
+		
+	};
 
 	when(init, "complete", steal,"bothloaded");
 	when(steal,"windowloaded",steal,"bothloaded");
-	
+
 	steal.load = function(ob, cb) {
 		if(typeof ob == 'function' && !cb){
 			ob = {

@@ -97,6 +97,10 @@ steal.test =  {
 			logLevel: 2,
 			dontPrintUserAgent: true
 		});
+		//var newSteal = window.steal;
+		//newSteal.done(function(){});
+		//Envjs.wait();
+		
 	},
 	test : function(name, test){
 		assertions = []
