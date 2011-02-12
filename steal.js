@@ -506,6 +506,7 @@
 				setTimeout(function(){
 					this.pack = "production.js"
 					self.loaded();
+					when(self, "complete", steal, "startjQuery")
 				},0);
 				return;
 			}
@@ -579,6 +580,9 @@
 		 *   - mark yourself as complete when everything is completed
 		 */
 		loaded : function(myqueue){
+			//check if jQuery has been loaded
+			jQueryCheck();
+			
 			var defs = defines.slice(0);
 			defines = [];
 			for(var i =0; i < defs.length; i++){
@@ -1465,6 +1469,12 @@
 		},
 		cleanId: function( id ) {
 			return id.replace(/[\/\.]/g, "_");
+		},
+		startjQuery : function(){
+			if (jQueryIncremented) {
+                jQuery.readyWait -= 1;
+                jQueryIncremented = false;
+            }
 		}
 	});
 	//for integration with other build types
@@ -1498,4 +1508,20 @@
 		}
 		when(steal, "bothloaded", ob,cb)
 	}
+	var jQueryIncremented = false;
+	
+	function jQueryCheck() {
+        //if (!window.jQuery) {
+            var $ = typeof jQuery !== "undefined" ? jQuery : null;
+            if ($ && "readyWait" in $) {
+                
+                //Increment jQuery readyWait if ncecessary.
+                if (!jQueryIncremented) {
+                    $.readyWait += 1;
+                    jQueryIncremented = true;
+                }
+            }
+        //}
+    }
+	//onload decrement
 })();
