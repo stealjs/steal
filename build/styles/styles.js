@@ -13,18 +13,14 @@ steal(function( steal ) {
 			pageFolder = steal.File(opener.url).dir(),
 			currentPackage = [];
 
-		opener.each('link', function( link, text, i ) {
-			steal.print(link.type)
-			//let people know we are adding it
-			if ( link.href && steal.build.types[link.type] ) {
-				steal.print(link.href)
+		opener.each('style', function( link, text, i ) {
+			if ( steal.build.types[link.type] ) {
+				steal.print(link.pathFromPage)
 
-				var loc = steal.File(pageFolder).join(link.href),
-					converted = convert(text, loc, folder)
-
-
-					currentPackage.push(steal.cssMin(converted))
-
+				var loc = steal.File(pageFolder).join(link.pathFromPage),
+					converted = convert(text, loc, folder);
+				
+				currentPackage.push(steal.cssMin(converted))
 			}
 
 		});

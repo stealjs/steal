@@ -23,7 +23,7 @@ steal(function( steal ) {
 		}
 
 		// for each steal we find
-		opener.each("script", function( stl, text, i ) {
+		opener.each('script', function( stl, text, i ) {
 
 			// if we should ignore it, ignore it
 			if ( stl.ignore  ) {

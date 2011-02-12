@@ -533,6 +533,8 @@
 				};
 			}
 			this.type = options.type || "text/javascript"
+			this.resource = options.resource || "script";
+			
 			this.kind = 'file'
 			var pathFile = steal.File(options.path),
 				normalized = pathFile.normalize();
@@ -550,10 +552,9 @@
 						steal.root.join(options.path.substr(2)) :
 						( pathFile.relative() ? pathFile.joinFrom(File.cur().getAbsolutePath(), true) : normalized ),
 				dir : steal.File(normalized).dir(),
-				pathFromPage : !pathFile.isLocalAbsolute() && !pathFile.protocol() ? steal.root.join(normalized) : normalized,
+				pathFromPage : steal.root.join(normalized),
 				id: steal.cleanId(normalized)
 			})
-
 			var self = this;
 			
 		},
@@ -1194,7 +1195,9 @@
 			for(var i =0; i < arguments.length; i++){
 				steal({
 					path : arguments[i]+".css",
-					load : this.cssLoad
+					load : this.cssLoad,
+					type : "text/css",
+					resource : "style"
 				})
 			}
 			return this;
@@ -1507,7 +1510,7 @@
 			cb = 'func'
 		}
 		when(steal, "bothloaded", ob,cb)
-	}
+	};
 	var jQueryIncremented = false;
 	
 	function jQueryCheck() {
