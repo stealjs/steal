@@ -7509,7 +7509,7 @@ Aspect.around({
 			 node.namespaceURI === "http://www.w3.org/1999/xhtml" || 
 			 node.namespaceURI === null) ) {
             //console.log('appending script while parsing');
-            if((this.nodeName.toLowerCase() === 'head')){
+            /*if((this.nodeName.toLowerCase() === 'head')){
                 try{
                     okay = Envjs.loadLocalScript(node, null);
                     //console.log('loaded script? %s %s', node.uuid, okay);
@@ -7522,7 +7522,7 @@ Aspect.around({
                 }catch(e){
                     console.log('error loading html element %s %e', node, e.toString());
                 }
-            }
+            }*/
         }
         break;
         case false:
@@ -7538,7 +7538,7 @@ Aspect.around({
                         break;
                     case 'script':
                         //console.log('appending script %s', node.src);
-                        if((this.nodeName.toLowerCase() === 'head')){
+                        /*if((this.nodeName.toLowerCase() === 'head')){
                             try{
                                 okay = Envjs.loadLocalScript(node, null);
                                 //console.log('loaded script? %s %s', node.uuid, okay);
@@ -7551,7 +7551,7 @@ Aspect.around({
                             }catch(e){
                                 console.log('error loading html element %s %e', node, e.toString());
                             }
-                        }
+                        }*/
                         break;
                     case 'frame':
                     case 'iframe':

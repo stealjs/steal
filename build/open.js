@@ -85,8 +85,8 @@ steal(function(s){
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
 			},
-			dontPrintUserAgent: true,
-			killTimersAfterLoad: true
+			dontPrintUserAgent: true//,
+			//killTimersAfterLoad: true
 		});
 
 		// set back steal
@@ -103,6 +103,7 @@ steal(function(s){
 		}
 		
 		newSteal.done(function(init){
+			Envjs.clear();
 			cb({
 				/**
 				 * @hide
@@ -112,7 +113,7 @@ steal(function(s){
 				 * @param {Object} func a function to call back with the element and its content
 				 */
 				each: function( filter, func ) {
-					touched = [];
+					touched = {};
 					if ( !func ) {
 						func = filter;
 						filter = function(){return true;};
