@@ -180,15 +180,15 @@
 		//   when(parent,"start", steal, "start")
 		when = function(ob1, func1, ob2, func2){
 			var f1 = convert(ob1,func1),
-				f2 = convert(ob2, func2);
+				f2 = convert(ob2, func2),
+				ret;
 	
 			// if the caller has already been called, 
 			if(ob1[func1].called){
 				// call ob2 right away.
-				setTimeout(function(){
-					//print("calling")
+				ret = function(){ // timeout b/c calling func might need other things
 					ob2[func2](ob1)
-				},1)
+				}
 			}else{
 				// push the callee to be called later
 				f1.callbacks.push({
@@ -201,6 +201,7 @@
 				f2.calls=0;
 			}
 			f2.calls++;
+			return ret;
 		},
 		// an implementation of each
 		each = function(arr, cb){
@@ -503,10 +504,13 @@
 			if(!options){ //global init cur ...
 				var self = this;
 				this.kind="file";
+				this.pack = "production.js"
+				
 				setTimeout(function(){
-					this.pack = "production.js"
+					
 					self.loaded();
-					when(self, "complete", steal, "startjQuery")
+					var res = when(self, "complete", steal, "startjQuery");
+					res && res();
 				},0);
 				return;
 			}
@@ -584,11 +588,7 @@
 			//check if jQuery has been loaded
 			jQueryCheck();
 			
-			var defs = defines.slice(0);
-			defines = [];
-			for(var i =0; i < defs.length; i++){
-				defs[i]();
-			}
+			//console.log("LOADED ",this.path)
 			
 			
 			//mark yourself as current
@@ -609,7 +609,8 @@
 			var set = [],
 				start = this, // this is who we are listening to
 				stel,
-				initial = [];
+				initial = [],
+				callers = [];
 			//now go through what you stole and hook everything up
 			each(myqueue, function(i, item){
 				stel = steal.fn.make( item );
@@ -620,12 +621,12 @@
 						initial.push(stel)
 					}else{
 						//stel.dependencies.push(start);
-						when(start,"complete",stel,"load") //blah blah
+						callers.push( when(start,"complete",stel,"load") ) //blah blah
 					}
 				}else{
 					each(set,function(){
 						//stel.dependencies.push(this);
-						when(this,"complete", stel, "load") // if already complete .. call load
+						callers.push( when(this,"complete", stel, "load") ) // if already complete .. call load
 					})
 					set = [stel];
 					start = stel;
@@ -639,11 +640,16 @@
 			if(set.length){
 
 				each(set, function(){ 
-					when(this,"complete",self,"complete")
+					callers.push( when(this,"complete",self,"complete") );
 				})
 			}else{
-				when(stel,"complete",self,"complete")
+				callers.push( when(stel,"complete",self,"complete") );
 			}
+			each(callers, function(i, f){
+				if (f) {
+					f();
+				}
+			})
 			var thing = function(item){
 				return 	typeof item == 'string' ? item : (
 					typeof item == 'function' ? "f()" :
@@ -1156,7 +1162,7 @@
 				return cur;
 			}
 		},
-		defined: function(name){
+		loaded: function(name){
 			//get other steals
 			//basically create each one ... mark it as loading
 			//  load each one
@@ -1166,11 +1172,18 @@
 			var myqueue = queue.slice(0);
 			queue = [];
 			//an array to say each has 'loaded'
-			defines.push(function(){
+			//defines.push(function(){
 				//print("  loaded with "+stel.path+" queue "+myqueue.length)
 				stel.loaded(myqueue)
-			});
+			//});
 			return steal;
+		},
+		loading : function(){
+			for(var i =0; i< arguments.length;i++){
+				var stel = steal.fn.make( arguments[i] );
+				stel.loading = true;
+			}
+			
 		},
 		done: function(ob, cb) {
 			if(typeof ob == 'function' && !cb){
@@ -1179,7 +1192,7 @@
 				}
 				cb = 'func'
 			}
-			when(init, "complete", ob,cb)
+			return when(init, "complete", ob,cb)
 		},
 		/**
 		 * Loads css files from the given relative path.
@@ -1476,7 +1489,6 @@
 		startjQuery : function(){
 			if (jQueryIncremented) {
                 jQuery.readyWait -= 1;
-                jQueryIncremented = false;
             }
 		}
 	});

@@ -15,7 +15,10 @@ steal(function( steal ) {
 			packages = {},
 
 			// the current package
-			currentPackage = [];
+			currentPackage = {
+				scripts : [],
+				src : []
+			};
 
 		// compress all scripts by default
 		if ( true/*options.all*/ ) {
@@ -44,7 +47,7 @@ steal(function( steal ) {
 			if ( pack ) {
 				//if we don't have it, create it and set it to the current package
 				if (!packages[pack] ) {
-					packages[pack] = [];
+					packages[pack] = {scripts: [], src : []};
 				}
 				currentPackage = packages[pack];
 			}
@@ -53,23 +56,24 @@ steal(function( steal ) {
 			text = scripts.clean(text);
 
 			// if we should compress the script, compress it
-			if ( stl.compress || options.all ) {
+			if ( stl.compress !== false || options.all ) {
 				text = compressor(text, true);
 			}
-
+			currentPackage.scripts.push("'//"+stl.path+"'")
 			// put the result in the package
-			currentPackage.push(text+";\nsteal.defined('//"+stl.path+"');");
+			currentPackage.src.push(text+";\nsteal.loaded('//"+stl.path+"');");
 		});
 
 		steal.print("");
 
 		// go through all the packages
 		for ( var p in packages ) {
-			if ( packages[p].length ) {
+			if ( packages[p].src.length ) {
 				//join them
-				var compressed = packages[p].join("\n");
+				var loading = "steal.loading("+packages[p].scripts.join(',')+");\n";
+				var compressed = packages[p].src.join("\n");
 				//save them
-				new steal.File(options.to + p).save(compressed);
+				new steal.File(options.to + p).save(loading+compressed);
 				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}

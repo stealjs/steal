@@ -101,8 +101,7 @@ steal(function(s){
 				oldSteal.build.types[buildType] = newSteal.build.types[buildType];
 			}
 		}
-		
-		newSteal.done(function(init){
+		var res = newSteal.done(function(init){
 			Envjs.clear();
 			cb({
 				/**
@@ -135,6 +134,7 @@ steal(function(s){
 				url: url
 			})
 		});
+		res && res();
 		Envjs.wait();
 	};
 })

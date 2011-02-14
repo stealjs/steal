@@ -220,7 +220,8 @@ test("when",3, function(){
 			complete : function(){
 				count++;
 				equals(count, 1, "complete called once");
-				when(ob2,"loaded", ob4,"complete");
+				var res = when(ob2,"loaded", ob4,"complete");
+				res && res();
 			},
 			path: "ob3"
 		},
@@ -231,7 +232,8 @@ test("when",3, function(){
 				equals(count, 2, "complete called again")
 				
 				
-				when(ob3,"complete",ob5,"complete")
+				var res = when(ob3,"complete",ob5,"complete");
+				res && res();
 			},
 			path: "ob4"
 		},
@@ -244,9 +246,10 @@ test("when",3, function(){
 			path: "ob5"
 		}
 		
-	when(ob1,"loaded",ob3,"complete");
-	when(ob2,"loaded",ob3,"complete");
-	
+	var res1 = when(ob1,"loaded",ob3,"complete");
+	var res2 = when(ob2,"loaded",ob3,"complete");
+	res1 && res1();
+	res2 && res2();
 	ob1.loaded();
 	ob2.loaded();
 	stop();

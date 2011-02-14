@@ -17,7 +17,7 @@ steal('//steal/test/test', function( s ) {
 					s.test.equals(content.length > 1, true, "No content from "+stl.path)
 				})
 			})
-			s.test.equals(count, 3, "Basic source not right number")
+			s.test.equals(count, 4, "Basic source not right number")
 			
 		});
 		s.test.clear();
@@ -25,14 +25,18 @@ steal('//steal/test/test', function( s ) {
 	
 	s.test.test("using stealjs", function(){
 		load('steal/rhino/steal.js')
-		steal.plugins("steal/build","steal/build")
-		steal("//steal/build/scripts/scripts")
-		steal.build("steal/build/test/stealpage.html", {
-			to: 'steal/build/test'
-		})
+		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+			s2.build("steal/build/test/stealpage.html", {
+				to: 'steal/build/test'
+			})
+		});
 		s.test.clear();
 		s.test.open('steal/build/test/stealprodpage.html')
-		s.test.equals(BasicSource, 7, "Basic source not right number")
+		var res = ["0","1","2"]
+		s.test.equals(packagesStolen.length, res.length, "Lengths not equal");
+		for(var i=0; i < res.length; i++){
+			s.test.equals(packagesStolen[i],res[i])
+		}
 		s.test.clear();
 	
 		//s.test.remove('steal/build/test/production.js')
@@ -42,11 +46,12 @@ steal('//steal/test/test', function( s ) {
 	return;
 	s.test.test("foreign characters", function(){
 		load('steal/rhino/steal.js')
-		steal("//steal/build/build")
-		steal("//steal/build/scripts/scripts")
-		steal.build("steal/build/test/foreign.html", {
-			to: 'steal/build/test'
+		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+			s2.build("steal/build/test/foreign.html", {
+				to: 'steal/build/test'
+			})
 		})
+		
 		s.test.clear();
 	
 		//check that srcs are equal
