@@ -7,9 +7,9 @@ steal(function(){
 		}
 	},
 	getViewText = function( steal, type ){
-		var text = loadScriptText(steal.absolute, steal),
+		var text = loadScriptText(steal.pathFromPage, steal),
 			id = steal.id;
-			checkText(text, id);
+			checkText(text, steal.path);
 		return jQuery.View.registerScript("ejs", id, text);
 	};
 	
@@ -19,16 +19,11 @@ steal(function(){
 	steal.build.types = {
 		'text/javascript': function( stl ) {
 			
-			return loadScriptText(stl.absolute, stl);
+			return loadScriptText(stl.pathFromPage, stl);
 
 		},
 		'text/css': function( script ) {
-			if ( script.href ) {
-				return loadScriptText(script.href, script);
-			}
-			else {
-				return script.text;
-			}
+			return loadScriptText(script.pathFromPage, script);
 		},
 		'text/ejs': function( steal ) {
 			return getViewText(steal, "ejs");

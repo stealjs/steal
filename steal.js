@@ -506,6 +506,7 @@
 				setTimeout(function(){
 					this.pack = "production.js"
 					self.loaded();
+					when(self, "complete", steal, "startjQuery")
 				},0);
 				return;
 			}
@@ -532,6 +533,8 @@
 				};
 			}
 			this.type = options.type || "text/javascript"
+			this.resource = options.resource || "script";
+			
 			this.kind = 'file'
 			var pathFile = steal.File(options.path),
 				normalized = pathFile.normalize();
@@ -549,10 +552,9 @@
 						steal.root.join(options.path.substr(2)) :
 						( pathFile.relative() ? pathFile.joinFrom(File.cur().getAbsolutePath(), true) : normalized ),
 				dir : steal.File(normalized).dir(),
-				pathFromPage : !pathFile.isLocalAbsolute() && !pathFile.protocol() ? steal.root.join(normalized) : normalized,
+				pathFromPage : steal.root.join(normalized),
 				id: steal.cleanId(normalized)
 			})
-
 			var self = this;
 			
 		},
@@ -579,6 +581,9 @@
 		 *   - mark yourself as complete when everything is completed
 		 */
 		loaded : function(myqueue){
+			//check if jQuery has been loaded
+			jQueryCheck();
+			
 			var defs = defines.slice(0);
 			defines = [];
 			for(var i =0; i < defs.length; i++){
@@ -1190,7 +1195,9 @@
 			for(var i =0; i < arguments.length; i++){
 				steal({
 					path : arguments[i]+".css",
-					load : this.cssLoad
+					load : this.cssLoad,
+					type : "text/css",
+					resource : "style"
 				})
 			}
 			return this;
@@ -1465,6 +1472,12 @@
 		},
 		cleanId: function( id ) {
 			return id.replace(/[\/\.]/g, "_");
+		},
+		startjQuery : function(){
+			if (jQueryIncremented) {
+                jQuery.readyWait -= 1;
+                jQueryIncremented = false;
+            }
 		}
 	});
 	//for integration with other build types
@@ -1497,5 +1510,21 @@
 			cb = 'func'
 		}
 		when(steal, "bothloaded", ob,cb)
-	}
+	};
+	var jQueryIncremented = false;
+	
+	function jQueryCheck() {
+        //if (!window.jQuery) {
+            var $ = typeof jQuery !== "undefined" ? jQuery : null;
+            if ($ && "readyWait" in $) {
+                
+                //Increment jQuery readyWait if ncecessary.
+                if (!jQueryIncremented) {
+                    $.readyWait += 1;
+                    jQueryIncremented = true;
+                }
+            }
+        //}
+    }
+	//onload decrement
 })();

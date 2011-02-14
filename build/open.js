@@ -112,13 +112,21 @@ steal(function(s){
 				 * @param {Object} func a function to call back with the element and its content
 				 */
 				each: function( filter, func ) {
-					if ( typeof filter == 'function' ) {
+					touched = [];
+					if ( !func ) {
 						func = filter;
-						filter = 'script';
+						filter = function(){return true;};
 					};
+					if(typeof filter == 'string'){
+						var resource = filter;
+						filter = function(stl){
+							return stl.resource === resource;
+						}
+					}
 					breadth(init, function(stealer){
-//						console.log("func: "+stealer.path)
-						func(stealer, steal.build.types[stealer.type] && steal.build.types[stealer.type](stealer, loadScriptText))
+						if(filter(stealer)){
+							func(stealer, steal.build.types[stealer.type] && steal.build.types[stealer.type](stealer, loadScriptText))
+						}
 					});
 				},
 				// the 

@@ -141,6 +141,7 @@ steal(function( steal ) {
 			url = steal.root.join(url.substr(2)); //can steal be removed?
 		}
 		url = Envjs.uri(url, base);
+		
 		if ( url.match(/^file\:/) ) {
 			url = url.replace("file:/", "");
 			text = readFile("/" + url);
