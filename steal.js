@@ -676,7 +676,7 @@
 			if(this.loading){
 				return;
 			}
-			
+			var isProduction = (steal.options.env == "production");
 			this.loading = true;
 			
 			// ejs and other types don't get inserted in the page
@@ -685,14 +685,19 @@
 				return;
 			}
 			
-			if(this.func){
+			if (this.func) {
 				//console.log(this.path, this);
 				this.func();
 				this.loaded();
-			}else{
+			}
+			else if (isProduction && this.ignore) {
+				this.loaded();
+			} else {
 				var self = this;
 				//console.log(returnScript,"------------")
-				return   writeScript(this.path, {type :"text/javascript"},function(){
+				return writeScript(this.path, {
+					type: "text/javascript"
+				}, function(){
 					//mark as loaded ...
 					self.loaded();
 				}, returnScript);
