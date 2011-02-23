@@ -1,0 +1,1 @@
+steal.css('css2', 'css/css1')

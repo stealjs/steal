@@ -588,7 +588,7 @@
 			//check if jQuery has been loaded
 			jQueryCheck();
 			
-			//console.log("LOADED ",this.path)
+//			console.log("LOADED ",this.path)
 			
 			
 			//mark yourself as current
@@ -1205,6 +1205,19 @@
 		 */
 		css: function() {
 			//if production, 
+			if ( steal.options.env == 'production' ) {
+				if ( steal.loadedProductionCSS ) {
+					return steal;
+				} else {
+					var productionCssPath = steal.File(steal.options.production.replace(".js", ".css")).normalize();
+					productionCssPath = steal.root.join(productionCssPath);
+					var el = steal.createLink(productionCssPath),
+						headEl = head();
+					headEl.insertBefore( el, headEl.firstChild );
+					steal.loadedProductionCSS = true;
+					return steal;
+				}
+			}
 			for(var i =0; i < arguments.length; i++){
 				steal({
 					path : arguments[i]+".css",
