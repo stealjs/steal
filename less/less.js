@@ -44,14 +44,16 @@ steal({path: "less_engine.js",ignore: true},function(){
 	 */
 	steal.less = function(){
 		//if production, 
-		if(steal.options.env == 'production'){
-			if(steal.loadedProductionCSS){
+		if ( steal.options.env == 'production' ) {
+			if ( steal.loadedProductionCSS ) {
 				return steal;
-			}else{
-				var productionCssPath = steal.File( steal.options.production.replace(".js", ".css") ).normalize();
-				productionCssPath = steal.root.join( productionCssPath );
-				steal.createLink( productionCssPath );
-				loadedProductionCSS = true;
+			} else {
+				var productionCssPath = steal.File(steal.options.production.replace(".js", ".css")).normalize();
+				productionCssPath = steal.root.join(productionCssPath);
+				var el = steal.createLink(productionCssPath),
+					headEl = steal.head();
+				headEl.insertBefore( el, headEl.firstChild );
+				steal.loadedProductionCSS = true;
 				return steal;
 			}
 		}
@@ -61,10 +63,14 @@ steal({path: "less_engine.js",ignore: true},function(){
 			current = new steal.File(arguments[i]+".less").joinCurrent();
 			path = steal.root.join(current)
 			if(steal.browser.rhino){
-				//rhino will just look for this
-				steal.createLink(path, {
-					type : "text/less"
-				})
+				for(var i =0; i < arguments.length; i++){
+					steal({
+						path : arguments[i]+".less",
+						load : this.cssLoad,
+						type : "text/less",
+						resource : "style"
+					})
+				}
 			}else{
 				var src = steal.request(path);
 				if(!src){
@@ -109,8 +115,8 @@ steal({path: "less_engine.js",ignore: true},function(){
 		return steal;
 	}
 	//@steal-remove-start
-	steal.build.types['text/less'] =  function(script, loadScriptText){
-		var text =   script.text || loadScriptText(script.href, script),
+	steal.build.types['text/less'] =  function(stl){
+		var text =  steal.build.loadScriptText(stl.pathFromPage, stl),
 			styles;
 		new (less.Parser)({
 	                optimization: less.optimization,

@@ -469,6 +469,7 @@
 	};
 	steal.dependencies = map;
 	steal.mappings = {};
+	steal.head = head;
 	steal.map = function(mappings, path){
 		if(typeof mappings == "string"){
 			steal.mappings[mappings] = path;
