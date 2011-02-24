@@ -89,7 +89,7 @@
 						= script[ STR_ONLOAD ]
 						= null;
 					//console.log("clear")
-					head()[ STR_REMOVE_CHILD ]( script );
+//					head()[ STR_REMOVE_CHILD ]( script );
 					//scriptAfter && head[ STR_REMOVE_CHILD ]( scriptAfter );
 				},
 				callback = function( result ) {
@@ -1245,7 +1245,9 @@
 			setTimeout(function(){
 				self.loaded();
 			},0);
-			return steal.createLink(src);
+			var el = steal.createLink(src)
+			head().appendChild(el);
+			return;
 		},
 		/**
 		 * Creates a css link and appends it to head.

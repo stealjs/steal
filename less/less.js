@@ -50,9 +50,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 			} else {
 				var productionCssPath = steal.File(steal.options.production.replace(".js", ".css")).normalize();
 				productionCssPath = steal.root.join(productionCssPath);
-				var el = steal.createLink(productionCssPath),
-					headEl = steal.head();
-				headEl.insertBefore( el, headEl.firstChild );
+				steal.createLink(productionCssPath);
 				steal.loadedProductionCSS = true;
 				return steal;
 			}
@@ -64,6 +62,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 			path = steal.root.join(current)
 			if(steal.browser.rhino){
 				for(var i =0; i < arguments.length; i++){
+					print( arguments[i]+".less")
 					steal({
 						path : arguments[i]+".less",
 						load : this.cssLoad,
