@@ -539,7 +539,7 @@
 				};
 			}
 			
-			options.path = appendMapping(options.path);
+			options.path = insertMapping(options.path);
 			this.type = options.type || "text/javascript"
 			this.resource = options.resource || "script";
 			
@@ -567,6 +567,7 @@
 			
 		},
 		complete : function(){
+			cur = null;
 			clearTimeout(this.completeTimeout)
 			//console.log("completed "+this.path, this === init)
 			/*console.log("      COMPLETED  ",this.path+" "+(this.func ? "f()" : ""),
@@ -780,6 +781,14 @@
 		 * @param {String} url
 		 */
 		join: function( url ) {
+			return File(url).joinFrom(this.path);
+		},
+		/**
+		 * Does the same thing as join, but takes into account mappings setup in steal.map
+		 * @param {Object} url
+		 */
+		mapJoin: function( url ){
+			url = insertMapping(url);
 			return File(url).joinFrom(this.path);
 		},
 		/**
@@ -1322,22 +1331,31 @@
 		then: steal,
 		total: total
 	});
-	var appendMapping = function(p){
+	var insertMapping = function(p){
+		// don't worry about // rooted paths
+		var rooted = false,
+			firstPath,
+			converted;
+		if(/\/\//.test(p)){
+			rooted = true;
+			p = p.substring(2);
+		}
 		// go through mappings
 		for(var map in steal.mappings){
 			// first x characters of map match first x characters of p
 			if(p.indexOf(map) == 0 && 
 				p.match(new RegExp("("+map+")([/.]|$)"))){ // check that mapping "foo" wouldn't match for "foo2.js"
 				// possible values for p include "foo" (for a plugin), "foo.js" or "foo/foo2.js"
-				return p.replace(map, steal.mappings[map]);
+				converted = p.replace(map, steal.mappings[map]);
+				firstPath = (/^(http|\/)/.test(converted) ? "": (rooted? "//": ""));
+				return firstPath+converted;
 			}
 		}
-		return p;
+		return (rooted? "//": "")+p;
 	}
 	var stealPlugin = function( p ) {
-		var prefix = appendMapping(p);
-		var firstPath = /^(http|\/)/.test(prefix) ? "": "//";
-		var path = firstPath + prefix + '/' + getLastPart(prefix);
+		var firstPath = /^(http|\/)/.test(p) ? "": "//";
+		var path = firstPath + p + '/' + getLastPart(p);
 		return steal(path);
 	};
 	steal.packs = function() {
