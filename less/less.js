@@ -62,7 +62,6 @@ steal({path: "less_engine.js",ignore: true},function(){
 			path = steal.root.join(current)
 			if(steal.browser.rhino){
 				for(var i =0; i < arguments.length; i++){
-					print( arguments[i]+".less")
 					steal({
 						path : arguments[i]+".less",
 						load : this.cssLoad,

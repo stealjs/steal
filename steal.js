@@ -478,6 +478,7 @@
 				steal.mappings[key] = mappings[key];
 			}
 		}
+		return this;
 	}
 	steal.fn = steal.prototype = {
 		
@@ -537,6 +538,8 @@
 					path: /\.js$/i.test(options) ? options : options + '.js'
 				};
 			}
+			
+			options.path = appendMapping(options.path);
 			this.type = options.type || "text/javascript"
 			this.resource = options.resource || "script";
 			
@@ -1246,7 +1249,6 @@
 				self.loaded();
 			},0);
 			var el = steal.createLink(src)
-			head().appendChild(el);
 			return;
 		},
 		/**
@@ -1261,6 +1263,7 @@
 			link.rel = options.rel || "stylesheet";
 			link.href = location;
 			link.type = options.type || 'text/css';
+			head().appendChild(link);
 			return link;
 		},
 		/**
@@ -1323,7 +1326,9 @@
 		// go through mappings
 		for(var map in steal.mappings){
 			// first x characters of map match first x characters of p
-			if(p.indexOf(map) == 0){
+			if(p.indexOf(map) == 0 && 
+				p.match(new RegExp("("+map+")([/.]|$)"))){ // check that mapping "foo" wouldn't match for "foo2.js"
+				// possible values for p include "foo" (for a plugin), "foo.js" or "foo/foo2.js"
 				return p.replace(map, steal.mappings[map]);
 			}
 		}

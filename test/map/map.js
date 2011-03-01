@@ -13,3 +13,4 @@ steal.plugins('poo',
 	//'thing/bed',
 	//'thing/bed/couch',
 	'foo/second')
+	.then('jquery/lang/rsplit/rsplit')
