@@ -567,9 +567,11 @@
 			
 		},
 		complete : function(){
-			cur = null;
+			if(this === init){ // this is the last steal
+				cur = null;
+			}
 			clearTimeout(this.completeTimeout)
-			//console.log("completed "+this.path, this === init)
+//			console.log("completed "+this.path, this === init)
 			/*console.log("      COMPLETED  ",this.path+" "+(this.func ? "f()" : ""),
 					mapA(this.complete.callbacks,function(item){
 				return item.obj.path+
