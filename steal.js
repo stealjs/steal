@@ -1224,6 +1224,7 @@
 		 * @return {steal} steal for chaining
 		 */
 		css: function() {
+			
 			//if production, 
 			if ( steal.options.env == 'production' ) {
 				if ( steal.loadedProductionCSS ) {
@@ -1255,11 +1256,8 @@
 			if (!srcFile.isLocalAbsolute() && !srcFile.protocol() ) {
 				src = steal.root.join(src);
 			}
-			var self = this;
-			setTimeout(function(){
-				self.loaded();
-			},0);
 			var el = steal.createLink(src)
+			this.loaded();
 			return;
 		},
 		/**
