@@ -85,8 +85,8 @@ steal(function(s){
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
 			},
-			dontPrintUserAgent: true,
-			killTimersAfterLoad: true
+			dontPrintUserAgent: true//,
+//			killTimersAfterLoad: true
 		});
 //		console.log('here we are')
 		// set back steal
