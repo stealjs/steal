@@ -29,13 +29,20 @@ steal(function( steal ) {
 		opener.each('script', function( stl, text, i ) {
 
 			// if we should ignore it, ignore it
-			if ( stl.ignore  ) {
+			if ( stl.packaged === false ) {
+				if ( stl.path ) {
+					steal.print('   not packaging ' + stl.path);
+				}
+				return;
+			}
+			
+			// ignore
+			if ( stl.ignore ) {
 				if ( stl.path ) {
 					steal.print('   ignoring ' + stl.path);
 				}
 				return;
 			}
-
 			// if it has a src, let people know we are compressing it
 			if ( stl.path ) {
 				steal.print("   " + stl.path);

@@ -448,7 +448,8 @@
 	 *  <li>type {optional:String} - Script type (defaults to text/javascript)</li>
 	 *  <li>skipInsert {optional:Boolean} - Include not added as script tag</li>
 	 *  <li>compress {optional:String} - "false" if you don't want to compress script</li>
-	 *  <li>package {optional:String} - Script package name (defaults to production.js)</li> 
+	 *  <li>packaged {optional:Boolean} - false if script will not be added to package and loaded on its own.</li> 
+	 *  <li>ignore {optional:Boolean} - true if script will only be loaded in development mode</li>
 	 *  </ul>
 	 *  </td></tr>
 	 *  <tr><td>Function</td><td>A function to run after all the prior steals have finished loading</td></tr>
@@ -617,9 +618,15 @@
 				start = this, // this is who we are listening to
 				stel,
 				initial = [],
-				callers = [];
+				callers = [],
+				isProduction = steal.options.env == 'production';
+				
 			//now go through what you stole and hook everything up
 			each(myqueue, function(i, item){
+				//check for ignored before even making ...
+				if(isProduction && item.ignore){
+					return;
+				}
 				stel = steal.fn.make( item );
 				self.dependencies.push(stel)
 				if(stel.kind === 'file'){
@@ -682,7 +689,6 @@
 			if(this.loading){
 				return;
 			}
-			var isProduction = (steal.options.env == "production");
 			this.loading = true;
 			
 			// ejs and other types don't get inserted in the page
@@ -694,9 +700,6 @@
 			if (this.func) {
 				//console.log(this.path, this);
 				this.func();
-				this.loaded();
-			}
-			else if (isProduction && this.ignore) {
 				this.loaded();
 			} else {
 				var self = this;
@@ -1147,7 +1150,6 @@
 				}
 
 			} else {
-
 				var current_path = File.cur();
 				steal({
 					path: 'steal/dev/dev.js',
