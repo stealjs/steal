@@ -61,7 +61,7 @@ steal(function( steal ) {
 		return newCSss;
 	},
 		isRelative = function( part ) {
-			// http://, https://, / 
+			// http://, https://, /
 			return !/^(http:\/\/|https:\/\/|\/)/.test(part)
 		}
 
@@ -74,7 +74,7 @@ steal(function( steal ) {
 
 	steal.cssMin = function( css ) {
 		//remove comments
-		return css.replace(comments, "")
+		return css.replace(/\n/g,'\uffff').replace(comments, "").replace(/\uffff/g,'\n')
 			.replace(newLines, "")
 			.replace(space, " ")
 			.replace(spaceChars, '$1')
