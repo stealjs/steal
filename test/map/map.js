@@ -1,19 +1,15 @@
 steal.map({
 	foo: 'steal/test/map/foo', 
-	remotejquery: 'http://javascriptmvc.com/'//,
+	remotejquery: 'http://javascriptmvc.com/jquery'//,
 	//'thing/bed' : '/abc/bed'
-});
-
-steal.map('foo','steal/test/map/foo');
-
-steal.plugins('foo',
+})
+.map('foo','steal/test/map/foo')
+.plugins('foo',
 	'foo/another',
 	'jquery/view/ejs',
-	'remotejquery/jquery/lang',
-	//'thing/bed',
-	//'thing/bed/couch',
+	'remotejquery/lang',
 	'foo/second')
-	.then('remotejquery/jquery/lang/rsplit/rsplit')
+	.then('//remotejquery/lang/rsplit/rsplit')
 	.then(function(){
 		$(document.body).append('//foo/template', {})
 	})

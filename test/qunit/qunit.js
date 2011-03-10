@@ -6,3 +6,4 @@ steal
   }).then('loadtwice',
   	"//steal/test/package/package",
 	"//steal/test/package/uses")
+

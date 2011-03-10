@@ -259,7 +259,10 @@ test("when",3, function(){
 });
 test("loadtwice", function(){
 	same(ORDERNUM,['func'])
-})
+});
+
+
+
 test("packages", function(){
 	same(packagesStolen,["0","1","uses"],"defined works right")
 })

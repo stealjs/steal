@@ -24,7 +24,17 @@
 		STR_REMOVE_CHILD = "removeChild",
 		STR_CREATE_ELEMENT = 'createElement'
 		noop = function(){},
-		stateCheck = /loaded|complete/;
+		stateCheck = /loaded|complete/,
+		support = {};
+	
+		support.inorder = typeof document !== "undefined" &&
+                                   typeof window !== "undefined" &&
+                                   (document.createElement("script").async ||
+                               (window.opera && Object.prototype.toString.call(window.opera) === "[object Opera]") ||
+                               //If Firefox 2 does not have to be supported, then
+                               //a better check may be:
+                               //('mozIsLocallyAvailable' in window.navigator)
+                               ("MozAppearance" in document.documentElement.style));
 		
 	if ( typeof steal != 'undefined' && steal.nodeType ) {
 		throw ("steal is defined an element's id!");
@@ -50,9 +60,9 @@
 			return hd;
 		},
 		// creates a script tag
-		scriptTag = function() {
+		scriptTag = function(type) {
 			var start = document[STR_CREATE_ELEMENT]('script');
-			start.type = 'text/javascript';
+			start.type = type || 'text/javascript';
 			return start;
 		},
 		// extends one object with another
@@ -79,57 +89,84 @@
 		factory = function() {
 			return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 		},
+		// cleans up a script
+		cleanUp = function(script) {
+			script[ STR_ONREADYSTATECHANGE ]
+				= script[ STR_ONCLICK ]
+				= script[ STR_ONLOAD ]
+				= null;
+				
+			head()[ STR_REMOVE_CHILD ]( script );
+
+		},
+		scriptQueue = [],
+		runNext = function(){
+		  var i=0, current;
+		  while(current = scriptQueue[i]){
+		    if(!current.loaded){
+		      return;
+		    }else{
+		      scriptQueue.shift();
+		      current.cb();
+		    }
+		  }
+		
+		},
 		// writes a steal to the page in a way that steal.end gets called after the script gets run
-		writeScript = function(src, attrs, onload, returnScript){
+		writeScript = function(src, onload, returnScript, cached){
 			var srcFile = steal.File(src),
-				script = scriptTag(),
-				cleanUp = function() {
-					script[ STR_ONREADYSTATECHANGE ]
-						= script[ STR_ONCLICK ]
-						= script[ STR_ONLOAD ]
-						= null;
-					//console.log("clear")
-//					head()[ STR_REMOVE_CHILD ]( script );
-					//scriptAfter && head[ STR_REMOVE_CHILD ]( scriptAfter );
-				},
+				script ,
+				orgSrc = src,
 				callback = function( result ) {
 					( script[ STR_ONCLICK ] || noop )();
-					cleanUp();
+					cleanUp(script);
 					onload && onload(script);
-					
 				};
 			//src should be relative to steal
 			if (!srcFile.isLocalAbsolute() && !srcFile.protocol() ) {
 				src = steal.root.join(src);
 			}
-			
+			if(support.inorder || cached){
+				script = scriptTag();
+				script[ STR_ASYNC ] = false;
+				script[ STR_ONLOAD ] = callback;
+			}else{
+				if(support.readyStateScript){
+					script = scriptTag();
+					script.event = STR_ONCLICK;
+					script.htmlFor = script.id;
+					script[ STR_ONREADYSTATECHANGE ] = function() {
+						stateCheck.test( script.readyState ) && callback();
+					};
+				}else{
+					// Webkit browsers ....
+					script = scriptTag("script/cache");
+					// add to waiting ....
+					var orgOnload = onload,
+						obj = {
+							loaded : false,
+							cb : function(){
+								writeScript(orgSrc, orgOnload, false, true)
+							}
+						};
+					onload = null;
+					scriptQueue.push(obj);
+					script[ STR_ONLOAD ] = function(){
+						//run next ...
+						callback();
+						obj.loaded = true;
+						runNext();
+					}
+
+				}
+			}
 			// set the id
 			script.id = steal.cleanId(src); 
 			
-			// prevent out of order execution
-			script[ STR_ASYNC ] = "false"	
-				
-			// IE: event/htmlFor/onclick trick
-			// One can't rely on proper order for onreadystatechange
-			// We have to sniff since FF doesn't like event & htmlFor... at all
-			if ( browser.msie ) {
-				
-				script.event = STR_ONCLICK;
-				script.htmlFor = script.id;
-				script[ STR_ONREADYSTATECHANGE ] = function() {
-					stateCheck.test( script.readyState ) && callback();
-				};
-				
-			// All others: standard handlers
-			} else {					
-			
-				script[ STR_ONLOAD ] = callback;
-			}
 			// Set source
 			script.src = src;
-			for ( var attr in attrs ) {
-				script.setAttribute(attr, attrs[attr] )
-			}
+
+			
 			// Append main script
 			if(returnScript === true){
 				return script;
@@ -227,7 +264,7 @@
 		// the defines in the current 'load'
 		defines = [];
 		
-
+	support.readyStateScript = "readyState" in scriptTag();
 	/**
 	 * @class steal
 	 * @parent stealjs
@@ -473,10 +510,13 @@
 	steal.head = head;
 	steal.map = function(mappings, path){
 		if(typeof mappings == "string"){
-			steal.mappings[mappings] = path;
+			steal.mappings[mappings] = {
+				test : new RegExp("^("+mappings+")([/.]|$)"),
+				path: path
+			};
 		} else { // its an object
 			for(var key in mappings){
-				steal.mappings[key] = mappings[key];
+				steal.map(key, mappings[key]);
 			}
 		}
 		return this;
@@ -540,13 +580,15 @@
 				};
 			}
 			
-			options.path = insertMapping(options.path);
+			
 			this.type = options.type || "text/javascript"
 			this.resource = options.resource || "script";
 			
 			this.kind = 'file'
+			
 			var pathFile = steal.File(options.path),
-				normalized = pathFile.normalize();
+				normalized = insertMapping( pathFile.normalize() );
+			
 			//console.log(options.path,"->",normalized)
 			//add default options
 			extend(this,options);
@@ -704,9 +746,7 @@
 			} else {
 				var self = this;
 				//console.log(returnScript,"------------")
-				return writeScript(this.path, {
-					type: "text/javascript"
-				}, function(){
+				return writeScript(this.path, function(){
 					//mark as loaded ...
 					self.loaded();
 				}, returnScript);
@@ -1335,25 +1375,19 @@
 	});
 	var insertMapping = function(p){
 		// don't worry about // rooted paths
-		var rooted = false,
-			firstPath,
-			converted;
-		if(/\/\//.test(p)){
-			rooted = true;
-			p = p.substring(2);
-		}
+		var mapName,
+			map;
+			
+		console.log(p)
+		
 		// go through mappings
-		for(var map in steal.mappings){
-			// first x characters of map match first x characters of p
-			if(p.indexOf(map) == 0 && 
-				p.match(new RegExp("("+map+")([/.]|$)"))){ // check that mapping "foo" wouldn't match for "foo2.js"
-				// possible values for p include "foo" (for a plugin), "foo.js" or "foo/foo2.js"
-				converted = p.replace(map, steal.mappings[map]);
-				firstPath = (/^(http|\/)/.test(converted) ? "": (rooted? "//": ""));
-				return firstPath+converted;
+		for(var mapName in steal.mappings){
+			map = steal.mappings[mapName]
+			if(map.test.test(p)){ 
+				return p.replace(mapName, map.path);
 			}
 		}
-		return (rooted? "//": "")+p;
+		return p;
 	}
 	var stealPlugin = function( p ) {
 		var firstPath = /^(http|\/)/.test(p) ? "": "//";
@@ -1534,7 +1568,7 @@
 		},
 		startjQuery : function(){
 			if (jQueryIncremented) {
-                jQuery.readyWait -= 1;
+                jQ.readyWait -= 1;
             }
 		}
 	});
@@ -1554,7 +1588,8 @@
 	});
 	steal.windowloaded = function(){};
 	steal.bothloaded = function(){
-		
+		window.parent.console.log("ready ....")
+		steal.isReady = true;
 	};
 
 	when(init, "complete", steal,"bothloaded");
@@ -1569,7 +1604,8 @@
 		}
 		when(steal, "bothloaded", ob,cb)
 	};
-	var jQueryIncremented = false;
+	var jQueryIncremented = false,
+		jQ;
 	
 	function jQueryCheck() {
         //if (!window.jQuery) {
@@ -1578,7 +1614,8 @@
                 
                 //Increment jQuery readyWait if ncecessary.
                 if (!jQueryIncremented) {
-                    $.readyWait += 1;
+                    jQ = $;
+					$.readyWait += 1;
                     jQueryIncremented = true;
                 }
             }
