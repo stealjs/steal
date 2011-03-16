@@ -103,10 +103,10 @@
 				scriptTag += steal.loadErrorTimer(options);
 			}
 			scriptTag += '>' + (bodyText || '') + '</script>';
-			if ( steal.support.load ) {
+			if ( steal.support.load && !browser.msie) {
 				scriptTag += '<script type="text/javascript"' + '>steal.end()</script>';
 			}
-			else {
+			else { // this is here b/c IE will run a script above right away (before the script above it loads)
 				scriptTag += '<script type="text/javascript" src="' + steal.root.join('steal/end.js') + '"></script>';
 			}
 			document.write((options.src || bodyText ? scriptTag : ''));

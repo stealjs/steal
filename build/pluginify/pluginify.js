@@ -62,6 +62,8 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 					print("  > "+steals[i].path)
 					out.push(steal.build.builders.scripts.clean(content));
 				}
+			}else{
+				print("  Ignoring "+steals[i].path)
 			}
 		}
 
