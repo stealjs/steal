@@ -1,19 +1,19 @@
 steal(function(s){
 	var touched = {},
 		breadth = function(stl, CB){
-			//load each dependency unti
+			//load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 
 			  
 			while(i < depends.length){
-				if(!depends[i].func){
-				i++;
-			}else{
-				var steals = depends.splice(0,i);
-				loadset(steals, CB);
-				loadset(depends.shift().dependencies, CB)
-				i=0;
-			}
+				if(!depends[i].waits){
+					i++;
+				}else{
+					var steals = depends.splice(0,i);
+					loadset(steals, CB);
+					loadset(depends.shift().dependencies, CB)
+					i=0;
+				}
 			}
 			if(depends.length){
 				loadset(depends, CB);
