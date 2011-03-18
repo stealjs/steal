@@ -770,7 +770,9 @@
 		 */
 		setScriptOptions: function() {
 			var scripts = document.getElementsByTagName("script"),
-				scriptOptions, commaSplit, stealReg = /steal\.(production\.)?js/;
+				scriptOptions, 
+				commaSplit, 
+				stealReg = /steal\.(production\.)?js/;
 
 			//find the steal script and setup initial paths.
 			for ( var i = 0; i < scripts.length; i++ ) {
@@ -790,6 +792,7 @@
 					if ( src.indexOf('?') != -1 ) {
 						scriptOptions = src.split('?')[1];
 					}
+					steal.options.evalAfter = /\w+/.test(scripts[i].text) && scripts[i].text
 				}
 
 			}
@@ -983,6 +986,9 @@
 			return;
 		},
 		done: function() {
+			if ( steal.options.evalAfter ){
+				eval(steal.options.evalAfter);
+			}
 			if ( typeof steal.options.done == "function" ) {
 				steal.options.done(total);
 			}
@@ -993,9 +999,7 @@
 			clearTimeout(steal.timer);
 			// add steals that were just added to the end of the list
 			steals = steals.concat(current_steals);
-			if (!steals.length ) {
-				return;
-			}
+			
 
 			// take the last one
 			var next = steals.pop();
