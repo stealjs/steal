@@ -857,8 +857,8 @@
 				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
 			}
 			//we only load things with force = true
-			if ( steal.options.env == 'production' && steal.options.loadProduction ) {
-				if ( steal.options.production ) {
+			if ( steal.options.env == 'production' ) {
+				if ( steal.options.production && steal.options.loadProduction ) {
 					first = false; //makes it so we call close after
 					//steal(steal.options.startFile);
 					steal({
