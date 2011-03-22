@@ -18,16 +18,15 @@
 	}
 	
 	var // String constants (for better minification)
-		STR_ASYNC = "async",
-		STR_ERROR = "error",
-		STR_ON = "on",
-		STR_ONCLICK = STR_ON + "click",
-		STR_ONLOAD = STR_ON + "load",
-		STR_ONREADYSTATECHANGE = STR_ON + "readystatechange",
+		win = (function(){return this}).call(null),
+		STR_ONCLICK = "onclick",
+		STR_ONLOAD = "onload",
+		STR_ONERROR = "onerror",
+		STR_ONREADYSTATECHANGE = "onreadystatechange",
 		STR_REMOVE_CHILD = "removeChild",
 		STR_CREATE_ELEMENT = 'createElement',
 		STR_GET_BY_TAG = 'getElementsByTagName',
-		doc = window.document,
+		doc = win.document,
 		
 		noop = function(){},
 		stateCheck = /loaded|complete/,
@@ -39,18 +38,20 @@
 		},
 		//get the browser (this only supports if it's rhino)
 		browser = {
-			rhino: /Rhino/.test(navigator.userAgent)
+			rhino: win.load & win.readUrl && win.readFile
 		},
 		support = {
 			inorder : typeof doc !== "undefined" &&
                                    typeof window !== "undefined" &&
                                    (doc.createElement("script").async ||
-                               (window.opera && Object.prototype.toString.call(window.opera) === "[object Opera]") ||
+                               (win.opera && Object.prototype.toString.call(win.opera) === "[object Opera]") ||
                                //If Firefox 2 does not have to be supported, then
                                //a better check may be:
                                //('mozIsLocallyAvailable' in window.navigator)
                                ("MozAppearance" in doc.documentElement.style)) || browser.rhino,
-	   		readyStateScript : "readyState" in scriptTag()
+	   		readyStateScript : win.document && "readyState" in scriptTag(),
+			// if we'll get an error
+			error : !win.document || "error" in scriptTag(),
 		},
 		endsWithJS = /\.js$/i,
 		addJS = function(path){
@@ -60,7 +61,7 @@
 	// HELPERS (if you are trying to understand steal, skip this part) -------------
 	
 	// keep a reference to the old steal
-	var oldsteal = window.steal,
+	var oldsteal = win.steal,
 		// returns the document head (creates one if necessary)
 		head = function() {
 			var d = doc,
@@ -91,13 +92,14 @@
 		},
 		//gets an XHR object
 		factory = function() {
-			return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+			return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 		},
 		// cleans up a script
 		cleanUp = function(script) {
 			script[ STR_ONREADYSTATECHANGE ]
 				= script[ STR_ONCLICK ]
 				= script[ STR_ONLOAD ]
+				= script[STR_ONERROR]
 				= null;
 				
 			head()[ STR_REMOVE_CHILD ]( script );
@@ -120,7 +122,7 @@
 		// writes script to the page
 		// src - the 'jmvc-root' normalized src
 		// 
-		writeScript = function(src, onload, returnScript, cached){
+		getScript = function(src, onload, returnScript, cached){
 			var srcFile = steal.File(src),
 				script ,
 				orgSrc = src,
@@ -128,16 +130,24 @@
 					( script[ STR_ONCLICK ] || noop )();
 					cleanUp(script);
 					onload && onload(script);
+				},
+				error = function(){
+					throw "steal.js "+orgSrc+" not loaded!"
 				};
 			// leave the path alone as much as possible ...
 			if (!srcFile.isLocalAbsolute() && !srcFile.protocol() ) { 
 				src = steal.root.join(src);
 			}
-			
+			if(steal.options.useLoad){
+				load(src);
+				onload && onload()
+				return;
+			}
 			if(support.inorder || cached){
 				script = scriptTag();
-				script[ STR_ASYNC ] = false;
+				script.async = false;
 				script[ STR_ONLOAD ] = callback;
+				script[ STR_ONERROR ] = error;
 			}else{
 				if(support.readyStateScript){
 					script = scriptTag();
@@ -146,6 +156,7 @@
 					script[ STR_ONREADYSTATECHANGE ] = function() {
 						stateCheck.test( script.readyState ) && callback();
 					};
+					script[ STR_ONERROR ] = error;
 				}else{
 					// Webkit browsers ....
 					script = scriptTag("script/cache");
@@ -154,7 +165,7 @@
 						obj = {
 							loaded : false,
 							cb : function(){
-								writeScript(orgSrc, orgOnload, false, true)
+								getScript(orgSrc, orgOnload, false, true)
 							}
 						};
 					onload = null;
@@ -165,6 +176,7 @@
 						obj.loaded = true;
 						runNext();
 					}
+					script[ STR_ONERROR ] = error;
 
 				}
 			}
@@ -468,11 +480,19 @@
 		
 	steal = function() {
 		//set the inital
+		var createdFirst = false;
 		if(!cur){
-			firstSteal = cur = new steal.fn.init()
+			firstSteal = cur = new steal.fn.init();
+			createdFirst = true;
 		}
 		// save the arguments to steal until a 'load' call
 		queue.push.apply(queue,  arguments);
+		
+		if(createdFirst){
+			var res = when(cur, "complete", steal, "startjQuery");
+			cur.loaded();
+			res && res();
+		}
 		return steal;
 	};
 
@@ -490,9 +510,13 @@
 					
 					steals[stel.path] = stel;
 					
-					stel.completeTimeout = setTimeout(function(){
-						throw "steal.js : "+stel.path+" not completed"
-					},5000)
+					if(!support.error){
+						stel.completeTimeout = setTimeout(function(){
+							throw "steal.js : "+stel.path+" not completed"
+						},5000);
+					}
+					
+					
 				}
 				stel = steals[stel.path];
 			}
@@ -519,19 +543,8 @@
 			
 			// if we have no options, we are the global init ... set ourselves up ...
 			if(!options){ //global init cur ...
-				var self = this;
 				this.waits = false;
-				this.pack = "production.js"
-				
-				// call load on ourselves right away
-				setTimeout(function(){
-					
-					self.loaded();
-					var res = when(self, "complete", steal, "startjQuery");
-					res && res();
-					
-				},0);
-
+				this.pack = "production.js";
 			} 
 			//handle callback functions	
 			else if ( typeof options == 'function' ) {
@@ -546,7 +559,7 @@
 					File.cur(path);
 					
 					// call the function, someday soon this will be requireJS-like
-					options(steal.send || window.jQuery || steal); 
+					options(steal.send || win.jQuery || steal); 
 				};
 				// save the function for later ...
 				this.options = options;
@@ -589,7 +602,7 @@
 			if(this === firstSteal){ // this is the last steal
 				cur = null;
 			}
-			clearTimeout(this.completeTimeout)
+			this.completeTimeout && clearTimeout(this.completeTimeout)
 		},
 		/**
 		 * @hide
@@ -683,18 +696,23 @@
 					f();
 				}
 			})
+			
 
-
-			var frag = doc.createDocumentFragment(),
-				headEl = head();
+			var frag = doc && doc.createDocumentFragment(),
+				headEl;
+				
 			each(initial, function(){
-				var el = this.load(true);
+				var el = this.load(frag);
 				//console.log(">>>>>",el&&el.src, this.path);
 				if(el){
 					frag.appendChild(el)
 				}
 			});
-			headEl.insertBefore( frag, headEl.firstChild );
+			if(frag){
+				headEl = head();
+				headEl.insertBefore( frag, headEl.firstChild );
+			}
+			
 		},
 		/**
 		 * When the script loads, 
@@ -719,7 +737,7 @@
 			} else {
 				var self = this;
 				//console.log(returnScript,"------------")
-				return writeScript(this.path, function(){
+				return getScript(this.path, function(){
 					//mark as loaded ...
 					self.loaded();
 				}, returnScript);
@@ -731,8 +749,7 @@
 	steal.fn.init.prototype = steal.fn;
 	//where the root steal folder is
 	steal.root = null;
-	//where the page is
-	steal.pageDir = null;
+
 	//provide extend to others
 	steal.extend = extend;
 	//save a reference to the browser
@@ -831,7 +848,7 @@
 					return this.path;
 				}
 
-			} else if ( url == steal.pageDir && !expand ) {
+			} else if ( url === steal.pageDir && !expand ) {
 
 				return this.path;
 
@@ -912,7 +929,7 @@
 		 * Is the file on the same domain as our page.
 		 */
 		isCrossDomain: function() {
-			return this.isLocalAbsolute() ? false : this.domain() != File(window.location.href).domain();
+			return this.isLocalAbsolute() ? false : this.domain() != File(win.location.href).domain();
 		},
 		isLocalAbsolute: function() {
 			return this.path.indexOf('/') === 0;
@@ -959,12 +976,7 @@
 	// break
 	/* @static */
 	//break
-	/**
-	 * @attribute pageDir
-	 * @hide
-	 * The current page's folder's path.
-	 */
-	steal.pageDir = File(window.location.href).dir();
+	
 
 	//find steal
 	/**
@@ -985,27 +997,27 @@
 	 * <tr><td>startFile</td><td>null</td><td>This is the first file to load.  It is typically determined from the first script option parameter 
 	 * in the inclue script. </td></tr>
 	 * </table>
-	 * <ul>
-	 *    <li><code>steal.options.startFile</code> - the first file steal loads.  This file
-	 *    loads all other scripts needed by your application.</li>
-	 *    <li><code>steal.options.env</code> - the environment (development or production)
-	 *     that determines if steal loads your all your script files or a single
-	 *     compressed file.
-	 *    </li>
-	 * </ul>
-	 * <p><code>steal.options</code> can be configured by:</p>
-	 * <ul>
-	 *    <li>The steal.js script tag in your page (most common pattern).</li>
-	 *    <li>An existing steal object in the window object</li>
-	 *    <li><code>window.location.hash</code></li>
-	 * </ul>
-	 * <p>
-	 *    The steal.js script tag is by far the most common approach. 
-	 *    For the other methods,
-	 *    check out [steal.static.options] documentation.
-	 *    To load <code>myapp/myapp.js</code> in development mode, your 
-	 *    script tag would look like:
-	 * </p>
+	 * 
+	 *  - <code>steal.options.startFile</code> - the first file steal loads.  This file
+	 *    loads all other scripts needed by your application.
+	 *  - <code>steal.options.env</code> - the environment (development or production)
+	 *    that determines if steal loads your all your script files or a single
+	 *    compressed file.
+	 *    
+	 * 
+	 * <code>steal.options</code> can be configured by:
+	 * 
+	 *  - The steal.js script tag in your page (most common pattern).</li>
+	 *  - An existing steal object in the window object</li>
+	 *  - <code>window.location.hash</code>
+	 * 
+	 * 
+	 * The steal.js script tag is by far the most common approach. 
+	 * For the other methods,
+	 * check out [steal.static.options] documentation.
+	 * To load <code>myapp/myapp.js</code> in development mode, your 
+	 * script tag would look like:
+	 * 
 	 * 
 	 * @codestart
 	 * &lt;script type='text/javascript'
@@ -1044,10 +1056,12 @@
 		cacheInclude: true,
 		logLevel: 0
 	};
-
+	
+	
+	
+	
 	// variables used while including
 	var graph = [],
-		first = true,
 		//If we haven't steald a file yet
 		first_wave_done = false,
 		//a list of all steald paths
@@ -1082,28 +1096,37 @@
 		},
 		when : when,
 		/**
-		 * Sets options from script
+		 * Gets options from script
 		 * @hide
 		 */
-		setScriptOptions: function() {
+		getScriptOptions: function() {
+			if(!doc){
+				return {};
+			}
 			var scripts = doc[STR_GET_BY_TAG]("script"),
-				scriptOptions, commaSplit, stealReg = /steal\.(production\.)?js/;
+				scriptOptions, 
+				commaSplit, 
+				stealReg = /steal\.(production\.)?js/,
+				options = {};
 
+			
 			//find the steal script and setup initial paths.
 			for ( var i = 0; i < scripts.length; i++ ) {
 				var src = scripts[i].src;
 				if ( src && stealReg.test(src) ) { //if script has steal.js
-					var mvc_root = File(File(src).joinFrom(steal.pageDir)).dir(),
+					options.pathToSteal = src;
+					
+					/*var mvc_root = File(File(src).joinFrom(steal.pageDir)).dir(),
 						loc = /\.\.$/.test(mvc_root) ? mvc_root + '/..' : mvc_root.replace(/steal$/, '');
 
 					if (/.+\/$/.test(loc) ) {
 						loc = loc.replace(/\/$/, '');
-					}
+					}*/
 
 					if (/steal\.production\.js/.test(src) ) {
-						steal.options.env = "production";
+						options.env = "production";
 					}
-					steal.root = File(loc);
+					//steal.root = File(loc);
 					if ( src.indexOf('?') != -1 ) {
 						scriptOptions = src.split('?')[1];
 					}
@@ -1116,44 +1139,63 @@
 				// if it looks like steal[xyz]=bar, add those to the options
 				if ( scriptOptions.indexOf('=') > -1 ) {
 					scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
-						steal.options[prop] = val;
+						options[prop] = val;
 					});
 				} else {
 					//set with comma style
 					commaSplit = scriptOptions.split(",");
 					if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
-						steal.options.startFile = commaSplit[0];
+						options.startFile = commaSplit[0];
 					} else if ( commaSplit[0] ) {
-						steal.options.app = commaSplit[0];
+						options.app = commaSplit[0];
 					}
 					if ( commaSplit[1] && steal.options.env != "production" ) {
-						steal.options.env = commaSplit[1];
+						options.env = commaSplit[1];
 					}
 				}
 			}
+			return options;
+		},
 
-		},
-		setOldIncludeOptions: function() {
-			extend(steal.options, oldsteal);
-		},
-		setHashOptions: function() {
-			window.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function( whoe, prop, val ) {
-				steal.options[prop] = val;
-			});
-		},
 		/**
-		 * Starts including files, sets options.
+		 * This is where the dom-specific magic of steal should happen ...
+		 * 
+		 * - figure out the current page and path stuff
+		 * - set options from script tag, initial steal, and hash
+		 * - load initial files 
+		 * 
 		 * @hide
 		 */
 		init: function() {
-			this.setScriptOptions();
-			//force into development mode to prevent errors
-			//if ( steal.browser.rhino ) {
-			//	steal.options.env = 'development';
-			//}
-			this.setOldIncludeOptions();
-			this.setHashOptions();
-			//clean up any options
+
+			// GET OPTIONS FROM ...
+			
+			// the script tag
+			extend(steal.options, this.getScriptOptions());
+			// a steal that existed before this steal
+			extend(steal.options, oldsteal);
+			// the hash
+			if(win.location){
+				win.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function( whoe, prop, val ) {
+					steal.options[prop] = val;
+				});
+			}
+			
+			// CALCULATE CURRENT LOCATION OF THINGS ...
+			
+			// the place we are running code from
+			steal.pageDir = File(steal.options.location !== undefined ? steal.options.location : win.location.href).dir();
+			
+			// the steal root folder
+			var mvc_root = File(File(steal.options.pathToSteal).joinFrom(steal.pageDir)).dir(),
+				loc = /\.\.$/.test(mvc_root) ? mvc_root + '/..' : mvc_root.replace(/steal$/, '');
+			if (/.+\/$/.test(loc) ) {
+				loc = loc.replace(/\/$/, '');
+			}
+			steal.root = File(loc);
+
+
+			// CLEAN UP OPTIONS
 			if ( steal.options.app ) {
 				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
 			}
@@ -1175,7 +1217,6 @@
 			//we only load things with force = true
 			if ( steal.options.env == 'production' && steal.options.loadProduction ) {
 				if ( steal.options.production ) {
-					first = false; //makes it so we call close after
 					//steal(steal.options.startFile);
 					steal({
 						path: steal.options.production,
@@ -1184,22 +1225,25 @@
 				}
 
 			} else {
-				var current_path = File.cur();
-				steal({
-					path: 'steal/dev/dev.js',
-					ignore: true
-				});
-				File.cur(current_path);
+				var steals = [];
+				if(steal.options.loadDev !== false){
+					steals.push({
+						path: 'steal/dev/dev.js',
+						ignore: true
+					});
+				}
 
 				//if you have a startFile load it
 				if ( steal.options.startFile ) {
-					first = false; //makes it so we call close after
 					//steal(steal.options.startFile);
-					steal(steal.options.startFile)
+					steals.push(steal.options.startFile)
 					//steal._start = new steal.fn.init(steal.options.startFile);
 					//steal.queue(steal._start);
 				}
-
+				if(steals.length){
+					steal.apply(null, steals);
+				}
+				
 			}
 		},
 		cur: function( file ) {
@@ -1561,17 +1605,20 @@
 	steal.loadedProductionCSS = false;
 
 	steal.init();
+	steal.windowloaded = function(){};
 	
-	addEvent(window, "load", function(){
+	addEvent(win, "load", function(){
 		steal.windowloaded();
 	});
-	steal.windowloaded = function(){};
+	
 	steal.bothloaded = function(){
 		steal.isReady = true;
 	};
-
-	when(firstSteal, "complete", steal,"bothloaded");
-	when(steal,"windowloaded",steal,"bothloaded");
+	if(firstSteal){
+		when(firstSteal, "complete", steal,"bothloaded");
+		when(steal,"windowloaded",steal,"bothloaded");
+	}
+	
 
 	steal.load = function(ob, cb) {
 		if(typeof ob == 'function' && !cb){
