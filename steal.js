@@ -489,9 +489,18 @@
 		queue.push.apply(queue,  arguments);
 		
 		if(createdFirst){
-			var res = when(cur, "complete", steal, "startjQuery");
-			cur.loaded();
-			res && res();
+			var go = function(){
+				var res = when(cur, "complete", steal, "startjQuery");
+				cur.loaded();
+				res && res();
+			}
+			
+			if(browser.rhino){
+				go()
+			}else{
+				setTimeout(go,0)
+			}
+			
 		}
 		return steal;
 	};
