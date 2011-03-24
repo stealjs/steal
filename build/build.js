@@ -91,6 +91,8 @@ steal(function( steal ) {
 	 *       <tr><td>all</td>
 	 *       <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
 	 *           scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
+	 *       <tr><td>compressor</td>
+	 *           <td>The compressor to use: shrinksafe, localClosure, closureService or yui</td></tr>
 	 *     </table>
 	 */
 	steal.build = function( url, options ) {
@@ -100,7 +102,9 @@ steal(function( steal ) {
 			//compress everything, regardless of what you find
 			all: 1,
 			//folder to build to, defaults to the folder the page is in
-			to: 1
+			to: 1,
+			//compressor to use, e.g. shrinksafe, localClosure, closureService or yui
+			compressor: 1
 		});
 
 		// to is the folder packages will be put in
