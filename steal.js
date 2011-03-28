@@ -38,7 +38,7 @@
 		},
 		//get the browser (this only supports if it's rhino)
 		browser = {
-			rhino: win.load & win.readUrl && win.readFile
+			rhino: win.load && win.readUrl && win.readFile
 		},
 		support = {
 			inorder : typeof doc !== "undefined" &&
@@ -138,6 +138,7 @@
 			if (!srcFile.isLocalAbsolute() && !srcFile.protocol() ) { 
 				src = steal.root.join(src);
 			}
+
 			if(steal.options.useLoad){
 				load(src);
 				onload && onload()
@@ -495,7 +496,7 @@
 				res && res();
 			}
 			
-			if(browser.rhino){
+			if(browser.rhino && !window.setTimeout){
 				go()
 			}else{
 				setTimeout(go,0)
@@ -1182,7 +1183,10 @@
 			// the script tag
 			extend(steal.options, this.getScriptOptions());
 			// a steal that existed before this steal
-			extend(steal.options, oldsteal);
+			if(typeof oldsteal == 'object'){
+				extend(steal.options, oldsteal);
+			}
+			
 			// the hash
 			if(win.location){
 				win.location.hash.replace(/steal\[(\w+)\]=(\w+)/g, function( whoe, prop, val ) {
