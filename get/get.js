@@ -216,7 +216,7 @@ steal("//steal/get/json",
 				var plugins = []
 				for(var i = 0; i < stealCalls.plugins.length; i++){
 					var plugin = stealCalls.plugins[i];
-					if(!/^jquery\/|steal/.test(plugin) ){
+					if(!/^jquery\/|steal/.test(plugin) && plugin != 'jquery' ){
 						plugins.push(stealCalls.plugins[i])
 					}
 				}
