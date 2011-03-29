@@ -1,27 +1,44 @@
 steal(function(s){
 	var touched = {},
+		//recursively goes through dependencies
 		breadth = function(stl, CB){
-			//load each dependency until
+			// load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 
-			  
+			
+			// this goes through the scripts until it finds one that waits for 
+			// everything before it to complete
 			while(i < depends.length){
-				if(!depends[i].waits){
-					i++;
-				}else{
+				
+				if(depends[i].waits){
+					// once we found something like this ...
+					
 					var steals = depends.splice(0,i);
+					
+					// load all these steals, and their dependencies
 					loadset(steals, CB);
+					
+					// does it need to load the depend itself?
+					
+					// load any dependencies 
 					loadset(depends.shift().dependencies, CB)
 					i=0;
+				}else{
+					i++;
 				}
 			}
+			
+			// if there's a remainder, load them
 			if(depends.length){
 				loadset(depends, CB);
 			}
 		  
 		},
+		// loads each steal 'in parallel', then 
+		// loads their dependencies one after another
 		loadset = function(steals, CB){
 			for(var i =0; i < steals.length; i++){
+				//print("  Touching "+steals[i].path)
 				if(!touched[steals[i].path]){
 					CB( steals[i] );
 					touched[steals[i].path] = true;
@@ -123,6 +140,7 @@ steal(function(s){
 						}
 					}
 					breadth(init, function(stealer){
+						
 						if(filter(stealer)){
 							func(stealer, steal.build.types[stealer.type] && steal.build.types[stealer.type](stealer, loadScriptText))
 						}

@@ -561,7 +561,7 @@
 			
 				var path = File.cur().path;
 				this.path = path;
-				
+				this.waits = true;
 				// what to call 
 				this.func = function() {
 					
@@ -622,7 +622,7 @@
 		 *   - mark yourself as complete when everything is completed
 		 *   - this is where all the actions is
 		 */
-		loaded : function(myqueue){
+		loaded: function(myqueue){
 			//check if jQuery has been loaded
 			jQueryCheck();
 			
@@ -1266,7 +1266,9 @@
 				return cur;
 			}
 		},
+		// called when a script has loaded via production
 		loaded: function(name){
+			console.log("LOADED "+name)
 			//get other steals
 			//basically create each one ... mark it as loading
 			//  load each one
