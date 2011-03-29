@@ -5,7 +5,14 @@
  */
 
 steal(function( steal ) {
-
+	// helpers ...
+	var addHttps = function(url){
+		return !/^https/.test(url) ? url.replace(/http/i, 'https') : url;
+	},
+	lastPart = function(url){
+		return (url.substr(url.length-1) === "/" ? url.substr(0, url.length-1) : url).match(/[^\/]+$/)[0]
+	};
+	
 	steal.get.github = function( url, where, options, level ) {
 		if ( url ) {
 			this.init.apply(this, arguments);
@@ -13,15 +20,19 @@ steal(function( steal ) {
 	};
 	
 	steal.get.github.dependenciesUrl = function( url ) {
-		if(!/https/.test(url)) { // github requires https
-			url = url.replace(/http/, 'https');
-		}
-		var depUrl = url + 
-			(url.lastIndexOf("/") === url.length - 1 ? "" : "/") + 
-			"raw/master/dependencies.json";
-		return depUrl;
+		url = addHttps(url);
+		return steal.File(url).join("raw/master/dependencies.json");
 	};
-
+	// 
+	steal.get.github.pluginDependenciesUrl = function(url){
+		//http://github.com/jupiterjs/mxui/tree/master/util/selectable/ ->
+		//https://github.com/jupiterjs/mxui/raw/master/util/selectable/selectable.js
+		var pluginName = lastPart( url );
+		if(url.indexOf('tree') == -1){
+			return null;
+		}
+		return steal.File(addHttps(url)).join(pluginName + ".js").replace("/tree/","/raw/");
+	}
 	steal.get.github.prototype = new steal.get.getter();
 	steal.extend(steal.get.github.prototype, {
 		init: function( url, where, options, level ) {

@@ -185,6 +185,19 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 				.replace(regs.dash, '_').toLowerCase();
 		},
 		//converts a name to a bunch of useful things
+		
+		/**
+		 * @hide
+		 * FooBar.ZedTed ->
+		 * {
+		 *   appName : "foobar",
+		 *   className : "ZedTed",
+		 *   fullName : "FooBar.ZedTed",
+		 *   name : "FooBar.ZedTed",
+		 *   path : foo_bar,
+		 *   underscore : "zed_ted"
+		 * }
+		 */
 		convert: function( name ) {
 			var className = name.match(/[^\.]*$/)[0]; //Customer
 			var appName = name.split(".")[0]; //Customer
