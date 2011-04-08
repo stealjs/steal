@@ -114,14 +114,15 @@ steal(function( steal ) {
 			}
 
 			var oldsrc = readFile(f),
-				tmp = new steal.File("tmp"),
-				newsrc = readFile("tmp"),
+				tmp = new steal.File("tmps"),
+				newsrc = readFile("tmps"),
 				p = "   ",
 				pstar = "   ";
 			try{
 				tmp.download_from(rawUrl, true);
 			}catch(e){
-				steal.print(pstar+"Error "+f);
+				tmp.remove();
+				steal.print(pstar+"Error "+f+"\n"+e);
 				return;
 			}
 			
@@ -150,7 +151,9 @@ steal(function( steal ) {
 			if ( this.level > 0 ) {
 				this.push_d(new steal.File(url).basename());
 			}
-			if ( /\/tree\/\w+\/$/.test(url) ) { //if the root of the repo
+			// the root of a git repo has different rules about getting its contents:
+			// what about a url like: https://github.com/jupiterjs/mxui/tree/master/data/grid2/tree/views
+			if ( url.search(/\/tree\/\w+\/$/) == url.indexOf("/tree/") && url.indexOf("/tree/") > -1 ) { //if the root of the repo
 				this.fetch(this.ls_top());
 			} else {
 				// change to the raw url
