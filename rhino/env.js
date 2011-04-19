@@ -9860,6 +9860,11 @@ __extend__(HTMLInputElement.prototype, {
     },
     toString: function() {
         return '[object HTMLInputElement]';
+    },
+    cloneNode : function(){
+        var newnode = HTMLInputAreaCommon.prototype.cloneNode.apply(this, arguments);
+        newnode.checked = this.checked;
+        return newnode;
     }
 });
 

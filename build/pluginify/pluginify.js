@@ -9,7 +9,10 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 
 	/**
 	 * Builds a 'steal-less' version of your application.  To use this, files that use steal must
-	 * have their code within a callback function.  
+	 * have their code within a callback function.
+	 * 
+	 *     js steal\pluginify jquery\controller -nojquery
+	 *   
 	 * @param {Object} plugin
 	 * @param {Object} opts
 	 */
@@ -24,7 +27,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 				"global" : 0,
 				"compress" : 0
 			}),
-			destination = opts.destination || plugin+"/"+plugin.replace("/",".") + ".js";
+			destination = opts.destination || plugin+"/"+plugin.replace(/\//g,".") + ".js";
 
 		opts.exclude = !opts.exclude ? [] : (steal.isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 

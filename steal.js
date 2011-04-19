@@ -1172,6 +1172,10 @@
 				return steal;
 			};
 		},
+		/**
+		 * @function then
+		 * A chainable alias for [steal].
+		 */
 		then: steal,
 		total: total
 	});
