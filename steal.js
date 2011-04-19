@@ -51,7 +51,7 @@
                                ("MozAppearance" in doc.documentElement.style)) || browser.rhino,
 	   		readyStateScript : win.document && "readyState" in scriptTag(),
 			// if we'll get an error
-			error : !win.document || "error" in scriptTag(),
+			error : !win.document || "error" in scriptTag()
 		},
 		endsWithJS = /\.js$/i,
 		addJS = function(path){
@@ -152,6 +152,8 @@
 			}else{
 				if(support.readyStateScript){
 					script = scriptTag();
+					// we need to set the id before we do htmlFor
+					script.id = steal.cleanId(src); 
 					script.event = STR_ONCLICK;
 					script.htmlFor = script.id;
 					script[ STR_ONREADYSTATECHANGE ] = function() {
@@ -1268,7 +1270,7 @@
 		},
 		// called when a script has loaded via production
 		loaded: function(name){
-			console.log("LOADED "+name)
+			// console.log("LOADED "+name)
 			//get other steals
 			//basically create each one ... mark it as loading
 			//  load each one
