@@ -5,7 +5,14 @@
  */
 
 steal(function( steal ) {
-
+	// helpers ...
+	var addHttps = function(url){
+		return !/^https/.test(url) ? url.replace(/http/i, 'https') : url;
+	},
+	lastPart = function(url){
+		return (url.substr(url.length-1) === "/" ? url.substr(0, url.length-1) : url).match(/[^\/]+$/)[0]
+	};
+	
 	steal.get.github = function( url, where, options, level ) {
 		if ( url ) {
 			this.init.apply(this, arguments);
@@ -13,15 +20,19 @@ steal(function( steal ) {
 	};
 	
 	steal.get.github.dependenciesUrl = function( url ) {
-		if(!/https/.test(url)) { // github requires https
-			url = url.replace(/http/, 'https');
-		}
-		var depUrl = url + 
-			(url.lastIndexOf("/") === url.length - 1 ? "" : "/") + 
-			"raw/master/dependencies.json";
-		return depUrl;
+		url = addHttps(url);
+		return steal.File(url).join("raw/master/dependencies.json");
 	};
-
+	// 
+	steal.get.github.pluginDependenciesUrl = function(url){
+		//http://github.com/jupiterjs/mxui/tree/master/util/selectable/ ->
+		//https://github.com/jupiterjs/mxui/raw/master/util/selectable/selectable.js
+		var pluginName = lastPart( url );
+		if(url.indexOf('tree') == -1){
+			return null;
+		}
+		return steal.File(addHttps(url)).join(pluginName + ".js").replace("/tree/","/raw/");
+	}
 	steal.get.github.prototype = new steal.get.getter();
 	steal.extend(steal.get.github.prototype, {
 		init: function( url, where, options, level ) {
@@ -103,14 +114,15 @@ steal(function( steal ) {
 			}
 
 			var oldsrc = readFile(f),
-				tmp = new steal.File("tmp"),
-				newsrc = readFile("tmp"),
+				tmp = new steal.File("tmps"),
+				newsrc = readFile("tmps"),
 				p = "   ",
 				pstar = "   ";
 			try{
 				tmp.download_from(rawUrl, true);
 			}catch(e){
-				steal.print(pstar+"Error "+f);
+				tmp.remove();
+				steal.print(pstar+"Error "+f+"\n"+e);
 				return;
 			}
 			
@@ -139,7 +151,9 @@ steal(function( steal ) {
 			if ( this.level > 0 ) {
 				this.push_d(new steal.File(url).basename());
 			}
-			if ( /\/tree\/\w+\/$/.test(url) ) { //if the root of the repo
+			// the root of a git repo has different rules about getting its contents:
+			// what about a url like: https://github.com/jupiterjs/mxui/tree/master/data/grid2/tree/views
+			if ( url.search(/\/tree\/\w+\/$/) == url.indexOf("/tree/") && url.indexOf("/tree/") > -1 ) { //if the root of the repo
 				this.fetch(this.ls_top());
 			} else {
 				// change to the raw url

@@ -1989,7 +1989,16 @@ Envjs.runAsync = function(fn, onInterupt){
 
     try{
         run = Envjs.sync(function(){
-            fn();
+            if(Envjs.exitOnError){
+            	try { fn(); }
+            	catch(ex) {
+            		console.log("Rhino shell error: " + ex.message);
+            		java.lang.System.exit(1);
+            	}
+            } else {
+            	fn();
+            }
+            
             Envjs.wait();
         });
         Envjs.spawn(run);
@@ -9851,6 +9860,11 @@ __extend__(HTMLInputElement.prototype, {
     },
     toString: function() {
         return '[object HTMLInputElement]';
+    },
+    cloneNode : function(){
+        var newnode = HTMLInputAreaCommon.prototype.cloneNode.apply(this, arguments);
+        newnode.checked = this.checked;
+        return newnode;
     }
 });
 
