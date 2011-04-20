@@ -24,6 +24,11 @@ if "%1"=="-mail" (
 	SET CP=steal/rhino/mail.jar;funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
 	SHIFT /0
 )
+SET ERRORLEV=0
+if "%1"=="-e" (
+	SET ERRORLEV=1
+	SHIFT /0
+)
 SET ARGS=[
 SET FILENAME=%1
 SET FILENAME=%FILENAME:\=/%
@@ -38,6 +43,10 @@ SET ARGS=%ARGS: =%
 SET ARGS=%ARGS%]
 set ARGS=%ARGS:\=/%
 java -Xmx228m -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+
+if "%ERRORLEV%"=="1" (
+	if errorlevel 1 exit 1
+)
 
 GOTO END
 
@@ -57,5 +66,3 @@ echo js steal/generate/model [TYPE] [NAME]	Generates a Model file
 echo js apps/[NAME]/compress.js	Compress your application and generate documentation
 
 :END
-
-exit %errorlevel%
