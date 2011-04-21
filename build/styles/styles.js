@@ -1,5 +1,5 @@
 
-steal.plugins('steal/build').then(function( steal ) {
+steal(function( steal ) {
 
 	/**
 	 * Builds and compresses CSS files.
