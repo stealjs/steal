@@ -1,4 +1,4 @@
-// load('steal/compress/test/run.js')
+// load('steal/build/styles/test/styles_test.js')
 /**
  * Tests compressing a very basic page and one that is using steal
  */
@@ -12,8 +12,6 @@ steal('//steal/test/test', function( s ) {
 	s.test.test("css", function(){
 		load('steal/rhino/steal.js');
 		steal.plugins(
-			'steal/build',
-			'steal/build/scripts',
 			'steal/build/styles',
 			function(){
 				steal.build('steal/build/styles/test/page.html',
@@ -31,4 +29,16 @@ steal('//steal/test/test', function( s ) {
 		s.test.clear();
 	})
 
+
+	s.test.test("min multiline", function(){
+		load('steal/rhino/steal.js');
+		steal.plugins('steal/build/styles',function(){
+			var input = readFile('steal/build/styles/test/multiline.css'),
+				out = steal.build.builders.styles.min(input);
+			
+			s.test.equals(out, ".foo{color:blue}", "multline comments wrong")
+			
+		});
+		
+	});
 });
