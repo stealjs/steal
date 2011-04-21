@@ -863,6 +863,8 @@
 			}
 			//we only load things with force = true
 			if ( steal.options.env == 'production' ) {
+				
+				// if we have a production script and we haven't been told not to load it
 				if ( steal.options.production && steal.options.loadProduction ) {
 					first = false; //makes it so we call close after
 					//steal(steal.options.startFile);
