@@ -9,22 +9,23 @@ steal("//steal/get/json",
 	 * @parent stealjs
 	 * Downloads and installs a plugin from a url.  Normally this is run from the steal/getjs script.
 	 * 
-	 * <p>The following copies the mustache-javascript repo to a local mustache folder.</p>
+	 * The following copies the mustache-javascript repo to a local mustache folder.
 	 * 
-	 * @codestart text
-	 * js steal/getjs "ttp://github.com/tdreyno/mustache-javascriptmvc mustache
-	 * @codeend
-	 * <p>Get will:</p>
-	 * <ul>
-	 * 	<li>Download the files that comprise the plugin.</li>
-	 *  <li>Prompt you to install dependencies found in its dependencies.json file.</li>
-	 *  <li>Prompt you to run an install script.</li>
-	 * </ul>
-	 * <h2>Offical Plugins</h2>
-	 * <p>JavaScriptMVC maintains a list of offical plugins compatible with JavaScriptMVC 3.0.
-	 *   You can install these by simply typing there name.  This is the current list of
-	 *   offical plugins:
-	 * </p>
+	 * 
+	 *     js steal/getjs "ttp://github.com/tdreyno/mustache-javascriptmvc mustache
+	 * 
+	 * Get will:
+	 * 
+	 *   - Download the files that comprise the plugin.
+	 *   - Prompt you to install dependencies found in its dependencies.json file.
+	 *   - Prompt you to run an install script.
+	 * 
+	 * ## Offical Plugins
+	 * 
+	 * JavaScriptMVC maintains a list of offical plugins compatible with JavaScriptMVC 3.0.
+	 * You can install these by simply typing there name.  This is the current list of
+	 * offical plugins:
+	 * 
 	 * <ul>
 	 * 	<li><code>mustache</code> - mustache templates.</li>
 	 *  <li><code>steal</code> - script loader, and more.</li>
@@ -33,12 +34,16 @@ steal("//steal/get/json",
 	 *  <li><code>mxui</code> - UI widgets.</li>
 	 *  <li><code>documentjs</code> - documentation engine.</li>
 	 * </ul>
-	 * <p>You can install these just by writing</p>
-	 * @codestart text
-	 * js steal/getjs funcunit
-	 * @codeend
-	 * <p>If you have something good, let us know on the forums and we can make your project official too!</p>
-	 * <h2>The Get function</h2>
+	 * 
+	 * You can install these just by writing
+	 * 
+	 *     js steal/getjs funcunit
+	 * 
+	 * 
+	 * If you have something good, let us know on the forums and we can make your project official too!
+	 * 
+	 * ## The Get function
+	 * 
 	 * get takes a url or official plugin name and installs it.
 	 * @param {String} url the path to a svn or github repo or a name of a recognized plugin.
 	 * @param {Object} options configure the download.  
@@ -54,39 +59,55 @@ steal("//steal/get/json",
 	 * 
 	 */
 	var get = (steal.get = function( url, options ) {
+		
 		options = steal.opts(options, {
 			name: 1
 		});
-		var getter, name = options.name, dependenciesUrl;
-
+		
+		var getter, 
+			name = options.name, 
+			dependenciesUrl;
+		
+		// if not a url, get the url from the plugin list
 		if (!url.match(/^http/) ) {
 			name = url;
 			url = pluginList(name);
 		}
+		
+		// if we don't get a url back, throw an error
 		if (!url ) {
 			steal.print("There is no plugin named " + name);
 			return;
 		}
+		
+		// pick the default getter or the github getter ... somehow getters should register themselves
 		getter = url.indexOf("github.com") !== -1 ? get.github : get.getter;
+		
+		// if we don't have a name (a place for the app) try to guess one from the url
 		if (!name ) {
 			name = guessName(url);
 		}
-		//print("getting name "+name+" "+url);
-		
+
 		//make the folder for this plugin
 		new steal.File(name).mkdirs();
-		// do old dependency thing ...
 		
+		// check for a dependency file
 		steal.print("  Checking dependencies ... ");
 		dependenciesUrl = getter.dependenciesUrl(url);
 
 		installDependencies(dependenciesUrl, name);
 
-		// do new dependency thing ...
-		var stealDependsUrl = getter.pluginDependenciesUrl(url);
-		if(stealDependsUrl){
-			get.installDependencies( get.pluginDependencies(stealDependsUrl) )
+		// check if we should be installing dependencies read from the JS file itself
+		if( name.indexOf("/") !== -1 ){
+			
+			// gets the plugin.js file
+			var stealDependsUrl = getter.pluginDependenciesUrl(url);
+			if(stealDependsUrl){
+				// if we have a plugin.js file, get dependencies and install them
+				get.installDependencies( get.pluginDependencies(stealDependsUrl) )
+			}
 		}
+		
 		steal.print("   ");
 		
 		//get contents
