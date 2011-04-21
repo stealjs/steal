@@ -2,8 +2,13 @@ steal(function( steal ) {
 
 	/**
 	 * Builds JavaScripts
+	 *
 	 * @param {Object} opener the result of a steal.build.open
 	 * @param {Object} options options passed to the build script
+	 * 
+	 *   * __to__  - which folder the production.css files should be put in
+	 *   * __quite__  - tell the compressor to be less abnoxious about sending errors
+	 *   * __all__ - compress all scripts
 	 */
 	var scripts = (steal.build.builders.scripts = function( opener, options ) {
 		steal.print("\nBUILDING SCRIPTS --------------- ");
