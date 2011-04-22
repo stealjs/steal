@@ -208,7 +208,7 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 				fullName: name,
 				className: className,
 				plural: steal.Inflector.pluralize(generate.underscore(className)),
-				appName: appName.toLowerCase()
+				appName: generate.underscore(appName)
 			};
 		},
 		render: render
