@@ -152,6 +152,7 @@ steal(function( steal ) {
 			};
 		},
 		yui: function() {
+			// needs yuicompressor.jar at steal/build/scripts/yuicompressor.jar
 			steal.print("steal.compress - Using YUI compressor");
 
 			return function( src ) {

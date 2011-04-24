@@ -94,6 +94,7 @@ steal(function( steal ) {
 	 *       <tr><td>compressor</td>
 	 *           <td>The compressor to use: shrinksafe, localClosure, closureService or yui</td></tr>
 	 *     </table>
+	 * Note that you must install shrinksafe and YUI compressor manually, because they are not included in the JavaScriptMVC distribution.
 	 */
 	steal.build = function( url, options ) {
 
