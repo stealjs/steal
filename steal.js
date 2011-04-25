@@ -762,7 +762,9 @@
 		//    
 		current_steals = [],
 		//steals that are pending to be steald
-		total = []; //
+		total = [],
+		//mapping of loaded css files
+		css = {};
 	extend(steal, {
 		/**
 		 * Sets options from script
@@ -860,8 +862,10 @@
 				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
 			}
 			//we only load things with force = true
-			if ( steal.options.env == 'production' && steal.options.loadProduction ) {
-				if ( steal.options.production ) {
+			if ( steal.options.env == 'production' ) {
+				
+				// if we have a production script and we haven't been told not to load it
+				if ( steal.options.production && steal.options.loadProduction ) {
 					first = false; //makes it so we call close after
 					//steal(steal.options.startFile);
 					steal({
@@ -1059,8 +1063,12 @@
 			}
 			var current;
 			for ( var i = 0; i < arguments.length; i++ ) {
-				current = File(arguments[i] + ".css").joinCurrent();
-				steal.createLink(steal.root.join(current));
+				current = steal.root.join( File(arguments[i] + ".css").joinCurrent() );
+				if(!css[current]){
+					steal.createLink(current);
+					css[current] = true;
+				}
+				
 			}
 			return this;
 		},
