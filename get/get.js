@@ -6,20 +6,22 @@ steal("//steal/get/json",
 	var installed = {};
 	
 	/**
-	 * @parent stealjs
 	 * @class steal.get
+	 * @parent stealjs
 	 * 
-	 * Downloads and installs a plugin from a url.  Normally this is run from the steal/getjs script.
+	 * Downloads and installs a plugin from a url.  Normally 
+	 * this is run from the steal/getjs script.
 	 * 
-	 * The following copies the mustache-javascript repo to a local mustache folder.
+	 * The following copies the mustache-javascript repo to a 
+	 * local mustache folder.
 	 * 
 	 * 
-	 *     js steal/getjs "ttp://github.com/tdreyno/mustache-javascriptmvc mustache
+	 *     js steal/getjs http://github.com/tdreyno/mustache-javascriptmvc mustache
 	 * 
 	 * Get will:
 	 * 
-	 *   - Download the files that comprise the plugin.
-	 *   - Prompt you to install dependencies found in its dependencies.json file.
+	 *   - Download the plugins files.
+	 *   - Prompt you to install dependencies.
 	 *   - Prompt you to run an install script.
 	 * 
 	 * ## Offical Plugins
@@ -28,39 +30,34 @@ steal("//steal/get/json",
 	 * You can install these by simply typing there name.  This is the current list of
 	 * offical plugins:
 	 * 
-	 * <ul>
-	 * 	<li><code>mustache</code> - mustache templates.</li>
-	 *  <li><code>steal</code> - script loader, and more.</li>
-	 *  <li><code>jquery</code> - jQuery 1.4.3 and the MVC components.</li>
-	 *  <li><code>funcunit</code> - Functional testing platform.</li>
-	 *  <li><code>mxui</code> - UI widgets.</li>
-	 *  <li><code>documentjs</code> - documentation engine.</li>
-	 * </ul>
-	 * 
+	 *  - <code>mustache</code> - mustache templates.
+	 *  - <code>steal</code> - script loader, and more.
+	 *  - <code>jquery</code> - jQuery 1.4.3 and the MVC components.
+	 *  - <code>funcunit</code> - Functional testing platform.
+	 *  - <code>mxui</code> - UI widgets.
+	 *  - <code>documentjs</code> - documentation engine.
+	 *
 	 * You can install these just by writing
 	 * 
 	 *     js steal/getjs funcunit
 	 * 
-	 * 
 	 * If you have something good, let us know on the forums and we can make your project official too!
 	 * 
+	 * ## Making your own Getter
+	 * 
+	 * This is easy to do and will be documented shortly.
 	 * 
 	 * @constructor
-	 * ## The Get function
 	 * 
-	 * get takes a url or official plugin name and installs it.
+	 * Get takes a url or official plugin name and installs it.
+	 * 
 	 * @param {String} url the path to a svn or github repo or a name of a recognized plugin.
 	 * @param {Object} options configure the download.  
-	 * <table class='options'>
-	 * 	  <tr>
-	 * 	      <th>Name</th><th>Description</th>
-	 * 	  </tr>
-	 * 	  <tr><td>name</td>
-	 * 	  	  <td>The name of the folder to put the download in.</td></tr>
-	 *    <tr><td>ignore</td>
-	 * 	  	  <td>An array of regexps that if the filename matches, these will be ignored.</td></tr>
-	 * 	</table>
 	 * 
+	 *   - __name__  - The name of the folder to put the download in.
+	 *   - __ignore__ - An array of regexps that if the filename matches, these will be ignored.
+	 * 
+	 * @return {boolean} if the installation was successful 
 	 */
 	var get = (steal.get = function( url, options ) {
 		
@@ -142,8 +139,14 @@ steal("//steal/get/json",
 		 * 
 		 *     https://github.com/jupiterjs/steal/raw/master/get/gets.json
 		 * 
-		 * @param {String} name
-		 * @param {String} the url of the repository
+		 * Or locally at
+		 * 
+		 *     //gets.json
+		 * 
+		 * ## API
+		 * 
+		 * @param {String} name the name of the project (ex:  'funcunit')
+		 * @return {String} the url of the repository (ex: 'http://github.com/jupiterjs/funcunit')
 		 */
 		url: function( name ) {
 			//steal.print("  Looking for plugin ...");
@@ -282,6 +285,16 @@ steal("//steal/get/json",
 		/**
 		 * Recursively gets the contents of a folder at a url, and puts it at path.
 		 * 
+		 * The following gets everything in the controller folder
+		 * 
+		 *     steal.fetch(
+		 *       "https://github.com/jupiterjs/jquerymx/tree/master/controller",
+		 *       "jquery/controller/controller",
+		 *       {getter: steal.get.git})
+		 * 
+		 * 
+		 * ## API
+		 * 
 		 * @param {Object} url the 'human' folder name
 		 * @param {Object} path a folder on the local filesystem to put the contents of the folder in. Must end in /.
 		 * @param {Object} options options to configure the downloading.  It has the following properties:
@@ -336,6 +349,17 @@ steal("//steal/get/json",
 		 * 
 		 *   - A - added
 		 *   - U - updated
+		 * 
+		 * ### Example
+		 * 
+		 * The following downloads controller using the git getter:
+		 * 
+		 *     steal.get.download(
+		 *         "https://github.com/jupiterjs/jquerymx/blob/master/controller/controller.js",
+		 *         "jquery/controller/controller.js",
+		 *         {getter: steal.get.git})
+		 * 
+		 * ## API 
 		 * 
 		 * @param {Object} url
 		 * @param {Object} path
