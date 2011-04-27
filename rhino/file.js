@@ -196,9 +196,15 @@
 						copy(newMe, newYou)
 					}
 				}
-				return;
+				return this;
 			}
 			copy(me, you)
+			return this;
+		},
+		setExecutable: function(){
+			var me = new java.io.File(this.path)
+			me.setExecutable(true);
+			return this;
 		},
 		save: function( src, encoding ) {
 			var fout = new java.io.FileOutputStream(new java.io.File(this.path));
