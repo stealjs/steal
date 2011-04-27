@@ -8210,6 +8210,14 @@ __extend__(HTMLElement.prototype, {
         //Not in the specs but I'll leave it here for now.
         return this.xhtml;
     },
+	get clearAttributes(){
+        //Not in the specs but I'll leave it here for now.
+        return;
+    },
+	get mergeAttributes(src){
+        //Not in the specs but I'll leave it here for now.
+        return;
+    },
     scrollIntoView: function(){
         /*TODO*/
         return;
