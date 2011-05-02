@@ -39,6 +39,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 		opts.exclude.push("steal/dev/")
 		rhinoLoader = {
 			callback: function( s ) {
+				s.pluginify = true;
 				s.plugins(plugin);
 			}
 		};
