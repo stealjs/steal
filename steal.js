@@ -1610,8 +1610,8 @@
 		startjQuery : function(){
 			if (jQueryIncremented) {
                 jQ.readyWait -= 1;
+				jQ.ready();
             }
-			jQ.ready();
 		}
 	});
 	//for integration with other build types
