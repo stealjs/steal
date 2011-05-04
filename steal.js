@@ -613,6 +613,7 @@
 		},
 		complete : function(){
 			if(this === firstSteal){ // this is the last steal
+				console.log('complete', jQuery.readyWait)
 				cur = null;
 			}
 			this.completeTimeout && clearTimeout(this.completeTimeout)
@@ -1611,6 +1612,7 @@
 			if (jQueryIncremented) {
                 jQ.readyWait -= 1;
             }
+			jQ.ready();
 		}
 	});
 	//for integration with other build types
@@ -1659,6 +1661,7 @@
             if (!jQueryIncremented) {
                 jQ = $;
 				$.readyWait += 1;
+				console.log('jQueryIncremented', jQuery.readyWait)
                 jQueryIncremented = true;
             }
         }

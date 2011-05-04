@@ -1,3 +1,6 @@
+steal.plugins('jquery').then(function(){
+	
+
 module("steal")
 
 test("domain", function() {
@@ -261,8 +264,20 @@ test("loadtwice", function(){
 	same(ORDERNUM,['func'])
 });
 
+// this was breaking in safari/chrome
+test("ready", function(){
+	stop()
+	$(document).ready(function(){
+		start()
+		ok(true,'ready was called')
+	})
+	
+});
+
 
 
 test("packages", function(){
 	same(packagesStolen,["0","1","uses"],"defined works right")
+})
+
 })
