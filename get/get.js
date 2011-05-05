@@ -463,7 +463,7 @@ steal("//steal/get/json",
 		 */
 		steals : function(url, options){
 			// is it a folder, if so, get it's contents and file ...
-			if(!/\.js$/.test(url)){ // has to be a folder
+			if(!/\.js$/.test(url) && !/\/$/.test(url)){ // has to be a folder (if it isn't already)
 				url = url +"/";
 			}
 			
