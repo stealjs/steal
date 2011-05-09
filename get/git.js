@@ -16,7 +16,7 @@ var lastCommitId = function(inf){
 },
 // returns a url of commit data
 lastCommitUrl = function(inf){
-	return "http://github.com/api/v2/json/tree/show/" + 
+	return "https://github.com/api/v2/json/tree/show/" + 
 			inf.user + "/" + 
 			inf.repo + "/" + lastCommitId(inf);
 	
