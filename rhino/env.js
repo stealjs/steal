@@ -1999,7 +1999,7 @@ Envjs.runAsync = function(fn, onInterupt){
             	fn();
             }
             
-            Envjs.wait();
+            //Envjs.wait();
         });
         Envjs.spawn(run);
     }catch(e){
@@ -24522,7 +24522,13 @@ XMLHttpRequest.prototype = {
 
             if (!_this.aborted  && !redirecting){
 				//console.log('did not abort so call onreadystatechange');
-                _this.onreadystatechange();
+                if(_this.async){
+                	setTimeout(function(){
+                		_this.onreadystatechange();
+                	},10)
+            	 } else {
+            		_this.onreadystatechange();
+            	}
             }
         }
 
