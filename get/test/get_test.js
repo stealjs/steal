@@ -10,7 +10,7 @@ steal('//steal/get/get',function(rhinoSteal){
 	// STEALPRINT = false;
 	
 	_S.test("pluginList", function(t){
-		var url = rhinoSteal.get.pluginList("mxui/util/selectable");
+		var url = rhinoSteal.get.url("mxui/util/selectable");
 		
 		t.equals(url, "http://github.com/jupiterjs/mxui/tree/master/util/selectable/", "Right url")
 	});
@@ -73,7 +73,7 @@ steal('//steal/get/get',function(rhinoSteal){
 		var raw = G.git.raw("https://github.com/jupiterjs/srchr/tree/master/srchr/disabler/disabler.html");
 		t.equals(raw, "https://github.com/jupiterjs/srchr/raw/master/srchr/disabler/disabler.html", "file");
 		
-		raw = G.git.raw("http://github.com/secondstory/secondstoryjs-plugins/blob/master/jScrollPane/jScrollPane.js");
+		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/blob/master/jScrollPane/jScrollPane.js");
 		t.equals(raw, "https://github.com/secondstory/secondstoryjs-plugins/raw/master/jScrollPane/jScrollPane.js", "file");
 		
 		// folders
@@ -82,10 +82,10 @@ steal('//steal/get/get',function(rhinoSteal){
 		
 		// root
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit")
-		t.equals(raw.indexOf("http://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
+		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
 		
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit/tree/2.0")
-		t.equals(raw.indexOf("http://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
+		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
 		
 	});
 	
@@ -140,7 +140,7 @@ steal('//steal/get/get',function(rhinoSteal){
 		var depends = steal.get.dependencies("https://github.com/jupiterjs/funcunit",
 		                            {getter: steal.get.git});
 		                            
-		t.equals(depends["funcunit/syn"], "http://github.com/jupiterjs/syn", "dependency");
+		t.equals(depends["funcunit/syn"], "https://github.com/jupiterjs/syn", "dependency");
 		
 	});
 	
