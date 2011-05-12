@@ -60,5 +60,17 @@ steal.plugins('steal/test','steal/parse').then( function( s ) {
 		
 	});
 	
+	s.test.test("parse logs", function(t){
+		var parser = steal.parse(readFile('steal/parse/test/dev.js')),
+			tokens = [];
+
+		parser.until(["steal",".","dev",".","log","("]);
+		parser.partner("(", function(token){
+			tokens.push(token);
+		})
+		
+		t.equals(tokens[0].value,"()");
+		
+	});
 
 });
