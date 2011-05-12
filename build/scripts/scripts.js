@@ -155,6 +155,35 @@ steal(function( steal ) {
 
 				return outBaos.toString();
 			};
+		},
+		yui: function() {
+			// needs yuicompressor.jar at steal/build/scripts/yuicompressor.jar
+			steal.print("steal.compress - Using YUI compressor");
+
+			return function( src ) {
+				var rnd = Math.floor(Math.random() * 1000000 + 1),
+					filename = "tmp" + rnd + ".js",
+					tmpFile = new steal.File(filename);
+
+				tmpFile.save(src);
+
+				var outBaos = new java.io.ByteArrayOutputStream(),
+					output = new java.io.PrintStream(outBaos);
+					
+				runCommand(
+					"java", 
+					"-jar", 
+					"steal/build/scripts/yuicompressor.jar", 
+					"--charset",
+					"utf-8",
+					filename, 
+					{ output: output }
+				);
+			
+				tmpFile.remove();
+
+				return outBaos.toString();
+			};
 		}
 	};
 });
