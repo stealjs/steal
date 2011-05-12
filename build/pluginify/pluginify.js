@@ -4,7 +4,7 @@
 // js steal\scripts\pluginify.js jquery/event/drag -exclude jquery/lang/vector/vector.js jquery/event/livehack/livehack.js
 // load("steal/rhino/steal.js");
 
-steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
+steal.plugins('steal/parse','steal/build/scripts').then(
  function(s) {
 
 	/**
@@ -106,8 +106,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 		}
 	};
 	s.build.pluginify.getFunction = function(content, ith){
-
-		var p = s.build.parse(content),
+		var p = steal.parse(content),
 			token,
 			funcs = [];
 
@@ -115,9 +114,6 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 			//print(token.value)
 			if(token.type !== "string"){
 				switch(token.value){
-					case "/" : 
-						comment(p)
-						break;
 					case "steal" : 
 						stealPull(p, content, function(func){
 							funcs.push(func)
@@ -149,7 +145,7 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 			
 			startToken = p.until("{");
 
-			endToken = nextBracket(p);
+			endToken = p.partner("{");
 			cb(content.substring(token.from, endToken.to))
 			//print("CONTENT\n"+  );
 			p.moveNext();
@@ -158,42 +154,5 @@ steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
 		}
 		stealPull(p,content, cb );
 		
-	},
-	//moves across a comment
-	comment = function(p){ //we don't really need this anymore
-		var n =p.next()
-		if(n.value == "*" && n.value != 'string'){
-			p.until(["*","/"])
-		}
-	},
-	//gets the next bracket
-	nextBracket = function(p){
-		var count = 1, token, last, prev;
-		while(token = p.moveNext()){
-			//print(token.value)
-			if(token.type == 'operator'){
-				switch(token.value){
-					case "{": 
-						
-						count++;
-						//print("  +"+count+" "+prev+" "+last)
-						break;
-					case "}" :
-						
-						count--;
-						//print("  -"+count+" "+prev+" "+last)
-						if(count === 0){
-							return token;
-						}
-						break;
-					case "/" : 
-						comment(p);
-						break;
-				}
-			}
-			
-			prev = last;
-			last = (token.value)
-		}
-	}
+	};
 });

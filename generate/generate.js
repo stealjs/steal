@@ -175,7 +175,8 @@ steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/promp
 			colons: /::/,
 			words: /([A-Z]+)([A-Z][a-z])/g,
 			lowerUpper: /([a-z\d])([A-Z])/g,
-			dash: /([a-z\d])([A-Z])/g
+			dash: /([a-z\d])([A-Z])/g,
+			undHash: /_|-/
 		},
 		underscore: function( s ) {
 			var regs = this.regexps;
