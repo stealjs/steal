@@ -48,7 +48,10 @@
                                //If Firefox 2 does not have to be supported, then
                                //a better check may be:
                                //('mozIsLocallyAvailable' in window.navigator)
-                               ("MozAppearance" in doc.documentElement.style)) || browser.rhino,
+                               ("MozAppearance" in doc.documentElement.style)) || browser.rhino ||
+							   // Webkit works with inorder execution
+							   // TODO find a better way to detect this
+							   /WebKit/.test(navigator.userAgent),
 	   		readyStateScript : win.document && "readyState" in scriptTag(),
 			// if we'll get an error
 			error : !win.document || "error" in scriptTag()
@@ -127,7 +130,6 @@
 				script ,
 				orgSrc = src,
 				callback = function( result ) {
-					( script[ STR_ONCLICK ] || noop )();
 					cleanUp(script);
 					onload && onload(script);
 				},
@@ -150,38 +152,39 @@
 				script[ STR_ONLOAD ] = callback;
 				script[ STR_ONERROR ] = error;
 			}else{
-				if(support.readyStateScript){
-					script = scriptTag();
-					// we need to set the id before we do htmlFor
-					script.id = steal.cleanId(src); 
-					script.event = STR_ONCLICK;
-					script.htmlFor = script.id;
-					script[ STR_ONREADYSTATECHANGE ] = function() {
-						stateCheck.test( script.readyState ) && callback();
-					};
-					script[ STR_ONERROR ] = error;
-				}else{
-					// Webkit browsers ....
-					script = scriptTag("script/cache");
-					// add to waiting ....
-					var orgOnload = onload,
-						obj = {
-							loaded : false,
-							cb : function(){
-								getScript(orgSrc, orgOnload, false, true)
-							}
-						};
-					onload = null;
-					scriptQueue.push(obj);
-					script[ STR_ONLOAD ] = function(){
-						//run next ...
+				script = scriptTag("script/cache");
+				// add to waiting ....
+				var orgOnload = onload,
+					obj = {
+						loaded : false,
+						cb : function(){
+							// IE executes cached scripts immediately upon insertion
+							getScript(orgSrc, null, false, true)
+							orgOnload && orgOnload(script);
+						}
+					}, 
+					onScriptLoad = function() {
+						// do a little cleanup here because the cleanUp function 
+						// doesn't have a reference to this function
+			            if (script.detachEvent) {
+			                script.detachEvent("onreadystatechange", arguments.callee);
+			            } else {
+			                script.removeEventListener("load", arguments.callee, false);
+			            }
 						callback();
 						obj.loaded = true;
 						runNext();
-					}
-					script[ STR_ONERROR ] = error;
+					};
+				onload = null;
+				scriptQueue.push(obj);
+				script.async = false;
+	            if (script.attachEvent) {
+	                script.attachEvent("onreadystatechange", onScriptLoad);
+	            } else {
+	                script.addEventListener("load", onScriptLoad, false);
+	            }
+				script[ STR_ONERROR ] = error;
 
-				}
 			}
 			// set the id
 			script.id = steal.cleanId(src); 
@@ -490,7 +493,6 @@
 		}
 		// save the arguments to steal until a 'load' call
 		queue.push.apply(queue,  arguments);
-		
 		if(createdFirst){
 			var oldCur = cur, 
 				go = function(){
@@ -731,7 +733,6 @@
 		 * When the script loads, 
 		 */
 		load: function(returnScript) {
-			//console.log("  LOAD ", this.path,this.func ? " f()" : "", this.loading)
 			if(this.loading){
 				return;
 			}
@@ -744,12 +745,10 @@
 			}
 			
 			if (this.func) {
-				//console.log(this.path, this);
 				this.func();
 				this.loaded();
 			} else {
 				var self = this;
-				//console.log(returnScript,"------------")
 				return getScript(this.path, function(){
 					//mark as loaded ...
 					self.loaded();
