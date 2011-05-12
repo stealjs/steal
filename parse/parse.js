@@ -30,10 +30,23 @@ like = function(a, b){
 };
 
 /**
+ * @class steal.parse
+ * @parent stealjs
  * Returns an pull parser useful for walking through
  * token streams.
  * 
+ *     var p = steal.parse("  steal.dev.log('fo(')  ");
+ *     
+ *     //parses until it finds thing(
+ *     p.until( [ "thing", "(" ] );
+ *     
+ *     //parse until it finds the matching ) to (
+ *     p.partner("(");
+ *     
+ * ## API
+ * @constructor
  * @param {String} str
+ * @return {steal.parse} an object that can be used to pull tokens.
  */
 steal.parse = function(str){
 		//print("Breaking up strs")
@@ -66,13 +79,47 @@ steal.parse = function(str){
 		}
 		
 		return {
+			/**
+			 * @attribute ignoreComments
+			 * A boolean you can set to ignore comments.  
+			 * Comments are ignored by default.
+			 * 
+			 *     p.ignoreComments = true
+			 */
 			ignoreComments : true,
+			/**
+			 * Moves to the next token and returns it.
+			 * 
+			 *     var p = steal.parse("CONTENT"),
+			 *         cur
+			 *     while( cur = p.moveNext() ){
+			 *     
+			 *     }
+			 * 
+			 * @return {token} A token like:
+			 * 
+			 *     {from: 22, to: 24, value: "hi", type: "string"}
+			 */
 			moveNext : function(){
 				return moveNext(this.ignoreComments)
 			},
+			/**
+			 * Returns the next token.
+			 * 
+			 * @return {token} A token like:
+			 * 
+			 *     {from: 22, to: 24, value: "hi", type: "string"}
+			 */
 			next : function(){
 				return tokens[tokenNum];
 			},
+			/**
+			 * Returns the current token.
+			 * 
+			 * @return {token} A token like:
+			 * 
+			 *     {from: 22, to: 24, value: "hi", type: "string"}
+			 */
 			cur : function(){
 				return tokens[tokenNum-1];
 			},
@@ -84,9 +131,17 @@ steal.parse = function(str){
 				token = token || tokens[tokenNum];
 			},
 			/**
-			 * parses until it finds the corresponding partner for a (),[],{},<> pair.
-			 * returns all the tokens in between.
-			 * parse.partner
+			 * Parses it until it finds the right partner of the 
+			 * left parameter.
+			 * 
+			 *     p.partner("(", function(token){
+			 *       
+			 *     })
+			 * 
+			 * @param {String} left a string like (,[,{,<
+			 * @param {Function} cb a function that gets called
+			 * with all tokens between the left and right token.
+			 * @return {token} the ending token
 			 */
 			partner : function(left, cb){
 				var right = {
