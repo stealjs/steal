@@ -1107,7 +1107,7 @@ steal.request = function(options, success, error){
 			
 			// CLEAN UP OPTIONS
 			if ( steal.options.app ) {
-				steal.options.startFile = "//"+steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
+				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
 			}
 
 			//calculate production location;
