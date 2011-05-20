@@ -1,7 +1,8 @@
 steal.plugins('funcunit/qunit').then(function(){
 	
-	var src = function(src){
-		return steal.root.join(src)
+	var orig = steal.File( steal.root.path );
+		src = function(src){
+		return orig.join(src)
 	},
 	bId = function(id){
 		return document.getElementById(id);
