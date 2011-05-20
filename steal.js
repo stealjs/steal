@@ -1072,14 +1072,22 @@ steal.request = function(options, success, error){
 					scriptOptions = src.split('?')[1];
 					commaSplit = scriptOptions.split(",");
 					
-					if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
-						options.startFile = commaSplit[0];
-					} else if ( commaSplit[0] ) {
-						options.app = commaSplit[0];
-					}
-					
-					if ( commaSplit[1] && steal.options.env != "production" ) {
-						options.env = commaSplit[1];
+					// if it looks like steal[xyz]=bar, add those to the options
+					if ( scriptOptions.indexOf('=') > -1 ) {
+						scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+							options[prop] = val;
+						});
+					} else {
+						//set with comma style
+						commaSplit = scriptOptions.split(",");
+						if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
+							options.startFile = commaSplit[0];
+						} else if ( commaSplit[0] ) {
+							options.app = commaSplit[0];
+						}
+						if ( commaSplit[1] && steal.options.env != "production" ) {
+							options.env = commaSplit[1];
+						}
 					}
 				}
 			
