@@ -515,6 +515,15 @@ test("File.ext", function(){
 		})
 	})
 	
+	test("loading same file twice", function(){
+		ORDER = [];
+		stop(1000);
+		steal.rootUrl("../../").then('files/duplicate', 'files/duplicate',function(){
+			same(ORDER,[1])
+			start();
+		})
+	})
+	
 	test("getScriptOptions", function(){
 		var script = document.createElement('script'),
 			F = steal.File;
