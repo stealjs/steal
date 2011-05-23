@@ -280,21 +280,24 @@
 		// the 
 	var pending = [],
 		s = steal,
-		id = 0;
+		id = 0,
+		steals = {};
 
 	steal.p = {
 		// adds a new steal and throws an error if the script doesn't load
 		// this also checks the steals map
 		make: function(options){
 			
-			var stel = new steal.p.init(options)
-			
-			if(stel.unique && stel.rootSrc){
+			var stel = new steal.p.init(options),
+				rootSrc = stel.options.rootSrc;
 				
-				if(!steals[stel.rootSrc]){  //if we haven't loaded it before
-					steal.add(stel)
+			if(stel.unique && rootSrc){
+				
+				if(!steals[rootSrc]){  //if we haven't loaded it before
+					steal.add(stel);
+					steals[rootSrc] = stel;
 				}
-				stel = steals[stel.rootSrc];
+				stel = steals[rootSrc];
 			}
 			
 			return stel;
@@ -350,6 +353,7 @@
 					typeof options == 'string' ? { src: options } : options));
 
 				this.waits = this.options.waits || false;
+				this.unique = true;
 			}
 		},
 		complete : function(){},

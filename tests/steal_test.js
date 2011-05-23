@@ -326,7 +326,6 @@ test("File.ext", function(){
 			ob4 = {
 				complete : function(){
 					count++;
-					console.log('here')
 					equals(count, 2, "complete called again")
 					
 					steal.when(ob3,"complete",ob5,"complete");
@@ -370,7 +369,6 @@ test("File.ext", function(){
 			ob4 = {
 				complete : function(){
 					count++;
-					console.log('here')
 					equals(count, 2, "complete called again")
 					
 					steal.when(ob3,"complete",ob5,"complete");
@@ -528,7 +526,6 @@ test("File.ext", function(){
 		var script = document.createElement('script'),
 			F = steal.File;
 		script.src= "../../steal/steal.js?foo";
-		console.log(script.src)
 		var url = F(script.src).protocol() ?  F( F(script.src).dir() ).dir()+"/"  : "../../";
 		
 		var options = steal.getScriptOptions(script);
@@ -537,7 +534,7 @@ test("File.ext", function(){
 		equals(options.app,"foo","app right");
 		
 		script.src = "../steal.js?bar.js";
-		console.log(script.src)
+
 		options = steal.getScriptOptions(script);
 		
 		url = F(script.src).protocol() ?   F( F(script.src).dir() ).dir()+"/" : "../../";
