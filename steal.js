@@ -1,4 +1,5 @@
 (function(){
+	
 	var // String constants (for better minification)
 		win = (function(){return this}).call(null),
 		STR_ONCLICK = "onclick",
@@ -292,9 +293,7 @@
 				rootSrc = stel.options.rootSrc;
 				
 			if(stel.unique && rootSrc){
-				
 				if(!steals[rootSrc]){  //if we haven't loaded it before
-					steal.add(stel);
 					steals[rootSrc] = stel;
 				}
 				stel = steals[rootSrc];
@@ -400,6 +399,11 @@
 				
 				// make a steal object
 				stel = steal.p.make( item );
+				
+				// if this is a script already finished loading, don't add it as a dependency
+				if(stel.hasLoaded){
+					return;
+				}
 				
 				// add it as a dependency, circular are not allowed
 				self.dependencies.push(stel)
@@ -669,6 +673,7 @@ steal.type("js", function(options,original, success, error){
 	} else {
 		script[ STR_ONLOAD ] = script[ STR_ONLOAD ] = function( result ) {
 			cleanUp(script);
+			
 			success && success(script);
 		};
 		if(support.error){
@@ -854,6 +859,8 @@ steal.request = function(options, success, error){
 		if(this === currentCollection){ // this is the last steal
 			currentCollection = null;
 		}
+		// mark other scripts that we're done for other scripts
+		this.hasLoaded = true;
 	});
 	
 	// =============================== jQuery ===============================
@@ -1177,6 +1184,5 @@ steal.request = function(options, success, error){
 	startup();
 	
 })()
-
 
 
