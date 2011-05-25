@@ -679,17 +679,13 @@ steal.type("js", function(options,original, success, error){
 		if(support.error){
 			script[ STR_ONERROR ] = error;
 		}
-		
-		script[ STR_ONREADYSTATECHANGE ] = function() {
-
-          stateCheck.test( script.readyState ) && success();
- 	
-    	};
 		script.src = options.src;
 	}
 	
 	head().insertBefore( script, head().firstChild );
-	
+	// IE inserts and executes the scripts inline, but doesn't call 
+	// onreadystatechange until later, so we call success right away
+	stateCheck.test( script.readyState ) && success();
 	
 	if (options.text) {
 		success();
@@ -1184,5 +1180,4 @@ steal.request = function(options, success, error){
 	startup();
 	
 })()
-
 
