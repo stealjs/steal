@@ -2,7 +2,6 @@
 	
 	var // String constants (for better minification)
 		win = (function(){return this}).call(null),
-		STR_ONCLICK = "onclick",
 		STR_ONLOAD = "onload",
 		STR_ONERROR = "onerror",
 		STR_ONREADYSTATECHANGE = "onreadystatechange",
@@ -52,7 +51,8 @@
 			}
 		},
 		support = {
-			error: !win.document || "error" in scriptTag()
+			error: !win.document || "error" in scriptTag(),
+			useInteractive: "attachEvent" in scriptTag()
 		},
 		startup = function(){},
 		oldsteal = win.steal,
@@ -295,8 +295,13 @@
 			if(stel.unique && rootSrc){
 				if(!steals[rootSrc]){  //if we haven't loaded it before
 					steals[rootSrc] = stel;
+				} else{
+					stel = steals[rootSrc];
+					// something else wants to load this file, so start loading it
+					if(!stel.loading && !stel.hasLoaded){
+						stel.load();
+					}
 				}
-				stel = steals[rootSrc];
 			}
 			
 			return stel;
@@ -355,7 +360,10 @@
 				this.unique = true;
 			}
 		},
-		complete : function(){},
+		complete : function(){
+			// mark other scripts that we're done for other scripts
+			this.hasLoaded = true;
+		},
 		/**
 		 * @hide
 		 * After the script has been loaded and run
@@ -409,7 +417,7 @@
 				self.dependencies.push(stel)
 				
 				
-				if(stel.waits === false){
+				if(stel.waits === false){ // file
 					// on the current 
 					set.push(stel,"complete");
 					
@@ -420,7 +428,7 @@
 						when(start,"complete",stel,"load")
 					}
 					
-				}else{
+				}else{ // function
 					
 					if(!initial.length){ //if we start with a function
 						initial.push(stel)
@@ -454,8 +462,8 @@
 			this.loading = true;
 			var self = this;
 			// get yourself
-			steal.require(this.options,this.orig, function(){
-				self.loaded();
+			steal.require(this.options,this.orig, function(script, pending){
+				self.loaded(pending);
 			});
 			
 		}
@@ -642,12 +650,12 @@
 		
 		var type = types[converters.shift()];
 		
-		type.require(options, original, function(val){
+		type.require(options, original, function(){
 			// if we have more types to convert
 			if(converters.length){
 				require(options, original, converters, success, error)
 			} else { // otherwise this is the final
-				success(val);
+				success.apply(this, arguments);
 			}
 		}, error)
 	};
@@ -657,7 +665,6 @@
 
 var cleanUp = function(script) {
 	script[ STR_ONREADYSTATECHANGE ]
-		= script[ STR_ONCLICK ]
 		= script[ STR_ONLOAD ]
 		= script[STR_ONERROR]
 		= null;
@@ -666,26 +673,36 @@ var cleanUp = function(script) {
 };
 
 steal.type("js", function(options,original, success, error){
-	var script = scriptTag();
-	if(options.text){
+	var script = scriptTag(), deps;
+	if (options.text) {
 		// insert
 		script.text = options.text;
-	} else {
-		script[ STR_ONLOAD ] = script[ STR_ONLOAD ] = function( result ) {
-			cleanUp(script);
-			
-			success && success(script);
-		};
-		if(support.error){
-			script[ STR_ONERROR ] = error;
-		}
-		script.src = options.src;
 	}
-	
-	head().insertBefore( script, head().firstChild );
-	// IE inserts and executes the scripts inline, but doesn't call 
-	// onreadystatechange until later, so we call success right away
-	stateCheck.test( script.readyState ) && success();
+	else {
+		var callback = function(evt){
+		
+			if (!script.readyState || stateCheck.test(script.readyState)) {
+				//				cleanUp(script);
+				if (support.useInteractive) {
+					deps = interactives[script.src] || [];
+				}
+				success(script, deps)
+			}
+		}
+		if (script.attachEvent) {
+			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
+		} else {
+			script[STR_ONLOAD] = callback;
+		}
+			
+			if (support.error) {
+				script[STR_ONERROR] = error;
+			}
+			script.src = options.src;
+			script.onSuccess = success;
+		}
+		
+	head().insertBefore(script, head().firstChild);
 	
 	if (options.text) {
 		success();
@@ -829,12 +846,12 @@ steal.request = function(options, success, error){
 				currentCollection = new steal.p.init();
 				
 				var go = function(){
+					currentCollection.loaded();
 					// let anyone listening to a start, start
 					steal.trigger("start", currentCollection);
 					when(currentCollection,"complete", function(){
 						steal.trigger("end", currentCollection);
 					})
-					currentCollection.loaded();
 				}
 				
 				// this needs to change for old way ....
@@ -855,9 +872,9 @@ steal.request = function(options, success, error){
 		if(this === currentCollection){ // this is the last steal
 			currentCollection = null;
 		}
-		// mark other scripts that we're done for other scripts
-		this.hasLoaded = true;
 	});
+	
+	
 	
 	// =============================== jQuery ===============================
 	(function(){
@@ -1049,6 +1066,48 @@ steal.request = function(options, success, error){
 		steal.trigger("ready")
 	})
 	
+	// =========== INTERACTIVE STUFF ===========
+	
+
+var interactiveScript, 
+	// key is script name, value is array of pending items
+	interactives = {},
+	getInteractiveScript = function() {
+	    var scripts, i, script;
+	    if (interactiveScript && interactiveScript.readyState === 'interactive') {
+	        return interactiveScript;
+	    }
+	
+	    scripts = document.getElementsByTagName('script');
+	    for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
+	        if (script.readyState === 'interactive') {
+	            return script;
+	        }
+	    }
+	
+	    return null;
+	}
+
+if (support.useInteractive) {
+
+	// after steal is called, check which script is "interactive" (for IE)
+	steal.after = after(steal.after, function(){
+		var interactive = getInteractiveScript();
+		if (!interactive.src || /steal\.js/.test(interactive.src)) {
+			return;
+		}
+		if (!interactives[interactive.src]) {
+			interactives[interactive.src] = []
+		}
+		if (interactive.src) {
+			interactives[interactive.src].push.apply(interactives[interactive.src], pending);
+			pending = [];
+			interactiveScript = interactive;
+		}
+	})
+	
+}
+	
 	// ===========  OPTIONS ==========
 	
 	var getStealScriptSrc = function(){
@@ -1180,4 +1239,3 @@ steal.request = function(options, success, error){
 	startup();
 	
 })()
-
