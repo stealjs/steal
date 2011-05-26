@@ -612,6 +612,9 @@
 	steal.type = function(type, cb){
 		var typs = type.split(" ");
 		
+		if(!cb){
+			return types[typs.shift()].require
+		}
 		
 		types[typs.shift()] = {
 			require : cb,
@@ -829,6 +832,29 @@ steal.request = function(options, success, error){
 		raw.src = steal.root.join(raw.rootSrc = insertMapping(raw.rootSrc));
 	})
 	
+	//root mappings to other locations
+	steal.mappings = {};
+	/**
+	 * Maps a 'rooted' folder to another location.
+	 * @param {String|Object} from the location you want to map from.  For example:
+	 *   'foo/bar'
+	 * @param {String} [to] where you want to map this folder too.  Ex: 'http://foo.cdn/bar'
+	 * @return {steal}
+	 */
+	steal.map = function(from, to){
+		if(typeof from == "string"){
+			steal.mappings[from] = {
+				test : new RegExp("^("+from+")([/.]|$)"),
+				path: to
+			};
+		} else { // its an object
+			for(var key in from){
+				steal.map(key, from[key]);
+			}
+		}
+		return this;
+	}
+	
 	// =============================== STARTUP ===============================
 	
 	
@@ -1032,7 +1058,7 @@ steal.request = function(options, success, error){
 		return stel.options ? stel.options.src : "CONTAINER"
 	}
 	
-	/*steal.p.load = before(steal.p.load, function(){
+	/**steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id, pending)
 	})
 	
