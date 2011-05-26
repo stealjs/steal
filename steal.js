@@ -1119,7 +1119,8 @@ if (support.useInteractive) {
 	// after steal is called, check which script is "interactive" (for IE)
 	steal.after = after(steal.after, function(){
 		var interactive = getInteractiveScript();
-		if (!interactive.src || /steal\.js/.test(interactive.src)) {
+		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
+		if (!interactive || !interactive.src || /steal\.js/.test(interactive.src)) {
 			return;
 		}
 		if (!interactives[interactive.src]) {
