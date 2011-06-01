@@ -337,7 +337,7 @@
 						// call the function, someday soon this will be requireJS-like
 						options(steal.send || win.jQuery || steal); 
 					},
-					src: path,
+					rootSrc: path,
 					orig: options,
 					type: "fn"
 				}
@@ -368,7 +368,7 @@
 		loaded: function(myqueue){
 			//check if jQuery has been loaded
 			//mark yourself as current
-			File.cur(this.options && this.options.src);
+			File.cur(this.options && this.options.rootSrc);
 			
 			if(!myqueue){
 				myqueue = pending.slice(0);
@@ -517,12 +517,14 @@
 		 * @param {Object} options
 		 */
 		makeOptions : function(options){
-			var normalized = steal.File(options.src).normalize();
+			
+			var orig = options.src,
+				normalized = steal.File(orig).normalize();
 			extend(options,{
 				originalSrc : options.src,
 				rootSrc : normalized,
 				src : steal.root.join(normalized)
-			})
+			});
 			options.originalSrc = options.src;
 			return options;
 		},
@@ -622,7 +624,7 @@
 			raw.type =  ext;
 		}
 		//test this, and then test append, then continue other convert stuff
-	})
+	});
 	
 	// loads a single file, given a src (or text)
 	steal.require = function(options, original, success, error){
@@ -636,7 +638,7 @@
 			converters = [options.type]
 		}
 		require(options, original, converters, success, error)
-	}
+	};
 	function require(options, original, converters, success, error){
 		
 		var type = types[converters.shift()];
@@ -670,6 +672,7 @@ steal.type("js", function(options,original, success, error){
 		script.text = options.text;
 	}
 	else {
+		
 		var callback = function(evt){
 		
 			if (!script.readyState || stateCheck.test(script.readyState)) {
@@ -708,7 +711,7 @@ steal.type("text", function(options, original, success, error){
 		options.text = text;
 		success(text);
 	}, error)
-})
+});
 
 steal.type("css", function(options, original, success, error){
 	if(options.text){
@@ -744,7 +747,7 @@ steal.type("css", function(options, original, success, error){
 			steal.type(type, opts.types[type]);
 		}
 	}
-}())
+}());
 
 
 // =============================== HELPERS ===============================
@@ -791,7 +794,7 @@ steal.request = function(options, success, error){
 		clean();
 	}
 			 
-}
+};
 
 
 
@@ -810,15 +813,15 @@ steal.request = function(options, success, error){
 			}
 		}
 		return p;
-	}
+	};
 	File.prototype.mapJoin = function( url ){
 		url = insertMapping(url);
 		return File(url).joinFrom(this.path);
-	}
+	};
 	// modifies src
 	steal.makeOptions = after(steal.makeOptions,function(raw){
 		raw.src = steal.root.join(raw.rootSrc = insertMapping(raw.rootSrc));
-	})
+	});
 	
 	//root mappings to other locations
 	steal.mappings = {};
