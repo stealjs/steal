@@ -1,5 +1,5 @@
 // A Rhino-version of steal
-(function(){
+(function(win){
 	
 	
 	win.steal = {
@@ -15,5 +15,5 @@
 		}
 	}
 	load("steal/steal.js");
-})();
+})(this);
 

@@ -52,7 +52,7 @@
 		},
 		support = {
 			error: !win.document || "error" in scriptTag(),
-			useInteractive: "attachEvent" in scriptTag()
+			interactive: win.document && "attachEvent" in scriptTag()
 		},
 		startup = function(){},
 		oldsteal = win.steal,
@@ -297,10 +297,6 @@
 					steals[rootSrc] = stel;
 				} else{
 					stel = steals[rootSrc];
-					// something else wants to load this file, so start loading it
-					if(!stel.loading && !stel.hasLoaded){
-						stel.load();
-					}
 				}
 			}
 			
@@ -360,10 +356,7 @@
 				this.unique = true;
 			}
 		},
-		complete : function(){
-			// mark other scripts that we're done for other scripts
-			this.hasLoaded = true;
-		},
+		complete : function(){},
 		/**
 		 * @hide
 		 * After the script has been loaded and run
@@ -407,11 +400,6 @@
 				
 				// make a steal object
 				stel = steal.p.make( item );
-				
-				// if this is a script already finished loading, don't add it as a dependency
-				if(stel.hasLoaded){
-					return;
-				}
 				
 				// add it as a dependency, circular are not allowed
 				self.dependencies.push(stel)
@@ -686,7 +674,7 @@ steal.type("js", function(options,original, success, error){
 		
 			if (!script.readyState || stateCheck.test(script.readyState)) {
 				//				cleanUp(script);
-				if (support.useInteractive) {
+				if (support.interactive) {
 					deps = interactives[script.src] || [];
 				}
 				success(script, deps)
@@ -872,12 +860,13 @@ steal.request = function(options, success, error){
 				currentCollection = new steal.p.init();
 				
 				var go = function(){
-					currentCollection.loaded();
+					
 					// let anyone listening to a start, start
 					steal.trigger("start", currentCollection);
 					when(currentCollection,"complete", function(){
 						steal.trigger("end", currentCollection);
-					})
+					});
+					currentCollection.loaded();
 				}
 				
 				// this needs to change for old way ....
@@ -1114,7 +1103,7 @@ var interactiveScript,
 	    return null;
 	}
 
-if (support.useInteractive) {
+if (support.interactive) {
 
 	// after steal is called, check which script is "interactive" (for IE)
 	steal.after = after(steal.after, function(){
