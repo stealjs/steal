@@ -307,26 +307,31 @@ test("File.ext", function(){
 	// this has to be done via a steal request instead of steal.require
 	// because require won't add buildType.  Require just gets stuff
 	// and that is how it should stay.
-//	test("buildType set", function(){
-//		stop();
-//		
-//		steal.type("foo js", function(options, original, success, error){
-//			var parts = options.text.split(" ")
-//			options.text = parts[0]+"='"+parts[1]+"'";
-//			success();
-//			equals(options.buildType, "js", "build type set right");
-//			equals(options.type, "foo", "type set right");
-//		});
-//		
-//		steal({
-//			src : src('steal/tests/files/require.foo'),
-//			type: "foo"
-//		},function(){
-//			start();
-//		})
-//	});
+	test("buildType set", function(){
+		stop(2000);
+		
+		steal.type("foo js", function(options, original, success, error){
+			var parts = options.text.split(" ")
+			options.text = parts[0]+"='"+parts[1]+"'";
+			success();
+			equals(options.buildType, "js", "build type set right");
+			equals(options.type, "foo", "type set right");
+		});
+		
+		steal({
+			src : src('steal/tests/files/require.foo'),
+			type: "foo"
+		},function(){
+			start();
+		})
+	});
 	
 	test("when", function(){
+		//start  1.loaded 2.loaded -> 3.complete
+		//in 3   2.loaded -> 4.complete
+		//in 4   3.complete -> 5.complete
+		//
+		
 		var count = 0,
 			ob1 = {
 				loaded : function(){},

@@ -1059,32 +1059,50 @@ steal.request = function(options, success, error){
 				var me = arguments.callee,
 					ret;
 				
-				//if we are a callee, and have been called, decrement the number of calls
-				if(me.calls !== undefined){
-					me.calls--;
+				// call the original function
+				ret = oldFunc.apply(ob,arguments)
+				var cbs = me.callbacks,
+					len = cbs.length;
+				
+				//mark as called so any callees added to this caller will
+				//automatically get called
+				me.called = true;
+				// call other callbacks
+				for(var i =0; i < len; i++){
+					cbs[i].called()
 				}
-				//if we have been called the right number of times, or are not a callee
-				if( me.calls === 0 || me.calls === undefined ) {
-					// call the original function
-					ret = oldFunc.apply(ob,arguments)
-					var cbs = me.callbacks,
-						len = cbs.length;
-					
-					//mark as called so any callees added to this caller will
-					//automatically get called
-					me.called = true;
-					// call other callbacks
-					for(var i =0; i < len; i++){
-						cbs[i].obj[cbs[i].func](ob)
-					}
-					return ret;
-				}
+				return ret;
+				
 			}
 			ob[func].callbacks = [];
 		}
 
 		return ob[func];
 	};
+	function join(obj, meth){
+		this.obj = obj;
+		this.meth = meth;
+		convert(obj, meth)
+		this.calls = 0
+	}
+	extend(join.prototype,{
+		called : function(){
+			this.calls--;
+			this.go();
+		},
+		add : function(obj, meth){
+			var f = convert(obj, meth)
+			if(!f.called){
+				f.callbacks.push(this);
+				this.calls++;
+			}
+		},
+		go : function(){
+			if(this.calls === 0){
+				this.obj[this.meth]()
+			}
+		}
+	})
 	// chains two functions.  When the first one is called,
 	//   it calls the second function.
 	//   If the second function has multiple callers, it waits until all have been called
@@ -1104,27 +1122,14 @@ steal.request = function(options, success, error){
 		
 		var waitMeth = args.pop(), 
 			waitObj = args.pop(),
-			f2 = convert(waitObj, waitMeth),
-			f; 
+			joined = new join(waitObj, waitMeth); 
 		
-
 		for(var i =0; i < args.length; i = i+2){
-			f = convert(args[i], args[i+1]);
-			
-			if(! f.called){
-				// push the callee to be called later
-				f.callbacks.push({
-					obj : waitObj,
-					func: waitMeth
-				});
-				f2.calls = (f2.calls || 0 )+1;
-			}
+			joined.add(args[i], args[i+1])
 		}
 		
-		// call right away 
-		if(!f2.calls){
-			waitObj[waitMeth](waitObj)
-		}
+		// call right away if it should
+		joined.go();
 	}
 	
 	// =========== DEBUG =========
