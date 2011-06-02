@@ -552,6 +552,26 @@ test("File.ext", function(){
 		})
 	})
 	
+	// c should load whenever something its waiting on completes
+	test("deadlocked whens", function(){
+		expect(1)
+		var a = {
+				complete: function(){}
+			},
+			b = {
+				complete: function(){}
+			},
+			c = {
+				load: function(){
+					ok(true, "didn't deadlock")
+				}
+			}
+		
+		steal.when(a, "complete", c, "load")
+		steal.when(b, "complete", c, "load")
+		b.complete();
+	})
+	
 	test("getScriptOptions", function(){
 		var script = document.createElement('script'),
 			F = steal.File;
