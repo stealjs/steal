@@ -44,6 +44,21 @@ steal('//steal/test/test', function( s ) {
 		
 	});
 
+	
+	s.test.test("jquery ready code doesn't run", function(){
+		load('steal/rhino/steal.js')
+		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+			s2.build("steal/build/test/jqueryready.html", {
+				to: 'steal/build/test'
+			})
+		});
+		
+		s.test.equals(jqueryReadyCodeRun, false, "document ready code not called");
+		s.test.clear();
+		s.test.remove('steal/build/test/production.js')
+		
+	});
+	
 	// Closure doesn't handle these characters, and you should probably be pulling them in from elsewhere.
 	// but I'd still like this to work.
 	return;
@@ -68,6 +83,8 @@ steal('//steal/test/test', function( s ) {
 		s.test.clear();
 		s.test.remove('steal/build/test/production.js')
 	});
+	
+	
 	
 
 });
