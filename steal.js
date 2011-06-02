@@ -1003,8 +1003,7 @@ steal.request = function(options, success, error){
 		// once the current batch is done, fire ready if it hasn't already been done
 		steal.bind('end', function(){
 			if (jQueryIncremented && !ready) {
-	            jQ.readyWait -= 1;
-				jQ.ready();
+				jQ.ready(true);
 				ready = true;
 	        }
 		})
