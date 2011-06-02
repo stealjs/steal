@@ -1,3 +1,3 @@
-steal.css('css2', 'css/css1')
+steal('css2.css', 'css/css1.css')
 	.then(function(){})
-	.css('css3')
+	.then('css3.css')
