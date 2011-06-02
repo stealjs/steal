@@ -1,7 +1,7 @@
-steal.loading('//steal/less/test/test.js','//steal/less/less.js');
-steal.plugins("steal/less").then(function(){steal.less("styles")}).css("styles");
+steal.loading('//steal/less/test/test.js','//steal/less/less');
+steal.plugins("steal/less").then("styles.less","styles.css");
 ;
 steal.loaded('//steal/less/test/test.js');
-steal({path:"less_engine.js",ignore:true},function(){steal.less=function(){if(steal.options.env=="production"){if(!steal.loadedProductionCSS){var a=steal.File(steal.options.production.replace(".js",".css")).normalize();a=steal.root.join(a);steal.createLink(a);steal.loadedProductionCSS=true}return steal}return steal}});
+steal({src:"less_engine.js",ignore:true},function(){steal.type("less css",function(a,d,b){(new less.Parser({optimization:less.optimization,paths:[]})).parse(a.text,function(e,c){a.text=c.toCSS();b()})})});
 ;
-steal.loaded('//steal/less/less.js');
+steal.loaded('//steal/less/less');

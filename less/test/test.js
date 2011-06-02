@@ -1,5 +1,1 @@
-steal.plugins('steal/less')
-	.then(function(){
-		steal.less('styles')
-	})
-	.css('styles')
+steal.plugins('steal/less').then('styles.less','styles.css');

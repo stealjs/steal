@@ -33,3 +33,5 @@ writeItems = (item) ->
   document.body.appendChild p
   
 writeItems item for item in cubes;
+
+window.cubes = cubes;

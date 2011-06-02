@@ -1,4 +1,4 @@
-// load('steal/compress/test/run.js')
+// load('steal/less/test/less_test.js')
 /**
  * Tests compressing a very basic page and one that is using steal
  */
