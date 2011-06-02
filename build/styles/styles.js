@@ -13,7 +13,7 @@ steal(function( steal ) {
 			pageFolder = steal.File(opener.url).dir(),
 			currentPackage = [];
 
-		opener.each('style', function( link, text, i ) {
+		opener.each('css', function( link, text, i ) {
 			if ( steal.build.types[link.type] ) {
 				steal.print(link.pathFromPage)
 

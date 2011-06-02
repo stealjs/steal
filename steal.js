@@ -503,7 +503,9 @@
 			rhino: win.load && win.readUrl && win.readFile
 		},
 		options : {
-			env : 'development'
+			env : 'development',
+			// TODO: document this
+			loadProduction : true
 		},
 		/**
 		 * when a 'unique' steal gets added ...
@@ -546,14 +548,19 @@
 			if(!events[event]){
 				events[event] = [] 
 			}
-			events[event].push(listener)
+			var special = steal.events[event]
+			if(special && special.add){
+				listener = special.add(listener);
+			}
+			listener && events[event].push(listener)
 		},
 		one : function(event, listener){
 			steal.bind(event,function(){
-				listener.call(this, arguments);
+				listener.apply(this, arguments);
 				steal.unbind(arguments.callee);
 			})
 		},
+		events : {},
 		unbind : function(event, listener){
 			var evs = events[event] || [],
 				i = 0;
@@ -569,6 +576,32 @@
 			each(events[event] || [], function(i,f){
 				f(arg);
 			})
+		},
+		/**
+		 * @hide
+		 * Used to tell steal that it is loading a number of plugins
+		 */
+		loading : function(){
+			for(var i =0; i< arguments.length;i++){
+				var stel = steal.p.make( arguments[i] );
+				stel.loading = true;
+			}
+
+		},
+		// called when a script has loaded via production
+		loaded: function(name){
+			// console.log("LOADED "+name)
+			//get other steals
+			//basically create each one ... mark it as loading
+			//  load each one
+			var stel = steal.p.make( name );
+			stel.loading = true;
+			var myqueue = pending.slice(0);
+			pending = [];
+
+			stel.loaded(myqueue)
+
+			return steal;
 		}
 	});
 	var events = {};
@@ -611,7 +644,7 @@
 			convert: typs
 		};
 	};
-	// adds a type (js by default)
+	// adds a type (js by default) and buildType (css, js)
 	steal.makeOptions = before(steal.makeOptions,function(raw){
 		// if it's a string, get it's extension and check if
 		// it is a registered type, if it is ... set the type
@@ -623,14 +656,17 @@
 			}
 			raw.type =  ext;
 		}
-		//test this, and then test append, then continue other convert stuff
+		var converters =  types[raw.type].convert;
+		raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
 	});
 	
 	// loads a single file, given a src (or text)
 	steal.require = function(options, original, success, error){
+		// get the type
 		var type = types[options.type],
 			converters;
 		
+		// if this has converters, make it get the text first, then pass it to the type
 		if(type.convert.length){
 			converters = type.convert.slice(0);
 			converters.unshift('text', options.type)
@@ -861,17 +897,18 @@ steal.request = function(options, success, error){
 		after: function(){
 			if(! currentCollection ){
 				currentCollection = new steal.p.init();
+				// keep a reference in case it dissappears 
 				
-				var go = function(){
+				var cur = currentCollection,
+					go = function(){
 					
-					// let anyone listening to a start, start
-					steal.trigger("start", currentCollection);
-					when(currentCollection,"complete", function(){
-						steal.trigger("end", currentCollection);
-					});
-					currentCollection.loaded();
-				}
-				
+						// let anyone listening to a start, start
+						steal.trigger("start", cur);
+						when(cur,"complete", function(){
+							steal.trigger("end", cur);
+						});
+						cur.loaded();
+					};
 				// this needs to change for old way ....
 				if(!win.setTimeout){
 					go()
@@ -880,7 +917,6 @@ steal.request = function(options, success, error){
 				}
 			}
 		},
-		done : function(){},
 		_before : before,
 		_after: after
 	});
@@ -1073,16 +1109,30 @@ steal.request = function(options, success, error){
 	var loaded = {
 		load : function(){},
 		end : function(){}
-	}
+	};
+	
+	firstEnd = false;
 	addEvent(win, "load", function(){
 		loaded.load();
 	});
-	steal.one("end", function(){
-		loaded.end()
+	steal.one("end", function(collection){
+		loaded.end();
+		firstEnd = collection;
 	})
 	when(loaded,"load",loaded,"end", function(){
 		steal.trigger("ready")
-	})
+	});
+	
+	steal.events.done = {
+		add : function(cb){
+			if(firstEnd){
+				cb(firstEnd);
+				return false;
+			} else {
+				return cb;
+			}
+		}
+	};
 	
 	// =========== INTERACTIVE STUFF ===========
 	
@@ -1168,26 +1218,19 @@ if (support.interactive) {
 					options.env = "production";
 				}
 				if ( src.indexOf('?') !== -1 ) {
+					
 					scriptOptions = src.split('?')[1];
 					commaSplit = scriptOptions.split(",");
 					
-					// if it looks like steal[xyz]=bar, add those to the options
-					if ( scriptOptions.indexOf('=') > -1 ) {
-						scriptOptions.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
-							options[prop] = val;
-						});
-					} else {
-						//set with comma style
-						commaSplit = scriptOptions.split(",");
-						if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
-							options.startFile = commaSplit[0];
-						} else if ( commaSplit[0] ) {
-							options.app = commaSplit[0];
-						}
-						if ( commaSplit[1] && steal.options.env != "production" ) {
-							options.env = commaSplit[1];
-						}
+					if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
+						options.startFile = commaSplit[0];
+					} else if ( commaSplit[0] ) {
+						options.app = commaSplit[0];
 					}
+					if ( commaSplit[1] && steal.options.env != "production" ) {
+						options.env = commaSplit[1];
+					}
+					
 				}
 			
 			}

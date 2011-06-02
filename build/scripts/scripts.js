@@ -26,27 +26,26 @@ steal(function( steal ) {
 		}
 
 		// for each steal we find
-		opener.each('script', function( stl, text, i ) {
+		opener.each('js', function( stl, text, i ) {
 
+			var out = stl.rootSrc || "!";
 			// if we should ignore it, ignore it
 			if ( stl.packaged === false ) {
-				if ( stl.path ) {
-					steal.print('   not packaging ' + stl.path);
-				}
+
+				steal.print('   not packaging ' + out);
+				
 				return;
 			}
 			
 			// ignore
 			if ( stl.ignore ) {
-				if ( stl.path ) {
-					steal.print('   ignoring ' + stl.path);
-				}
+				steal.print('   ignoring ' + out);
 				return;
 			}
 			// if it has a src, let people know we are compressing it
-			if ( stl.path ) {
-				steal.print("   " + stl.path);
-			}
+			
+			steal.print("   " + out);
+			
 
 			// get the package, this will be production.js
 			var pack = stl['pack'];
@@ -66,9 +65,9 @@ steal(function( steal ) {
 			if ( stl.compress !== false || options.all ) {
 				text = compressor(text, true);
 			}
-			currentPackage.scripts.push("'//"+stl.path+"'")
+			currentPackage.scripts.push("'//"+stl.rootSrc+"'")
 			// put the result in the package
-			currentPackage.src.push(text+";\nsteal.loaded('//"+stl.path+"');");
+			currentPackage.src.push(text+";\nsteal.loaded('//"+stl.rootSrc+"');");
 		});
 
 		steal.print("");

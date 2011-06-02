@@ -5,7 +5,7 @@ steal(function(s){
 			// load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 
-			
+
 			// this goes through the scripts until it finds one that waits for 
 			// everything before it to complete
 			while(i < depends.length){
@@ -39,9 +39,9 @@ steal(function(s){
 		loadset = function(steals, CB){
 			for(var i =0; i < steals.length; i++){
 				//print("  Touching "+steals[i].path)
-				if(!touched[steals[i].path]){
+				if(!touched[steals[i].options.rootSrc]){
 					CB( steals[i] );
-					touched[steals[i].path] = true;
+					touched[steals[i].options.rootSrc] = true;
 				}
 				
 			}
@@ -117,7 +117,8 @@ steal(function(s){
 				oldSteal.build.types[buildType] = newSteal.build.types[buildType];
 			}
 		}
-		var res = newSteal.done(function(init){
+
+		newSteal.one('done',function(init){
 			Envjs.clear();
 			cb({
 				/**
@@ -136,13 +137,14 @@ steal(function(s){
 					if(typeof filter == 'string'){
 						var resource = filter;
 						filter = function(stl){
-							return stl.resource === resource;
+							return stl.options.buildType === resource;
 						}
 					}
+					
 					breadth(init, function(stealer){
 						
 						if(filter(stealer)){
-							func(stealer, steal.build.types[stealer.type] && steal.build.types[stealer.type](stealer, loadScriptText))
+							func(stealer.options, loadScriptText(stealer.options) )
 						}
 					});
 				},
@@ -151,7 +153,34 @@ steal(function(s){
 				url: url
 			})
 		});
-		res && res();
 		Envjs.wait();
+	};
+	
+	
+	var loadScriptText = function( options ) {
+		if(options.text){
+			return options.text;
+		}
+		
+		// src is relative to the page, we need it relative
+		// to the filesystem
+		var src = options.src,
+			text = "",
+			base = "" + window.location,
+			url = src.match(/([^\?#]*)/)[1];
+
+
+		
+		url = Envjs.uri(url, base);
+		
+		if ( url.match(/^file\:/) ) {
+			url = url.replace("file:/", "");
+			text = readFile("/" + url);
+		}
+
+		if ( url.match(/^http\:/) ) {
+			text = readUrl(url);
+		}
+		return text;
 	};
 })
