@@ -293,7 +293,9 @@
 				rootSrc = stel.options.rootSrc;
 				
 			if(stel.unique && rootSrc){
-				if(!steals[rootSrc]){  //if we haven't loaded it before
+				// the .js is b/c we are not adding that automatically until
+				// load because we defer 'type' determination until then
+				if(!steals[rootSrc] && ! steals[rootSrc+".js"]){  //if we haven't loaded it before
 					steals[rootSrc] = stel;
 				} else{
 					stel = steals[rootSrc];
@@ -645,7 +647,17 @@
 		};
 	};
 	// adds a type (js by default) and buildType (css, js)
-	steal.makeOptions = before(steal.makeOptions,function(raw){
+	// this should happen right before loading
+	// however, what if urls are different 
+	// because one file has JS and another does not?
+	// we could check if it matches something with .js because foo.less.js SHOULD
+	// be rare
+	//steal.makeOptions = before(steal.makeOptions,function(raw){
+		
+	//});
+	steal.p.load = before(steal.p.load, function(){
+		var raw = this.options;
+		
 		// if it's a string, get it's extension and check if
 		// it is a registered type, if it is ... set the type
 		if(!raw.type){
@@ -706,6 +718,7 @@ steal.type("js", function(options,original, success, error){
 	if (options.text) {
 		// insert
 		script.text = options.text;
+		
 	}
 	else {
 		
@@ -751,6 +764,7 @@ steal.type("text", function(options, original, success, error){
 
 steal.type("css", function(options, original, success, error){
 	if(options.text){
+		var css  = document.createElement('style')
 		if (css.styleSheet) { // IE
             css.styleSheet.cssText = options.text;
 	    } else {
@@ -764,6 +778,7 @@ steal.type("css", function(options, original, success, error){
 	            }
 	        })(document.createTextNode(options.text));
 	    }
+		head().appendChild(css);
 	} else {
 		options = options || {};
 		var link = doc[STR_CREATE_ELEMENT]('link');
