@@ -1325,12 +1325,6 @@ if (support.interactive) {
 			}
 			else {
 				var steals = [];
-				if (steal.options.loadDev !== false) {
-					steals.push({
-						src: '//steal/dev/dev.js',
-						ignore: true
-					});
-				}
 				
 				//if you have a startFile load it
 				if (steal.options.startFile) {
@@ -1338,6 +1332,12 @@ if (support.interactive) {
 					steals.push("//"+steal.options.startFile)
 				//steal._start = new steal.fn.init(steal.options.startFile);
 				//steal.queue(steal._start);
+				}
+				if (steal.options.loadDev !== false) {
+					steals.push({
+						src: '//steal/dev/dev.js',
+						ignore: true
+					});
 				}
 				if (steals.length) {
 					steal.apply(null, steals);
