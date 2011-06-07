@@ -58,26 +58,41 @@ steal(function( steal ) {
 			// clean out any remove-start style comments
 			text = scripts.clean(text);
 
-			// if we should compress the script, compress it
-			if ( script.getAttribute('compress') == "true" || options.all ) {
-				text = compressor(text, true);
-			}
+			// note whether this script should be compressed or not
+			var compress = script.getAttribute('compress') == "true" || options.all;
 
 			// put the result in the package
-			currentPackage.push(text);
+			currentPackage.push({ text: text, compress: compress });
 		});
 
 		steal.print("");
 
 		// go through all the packages
 		for ( var p in packages ) {
-			if ( packages[p].length ) {
-				//join them
-				var compressed = packages[p].join(";\n");
-				//save them
-				new steal.File(options.to + p).save(compressed);
-				steal.print("SCRIPT BUNDLE > " + options.to + p);
+			var compressable = [];
+			var uncompressable = [];
+			for ( var s in packages[p] ) {
+				if ( packages[p][s].text && packages[p][s].text.length ) {
+					if ( packages[p][s].compress ) {
+						compressable.push(packages[p][s].text);
+					} else {
+						uncompressable.push(packages[p][s].text);
+					}
+				}
 			}
+
+			var combined = "";
+			if (compressable.length) {
+				combined += compressor(compressable.join(";\nsteal.end();\n"), true);
+			}
+			if (uncompressable.length) {
+				combined = ( ( combined.length == 0 ) ? combined : combined + ";\n" );
+				combined += uncompressable.join(";\n");
+			}
+
+			// save them
+			new steal.File(options.to + p).save(combined);
+			steal.print("SCRIPT BUNDLE > " + options.to + p);
 		}
 	});
 	// removes  dev comments from text
