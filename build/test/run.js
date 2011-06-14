@@ -58,6 +58,23 @@ steal('//steal/test/test', function( s ) {
 		s.test.remove('steal/build/test/production.js')
 		
 	});
+
+	
+	// test that production created successfully
+	// this test has zero assertions
+	// if it fails no production file will be created so it will error
+	s.test.test("duplicate dependencies don't finish early", function(){
+		load('steal/rhino/steal.js')
+		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+			s2.build("steal/build/test/circular/circular.html", {
+				to: 'steal/build/test/circular'
+			})
+		});
+		s.test.open('steal/build/test/circular/prod.html');
+		s.test.remove('steal/build/test/circular/production.js')
+		s.test.clear();
+		
+	});
 	
 	// Closure doesn't handle these characters, and you should probably be pulling them in from elsewhere.
 	// but I'd still like this to work.
