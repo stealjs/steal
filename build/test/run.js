@@ -76,6 +76,23 @@ steal('//steal/test/test', function( s ) {
 		
 	});
 	
+	s.test.test("exclude files", function(){
+		load('steal/rhino/steal.js')
+		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+			s2.build("steal/build/test/circular/circular.html", {
+				to: 'steal/build/test/circular',
+				exclude: ['steal/build/test/circular/fileB', 'jquery/jquery']
+			})
+		});
+		s.test.clear();
+		var prod = readFile("steal/build/test/circular/production.js");
+		
+		s.test.equals(/\/\/steal\/build\/test\/circular\/fileB/.test(prod), false, "fileB.js is not included");
+		s.test.remove('steal/build/test/circular/production.js')
+		s.test.clear();
+		
+	});
+	
 	// Closure doesn't handle these characters, and you should probably be pulling them in from elsewhere.
 	// but I'd still like this to work.
 	return;
