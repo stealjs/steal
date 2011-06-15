@@ -431,7 +431,7 @@
 					if(!joiner){
 						
 						// when they are complete, complete me
-						whenEach(files.length ? files : [stel], "complete", self, "complete");
+						whenEach(files.length ? files.concat(stel) : [stel], "complete", self, "complete");
 						
 						// if there was a function then files, then end, function loads all files
 						if(files.length){
@@ -440,7 +440,7 @@
 						
 					} else { //   function,  file1, file2, file3, joiner function
 						
-						whenEach(files.length ? files : [stel], "complete", joiner, "load");
+						whenEach(files.length ? files.concat(stel) : [stel], "complete", joiner, "load");
 						
 						// make stel complete load files
 						whenThe(stel,"complete", files.length ? files : [joiner] ,"load")

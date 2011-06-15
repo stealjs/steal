@@ -38,7 +38,7 @@ steal(function( steal ) {
 			}
 			
 			// ignore
-			if ( stl.ignore ) {
+			if ( stl.ignore || (options.exclude && options.exclude.indexOf(stl.rootSrc) != -1)) {
 				steal.print('   ignoring ' + out);
 				return;
 			}
@@ -63,7 +63,7 @@ steal(function( steal ) {
 
 			// if we should compress the script, compress it
 			if ( stl.compress !== false || options.all ) {
-				text = compressor(text, true);
+//				text = compressor(text, true);
 			}
 			currentPackage.scripts.push("'//"+stl.rootSrc+"'")
 			// put the result in the package
