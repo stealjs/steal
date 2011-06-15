@@ -16,19 +16,19 @@ steal('//steal/test/test', function( s ) {
 	});
 	
 	s.test.test("build and production", function(){
-		load('steal/rhino/steal.js')
+		load('steal/rhino/rhino.js')
 		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
 			s2.build('steal/coffee/coffee.html', {
 				to: 'steal/coffee'
 			})
-		});
+			
+			s.test.clear();
+			s.test.equals(typeof cubes, "undefined", "cubes array populated");
+			s.test.open('steal/coffee/coffeeprod.html')
+			s.test.equals(5, cubes.length, "cubes array populated");
 		
-		s.test.clear();
-		s.test.equals(typeof cubes, "undefined", "cubes array populated");
-		s.test.open('steal/coffee/coffeeprod.html')
-		s.test.equals(5, cubes.length, "cubes array populated");
-	
-		s.test.remove('steal/coffee/production.js')
+			s.test.remove('steal/coffee/production.js')
+		});
 		
 	});
 
