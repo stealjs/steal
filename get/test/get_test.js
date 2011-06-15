@@ -1,4 +1,4 @@
-load('steal/rhino/steal.js')
+load('steal/rhino/rhino.js')
 load('steal/rhino/test.js');
 
 steal('//steal/get/get',function(rhinoSteal){
@@ -7,12 +7,12 @@ steal('//steal/get/get',function(rhinoSteal){
 
 	
 	_S.module("steal/get")
-	// STEALPRINT = false;
+	STEALPRINT = false;
 	
 	_S.test("pluginList", function(t){
 		var url = rhinoSteal.get.pluginList("mxui/util/selectable");
 		
-		t.equals(url, "http://github.com/jupiterjs/mxui/tree/master/util/selectable/", "Right url")
+		t.equals(url, "https://github.com/jupiterjs/mxui/tree/master/util/selectable/", "Right url")
 	});
 	
 	_S.test("pluginUrl", function(t){
@@ -34,8 +34,8 @@ steal('//steal/get/get',function(rhinoSteal){
 	_S.test("pluginDependencies", function(t){
 		var depends = rhinoSteal.get.pluginDependencies("https://github.com/jupiterjs/mxui/raw/master/data/grid/grid.js");
 
-		t.equals(depends[0], "mxui/layout/fill", "first is right");
-		t.equals(depends.length, 2, "has other plugins")
+		t.equals(depends[0], "mxui/layout/table_scroll", "first is right");
+		t.equals(depends.length, 4, "has other plugins")
 	});
 	
 	_S.test("installDependency", function(t){
