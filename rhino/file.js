@@ -1,7 +1,10 @@
 ;
 (function( steal ) {
 
-	var extend = steal.extend;
+	var extend = function( d, s ) {
+		for ( var p in s ) d[p] = s[p];
+		return d;
+	};
 
 	if (!steal.File ) {
 		steal.File = function( path ) {

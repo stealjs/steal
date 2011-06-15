@@ -15,5 +15,6 @@
 		}
 	}
 	load("steal/steal.js");
+	load("steal/rhino/file.js");
 })(this);
 
