@@ -2,7 +2,6 @@
 // js steal\scripts\pluginify.js funcunit/functional -destination funcunit/dist/funcunit.js
 // js steal\scripts\pluginify.js jquery/controller
 // js steal\scripts\pluginify.js jquery/event/drag -exclude jquery/lang/vector/vector.js jquery/event/livehack/livehack.js
-// load("steal/rhino/steal.js");
 
 steal("//steal/build/pluginify/parse").plugins('steal/build/scripts').then(
  function(s) {
