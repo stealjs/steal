@@ -763,7 +763,8 @@ steal.type("js", function(options,original, success, error){
 				if (support.interactive) {
 					deps = interactives[script.src] || [];
 				}
-				success(script, deps)
+				success(script, deps);
+				script.parentNode.removeChild(script);
 			}
 		}
 		if (script.attachEvent) {
@@ -1296,7 +1297,6 @@ if (support.interactive) {
 			if(typeof oldsteal == 'object'){
 				extend(steal.options, oldsteal);
 			}
-			
 			// CALCULATE CURRENT LOCATION OF THINGS ...
 			steal.rootUrl(steal.options.rootUrl);
 			
