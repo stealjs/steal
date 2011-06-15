@@ -16,12 +16,17 @@ if "%1"=="-d" (
 	GOTO END
 )
 if "%1"=="-selenium" (
-	java -jar funcunit\java\selenium-server.jar
+	java -jar funcunit\java\selenium-server-standalone-2.0b3.jar
 	GOTO END
 )
 SET CP=funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
 if "%1"=="-mail" (
 	SET CP=steal/rhino/mail.jar;funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
+	SHIFT /0
+)
+SET ERRORLEV=0
+if "%1"=="-e" (
+	SET ERRORLEV=1
 	SHIFT /0
 )
 SET ARGS=[
@@ -38,6 +43,10 @@ SET ARGS=%ARGS: =%
 SET ARGS=%ARGS%]
 set ARGS=%ARGS:\=/%
 java -Xmx228m -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+
+if "%ERRORLEV%"=="1" (
+	if errorlevel 1 exit 1
+)
 
 GOTO END
 

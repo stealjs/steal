@@ -1,4 +1,10 @@
-steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
+steal("//steal/get/json", 
+	  "//steal/rhino/prompt", 
+	  "//steal/get/dummysteal",function( steal ) {
+	
+	// a map of plugins that you just installed (prevents cycles)
+	var installed = {};
+	
 	/**
 	 * @parent stealjs
 	 * Downloads and installs a plugin from a url.  Normally this is run from the steal/getjs script.
@@ -65,13 +71,24 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 		if (!name ) {
 			name = guessName(url);
 		}
+		//print("getting name "+name+" "+url);
+		
 		//make the folder for this plugin
 		new steal.File(name).mkdirs();
-
+		// do old dependency thing ...
+		
+		steal.print("  Checking dependencies ... ");
 		dependenciesUrl = getter.dependenciesUrl(url);
 
 		installDependencies(dependenciesUrl, name);
 
+		// do new dependency thing ...
+		var stealDependsUrl = getter.pluginDependenciesUrl(url);
+		if(stealDependsUrl){
+			get.installDependencies( get.pluginDependencies(stealDependsUrl) )
+		}
+		steal.print("   ");
+		
 		//get contents
 		var fetcher = new getter(url, name, options);
 		fetcher.quiet = options.quiet || true;
@@ -81,14 +98,14 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 		steal.print("\n  " + name + " plugin downloaded.");
 		runInstallScript(name);
 
-		}),
+	}),
 		/**
 		 * @hide
 		 * looks for a url elsewhere
 		 * @param {Object} name
 		 */
 		pluginList = function( name ) {
-			steal.print("  Looking for plugin ...");
+			//steal.print("  Looking for plugin ...");
 
 			var plugin_list_source =
 				readUrl("https://github.com/jupiterjs/steal/raw/master/get/gets.json");
@@ -97,6 +114,23 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			if ( plugin_list[name] ) {
 				return plugin_list[name];
 			}
+			// check if the first part matches ....
+			var parts = name.split("/")
+				firstPart = parts.shift();
+			if(plugin_list[firstPart]){
+				var first =  plugin_list[firstPart];
+				if(/github\.com/.test(first) && !/tree\/\w+/.test(first)){
+					// http://github.com/jupiterjs/mxui -> 
+					//    http://github.com/jupiterjs/mxui/tree/master/util/selectable/
+					return first+"/tree/master/"+parts.join("/")+"/"
+					//first = first.replace(/[^\/]+$/g, function(end){
+					//	
+					//})
+				}
+				return first;
+			}
+			
+			
 			steal.print("  Looking in gets.json for your own plugin list")
 			
 			plugin_list_source = readFile("gets.json");
@@ -117,7 +151,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 		// works for 
 		// https://github.com/jupiterjs/funcunit/raw/master/dependencies.json
 		installDependencies = function( depend_url, name ) {
-			steal.print("  Checking dependencies ...");
+			
 			var depend_text, dependencies;
 			
 			try {
@@ -125,7 +159,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			} catch (e) {}
 			
 			if (!depend_text ) {
-				steal.print("  No dependancies");
+				//steal.print("  No dependancies");
 				return;
 			}
 
@@ -145,7 +179,7 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 				}
 			}
 
-			steal.print("  Installed all dependencies for " + name);
+			//steal.print("  Installed all dependencies for " + name);
 		},
 		runInstallScript = function( name ) {
 			if ( readFile(name + "/install.js") ) {
@@ -158,5 +192,81 @@ steal("//steal/get/json", "//steal/rhino/prompt", function( steal ) {
 			}
 		};
 
-
+		steal.extend(get,{
+			pluginList: pluginList,
+			pluginDependencies : function(url){
+				//steal.print("  Checking plugin file ..."+url);
+				var script, dependencies;
+				
+				try {
+					script = readUrl(url);
+				} catch (e) {
+					steal.print("No plugin file");
+					return;
+				}
+				if(/steal/.test(script)){
+					try{
+						var stealCalls = steal.dummy(script)
+					} catch(e){
+						//steal.print("Unable to figure out plugins.  Are you using steal in an unusual way?");
+						//return;
+					}
+				}
+				// get non-jquery plugins and see if they want to install ...
+				var plugins = []
+				for(var i = 0; i < stealCalls.plugins.length; i++){
+					var plugin = stealCalls.plugins[i];
+					if(!/^jquery\/|steal/.test(plugin) ){
+						plugins.push(stealCalls.plugins[i])
+					}
+				}
+				//create a temp steal to run this app ...
+				
+				
+				
+				
+				if (!plugins.length ) {
+					//steal.print("  No dependancies");
+					return;
+				}
+				//print("length", plugins.length)
+				return plugins;
+			},
+			installDependencies : function(dependencies){
+				if(dependencies){
+					//first we need to make sure the folder doesn't exist locally ...
+					for(var i =0; i < dependencies.length; i++){
+						get.installDependency(dependencies[i]);
+					}
+				}
+				
+			},
+			installDependency : function(depend){
+				if(installed[depend]){
+					return;
+				}
+				if(steal.File(depend).exists()){
+					installed[depend] = true;
+					if ( steal.prompt.yesno("Update dependency " + depend + "? (yN):") ) {
+						steal.print("Updating " + depend + "...");
+						steal.get(depend, {
+							name: depend
+						});
+					}
+					
+					return false;
+				}else{
+					
+					if ( steal.prompt.yesno("Install dependency " + depend + "? (yN):") ) {
+						installed[depend] = true;
+						steal.print("Installing " + depend + "...");
+						steal.get(depend, {
+							name: depend
+						});
+					}
+					
+					return true;
+				}
+			}
+		})
 }, "//steal/get/getter", "//steal/get/github");

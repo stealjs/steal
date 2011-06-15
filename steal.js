@@ -853,7 +853,7 @@ steal.request = function(options, success, error){
 				if ( request.status === 500 || request.status === 404 || 
 				     request.status === 2 || 
 					 (request.status === 0 && request.responseText === '') ) {
-					error();
+					error && error();
 					clean();
 				} else {
 					success(request.responseText);
@@ -876,7 +876,7 @@ steal.request = function(options, success, error){
 		request.send(null);
 	}
 	catch (e) {
-		error();
+		error && error();
 		clean();
 	}
 			 
