@@ -1,22 +1,12 @@
-steal.loading("//steal/test/package/1.js",
-	"//steal/test/package/0.js",
-	"//steal/test/package/2.js");
-	
-steal("//steal/test/package/0").then(function(){
+steal.loading('//steal/test/package/1','//steal/test/package/0','//steal/test/package/2');
+steal("0").then(function(){
 	packagesStolen.push("1");
-}).then("//steal/test/package/2");
-
-steal.loaded("//steal/test/package/1.js");
-
+},"2");
+;
+steal.loaded('//steal/test/package/1');
 steal(function(){
 	packagesStolen = ["0"]
 });
-steal.loaded("//steal/test/package/0.js");
-packagesStolen.push("2");
-steal.loaded("//steal/test/package/2.js");
-
-
-
-
-
-
+steal.loaded('//steal/test/package/0');
+packagesStolen.push("2");;
+steal.loaded('//steal/test/package/2');
