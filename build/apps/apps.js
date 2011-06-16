@@ -134,6 +134,12 @@ steal(function( steal ) {
 			//set defaults
 			options.depth = options.depth || 2;
 			options.to = options.to || "packages/"
+			// check if path exists
+			var dest = steal.File(options.to);
+			if(!dest.exists()){
+				var dir = dest.dir();
+				dest.mkdir();
+			}
 
 			//go through, open each app, and make dependency graph
 			for ( var i = 0; i < list.length; i++ ) {
