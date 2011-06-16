@@ -32,8 +32,10 @@ steal(function( steal ) {
 		}
 
 		var data = files[steel.path];
-
-		data.apps.push(app);
+		// don't add the same app more than once
+		if(data.apps.indexOf(app) == -1){
+			data.apps.push(app);
+		}
 		for ( var d = 0; d < steel.dependencies.length; d++ ) {
 			var dependency = steel.dependencies[d];
 			if ( dependency.dependencies ) { //this dependency was actually loaded
