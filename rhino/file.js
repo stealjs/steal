@@ -398,9 +398,6 @@
 			print.apply(null, arguments)
 		}
 	}
-	steal.extend = function( d, s ) {
-		for ( var p in s ) d[p] = s[p];
-		return d;
-	};
+	
 
 })(steal);

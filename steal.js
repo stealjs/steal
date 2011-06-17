@@ -499,6 +499,7 @@
 	var page;
 	extend(steal,{
 		root : File(""),
+		extend: extend,
 		rootUrl : function(src){
 			if (src !== undefined) {
 				steal.root = File(src);
