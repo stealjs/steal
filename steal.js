@@ -513,6 +513,7 @@
 				return steal.root.path;
 			}
 		},
+		extend : extend,
 		pageUrl : function(newPage){
 			if(newPage){
 				page = File( File(newPage).clean() );
