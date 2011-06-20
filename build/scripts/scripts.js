@@ -20,7 +20,7 @@ steal(function( steal ) {
 			packages = {},
 
 			// the current package
-			currentPackage = [];
+			currentPackage = { completed: [], pending: [] };
 
 		// compress all scripts by default
 		if ( options.all ) {
@@ -50,7 +50,7 @@ steal(function( steal ) {
 			if ( pack ) {
 				//if we don't have it, create it and set it to the current package
 				if (!packages[pack] ) {
-					packages[pack] = [];
+					packages[pack] = { completed: [], pending: [] };
 				}
 				currentPackage = packages[pack];
 			}
@@ -58,24 +58,43 @@ steal(function( steal ) {
 			// clean out any remove-start style comments
 			text = scripts.clean(text);
 
-			// if we should compress the script, compress it
-			if ( script.getAttribute('compress') == "true" || options.all ) {
-				text = compressor(text, true);
+			if ( text === 'steal.end()' ) {
+				// treat these specially to avoid triggering a premature flush of then pending array
+				if ( currentPackage.pending.length ) {
+					currentPackage.pending.push(text);
+				} else {
+					currentPackage.completed.push(text);
+				}
+			} else if ( options.all || script.getAttribute('compress') == "true" ) {
+				// compressable scripts go into the pending array, so that we can hopefully batch process them
+				currentPackage.pending.push(text);
+			} else {
+				// whenever we reach a non-compressable script, first process any pending compressable scripts
+				if ( currentPackage.pending.length ) {
+					currentPackage.completed.push(compressor(currentPackage.pending.join(";\n"), true));
+					currentPackage.pending = [];
+				}
+				// ...and then process the non-compressable script itself
+				currentPackage.completed.push(text);
 			}
-
-			// put the result in the package
-			currentPackage.push(text);
 		});
 
 		steal.print("");
 
 		// go through all the packages
 		for ( var p in packages ) {
-			if ( packages[p].length ) {
-				//join them
-				var compressed = packages[p].join(";\n");
-				//save them
-				new steal.File(options.to + p).save(compressed);
+			var combined = [];
+			if ( packages[p].completed && packages[p].completed.length ) {
+				combined.push(packages[p].completed.join(";\n"));
+			}
+			// If anything is left in the pending array, it goes last
+			if ( packages[p].pending && packages[p].pending.length ) {
+				combined.push(compressor(packages[p].pending.join(";\n"), true));
+			}
+
+			if ( combined.length ) {
+				var bundle = combined.join(";\n");
+				new steal.File(options.to + p).save(bundle);
 				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
