@@ -504,6 +504,18 @@
 			return parts && parts[1] ? this.clean() : dir;
 		},
 		/**
+		 * Returns everything after the last / (optionally without suffix)
+		 */
+		basename: function(suffix) {
+			var last = this.clean().lastIndexOf('/'),
+				basename = (last != -1) ? this.clean().substr(last + 1) : '';
+			if(suffix) {
+				last = basename.lastIndexOf(suffix);
+				basename = (last != -1) ? basename.substring(0, last) : basename;
+			}
+			return basename;
+		},
+		/**
 		 * Returns the domain for the current path.
 		 * Returns null if the domain is a file.
 		 */
@@ -856,7 +868,13 @@
 			}
 			//calculate production location;
 			if (!steal.options.production && steal.options.startFile ) {
-				steal.options.production = "//" + File(steal.options.startFile).dir() + '/production';
+				steal.options.production = "//" + File(steal.options.startFile).dir();
+								
+				if(!steal.options.app) {
+					steal.options.production += '/' + File(steal.options.startFile).basename('.js');
+				}
+				
+				steal.options.production += '/production';
 			}
 			if ( steal.options.production ) {
 				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
