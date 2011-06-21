@@ -25,6 +25,7 @@ steal.plugins('steal/test','steal/build', 'steal/build/pluginify').then( functio
 		var firstFunc = steal.build.pluginify.getFunction(js, 0);
 		//print(firstFunc);
 	})
+
 	s.test.test("parse", function(t){
 		var js = readFile('jquery/class/class.js');
 		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
