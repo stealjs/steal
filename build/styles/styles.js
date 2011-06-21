@@ -14,14 +14,12 @@ steal(function( steal ) {
 			currentPackage = [];
 
 		opener.each('css', function( link, text, i ) {
-			if ( steal.build.types[link.type] ) {
-				steal.print(link.pathFromPage)
+			steal.print(link.src)
 
-				var loc = steal.File(pageFolder).join(link.pathFromPage),
-					converted = convert(text, loc, folder);
-				
-				currentPackage.push(steal.cssMin(converted))
-			}
+			var loc = steal.File(pageFolder).join(link.src),
+				converted = convert(text, loc, folder);
+			
+			currentPackage.push(steal.cssMin(converted))
 
 		});
 		steal.print("")
