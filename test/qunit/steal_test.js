@@ -480,6 +480,15 @@ test("File.ext", function(){
 		equal(res,"ChangedRet","updated return");
 		same(order, [0,1,2,3])
 	})
+
+	test("loading with ./", function(){
+		REQUIRED = false;
+		stop(1000);
+		steal.rootUrl("../../").then('./files/require',function(){
+			equals(REQUIRED, true)
+			start();
+		})
+	})
 	
 	test("steal one js", function(){
 		// doesn't this imply the next ...
@@ -492,6 +501,8 @@ test("File.ext", function(){
 			equals(REQUIRED,"steal", "loaded the file")
 		})
 	})
+	
+	
 	
 	
 	
