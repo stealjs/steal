@@ -42,7 +42,6 @@ steal.plugins('steal/parse','steal/build/scripts').then(
 		
 		//		steal.win().build_in_progress = true;
 		var out = [], str, i, inExclude = function(path){
-			if(!opts.exclude) return true;
 			for (var i = 0; i < opts.exclude.length; i++) {
 				if (path.indexOf(opts.exclude[i]) > -1) {
 					return true;
@@ -52,24 +51,19 @@ steal.plugins('steal/parse','steal/build/scripts').then(
 		}, pageSteal, steals = [];
 		steal.build.open("steal/rhino/empty.html", {}, function(opener){
 			opener.each('js', function(stl, text, i){
-				steals.push(stl)
+				if (!inExclude(stl.rootSrc)) {
+				
+					var content = steal.build.pluginify.content(stl, opts.global ? opts.global : "jQuery", text);
+					if (content) {
+						print("  > " + stl.rootSrc)
+						out.push(steal.build.builders.scripts.clean(content));
+					}
+				}
+				else {
+					print("  Ignoring " + stl.rootSrc)
+				}
 			})
 		});
-		
-		for (i = 0; i < steals.length; i++) {
-			print(steals[i].rootSrc)
-			if (!inExclude(steals[i].rootSrc)) {
-			
-				var content = steal.build.pluginify.content(steals[i], opts.global ? opts.global : "jQuery", opener);
-				if (content) {
-					print("  > " + steals[i].rootSrc)
-					out.push(steal.build.builders.scripts.clean(content));
-				}
-			}
-			else {
-				print("  Ignoring " + steals[i].rootSrc)
-			}
-		}
 		
 		var output = out.join(";\n");
 		if (opts.compress) {
@@ -90,15 +84,13 @@ steal.plugins('steal/parse','steal/build/scripts').then(
 		if (steal.func) {
 			// if it's a function, go to the file it's in ... pull out the content
 			var index = funcCount[steal.path] || 0, contents = readFile(steal.path);
-			//print("FOOO "+steal.path);
 			funcCount[steal.path]++;
 			return "(" + s.build.pluginify.getFunction(contents, index) + ")(" + param + ")";
 		}
 		else {
-			var content = readFile(steal.path);
-			//if(steal.type && opener.)
+			var content = readFile(steal.rootSrc+".js");
 			if (/steal[.\(]/.test(content)) {
-				return;
+				return "(" + s.build.pluginify.getFunction(content, 0) + ")(" + param + ")";
 			}
 			//make sure steal isn't in here
 			return content;
