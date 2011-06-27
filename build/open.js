@@ -89,11 +89,15 @@ steal(function(s){
 				"text/envjs": true,
 				"": true
 			},
-			fireLoad: false,
+			fireLoad: true,
 			logLevel: 2,
 			afterScriptLoad: {
 				".*": function( script ) {
 					scripts.push(script);
+				},
+				// prevent $(document).ready from being called even though load is fired
+				"jquery.js": function( script ) {
+					jQuery.readyWait++;
 				}
 			},
 			onLoadUnknownTypeScript: function( script ) {
@@ -102,8 +106,7 @@ steal(function(s){
 			afterInlineScriptLoad: function( script ) {
 				scripts.push(script);
 			},
-			dontPrintUserAgent: true,
-			killTimersAfterLoad: true
+			dontPrintUserAgent: true
 		});
 		// set back steal
 		newSteal = window.steal;
