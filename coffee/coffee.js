@@ -48,7 +48,7 @@ steal({
 		var current, path;
 		for ( var i = 0; i < arguments.length; i++ ) {
 			steal({
-				path: arguments[0] + ".coffee",
+				path: arguments[i] + ".coffee",
 				type: "text/coffee",
 				process: function( text ) {
 					return CoffeeScript.compile(text)
