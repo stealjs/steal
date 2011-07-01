@@ -158,9 +158,11 @@
 			var u = File(url);
 			if ( this.protocol() ) { //if we are absolutely referenced
 				//try to shorten the path as much as possible:
-				if ( this.domain() == u.domain() ) {
+				var firstDomain = this.domain(),
+					secondDomain = u.domain();
+				if ( firstDomain && firstDomain == secondDomain ) {
 					// if there is no domain, we are on the file system
-					return this.domain() ? this.afterDomain() :
+					return firstDomain ? this.afterDomain() :
 						this.toReferenceFromSameDomain(url);
 				} else {
 					return this.path;
@@ -881,8 +883,11 @@ steal.request = function(options, success, error){
 		request.send(null);
 	}
 	catch (e) {
-		error && error();
-		clean();
+		console.error(e);
+		setTimeout(function(){
+			error && error();
+			clean();
+		}, 0)
 	}
 			 
 };
