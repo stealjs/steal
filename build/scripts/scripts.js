@@ -1,4 +1,4 @@
-steal(function( steal ) {
+steal.plugins('steal/build').then(function( steal ) {
 
 	/**
 	 * Builds JavaScripts
