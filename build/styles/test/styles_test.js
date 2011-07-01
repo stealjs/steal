@@ -26,12 +26,13 @@ steal('//steal/test/test', function( s ) {
 					"css out right");
 					
 				s.test.clear();
+				s.test.remove('steal/build/styles/test/production.css')
 			});
 	})
 
 
 	s.test.test("min multiline comment", function(){
-		load('steal/rhino/steal.js');
+		load('steal/rhino/rhino.js');
 		steal.plugins('steal/build','steal/build/styles',function(){
 			var input = readFile('steal/build/styles/test/multiline.css'),
 				out = steal.build.builders.styles.min(input);
@@ -43,7 +44,7 @@ steal('//steal/test/test', function( s ) {
 	});
 	
 	s.test.test("load the same css twice, but only once in prod", function(){
-		load('steal/rhino/steal.js');
+		load('steal/rhino/rhino.js');
 		steal.plugins('steal/build',
 			'steal/build/styles',
 			function(){

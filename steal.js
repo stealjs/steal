@@ -268,7 +268,11 @@
 
 			if (/^\/\//.test(this.path) ) { //if path is rooted from steal's root 
 				path = this.path.substr(2);
-
+			
+			} else if(/^\.\//.test(this.path) ){ // should be relative
+				this.path = this.path.substr(2);
+				path = this.joinFrom(current);
+				this.path = "./"+this.path;
 			} else if ( this.relative() 
 					|| (File.cur().isCrossDomain() && //if current file is on another domain and
 						!this.protocol()) ) { //this file doesn't have a protocol
