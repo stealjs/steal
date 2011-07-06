@@ -1,1 +1,1 @@
-steal.then('app.css','app.css')
+steal.then('./app.css','./app.css')
