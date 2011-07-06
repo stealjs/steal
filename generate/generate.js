@@ -1,4 +1,4 @@
-steal("//steal/generate/ejs", '//steal/generate/inflector', '//steal/rhino/prompt', function( steal ) {
+steal("steal/generate/ejs.js", 'steal/generate/inflector.js', 'steal/rhino/prompt.js', function( steal ) {
 
 	var render = function( from, to, data ) {
 		var text = readFile(from);
