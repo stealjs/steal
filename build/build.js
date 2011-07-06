@@ -155,4 +155,4 @@ steal(function( steal ) {
 	
 	
 
-}).then('//steal/build/open','//steal/build/types');
+}).then('steal/build/open.js','steal/build/types.js');

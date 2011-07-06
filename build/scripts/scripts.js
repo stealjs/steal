@@ -1,4 +1,4 @@
-steal.plugins('steal/build').then(function( steal ) {
+steal('steal/build').then(function( steal ) {
 
 	/**
 	 * Builds JavaScripts
@@ -70,9 +70,9 @@ steal.plugins('steal/build').then(function( steal ) {
 			if ( stl.compress !== false || options.all ) {
 //				text = compressor(text, true);
 			}
-			currentPackage.scripts.push("'//"+stl.rootSrc+"'")
+			currentPackage.scripts.push("'"+stl.rootSrc+"'")
 			// put the result in the package
-			currentPackage.src.push(text+";\nsteal.loaded('//"+stl.rootSrc+"');");
+			currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
 		});
 
 		steal.print("");

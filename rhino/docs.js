@@ -16,7 +16,7 @@ dependency management tool.  Features:
 	<li>Can load relative to the current file.</li>
 </ul>
 @codestart
-steal.plugins('jquery/controller','jquery/view/ejs');
+steal('jquery/controller','jquery/view/ejs');
 @codeend
 <h3>JS/CSS Concatenation and Compression</h3>
 The steal [steal.build build] plugin makes compressing an application into a single compressed 

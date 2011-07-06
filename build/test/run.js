@@ -3,13 +3,13 @@
  * Tests compressing a very basic page and one that is using steal
  */
 load('steal/rhino/rhino.js')
-steal('//steal/test/test', function( s ) {
+steal('steal/test/test.js', function( s ) {
 	STEALPRINT = false;
 	s.test.module("steal/build")
 	
 	s.test.test("open", function(){
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build").then(function(newSteal){
+		steal("steal/build").then(function(newSteal){
 			var count = 0;
 			newSteal.build.open("steal/build/test/stealpage.html", function(scripts){
 				scripts.each(function(stl, content){
@@ -25,7 +25,7 @@ steal('//steal/test/test', function( s ) {
 	
 	s.test.test("using stealjs", function(){
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+		steal("steal/build","steal/build/scripts").then(function(s2){
 			s2.build("steal/build/test/stealpage.html", {
 				to: 'steal/build/test'
 			})
@@ -47,7 +47,7 @@ steal('//steal/test/test', function( s ) {
 	
 	s.test.test("jquery ready code doesn't run", function(){
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+		steal("steal/build","steal/build/scripts").then(function(s2){
 			s2.build("steal/build/test/jqueryready.html", {
 				to: 'steal/build/test'
 			})
@@ -65,7 +65,7 @@ steal('//steal/test/test', function( s ) {
 	// if it fails no production file will be created so it will error
 	s.test.test("duplicate dependencies don't finish early", function(){
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+		steal("steal/build","steal/build/scripts").then(function(s2){
 			s2.build("steal/build/test/circular/circular.html", {
 				to: 'steal/build/test/circular'
 			})
@@ -78,16 +78,16 @@ steal('//steal/test/test', function( s ) {
 	
 	s.test.test("exclude files", function(){
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+		steal("steal/build","steal/build/scripts").then(function(s2){
 			s2.build("steal/build/test/circular/circular.html", {
 				to: 'steal/build/test/circular',
-				exclude: ['steal/build/test/circular/fileB', 'jquery/jquery']
+				exclude: ['steal/build/test/circular/fileB.js', 'jquery/jquery.js']
 			})
 		});
 		s.test.clear();
 		var prod = readFile("steal/build/test/circular/production.js");
 		
-		s.test.equals(/\/\/steal\/build\/test\/circular\/fileB/.test(prod), false, "fileB.js is not included");
+		s.test.equals(/steal\/build\/test\/circular\/fileB/.test(prod), false, "fileB.js is not included");
 		s.test.remove('steal/build/test/circular/production.js')
 		s.test.clear();
 		
@@ -99,7 +99,7 @@ steal('//steal/test/test', function( s ) {
 	s.test.test("foreign characters", function(){
 		s.test.remove('steal/build/test/production.js')
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+		steal("steal/build","steal/build/scripts").then(function(s2){
 			s2.build("steal/build/test/foreign.html", {
 				to: 'steal/build/test'
 			})

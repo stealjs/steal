@@ -1,5 +1,5 @@
 jqueryReadyCodeRun = false
-steal.plugins("jquery").then(function(){
+steal("jquery").then(function(){
 	$(document).ready(function(){
 		jqueryReadyCodeRun = true;
 	})

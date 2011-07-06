@@ -17,7 +17,7 @@ steal('//steal/test/test', function( s ) {
 	
 	s.test.test("build and production", function(){
 		load('steal/rhino/rhino.js')
-		steal.plugins("steal/build","steal/build/scripts").then(function(s2){
+		steal("steal/build","steal/build/scripts").then(function(s2){
 			s2.build('steal/coffee/coffee.html', {
 				to: 'steal/coffee'
 			})

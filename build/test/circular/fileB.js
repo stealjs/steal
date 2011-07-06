@@ -1,2 +1,2 @@
-steal.plugins("jquery")
+steal("jquery")
 steal.fileBLoaded = true;

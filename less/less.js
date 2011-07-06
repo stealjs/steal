@@ -31,7 +31,7 @@ steal({src: "less_engine.js",ignore: true},function(){
 	 * steal.less to load your less style:
 	 * </p>
 	 * @codestart
-	 * steal.plugins('steal/less').then(function(){
+	 * steal('steal/less').then(function(){
 	 *   steal.less('red');
 	 * });
 	 * @codeend

@@ -127,6 +127,16 @@
 			return parts && parts[1] ? this.clean() : dir;
 		},
 		/**
+		 * Returns everything after the last /
+		 */
+		filename: function() {
+			var cleaned = this.clean(),
+				last = cleaned.lastIndexOf('/'),
+				filename = (last != -1) ? cleaned.substring(last+1, cleaned.length) : cleaned,
+				parts = filename.match(/^(https?:\/|file:\/)$/);
+			return parts && parts[1] ? cleaned : filename;
+		},
+		/**
 		 * Returns the domain for the current path.
 		 * Returns null if the domain is a file.
 		 */
@@ -158,9 +168,11 @@
 			var u = File(url);
 			if ( this.protocol() ) { //if we are absolutely referenced
 				//try to shorten the path as much as possible:
-				if ( this.domain() == u.domain() ) {
+				var firstDomain = this.domain(),
+					secondDomain = u.domain();
+				if ( firstDomain && firstDomain == secondDomain ) {
 					// if there is no domain, we are on the file system
-					return this.domain() ? this.afterDomain() :
+					return firstDomain ? this.afterDomain() :
 						this.toReferenceFromSameDomain(url);
 				} else {
 					return this.path;
@@ -258,26 +270,33 @@
 		 * 
 		 * We want everything relative to steal's root so the same app can work in multiple pages.
 		 * 
-		 * On different domains ...
+		 *  ./files/a.js = steals a.js
+			./files/a = tries a/a.js first, then a.js
+			files/a = tries //files/a/a.js first, then //files/a.js
+			files/a.js = loads //files/a.js
 		 */
 		normalize: function() {
 
 			var current = File.cur().dir(),
 				//if you are cross domain from the page, and providing a path that doesn't have an domain
 				path = this.path;
-
-			if (/^\/\//.test(this.path) ) { //if path is rooted from steal's root 
+			if (/^\/\//.test(this.path)) { //if path is rooted from steal's root (DEPRECATED) 
 				path = this.path.substr(2);
-			
-			} else if(/^\.\//.test(this.path) ){ // should be relative
+			} 
+			else if (/^\.\//.test(this.path)) { // should be relative
 				this.path = this.path.substr(2);
 				path = this.joinFrom(current);
-				this.path = "./"+this.path;
-			} else if ( this.relative() 
-					|| (File.cur().isCrossDomain() && //if current file is on another domain and
-						!this.protocol()) ) { //this file doesn't have a protocol
-				path = this.joinFrom(current);
+				this.path = "./" + this.path;
 			}
+			else if (/^[^\.|\/]/.test(this.path)) {}
+			else {
+				if (this.relative() ||
+				File.cur().isCrossDomain() && //if current file is on another domain and
+				!this.protocol()) { //this file doesn't have a protocol
+					path = this.joinFrom(current);
+				}
+			}
+			
 			return path;
 		}
 	});
@@ -461,7 +480,6 @@
 			if(files.length){
 				//we have initial files
 				// if there is a joiner, we need to load it when the initial files are complete
-				//console.log(this.options && this.options.src, files, joiner )
 				if(joiner){
 					whenEach(files, "complete", joiner, "load");
 				} else {
@@ -511,6 +529,7 @@
 				
 				var cleaned = steal.pageUrl(),
 					loc = cleaned.join(src);
+//				File.cur(cleaned)
 				File.cur( cleaned.toReferenceFromSameDomain(loc) );
 				return steal;
 			} else {
@@ -561,14 +580,23 @@
 		 */
 		makeOptions : function(options){
 			
+			var ext = File(options.src).ext();
+			// if no extension, load as a plugin
+			if (!ext) {
+				options.src = options.src + "/" + File(options.src).filename() + ".js";
+			}
+			
 			var orig = options.src,
 				normalized = steal.File(orig).normalize();
+				
 			extend(options,{
 				originalSrc : options.src,
 				rootSrc : normalized,
 				src : steal.root.join(normalized)
 			});
+			
 			options.originalSrc = options.src;
+			
 			return options;
 		},
 		then : function(){
@@ -646,17 +674,6 @@
 		}
 	});
 	var events = {};
-	
-	
-	var stealPlugin = function( p ) {
-		return steal( typeof p == 'function' ? 
-					  p :
-				      (/^(http|\/)/.test(p) ? "": "//")+ p + '/' + getLastPart(p) );
-	},
-	getLastPart = function( p ) {
-		return p.match(/[^\/]+$/)[0];
-	};
-	steal.plugins = steal.callOnArgs(stealPlugin);
 	startup = before(startup, function(){
 		
 		steal.pageUrl(win.location ?  win.location.href : "");
@@ -703,7 +720,6 @@
 			var ext = File(raw.src).ext();
 			if(!ext && !types[ext]){
 				ext = "js";
-				raw.src += ".js"
 			}
 			raw.type =  ext;
 		}
@@ -760,32 +776,34 @@ steal.type("js", function(options,original, success, error){
 		
 	}
 	else {
-		
 		var callback = function(evt){
-		
-			if (!script.readyState || stateCheck.test(script.readyState)) {
-				//				cleanUp(script);
-				if (support.interactive) {
-					deps = interactives[script.src] || [];
+				if (!script.readyState || stateCheck.test(script.readyState)) {
+					cleanUp(script);
+					if (support.interactive) {
+						deps = interactives[script.src] || [];
+					}
+					success(script, deps);
 				}
-				success(script, deps);
-				script.parentNode.removeChild(script);
 			}
-		}
-		if (script.attachEvent) {
-			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
-		} else {
-			script[STR_ONLOAD] = callback;
-		}
+			if (script.attachEvent) {
+				script.attachEvent(STR_ONREADYSTATECHANGE, callback)
+			} else {
+				script[STR_ONLOAD] = callback;
+			}
 			
-			if (support.error) {
+//			if (support.error) {
 				script[STR_ONERROR] = error;
-			}
-			script.src = options.src;
+//			}
+			
+			script.src = options.src;			
 			script.onSuccess = success;
 		}
 		
-	head().insertBefore(script, head().firstChild);
+	try {
+		head().insertBefore(script, head().firstChild);
+	} catch(e){
+		console.log(e)
+	}
 	
 	if (options.text) {
 		success();
@@ -881,8 +899,13 @@ steal.request = function(options, success, error){
 		request.send(null);
 	}
 	catch (e) {
-		error && error();
-		clean();
+		console.error(e);
+		// from server, missing file errors happen async, but from filesystem its sync
+		// adding setTimeout to make it behave consistently
+		setTimeout(function(){
+			error && error();
+			clean();
+		}, 0)
 	}
 			 
 };
@@ -1312,7 +1335,7 @@ if (support.interactive) {
 
 			//calculate production location;
 			if (!steal.options.production && steal.options.startFile ) {
-				steal.options.production = "//" + File(steal.options.startFile).dir() + '/production';
+				steal.options.production = File(steal.options.startFile).dir() + '/production.js';
 			}
 			if ( steal.options.production ) {
 				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
@@ -1334,13 +1357,13 @@ if (support.interactive) {
 				//if you have a startFile load it
 				if (steal.options.startFile) {
 					//steal(steal.options.startFile);
-					steals.push("//"+steal.options.startFile)
+					steals.push(steal.options.startFile)
 				//steal._start = new steal.fn.init(steal.options.startFile);
 				//steal.queue(steal._start);
 				}
 				if (steal.options.loadDev !== false) {
 					steals.push({
-						src: '//steal/dev/dev.js',
+						src: 'steal/dev/dev.js',
 						ignore: true
 					});
 				}

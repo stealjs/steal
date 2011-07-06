@@ -1,7 +1,7 @@
 // lets you know if your JS sucks and will try to clean it for you
 // using with jslint: js steal/cleanjs path/to/file -jslint
 
-steal.plugins('steal/build').then('//steal/clean/beautify','//steal/clean/jslint','//steal/rhino/prompt', function(steal){
+steal('steal/build').then('//steal/clean/beautify','//steal/clean/jslint','//steal/rhino/prompt', function(steal){
 	var extend = function( d, s ) {
 			for ( var p in s ) d[p] = s[p];
 			return d;

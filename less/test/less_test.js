@@ -11,7 +11,7 @@ steal('//steal/test/test', function( s ) {
 
 	s.test.test("css", function(){
 		load('steal/rhino/rhino.js');
-		steal.plugins(
+		steal(
 			'steal/build',
 			'steal/build/scripts',
 			'steal/build/styles',

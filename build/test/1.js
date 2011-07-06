@@ -1,3 +1,3 @@
-steal("0").then(function(){
+steal("./0.js").then(function(){
 	packagesStolen.push("1");
-},"2");
+},"./2.js");

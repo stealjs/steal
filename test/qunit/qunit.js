@@ -1,12 +1,9 @@
 //console.log('running qunit');
-steal
-  .plugins("funcunit/qunit")
-  .then('one.css','../two.css')
-  .then("steal_test","loadtwice").then(function(){
+steal("funcunit/qunit")
+  .then('./one.css','../two.css')
+  .then("./steal_test.js","./loadtwice.js").then(function(){
   	ORDERNUM.push('func')
   })
-  .then('loadtwice')
-  .then("//steal/test/package/package")
-  .then("//steal/test/package/uses")
-
-
+//  .then('./loadtwice')
+  .then("steal/test/package")
+  .then("steal/test/package/uses.js")
