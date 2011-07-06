@@ -1,5 +1,5 @@
 steal.loading('//steal/less/test/test.js','//steal/less/less');
-steal.plugins('steal/less').then('styles.less','styles.css');;
+steal('steal/less').then('styles.less','styles.css');;
 steal.loaded('//steal/less/test/test.js');
 /**
  * @add steal.static
@@ -34,7 +34,7 @@ steal({src: "less_engine.js",ignore: true},function(){
 	 * steal.less to load your less style:
 	 * </p>
 	 * @codestart
-	 * steal.plugins('steal/less').then(function(){
+	 * steal('steal/less').then(function(){
 	 *   steal.less('red');
 	 * });
 	 * @codeend

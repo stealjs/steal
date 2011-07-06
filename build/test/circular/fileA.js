@@ -1,1 +1,1 @@
-steal.plugins("jquery")
+steal("jquery")

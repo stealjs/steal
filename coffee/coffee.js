@@ -28,7 +28,7 @@ steal({
 	 * steal.coffee to load your coffee script:
 	 * </p>
 	 * @codestart
-	 * steal.plugins('steal/coffee').then(function(){
+	 * steal('steal/coffee').then(function(){
 	 *   steal.coffee('log');
 	 * });
 	 * @codeend

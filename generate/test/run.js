@@ -1,6 +1,6 @@
 load('steal/rhino/rhino.js')
 
-steal.plugins('steal/test', "steal/generate")
+steal('steal/test', "steal/generate")
 	.then('//steal/generate/system').then(function(){
 	_S = steal.test;
 	

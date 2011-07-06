@@ -11,7 +11,7 @@ steal('//steal/test/test', function( s ) {
 
 	s.test.test("css", function(){
 		load('steal/rhino/rhino.js');
-		steal.plugins(
+		steal(
 			'steal/build','steal/build/styles',
 			function(){
 				steal.build('steal/build/styles/test/page.html',
@@ -33,7 +33,7 @@ steal('//steal/test/test', function( s ) {
 
 	s.test.test("min multiline comment", function(){
 		load('steal/rhino/rhino.js');
-		steal.plugins('steal/build','steal/build/styles',function(){
+		steal('steal/build','steal/build/styles',function(){
 			var input = readFile('steal/build/styles/test/multiline.css'),
 				out = steal.build.builders.styles.min(input);
 			
@@ -45,7 +45,7 @@ steal('//steal/test/test', function( s ) {
 	
 	s.test.test("load the same css twice, but only once in prod", function(){
 		load('steal/rhino/rhino.js');
-		steal.plugins('steal/build',
+		steal('steal/build',
 			'steal/build/styles',
 			function(){
 				steal.build('steal/build/styles/test/app/app.html',

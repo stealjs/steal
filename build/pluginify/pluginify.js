@@ -3,7 +3,7 @@
 // js steal\scripts\pluginify.js jquery/controller
 // js steal\scripts\pluginify.js jquery/event/drag -exclude jquery/lang/vector/vector.js jquery/event/livehack/livehack.js
 
-steal.plugins('steal/parse','steal/build/scripts').then(
+steal('steal/parse','steal/build/scripts').then(
  function(s) {
 
 	/**
@@ -36,7 +36,7 @@ steal.plugins('steal/parse','steal/build/scripts').then(
 		rhinoLoader = {
 			callback: function(s){
 				s.pluginify = true;
-				s.plugins(plugin);
+				s(plugin);
 			}
 		};
 		

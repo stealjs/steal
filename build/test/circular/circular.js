@@ -1,2 +1,2 @@
-steal("fileA", "fileB")
-	.then("//jquery/jquery")
+steal("./fileA.js", "./fileB.js")
+	.then("jquery")

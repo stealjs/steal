@@ -1,8 +1,8 @@
 // tests loading multiple apps
-steal.plugins('jquery')
+steal('jquery')
 	.then(function(){
 		APP1 = true;
 		setTimeout(function(){
-			steal.plugins('//steal/test/multiple/app2')
+			steal('//steal/test/multiple/app2')
 		}, 1000)
 	})
