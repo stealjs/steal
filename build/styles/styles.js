@@ -1,5 +1,5 @@
 
-steal(function( steal ) {
+steal('steal/build').then(function( steal ) {
 
 	/**
 	 * Builds and compresses CSS files.
