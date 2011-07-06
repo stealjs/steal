@@ -9,5 +9,3 @@ load('steal/get/test/get_test.js');
 load('steal/clean/test/clean_test.js');
 
 load('steal/generate/test/run.js');
-
-// TODO test get!
