@@ -791,9 +791,9 @@ steal.type("js", function(options,original, success, error){
 				script[STR_ONLOAD] = callback;
 			}
 			
-//			if (support.error) {
+			if (support.error) {
 				script[STR_ONERROR] = error;
-//			}
+			}
 			
 			script.src = options.src;			
 			script.onSuccess = success;
