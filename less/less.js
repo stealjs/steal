@@ -59,7 +59,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 		var current, path;
 		for(var i=0; i < arguments.length; i++){
 			current = new steal.File(arguments[i]+".less").joinCurrent();
-			path = steal.root.join(current)
+			path = steal.root.join(current);
 			if(steal.browser.rhino){
 				//rhino will just look for this
 				steal.createLink(path, {
@@ -71,9 +71,17 @@ steal({path: "less_engine.js",ignore: true},function(){
 					steal.dev.warn("steal/less : There's no content at "+path+", or you're on the filesystem and it's in another folder.");
 					return steal;
 				}
+				
+				var locParts = location.href.split('#');
+				
+				if(path.indexOf('/') == 0) {
+					path = path.substr(1); // Prevent double // in newPath
+				}
+				
 				// less needs the full path with http:// or file://
-				var newPath = location.href.replace(/[\w\.-]+$/, '')+
+				var newPath = locParts[0].replace(/[\w\.-]+$/, '') +
 					path.replace(/[\w\.-]+$/, '');
+
 				//get and insert stype
 				new (less.Parser)({
 	                optimization: less.optimization,
@@ -109,12 +117,15 @@ steal({path: "less_engine.js",ignore: true},function(){
 	}
 	//@steal-remove-start
 	steal.build.types['text/less'] =  function(script, loadScriptText){
+		var pathParts = script.href.split('/');
+		pathParts[pathParts.length - 1] = ''; // Remove filename
+
 		var text =   script.text || loadScriptText(script.href, script),
 			styles;
 		new (less.Parser)({
-	                optimization: less.optimization,
-	                paths: []
-	            }).parse(text, function (e, root) {
+				optimization: less.optimization,
+				paths: [pathParts.join('/')]
+				}).parse(text, function (e, root) {
 					styles = root.toCSS();
 				});
 		return styles;
