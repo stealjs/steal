@@ -1333,6 +1333,9 @@ if (support.interactive) {
 			if ( steal.options.app ) {
 				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
 			}
+			if(!steal.options.logLevel){
+				steal.options.logLevel = 0;
+			}
 
 			//calculate production location;
 			if (!steal.options.production && steal.options.startFile ) {
