@@ -1,1 +1,1 @@
-steal('steal/less').then('less.less')
+steal('steal/less').then('./less.less')

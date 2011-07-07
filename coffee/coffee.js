@@ -2,7 +2,7 @@
  * @add steal.static
  */
 steal({
-	src: "coffee-script.js",
+	src: "./coffee-script.js",
 	ignore: true
 }, function() {
 
