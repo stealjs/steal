@@ -1200,6 +1200,7 @@ steal.request = function(options, success, error){
 	steal.one("end", function(collection){
 		loaded.end();
 		firstEnd = collection;
+		steal.trigger("done", firstEnd)
 	})
 	when(loaded,"load",loaded,"end", function(){
 		steal.trigger("ready")

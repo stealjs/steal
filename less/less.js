@@ -1,7 +1,7 @@
 /**
  * @add steal.static
  */
-steal({src: "less_engine.js",ignore: true},function(){
+steal({src: "./less_engine.js",ignore: true},function(){
 	
 	/**
 	 * @function less

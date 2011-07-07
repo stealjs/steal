@@ -1,5 +1,5 @@
-steal("//steal/parse/tokens").
-	plugins('steal/build').then(function(steal){
+steal("steal/parse/tokens.js")
+	.then('steal/build').then(function(steal){
 
 var isArray = function( array ) {
   return Object.prototype.toString.call( array ) === "[object Array]";

@@ -1,3 +1,3 @@
 steal
-  .plugins("funcunit/qunit", "steal/test/map")
-  .then("map_test")
+  .then("funcunit/qunit", "steal/test/map")
+  .then("./map_test.js")

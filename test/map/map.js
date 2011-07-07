@@ -4,7 +4,7 @@ steal.map({
 	//'thing/bed' : '/abc/bed'
 })
 .map('foo','steal/test/map/foo')
-.plugins('foo',
+.then('foo',
 	'foo/another',
 	'jquery/view/ejs',
 	'remotejquery/lang',

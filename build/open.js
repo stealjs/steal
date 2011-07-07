@@ -83,45 +83,8 @@ steal(function(s){
 		// get envjs
 		load('steal/rhino/env.js'); //reload every time
 		// open the url
-		Envjs(url, {
-			scriptTypes: {
-				"text/javascript": true,
-				"text/envjs": true,
-				"": true
-			},
-			fireLoad: true,
-			logLevel: 2,
-			afterScriptLoad: {
-				".*": function( script ) {
-					scripts.push(script);
-				},
-				// prevent $(document).ready from being called even though load is fired
-				"jquery.js": function( script ) {
-					jQuery.readyWait++;
-				}
-			},
-			onLoadUnknownTypeScript: function( script ) {
-				scripts.push(script);
-			},
-			afterInlineScriptLoad: function( script ) {
-				scripts.push(script);
-			},
-			dontPrintUserAgent: true
-		});
-		// set back steal
-		newSteal = window.steal;
-		window.steal = oldSteal;
-		window.steal._steal = newSteal;
-
-
-		// check if newSteal added any build types (used to convert less to css for example).
-		if(newSteal && newSteal.build && newSteal.build.types){
-			for ( var buildType in newSteal.build.types ) {
-				oldSteal.build.types[buildType] = newSteal.build.types[buildType];
-			}
-		}
-
-		newSteal.one('done',function(init){
+		
+		var doneCb = function(init){
 			Envjs.clear();
 			cb({
 				/**
@@ -155,7 +118,52 @@ steal(function(s){
 				steal: newSteal,
 				url: url
 			})
+		}
+		
+		Envjs(url, {
+			scriptTypes: {
+				"text/javascript": true,
+				"text/envjs": true,
+				"": true
+			},
+			fireLoad: true,
+			logLevel: 2,
+			afterScriptLoad: {
+				".*": function( script ) {
+					scripts.push(script);
+				},
+				// prevent $(document).ready from being called even though load is fired
+				"jquery.js": function( script ) {
+					jQuery.readyWait++;
+				},
+				"steal.js": function(script){
+					// if there's timers (like in less) we'll never reach next line 
+					// unless we bind to done here and kill timers
+					window.steal.one('done', doneCb);
+				}
+			},
+			onLoadUnknownTypeScript: function( script ) {
+				scripts.push(script);
+			},
+			afterInlineScriptLoad: function( script ) {
+				scripts.push(script);
+			},
+			dontPrintUserAgent: true
 		});
+		
+		// set back steal
+		newSteal = window.steal;
+		window.steal = oldSteal;
+		window.steal._steal = newSteal;
+
+
+		// check if newSteal added any build types (used to convert less to css for example).
+		if(newSteal && newSteal.build && newSteal.build.types){
+			for ( var buildType in newSteal.build.types ) {
+				oldSteal.build.types[buildType] = newSteal.build.types[buildType];
+			}
+		}
+
 		Envjs.wait();
 	};
 	

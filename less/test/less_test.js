@@ -3,13 +3,12 @@
  * Tests compressing a very basic page and one that is using steal
  */
 load('steal/rhino/rhino.js')
-steal('//steal/test/test', function( s ) {
-	//STEALPRINT = false;
+steal('steal/test', function( s ) {
 	s.test.module("steal/build/styles")
 	
 	STEALPRINT = false;
 
-	s.test.test("css", function(){
+	s.test.test("less", function(){
 		load('steal/rhino/rhino.js');
 		steal(
 			'steal/build',
@@ -28,6 +27,8 @@ steal('//steal/test/test', function( s ) {
 			expected,
 			"css out right");
 			
+		s.test.remove('steal/less/test/production.js')
+		s.test.remove('steal/less/test/production.css')
 		s.test.clear();
 	})
 
