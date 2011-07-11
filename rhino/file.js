@@ -75,9 +75,6 @@
 			var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
 			return http ? http[1] : null;
 		},
-		protocol: function() {
-			return this.path.match(/^(https?:|file:)/)[1]
-		},
 		/**
 		 * Joins url onto path
 		 * @param {Object} url

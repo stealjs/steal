@@ -51,13 +51,21 @@
 			}
 		},
 		support = {
-			error: !win.document || "error" in scriptTag(),
+			error: win.document && (function(){
+				var script = scriptTag();
+				script.setAttribute( "onerror", "return;" );
+    			if (typeof script["onerror"] === "function") {
+					return true;
+				}
+				else 
+					return "onerror" in script;
+			})(),
 			interactive: win.document && "attachEvent" in scriptTag()
 		},
 		startup = function(){},
 		oldsteal = win.steal,
 		opts = typeof oldsteal == 'object' ? oldsteal : {};
-
+		
 	// =============================== STEAL ===============================
 
 	/**
@@ -271,8 +279,8 @@
 		 * We want everything relative to steal's root so the same app can work in multiple pages.
 		 * 
 		 *  ./files/a.js = steals a.js
-			./files/a = tries a/a.js first, then a.js
-			files/a = tries //files/a/a.js first, then //files/a.js
+			./files/a = a/a.js
+			files/a = //files/a/a.js
 			files/a.js = loads //files/a.js
 		 */
 		normalize: function() {
@@ -381,7 +389,9 @@
 				this.unique = true;
 			}
 		},
-		complete : function(){},
+		complete : function(){
+			this.completed = true;
+		},
 		/**
 		 * @hide
 		 * After the script has been loaded and run
@@ -390,11 +400,19 @@
 		 *   - mark yourself as complete when everything is completed
 		 *   - this is where all the actions is
 		 */
-		loaded: function(myqueue){
+
+		loaded: function(script){
+			var myqueue, 
+				src = (script && script.src) || (this.options && this.options.src),
+				rootSrc = this.options && this.options.rootSrc;
 			//check if jQuery has been loaded
 			//mark yourself as current
-			File.cur(this.options && this.options.rootSrc);
+			File.cur(rootSrc);
 			
+			// only works in IE
+			if (support.interactive && src) {
+				myqueue = interactives[src];
+			}
 			if(!myqueue){
 				myqueue = pending.slice(0);
 				pending = [];
@@ -403,7 +421,6 @@
 			// if we have nothing, mark us as complete
 			if(!myqueue.length){
 				this.complete();
-				
 				return;
 			}
 			
@@ -445,7 +462,7 @@
 				
 				if(stel.waits === false){ // file
 					// on the current 
-					files.push(stel);					
+					files.push(stel);
 				}else{ // function
 					
 					// essentially have to bind current files to call previous joiner's load
@@ -508,8 +525,11 @@
 			this.loading = true;
 			var self = this;
 			// get yourself
-			steal.require(this.options,this.orig, function(script, pending){
-				self.loaded(pending);
+			steal.require(this.options,this.orig, function(script){
+				self.loaded(script);
+			}, function(error, src){
+				clearTimeout(self.completeTimeout)
+				throw "steal.js : "+self.options.src+" not completed"
 			});
 			
 		}
@@ -581,20 +601,28 @@
 		makeOptions : function(options){
 			
 			var ext = File(options.src).ext();
-			// if no extension, load as a plugin
 			if (!ext) {
-				options.src = options.src + "/" + File(options.src).filename() + ".js";
+				// if first character of path is a . or /, just load this file
+				if (options.src.indexOf(".") == 0 || options.src.indexOf("/") == 0) {
+					options.src = options.src + ".js"
+				}
+				// else, load as a plugin
+				else {
+					options.src = options.src + "/" + File(options.src).filename() + ".js";
+				}
 			}
 			
 			var orig = options.src,
-				normalized = steal.File(orig).normalize();
+				normalized = steal.File(orig).normalize(),
+				protocol = steal.File(options.src).protocol();
 				
 			extend(options,{
 				originalSrc : options.src,
 				rootSrc : normalized,
-				src : steal.root.join(normalized)
+				src : steal.root.join(normalized),
+				// "file:" or "http:" depending on what protocol the request uses
+				protocol: protocol || (win.document? location.protocol: "file:")
 			});
-			
 			options.originalSrc = options.src;
 			
 			return options;
@@ -651,6 +679,8 @@
 		 * Used to tell steal that it is loading a number of plugins
 		 */
 		loading : function(){
+			// we don't use IE's interactive script functionality while production scripts are loading
+			useInteractive = false;
 			for(var i =0; i< arguments.length;i++){
 				var stel = steal.p.make( arguments[i] );
 				stel.loading = true;
@@ -659,17 +689,12 @@
 		},
 		// called when a script has loaded via production
 		loaded: function(name){
-			// console.log("LOADED "+name)
 			//get other steals
 			//basically create each one ... mark it as loading
 			//  load each one
 			var stel = steal.p.make( name );
 			stel.loading = true;
-			var myqueue = pending.slice(0);
-			pending = [];
-
-			stel.loaded(myqueue)
-
+			stel.loaded()
 			return steal;
 		}
 	});
@@ -767,7 +792,7 @@ var cleanUp = function(script) {
 		
 	head()[ STR_REMOVE_CHILD ]( script );
 };
-
+var lastInserted;
 steal.type("js", function(options,original, success, error){
 	var script = scriptTag(), deps;
 	if (options.text) {
@@ -779,27 +804,30 @@ steal.type("js", function(options,original, success, error){
 		var callback = function(evt){
 				if (!script.readyState || stateCheck.test(script.readyState)) {
 					cleanUp(script);
-					if (support.interactive) {
-						deps = interactives[script.src] || [];
-					}
-					success(script, deps);
+					success(script);
 				}
 			}
-			if (script.attachEvent) {
-				script.attachEvent(STR_ONREADYSTATECHANGE, callback)
-			} else {
-				script[STR_ONLOAD] = callback;
-			}
-			
-			if (support.error) {
-				script[STR_ONERROR] = error;
-			}
-			
-			script.src = options.src;			
-			script.onSuccess = success;
+		if (script.attachEvent) {
+			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
+		} else {
+			script[STR_ONLOAD] = callback;
 		}
 		
+		// error handling doesn't work on firefox on the filesystem
+		if (support.error && error && options.protocol !== "file:") {
+			if(script.attachEvent){
+				script.attachEvent(STR_ONERROR, error);
+			} else {
+				script[ STR_ONERROR ] = error;
+			}
+		}
+		script.src = options.src;
+		script.onSuccess = success;
+	}
+		
 	try {
+		// running from filesystem in IE, this script tag doesn't show up until after it executes
+		lastInserted = script;
 		head().insertBefore(script, head().firstChild);
 	} catch(e){
 		console.log(e)
@@ -900,12 +928,8 @@ steal.request = function(options, success, error){
 	}
 	catch (e) {
 		console.error(e);
-		// from server, missing file errors happen async, but from filesystem its sync
-		// adding setTimeout to make it behave consistently
-		setTimeout(function(){
-			error && error();
-			clean();
-		}, 0)
+		error && error();
+		clean();
 	}
 			 
 };
@@ -1041,10 +1065,13 @@ steal.request = function(options, success, error){
 	})();
 	
 	// =============================== ERROR HANDLING ===============================
-	steal.add = after(steal.add, function(stel){
-		if(!support.error){
-			stel.completeTimeout = setTimeout(function(){
-				throw "steal.js : "+stel.path+" not completed"
+	
+	steal.p.load = after(steal.p.load, function(stel){
+		if(win.document && !this.completed && !this.completeTimeout && 
+			(this.options.protocol == "file:" || !support.error)){
+			var self = this;
+			this.completeTimeout = setTimeout(function(){
+				throw "steal.js : "+self.options.src+" not completed"
 			},5000);
 		}
 	});
@@ -1169,15 +1196,15 @@ steal.request = function(options, success, error){
 	}
 	
 	/**steal.p.load = before(steal.p.load, function(){
-		console.log("load", name(this), this.loading, this.id, pending)
+		console.log("load", name(this), this.loading, this.id)
 	})
 	
 	steal.p.loaded = before(steal.p.loaded, function(){
-		console.log("loaded", name(this), this.id, pending)
+		console.log("loaded", name(this), this.id)
 	})
 	steal.p.complete = before(steal.p.complete, function(){
-		console.log("complete", name(this), this.id, pending)
-	})*/
+		console.log("complete", name(this), this.id)
+	})**/
 	// ============= WINDOW LOAD ========
 	var addEvent = function(elem, type, fn) {
 		if ( elem.addEventListener ) {
@@ -1204,6 +1231,7 @@ steal.request = function(options, success, error){
 	})
 	when(loaded,"load",loaded,"end", function(){
 		steal.trigger("ready")
+		steal.isReady = true;
 	});
 	
 	steal.events.done = {
@@ -1229,12 +1257,18 @@ var interactiveScript,
 	        return interactiveScript;
 	    }
 	
+		// todo THIS IS A LIVE LIST, only have to get it once and reuse the function
 	    scripts = document.getElementsByTagName('script');
 	    for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
 	        if (script.readyState === 'interactive') {
 	            return script;
 	        }
 	    }
+		
+		// check last inserted
+		if(lastInserted && lastInserted.readyState == 'interactive'){
+			return lastInserted;
+		}
 	
 	    return null;
 	}
@@ -1245,18 +1279,29 @@ if (support.interactive) {
 	steal.after = after(steal.after, function(){
 		var interactive = getInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-		if (!interactive || !interactive.src || /steal\.js|production\.js/.test(interactive.src)) {
+		if (!interactive || !interactive.src || /steal\.js/.test(interactive.src)) {
 			return;
 		}
-		if (!interactives[interactive.src]) {
-			interactives[interactive.src] = []
+		var src = interactive.src;
+		if (!interactives[src]) {
+			interactives[src] = []
 		}
-		if (interactive.src) {
-			interactives[interactive.src].push.apply(interactives[interactive.src], pending);
+		if (src) {
+			interactives[src].push.apply(interactives[src], pending);
 			pending = [];
 			interactiveScript = interactive;
 		}
 	})
+	
+	// This is used for packaged scripts.  As the packaged script executes, we grab the 
+	// dependencies that has come so far and assign them to the loaded script
+	steal.loaded = before(steal.loaded, function(name){
+		var src = steals[name].options.src,
+			interactive = getInteractiveScript(),
+			interactiveSrc = interactive.src;
+		interactives[src] = interactives[interactiveSrc];
+		interactives[interactiveSrc] = null;
+	});
 	
 }
 	

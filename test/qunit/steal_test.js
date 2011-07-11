@@ -1,5 +1,4 @@
 steal('jquery').then(function(){
-	
 
 module("steal")
 
@@ -15,6 +14,122 @@ module("steal")
 	module("steal");
 	
 	
+
+// testing new steal API
+	
+
+test("packages", function(){
+	same(packagesStolen,["0","1","2", "uses"],"defined works right")
+})
+
+test("steal one js", function(){
+	// doesn't this imply the next ...
+	steal.rootUrl("../../");
+		 
+	stop(1000);
+	
+	steal("./files/steal.js", function(){
+		start();
+		equals(REQUIRED,"steal", "loaded the file")
+	})
+})
+
+test("steal one function", function(){
+	steal.rootUrl("../../")
+		.cur("foo/bar.js");
+	
+	stop(1000);
+	steal(function(){
+		start();
+		ok(true, "function called")
+	})
+})
+	
+	
+test("loading plugin from jmvcroot", function(){
+	PLUGINLOADED = false;
+	DEPENCENCYLOADED = false;
+	stop(1000);
+	steal.rootUrl("../../").then('steal/test/files/plugin',function(){
+		equals(PLUGINLOADED, true)
+		equals(DEPENCENCYLOADED, true)
+	start();
+	})
+})
+	
+// unless the path has nothing on it, it should add a .js to the end and load the literal file
+test("not using extension", function(){
+	REQUIRED = false;
+	stop(1000);
+	steal.rootUrl("../../").then('./files/require',function(){
+		equals(REQUIRED, true);
+	start();
+	})
+})
+	
+test("loading file from jmvcroot", function(){
+	REQUIRED = false;
+	stop(1000);
+	steal.rootUrl("../../").then('steal/test/files/require.js',function(){
+		equals(REQUIRED, true)
+		start();
+	})
+})
+
+test("loading two files", function(){
+	ORDER = [];
+	stop(1000);
+	steal.rootUrl("../../").then('./files/file1.js',function(){
+		same(ORDER,[1,2,"then2","then1"])
+		start();
+	})
+})
+
+test("steal one file with different rootUrl", function(){
+	// doesn't this imply the next ...
+	steal.rootUrl("../");
+	REQUIRED = undefined;
+	stop(1000);
+	
+	// still loading relative to the page
+	steal("./files/steal.js", function(){
+		start();
+		equals(REQUIRED,"steal", "loaded the file")
+	})
+})
+
+test("loading same file twice", function(){
+	ORDER = [];
+	stop(1000);
+	steal.rootUrl("../../").then('./files/duplicate.js', './files/duplicate.js',function(){
+		same(ORDER,[1])
+		start();
+	})
+})
+
+test("loading same file twice with absolute paths", function(){
+	ORDER = [];
+	stop(1000);
+	steal.rootUrl("../../").then('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
+		same(ORDER,[1])
+		start();
+	})
+})
+
+
+test("steal one file with different cur", function(){
+	// doesn't this imply the next ...
+	steal.rootUrl("../../")
+		.cur("foo/bar.js");
+	REQUIRED = undefined;
+	stop(1000);
+	
+	// still loading relative to the page
+	steal("../steal/test/files/steal.js", function(){
+		start();
+		equals(REQUIRED,"steal", "loaded the file")
+	})
+});
 	
 test("domain", function() {
 	equals(null, new steal.File("file://C:/Development").domain(), "problems from file")
@@ -230,7 +345,8 @@ test("File.ext", function(){
 			start();
 			count++;
 		})
-		equals(count, 0);
+		if(!/file/.test(location.protocol))
+			equals(count, 0);
 	});
 	
 	test("request async error", function(){
@@ -247,7 +363,8 @@ test("File.ext", function(){
 			start();
 			count++;
 		})
-		equals(count, 0);
+		if(!/file/.test(location.protocol))
+			equals(count, 0);
 	});
 	
 	test("request sync", function(){
@@ -481,84 +598,6 @@ test("File.ext", function(){
 		same(order, [0,1,2,3])
 	})
 	
-	test("steal one js", function(){
-		// doesn't this imply the next ...
-		steal.rootUrl("../../");
-			 
-		stop(1000);
-		
-		steal("./files/steal.js", function(){
-			start();
-			equals(REQUIRED,"steal", "loaded the file")
-		})
-	})
-	
-	test("steal one file with different rootUrl", function(){
-		// doesn't this imply the next ...
-		steal.rootUrl("../");
-		REQUIRED = undefined;
-		stop(1000);
-		
-		// still loading relative to the page
-		steal("./files/steal.js", function(){
-			start();
-			equals(REQUIRED,"steal", "loaded the file")
-		})
-	})
-	
-	
-	test("steal one file with different cur", function(){
-		// doesn't this imply the next ...
-		steal.rootUrl("../../")
-			.cur("foo/bar.js");
-		REQUIRED = undefined;
-		stop(1000);
-		
-		// still loading relative to the page
-		steal("../steal/test/files/steal.js", function(){
-			start();
-			equals(REQUIRED,"steal", "loaded the file")
-		})
-	});
-	
-	test("steal one function", function(){
-		steal.rootUrl("../../")
-			.cur("foo/bar.js");
-		
-		stop(1000);
-		steal(function(){
-			start();
-			ok(true, "function called")
-		})
-	})
-	
-	test("loading two files", function(){
-		ORDER = [];
-		stop(1000);
-		steal.rootUrl("../../").then('./files/file1.js',function(){
-			same(ORDER,[1,2,"then2","then1"])
-			start();
-		})
-	})
-	
-	test("loading same file twice", function(){
-		ORDER = [];
-		stop(1000);
-		steal.rootUrl("../../").then('./files/duplicate.js', './files/duplicate.js',function(){
-			same(ORDER,[1])
-			start();
-		})
-	})
-	
-	test("loading same file twice with absolute paths", function(){
-		ORDER = [];
-		stop(1000);
-		steal.rootUrl("../../").then('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
-			same(ORDER,[1])
-			start();
-		})
-	})
-	
 	// c should load whenever something its waiting on completes
 	test("deadlocked whens", function(){
 		expect(1)
@@ -629,31 +668,5 @@ test("ready", function(){
 	})
 	
 });
-
-test("packages", function(){
-	same(packagesStolen,["0","1","2", "uses"],"defined works right")
-})
-
-// testing new steal API
-	
-test("loading plugin from jmvcroot", function(){
-	PLUGINLOADED = false;
-	DEPENCENCYLOADED = false;
-	stop(1000);
-	steal.rootUrl("../../").then('steal/test/files/plugin',function(){
-		equals(PLUGINLOADED, true)
-		equals(DEPENCENCYLOADED, true)
-		start();
-	})
-})
-	
-test("loading file from jmvcroot", function(){
-	REQUIRED = false;
-	stop(1000);
-	steal.rootUrl("../../").then('steal/test/files/require.js',function(){
-		equals(REQUIRED, true)
-		start();
-	})
-})
 
 })
