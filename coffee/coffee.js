@@ -2,7 +2,7 @@
  * @add steal.static
  */
 steal({
-	path: "coffee-script.js",
+	src: "./coffee-script.js",
 	ignore: true
 }, function() {
 
@@ -28,7 +28,7 @@ steal({
 	 * steal.coffee to load your coffee script:
 	 * </p>
 	 * @codestart
-	 * steal.plugins('steal/coffee').then(function(){
+	 * steal('steal/coffee').then(function(){
 	 *   steal.coffee('log');
 	 * });
 	 * @codeend
@@ -39,24 +39,11 @@ steal({
 	 * You can pass multiple paths.
 	 * @return {steal} returns the steal function.
 	 */
-	steal.coffee = function() {
-		//if production, 
-		if ( steal.options.env == 'production' ) {
-			return this;
-		}
-		//@steal-remove-start
-		var current, path;
-		for ( var i = 0; i < arguments.length; i++ ) {
-			steal({
-				path: arguments[0] + ".coffee",
-				type: "text/coffee",
-				process: function( text ) {
-					return CoffeeScript.compile(text)
-				}
-			})
-		}
-		//@steal-remove-end
-		return this;
-	}
+	
+	steal.type("coffee js", function(options, original, success, error){
+		options.text = CoffeeScript.compile(options.text);
+		success();
+	});
+
 
 })
