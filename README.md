@@ -95,6 +95,10 @@ js steal/htmljs http://localhost/cookbook.html#recipes
 
 ### Loading Other Types
 
+[steal.static.type] makes it very easy to define other types in the build system.  You can easily define 
+a type for meta languages on top of JS/CSS (like coffeescript and LESS) and provide a simple 
+conversion function.
+
 ### Cleaning Scripts
 
 ### Installing Other Scripts
