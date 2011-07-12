@@ -1,5 +1,5 @@
-steal("//steal/build/pluginify/tokens").
-	plugins('steal/build').then(function(){
+steal("steal/build/pluginify/tokens.js")
+	.then('steal/build').then(function(){
 
 steal.build.parse = function(str){
 		//print("Breaking up strs")

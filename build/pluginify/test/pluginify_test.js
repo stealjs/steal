@@ -2,8 +2,8 @@
 /**
  * Tests compressing a very basic page and one that is using steal
  */
-load('steal/rhino/steal.js')
-steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
+load('steal/rhino/rhino.js')
+steal('steal/test','steal/build', 'steal/build/pluginify').then( function( s ) {
 	STEALPRINT = false;
 	s.test.module("steal/build/pluginify")
 	
@@ -26,5 +26,28 @@ steal.plugins('steal/test','steal/build/pluginify').then( function( s ) {
 		//print(firstFunc);
 	})
 
-
+	s.test.test("parse", function(t){
+		var js = readFile('jquery/class/class.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		var js = readFile('jquery/view/ejs/ejs.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		var js = readFile('jquery/lang/vector/vector.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		var js = readFile('jquery/dom/fixture/fixture.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		var js = readFile('jquery/view/view.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		var js = readFile('jquery/lang/json/json.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+		js = readFile('steal/build/pluginify/test/weirdRegexps.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
+	});
+	
 });

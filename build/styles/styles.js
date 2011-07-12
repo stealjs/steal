@@ -1,5 +1,5 @@
 
-steal(function( steal ) {
+steal('steal/build').then(function( steal ) {
 
 	/**
 	 * Builds and compresses CSS files.
@@ -16,16 +16,14 @@ steal(function( steal ) {
 			pageFolder = steal.File(opener.url).dir(),
 			currentPackage = [];
 
-		opener.each('link', function( link, text, i ) {
-			steal.print(link.type)
-			//let people know we are adding it
-			if ( link.href && steal.build.types[link.type] ) {
-				steal.print(link.href)
+		opener.each('css', function( link, text, i ) {
+			steal.print(link.src)
 
-				var loc = steal.File(pageFolder).join(link.href),
-					converted = convert(text, loc, folder);
-					currentPackage.push(converted);
-			}
+			var loc = steal.File(pageFolder).join(link.src),
+				converted = convert(text, loc, folder);
+			
+			currentPackage.push(converted)
+
 		});
 		steal.print("")
 		if ( currentPackage.length ) {
@@ -75,4 +73,4 @@ steal(function( steal ) {
         var e = Math.floor(Math.log(bytes)/Math.log(1024));
         return (bytes/Math.pow(1024,Math.floor(e))).toFixed(1)+' '+s[e];
     };
-},'//steal/build/styles/cssmin');
+},'steal/build/styles/cssmin.js');

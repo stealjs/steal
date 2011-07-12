@@ -10,7 +10,7 @@ then
 fi
 if [ $1 = "-selenium" ]
 then
-  java -jar funcunit/java/selenium-server.jar
+  java -jar funcunit/java/selenium-server-standalone-2.0b3.jar
   exit 127
 fi
 CP=funcunit/java/selenium-java-client-driver.jar:steal/rhino/js.jar
