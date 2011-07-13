@@ -789,11 +789,23 @@
 		root : File(""),
 		/**
 		 * Gets or sets the path from the current page to 
-		 * steal's (or JavaScriptMVC's) root folder.
+		 * steal's (or JavaScriptMVC's) root folder.  When passed a src, it sets the root folder. 
+		 * Otherwise, it returns the path to the root folder.
+		 * 
+		 * This is the path from which 
+		 * all plugins are stolen.  When you steal a plugin like steal("jquery/controller"), 
+		 * the plugin path is joined with this rootUrl to create a full path 
+		 * to the controller.js file.
 		 * 
 		 * By default, the rootUrl is calculated from the
-		 * steal script and the window location.
+		 * steal script and the window location.  For example, if the 
+		 * script tag looks like this:
 		 * 
+@codestart
+  <script type='text/javascript' src='../../steal/steal.js?ui/app'></script>
+@codeend
+		 * 
+		 * rootUrl will be set to "../../".
 		 * Setting the rootUrl can be useful if you want to have
 		 * steal.js in a different location.
 		 * 
@@ -804,9 +816,13 @@
 		 *     steal.rootUrl("../../jmvc/")
 		 * 
 		 * This appends  <code>"../../jmvc"</code> to paths
-		 * loaded from [steal.static.root]
+		 * loaded from [steal.static.root].  In some strange cases this might be desirable if 
+		 * plugin folders are in a different location from the steal directory. 
 		 * 
-		 * @param {Object} src
+		 * It also sets the current url to this directory so the first calls to steal work relative to the root JMVC directory.
+		 * 
+		 * @param {String} [src] a relative path from the current page to the root directory of JMVC, like ../../
+		 * @return {String} returns the last path passed to rootUrl
 		 */
 		rootUrl : function(src){
 			if (src !== undefined) {
@@ -833,8 +849,8 @@
 		 * have steal believe it is making requests from
 		 * another page.
 		 * 
-		 * @param {Object} [newPage]
-		 * @return {String|steal} returns 
+		 * @param {String} [newPage] a path to the page using steal (probably the windows location)
+		 * @return {steal.File} returns the last path to a page passed to pageUrl, converted to a steal.File object 
 		 */
 		pageUrl : function(newPage){
 			if(newPage){
