@@ -579,8 +579,11 @@
 				// load because we defer 'type' determination until then
 				if(!steals[rootSrc] && ! steals[rootSrc+".js"]){  //if we haven't loaded it before
 					steals[rootSrc] = stel;
-				} else{
+				} else{ // already have this steal
 					stel = steals[rootSrc];
+					if(stel.isLoaded && stel.options.has){
+						stel.loadHas();
+					}
 				}
 			}
 			
@@ -591,6 +594,7 @@
 			this.id = (++id);
 			// if we have no options, we are the global init ... set ourselves up ...
 			if(!options){ //global init cur ...
+				this.options = {};
 				this.waits = false;
 				this.pack = "production.js";
 			} 
@@ -639,12 +643,18 @@
 		 */
 
 		loaded: function(script){
-			var myqueue, 
-				src = (script && script.src) || (this.options && this.options.src),
-				rootSrc = this.options && this.options.rootSrc;
+			var myqueue, stel, 
+				src = (script && script.src) || this.options.src,
+				rootSrc = this.options.rootSrc;
 			//check if jQuery has been loaded
 			//mark yourself as current
 			File.cur(rootSrc);
+			
+			this.isLoaded = true;
+			
+			if(this.options.has){
+				this.loadHas();
+			}
 			
 			// only works in IE
 			if (support.interactive && src) {
@@ -665,7 +675,6 @@
 			var self = this,
 				set = [],
 				joiner, // the current 
-				stel,
 				initial = [],
 				isProduction = steal.options.env == 'production',
 				files = [],
@@ -756,7 +765,7 @@
 		 * When the script loads, 
 		 */
 		load: function(returnScript) {
-			if(this.loading){
+			if(this.loading || this.isLoaded){
 				return;
 			}
 			this.loading = true;
@@ -769,6 +778,20 @@
 				throw "steal.js : "+self.options.src+" not completed"
 			});
 			
+		},
+		
+		/**
+		 * Goes through the array of files listed in this.options.has, marks them all as loaded.  
+		 * This is used for files like production.css, which, once they load, need to mark the files they 
+		 * contain as loaded.
+		 */
+		loadHas: function(){
+			var stel, i
+			// mark everything in has loaded
+			for(i=0; i<this.options.has.length; i++){
+				stel = steal.p.make( this.options.has[i] );
+				stel.loaded();
+			}
 		}
 
 	};
@@ -1671,8 +1694,7 @@ var interactiveScript,
 	    if (interactiveScript && interactiveScript.readyState === 'interactive') {
 	        return interactiveScript;
 	    }
-	
-		// todo THIS IS A LIVE LIST, only have to get it once and reuse the function
+		
 	    scripts = document.getElementsByTagName('script');
 	    for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
 	        if (script.readyState === 'interactive') {
@@ -1812,6 +1834,11 @@ if (support.interactive) {
 						src: steal.options.production,
 						force: true
 					});
+				}
+				if(steal.options.loaded){
+					for(var i=0; i<steal.options.loaded.length; i++){
+						steal.loaded(steal.options.loaded[i]);
+					}
 				}
 				
 			}

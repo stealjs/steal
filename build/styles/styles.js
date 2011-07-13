@@ -14,10 +14,12 @@ steal('steal/build').then(function( steal ) {
 		var folder = options.to.substr(0, options.to.length - 1),
 			//where the page is
 			pageFolder = steal.File(opener.url).dir(),
+			scriptsConverted = [],
 			currentPackage = [];
 
 		opener.each('css', function( link, text, i ) {
 			steal.print(link.src)
+			scriptsConverted.push(link.src)
 
 			var loc = steal.File(pageFolder).join(link.src),
 				converted = convert(text, loc, folder);
@@ -35,6 +37,11 @@ steal('steal/build').then(function( steal ) {
             steal.File(folder + "/production.css").save(minified_css);
 		} else {
 			steal.print("no styles\n")
+		}
+		
+		return {
+			name: folder+"/production.css",
+			dependencies: scriptsConverted
 		}
 	});
 
