@@ -789,11 +789,20 @@
 		root : File(""),
 		/**
 		 * Gets or sets the path from the current page to 
-		 * steal's (or JavaScriptMVC's) root folder.
+		 * steal's (or JavaScriptMVC's) root folder.  This is the path from which 
+		 * all plugins are stolen.  When you steal a plugin like steal("jquery/controller"), 
+		 * the plugin path is joined with this rootUrl to create a full path 
+		 * to the controller.js file.
 		 * 
 		 * By default, the rootUrl is calculated from the
-		 * steal script and the window location.
+		 * steal script and the window location.  For example, if the 
+		 * script tag looks like this:
 		 * 
+@codestart
+  <script type='text/javascript' src='../../steal/steal.js?ui/app'></script>
+@codeend
+		 * 
+		 * rootUrl will be set to "../../".
 		 * Setting the rootUrl can be useful if you want to have
 		 * steal.js in a different location.
 		 * 
@@ -804,9 +813,10 @@
 		 *     steal.rootUrl("../../jmvc/")
 		 * 
 		 * This appends  <code>"../../jmvc"</code> to paths
-		 * loaded from [steal.static.root]
+		 * loaded from [steal.static.root].  In some strange cases this might be desirable if 
+		 * plugin folders are in a different location from the steal directory. 
 		 * 
-		 * @param {Object} src
+		 * @param {String} src a relative path from the current page to the root directory of JMVC, like ../../
 		 */
 		rootUrl : function(src){
 			if (src !== undefined) {
