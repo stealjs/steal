@@ -789,7 +789,10 @@
 		root : File(""),
 		/**
 		 * Gets or sets the path from the current page to 
-		 * steal's (or JavaScriptMVC's) root folder.  This is the path from which 
+		 * steal's (or JavaScriptMVC's) root folder.  When passed a src, it sets the root folder. 
+		 * Otherwise, it returns the path to the root folder.
+		 * 
+		 * This is the path from which 
 		 * all plugins are stolen.  When you steal a plugin like steal("jquery/controller"), 
 		 * the plugin path is joined with this rootUrl to create a full path 
 		 * to the controller.js file.
@@ -816,7 +819,10 @@
 		 * loaded from [steal.static.root].  In some strange cases this might be desirable if 
 		 * plugin folders are in a different location from the steal directory. 
 		 * 
-		 * @param {String} src a relative path from the current page to the root directory of JMVC, like ../../
+		 * It also sets the current url to this directory so the first calls to steal work relative to the root JMVC directory.
+		 * 
+		 * @param {String} [src] a relative path from the current page to the root directory of JMVC, like ../../
+		 * @return {String} returns the last path passed to rootUrl
 		 */
 		rootUrl : function(src){
 			if (src !== undefined) {
@@ -843,8 +849,8 @@
 		 * have steal believe it is making requests from
 		 * another page.
 		 * 
-		 * @param {Object} [newPage]
-		 * @return {String|steal} returns 
+		 * @param {String} [newPage] a path to the page using steal (probably the windows location)
+		 * @return {steal.File} returns the last path to a page passed to pageUrl, converted to a steal.File object 
 		 */
 		pageUrl : function(newPage){
 			if(newPage){
