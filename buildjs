@@ -1,5 +1,5 @@
-load("steal/rhino/steal.js");
-steal.plugins('steal/build', 'steal/build/scripts', 'steal/build/styles', 'steal/build/apps', function () {
+load("steal/rhino/rhino.js");
+steal('steal/build').then('steal/build/scripts', 'steal/build/styles', 'steal/build/apps', function () {
     //check if args
     var urls = [];
     while (_args.length) {

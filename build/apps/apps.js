@@ -111,8 +111,7 @@ steal(function( steal ) {
 			return most;
 		}
 
-
-		steal.build.apps = function( list, options ) {
+		steal.build.builders.apps = function( list, options ) {
 			options = steal.opts(options || {}, {
 				//compress everything, regardless of what you find
 				depth: 1,
