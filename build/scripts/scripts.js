@@ -68,7 +68,7 @@ steal('steal/build').then(function( steal ) {
 
 			// if we should compress the script, compress it
 			if ( stl.compress !== false || options.all ) {
-//				text = compressor(text, true);
+				text = compressor(text, true);
 			}
 			currentPackage.scripts.push("'"+stl.rootSrc+"'")
 			// put the result in the package
