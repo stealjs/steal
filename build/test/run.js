@@ -4,8 +4,31 @@
  */
 load('steal/rhino/rhino.js')
 steal('steal/test/test.js', function( s ) {
-	STEALPRINT = true;
+	STEALPRINT = false;
 	s.test.module("steal/build")
+	
+	s.test.test("less packages correctly", function(){
+		load('steal/rhino/rhino.js')
+		steal("steal/build","steal/build/scripts","steal/build/styles").then(function(s2){
+			s2.build("steal/build/test/styles/styles.html", {
+				to: 'steal/build/test/styles'
+			})
+		});
+		
+		// will throw an error if its not working
+		s.test.open('steal/build/test/styles/prod.html');
+		s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
+		s.test.equals(document.getElementsByTagName("link")[0].href.indexOf("production.css") != -1, true, "its the production.css")
+		
+		// this page tests putting link in the head
+		s.test.open('steal/build/test/styles/prod2.html');
+		s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
+		s.test.equals(document.getElementsByTagName("link")[0].href.indexOf("production.css") != -1, true, "its the production.css")
+		s.test.clear();
+		s.test.remove('steal/build/test/styles/production.js')
+		s.test.remove('steal/build/test/styles/production.css')
+		
+	});
 	
 	s.test.test("open", function(){
 		load('steal/rhino/rhino.js')
@@ -56,26 +79,6 @@ steal('steal/test/test.js', function( s ) {
 		s.test.equals(jqueryReadyCodeRun, false, "document ready code not called");
 		s.test.clear();
 		s.test.remove('steal/build/test/production.js')
-		
-	});
-
-	
-	s.test.test("less packages correctly", function(){
-		load('steal/rhino/rhino.js')
-		steal("steal/build","steal/build/scripts","steal/build/styles").then(function(s2){
-			s2.build("steal/build/test/styles/styles.html", {
-				to: 'steal/build/test/styles'
-			})
-		});
-		
-		// will throw an error if its not working
-		s.test.open('steal/build/test/styles/prod.html');
-		s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
-		s.test.equals(document.getElementsByTagName("link").href.indexOf("production.css") != -1, true, "its the production.css")
-//		s.test.open('steal/build/test/styles/prod2.html');
-		s.test.clear();
-		s.test.remove('steal/build/test/styles/production.js')
-		s.test.remove('steal/build/test/styles/production.css')
 		
 	});
 

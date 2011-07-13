@@ -94,6 +94,7 @@ steal(function( steal ) {
 	 *     </table>
 	 */
 	steal.build = function( url, options ) {
+		var dependencies = {}, dep;
 
 		//convert options (which might be an array) into an object
 		options = steal.opts(options || {}, {
@@ -117,7 +118,13 @@ steal(function( steal ) {
 			// iterates through the types of builders.  For now
 			// there are just scripts and styles builders
 			for ( var builder in steal.build.builders ) {
-				steal.build.builders[builder](opener, options);
+				if (builder != "scripts") {
+					dep = steal.build.builders[builder](opener, options);
+					dependencies[dep.name] = dep.dependencies;
+				}
+			}
+			if(steal.build.builders.scripts){
+				steal.build.builders.scripts(opener, options, dependencies);
 			}
 		});
 
