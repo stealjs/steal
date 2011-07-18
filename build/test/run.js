@@ -9,7 +9,7 @@ steal('steal/test/test.js', function( s ) {
 	
 	s.test.test("less packages correctly", function(){
 		load('steal/rhino/rhino.js')
-		steal("steal/build","steal/build/scripts","steal/build/styles").then(function(s2){
+		steal("steal/build","steal/build/scripts","steal/build/styles", "steal/build/apps").then(function(s2){
 			s2.build("steal/build/test/styles/styles.html", {
 				to: 'steal/build/test/styles'
 			})

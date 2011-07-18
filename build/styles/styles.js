@@ -19,7 +19,7 @@ steal('steal/build').then(function( steal ) {
 
 		opener.each('css', function( link, text, i ) {
 			steal.print(link.src)
-			scriptsConverted.push(link.src)
+			scriptsConverted.push(link.rootSrc)
 
 			var loc = steal.File(pageFolder).join(link.src),
 				converted = convert(text, loc, folder);
