@@ -581,9 +581,8 @@
 					steals[rootSrc] = stel;
 				} else{ // already have this steal
 					stel = steals[rootSrc];
-					if(stel.isLoaded && stel.options.has){
-						stel.loadHas();
-					}
+					// extend the old stolen file with any new options
+					extend(stel.options, options)
 				}
 			}
 			
@@ -652,11 +651,8 @@
 			
 			this.isLoaded = true;
 			
-			if(this.options.has){
-				this.loadHas();
-			}
-			
 			// only works in IE
+			// TODO move this out of this function
 			if (support.interactive && src) {
 				myqueue = interactives[src];
 			}
@@ -718,7 +714,6 @@
 						
 						// when they are complete, complete me
 						whenEach(files.length ? files.concat(stel) : [stel], "complete", self, "complete");
-						
 						// if there was a function then files, then end, function loads all files
 						if(files.length){
 							whenThe(stel,"complete", files ,"load")
@@ -778,20 +773,6 @@
 				throw "steal.js : "+self.options.src+" not completed"
 			});
 			
-		},
-		
-		/**
-		 * Goes through the array of files listed in this.options.has, marks them all as loaded.  
-		 * This is used for files like production.css, which, once they load, need to mark the files they 
-		 * contain as loaded.
-		 */
-		loadHas: function(){
-			var stel, i
-			// mark everything in has loaded
-			for(i=0; i<this.options.has.length; i++){
-				stel = steal.p.make( this.options.has[i] );
-				stel.loaded();
-			}
 		}
 
 	};
@@ -1527,6 +1508,13 @@ request = function(options, success, error){
 				return f.apply(this,arguments);
 			}
 	}
+	/**
+	 * Set up a function that runs after the first param. 
+	 * @param {Object} f
+	 * @param {Object} after
+	 * @param {Object} changeRet If true, the result of the function will be passed to the after function as the first param.  If false, the after function's params are the 
+	 * same as the original function's params
+	 */
 	function after(f, after, changeRet){
 		
 		return changeRet ?
@@ -1632,7 +1620,6 @@ request = function(options, success, error){
 	}
 	
 	/**
-	@hide
 	steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id)
 	})
@@ -1642,7 +1629,7 @@ request = function(options, success, error){
 	})
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
-	})**/
+	}) */
 	// ============= WINDOW LOAD ========
 	var addEvent = function(elem, type, fn) {
 		if ( elem.addEventListener ) {
@@ -1683,7 +1670,51 @@ request = function(options, success, error){
 		}
 	};
 	
+	// =========== HAS ARRAY STUFF ============
+	// Logic that deals with files that have collections of other files within them.  This is usually a production.css file, 
+	// which when it loads, needs to mark several CSS and LESS files it represents as being "loaded".  This is done 
+	// by the production.js file having steal({src: "production.css", has: ["file1.css", "file2.css"]  
+	
+	// after a steal is created, if its been loaded already and has a "has", mark those files as loaded
+	steal.p.make = after(steal.p.make, function(stel){
+		if(stel.isLoaded && stel.options.has){
+			stel.loadHas();
+		}
+		return stel;
+	}, true)
+	
+	// if we're about to mark a file as loaded, mark its "has" array files as loaded also
+	steal.p.loaded = before(steal.p.loaded, function(){
+		if(this.options.has){
+			this.loadHas();
+		}
+	})
+	
+	steal.p.
+		/**
+		 * Goes through the array of files listed in this.options.has, marks them all as loaded.  
+		 * This is used for files like production.css, which, once they load, need to mark the files they 
+		 * contain as loaded.
+		 */
+		loadHas = function(){
+			var stel, i,
+				current = File.cur();
+			// mark everything in has loaded
+			for(i=0; i<this.options.has.length; i++){
+				// don't want the current file to change, since we're just marking files as loaded
+				File.cur(current)
+				stel = steal.p.make( this.options.has[i] );
+				// need to set up a "complete" callback for this file, so later waits know its already 
+				// been completed
+				convert(stel, "complete")
+				stel.loaded();
+				
+			}
+		}
+	
 	// =========== INTERACTIVE STUFF ===========
+	// Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are 
+	// dependencies of another, steal needs to check which is the currently "interactive" script.
 	
 
 var interactiveScript, 
