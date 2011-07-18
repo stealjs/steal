@@ -120,7 +120,9 @@ steal(function( steal ) {
 			for ( var builder in steal.build.builders ) {
 				if (builder != "scripts") {
 					dep = steal.build.builders[builder](opener, options);
-					dependencies[dep.name] = dep.dependencies;
+					if (typeof dep == "object" && dep.name) {
+						dependencies[dep.name] = dep.dependencies;
+					}
 				}
 			}
 			if(steal.build.builders.scripts){

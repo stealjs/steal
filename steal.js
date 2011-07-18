@@ -560,7 +560,6 @@
 		}
 	});
 	
-		// the 
 	var pending = [],
 		s = steal,
 		id = 0,
@@ -573,7 +572,7 @@
 			
 			var stel = new steal.p.init(options),
 				rootSrc = stel.options.rootSrc;
-				
+			
 			if(stel.unique && rootSrc){
 				// the .js is b/c we are not adding that automatically until
 				// load because we defer 'type' determination until then
@@ -1612,6 +1611,15 @@ request = function(options, success, error){
 	}
 	
 	// =========== DEBUG =========
+	
+	if(steal.browser.rhino){
+		console = {
+			log: function(){
+				print.apply(null, arguments)
+			}
+		}
+	}
+	
 	var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
@@ -1629,7 +1637,7 @@ request = function(options, success, error){
 	})
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
-	}) */
+	})*/
 	// ============= WINDOW LOAD ========
 	var addEvent = function(elem, type, fn) {
 		if ( elem.addEventListener ) {
@@ -1699,6 +1707,7 @@ request = function(options, success, error){
 		loadHas = function(){
 			var stel, i,
 				current = File.cur();
+			
 			// mark everything in has loaded
 			for(i=0; i<this.options.has.length; i++){
 				// don't want the current file to change, since we're just marking files as loaded

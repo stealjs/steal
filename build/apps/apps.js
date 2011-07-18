@@ -1,4 +1,4 @@
-steal(function( steal ) {
+steal('steal/build').then(function( steal ) {
 
 	// recursively goes through steals and their dependencies.
 	var addDependencies = function( steel, files, app ) {
