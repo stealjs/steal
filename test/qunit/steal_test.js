@@ -172,6 +172,12 @@ test("joinFrom", function() {
 	
 	result = new steal.File('../../up.js').joinFrom('cookbook/')
 	equals(result, "../up.js", "up.js is correctly joined.")
+
+	result = new steal.File("./a/b").joinFrom("http://abc.com/");
+	equals(result, "http://abc.com/a/b", "./a/b joined correctly with http://abc.com/");
+
+	result = new steal.File("./a/b").joinFrom("../d/e");
+	equals(result, "../d/e/a/b", "./a/b joined correctly from ../d/e");
 })
 
 test("dir", function() {
