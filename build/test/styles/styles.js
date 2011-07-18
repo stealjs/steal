@@ -4,7 +4,7 @@ steal('jquery/controller', 'steal/less').then(function(){
     {}, 
     {       
         init: function() { 
-            console.log("im ready")
+//            console.log("im ready")
         }
     });
 })
@@ -13,4 +13,4 @@ steal('jquery/controller', 'steal/less').then(function(){
         $(document.body).myapp_app();
     });    
 })
-.then('./mystyles.less', 'steal/build/test/styles/another.less')
+.then('./another.js')
