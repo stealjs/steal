@@ -44,9 +44,11 @@ steal({src: "./less_engine.js",ignore: true},function(){
 	 */
 	
 	steal.type("less css", function(options, original, success, error){
+		var pathParts = options.src.split('/');
+		pathParts[pathParts.length - 1] = ''; // Remove filename
 		new (less.Parser)({
             optimization: less.optimization,
-            paths: []
+            paths: [pathParts.join('/')]
         }).parse(options.text, function (e, root) {
 			options.text = root.toCSS();
 			success();
