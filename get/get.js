@@ -1,6 +1,6 @@
-steal("//steal/get/json", 
-	  "//steal/rhino/prompt", 
-	  "//steal/get/dummysteal",function( steal ) {
+steal("steal/get/json.js", 
+	  "steal/rhino/prompt.js", 
+	  "steal/get/dummysteal.js",function( steal ) {
 	
 	// a map of plugins that you just installed (prevents cycles)
 	var installed = {};
@@ -511,4 +511,4 @@ steal("//steal/get/json",
 
 
 		
-},"//steal/get/basic","//steal/get/git");
+},"steal/get/basic.js","steal/get/git.js");

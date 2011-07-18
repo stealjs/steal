@@ -9,7 +9,7 @@ steal.foo().bar(function(abc){
 	// steal
 	
 	boom	
-}).plugins("boom").then(function($,foo){
+}).then("boom").then(function($,foo){
 	//yes
 })
 

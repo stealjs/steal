@@ -1,7 +1,7 @@
 /**
  * @add steal.static
  */
-steal({path: "less_engine.js",ignore: true},function(){
+steal({src: "./less_engine.js",ignore: true},function(){
 	
 	/**
 	 * @function less
@@ -31,7 +31,7 @@ steal({path: "less_engine.js",ignore: true},function(){
 	 * steal.less to load your less style:
 	 * </p>
 	 * @codestart
-	 * steal.plugins('steal/less').then(function(){
+	 * steal('steal/less').then(function(){
 	 *   steal.less('red');
 	 * });
 	 * @codeend
@@ -42,82 +42,21 @@ steal({path: "less_engine.js",ignore: true},function(){
 	 * You can pass multiple paths.
 	 * @return {steal} returns the steal function.
 	 */
-	steal.less = function(){
-		//if production, 
-		if(steal.options.env == 'production'){
-			if(steal.loadedProductionCSS){
-				return steal;
-			}else{
-				var productionCssPath = steal.File( steal.options.production.replace(".js", ".css") ).normalize();
-				productionCssPath = steal.root.join( productionCssPath );
-				steal.createLink( productionCssPath );
-				loadedProductionCSS = true;
-				return steal;
-			}
-		}
-		//@steal-remove-start
-		var current, path;
-		for(var i=0; i < arguments.length; i++){
-			current = new steal.File(arguments[i]+".less").joinCurrent();
-			path = steal.root.join(current)
-			if(steal.browser.rhino){
-				//rhino will just look for this
-				steal.createLink(path, {
-					type : "text/less"
-				})
-			}else{
-				var src = steal.request(path);
-				if(!src){
-					steal.dev.warn("steal/less : There's no content at "+path+", or you're on the filesystem and it's in another folder.");
-					return steal;
-				}
-				// less needs the full path with http:// or file://
-				var newPath = location.href.replace(/[\w\.-]+$/, '')+
-					path.replace(/[\w\.-]+$/, '');
-				//get and insert stype
-				new (less.Parser)({
-	                optimization: less.optimization,
-	                paths: [newPath]
-	            }).parse(src, function (e, root) {
-	                var styles = root.toCSS(),
-						css  = document.createElement('style');
-			        
-					css.type = 'text/css';
-					css.id = steal.cleanId(path)
-			        
-					document.getElementsByTagName('head')[0].appendChild(css);
-				    
-				    if (css.styleSheet) { // IE
-			            css.styleSheet.cssText = styles;
-				    } else {
-				        (function (node) {
-				            if (css.childNodes.length > 0) {
-				                if (css.firstChild.nodeValue !== node.nodeValue) {
-				                    css.replaceChild(node, css.firstChild);
-				                }
-				            } else {
-				                css.appendChild(node);
-				            }
-				        })(document.createTextNode(styles));
-				    }
-
-	            });
-			}
-		}
-		//@steal-remove-end
-		return steal;
-	}
-	//@steal-remove-start
-	steal.build.types['text/less'] =  function(script, loadScriptText){
-		var text =   script.text || loadScriptText(script.href, script),
-			styles;
+	
+	steal.type("less css", function(options, original, success, error){
+		var pathParts = options.src.split('/');
+		pathParts[pathParts.length - 1] = ''; // Remove filename
 		new (less.Parser)({
-	                optimization: less.optimization,
-	                paths: []
-	            }).parse(text, function (e, root) {
-					styles = root.toCSS();
-				});
-		return styles;
-	}
+            optimization: less.optimization,
+            paths: [pathParts.join('/')]
+        }).parse(options.text, function (e, root) {
+			options.text = root.toCSS();
+			success();
+		});
+	});
+	
+	
+	//@steal-remove-start
+
 	//@steal-remove-end
 })

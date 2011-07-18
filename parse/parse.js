@@ -1,5 +1,5 @@
-steal("//steal/parse/tokens").
-	plugins('steal/build').then(function(steal){
+steal("steal/parse/tokens.js")
+	.then('steal/build').then(function(steal){
 
 var isArray = function( array ) {
   return Object.prototype.toString.call( array ) === "[object Array]";
@@ -184,7 +184,7 @@ steal.parse = function(str){
 			 * until("function",")") -> looks for function or  )
 			 * until(["foo",".","bar"]) -> looks for foo.bar
 			 * 
-			 * 
+			 * @return {Array} an array of tokens of the matches
 			 */
 			until: function(){
 				var token, 
@@ -203,7 +203,7 @@ steal.parse = function(str){
 					callback = function(){};
 					
 				for(var i =0; i < arguments.length;i++){
-					patternMatchPosition[i] =0;
+					patternMatchPosition[i] =[];
 					if(isArray(arguments[i])){
 						patterns.push(makeTokens(arguments[i]))
 					}else if(typeof arguments[i] == 'function'){
@@ -218,12 +218,12 @@ steal.parse = function(str){
 						var pattern = patterns[i];
 	
 						if( token.type !== "string" && like( pattern[patternMatchPosition[i]], token) ){
-							patternMatchPosition[i] = patternMatchPosition[i]+1;
-							if(patternMatchPosition[i] === pattern.length){
-								return token;
+							patternMatchPosition[i].push(token);
+							if(patternMatchPosition[i].length === pattern.length){
+								return patternMatchPosition[i];
 							}
 						}else{
-							patternMatchPosition[i] = 0;
+							patternMatchPosition[i] = [];
 						}
 					}
 				}

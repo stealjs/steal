@@ -2,37 +2,38 @@
 /**
  * Tests compressing a very basic page and one that is using steal
  */
-load('steal/rhino/steal.js')
-steal('//steal/test/test', function( s ) {
+load('steal/rhino/rhino.js')
+steal('steal/test', function( s ) {
 	//STEALPRINT = false;
 	s.test.module("steal/build/styles")
 	
 	STEALPRINT = false;
 
 	s.test.test("css", function(){
-		load('steal/rhino/steal.js');
-		steal.plugins(
+		load('steal/rhino/rhino.js');
+		steal(
 			'steal/build','steal/build/styles',
 			function(){
 				steal.build('steal/build/styles/test/page.html',
 					{to: 'steal/build/styles/test'});
+					
+				var prod = readFile('steal/build/styles/test/production.css').replace(/\r|\n|\s/g,""),
+					expected = readFile('steal/build/styles/test/productionCompare.css').replace(/\r|\n|\s/g,"");
+				
+				s.test.equals(
+					prod,
+					expected,
+					"css out right");
+					
+				s.test.clear();
+				s.test.remove('steal/build/styles/test/production.css')
 			});
-		
-		var prod = readFile('steal/build/styles/test/production.css').replace(/\r|\n|\s/g,""),
-			expected = readFile('steal/build/styles/test/productionCompare.css').replace(/\r|\n|\s/g,"");
-		
-		s.test.equals(
-			prod,
-			expected,
-			"css out right");
-			
-		s.test.clear();
 	})
 
 
 	s.test.test("min multiline comment", function(){
-		load('steal/rhino/steal.js');
-		steal.plugins('steal/build','steal/build/styles',function(){
+		load('steal/rhino/rhino.js');
+		steal('steal/build','steal/build/styles',function(){
 			var input = readFile('steal/build/styles/test/multiline.css'),
 				out = steal.build.builders.styles.min(input);
 			
@@ -43,8 +44,8 @@ steal('//steal/test/test', function( s ) {
 	});
 	
 	s.test.test("load the same css twice, but only once in prod", function(){
-		load('steal/rhino/steal.js');
-		steal.plugins('steal/build',
+		load('steal/rhino/rhino.js');
+		steal('steal/build',
 			'steal/build/styles',
 			function(){
 				steal.build('steal/build/styles/test/app/app.html',
