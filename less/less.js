@@ -1,3 +1,4 @@
+if (!navigator.userAgent.match(/Rhino/)) {
 /**
  * @add steal.static
  */
@@ -58,3 +59,6 @@ steal({src: "./less_engine.js",ignore: true},function(){
 
 	//@steal-remove-end
 })
+} else {
+	steal.less = function () {};
+}
