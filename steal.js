@@ -742,8 +742,8 @@
 				} else {
 					whenEach(files, "complete", self, "complete");
 				}
-				
-				each(files, function(){
+				// reverse it
+				each(files.reverse(), function(){
 					this.load();
 				});
 			} else if(joiner){
@@ -765,7 +765,7 @@
 			this.loading = true;
 			var self = this;
 			// get yourself
-			steal.require(this.options,this.orig, function(script){
+			steal.require(this.options,this.orig, function load_calling_loaded(script){
 				self.loaded(script);
 			}, function(error, src){
 				clearTimeout(self.completeTimeout)
@@ -1168,7 +1168,7 @@
 		
 		var type = types[converters.shift()];
 		
-		type.require(options, original, function(){
+		type.require(options, original, function require_continue_check(){
 			// if we have more types to convert
 			if(converters.length){
 				require(options, original, converters, success, error)
@@ -1245,7 +1245,7 @@ steal.type("text", function(options, original, success, error){
 	}, error)
 });
 
-steal.type("css", function(options, original, success, error){
+steal.type("css", function css_type(options, original, success, error){
 	if(options.text){
 		var css  = document.createElement('style')
 		if (css.styleSheet) { // IE
@@ -1489,10 +1489,10 @@ request = function(options, success, error){
 	// =============================== AOP ===============================
 	function before(f, before, changeArgs){
 		return changeArgs ? 
-			function(){
+			function before_changeArgs(){
 				return f.apply(this,before.apply(this,arguments));
 			}:
-			function(){
+			function before_args(){
 				before.apply(this,arguments);
 				return f.apply(this,arguments);
 			}
@@ -1507,10 +1507,10 @@ request = function(options, success, error){
 	function after(f, after, changeRet){
 		
 		return changeRet ?
-			function(){
+			function after_CRet(){
 				return after.apply(this,[f.apply(this,arguments)].concat(makeArray(arguments)));
 			}:
-			function(){
+			function after_Ret(){
 				var ret = f.apply(this,arguments);
 				after.apply(this,arguments);
 				return ret;
@@ -1521,6 +1521,8 @@ request = function(options, success, error){
 	function convert(ob, func){
 			
 		var oldFunc = ob[func];
+		
+		// if we don't have callbacks
 		if(!ob[func].callbacks){
 			//replace start with a function that will call ob2's method
 			ob[func] = function(){
@@ -1528,7 +1530,8 @@ request = function(options, success, error){
 					ret;
 				
 				// call the original function
-				ret = oldFunc.apply(ob,arguments)
+				ret = oldFunc.apply(ob,arguments);
+				
 				var cbs = me.callbacks,
 					len = cbs.length;
 				
@@ -1547,24 +1550,35 @@ request = function(options, success, error){
 
 		return ob[func];
 	};
+	
+	// maintains 
 	function join(obj, meth){
 		this.obj = obj;
 		this.meth = meth;
-		convert(obj, meth)
+		convert(obj, meth);
 		this.calls = 0
-	}
+	};
+	
 	extend(join.prototype,{
 		called : function(){
 			this.calls--;
 			this.go();
 		},
+		// adds functions that will call this join
 		add : function(obj, meth){
-			var f = convert(obj, meth)
+			// converts the function to be able to call 
+			// this join
+			var f = convert(obj, meth);
 			if(!f.called){
+				
+				// adds us to the callback ... the callback will call
+				// called
 				f.callbacks.push(this);
 				this.calls++;
 			}
 		},
+		// call go every time the funtion is called
+		
 		go : function(){
 			if(this.calls === 0){
 				this.obj[this.meth]()
@@ -1580,7 +1594,8 @@ request = function(options, success, error){
 	function when(){
 		// handle if we get called with a function
 		var args = makeArray(arguments),
-			last = args[args.length -1]
+			last = args[args.length -1];
+			
 		if(typeof last === 'function' ){
 			args[args.length -1] = {
 				'fn' : last
@@ -1602,21 +1617,20 @@ request = function(options, success, error){
 	
 	// =========== DEBUG =========
 	
-	if(steal.browser.rhino){
+	if(steal.browser.rhino && typeof console == 'undefined'){
 		console = {
 			log: function(){
 				print.apply(null, arguments)
 			}
 		}
 	}
-	
 	var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
 		return stel.options ? stel.options.rootSrc : "CONTAINER"
 	}
-	
+
 	/**
 	steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id)
@@ -1628,6 +1642,7 @@ request = function(options, success, error){
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
 	})*/
+
 	// ============= WINDOW LOAD ========
 	var addEvent = function(elem, type, fn) {
 		if ( elem.addEventListener ) {
@@ -1874,7 +1889,12 @@ if (support.interactive) {
 			}
 			else {
 				var steals = [];
-				
+				if (steal.options.loadDev !== false) {
+					steals.push({
+						src: 'steal/dev/dev.js',
+						ignore: true
+					});
+				}
 				//if you have a startFile load it
 				if (steal.options.startFile) {
 					//steal(steal.options.startFile);
@@ -1882,12 +1902,7 @@ if (support.interactive) {
 				//steal._start = new steal.fn.init(steal.options.startFile);
 				//steal.queue(steal._start);
 				}
-				if (steal.options.loadDev !== false) {
-					steals.push({
-						src: 'steal/dev/dev.js',
-						ignore: true
-					});
-				}
+				
 				if (steals.length) {
 					steal.apply(null, steals);
 				}
