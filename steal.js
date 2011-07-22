@@ -804,9 +804,7 @@
 		 * steal script and the window location.  For example, if the 
 		 * script tag looks like this:
 		 * 
-@codestart
-  <script type='text/javascript' src='../../steal/steal.js?ui/app'></script>
-@codeend
+		 *     <script type='text/javascript' src='../../steal/steal.js?ui/app'></script>
 		 * 
 		 * rootUrl will be set to "../../".
 		 * Setting the rootUrl can be useful if you want to have
@@ -1047,31 +1045,25 @@
 	 * Here's an example converting files of type .foo to JavaScript.  Foo is a fake language that saves global variables defined like.  A .foo file might 
 	 * look like this:
 	 * 
-@codestart javascript
-REQUIRED FOO
-@codeend
+	 *     REQUIRED FOO
 	 * 
 	 * To define this type, you'd call steal.type like this:
 	 * 
-@codestart javascript
-steal.type("foo js", function(options, original, success, error){
-	var parts = options.text.split(" ")
-	options.text = parts[0]+"='"+parts[1]+"'";
-	success();
-});
-@codeend
+	 *     steal.type("foo js", function(options, original, success, error){
+	 *       var parts = options.text.split(" ")
+	 *       options.text = parts[0]+"='"+parts[1]+"'";
+	 *       success();
+	 *     });
 	 * 
 	 * The method we provide is called with the text of .foo files in options.text. We parse the file, create 
 	 * JavaScript and put it in options.text.  Couldn't be simpler.
 	 * 
 	 * Here's an example, converting [http://jashkenas.github.com/coffee-script/ coffeescript] to JavaScript:
 	 * 
-@codestart javascript
-steal.type("coffee js", function(options, original, success, error){
-	options.text = CoffeeScript.compile(options.text);
-	success();
-});
-@codeend
+	 *     steal.type("coffee js", function(options, original, success, error){
+	 *       options.text = CoffeeScript.compile(options.text);
+	 *       success();
+	 *     });
 	 * 
 	 * In this example, any time steal encounters a file with
 	 * extension .coffee, it will call the given 
@@ -1080,17 +1072,15 @@ steal.type("coffee js", function(options, original, success, error){
 	 * 
 	 * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can be converted to CSS:
 	 * 
-@codestart javascript
-steal.type("less css", function(options, original, success, error){
-	new (less.Parser)({
-        optimization: less.optimization,
-        paths: []
-    }).parse(options.text, function (e, root) {
-		options.text = root.toCSS();
-		success();
-	});
-});
-@codeend
+	 *     steal.type("less css", function(options, original, success, error){
+	 *       new (less.Parser)({
+	 *         optimization: less.optimization,
+	 *         paths: []
+   	 *       }).parse(options.text, function (e, root) {
+   	 *         options.text = root.toCSS();
+   	 *         success();
+   	 *       });
+	 *     });
 	 * 
 	 * This simple type system could be used to convert any file type to be used in your JavaScript app.  For example, 
 	 * [http://fdik.org/yml/ yml] could be used for configuration.  jQueryMX uses steal.type to support JS templates, such as EJS, TMPL, and others.
@@ -1106,10 +1096,10 @@ steal.type("less css", function(options, original, success, error){
 	 * to a basic type.  This method needs to do two things: 1) save the text of the converted file in options.text 
 	 * and 2) call success() when the conversion is done (it can work asynchronously).
 	 * 
-  - __options__ - the steal options for this file, including path information
-  - __original__ - the original argument passed to steal, which might be a path or a function
-  - __success__ - a method to call when the file is converted and processed successfully
-  - __error__ - a method called if the conversion fails or the file doesn't exist
+	 * - __options__ - the steal options for this file, including path information
+	 * - __original__ - the original argument passed to steal, which might be a path or a function
+	 * - __success__ - a method to call when the file is converted and processed successfully
+	 * - __error__ - a method called if the conversion fails or the file doesn't exist
 	 */
 	type = function(type, cb){
 		var typs = type.split(" ");
