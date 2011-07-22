@@ -1,10 +1,8 @@
-/**
- * @add steal.static
- */
 steal({src: "./less_engine.js",ignore: true},function(){
 	
 	/**
-	 * @function less
+	 * @page steal.less Less
+	 * @parent steal.static.type
 	 * @plugin steal/less
 	 * <p>Lets you build and compile [http://lesscss.org/ Less ] css styles.</p>
 	 * <p>Less is an extension of CSS that adds variables, mixins, and quite a bit more.
@@ -26,21 +24,19 @@ steal({src: "./less_engine.js",ignore: true},function(){
 	 * 
 	 * body { color:  @@my_color; }
 	 * @codeend
-	 * <p>Save this in a file named <code>red.less</code>.</p>
-	 * <p>Next, you have to require the <code>steal/less</code> plugin and then use
-	 * steal.less to load your less style:
-	 * </p>
+	 * 
+	 * Save this in a file named <code>red.less</code>.
+	 * 
+	 * Next, steal the <code>steal/less</code> plugin, wait for it to finish loading
+	 * (by using [steal.static.then then]) and then load the less file:
+	 * 
 	 * @codestart
-	 * steal('steal/less').then(function(){
-	 *   steal.less('red');
-	 * });
+	 * steal('steal/less').then('./red.less');
 	 * @codeend
 	 *
 	 * Loads Less files relative to the current file.  It's expected that all
 	 * Less files end with <code>less</code>.
-	 * @param {String+} path the relative path from the current file to the less file.
-	 * You can pass multiple paths.
-	 * @return {steal} returns the steal function.
+	 * 
 	 */
 	
 	steal.type("less css", function(options, original, success, error){
@@ -54,9 +50,4 @@ steal({src: "./less_engine.js",ignore: true},function(){
 			success();
 		});
 	});
-	
-	
-	//@steal-remove-start
-
-	//@steal-remove-end
 })

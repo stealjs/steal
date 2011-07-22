@@ -72,17 +72,75 @@
 	 * @class steal
 	 * @parent stealjs
 	 * 
-	 * <code>steal</code> is used to load scripts, css, and 
+	 * __steal__ is a function that loads scripts, css, and 
 	 * other resources into your application.
 	 * 
-	 * ## Adding steal to your page
+	 *     steal(FILE_or_FUNCTION, ...)
 	 * 
-	 * After installing StealJS (or JavaScriptMVC)
-	 * in a public folder on your server, you should 
-	 * have a <code>steal</code> folder with
+	 * ## Quick Walkthrough
+	 * 
+	 * Add a script tag that loads <code>steal/steal.js</code> and add
+	 * the path to the first file to load in the query string like:
+	 * 
+	 * &lt;script type='text/javascript'
+	 *     src='../steal/steal.js?myapp/myapp.js'>
+	 * &lt;/script>
+	 * 
+	 * Then, start loading things and using them like:
+	 * 
+	 *     steal('myapp/tabs.js',
+	 *           'myapp/slider.js', 
+	 *           'myapp/style.css',function(){
+	 *     
+	 *        // tabs and slider have loaded 
+	 *        $('#tabs').tabs();
+	 *        $('#slider').slider()
+	 *     })
+	 * 
+	 * Make sure your widgets load their dependencies too:
+	 * 
+	 *     // myapp/tabs.js
+	 *     steal('jquery', function(){
+	 *       $.fn.tabs = function(){
+	 *        ...
+	 *       }
+	 *     })
+	 * 
+	 * ## Examples:
+	 * 
+	 *     // Loads ROOT/jquery/controller/controller.js
+	 *     steal('jquery/controller')
+	 *     steal('jquery/controller/controller.js')
+	 *     
+	 *     // Loads coffee script type and a coffee file relative to
+	 *     // the current file
+	 *     steal('steal/coffee').then('./mycoffee.coffee')
+	 *     
+	 *     // Load 2 files and dependencies in parallel and
+	 *     // callback when both have completed
+	 *     steal('jquery/controller','jquery/model', function(){
+	 *       // $.Controller and $.Model are available
+	 *     })
+	 *     
+	 *     // Loads a coffee script with a non-standard extension (cf)
+	 *     // relative to the current page and instructs the build
+	 *     // system to not package it (but it will still be loaded).
+	 *     steal({
+	 *        src: "./foo.cf",
+	 *        packaged: false,
+	 *        type: "coffee"
+	 *      })
+	 * 
+	 * The following is a longer walkthrough of how to install
+	 * and use steal:
+	 * 
+	 * ## Adding steal to a page
+	 * 
+	 * After installing StealJS (or JavaScriptMVC), 
+	 * find the <code>steal</code> folder with
 	 * <code>steal/steal.js</code>. 
 	 * 
-	 * To use steal, you must add a script tag
+	 * To use steal, add a script tag
 	 * to <code>steal/steal.js</code> to your
 	 * html pages.  
 	 * 
@@ -255,70 +313,69 @@
 	 * Loads resources specified by each argument.  By default, resources
 	 * are loaded in parallel and run in any order.
 	 * 
-	 * Examples:
-	 * 
-	 *     // Loads ROOT/jquery/controller/controller.js
-	 *     steal('jquery/controller')
-	 *     steal('jquery/controller/controller.js')
-	 *     
-	 *     // Loads coffee script type and a coffee file relative to
-	 *     // the current file
-	 *     steal('steal/coffee').then('./mycoffee.coffee')
-	 *     
-	 *     // Load 2 files and dependencies in parallel and
-	 *     // callback when both have completed
-	 *     steal('jquery/controller','jquery/model', function(){
-	 *       // $.Controller and $.Model are available
-	 *     })
-	 *     
-	 *     // Loads a coffee script with a non-standard extension (cf)
-	 *     // relative to the current page and instructs the build
-	 *     // system to not package it (but it will still be loaded).
-	 *     steal({
-	 *        src: "./foo.cf",
-	 *        packaged: false,
-	 *        type: "coffee"
-	 *      })
 	 * 
 	 * @param {String|Function|Object} resource... 
 	 * 
-	 * Each argument specifies a resource.  Resources can be given as an:
+	 * Each argument specifies a resource.  Resources can 
+	 * be given as a:
 	 * 
-	 *  - __Object__ - options specifiy the behavior of this 
-	 *    resource.  The available options are:
-	 *    
-	 *    - __src__ {*String*} - the path to the resource.  
-	 *    
-	 *    - __waits__ {*Boolean default=false*} - true the resource should wait 
-	 *      for prior steals to load and run. False if the resource should load and run in
-	 *      parallel.  This defaults to true for functions.
+	 * ### Object
 	 *  
-	 *    - __unique__ {*Boolean default=true*} - true if this is a unique resource 
-	 *      that 'owns' this url.  This is true for files, false for functions.
+	 * An object that specifies the loading and build 
+	 * behavior of a resource.  
+	 *    
+	 *      steal({
+	 *        src: "myfile.cf",
+	 *        type: "coffee",
+	 *        packaged: true,
+	 *        unique: true,
+	 *        ignore: false,
+	 *        waits: false
+	 *      })
+	 *    
+	 * The available options are:
+	 *    
+	 *  - __src__ {*String*} - the path to the resource.  
+	 *    
+	 *  - __waits__ {*Boolean default=false*} - true the resource should wait 
+	 *    for prior steals to load and run. False if the resource should load and run in
+	 *    parallel.  This defaults to true for functions.
+	 *  
+	 *  - __unique__ {*Boolean default=true*} - true if this is a unique resource 
+	 *    that 'owns' this url.  This is true for files, false for functions.
 	 *             
-	 *    - __ignore__ {*Boolean default=false*} - true if this resource should
-	 *      not be built into a production file and not loaded in
-	 *      production.  This is great for script that should only be available
-	 *      in development mode.
+	 *  - __ignore__ {*Boolean default=false*} - true if this resource should
+	 *    not be built into a production file and not loaded in
+	 *    production.  This is great for script that should only be available
+	 *    in development mode.
 	 *  
-	 *    - __packaged__ {*Boolean default=true*} - true if the script should be built
-	 *      into the production file. false if the script should not be built
-	 *      into the production file, but still loaded.  This is useful for 
-	 *      loading 'packages'.
+	 *  - __packaged__ {*Boolean default=true*} - true if the script should be built
+	 *    into the production file. false if the script should not be built
+	 *    into the production file, but still loaded.  This is useful for 
+	 *    loading 'packages'.
 	 * 
-	 *    - __type__ {*String default="js"*} - the type of the resource.  This 
-	 *      is typically inferred from the src.
+	 *  - __type__ {*String default="js"*} - the type of the resource.  This 
+	 *    is typically inferred from the src.
 	 * 
-	 *  - __String__ - the src of the resource.  For example:
+	 * ### __String__
 	 *  
-	 *         steal('./file.js')
+	 * Specifies src of the resource.  For example:
+	 *  
+	 *       steal('./file.js')
 	 *         
-	 *    Is the same as calling:
+	 * Is the same as calling:
 	 *      
-	 *         steal({src: './file.js'})
+	 *       steal({src: './file.js'})
 	 *  
-	 *  - __Function__ - a callback function that runs when all previous steals
-	 *    have completed.
+	 * ### __Function__ 
+	 *  
+	 * A callback function that runs when all previous steals
+	 * have completed.
+	 *    
+	 *     steal('jquery', 'foo',function(){
+	 *       // jquery and foo have finished loading
+	 *       // and runing
+	 *     })
 	 * 
 	 * @return {steal} the steal object for chaining
 	 */
@@ -1150,10 +1207,10 @@ steal.type("less css", function(options, original, success, error){
 	 * Called for every file that is loaded.  It sets up a string of methods called for each type in the conversion chain and calls each type one by one.  
 	 * 
 	 * For example, if the file is a coffeescript file, here's what happens:
-
-  - The "text" type converter is called first.  This will perform an AJAX request for the file and save it in options.text.  
-  - Then the coffee type converter is called (the user provided method).  This converts the text from coffeescript to JavaScript.  
-  - Finally the "js" type converter is called, which inserts the JavaScript in the page as a script tag that is executed. 
+	 * 
+	 *   - The "text" type converter is called first.  This will perform an AJAX request for the file and save it in options.text.  
+	 *   - Then the coffee type converter is called (the user provided method).  This converts the text from coffeescript to JavaScript.  
+	 *   - Finally the "js" type converter is called, which inserts the JavaScript in the page as a script tag that is executed. 
 	 * 
 	 * @param {Object} options the steal options for this file, including path information
 	 * @param {Object} original the original argument passed to steal, which might be a path or a function
