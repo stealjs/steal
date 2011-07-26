@@ -6,64 +6,59 @@ var window = (function() {
 	url;
 
 /**
- * url, options
+ * @function steal.html
+ * @parent stealjs
+ * Loads a page in Envjs and gets it's HTML when it's ready.
  * 
- * options
+ * http://code.google.com/web/ajaxcrawling/docs/getting-started.html
  * 
- *   - page
+ *     // writes the html to the command line: 
+ *     load('steal/rhino/rhino.js')
+ *     steal('steal/html', function(){
+ *     	steal.html("page.html#Hello+World!")
+ *     })
+ * 
+ * 
+ * @param {String} urlo the url of the page to open. The url should be 
+ *   relative to [steal.static.root steal.root] or a website.
+ * @param {Object|Function} opts
  */
 var html = steal.html = function(urlo, opts){
-	options = opts;
-	url = urlo;
 	
-	load('steal/rhino/env.js');
+	var url = url,
+		options = opts;
 	
-	Envjs(urlo, {
-		scriptTypes: {
-			"text/javascript": true,
-			"text/envjs": true,
-			"": true
-		},
-		logLevel: 2,
-		dontPrintUserAgent: true,
-	});
-		
-	var newSteal = window.steal;
-	
-	newSteal.one('done',function(init){
+	steal.html.load(urlo, function(helpers){
+		var html = helpers.html();
+		if(typeof opts === "function"){
+			opts(html)
+		} else {
+			print(html)
+		}
+	})
 
-		newSteal.html.onready(function(){
-			var html = getDocType()+"\n"+document.innerHTML;
-			if(typeof opts === "function"){
-				opts(html)
-			} else {
-				print(html)
-			}
-		})
-	});
 	
 	
 },
 	options,
-	count,
-	getDocType  = function(){
-		var content;
-		if(s.File(url).domain() === null){
-			content = readFile(s.File(url).clean());
-		} else {
-			content = readUrl(url);
-		}
-		var docTypes = content.match( /<!doctype[^>]+>/i );
-		return docTypes ? docTypes[0] : "";
-	};
+	count;
 // wait for steal.done
 	
 var count = 0,
 	readyFunc;
-
+/**
+ * @function steal.html.wait
+ * @parent steal.html
+ * Waits for the html to finish
+ */
 html.wait = function(){
 	count++;
 };
+/**
+ * @function steal.html.ready
+ * @parent steal.html
+ * Lets the page know it's ready to render the html
+ */
 html.ready = function(){
 	count--;
 	if(readyFunc && count <= 0){
@@ -78,5 +73,40 @@ html.onready = function(func){
 	}
 };
 
+html.load = function(url, callback){
+	
+	load('steal/rhino/env.js');
+	
+	Envjs(url, {
+		scriptTypes: {
+			"text/javascript": true,
+			"text/envjs": true,
+			"": true
+		},
+		logLevel: 2,
+		dontPrintUserAgent: true,
+	});
+		
+	var newSteal = window.steal,
+		getDocType  = function(){
+			var content;
+			if(s.File(url).domain() === null){
+				content = readFile(s.File(url).clean());
+			} else {
+				content = readUrl(url);
+			}
+			var docTypes = content.match( /<!doctype[^>]+>/i );
+			return docTypes ? docTypes[0] : "";
+		};
+	
+	newSteal.one('done', function(){
+		callback({
+			newSteal : newSteal,
+			html : function(){
+				return getDocType()+"\n"+document.innerHTML
+			}
+		})
+	} );
+};
 
 });

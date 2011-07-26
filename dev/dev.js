@@ -1,4 +1,5 @@
 /*global  window: false, console: true, opera: true */
+//
 /**
  * @class steal.dev
  * @parent stealjs

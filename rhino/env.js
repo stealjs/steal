@@ -8730,7 +8730,7 @@ __extend__(HTMLAnchorElement.prototype, {
         if (!link) {
             return '';
         }
-        return Envjs.uri(link, this.ownerDocument.location.toString());
+        return Envjs.uri(link, this.ownerDocument.location.toString(), true);
     },
     set href(val) {
         return this.setAttribute("href", val);
@@ -9977,7 +9977,7 @@ __extend__(HTMLLinkElement.prototype, {
         this.setAttribute('charset',value);
     },
     get href(){
-        return this.getAttribute('href');
+		return this.getAttribute('href');
     },
     set href(value){
         this.setAttribute('href',value);
@@ -24195,6 +24195,10 @@ Location = function(url, doc, history) {
             if ($history) {
                 $history.add($url, 'hash');
             }
+            //console.log('triggering window.hashchange');
+            event = doc.createEvent('HTMLEvents');
+            event.initEvent('hashchange', false, false);
+            window.dispatchEvent( event, false );
         },
 
         get host() {
@@ -25373,6 +25377,8 @@ Window = function(scope, parent, opener){
         //onunload: function(){},
 		focus: function(){},
 		blur: function(){},
+		get onhashchange(){},
+		set onhashchange(){},
         get guid(){
             return $uuid;
         }
