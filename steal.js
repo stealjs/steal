@@ -1305,9 +1305,11 @@ steal.type("text", function(options, original, success, error){
 steal.type("css", function css_type(options, original, success, error){
 	if(options.text){
 		var css  = document.createElement('style')
-		if (css.styleSheet) { // IE
-            css.styleSheet.cssText = options.text;
-	    } else {
+		if (typeof css.styleSheet != 'undefined') { // IE
+			setTimeout(function () {
+				css.styleSheet.cssText = options.text;
+			}, 10);
+		} else {
 	        (function (node) {
 	            if (css.childNodes.length > 0) {
 	                if (css.firstChild.nodeValue !== node.nodeValue) {
