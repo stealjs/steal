@@ -12,6 +12,8 @@ var window = (function() {
  * 
  * http://code.google.com/web/ajaxcrawling/docs/getting-started.html
  * 
+ *     <meta name="fragment" content="!">
+ * 
  *     // writes the html to the command line: 
  *     load('steal/rhino/rhino.js')
  *     steal('steal/html', function(){
@@ -61,6 +63,7 @@ html.wait = function(){
  */
 html.ready = function(){
 	count--;
+	//print("    readyC "+count)
 	if(readyFunc && count <= 0){
 		readyFunc();
 	}
@@ -68,6 +71,7 @@ html.ready = function(){
 };
 html.onready = function(func){
 	readyFunc = func;
+	
 	if(count <= 0){
 		readyFunc();
 	}
