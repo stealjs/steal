@@ -55,6 +55,11 @@ steal('steal/test', "steal/generate")
 		s.test.equals(res, expected, "insertSteal is working");
 		s.test.remove(testFile)
 		
+	});
+	s.test.test("insertSteal blank", function(){
+		var testFile = "steal/generate/test/insertSteal.js",
+			expectedFile = "steal/generate/test/insertStealExpected.js"
+		
 		steal.File(testFile).save("");
 		steal.generate.insertSteal(testFile,"bar");
 		
@@ -64,7 +69,18 @@ steal('steal/test', "steal/generate")
 		s.test.equals(res, expected, "insertSteal is working");
 		s.test.remove(testFile)
 		
-		s.test.clear();
+	});
+	s.test.test("insertSteal ordering", function(){
+		var testFile = "steal/generate/test/insertSteal.js",
+			expectedFile = "steal/generate/test/insertStealExpected.js"
 		
+		steal.File(testFile).save("steal('foo').then('zoo');");
+		steal.generate.insertSteal(testFile,"bar");
+		
+		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
+			expected = "steal('foo').then('bar','zoo');"
+			
+		s.test.equals(res, expected, "insertSteal is working");
+		s.test.remove(testFile)
 	});
 })

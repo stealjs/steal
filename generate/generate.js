@@ -213,6 +213,37 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 				appName: generate.underscore(appName)
 			};
 		},
+		insertCode: function( destination, newCode ){
+			// get file, parse it
+			var fileTxt = readFile(destination),
+				parser =  steal.parse(fileTxt),
+				tokens = [],
+				lastToken,
+				token;
+
+			// parse until function(){
+			while (token = parser.until(["function", "(", ")"])) {
+				if (token) {
+					parser.partner("{", function(token){
+						if (token.value == "}") {
+							lastToken = token;
+						}
+						print("TOKEN = " + token.value, token.type, token.from, token.to)
+					})
+				}
+			}
+			
+			
+			// insert steal
+			if(lastToken){
+				fileTxt = fileTxt.slice(0, lastToken.from) 
+					+ newCode + "\n" + fileTxt.slice(lastToken.from)
+			}
+			
+			steal.print('      ' + destination + ' (code added)');
+			// save back to original file destination
+			steal.File(destination).save(fileTxt);
+		},
 		/**
 		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
 		 * 
@@ -223,8 +254,8 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 *   
 		 *   It will try to put the new steal before the last function first
 		 *   
-		 * @param {Object} destination a path to the script we're inserting a steal into
-		 * @param {Object} newStealPath the new steal path to be inserted
+		 * @param {String} destination a path to the script we're inserting a steal into
+		 * @param {String} newStealPath the new steal path to be inserted
 		 */
 		insertSteal: function( destination, newStealPath ){
 			// get file, parse it
@@ -232,23 +263,25 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 				parser =  steal.parse(fileTxt),
 				tokens = [],
 				lastToken,
+				token,
 				duplicate = false;
 
 			// parse until steal(
-			var token = parser.until(["steal", "("]);
-			if (token) {
-				parser.partner("(", function(token){
-					if (token.type == "name" || token.type == "string") {
-						lastToken = token;
-					}
-					if (token.type === "string" && token.value === newStealPath ){ // duplicate
-						duplicate = true;
-					}
-//					print("TOKEN = " + token.value, token.type, token.from, token.to)
-				})
-			}
-			if(duplicate){
-				return;
+			while (token = parser.until(["steal", "("], [".","then","("])) {
+				if (token) {
+					parser.partner("(", function(token){
+						if (token.type == "name" || token.type == "string") {
+							lastToken = token;
+						}
+						if (token.type === "string" && token.value === newStealPath) { // duplicate
+							duplicate = true;
+						}
+//						print("TOKEN = " + token.value, token.type, token.from, token.to)
+					})
+				}
+				if (duplicate) {
+					throw {type: "DUPLICATE"}
+				}
 			}
 			
 			
