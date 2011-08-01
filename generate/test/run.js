@@ -1,7 +1,7 @@
 load('steal/rhino/rhino.js')
 
 steal('steal/test', "steal/generate")
-	.then('steal/generate/system.js').then(function(){
+	.then('steal/generate/system.js').then(function(s){
 	_S = steal.test;
 	
 	//turn off printing
@@ -22,4 +22,49 @@ steal('steal/test', "steal/generate")
 	steal.File("foo").removeDir();
 	
 	print("== complete ==\n")
+	
+	
+
+	/**
+	 * Tests 4 cases:
+	 * 1. steal(function(){})
+	 * 2. steal("foo", function(){})
+	 * 3. steal("foo")
+	 * 4. no steal in the page initially
+	 */
+	s.test.test("insertSteal", function(){
+		var testFile = "steal/generate/test/insertSteal.js",
+			expectedFile = "steal/generate/test/insertStealExpected.js"
+		
+		// make blank file
+		steal.File(testFile).save("steal(function(){})");
+		steal.generate.insertSteal(testFile,"foo");
+		steal.generate.insertSteal(testFile,"bar");
+		
+		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
+			expected = "steal('foo','bar',function(){})"
+		s.test.equals(res, expected, "insertSteal is working");
+		s.test.remove(testFile)
+		
+		steal.File(testFile).save("steal('foo')");
+		steal.generate.insertSteal(testFile,"bar");
+		
+		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
+			expected = "steal('bar','foo')"
+			
+		s.test.equals(res, expected, "insertSteal is working");
+		s.test.remove(testFile)
+		
+		steal.File(testFile).save("");
+		steal.generate.insertSteal(testFile,"bar");
+		
+		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
+			expected = "steal('bar')"
+			
+		s.test.equals(res, expected, "insertSteal is working");
+		s.test.remove(testFile)
+		
+		s.test.clear();
+		
+	});
 })
