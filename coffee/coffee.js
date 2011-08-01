@@ -1,13 +1,11 @@
-/**
- * @add steal.static
- */
 steal({
 	src: "./coffee-script.js",
 	ignore: true
 }, function() {
 
 	/**
-	 * @function coffee
+	 * @page steal.coffee CoffeeScript
+	 * @parent steal.static.type
 	 * @plugin steal/coffee
 	 * <p>Requires a [http://jashkenas.github.com/coffee-script/ CoffeeScript] script.</p>
 	 * 
