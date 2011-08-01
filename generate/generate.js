@@ -1,4 +1,5 @@
-steal("steal/generate/ejs.js", 'steal/generate/inflector.js', 'steal/rhino/prompt.js', function( steal ) {
+steal("steal/generate/ejs.js", 'steal/generate/inflector.js', 
+	'steal/parse', 'steal/rhino/prompt.js', function( steal ) {
 
 	var render = function( from, to, data ) {
 		var text = readFile(from);
@@ -211,6 +212,57 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js', 'steal/rhino/promp
 				plural: steal.Inflector.pluralize(generate.underscore(className)),
 				appName: generate.underscore(appName)
 			};
+		},
+		/**
+		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
+		 * 
+		 *   1. Page already looks like steal("a", function(){})
+		 *   1. Page already looks like steal(function(){})
+		 *   1. Page has no steals
+		 *   1. Page already looks like steal("a")
+		 *   
+		 *   It will try to put the new steal before the last function first
+		 *   
+		 * @param {Object} destination a path to the script we're inserting a steal into
+		 * @param {Object} newStealPath the new steal path to be inserted
+		 */
+		insertSteal: function( destination, newStealPath ){
+			// get file, parse it
+			var fileTxt = readFile(destination),
+				parser =  steal.parse(fileTxt),
+				tokens = [],
+				lastToken,
+				duplicate = false;
+
+			// parse until steal(
+			var token = parser.until(["steal", "("]);
+			if (token) {
+				parser.partner("(", function(token){
+					if (token.type == "name" || token.type == "string") {
+						lastToken = token;
+					}
+					if (token.type === "string" && token.value === newStealPath ){ // duplicate
+						duplicate = true;
+					}
+//					print("TOKEN = " + token.value, token.type, token.from, token.to)
+				})
+			}
+			if(duplicate){
+				return;
+			}
+			
+			
+			// insert steal
+			if(lastToken){
+				fileTxt = fileTxt.slice(0, lastToken.from) 
+					+ "'" + newStealPath + "', " + fileTxt.slice(lastToken.from)
+			} else { // no steal found
+				fileTxt += "steal('" + newStealPath +"')"
+			}
+			
+			steal.print('      ' + destination + ' (steal added)');
+			// save back to original file destination
+			steal.File(destination).save(fileTxt);
 		},
 		render: render
 	});
