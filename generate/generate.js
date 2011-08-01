@@ -228,7 +228,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 						if (token.value == "}") {
 							lastToken = token;
 						}
-						print("TOKEN = " + token.value, token.type, token.from, token.to)
+//						print("TOKEN = " + token.value, token.type, token.from, token.to)
 					})
 				}
 			}
