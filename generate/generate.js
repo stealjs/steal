@@ -205,6 +205,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 			var appName = name.split(".")[0]; //Customer
 			return {
 				underscore: generate.underscore(className),
+				plugin : generate.underscore(name.replace(/\./g, "_")),
 				path: generate.underscore(name).replace(/\./g, "/").replace(/\/[^\/]*$/, ""),
 				name: name,
 				fullName: name,
