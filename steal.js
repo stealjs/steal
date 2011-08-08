@@ -51,16 +51,17 @@
 			}
 		},
 		support = {
-			error: win.document && (function(){
+			error: doc && (function(){
 				var script = scriptTag();
 				script.setAttribute( "onerror", "return;" );
-    			if (typeof script["onerror"] === "function") {
+				if (typeof script["onerror"] === "function") {
 					return true;
 				}
 				else 
 					return "onerror" in script;
 			})(),
-			interactive: win.document && "attachEvent" in scriptTag()
+			interactive: doc && "attachEvent" in scriptTag()
+			
 		},
 		startup = function(){},
 		oldsteal = win.steal,
@@ -973,15 +974,18 @@
 			}
 			
 			var orig = options.src,
+				// path relative to the current files path
+				// this is done relative to jmvcroot
 				normalized = steal.File(orig).normalize(),
 				protocol = steal.File(options.src).protocol();
 				
 			extend(options,{
 				originalSrc : options.src,
 				rootSrc : normalized,
+				// path from the page
 				src : steal.root.join(normalized),
 				// "file:" or "http:" depending on what protocol the request uses
-				protocol: protocol || (win.document? location.protocol: "file:")
+				protocol: protocol || (doc? location.protocol: "file:")
 			});
 			options.originalSrc = options.src;
 			
@@ -1133,10 +1137,10 @@
 	 *       new (less.Parser)({
 	 *         optimization: less.optimization,
 	 *         paths: []
-   	 *       }).parse(options.text, function (e, root) {
-   	 *         options.text = root.toCSS();
-   	 *         success();
-   	 *       });
+	 *       }).parse(options.text, function (e, root) {
+	 *         options.text = root.toCSS();
+	 *         success();
+	 *       });
 	 *     });
 	 * 
 	 * This simple type system could be used to convert any file type to be used in your JavaScript app.  For example, 
@@ -1302,24 +1306,52 @@ steal.type("text", function(options, original, success, error){
 	}, error)
 });
 
+var cssCount = 0,
+	createSheet = doc && doc.createStyleSheet,
+	lastSheet,
+	lastSheetOptions;
+
 steal.type("css", function css_type(options, original, success, error){
 	if(options.text){
-		var css  = document.createElement('style')
+		var css  = doc[STR_CREATE_ELEMENT]('style');
+		
 		if (css.styleSheet) { // IE
-            css.styleSheet.cssText = options.text;
-	    } else {
-	        (function (node) {
-	            if (css.childNodes.length > 0) {
-	                if (css.firstChild.nodeValue !== node.nodeValue) {
-	                    css.replaceChild(node, css.firstChild);
-	                }
-	            } else {
-	                css.appendChild(node);
-	            }
-	        })(document.createTextNode(options.text));
-	    }
+			css.styleSheet.cssText = options.text;
+		} else {
+			(function (node) {
+				if (css.childNodes.length > 0) {
+					if (css.firstChild.nodeValue !== node.nodeValue) {
+						css.replaceChild(node, css.firstChild);
+					}
+				} else {
+					css.appendChild(node);
+				}
+			})(doc.createTextNode(options.text));
+		}
 		head().appendChild(css);
 	} else {
+		if( createSheet ){
+			// IE has a 31 sheet and 31 import per sheet limit
+			if(cssCount == 0){
+				lastSheet = createSheet(options.src);
+				lastSheetOptions = options;
+				cssCount++;
+			} else {
+				var relative = File(options.src).joinFrom(
+					File(lastSheetOptions.src).dir());
+					
+				console.log(relative);
+				lastSheet.addImport( relative );
+				cssCount++;
+				if(cssCount == 30){
+					cssCount = 0;
+				}
+			}
+			success()
+			return;
+		}
+
+		
 		options = options || {};
 		var link = doc[STR_CREATE_ELEMENT]('link');
 		link.rel = options.rel || "stylesheet";
@@ -1363,7 +1395,7 @@ request = function(options, success, error){
 		check = function(){
 			if ( request.readyState === 4 )  {
 				if ( request.status === 500 || request.status === 404 || 
-				     request.status === 2 || 
+					 request.status === 2 || 
 					 (request.status === 0 && request.responseText === '') ) {
 					error && error();
 					clean();
@@ -1504,16 +1536,16 @@ request = function(options, success, error){
 		// check if jQuery loaded after every script load ...
 		steal.p.loaded = before(steal.p.loaded, function(){
 	
-	        var $ = typeof jQuery !== "undefined" ? jQuery : null;
-	        if ($ && "readyWait" in $) {
-	            
-	            //Increment jQuery readyWait if ncecessary.
-	            if (!jQueryIncremented) {
-	                jQ = $;
+			var $ = typeof jQuery !== "undefined" ? jQuery : null;
+			if ($ && "readyWait" in $) {
+				
+				//Increment jQuery readyWait if ncecessary.
+				if (!jQueryIncremented) {
+					jQ = $;
 					$.readyWait += 1;
-	                jQueryIncremented = true;
-	            }
-	        }
+					jQueryIncremented = true;
+				}
+			}
 		});
 		
 		// once the current batch is done, fire ready if it hasn't already been done
@@ -1521,7 +1553,7 @@ request = function(options, success, error){
 			if (jQueryIncremented && !ready) {
 				jQ.ready(true);
 				ready = true;
-	        }
+			}
 		})
 
 		
@@ -1792,24 +1824,24 @@ var interactiveScript,
 	// key is script name, value is array of pending items
 	interactives = {},
 	getInteractiveScript = function() {
-	    var scripts, i, script;
-	    if (interactiveScript && interactiveScript.readyState === 'interactive') {
-	        return interactiveScript;
-	    }
+		var scripts, i, script;
+		if (interactiveScript && interactiveScript.readyState === 'interactive') {
+			return interactiveScript;
+		}
 		
-	    scripts = document.getElementsByTagName('script');
-	    for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
-	        if (script.readyState === 'interactive') {
-	            return script;
-	        }
-	    }
+		scripts = document.getElementsByTagName('script');
+		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
+			if (script.readyState === 'interactive') {
+				return script;
+			}
+		}
 		
 		// check last inserted
 		if(lastInserted && lastInserted.readyState == 'interactive'){
 			return lastInserted;
 		}
 	
-	    return null;
+		return null;
 	}
 
 if (support.interactive) {
