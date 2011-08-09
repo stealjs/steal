@@ -300,6 +300,7 @@
 			if (!isFile ) {
 				myFolders.push('..')
 			}
+
 			return myFolders.join("/")
 		}
 	});
