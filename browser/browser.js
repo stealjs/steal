@@ -14,7 +14,6 @@
 			return this;
 		},
 		trigger: function(eventName, data){
-//			console.log("trigger: "+eventName)
 			this._events[eventName](data);
 		},
 		// shut down server or just kill the browser instance
@@ -22,7 +21,8 @@
 		// adds commandline=true&browser=selenium
 		// if there are already params, appends them, otherwise, adds params
 		_appendParamsToUrl: function(url){
-			var params = "mode=commandline&browser=" + this.type;
+			// should be & separated, but but in phantomjs prevents that url from being read, so we use a comma
+			var params = "mode=commandline,browser=" + this.type;
 			if (/\?/.test(url)) {
 				url += "&" + params;
 			}
