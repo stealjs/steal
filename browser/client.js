@@ -26,6 +26,9 @@ steal('jquery', function(){
 		}
 	}
 	else if (/browser=phantomjs/.test(window.location.search)) {
+		if(!$('iframe').length){
+			$("<iframe></iframe>").appendTo(document.body)
+		}
 		steal.client.dataQueue = []
 		steal.client.trigger = function(type, data){
 			steal.client.dataQueue.push({
@@ -35,13 +38,13 @@ steal('jquery', function(){
 			if(type == "done"){
 				setTimeout(function(){
 					alert('phantomexit')
-				}, 1000)
+				}, 400)
 			}
 		}
 		var sender = function(){
 			$.get("http://localhost:3001?"+encodeURIComponent(JSON.stringify(steal.client.dataQueue)))
 			steal.client.dataQueue = [];
-			setTimeout(arguments.callee, 500);
+			setTimeout(arguments.callee, 200);
 		}
 		sender();
 	}

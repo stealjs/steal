@@ -30,12 +30,6 @@ steal.browser.prototype.simpleServer = function(){
 			done = true;
 		}
 	}
-	
-	prtw.println("HTTP/1.0 200 OK");
-	prtw.println("Content-type: text/plain");
-	prtw.println();
-	prtw.println("Here is your request...");
-	
 	prtw.flush();
 	
 	bufr.close();
