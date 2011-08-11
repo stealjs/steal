@@ -21,27 +21,20 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 			return this;
 		},
 		_poll: function(){
-			var keepPolling = true;
 			if(DATA.length){
 				eval("var res = "+decodeURIComponent(unescape(DATA)))
 				// parse data into res
 				for (var i = 0; i < res.length; i++) {
 					evt = res[i];
+					this.trigger(evt.type, evt.data);
 					if (evt.type == "done") {
-						keepPolling = false;
 						quit();
-					}
-					else {
-						this.trigger(evt.type, evt.data);
 					}
 				}
 			}
 			DATA = "";
-			// keep polling
-			if (keepPolling) {
-				java.lang.Thread.currentThread().sleep(200);
-				arguments.callee.apply(this);
-			}
+			java.lang.Thread.currentThread().sleep(500);
+			arguments.callee.apply(this);
 		}
 	})
 })

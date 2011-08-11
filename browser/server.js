@@ -2,7 +2,7 @@
 
 steal.browser.prototype.simpleServer = function(){
 	
-	var serv = new java.net.ServerSocket(3001);
+	var serv = new java.net.ServerSocket(5555);
 	
 	var sock = serv.accept();
 	var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream()));

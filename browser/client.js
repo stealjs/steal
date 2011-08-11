@@ -36,15 +36,19 @@ steal('jquery', function(){
 				data: data
 			})
 			if(type == "done"){
-				setTimeout(function(){
-					alert('phantomexit')
-				}, 400)
+				steal.client.phantomexit = true;
 			}
 		}
 		var sender = function(){
-			$.get("http://localhost:3001?"+encodeURIComponent(JSON.stringify(steal.client.dataQueue)))
+			$.get("http://localhost:5555?"+encodeURIComponent(JSON.stringify(steal.client.dataQueue)))
 			steal.client.dataQueue = [];
-			setTimeout(arguments.callee, 200);
+			if(steal.client.phantomexit){
+				// kills phantom process
+				setTimeout(function(){
+					alert('phantomexit')
+				}, 300)
+			}
+			setTimeout(arguments.callee, 1000);
 		}
 		sender();
 	}
