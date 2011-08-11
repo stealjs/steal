@@ -6,6 +6,7 @@ steal('steal/browser', function(){
 		this.serverHost = options.serverHost || "localhost";
 		this.serverDomain = options.serverDomain;
 		this._startSelenium();
+		this.DefaultSelenium = this._loadDriverClass();
 	}
 	steal.browser.selenium.prototype = new steal.browser();
 	steal.extend(steal.browser.selenium.prototype, {
@@ -21,26 +22,52 @@ steal('steal/browser', function(){
 			this._browserStart(0);
 			return this;
 		},
+		_loadDriverClass: function() {
+			var URLClassLoader = Packages.java.net.URLClassLoader,
+				URL = java.net.URL,
+				File = java.io.File,
+				ss = new File("steal/browser/jars/selenium-java-client-driver.jar"),
+				ssurl = ss.toURL(),
+				urls = java.lang.reflect.Array.newInstance(URL, 1);
+			urls[0] = new URL(ssurl);
+
+			var clazzLoader = new URLClassLoader(urls),
+				mthds = clazzLoader.loadClass("com.thoughtworks.selenium.DefaultSelenium").getDeclaredConstructors(),
+				rawMeth = null;
+			//iterate through methods to find the one we are looking for
+			for ( var i = 0; i < mthds.length; i++ ) {
+				var meth = mthds[i]; 
+				if ( meth.toString().match(/DefaultSelenium\(java.lang.String,int,java.lang.String,java.lang.String\)/) ) {
+					constructor = meth;
+				}
+			} 
+			return function( serverHost, serverPort, browserStartCommand, browserURL ) {
+				var host = new java.lang.String(serverHost),
+					port = new java.lang.Integer(serverPort),
+					cmd = new java.lang.String(browserStartCommand),
+					url = new java.lang.String(browserURL);
+				return constructor.newInstance(host, port, cmd, url);
+			};
+		},
 		_startSelenium: function(){
-			importClass(Packages.com.thoughtworks.selenium.DefaultSelenium);
-			
 			//first lets ping and make sure the server is up
-			var addr = java.net.InetAddress.getByName(this.serverHost)
+			var port = this.serverPort, 
+				addr = java.net.InetAddress.getByName(this.serverHost)
 			try {
-				var s = new java.net.Socket(addr, this.serverPort)
+				var s = new java.net.Socket(addr, port)
 			} 
 			catch (ex) {
 				spawn(function(){
 					var jarCommand = 'java -jar '+
-						'funcunit/sel/selenium-server-standalone-2.0rc3.jar'+
+						'steal/browser/jars/selenium-server-standalone-2.0rc3.jar'+
 						' -userExtensions '+
-						'funcunit/sel/user-extensions.js';
+						'funcunit/commandline/user-extensions.js';
 					if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 						var command = 'start "selenium" ' + jarCommand;
 						runCommand("cmd", "/C", command.replace(/\//g, "\\"))
 					}
 					else {
-						var command = jarCommand;// + " > selenium.log 2> selenium.log &";
+						var command = jarCommand + " > selenium.log 2> selenium.log &";
 						runCommand("sh", "-c", command);
 					}
 				})
@@ -48,7 +75,7 @@ steal('steal/browser', function(){
 					started = false;
 				var pollSeleniumServer = function(){
 					try {
-						var s = new java.net.Socket(addr, this.serverPort)
+						var s = new java.net.Socket(addr, port)
 						started = true;
 					} 
 					catch (ex) {
@@ -78,7 +105,7 @@ steal('steal/browser', function(){
 			this.trigger("browserStart", {
 				browser: browser
 			})
-			this.selenium = new DefaultSelenium(this.serverHost, 
+			this.selenium = this.DefaultSelenium(this.serverHost, 
 				this.serverPort, 
 				browser, 
 				this.serverDomain);

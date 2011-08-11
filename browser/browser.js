@@ -14,6 +14,7 @@
 			return this;
 		},
 		trigger: function(eventName, data){
+//			console.log("trigger: "+eventName)
 			this._events[eventName](data);
 		},
 		// shut down server or just kill the browser instance
