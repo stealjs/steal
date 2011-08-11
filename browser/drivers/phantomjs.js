@@ -22,7 +22,9 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 		},
 		_poll: function(){
 			if(DATA.length){
-				eval("var res = "+decodeURIComponent(unescape(DATA)))
+				var d = decodeURIComponent(unescape(DATA));
+//				print(d)
+				eval("var res = "+d)
 				// parse data into res
 				for (var i = 0; i < res.length; i++) {
 					evt = res[i];
@@ -33,7 +35,7 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 				}
 			}
 			DATA = "";
-			java.lang.Thread.currentThread().sleep(100);
+			java.lang.Thread.currentThread().sleep(200);
 			arguments.callee.apply(this);
 		}
 	})

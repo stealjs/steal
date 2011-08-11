@@ -4,6 +4,9 @@
 	page.onConsoleMessage = function (msg) {
 //	    console.log(msg);
 	};
+	page.onResourceRequested = function (req) {
+//		console.log('Request ' + JSON.stringify(req, undefined, 4));
+	};
 	page.onAlert = function(msg){
 		if(msg=="phantomexit"){
 			phantom.exit()
