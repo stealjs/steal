@@ -46,9 +46,9 @@ steal('jquery', function(){
 				// kills phantom process
 				setTimeout(function(){
 					alert('phantomexit')
-				}, 300)
+				}, 100)
 			}
-			setTimeout(arguments.callee, 1000);
+			setTimeout(arguments.callee, 200);
 		}
 		sender();
 	}
