@@ -1,10 +1,11 @@
-(function(){
+steal('jquery', function(){
 	// sometimes this might load without steal (in funcunit standalone mode)
 	if(typeof steal === "undefined"){
 		steal = {};
 	}
+	console.log(window.location.search)
 	steal.client = {}
-	if (/browser=selenium/.test(window.location.search) || /browser=phantomjs/.test(window.location.search)) {
+	if (/browser=selenium/.test(window.location.search)) {
 		steal.client.dataQueue = []
 		steal.client.trigger = function(type, data){
 			steal.client.dataQueue.push({
@@ -24,4 +25,24 @@
 			Envjs.trigger(type, data)
 		}
 	}
-})()
+	else if (/browser=phantomjs/.test(window.location.search)) {
+		steal.client.dataQueue = []
+		steal.client.trigger = function(type, data){
+			steal.client.dataQueue.push({
+				type: type,
+				data: data
+			})
+			if(type == "done"){
+				setTimeout(function(){
+					alert('phantomexit')
+				}, 1000)
+			}
+		}
+		var sender = function(){
+			$.get("http://localhost:3001?"+encodeURIComponent(JSON.stringify(steal.client.dataQueue)))
+			steal.client.dataQueue = [];
+			setTimeout(arguments.callee, 500);
+		}
+		sender();
+	}
+})

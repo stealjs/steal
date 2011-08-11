@@ -11,60 +11,37 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 	steal.extend(steal.browser.phantomjs.prototype, {
 		_startServer: function(){
 			spawn(this.simpleServer)
-			this._poll();
 		},
 		open: function(page){
-			this.page = this._appendParamsToUrl(page);
-			var page = new WebPage(), 
-				trigger = this.trigger,
-				self = this;
-			page.onConsoleMessage = function (msg) {
-			    console.log(msg);
-			};
-			page.open(this.page, function (status) {
-				var cb = arguments.callee;
-			    var res = page.evaluate(function () {
-			        if (typeof steal !== "undefined" && steal.client && steal.client.dataQueue) {
-						var res = steal.client.dataQueue;
-						steal.client.dataQueue = [];
-						return res;
-					}
-			    });
-				if(res && res.length){
-					for (var i = 0; i < res.length; i++) {
-						evt = res[i];
-						if (evt.type == "done") {
-							keepPolling = false;
-//							this.webpage.exit();
-						}
-						else {
-							self.trigger(evt.type, evt.data);
-						}
-					}
-				}
-				setTimeout(arguments.callee, 500)
-			});
-			
+			var page = this._appendParamsToUrl(page);
+			spawn(function(){
+				runCommand("sh", "-c", "phantomjs steal/browser/drivers/phantomLauncher.js "+page)
+			})
+			this._poll();
 			return this;
 		},
 		_poll: function(){
+			var keepPolling = true;
 			if(DATA.length){
-				print(DATA)
+				eval("var res = "+decodeURIComponent(unescape(DATA)))
 				// parse data into res
-//				for (var i = 0; i < res.length; i++) {
-//					evt = res[i];
-//					if (evt.type == "done") {
-//						keepPolling = false;
-//					}
-//					else {
-//						this.trigger(evt.type, evt.data);
-//					}
-//				}
+				for (var i = 0; i < res.length; i++) {
+					evt = res[i];
+					if (evt.type == "done") {
+						keepPolling = false;
+						quit();
+					}
+					else {
+						this.trigger(evt.type, evt.data);
+					}
+				}
 			}
 			DATA = "";
 			// keep polling
-			java.lang.Thread.currentThread().sleep(400);
-			arguments.callee.apply(this);
+			if (keepPolling) {
+				java.lang.Thread.currentThread().sleep(400);
+				arguments.callee.apply(this);
+			}
 		}
 	})
 })
