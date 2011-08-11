@@ -39,7 +39,7 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 			DATA = "";
 			// keep polling
 			if (keepPolling) {
-				java.lang.Thread.currentThread().sleep(400);
+				java.lang.Thread.currentThread().sleep(200);
 				arguments.callee.apply(this);
 			}
 		}
