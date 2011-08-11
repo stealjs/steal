@@ -7,7 +7,7 @@ steal('steal/build').then(function( steal ) {
 	 * @param {Object} options options passed to the build script
 	 * 
 	 *   * __to__  - which folder the production.css files should be put in
-	 *   * __quite__  - tell the compressor to be less abnoxious about sending errors
+	 *   * __quiet__  - tell the compressor to be less abnoxious about sending errors
 	 *   * __all__ - compress all scripts
 	 * @param {Object} dependencies array of files and the dependencies they contain under the hood
 	 */
