@@ -3,7 +3,6 @@ steal('jquery', function(){
 	if(typeof steal === "undefined"){
 		steal = {};
 	}
-	console.log(window.location.search)
 	steal.client = {}
 	if (/browser=selenium/.test(window.location.search)) {
 		steal.client.dataQueue = []
@@ -39,7 +38,7 @@ steal('jquery', function(){
 				steal.client.phantomexit = true;
 			}
 		}
-		var sender = function(){
+		steal.client.sendData = function(){
 			$.get("http://localhost:5555?"+encodeURIComponent(JSON.stringify(steal.client.dataQueue)))
 			steal.client.dataQueue = [];
 			if(steal.client.phantomexit){
@@ -50,6 +49,6 @@ steal('jquery', function(){
 			}
 			setTimeout(arguments.callee, 200);
 		}
-		sender();
+		steal.client.sendData();
 	}
 })
