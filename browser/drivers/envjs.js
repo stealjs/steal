@@ -3,6 +3,10 @@ steal('steal/browser', function(){
 		steal.browser.apply(this, arguments)
 		this.type = 'envjs';
 		this.options = options;
+		var self = this;
+		Envjs.trigger = function(){
+			self.trigger.apply(self, arguments);
+		};
 	}
 	steal.browser.envjs.prototype = new steal.browser();
 	steal.extend(steal.browser.envjs.prototype, {

@@ -4,7 +4,7 @@
 		steal = {};
 	}
 	steal.client = {}
-	if (/browser=selenium/.test(window.location.search)) {
+	if (/browser=selenium/.test(window.location.search) || /browser=phantomjs/.test(window.location.search)) {
 		steal.client.dataQueue = []
 		steal.client.trigger = function(type, data){
 			steal.client.dataQueue.push({
@@ -21,7 +21,7 @@
 	}
 	else if (/browser=envjs/.test(window.location.search)) {
 		steal.client.trigger = function(type, data){
-			Envjs.browser.trigger(type, data)
+			Envjs.trigger(type, data)
 		}
 	}
 })()
