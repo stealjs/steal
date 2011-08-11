@@ -33,7 +33,7 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 				}
 			}
 			DATA = "";
-			java.lang.Thread.currentThread().sleep(500);
+			java.lang.Thread.currentThread().sleep(100);
 			arguments.callee.apply(this);
 		}
 	})
