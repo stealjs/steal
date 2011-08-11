@@ -1,8 +1,8 @@
-steal('steal/browser', 'steal/browser/server.js', function(){
+steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	var page;
 	steal.browser.phantomjs = function(options){
 		steal.browser.apply(this, arguments)
-		DATA = "";
+		steal.browser.data = "";
 		this.type = 'phantomjs';
 		this.options = options;
 		this._startServer();
@@ -10,33 +10,30 @@ steal('steal/browser', 'steal/browser/server.js', function(){
 	steal.browser.phantomjs.prototype = new steal.browser();
 	steal.extend(steal.browser.phantomjs.prototype, {
 		_startServer: function(){
-			spawn(this.simpleServer)
+			var self = this;
+			spawn(function(){
+				self.simpleServer()
+			})
 		},
 		open: function(page){
 			var page = this._appendParamsToUrl(page);
 			spawn(function(){
-				runCommand("sh", "-c", "phantomjs steal/browser/drivers/phantomLauncher.js "+page)
+				runCommand("sh", "-c", "phantomjs steal/browser/utils/phantomLauncher.js "+page)
 			})
-			this._poll();
 			return this;
 		},
-		_poll: function(){
-			if(DATA.length){
-				var d = decodeURIComponent(unescape(DATA));
-//				print(d)
-				eval("var res = "+d)
-				// parse data into res
-				for (var i = 0; i < res.length; i++) {
-					evt = res[i];
-					this.trigger(evt.type, evt.data);
-					if (evt.type == "done") {
-						quit();
-					}
+		_processData: function(data){
+			var d = decodeURIComponent(unescape(data));
+//			print(d)
+			eval("var res = "+d)
+			// parse data into res
+			for (var i = 0; i < res.length; i++) {
+				evt = res[i];
+				this.trigger(evt.type, evt.data);
+				if (evt.type == "done") {
+					quit();
 				}
 			}
-			DATA = "";
-			java.lang.Thread.currentThread().sleep(200);
-			arguments.callee.apply(this);
 		}
 	})
 })

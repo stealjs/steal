@@ -1,6 +1,6 @@
 // listens for 3001, returns something super simple
-
-function process(sock){
+(function(){
+var processRequest = function(sock, browser){
 	var copy = sock;
 	sock = null;
 	spawn(function(){
@@ -19,8 +19,8 @@ function process(sock){
 				else {
 					var params = x.match(/^GET.*\?(.*)\s/)
 					if (params.length) {
-						DATA = params[1];
 //						print(params[1])
+						browser._processData(params[1])
 					}
 					v.addElement(x);
 				}
@@ -37,12 +37,12 @@ function process(sock){
 }
 
 steal.browser.prototype.simpleServer = function(){
-	
 	var serv = new java.net.ServerSocket(5555);
 	while (true) {
 		var sock = serv.accept();
-		process(sock);
+		processRequest(sock, this);
 	}
 	sock.close();
 	serv.close();
 }
+})()
