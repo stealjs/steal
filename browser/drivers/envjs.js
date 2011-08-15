@@ -20,7 +20,6 @@ steal('steal/browser', function(){
 			"text/envjs": true,
 			"": true
 		},
-		fireLoad: true,
 		logLevel: 2,
 		dontPrintUserAgent: true
 	}
