@@ -1,12 +1,10 @@
 // listens for 3001, returns something super simple
 (function(){
 var processRequest = function(sock, browser){
-	var copy = sock;
-	sock = null;
 	spawn(function(){
-		var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(copy.getInputStream()));
+		var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream()));
 		
-		var prtw = new java.io.PrintWriter(copy.getOutputStream(), false); // no autoFlush
+		var prtw = new java.io.PrintWriter(sock.getOutputStream(), false); // no autoFlush
 		var v = new java.util.Vector(10); // collects headers sent by browser
 		var done = false;
 		
@@ -39,8 +37,10 @@ var processRequest = function(sock, browser){
 steal.browser.prototype.simpleServer = function(){
 	var serv = new java.net.ServerSocket(5555);
 	while (true) {
-		var sock = serv.accept();
-		processRequest(sock, this);
+		var sock = serv.accept(),
+			copy = sock;
+		sock = null;
+		processRequest(copy, this);
 	}
 	sock.close();
 	serv.close();
