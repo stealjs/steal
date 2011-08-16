@@ -1293,6 +1293,7 @@ steal.type("js", function(options,original, success, error){
 	
 	if (options.text) {
 		success();
+		cleanUp(script);
 	}
 });
 
