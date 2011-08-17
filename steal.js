@@ -1334,7 +1334,7 @@ steal.type("css", function css_type(options, original, success, error){
 		if( createSheet ){
 			// IE has a 31 sheet and 31 import per sheet limit
 			if(cssCount == 0){
-				lastSheet = createSheet(options.src);
+				lastSheet = document.createStyleSheet(options.src);
 				lastSheetOptions = options;
 				cssCount++;
 			} else {
