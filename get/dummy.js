@@ -1,6 +1,10 @@
 // a dummy version of steal that can run on a file and extract data from it ...
 steal(function(s){
+	print(s.toString());
+	return;
+	
 	s.dummy = function(code){
+		print("I SHOULD NOT BE RUNNING >>>!")
 		var args = [], 
 			arg;
 			
@@ -33,7 +37,7 @@ steal(function(s){
 		
 		steal = curSteal;
 		return dummy;
-	}
+	};
 	
 	
-})()
+});
