@@ -134,33 +134,18 @@ steal('steal/build').then('steal/clean/beautify.js','steal/clean/jslint.js','ste
 				clean = /\/\/@steal-clean/
 			//folder
 			
-			steal.build.open(url).each(function(script, text, i){
-				if(!text || !script.src){
-					return;
-				}
-				var path = steal.File(script.src).joinFrom(folder).replace(/\?.*/,"")
-				if(clean.test(text) || (options.ignore && options.ignore.test(path) ) ){
-					print("I "+path)
-				}else{
-					var out = js_beautify(text, options);
-					if(out == text){
-						print("C "+path);
-						if(options.jslint){
-							var errors = lintAndPrint(out, options.predefined || {});
-							if(errors){
-								print("quiting because of JSLint Errors");
-								quit();
-							}
-						}
-						
+			steal.build.open(url, function(files){
+				files.each(function(script, text, i){
+					if(!text || !script.src){
+						return;
+					}
+					var path = steal.File(script.src).joinFrom(folder).replace(/\?.*/,"")
+					if(clean.test(text) || (options.ignore && options.ignore.test(path) ) ){
+						print("I "+path)
 					}else{
-						if(steal.prompt.yesno("B "+path+" Overwrite? [Yn]")){
-							if(options.print){
-								print(out)
-							}else{
-								steal.File(path).save( out  )
-							}
-							
+						var out = js_beautify(text, options);
+						if(out == text){
+							print("C "+path);
 							if(options.jslint){
 								var errors = lintAndPrint(out, options.predefined || {});
 								if(errors){
@@ -168,19 +153,29 @@ steal('steal/build').then('steal/clean/beautify.js','steal/clean/jslint.js','ste
 									quit();
 								}
 							}
-						}
+						
+						}else{
+							if(steal.prompt.yesno("B "+path+" Overwrite? [Yn]")){
+								if(options.print){
+									print(out)
+								}else{
+									steal.File(path).save( out  )
+								}
+							
+								if(options.jslint){
+									var errors = lintAndPrint(out, options.predefined || {});
+									if(errors){
+										print("quiting because of JSLint Errors");
+										quit();
+									}
+								}
+							}
 	
-					}
+						}
 					
-				}
+					}
+				})
 			});
 		}
-		
-		
-		
-		
 	};
-	
-
-  
 });

@@ -1313,11 +1313,13 @@ var cssCount = 0,
 	lastSheetOptions;
 
 steal.type("css", function css_type(options, original, success, error){
-	if(options.text){
+	if(options.text){ // less
 		var css  = doc[STR_CREATE_ELEMENT]('style');
-		
-		if (css.styleSheet) { // IE
-			css.styleSheet.cssText = options.text;
+		if (typeof css.styleSheet !== 'undefined') { // IE
+			// stylesheet property is null, need a timeout before it appears
+			setTimeout(function () {
+				css.styleSheet.cssText = options.text;
+			}, 0);
 		} else {
 			(function (node) {
 				if (css.childNodes.length > 0) {
@@ -1851,7 +1853,7 @@ if (support.interactive) {
 	steal.after = after(steal.after, function(){
 		var interactive = getInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-		if (!interactive || !interactive.src || /steal\.js/.test(interactive.src)) {
+		if (!interactive || !interactive.src || /steal\.(production\.)*js/.test(interactive.src)) {
 			return;
 		}
 		var src = interactive.src;
