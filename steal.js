@@ -1341,7 +1341,7 @@ steal.type("css", function css_type(options, original, success, error){
 				var relative = File(options.src).joinFrom(
 					File(lastSheetOptions.src).dir());
 					
-				console.log(relative);
+				//console.log(relative);
 				lastSheet.addImport( relative );
 				cssCount++;
 				if(cssCount == 30){
