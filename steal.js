@@ -1861,7 +1861,7 @@ if (support.interactive) {
 	steal.after = after(steal.after, function(){
 		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-		if (!interactive || !interactive.src || /steal\.js/.test(interactive.src)) {
+		if (!interactive || !interactive.src || /steal\.(production\.)*js/.test(interactive.src)) {
 			return;
 		}
 		var src = interactive.src;
