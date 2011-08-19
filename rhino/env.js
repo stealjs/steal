@@ -1392,7 +1392,7 @@ urlparse.urlnormalize = function(url, allow)
     case 'file':
         // files can't have query strings
         //  and we don't bother with fragments
-        parts.query = '';
+        // parts.query = '';
         if(!allow){
         	parts.fragment = '';
         }
@@ -1436,7 +1436,6 @@ urlparse.urlsplit = function(url, default_scheme, allow_fragments)
     if (typeof allow_fragments === 'undefined') {
         allow_fragments = true;
     }
-
     // scheme (optional), host, port
     var fullurl = /^([A-Za-z]+)?(:?\/\/)([0-9.\-A-Za-z]*)(?::(\d+))?(.*)$/;
     // path, query, fragment
@@ -1476,7 +1475,6 @@ urlparse.urlsplit = function(url, default_scheme, allow_fragments)
     } else {
         o.fragment = '';
     }
-
     return o;
 };
 
@@ -1597,7 +1595,6 @@ Envjs.getcwd = function() {
  
  */
 Envjs.uri = function(path, base, allow) {
-
 	path = path.replace(/\\/g, '/');
     //console.log('constructing uri from path %s and base %s', path, base);
 
@@ -2121,7 +2118,7 @@ Envjs.connection = function(xhr, responseHandler, data){
                 //try to add some canned headers that make sense
                 xhr.readyState = 4;
                 xhr.statusText = "ok";
-                xhr.responseText = Envjs.readFromFile(xhr.url);
+                xhr.responseText = Envjs.readFromFile(xhr.url.replace(/\?.+$/, ""));
                 try{
                     if(xhr.url.match(/html$/)){
                         xhr.responseHeaders["Content-Type"] = 'text/html';
@@ -18935,7 +18932,7 @@ function $clinit_124(){
   ONCELLCHANGE = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('oncellchange'), ALL_NO_PREFIX, ALL_NCNAME, false);
   ONMOUSEWHEEL = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('onmousewheel'), ALL_NO_PREFIX, ALL_NCNAME, false);
   ONMOUSEENTER = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('onmouseenter'), ALL_NO_PREFIX, ALL_NCNAME, false);
-  ONAFTERPRINT = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('onafterprint'), ALL_NO_PREFIX, ALL_NCNAME, false);
+  ONAFTERPRINT = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('onafterupdate'), ALL_NO_PREFIX, ALL_NCNAME, false);
   ONBEFORECOPY = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('onbeforecopy'), ALL_NO_PREFIX, ALL_NCNAME, false);
   MARGINHEIGHT = $AttributeName_0(new AttributeName, ALL_NO_NS, SAME_LOCAL('marginheight'), ALL_NO_PREFIX, ALL_NCNAME, false);
   MARKERHEIGHT = $AttributeName_0(new AttributeName, ALL_NO_NS, SVG_DIFFERENT('markerheight', 'markerHeight'), ALL_NO_PREFIX, ALL_NCNAME, false);
@@ -25225,7 +25222,7 @@ Window = function(scope, parent, opener){
         set location(url){
 			//very important or you will go into an infinite
         	//loop when creating a xml document
-			//console.log('setting window location %s', url);
+			// console.log('setting window location %s', url);
         	if(url) {
             	$location.assign(Envjs.uri(url, $location+'', true));
 			}
