@@ -60,7 +60,7 @@
 				else 
 					return "onerror" in script;
 			})(),
-			interactive: doc && "attachEvent" in scriptTag()
+			interactive: false
 			
 		},
 		startup = function(){},
@@ -1826,17 +1826,22 @@ request = function(options, success, error){
 var interactiveScript, 
 	// key is script name, value is array of pending items
 	interactives = {},
-	getInteractiveScript = function() {
+	getInteractiveScript = function(){
+		var scripts = doc[STR_GET_BY_TAG]('script');
+		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
+			if (script.readyState === 'interactive') {
+				return script;
+			}
+		}
+	},
+	getCachedInteractiveScript = function() {
 		var scripts, i, script;
 		if (interactiveScript && interactiveScript.readyState === 'interactive') {
 			return interactiveScript;
 		}
 		
-		scripts = document.getElementsByTagName('script');
-		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
-			if (script.readyState === 'interactive') {
-				return script;
-			}
+		if(script = getInteractiveScript()){
+			return script;
 		}
 		
 		// check last inserted
@@ -1845,13 +1850,16 @@ var interactiveScript,
 		}
 	
 		return null;
-	}
+	};
+	
+support.interactive = doc && !!getInteractiveScript();
+
 
 if (support.interactive) {
 
 	// after steal is called, check which script is "interactive" (for IE)
 	steal.after = after(steal.after, function(){
-		var interactive = getInteractiveScript();
+		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
 		if (!interactive || !interactive.src || /steal\.js/.test(interactive.src)) {
 			return;
@@ -1871,7 +1879,7 @@ if (support.interactive) {
 	// dependencies that has come so far and assign them to the loaded script
 	steal.loaded = before(steal.loaded, function(name){
 		var src = steals[name].options.src,
-			interactive = getInteractiveScript(),
+			interactive = getCachedInteractiveScript(),
 			interactiveSrc = interactive.src;
 		interactives[src] = interactives[interactiveSrc];
 		interactives[interactiveSrc] = null;
