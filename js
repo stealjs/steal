@@ -13,7 +13,7 @@ then
   java -jar funcunit/java/selenium-server-standalone-2.0b3.jar
   exit 127
 fi
-CP=funcunit/java/selenium-java-client-driver.jar:steal/rhino/js.jar
+CP=funcunit/java/selenium-java-client-driver.jar:steal/rhino/js.jar:steal/browser/jars/lib/\*
 if [ $1 = "-mail" ]
 then
 	CP=steal/rhino/mail.jar:funcunit/java/selenium-java-client-driver.jar:steal/rhino/js.jar
