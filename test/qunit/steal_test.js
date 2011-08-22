@@ -2,7 +2,6 @@ steal('jquery').then(function(){
 
 module("steal")
 
-
 	var orig = steal.File( steal.root.path );
 		src = function(src){
 		return orig.join(src)
@@ -400,8 +399,11 @@ test("File.ext", function(){
 			src : src('steal/test/files/require.css'),
 			type: "css"
 		},{}, function(){
-			start();
-			ok( bId('qunit-header').clientHeight > 65, "Client height changed to "+bId('qunit-header').clientHeight );
+			setTimeout(function(){
+				start();
+				ok( bId('qunit-header').clientHeight > 65, "Client height changed to "+bId('qunit-header').clientHeight );
+			},1000)
+			
 			
 		})
 	});
@@ -429,7 +431,9 @@ test("File.ext", function(){
 	// because require won't add buildType.  Require just gets stuff
 	// and that is how it should stay.
 	test("buildType set", function(){
-		stop(2000);
+		stop(10000);
+		
+		steal.rootUrl("../");
 		
 		steal.type("foo js", function(options, original, success, error){
 			var parts = options.text.split(" ")
@@ -438,11 +442,8 @@ test("File.ext", function(){
 			equals(options.buildType, "js", "build type set right");
 			equals(options.type, "foo", "type set right");
 		});
-		
-		steal({
-			src : src('steal/test/files/require.foo'),
-			type: "foo"
-		},function(){
+
+		steal('test/files/require.foo',function(){
 			start();
 		})
 	});
@@ -645,14 +646,18 @@ test("css", function(){
 	equals(document.getElementById("makeBlue").clientWidth, 100, "relative in loaded");
 	equals(document.getElementById("makeGreen").clientWidth, 50, "relative up loaded");
 	
-	var els = document.getElementsByTagName('link'),
+	// we'd have to check the imports.
+	if(!document.createStyleSheet){
+		var els = document.getElementsByTagName('link'),
 		count = 0;
-	for(var i =0; i< els.length; i++){
-		if(els[i].href.indexOf('one.css') > -1){
-			count++;
+		for(var i =0; i< els.length; i++){
+			if(els[i].href.indexOf('one.css') > -1){
+				count++;
+			}
 		}
+		equals(count, 1, "only one one.css loaded")
 	}
-	equals(count, 1, "only one one.css loaded")
+
 })
 
 test("loadtwice", function(){
