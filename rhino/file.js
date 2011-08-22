@@ -93,7 +93,7 @@
 		 */
 		joinFrom: function( url, expand ) {
 			if ( this.isDomainAbsolute() ) {
-				var u = new File(url);
+				var u = new steal.File(url);
 				if ( this.domain() && this.domain() == u.domain() ) return this.afterDomain();
 				else if ( this.domain() == u.domain() ) { // we are from a file
 					return this.toReferenceFromSameDomain(url);
