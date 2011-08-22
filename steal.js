@@ -1750,7 +1750,7 @@ request = function(options, success, error){
 		end : function(){}
 	};
 	
-	firstEnd = false;
+	var firstEnd = false;
 	addEvent(win, "load", function(){
 		loaded.load();
 	});
@@ -1827,7 +1827,8 @@ var interactiveScript,
 	// key is script name, value is array of pending items
 	interactives = {},
 	getInteractiveScript = function(){
-		var scripts = doc[STR_GET_BY_TAG]('script');
+		var i, script,
+		  scripts = doc[STR_GET_BY_TAG]('script');
 		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
 			if (script.readyState === 'interactive') {
 				return script;
