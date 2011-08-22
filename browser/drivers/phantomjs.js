@@ -6,6 +6,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		this.type = 'phantomjs';
 		this.options = options;
 		this._startServer();
+		this._evts = {}
 	}
 	steal.browser.phantomjs.prototype = new steal.browser();
 	steal.extend(steal.browser.phantomjs.prototype, {
@@ -29,6 +30,10 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			// parse data into res
 			for (var i = 0; i < res.length; i++) {
 				evt = res[i];
+				// server receives duplicate requests for an unknown reason
+				// to work around this we check event ids to make sure we're not seeing a duplicate
+				if(this._evts[evt.id]) continue;
+				this._evts[evt.id] = true
 				this.trigger(evt.type, evt.data);
 				if (evt.type == "done") {
 					quit();

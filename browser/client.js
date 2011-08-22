@@ -29,8 +29,11 @@ steal('jquery', function(){
 			$("<iframe></iframe>").appendTo(document.body)
 		}
 		steal.client.dataQueue = []
+		var id=0;
 		steal.client.trigger = function(type, data){
 			steal.client.dataQueue.push({
+				// workaround
+				id: ++id,
 				type: type,
 				data: data
 			})
@@ -49,7 +52,7 @@ steal('jquery', function(){
 					alert('phantomexit')
 				}, 100)
 			}
-			setTimeout(arguments.callee, 500);
+			setTimeout(arguments.callee, 400);
 		}
 		steal.client.sendData();
 	}
