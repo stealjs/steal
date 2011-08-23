@@ -1192,6 +1192,9 @@
 			}
 			raw.type =  ext;
 		}
+		if (!types[raw.type]){
+			throw "steal.js - type " + raw.type + " has not been loaded.";
+		}
 		var converters =  types[raw.type].convert;
 		raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
 	});
