@@ -13,8 +13,6 @@ steal('steal/test/test.js', function(s) {
 			browser
 				.bind('myevent', function(data){
 					s.test.equals(data.foo, 'bar', 'bind works')
-					s.test.clear();
-					browser.close();
 				})
 				.open('steal/browser/test/mypage.html')
 			var result = browser.evaluate(function(){
@@ -22,7 +20,8 @@ steal('steal/test/test.js', function(s) {
 			})
 			s.test.equals(result, "bla", "execute works!")
 			s.test.expect(2)
-//			browser.injectJS('event.js')
+			browser.close();
+			s.test.clear();
 		})
 	})
 })

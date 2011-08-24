@@ -12,6 +12,7 @@
 	var evalText = null;
 	var processRequest = function(sock, browser){
 		spawn(function(){
+			if (stopServer) return;
 			var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream()));
 			
 			var v = new java.util.Vector(10); // collects headers sent by browser
@@ -37,13 +38,11 @@
 				}
 			}
 			// write output
-			if (!stopServer) {
 				var output = new java.io.DataOutputStream(sock.getOutputStream()),
 					resp = "";
 				if(evalText){
 					resp = "steal.client.evaluate('"+evalText+"');"
 					evalText = null;
-				}
 				response(resp, output);
 				output.close();
 			}
