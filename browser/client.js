@@ -44,8 +44,11 @@ steal('jquery', function(){
 		steal.client.sendData = function(){
 			var q = steal.client.dataQueue;
 			steal.client.dataQueue = [];
-//			console.log("sending " + q.length)
-			$.get("http://localhost:5555?" + encodeURIComponent(JSON.stringify(q)))
+			$.ajax({
+				url: "http://localhost:5555?" + encodeURIComponent(JSON.stringify(q)),
+				cache: true,
+				dataType: 'script'
+			})
 			if (steal.client.phantomexit) {
 				// kills phantom process
 				setTimeout(function(){
@@ -53,6 +56,14 @@ steal('jquery', function(){
 				}, 100)
 			}
 			setTimeout(arguments.callee, 400);
+		}
+		steal.client.injectJS = function(script){
+			console.log('injecting '+script)
+		}
+		steal.client.evaluate = function(script){
+			eval("var fn = "+script);
+			var res = fn();
+			steal.client.trigger("evaluated", res)
 		}
 		steal.client.sendData();
 	}

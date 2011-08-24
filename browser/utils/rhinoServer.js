@@ -1,10 +1,19 @@
 // listens for 3001, returns something super simple
 (function(){
+	var response = function(content, output){
+		output.writeBytes("HTTP/1.1 200 OK" + "\r\n");
+		output.writeBytes("Server: Java HTTPServer" + "\r\n");
+		output.writeBytes("Content-Type: text/html" + "\r\n");
+		output.writeBytes("Content-Length: " + content.length + "\r\n");
+		output.writeBytes("Connection: close\r\n");
+		output.writeBytes("\r\n");
+		output.writeBytes(content);
+	}
+	var evalText = null;
 	var processRequest = function(sock, browser){
 		spawn(function(){
 			var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream()));
 			
-			var prtw = new java.io.PrintWriter(sock.getOutputStream(), false); // no autoFlush
 			var v = new java.util.Vector(10); // collects headers sent by browser
 			var done = false;
 			
@@ -17,7 +26,7 @@
 					else {
 						var params = x.match(/^GET.*\?(.*)\s/)
 						if (params.length) {
-	//						print(params[1])
+//							print(params[1])
 							browser._processData(params[1])
 						}
 						v.addElement(x);
@@ -27,17 +36,34 @@
 					done = true;
 				}
 			}
-			
-			prtw.flush();
+			// write output
+			if (!stopServer) {
+				var output = new java.io.DataOutputStream(sock.getOutputStream()),
+					resp = "";
+				if(evalText){
+					resp = "steal.client.evaluate('"+evalText+"');"
+					evalText = null;
+				}
+				response(resp, output);
+				output.close();
+			}
 			
 			bufr.close();
-			prtw.close();
 		})
 	}, 
 	stopServer = false;
 	steal.browser.prototype.stopServer = function(){
 		serv.close();
 		stopServer = true;
+	}
+	steal.browser.prototype.evaluate = function(fn){
+		evalText = fn.toString().replace(/\n|\r\n/g,"");
+		while(!this.evaluated) {
+			java.lang.Thread.currentThread().sleep(300);
+		}
+		var res = this.evaluated;
+		this.evaluated = null;
+		return res;
 	}
 	var serv;
 	steal.browser.prototype.simpleServer = function(){
@@ -46,11 +72,8 @@
 			var killed = false;
 			try {
 				var sock = serv.accept();
-			}catch(e){
-				// if we were closed
-				killed = true;
-			}
-			if (!killed) {
+			}catch(e){}
+			if (!stopServer) {
 				var copy = sock;
 				sock = null;
 				processRequest(copy, this);
