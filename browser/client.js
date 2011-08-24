@@ -24,7 +24,7 @@ steal('jquery', function(){
 			Envjs.trigger(type, data)
 		}
 	}
-	else if (/browser=phantomjs/.test(window.location.search)) {
+	else if (/PhantomJS/.test(navigator.userAgent)) {
 		if(!$('iframe').length){
 			$("<iframe></iframe>").appendTo(document.body)
 		}

@@ -19,6 +19,16 @@ steal.test =  {
 	getWindow: function() {
 		return (function(){return this}).call(null,0)
 	},
+	expect: function(num){
+		var checkReady = function(){
+			if(assertions.length >= num)
+				return true;
+	        return false;
+	    }
+	    while(!checkReady()){
+	        java.lang.Thread.currentThread().sleep(300);
+	    }
+	},
 	wait: function( name ) {
 		var checkExists = function(name){
 	        var parts = name.split(".");

@@ -18,10 +18,24 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		},
 		open: function(page){
 			var page = this._appendParamsToUrl(page);
+			var verbose = this.options.print;
 			spawn(function(){
-				runCommand("sh", "-c", "phantomjs steal/browser/utils/phantomLauncher.js "+page)
+				var cmd = "phantomjs steal/browser/utils/phantomLauncher.js "+page+(verbose?  " -verbose": "");
+				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
+					runCommand("cmd", "/C", cmd)
+				}
+				else {
+					runCommand("sh", "-c", cmd);
+				}
 			})
 			return this;
+		},
+		// kill phantom and kill simple server
+		close: function(){
+			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
+				runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
+			}
+			this.stopServer();
 		},
 		_processData: function(data){
 			var d = decodeURIComponent(unescape(data));
