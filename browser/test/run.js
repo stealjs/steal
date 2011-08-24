@@ -17,13 +17,12 @@ steal('steal/test/test.js', function(s) {
 					browser.close();
 				})
 				.open('steal/browser/test/mypage.html')
-				
-			s.test.expect(1)
+			var result = browser.evaluate(function(){
+				return MyCo.foo;
+			})
+			s.test.equals(result, "bla", "execute works!")
+			s.test.expect(2)
 //			browser.injectJS('event.js')
-//			var result = browser.evaluate(function(){
-//				return MyCo.foo
-//			})
-//			steal.test.equals(result, "bar", "execute works")
 		})
 	})
 })

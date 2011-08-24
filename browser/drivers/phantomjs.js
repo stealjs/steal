@@ -5,8 +5,13 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		steal.browser.data = "";
 		this.type = 'phantomjs';
 		this.options = options;
+		this.kill();
 		this._startServer();
 		this._evts = {}
+		var self = this;
+		this.bind("evaluated", function(data){
+			self.evaluated = data;
+		})
 	}
 	steal.browser.phantomjs.prototype = new steal.browser();
 	steal.extend(steal.browser.phantomjs.prototype, {
@@ -32,10 +37,13 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		},
 		// kill phantom and kill simple server
 		close: function(){
+			this.kill();
+			this.stopServer();
+		},
+		kill: function(){
 			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 				runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
 			}
-			this.stopServer();
 		},
 		_processData: function(data){
 			var d = decodeURIComponent(unescape(data));
