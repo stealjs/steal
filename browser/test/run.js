@@ -9,7 +9,7 @@ steal('steal/test/test.js', function(s) {
 				load('steal/rhino/rhino.js')
 				steal("steal/browser/"+type, function(){
 					var browser = new steal.browser[type]({
-						print: true
+//						print: true
 					});
 					browser
 						.bind('myevent', function(data){
@@ -25,6 +25,9 @@ steal('steal/test/test.js', function(s) {
 						// triggered after steal/browser/selenium/client.js has loaded
 						.bind('clientloaded', function(){
 							this.injectJS('steal/browser/test/trigger.js')
+							this.evaluate(function(){
+								$.holdReady(false);
+							})
 						})
 						.open('steal/browser/test/mypage.html')
 					s.test.expect(3)

@@ -40,5 +40,4 @@ steal('jquery', function(){
 		steal.client.trigger("evaluated", res)
 	}
 	steal.client.sendData();
-	steal.client.trigger("clientloaded");
-})
+}, 'steal/browser/client.js')
