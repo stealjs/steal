@@ -18,7 +18,7 @@ steal('steal/browser', function(){
 			this._currentBrowserIndex = 0;
 			this.page = this._getPageUrl(page);
 			this.page = this._appendParamsToUrl(this.page);
-			this.browsers = browsers || ["*iexplore"];
+			this.browsers = browsers || ["*firefox"];
 			this._browserStart(0);
 			return this;
 		},
@@ -61,7 +61,7 @@ steal('steal/browser', function(){
 					var jarCommand = 'java -jar '+
 						'steal/browser/selenium/selenium-server-standalone-2.0rc3.jar'+
 						' -userExtensions '+
-						'funcunit/commandline/user-extensions.js';
+						'steal/browser/selenium/user-extensions.js';
 					if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 						var command = 'start "selenium" ' + jarCommand;
 						runCommand("cmd", "/C", command.replace(/\//g, "\\"))
@@ -95,7 +95,7 @@ steal('steal/browser', function(){
 		},
 		killServer: function(){
 			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
-//				runCommand("cmd", "/C", 'taskkill /fi "Windowtitle eq selenium" > NUL')
+				runCommand("cmd", "/C", 'taskkill /fi "Windowtitle eq selenium" > NUL')
 				//quit()
 			}
 		},
@@ -119,7 +119,6 @@ steal('steal/browser', function(){
 			this.trigger("browserDone", {
 				browser: browser
 			})
-			print(this.selenium)
 			this.selenium.close();
 			this.selenium.stop();
 			this._currentBrowserIndex++;
@@ -131,10 +130,23 @@ steal('steal/browser', function(){
 				this.trigger("done");
 			}
 		},
+		evaluate: function(fn){
+			var txt = fn.toString().replace(/\n|\r\n/g,""),
+				evalText = "Selenium.evaluate('"+txt+"')";
+			var res = this.selenium.getEval(evalText);
+			res = ""+res;
+			return res;
+		},
+		injectJS: function(file){
+			var scriptText = readFile(file).replace(/\n|\r\n/g,""),
+				evalText = "Selenium.injectJS('"+escape(scriptText)+"')";
+			this.selenium.getEval(evalText);
+		},
 		_poll: function(){
 			var self = this;
+			this.keepPolling = true;
 			spawn(function(){
-				if(!this.keepPolling) return;
+				if(!self.keepPolling) return;
 				var resultJSON, 
 					res,
 					evt;

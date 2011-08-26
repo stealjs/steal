@@ -18,7 +18,6 @@ steal('steal/test/test.js', function(s) {
 								return MyCo.foo;
 							})
 							s.test.equals(result, "bla", "execute works!")
-							this.close();
 						})
 						.bind('triggered', function(data){
 							s.test.ok(true, 'injectJS works')
@@ -29,12 +28,12 @@ steal('steal/test/test.js', function(s) {
 						})
 						.open('steal/browser/test/mypage.html')
 					s.test.expect(3)
+					browser.close();
 					s.test.clear();
 				})
 			})
 		}, 
-		browsers = ["phantomjs", "envjs"]
-//		browsers = ["selenium"]
+		browsers = ["selenium", "phantomjs", "envjs"]
 		
 	for(var i=0; i<browsers.length; i++){
 		browserTest(browsers[i])
