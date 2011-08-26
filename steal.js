@@ -1318,11 +1318,9 @@ var cssCount = 0,
 steal.type("css", function css_type(options, original, success, error){
 	if(options.text){ // less
 		var css  = doc[STR_CREATE_ELEMENT]('style');
-		if (typeof css.styleSheet !== 'undefined') { // IE
-			// stylesheet property is null, need a timeout before it appears
-			setTimeout(function () {
-				css.styleSheet.cssText = options.text;
-			}, 0);
+		css.type = 'text/css';
+		if (css.styleSheet) { // IE
+			css.styleSheet.cssText = options.text;
 		} else {
 			(function (node) {
 				if (css.childNodes.length > 0) {
