@@ -26,12 +26,19 @@ steal('steal/browser', function(){
 	steal.browser.envjs.prototype = new steal.browser();
 	steal.extend(steal.browser.envjs.prototype, {
 		open: function(page){
-			this.page = this._appendParamsToUrl(page);
-			Envjs(this.page, this.options);
+			page = this._getPageUrl(page);
+			page = this._appendParamsToUrl(page);
+			Envjs(page, this.options);
 			return this;
 		},
 		close: function(){
 			
+		},
+		evaluate: function(fn){
+			return fn();
+		},
+		injectJS: function(file){
+			load(file);
 		}
 	})
 }).then('steal/rhino/env.js')

@@ -4,11 +4,11 @@ steal('steal/test/test.js', function(s) {
 //	STEALPRINT = false;
 	steal.test.module("steal/browser")
 	
-	steal.test.test("phantomjs", function(){
+	steal.test.test("envjs", function(){
 		load('steal/rhino/rhino.js')
-		steal("steal/browser/phantomjs").then(function(){
-			var browser = new steal.browser.phantomjs({
-				print: true
+		steal("steal/browser/envjs")
+			var browser = new steal.browser.envjs({
+//				print: true
 			});
 			browser
 				.bind('myevent', function(data){
@@ -25,7 +25,5 @@ steal('steal/test/test.js', function(s) {
 			browser.injectJS('steal/browser/test/trigger.js')
 			s.test.expect(3)
 			browser.close();
-			s.test.clear();
-		})
 	})
 })

@@ -30,6 +30,17 @@
 				url += "?" + params;
 			}
 			return url;
-		}
+		},
+		_getPageUrl: function(page){
+			if(typeof phantom === "undefined" && !/http:|file:/.test(page)){ // if theres no protocol, turn it into a filesystem url
+				var cwd = (new java.io.File (".")).getCanonicalPath();
+				page = "file:///"+cwd+"/"+page;
+				page = page.replace(/\\/g, "/")
+			}
+			
+			//convert spaces to %20.
+			var newPage = /http:/.test(page) ? page: page.replace(/ /g,"%20");
+			return newPage;
+		},
 	})
 })()
