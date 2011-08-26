@@ -4,7 +4,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		steal.browser.apply(this, arguments)
 		steal.browser.data = "";
 		this.type = 'phantomjs';
-		this.options = options;
+		this.options = options || {};
 		this.kill();
 		this._startServer();
 		this._evts = {}
