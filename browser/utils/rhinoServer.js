@@ -43,7 +43,8 @@
 				resp = "";
 			if(evalText || scriptText){
 				resp = evalText? "steal.client.evaluate('"+evalText+"');": scriptText;
-				evalText = scriptText = null;
+				evalText = null;
+				scriptText = null;
 				response(resp, output);
 				output.close();
 				browser.injecting = false;
