@@ -1892,15 +1892,7 @@ if (support.interactive) {
 }
 
 	// ===========  STEAL.BROWSERS ==========
-	if(win.location && /mode=commandline/.test(win.location.search)){
-		var browserMode = win.location.search.match(/browser=(\w+)/)[1],
-			clientPath =  "steal/browser/"+browserMode+"/client.js";
-		steal({
-			src: clientPath,
-			ignore: true
-		});
-	}
-	
+	win.location && /mode=commandline/.test(win.location.search) && steal("steal/browser/"+win.location.search.match(/browser=(\w+)/)[1]+"/client.js")
 	
 	// ===========  OPTIONS ==========
 	
