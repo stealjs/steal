@@ -19,8 +19,10 @@ steal('jquery', function(){
 	steal.client.sendData = function(){
 		var q = steal.client.dataQueue;
 		steal.client.dataQueue = [];
+		var params = encodeURIComponent(JSON.stringify(q));
+//		console.log(params)
 		$.ajax({
-			url: "http://localhost:5555?" + encodeURIComponent(JSON.stringify(q)),
+			url: "http://localhost:5555?" + params,
 			cache: true,
 			dataType: 'script'
 		})
@@ -38,4 +40,5 @@ steal('jquery', function(){
 		steal.client.trigger("evaluated", res)
 	}
 	steal.client.sendData();
+	steal.client.trigger("clientloaded");
 })

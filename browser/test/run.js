@@ -14,23 +14,27 @@ steal('steal/test/test.js', function(s) {
 					browser
 						.bind('myevent', function(data){
 							s.test.equals(data.foo, 'bar', 'bind works')
+							var result = this.evaluate(function(){
+								return MyCo.foo;
+							})
+							s.test.equals(result, "bla", "execute works!")
+							this.close();
 						})
 						.bind('triggered', function(data){
 							s.test.ok(true, 'injectJS works')
 						})
+						// triggered after steal/browser/selenium/client.js has loaded
+						.bind('clientloaded', function(){
+							this.injectJS('steal/browser/test/trigger.js')
+						})
 						.open('steal/browser/test/mypage.html')
-					var result = browser.evaluate(function(){
-						return MyCo.foo;
-					})
-					s.test.equals(result, "bla", "execute works!")
-					browser.injectJS('steal/browser/test/trigger.js')
 					s.test.expect(3)
-					browser.close();
 					s.test.clear();
 				})
 			})
 		}, 
 		browsers = ["phantomjs", "envjs"]
+//		browsers = ["selenium"]
 		
 	for(var i=0; i<browsers.length; i++){
 		browserTest(browsers[i])

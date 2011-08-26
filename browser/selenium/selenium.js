@@ -4,7 +4,6 @@ steal('steal/browser', function(){
 		this.type = 'selenium';
 		this.serverPort = options.serverPort || 4444;
 		this.serverHost = options.serverHost || "localhost";
-		this.serverDomain = options.serverDomain;
 		this._startSelenium();
 		this.DefaultSelenium = this._loadDriverClass();
 	}
@@ -17,8 +16,9 @@ steal('steal/browser', function(){
 		 */
 		open: function(page, browsers){
 			this._currentBrowserIndex = 0;
-			this.page = this._appendParamsToUrl(page);
-			this.browsers = browsers;
+			this.page = this._getPageUrl(page);
+			this.page = this._appendParamsToUrl(this.page);
+			this.browsers = browsers || ["*iexplore"];
 			this._browserStart(0);
 			return this;
 		},
@@ -26,7 +26,7 @@ steal('steal/browser', function(){
 			var URLClassLoader = Packages.java.net.URLClassLoader,
 				URL = java.net.URL,
 				File = java.io.File,
-				ss = new File("steal/browser/jars/selenium-java-client-driver.jar"),
+				ss = new File("steal/browser/selenium/selenium-java-client-driver.jar"),
 				ssurl = ss.toURL(),
 				urls = java.lang.reflect.Array.newInstance(URL, 1);
 			urls[0] = new URL(ssurl);
@@ -59,7 +59,7 @@ steal('steal/browser', function(){
 			catch (ex) {
 				spawn(function(){
 					var jarCommand = 'java -jar '+
-						'steal/browser/jars/selenium-server-standalone-2.0rc3.jar'+
+						'steal/browser/selenium/selenium-server-standalone-2.0rc3.jar'+
 						' -userExtensions '+
 						'funcunit/commandline/user-extensions.js';
 					if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
@@ -93,9 +93,9 @@ steal('steal/browser', function(){
 				}
 			}
 		},
-		close: function(){
+		killServer: function(){
 			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
-				runCommand("cmd", "/C", 'taskkill /fi "Windowtitle eq selenium" > NUL')
+//				runCommand("cmd", "/C", 'taskkill /fi "Windowtitle eq selenium" > NUL')
 				//quit()
 			}
 		},
@@ -108,16 +108,18 @@ steal('steal/browser', function(){
 			this.selenium = this.DefaultSelenium(this.serverHost, 
 				this.serverPort, 
 				browser, 
-				this.serverDomain);
+				this.page);
 			this.selenium.start();
 			this.selenium.open(this.page);
 			this._poll();
 		},
-		_browserDone: function(data){
+		close: function(data){
+			this.keepPolling = false;
 			var browser = this.browsers[this._currentBrowserIndex];
 			this.trigger("browserDone", {
 				browser: browser
 			})
+			print(this.selenium)
 			this.selenium.close();
 			this.selenium.stop();
 			this._currentBrowserIndex++;
@@ -125,34 +127,36 @@ steal('steal/browser', function(){
 				this._browserStart(this._currentBrowserIndex)
 			} 
 			else {
-				this.close();
+				this.killServer();
 				this.trigger("done");
 			}
 		},
 		_poll: function(){
-			var resultJSON, 
-				res,
-				evt,
-				keepPolling = true;
-			resultJSON = this.selenium.getEval("Selenium.getResult()");
-			eval("res = "+resultJSON);
-			if(res && res.length){
-				for (var i = 0; i < res.length; i++) {
-					evt = res[i];
-					if (evt.type == "done") {
-						keepPolling = false;
-						this._browserDone(evt.data);
-					}
-					else {
-						this.trigger(evt.type, evt.data);
+			var self = this;
+			spawn(function(){
+				if(!this.keepPolling) return;
+				var resultJSON, 
+					res,
+					evt;
+				self.keepPolling = true;
+				resultJSON = self.selenium.getEval("Selenium.getResult()");
+				eval("res = "+resultJSON);
+				if(res && res.length){
+					for (var i = 0; i < res.length; i++) {
+						evt = res[i];
+						if (evt.type == "done") {
+							self.keepPolling = false;
+							self.close(evt.data);
+						}
+						else {
+							self.trigger(evt.type, evt.data);
+						}
 					}
 				}
-			}
-			if(keepPolling) {
 				// keep polling
 				java.lang.Thread.currentThread().sleep(400);
-				this._poll();
-			}
+				arguments.callee();
+			})
 		}
 	})
 })
