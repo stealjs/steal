@@ -9,7 +9,8 @@
 		output.writeBytes("\r\n");
 		output.writeBytes(content);
 	}
-	var evalText = null;
+	var evalText = null, 
+		scriptText = null;
 	var processRequest = function(sock, browser){
 		spawn(function(){
 			if (stopServer) return;
@@ -38,11 +39,11 @@
 				}
 			}
 			// write output
-				var output = new java.io.DataOutputStream(sock.getOutputStream()),
-					resp = "";
-				if(evalText){
-					resp = "steal.client.evaluate('"+evalText+"');"
-					evalText = null;
+			var output = new java.io.DataOutputStream(sock.getOutputStream()),
+				resp = "";
+			if(evalText || scriptText){
+				resp = evalText? "steal.client.evaluate('"+evalText+"');": scriptText;
+				evalText = scriptText = null;
 				response(resp, output);
 				output.close();
 			}
@@ -64,9 +65,13 @@
 		this.evaluated = null;
 		return res;
 	}
+	steal.browser.prototype.injectJS = function(file){
+		scriptText = readFile(file).replace(/\n|\r\n/g,"");
+	}
 	var serv;
 	steal.browser.prototype.simpleServer = function(){
 		serv = new java.net.ServerSocket(5555);
+		this.injectJS('steal/browser/phantom/client.js')
 		while (!stopServer) {
 			var killed = false;
 			try {
