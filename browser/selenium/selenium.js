@@ -141,6 +141,7 @@ steal('steal/browser', function(){
 			var scriptText = readFile(file).replace(/\n|\r\n/g,""),
 				evalText = "Selenium.injectJS('"+escape(scriptText)+"')";
 			this.selenium.getEval(evalText);
+			return true;
 		},
 		_poll: function(){
 			var self = this;

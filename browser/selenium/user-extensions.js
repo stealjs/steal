@@ -560,7 +560,6 @@ if (!JSON) {
 	}
 	Selenium.injectJS = function(script){
 		var text = unescape(script);
-		console.log(text)
 		var _win = selenium.browserbot.getCurrentWindow();
 		_win.eval(text);
 	}
