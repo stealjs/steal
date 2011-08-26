@@ -46,6 +46,7 @@
 				evalText = scriptText = null;
 				response(resp, output);
 				output.close();
+				browser.injecting = false;
 			}
 			
 			bufr.close();
@@ -66,12 +67,15 @@
 		return res;
 	}
 	steal.browser.prototype.injectJS = function(file){
+		this.injecting = true;
 		scriptText = readFile(file).replace(/\n|\r\n/g,"");
+		while(this.injecting) {
+			java.lang.Thread.currentThread().sleep(300);
+		}
 	}
 	var serv;
 	steal.browser.prototype.simpleServer = function(){
 		serv = new java.net.ServerSocket(5555);
-		this.injectJS('steal/browser/phantom/client.js')
 		while (!stopServer) {
 			var killed = false;
 			try {
