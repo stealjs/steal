@@ -6,26 +6,27 @@ steal('steal/test/test.js', function(s) {
 	
 	s.test.test("envjs", function(){
 		load('steal/rhino/rhino.js')
-		steal("steal/browser/envjs")
-		var browser = new steal.browser.envjs({
-//			print: true
-		});
-		browser
-			.bind('myevent', function(data){
-				s.test.equals(data.foo, 'bar', 'bind works')
+		steal("steal/browser/envjs").then(function(){
+			var browser = new steal.browser.envjs({
+				print: true
+			});
+			browser
+				.bind('myevent', function(data){
+					s.test.equals(data.foo, 'bar', 'bind works')
+				})
+				.bind('triggered', function(data){
+					s.test.ok(true, 'injectJS works')
+				})
+				.open('steal/browser/test/mypage.html')
+			var result = browser.evaluate(function(){
+				return MyCo.foo;
 			})
-			.bind('triggered', function(data){
-				s.test.ok(true, 'injectJS works')
-			})
-			.open('steal/browser/test/mypage.html')
-		var result = browser.evaluate(function(){
-			return MyCo.foo;
+			s.test.equals(result, "bla", "execute works!")
+			browser.injectJS('steal/browser/test/trigger.js')
+			s.test.expect(3)
+			browser.close();
+			s.test.clear();
 		})
-		s.test.equals(result, "bla", "execute works!")
-		browser.injectJS('steal/browser/test/trigger.js')
-		s.test.expect(3)
-		browser.close();
-		s.test.clear();
 	})
 	
 	s.test.test("phantomjs", function(){
