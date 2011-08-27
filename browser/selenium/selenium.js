@@ -94,10 +94,13 @@ steal('steal/browser', function(){
 			}
 		},
 		killServer: function(){
-			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
-				runCommand("cmd", "/C", 'taskkill /fi "Windowtitle eq selenium" > NUL')
-				//quit()
-			}
+			spawn(function(){
+				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
+					runCommand("cmd", "/C", 'taskkill /fi "Windowtitle eq selenium" > NUL')
+				} else { // mac
+					runCommand("sh", "-c", "ps aux | awk '/selenium\\// {print$2}' | xargs kill -9")
+				}
+			})
 		},
 		// create new selenium instance, start it, open page, set FuncUnit.mode = "Selenium", start polling for data
 		_browserStart: function(index){
@@ -126,8 +129,8 @@ steal('steal/browser', function(){
 				this._browserStart(this._currentBrowserIndex)
 			} 
 			else {
-				this.killServer();
 				this.trigger("done");
+				this.killServer();
 			}
 		},
 		evaluate: function(fn){
