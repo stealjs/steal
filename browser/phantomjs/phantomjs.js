@@ -5,12 +5,12 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		steal.browser.data = "";
 		this.type = 'phantomjs';
 		this.options = options || {};
-		this.kill();
 		this._startServer();
 		this._evts = {}
 		var self = this;
 		this.bind("evaluated", function(data){
-			self.evaluated = data;
+			self.evaluateResult = data;
+			self.evaluateInProgress = false;
 		})
 	}
 	steal.browser.phantomjs.prototype = new steal.browser();
@@ -25,26 +25,36 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			page = this._getPageUrl(page);
 			page = this._appendParamsToUrl(page);
 			var verbose = this.options.print;
-			spawn(function(){
+			this.launcher = spawn(function(){
 				var cmd = "phantomjs steal/browser/phantomjs/launcher.js "+page+(verbose?  " -verbose": "");
 				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 					runCommand("cmd", "/C", cmd)
 				}
 				else {
+					var command = cmd + " > selenium.log 2> selenium.log &";
 					runCommand("sh", "-c", cmd);
+//					runCommand("sh", "-c", cmd+" 2> 1&");
 				}
 			})
 			return this;
 		},
 		// kill phantom and kill simple server
 		close: function(){
+//			this.launcher.stop();
+//			this.launcher.destroy();
 			this.kill();
 			this.stopServer();
 		},
 		kill: function(){
-			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
-				runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
-			}
+			spawn(function(){
+				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
+					runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
+				} else { // mac
+					var cmd = "ps aux | awk '/phantomjs\\// {print$2}' | xargs kill -9"
+
+					runCommand("sh", "-c", cmd)
+				}
+			})
 		},
 		_processData: function(data){
 			var d = decodeURIComponent(unescape(data));
@@ -58,9 +68,6 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 				if(this._evts[evt.id]) continue;
 				this._evts[evt.id] = true
 				this.trigger(evt.type, evt.data);
-				if (evt.type == "done") {
-					quit();
-				}
 			}
 		}
 	})

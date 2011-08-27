@@ -10,10 +10,15 @@
 		output.writeBytes(content);
 	}
 	var evalText = null, 
-		scriptText = null;
+		scriptText = null,
+		id = 0;
 	var processRequest = function(sock, browser){
+		id++;
 		spawn(function(){
-			if (stopServer) return;
+			var myid = id;
+			if (stopServer) {
+				return;
+			}
 			var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream()));
 			
 			var v = new java.util.Vector(10); // collects headers sent by browser
@@ -29,7 +34,12 @@
 						var params = x.match(/^GET.*\?(.*)\s/)
 						if (params.length) {
 //							print(params[1])
-							browser._processData(params[1])
+							// don't block thread from finishing
+							(function(p){
+							spawn(function(){
+								browser._processData(p)
+							})
+							})(params[1])
 						}
 						v.addElement(x);
 					}
@@ -47,7 +57,7 @@
 				scriptText = null;
 				response(resp, output);
 				output.close();
-				browser.injecting = false;
+				browser.injectJSInProgress = false;
 			}
 			
 			bufr.close();
@@ -59,18 +69,27 @@
 		stopServer = true;
 	}
 	steal.browser.prototype.evaluate = function(fn){
-		evalText = fn.toString().replace(/\n|\r\n/g,"");
-		while(!this.evaluated) {
+		// wait until previous finishes
+		while(this.evaluateInProgress || this.injectJSInProgress) {
 			java.lang.Thread.currentThread().sleep(300);
 		}
-		var res = this.evaluated;
-		this.evaluated = null;
+		evalText = fn.toString().replace(/\n|\r\n/g,"");
+		this.evaluateInProgress = true;
+		while(this.evaluateInProgress || this.injectJSInProgress) {
+			java.lang.Thread.currentThread().sleep(300);
+		}
+		var res = this.evaluateResult;
+		this.evaluateResult = null;
 		return res;
 	}
 	steal.browser.prototype.injectJS = function(file){
-		this.injecting = true;
+		// wait until previous finishes
+		while(this.evaluateInProgress || this.injectJSInProgress) {
+			java.lang.Thread.currentThread().sleep(300);
+		}
+		this.injectJSInProgress = true;
 		scriptText = readFile(file).replace(/\n|\r\n/g,"");
-		while(this.injecting) {
+		while(this.evaluateInProgress || this.injectJSInProgress) {
 			java.lang.Thread.currentThread().sleep(300);
 		}
 	}
