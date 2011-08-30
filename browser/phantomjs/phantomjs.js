@@ -1,9 +1,9 @@
 steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	var page;
 	steal.browser.phantomjs = function(options){
+		this.type = 'phantomjs';
 		steal.browser.apply(this, arguments)
 		steal.browser.data = "";
-		this.type = 'phantomjs';
 		this.options = options || {};
 		this._startServer();
 		this._evts = {}
@@ -36,6 +36,11 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 //					runCommand("sh", "-c", cmd+" 2> 1&");
 				}
 			})
+			// block until we're done
+			this.browserOpen = true;
+			while(this.browserOpen) {
+				java.lang.Thread.currentThread().sleep(1000);
+			}
 			return this;
 		},
 		// kill phantom and kill simple server
@@ -44,21 +49,20 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 //			this.launcher.destroy();
 			this.kill();
 			this.stopServer();
+			this.browserOpen = false;
 		},
 		kill: function(){
 			spawn(function(){
 				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 					runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
 				} else { // mac
-					var cmd = "ps aux | awk '/phantomjs\\// {print$2}' | xargs kill -9"
-
-					runCommand("sh", "-c", cmd)
+					runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9")
 				}
 			})
 		},
 		_processData: function(data){
 			var d = decodeURIComponent(unescape(data));
-//			print(d)
+//			print("_processData: "+d)
 			eval("var res = "+d)
 			// parse data into res
 			for (var i = 0; i < res.length; i++) {

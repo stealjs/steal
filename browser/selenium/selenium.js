@@ -1,7 +1,7 @@
 steal('steal/browser', function(){
 	steal.browser.selenium = function(options){
-		steal.browser.apply(this, arguments)
 		this.type = 'selenium';
+		steal.browser.apply(this, arguments)
 		this.serverPort = options.serverPort || 4444;
 		this.serverHost = options.serverHost || "localhost";
 		this._startSelenium();
@@ -20,6 +20,11 @@ steal('steal/browser', function(){
 			this.page = this._appendParamsToUrl(this.page);
 			this.browsers = browsers || ["*firefox"];
 			this._browserStart(0);
+			// block until we're done
+			this.browserOpen = true;
+			while(this.browserOpen) {
+				java.lang.Thread.currentThread().sleep(1000);
+			}
 			return this;
 		},
 		_loadDriverClass: function() {
@@ -129,8 +134,9 @@ steal('steal/browser', function(){
 				this._browserStart(this._currentBrowserIndex)
 			} 
 			else {
-				this.trigger("done");
+				this.trigger("allDone");
 				this.killServer();
+				this.browserOpen = false;
 			}
 		},
 		evaluate: function(fn){
@@ -160,13 +166,13 @@ steal('steal/browser', function(){
 				if(res && res.length){
 					for (var i = 0; i < res.length; i++) {
 						evt = res[i];
-						if (evt.type == "done") {
-							self.keepPolling = false;
-							self.close(evt.data);
-						}
-						else {
+//						if (evt.type == "done") {
+//							self.keepPolling = false;
+//							self.close(evt.data);
+//						}
+//						else {
 							self.trigger(evt.type, evt.data);
-						}
+//						}
 					}
 				}
 				// keep polling
