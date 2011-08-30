@@ -166,13 +166,7 @@ steal('steal/browser', function(){
 				if(res && res.length){
 					for (var i = 0; i < res.length; i++) {
 						evt = res[i];
-//						if (evt.type == "done") {
-//							self.keepPolling = false;
-//							self.close(evt.data);
-//						}
-//						else {
-							self.trigger(evt.type, evt.data);
-//						}
+						self.trigger(evt.type, evt.data);
 					}
 				}
 				// keep polling

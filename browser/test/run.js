@@ -16,11 +16,11 @@ steal('steal/test/test.js', function(s) {
 							s.test.equals(data.foo, 'bar', 'bind works')
 							var result = this.evaluate(function(){
 								return MyCo.foo;
-							})
-							s.test.equals(result, "bla", "execute works!")
+							});
+							s.test.equals(result, "bla", "execute works!");
 						})
 						.bind('triggered', function(data){
-							s.test.ok(true, 'injectJS works')
+							s.test.ok(true, 'injectJS works');
 						})
 						// triggered after steal/browser/selenium/client.js has loaded
 						.bind('clientloaded', function(){
@@ -29,9 +29,11 @@ steal('steal/test/test.js', function(s) {
 								$.holdReady(false);
 							})
 						})
+						.bind('done', function(){
+							this.close();
+						})
 						.open('steal/browser/test/mypage.html')
-					s.test.expect(3)
-					browser.close();
+					s.test.expect(3);
 					s.test.clear();
 				})
 			})
