@@ -33,13 +33,13 @@
 					else {
 						var params = x.match(/^GET.*\?(.*)\s/)
 						if (params.length) {
-//							print(params[1])
+//							print("params: "+params[1]);
 							// don't block thread from finishing
 							(function(p){
 							spawn(function(){
 								browser._processData(p)
 							})
-							})(params[1])
+							})(params[1]);
 						}
 						v.addElement(x);
 					}
@@ -63,7 +63,7 @@
 			bufr.close();
 		})
 	}, 
-	stopServer = false;
+	stopServer;
 	steal.browser.prototype.stopServer = function(){
 		serv.close();
 		stopServer = true;
@@ -95,6 +95,7 @@
 	}
 	var serv;
 	steal.browser.prototype.simpleServer = function(){
+		stopServer = false;
 		serv = new java.net.ServerSocket(5555);
 		while (!stopServer) {
 			var killed = false;

@@ -21,8 +21,11 @@
 	 * @param {Object} options
 	 */
 	steal.browser = function(options){
-		this._events = {};
-		// driver should start the server if there is one (selenium/jstestdriver)
+		if (options) {
+			print('starting steal.browser.' + this.type)
+			this._events = {};
+			// driver should start the server if there is one (selenium/jstestdriver)
+		}
 	};
 	
 	// generic steal.browser API
