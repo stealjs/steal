@@ -1,6 +1,7 @@
 load('steal/rhino/rhino.js');
 
-
-steal('steal/html').then(function(){
+print('here')
+steal('steal/html', function(){
+	print('hi')
 	steal.html("steal/html/test/page.html#Hello+World!")
 })

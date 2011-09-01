@@ -1,13 +1,14 @@
 // listens for 3001, returns something super simple
 (function(){
 	var response = function(content, output){
+		var out = "cb();"+content;
 		output.writeBytes("HTTP/1.1 200 OK" + "\r\n");
 		output.writeBytes("Server: Java HTTPServer" + "\r\n");
 		output.writeBytes("Content-Type: text/html" + "\r\n");
-		output.writeBytes("Content-Length: " + content.length + "\r\n");
+		output.writeBytes("Content-Length: " + out.length + "\r\n");
 		output.writeBytes("Connection: close\r\n");
 		output.writeBytes("\r\n");
-		output.writeBytes(content);
+		output.writeBytes(out);
 	}
 	var evalText = null, 
 		scriptText = null,
