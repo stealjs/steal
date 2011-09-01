@@ -1,7 +1,7 @@
 steal('steal/browser', function(){
 	steal.browser.selenium = function(options){
 		this.type = 'selenium';
-		steal.browser.apply(this, arguments)
+		steal.browser.call(this, options || {})
 		this.serverPort = options.serverPort || 4444;
 		this.serverHost = options.serverHost || "localhost";
 		this._startSelenium();

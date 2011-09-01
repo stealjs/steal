@@ -20,11 +20,16 @@ steal('jquery', function(){
 		var q = steal.client.dataQueue;
 		steal.client.dataQueue = [];
 		var params = encodeURIComponent(JSON.stringify(q));
-//		console.log(params)
+//		console.log('SENDING: '+params)
 		$.ajax({
 			url: "http://localhost:5555?" + params,
 			cache: true,
-			dataType: 'script'
+			dataType: 'jsonp',
+			jsonp: false,
+			jsonpCallback: 'cb',
+			success: function(){
+//				console.log(document.documentElement.innerHTML);
+			}
 		})
 		if (steal.client.phantomexit) {
 			// kills phantom process
@@ -39,5 +44,7 @@ steal('jquery', function(){
 		var res = fn();
 		steal.client.trigger("evaluated", res)
 	}
-	steal.client.sendData();
+	setTimeout(function(){
+		steal.client.sendData();
+	}, 1000)
 }, 'steal/browser/client.js')

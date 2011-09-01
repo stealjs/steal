@@ -44,9 +44,8 @@ steal.html.crawl = function(url, opts){
 		
 		print("  "+url)
 		// called every time the page is 'ready'
-		newSteal.html.onready(function(){
-			var html = helpers.html(),
-				hash = window.location.hash.substr(2);
+		newSteal.html.onready(function(html){
+			var hash = window.location.hash.substr(2);
 			
 			print("  > "+ opts.out+"/"+hash+".html")
 			// write out the page
@@ -111,9 +110,6 @@ steal.extend(steal.html.crawl, {
 			}
 		}
 		return queue.shift();
-	},
-	run : function(){
-		
 	}
 })
 // load a page, get its content, 

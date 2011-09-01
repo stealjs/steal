@@ -7,12 +7,14 @@ steal('steal/browser', function(){
 			}
 		}
 		this.type = 'envjs';
-		steal.browser.apply(this, arguments)
-		this.options = options;
+		this.options = options || {};
+		print('constructor')
+		steal.browser.call(this, this.options)
 		var self = this;
 		Envjs.trigger = function(){
 			self.trigger.apply(self, arguments);
 		};
+		print('constructor2 '+this._events)
 	}
 	steal.browser.envjs.defaults = {
 		scriptTypes: {
@@ -28,6 +30,7 @@ steal('steal/browser', function(){
 		open: function(page){
 			page = this._getPageUrl(page);
 			page = this._appendParamsToUrl(page);
+			print("page: "+page)
 			this.curSteal = steal;
 			Envjs(page, this.options);
 			return this;

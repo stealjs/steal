@@ -1,10 +1,5 @@
-steal(function(s){
-
-var window = (function() {
-		return this;
-	}).call(null, 0),
-	url;
-
+steal('steal/browser/phantomjs', function(){
+print('inside html.j')
 /**
  * @function steal.html
  * @parent stealjs
@@ -25,13 +20,11 @@ var window = (function() {
  *   relative to [steal.static.root steal.root] or a website.
  * @param {Object|Function} opts
  */
-var html = steal.html = function(urlo, opts){
+steal.html = function(urlo, opts){
 	
-	var url = url,
-		options = opts;
-	
-	steal.html.load(urlo, function(helpers){
-		var html = helpers.html();
+	var options = opts;
+	print("html: " + urlo)
+	steal.html.load(urlo, function(html){
 		if(typeof opts === "function"){
 			opts(html)
 		} else {
@@ -41,35 +34,9 @@ var html = steal.html = function(urlo, opts){
 
 	
 	
-},
-	options,
-	count;
+};
 // wait for steal.done
-	
-var count = 0,
-	readyFunc;
-/**
- * @function steal.html.wait
- * @parent steal.html
- * Waits for the html to finish
- */
-html.wait = function(){
-	count++;
-};
-/**
- * @function steal.html.ready
- * @parent steal.html
- * Lets the page know it's ready to render the html
- */
-html.ready = function(){
-	count--;
-	//print("    readyC "+count)
-	if(readyFunc && count <= 0){
-		readyFunc();
-	}
-	
-};
-html.onready = function(func){
+steal.html.onready = function(func){
 	readyFunc = func;
 	
 	if(count <= 0){
@@ -77,40 +44,34 @@ html.onready = function(func){
 	}
 };
 
-html.load = function(url, callback){
+steal.html.load = function(url, callback){
+	var getDocType  = function(url){
+		var content;
+		print('URL: '+url)
+		if(steal.File(url).domain() === null){
+			content = readFile(steal.File(url).clean());
+		} else {
+			content = readUrl(url);
+		}
+		var docTypes = content.match( /<!doctype[^>]+>/i );
+		return docTypes ? docTypes[0] : "";
+	};
 	
-	load('steal/rhino/env.js');
-	
-	Envjs(url, {
-		scriptTypes: {
-			"text/javascript": true,
-			"text/envjs": true,
-			"": true
-		},
-		logLevel: 2,
-		dontPrintUserAgent: true,
-	});
-		
-	var newSteal = window.steal,
-		getDocType  = function(){
-			var content;
-			if(s.File(url).domain() === null){
-				content = readFile(s.File(url).clean());
-			} else {
-				content = readUrl(url);
-			}
-			var docTypes = content.match( /<!doctype[^>]+>/i );
-			return docTypes ? docTypes[0] : "";
-		};
-	
-	newSteal.one('done', function(){
-		callback({
-			newSteal : newSteal,
-			html : function(){
-				return getDocType()+"\n"+document.innerHTML
-			}
-		})
-	} );
+	print('open: '+url)
+	var browser = new steal.browser.phantomjs({
+		print: true
+	})
+	browser.bind('pageready', function(){
+		print('PAGEREADY')
+		var docType = getDocType(url),
+			html = this.evaluate(function(){
+				return document.documentElement.innerHTML;
+			}),
+			total = docType+"\n"+html;
+			print(" HTML: "+html)
+		callback.call(this, total)
+	})
+	.open(url)
 };
 
 });

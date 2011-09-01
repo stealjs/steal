@@ -38,7 +38,8 @@ steal('steal/test/test.js', function(s) {
 				})
 			})
 		}, 
-		browsers = ["selenium", "phantomjs", "envjs"]
+//		browsers = ["selenium", "phantomjs", "envjs"]
+		browsers = ["phantomjs"]
 		
 	for(var i=0; i<browsers.length; i++){
 		browserTest(browsers[i])
