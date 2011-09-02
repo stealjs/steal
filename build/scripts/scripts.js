@@ -145,6 +145,54 @@ steal('steal/build').then(function( steal ) {
 				return "" + xhr.responseText;
 			};
 		},
+		uglify: function() {
+			steal.print("steal.compress - Using Uglify");
+			return function( src, quiet ) {
+				var rnd = Math.floor(Math.random() * 1000000 + 1),
+					origFileName = "tmp" + rnd + ".js",
+					origFile = new steal.File(origFileName);
+
+				origFile.save(src);
+
+
+				var outBaos = new java.io.ByteArrayOutputStream(),
+					output = new java.io.PrintStream(outBaos);
+					
+				runCommand("uglifyjs", origFileName,
+					{ output: output }
+				);
+			
+				origFile.remove();
+
+				return outBaos.toString();
+			};
+		},
+		localClosure: function() {
+			//was unable to use SS import method, so create a temp file
+			steal.print("steal.compress - Using Google Closure app");
+			return function( src, quiet ) {
+				var rnd = Math.floor(Math.random() * 1000000 + 1),
+					filename = "tmp" + rnd + ".js",
+					tmpFile = new steal.File(filename);
+
+				tmpFile.save(src);
+
+				var outBaos = new java.io.ByteArrayOutputStream(),
+					output = new java.io.PrintStream(outBaos);
+				if ( quiet ) {
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--warning_level", "QUIET", "--js", filename, {
+						output: output
+					});
+				} else {
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", filename, {
+						output: output
+					});
+				}
+				tmpFile.remove();
+
+				return outBaos.toString();
+			};
+		},
 		localClosure: function() {
 			//was unable to use SS import method, so create a temp file
 			steal.print("steal.compress - Using Google Closure app");
