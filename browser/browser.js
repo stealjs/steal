@@ -24,6 +24,12 @@
 		if (options) {
 			print('starting steal.browser.' + this.type)
 			this._events = {};
+			this.bind('clientloaded', function(){
+				// if they don't bind to this event, just make document ready fire right away
+				this.evaluate(function(){
+					$.holdReady(false);
+				})
+			})
 			// driver should start the server if there is one (selenium/jstestdriver)
 		}
 	};
@@ -47,13 +53,13 @@
 		// if there are already params, appends them, otherwise, adds params
 		_appendParamsToUrl: function(url){
 			// should be & separated, but but in phantomjs prevents that url from being read, so we use a comma
-			var params = "mode=commandline,browser=" + this.type;
-			if (/\?/.test(url)) {
-				url += "&" + params;
-			}
-			else {
-				url += "?" + params;
-			}
+			var params = "mode=commandline,browser=" + this.type, 
+				searchMatch = url.match(/(\?[^\#]*)[\#]?/),
+				hashMatch = url.match(/(\#.*)/),
+				hrefMatch = url.match(/([^\#|\?]*)[\#|\?]?/);
+			url = (hrefMatch? hrefMatch[1]: url)+
+				(searchMatch? searchMatch[1]+"&"+params: "?"+params)+
+				(hashMatch? hashMatch[1]: "");
 			return url;
 		},
 		_getPageUrl: function(page){

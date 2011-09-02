@@ -71,7 +71,12 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 				// to work around this we check event ids to make sure we're not seeing a duplicate
 				if(this._evts[evt.id]) continue;
 				this._evts[evt.id] = true
-				this.trigger(evt.type, evt.data);
+				var self = this;
+				(function(e){
+				spawn(function(){
+					self.trigger(e.type, e.data);
+				})
+				})(evt)
 			}
 		}
 	})
