@@ -1,5 +1,5 @@
 steal('steal/browser/phantomjs', function(){
-print('inside html.j')
+
 /**
  * @function steal.html
  * @parent stealjs
@@ -23,7 +23,6 @@ print('inside html.j')
 steal.html = function(urlo, opts){
 	
 	var options = opts;
-	print("html: " + urlo)
 	steal.html.load(urlo, function(html){
 		if(typeof opts === "function"){
 			opts(html)
@@ -35,19 +34,10 @@ steal.html = function(urlo, opts){
 	
 	
 };
-// wait for steal.done
-steal.html.onready = function(func){
-	readyFunc = func;
-	
-	if(count <= 0){
-		readyFunc();
-	}
-};
 
 steal.html.load = function(url, callback){
 	var getDocType  = function(url){
 		var content;
-		print('URL: '+url)
 		if(steal.File(url).domain() === null){
 			content = readFile(steal.File(url).clean());
 		} else {
@@ -57,18 +47,16 @@ steal.html.load = function(url, callback){
 		return docTypes ? docTypes[0] : "";
 	};
 	
-	print('open: '+url)
 	var browser = new steal.browser.phantomjs({
 		print: true
 	})
 	browser.bind('pageready', function(){
-		print('PAGEREADY')
 		var docType = getDocType(url),
 			html = this.evaluate(function(){
 				return document.documentElement.innerHTML;
 			}),
 			total = docType+"\n"+html;
-			print(" HTML: "+html)
+//		print(" HTML: "+total)
 		callback.call(this, total)
 	})
 	.open(url)

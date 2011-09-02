@@ -53,10 +53,11 @@ steal.test =  {
 		for(var n in win) print(n);
 	},
 	deleteDir: function( dir ) {
+		dir = new java.io.File(dir)
 		if (dir.isDirectory()) {
 	        var children = dir.list();
 	        for (var i=0; i<children.length; i++) {
-	            var success = deleteDir(new java.io.File(dir, children[i]));
+	            var success = this.deleteDir(new java.io.File(dir, children[i]));
 	            if (!success) return false;
 	            
 	        }

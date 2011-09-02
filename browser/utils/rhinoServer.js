@@ -1,20 +1,21 @@
 // listens for 3001, returns something super simple
 (function(){
-	var response = function(content, output){
-		var out = "cb();"+content;
+	var id = 0, 
+	response = function(content, output){
+		id++;
+		var out = "cb({'id': "+id+", 'fn': function(){"+content+"}});";
 		output.writeBytes("HTTP/1.1 200 OK" + "\r\n");
 		output.writeBytes("Server: Java HTTPServer" + "\r\n");
 		output.writeBytes("Content-Type: text/html" + "\r\n");
 		output.writeBytes("Content-Length: " + out.length + "\r\n");
 		output.writeBytes("Connection: close\r\n");
 		output.writeBytes("\r\n");
+//		print('RESPONSE: '+out)
 		output.writeBytes(out);
 	}
 	var evalText = null, 
 		scriptText = null,
-		id = 0;
-	var processRequest = function(sock, browser){
-		id++;
+	processRequest = function(sock, browser, id){
 		spawn(function(){
 			var myid = id;
 			if (stopServer) {
@@ -32,9 +33,8 @@
 						done = true;
 					}
 					else {
-						var params = x.match(/^GET.*\?(.*)\s/)
+						var params = x.match(/^GET.*\?(.*)&_=/);
 						if (params.length) {
-//							print("params: "+params[1]);
 							// don't block thread from finishing
 							(function(p){
 							spawn(function(){
@@ -53,14 +53,17 @@
 			var output = new java.io.DataOutputStream(sock.getOutputStream()),
 				resp = "";
 			if(evalText || scriptText){
+//				print('evalText: '+evalText)
 				resp = evalText? "steal.client.evaluate('"+evalText+"');": scriptText;
 				evalText = null;
 				scriptText = null;
 				response(resp, output);
-				output.close();
 				browser.injectJSInProgress = false;
+			} else {
+				response("", output);
 			}
 			
+			output.close();
 			bufr.close();
 		})
 	}, 
@@ -77,6 +80,7 @@
 		evalText = fn.toString().replace(/\n|\r\n/g,"");
 		this.evaluateInProgress = true;
 		while(this.evaluateInProgress || this.injectJSInProgress) {
+//			print('evaluate 1b: '+evalText)
 			java.lang.Thread.currentThread().sleep(300);
 		}
 		var res = this.evaluateResult;
@@ -106,7 +110,7 @@
 			if (!stopServer) {
 				var copy = sock;
 				sock = null;
-				processRequest(copy, this);
+				processRequest(copy, this, id);
 			}
 		}
 		serv.close();

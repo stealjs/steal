@@ -5,6 +5,6 @@ steal('jquery', function(){
 		steal.client.trigger('myevent', {foo: "bar"});
 		setTimeout(function(){
 			steal.client.trigger('done')
-		}, 1000)
+		}, 4000)
 	})
 })
