@@ -1,4 +1,7 @@
 steal('jquery', function(){
+	if(!$('iframe').length){
+		$("<iframe></iframe>").appendTo(document.body);
+	}
 	steal.client = {}
 	steal.client.dataQueue = []
 	var id=0, 
