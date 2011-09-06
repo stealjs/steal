@@ -60,7 +60,7 @@
 				else 
 					return "onerror" in script;
 			})(),
-			interactive: doc && "attachEvent" in scriptTag()
+			interactive: false
 			
 		},
 		startup = function(){},
@@ -1192,6 +1192,9 @@
 			}
 			raw.type =  ext;
 		}
+		if (!types[raw.type]){
+			throw "steal.js - type " + raw.type + " has not been loaded.";
+		}
 		var converters =  types[raw.type].convert;
 		raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
 	});
@@ -1315,11 +1318,9 @@ var cssCount = 0,
 steal.type("css", function css_type(options, original, success, error){
 	if(options.text){ // less
 		var css  = doc[STR_CREATE_ELEMENT]('style');
-		if (typeof css.styleSheet !== 'undefined') { // IE
-			// stylesheet property is null, need a timeout before it appears
-			setTimeout(function () {
-				css.styleSheet.cssText = options.text;
-			}, 0);
+		css.type = 'text/css';
+		if (css.styleSheet) { // IE
+			css.styleSheet.cssText = options.text;
 		} else {
 			(function (node) {
 				if (css.childNodes.length > 0) {
@@ -1343,7 +1344,6 @@ steal.type("css", function css_type(options, original, success, error){
 				var relative = File(options.src).joinFrom(
 					File(lastSheetOptions.src).dir());
 					
-				//console.log(relative);
 				lastSheet.addImport( relative );
 				cssCount++;
 				if(cssCount == 30){
@@ -1750,7 +1750,7 @@ request = function(options, success, error){
 		end : function(){}
 	};
 	
-	firstEnd = false;
+	var firstEnd = false;
 	addEvent(win, "load", function(){
 		loaded.load();
 	});
@@ -1826,17 +1826,23 @@ request = function(options, success, error){
 var interactiveScript, 
 	// key is script name, value is array of pending items
 	interactives = {},
-	getInteractiveScript = function() {
+	getInteractiveScript = function(){
+		var i, script,
+		  scripts = doc[STR_GET_BY_TAG]('script');
+		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
+			if (script.readyState === 'interactive') {
+				return script;
+			}
+		}
+	},
+	getCachedInteractiveScript = function() {
 		var scripts, i, script;
 		if (interactiveScript && interactiveScript.readyState === 'interactive') {
 			return interactiveScript;
 		}
 		
-		scripts = document.getElementsByTagName('script');
-		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
-			if (script.readyState === 'interactive') {
-				return script;
-			}
+		if(script = getInteractiveScript()){
+			return script;
 		}
 		
 		// check last inserted
@@ -1845,13 +1851,16 @@ var interactiveScript,
 		}
 	
 		return null;
-	}
+	};
+	
+support.interactive = doc && !!getInteractiveScript();
+
 
 if (support.interactive) {
 
 	// after steal is called, check which script is "interactive" (for IE)
 	steal.after = after(steal.after, function(){
-		var interactive = getInteractiveScript();
+		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
 		if (!interactive || !interactive.src || /steal\.(production\.)*js/.test(interactive.src)) {
 			return;
@@ -1871,13 +1880,16 @@ if (support.interactive) {
 	// dependencies that has come so far and assign them to the loaded script
 	steal.loaded = before(steal.loaded, function(name){
 		var src = steals[name].options.src,
-			interactive = getInteractiveScript(),
+			interactive = getCachedInteractiveScript(),
 			interactiveSrc = interactive.src;
 		interactives[src] = interactives[interactiveSrc];
 		interactives[interactiveSrc] = null;
 	});
 	
 }
+
+	// ===========  STEAL.BROWSERS ==========
+	win.location && /mode=commandline/.test(win.location.search) && steal("steal/browser/"+win.location.search.match(/browser=(\w+)/)[1]+"/client.js")
 	
 	// ===========  OPTIONS ==========
 	

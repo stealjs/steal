@@ -1,8 +1,14 @@
-steal('steal/html','jquery').then(function(){
+steal('steal/html/client.js','jquery').then(function(){
 	steal.html.wait();
+	var showHash = function(){
+		$('#out').html("<p>"+window.location.hash+"</p>");
+	}
 	setTimeout(function(){
-		$(document.body).append("<p>"+window.location.hash+"</p>");
+		showHash();
 		steal.html.ready();
 	},10)
+	$(window).bind('hashchange', function(){
+		showHash();
+	})
 	
 })

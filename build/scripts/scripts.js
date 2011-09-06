@@ -13,6 +13,10 @@ steal('steal/build').then(function( steal ) {
 	 */
 	var scripts = (steal.build.builders.scripts = function( opener, options, dependencies ) {
 		steal.print("\nBUILDING SCRIPTS --------------- ");
+		
+		if(options.all !== false){
+			options.all = true;
+		}
 
 		// get the compressor
 		var compressor = scripts.compressors[options.compressor || "localClosure"](),
@@ -24,12 +28,23 @@ steal('steal/build').then(function( steal ) {
 			currentPackage = {
 				scripts : [],
 				src : []
-			};
+			}, 
+			
+			// there's no scripts that shouldn't be compressed
+			canCompressTogether = options.all;
 
 		// compress all scripts by default
 		if ( true/*options.all*/ ) {
 			packages['production.js'] = currentPackage;
 		}
+		
+		// do a first pass to determine if there's anything we shouldn't compress
+		opener.each('js', function( stl, text, i ) {
+			if ( stl.compress === false ) {
+				canCompressTogether = false;
+			}
+		});
+		// if nothing can't be compressed, compress whole app in one step
 
 		// for each steal we find
 		opener.each('js', function( stl, text, i ) {
@@ -68,7 +83,7 @@ steal('steal/build').then(function( steal ) {
 			text = scripts.clean(text);
 
 			// if we should compress the script, compress it
-			if ( stl.compress !== false || options.all ) {
+			if ( !canCompressTogether && (stl.compress !== false || options.all) ) {
 				text = compressor(text, true);
 			}
 			currentPackage.scripts.push("'"+stl.rootSrc+"'")
@@ -88,9 +103,13 @@ steal('steal/build').then(function( steal ) {
 					dependencyStr += "steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']});\n";
 				}
 				var compressed = packages[p].src.join("\n");
+				if(canCompressTogether){
+					compressed = compressor(compressed, true);
+				}
 				//save them
 				new steal.File(options.to + p).save(loading+dependencyStr+compressed);
-				steal.print("SCRIPT BUNDLE > " + options.to + p);
+				steal.print("SCRIPT BUNDLE > " + options.to + p + 
+					(canCompressTogether? "(compressed in single step)": ""));
 			}
 		}
 	});
@@ -143,6 +162,54 @@ steal('steal/build').then(function( steal ) {
 				var params = "js_code=" + encodeURIComponent(src) + "&compilation_level=WHITESPACE_ONLY" + "&output_format=text&output_info=compiled_code";
 				xhr.send(params);
 				return "" + xhr.responseText;
+			};
+		},
+		uglify: function() {
+			steal.print("steal.compress - Using Uglify");
+			return function( src, quiet ) {
+				var rnd = Math.floor(Math.random() * 1000000 + 1),
+					origFileName = "tmp" + rnd + ".js",
+					origFile = new steal.File(origFileName);
+
+				origFile.save(src);
+
+
+				var outBaos = new java.io.ByteArrayOutputStream(),
+					output = new java.io.PrintStream(outBaos);
+					
+				runCommand("node", "steal/build/scripts/uglify/bin/uglifyjs", origFileName,
+					{ output: output }
+				);
+			
+				origFile.remove();
+
+				return outBaos.toString();
+			};
+		},
+		localClosure: function() {
+			//was unable to use SS import method, so create a temp file
+			steal.print("steal.compress - Using Google Closure app");
+			return function( src, quiet ) {
+				var rnd = Math.floor(Math.random() * 1000000 + 1),
+					filename = "tmp" + rnd + ".js",
+					tmpFile = new steal.File(filename);
+
+				tmpFile.save(src);
+
+				var outBaos = new java.io.ByteArrayOutputStream(),
+					output = new java.io.PrintStream(outBaos);
+				if ( quiet ) {
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--warning_level", "QUIET", "--js", filename, {
+						output: output
+					});
+				} else {
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", filename, {
+						output: output
+					});
+				}
+				tmpFile.remove();
+
+				return outBaos.toString();
 			};
 		},
 		localClosure: function() {

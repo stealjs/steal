@@ -39,68 +39,66 @@ steal.html.crawl = function(url, opts){
 	
 	steal.File(opts.out).mkdirs();
 	
-	steal.html.load(url, function(helpers){
-		var newSteal = helpers.newSteal;
-		
-		print("  "+url)
+	steal.html.load(url, function(html){
 		// called every time the page is 'ready'
-		newSteal.html.onready(function(){
-			var html = helpers.html(),
-				hash = window.location.hash.substr(2);
-			
+//		steal.html.onready(function(html){
+			// write HTML to file
+			var hash = this.evaluate(function(){
+				return window.location.hash.substr(1);
+			})
 			print("  > "+ opts.out+"/"+hash+".html")
 			// write out the page
-			s.File(opts.out+"/"+hash+".html").save(html);
+			steal.File(opts.out+"/"+hash+".html").save(html);
+			var next = steal.html.crawl.addLinks(this);
 			
-			var next = s.html.crawl.addLinks();
 
 			if(next){
 				
 				print("  "+next)
-				newSteal.html.wait();
+				this.evaluate(function(){
+					steal.html.wait();
+				})
 				
-				var l = window.location;
-				l.hash = next;
-				//print("    wait "+next)
-				// always wait 20ms 
-				setTimeout(function(){
-					//print("    ready "+next)
-					newSteal.html.ready();
-				},30);
-				
-				Envjs.wait();
-				
+				// get the next link
+				this.evaluate(function(nextHash){
+					window.location.hash = "Foo"
+				}, next);
+				// always wait 20ms
+				java.lang.Thread.currentThread().sleep(30); 
+				this.evaluate(function(){
+					steal.html.ready();
+				});
 			}
-		})
-		
-		
-		
-		
+			else {
+				this.close()
+			}
 	})
 }
 
-var getHash = function(href){
-	var index = href.indexOf("#!");
-	if(index > -1){
-		return href.substr(index);
-	}
-}
-
 steal.extend(steal.html.crawl, {
-	getLinks : function(){
-		var links = document.getElementsByTagName('a'),
-			urls = [],
-			hash;
-		for(var i=0; i < links.length; i++){
-			hash = getHash(links[i].href)
-			if( hash ){
-				urls.push( hash )
+	getLinks : function(browser){
+		var urls = browser.evaluate(function(){
+			var getHash = function(href){
+				var index = href.indexOf("#!");
+				if(index > -1){
+					return href.substr(index);
+				}
+			};
+			var links = document.getElementsByTagName('a'),
+				urls = [],
+				hash;
+			for(var i=0; i < links.length; i++){
+				hash = getHash(links[i].href);
+				if( hash ){
+					urls.push( hash );
+				}
 			}
-		}
+			return urls;
+		});
 		return urls;
 	},
-	addLinks : function(){
-		var links = this.getLinks(),
+	addLinks : function(browser){
+		var links = this.getLinks(browser),
 			link;
 		// add links that haven't already been added
 		for(var i=0; i < links.length; i++){
@@ -111,9 +109,6 @@ steal.extend(steal.html.crawl, {
 			}
 		}
 		return queue.shift();
-	},
-	run : function(){
-		
 	}
 })
 // load a page, get its content, 
