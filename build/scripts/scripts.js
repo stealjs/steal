@@ -177,7 +177,7 @@ steal('steal/build').then(function( steal ) {
 				var outBaos = new java.io.ByteArrayOutputStream(),
 					output = new java.io.PrintStream(outBaos);
 					
-				runCommand("steal/build/scripts/uglify/bin/uglifyjs", origFileName,
+				runCommand("node", "steal/build/scripts/uglify/bin/uglifyjs", origFileName,
 					{ output: output }
 				);
 			
