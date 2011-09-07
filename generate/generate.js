@@ -174,7 +174,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 	steal.extend(generate, {
 		regexps: {
 			colons: /::/,
-			words: /([A-Z]+)([A-Z][a-z])/g,
+			words: /([A-Z]+[a-z])([A-Z][a-z])/g,
 			lowerUpper: /([a-z\d])([A-Z])/g,
 			dash: /([a-z\d])([A-Z])/g,
 			undHash: /_|-/
