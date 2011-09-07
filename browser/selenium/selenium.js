@@ -1,12 +1,16 @@
 steal('steal/browser', function(){
 	steal.browser.selenium = function(options){
-		this.type = 'selenium';
-		steal.browser.call(this, options || {})
-		this.serverPort = options.serverPort || 4444;
-		this.serverHost = options.serverHost || "localhost";
-		this._startSelenium();
-		this.DefaultSelenium = this._loadDriverClass();
+		steal.browser.call(this, options, 'selenium')
 	}
+	steal.extend(steal.browser.selenium, {
+		defaults:  {
+			serverPort: 4444,
+			serverHost: "localhost"
+		},
+		trigger: function(){
+			browser.trigger.apply(self, arguments);
+		}
+	});
 	steal.browser.selenium.prototype = new steal.browser();
 	steal.extend(steal.browser.selenium.prototype, {
 		/**
@@ -17,7 +21,6 @@ steal('steal/browser', function(){
 		open: function(page, browsers){
 			this._currentBrowserIndex = 0;
 			this.page = this._getPageUrl(page);
-			this.page = this._appendParamsToUrl(this.page);
 			this.browsers = browsers || ["*firefox"];
 			this._browserStart(0);
 			// block until we're done
@@ -54,10 +57,10 @@ steal('steal/browser', function(){
 				return constructor.newInstance(host, port, cmd, url);
 			};
 		},
-		_startSelenium: function(){
+		_startServer: function(){
 			//first lets ping and make sure the server is up
-			var port = this.serverPort, 
-				addr = java.net.InetAddress.getByName(this.serverHost)
+			var port = this.options.serverPort, 
+				addr = java.net.InetAddress.getByName(this.options.serverHost)
 			try {
 				var s = new java.net.Socket(addr, port)
 			} 
@@ -97,6 +100,7 @@ steal('steal/browser', function(){
 					pollSeleniumServer();
 				}
 			}
+			this.DefaultSelenium = this._loadDriverClass();
 		},
 		killServer: function(){
 			spawn(function(){
@@ -113,8 +117,8 @@ steal('steal/browser', function(){
 			this.trigger("browserStart", {
 				browser: browser
 			})
-			this.selenium = this.DefaultSelenium(this.serverHost, 
-				this.serverPort, 
+			this.selenium = this.DefaultSelenium(this.options.serverHost, 
+				this.options.serverPort, 
 				browser, 
 				this.page);
 			this.selenium.start();
