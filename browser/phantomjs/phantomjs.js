@@ -1,18 +1,13 @@
 steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	var page;
 	steal.browser.phantomjs = function(options){
-		this.type = 'phantomjs';
-		steal.browser.apply(this, arguments)
-		steal.browser.data = "";
-		this.options = options || {};
-		this._startServer();
-		this._evts = {}
-		var self = this;
-		this.bind("evaluated", function(data){
-			self.evaluateResult = data;
-			self.evaluateInProgress = false;
-		})
+		steal.browser.call(this, options, 'phantomjs')
 	}
+	steal.extend(steal.browser.phantomjs, {
+		defaults:  {
+			
+		}
+	});
 	steal.browser.phantomjs.prototype = new steal.browser();
 	steal.extend(steal.browser.phantomjs.prototype, {
 		_startServer: function(){
@@ -20,10 +15,16 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			spawn(function(){
 				self.simpleServer()
 			})
+			// used as a cache to make sure we only run events once
+			this._evts = {}
+			var self = this;
+			this.bind("evaluated", function(data){
+				self.evaluateResult = data;
+				self.evaluateInProgress = false;
+			})
 		},
 		open: function(page){
 			page = this._getPageUrl(page);
-			page = this._appendParamsToUrl(page);
 			var verbose = this.options.print;
 			this.launcher = spawn(function(){
 				var cmd = "phantomjs steal/browser/phantomjs/launcher.js "+page+(verbose?  " -verbose": "");
@@ -33,7 +34,6 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 				else {
 					var command = cmd + " > selenium.log 2> selenium.log &";
 					runCommand("sh", "-c", cmd);
-//					runCommand("sh", "-c", cmd+" 2> 1&");
 				}
 			})
 			// block until we're done
@@ -45,8 +45,6 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		},
 		// kill phantom and kill simple server
 		close: function(){
-//			this.launcher.stop();
-//			this.launcher.destroy();
 			this.kill();
 			this.stopServer();
 			this.browserOpen = false;

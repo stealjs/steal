@@ -20,10 +20,19 @@
 	 * required because the server needs to have a chance to load its own code and prevent race conditions.
 	 * @param {Object} options
 	 */
-	steal.browser = function(options){
-		if (options) {
+	steal.browser = function(options, type){
+		this.type = type;
+		if (type) {
+			options = options || {};
+			for(var option in steal.browser[type].defaults){
+				if(typeof options[option] === "undefined"){
+					options[option] = steal.browser[type].defaults[option]
+				}
+			}
+			this.options = options;
 			print('starting steal.browser.' + this.type)
 			this._events = {};
+			this._startServer();
 			this.bind('clientloaded', function(){
 				// if they don't bind to this event, just make document ready fire right away
 				this.evaluate(function(){
@@ -71,6 +80,7 @@
 			
 			//convert spaces to %20.
 			var newPage = /http:/.test(page) ? page: page.replace(/ /g,"%20");
+			newPage = this._appendParamsToUrl(newPage);
 			return newPage;
 		},
 	})

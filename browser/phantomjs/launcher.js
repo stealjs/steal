@@ -2,11 +2,11 @@
 	var url = phantom.args[0],
 		page = new WebPage(),
 		verbose = phantom.args[1];
-//	if (verbose && verbose == "-verbose") {
+	if (verbose && verbose == "-verbose") {
 		page.onConsoleMessage = function(msg){
 			console.log(msg);
 		};
-//	}
+	}
 	page.onResourceRequested = function (req) {
 //		console.log('Request ' + JSON.stringify(req, undefined, 4));
 	};
