@@ -9,7 +9,7 @@ steal('steal/test/test.js', function(s) {
 				load('steal/rhino/rhino.js')
 				steal("steal/browser/"+type, function(){
 					var browser = new steal.browser[type]({
-//						print: true
+						print: true
 					});
 					browser
 						.bind('myevent', function(data){

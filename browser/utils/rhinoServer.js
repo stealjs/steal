@@ -1,118 +1,143 @@
-// listens for 3001, returns something super simple
-(function(){
-	var id = 0, 
-	response = function(content, output){
-		id++;
-		var out = "cb({'id': "+id+", 'fn': function(){"+content+"}});";
-		output.writeBytes("HTTP/1.1 200 OK" + "\r\n");
-		output.writeBytes("Server: Java HTTPServer" + "\r\n");
-		output.writeBytes("Content-Type: text/html" + "\r\n");
-		output.writeBytes("Content-Length: " + out.length + "\r\n");
-		output.writeBytes("Connection: close\r\n");
-		output.writeBytes("\r\n");
-//		print('RESPONSE: '+out)
-		output.writeBytes(out);
-	}
-	var evalText = null, 
-		scriptText = null,
-	processRequest = function(sock, browser, id){
-		spawn(function(){
-			var myid = id;
-			if (stopServer) {
-				return;
-			}
-			var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream()));
-			
-			var v = new java.util.Vector(10); // collects headers sent by browser
-			var done = false;
-			
-			while (!done) {
-				try {
-					var x = bufr.readLine();
-					if (x.length() == 0) {
-						done = true;
-					}
-					else {
-						var params = x.match(/^GET.*\?(.*)&_=/);
-						if (params.length) {
-							// don't block thread from finishing
-							(function(p){
-							spawn(function(){
-								browser._processData(p)
-							})
-							})(params[1]);
-						}
-						v.addElement(x);
-					}
-				} 
-				catch (e) {
-					done = true;
-				}
-			}
-			// write output
-			var output = new java.io.DataOutputStream(sock.getOutputStream()),
-				resp = "";
-			if(evalText || scriptText){
-//				print('evalText: '+evalText)
-				resp = evalText? "steal.client.evaluate('"+evalText+"');": scriptText;
-				evalText = null;
-				scriptText = null;
-				response(resp, output);
-				browser.injectJSInProgress = false;
-			} else {
-				response("", output);
-			}
-			
-			output.close();
-			bufr.close();
-		})
-	}, 
-	stopServer;
-	steal.browser.prototype.stopServer = function(){
-		serv.close();
-		stopServer = true;
-	}
-	steal.browser.prototype.evaluate = function(fn){
-		// wait until previous finishes
-		while(this.evaluateInProgress || this.injectJSInProgress) {
-			java.lang.Thread.currentThread().sleep(300);
-		}
-		evalText = fn.toString().replace(/\n|\r\n/g,"");
-		this.evaluateInProgress = true;
-		while(this.evaluateInProgress || this.injectJSInProgress) {
-//			print('evaluate 1b: '+evalText)
-			java.lang.Thread.currentThread().sleep(300);
-		}
-		var res = this.evaluateResult;
-		this.evaluateResult = null;
-		return res;
-	}
-	steal.browser.prototype.injectJS = function(file){
-		// wait until previous finishes
-		while(this.evaluateInProgress || this.injectJSInProgress) {
-			java.lang.Thread.currentThread().sleep(300);
-		}
-		this.injectJSInProgress = true;
-		scriptText = readFile(file).replace(/\n|\r\n/g,"");
-		while(this.evaluateInProgress || this.injectJSInProgress) {
-			java.lang.Thread.currentThread().sleep(300);
-		}
-	}
-	var serv;
-	steal.browser.prototype.simpleServer = function(){
-		stopServer = false;
-		serv = new java.net.ServerSocket(5555);
-		while (!stopServer) {
+/**
+ * Creates a simple server at port 5555 for receiving and sending events to/from a client
+ * @param {Function} dataReceivedCb a function that is called when data is received
+ */
+steal.browser.server = function(dataReceivedCb){
+	this.dataReceivedCb = dataReceivedCb;
+	this.stopServer = false;
+	var self = this;
+	spawn(function(){
+		self.executeLoop();
+	})
+}
+steal.extend(steal.browser.server.prototype, {
+	executeLoop: function(){
+		this.serverSocket = new java.net.ServerSocket(5555);
+		while (!this.stopServer) {
 			var killed = false;
 			try {
-				var sock = serv.accept();
+				var sock = this.serverSocket.accept();
 			}catch(e){}
-			if (!stopServer) {
+			if (!this.stopServer) {
 				var copy = sock;
 				sock = null;
-				processRequest(copy, this, id);
+				this.processRequest(copy);
 			}
 		}
-		serv.close();
+		this.serverSocket.close();
+	},
+	/**
+	 * Sends HTTP headers to the client. Then sends the given content to the given output stream.
+	 * @param {String} content
+	 * @param {Object} sock
+	 */
+	sendResponse: function(content, sock){
+		var res = (content.length? "cb({'fn': function(){"+content+"}});": "cb()"),
+			outstream = new java.io.DataOutputStream(sock.getOutputStream()),
+			headers = "HTTP/1.1 200 OK\r\n"+
+				"Server: Java HTTPServer\r\n"+
+				"Content-Type: text/html\r\n"+
+				"Content-Length: " + res.length + "\r\n"+
+				"Connection: close\r\n\r\n";
+//		print('RESPONSE: '+res)
+		outstream.writeBytes(headers + res);
+		outstream.close();
+	},
+	/**
+	 * Kills the server.
+	 */
+	close: function(){
+		this.serverSocket.close();
+		this.stopServer = true;
+	},
+	/**
+	 * Saves some JS to be sent to the client.  Only one script can be sent at a time, so this method 
+	 * waits for any previous scripts to be sent before saving.
+	 * @param {String} data the string to be sent to the client as the response
+	 */
+	sendJS: function(script){
+		this.attr("script", script)
+	},
+	/**
+	 * Takes a socket that was received, processes the response, sending the correct data to the 
+	 * provided callback.  Also sends any data to the client.
+	 * @param {Object} sock
+	 */
+	processRequest: function(sock){
+		var self = this;
+		spawn(function(){
+			if (self.stopServer) {
+				return;
+			}
+			
+			var bufr = new java.io.BufferedReader(new java.io.InputStreamReader(sock.getInputStream())),
+				getData = self.getRequestData(bufr);
+			// spawn a new thread for this, because it might take forever
+			spawn(function(){
+				self.dataReceivedCb(getData);
+			})
+			var sending = self.attr("script") || "";
+			self.sendResponse(sending, sock);
+			bufr.close();
+		})
+	},
+	// after this attribute is set, it cannot be reset until something reads it
+	attr: function(name, value){
+		if(typeof value === "undefined"){
+			return this._attr(name);
+		}
+		var done = false;
+		// save new script to be sent
+		while (!done) {
+			try {
+				this._attr(name, value)
+				done = true;
+			} 
+			catch (e) {
+				// didn't set, try again
+				done = false;
+				java.lang.Thread.currentThread().sleep(300);
+			}
+		}
+	},
+	_attr: sync(function(name, value){
+		var val = this[name];
+		if (typeof value === "undefined") {
+			delete this[name];
+//			print('GET: ' + name + ", " + val)
+			return val;
+		}
+		else {
+			// it hasn't been read yet, 
+//			print('SET: ' + name + ", " + this[name])
+			if(typeof this[name] !== "undefined"){
+				throw "not ready yet"
+			}
+			this[name] = value;
+		}
+	}),
+	getRequestData: function(bufr){
+		var done = false, 
+			paramsMatch,
+			params;
+		
+		while (!done) {
+			try {
+				var x = bufr.readLine();
+				if (x.length() == 0) {
+					done = true;
+				}
+				else {
+					paramsMatch = x.match(/^GET.*\?(.*)&_=/);
+					if(paramsMatch && paramsMatch.length > 1){
+						params = paramsMatch[1];
+					}
+				}
+			} 
+			catch (e) {
+				done = true;
+			}
+		}
+		return params;
 	}
-})()
+});
