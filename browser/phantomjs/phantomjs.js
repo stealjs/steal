@@ -54,7 +54,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 					runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
 				} else { // mac
-					runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9")
+					runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9 &> /dev/null")
 				}
 			})
 		},

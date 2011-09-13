@@ -24,6 +24,9 @@
 		this.type = type;
 		if (type) {
 			options = options || {};
+			// this uses dashes in place of slashes because safari decodeURIComponent doesn't work with slashes
+			// its transformed back in steal.js
+			this.clientPath = "steal-browser-"+this.type;
 			for(var option in steal.browser[type].defaults){
 				if(typeof options[option] === "undefined"){
 					options[option] = steal.browser[type].defaults[option]
@@ -62,7 +65,7 @@
 		// if there are already params, appends them, otherwise, adds params
 		_appendParamsToUrl: function(url){
 			// should be & separated, but but in phantomjs prevents that url from being read, so we use a comma
-			var params = "mode=commandline,browser=" + this.type, 
+			var params = "mode=commandline,client=" + encodeURIComponent(this.clientPath), 
 				searchMatch = url.match(/(\?[^\#]*)[\#]?/),
 				hashMatch = url.match(/(\#.*)/),
 				hrefMatch = url.match(/([^\#|\?]*)[\#|\?]?/);

@@ -1889,7 +1889,7 @@ if (support.interactive) {
 }
 
 	// ===========  STEAL.BROWSERS ==========
-	win.location && /mode=commandline/.test(win.location.search) && steal("steal/browser/"+win.location.search.match(/browser=(\w+)/)[1]+"/client.js")
+	win.location && /mode=commandline/.test(win.location.search) && steal(decodeURIComponent(win.location.search).replace(/-/g, "/").match(/client=([\w|\/]+)/)[1]+"/client.js")
 	
 	// ===========  OPTIONS ==========
 	
