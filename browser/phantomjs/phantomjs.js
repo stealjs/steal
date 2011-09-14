@@ -11,16 +11,16 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	steal.browser.phantomjs.prototype = new steal.browser();
 	steal.extend(steal.browser.phantomjs.prototype, {
 		_startServer: function(){
-			var self = this;
-			spawn(function(){
-				self.simpleServer()
+			this.server = new steal.browser.server(function(){
+				self._processData.apply(self, arguments);
 			})
 			// used as a cache to make sure we only run events once
 			this._evts = {}
 			var self = this;
+			self.evaluateResult = null;
 			this.bind("evaluated", function(data){
 				self.evaluateResult = data;
-				self.evaluateInProgress = false;
+				self.attr("evaluateInProgress", false);
 			})
 		},
 		open: function(page){
@@ -46,7 +46,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 		// kill phantom and kill simple server
 		close: function(){
 			this.kill();
-			this.stopServer();
+			this.server.close();
 			this.browserOpen = false;
 		},
 		kill: function(){
@@ -54,7 +54,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 					runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
 				} else { // mac
-					runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9")
+					runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9 &> /dev/null")
 				}
 			})
 		},
@@ -71,11 +71,44 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 				this._evts[evt.id] = true
 				var self = this;
 				(function(e){
-				spawn(function(){
-					self.trigger(e.type, e.data);
-				})
+					spawn(function(){
+						self.trigger(e.type, e.data);
+					})
 				})(evt)
 			}
+		},
+		attr: function(name, value){
+			var self = this;
+			this.attrSynched = sync(function(){
+				if(typeof value === "undefined")
+					return self[name];
+				else self[name] = value;
+			});
+			return this.attrSynched();
+		},
+		sendJS: function(script){
+			// wait until previous finishes
+			while(this.attr("evaluateInProgress")) {
+				java.lang.Thread.currentThread().sleep(300);
+			}
+			this.server.sendJS(script);
+		},
+		evaluate: function(fn){
+			var evalText = fn.toString().replace(/\n|\r\n/g,""),
+				scriptText = "return steal.client.evaluate('"+evalText+"');";
+				
+			this.sendJS(scriptText);
+			this.attr("evaluateInProgress", true);
+			// wait until the "evaluated" event has been triggered, return the result
+			while(this.attr("evaluateInProgress")) {
+				java.lang.Thread.currentThread().sleep(300);
+			}
+			return this.evaluateResult;
+		},
+		injectJS: function(file){
+			var scriptText = readFile(file).replace(/\n|\r\n/g,"");
+			this.sendJS(scriptText);
+			this.attr("evaluateInProgress", true);
 		}
 	})
 })

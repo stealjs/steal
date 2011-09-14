@@ -14,10 +14,6 @@ steal('steal/build').then(function( steal ) {
 	var scripts = (steal.build.builders.scripts = function( opener, options, dependencies ) {
 		steal.print("\nBUILDING SCRIPTS --------------- ");
 		
-		if(options.all !== false){
-			options.all = true;
-		}
-
 		// get the compressor
 		var compressor = scripts.compressors[options.compressor || "localClosure"](),
 
@@ -30,20 +26,24 @@ steal('steal/build').then(function( steal ) {
 				src : []
 			}, 
 			
-			// there's no scripts that shouldn't be compressed
-			canCompressTogether = options.all;
+			// concatenated scripts waiting to be compressed
+			currentCollection = [],
+			 
+			compressCollection = function(currentCollection){
+				// grab the previous currentCollection and compress it, then add it to currentPackage
+				if (currentCollection.length) {
+					var compressed = currentCollection.join("\n");
+					compressed = compressor(compressed, true);
+					currentCollection = [];
+					return compressed;
+				}
+			};
 
 		// compress all scripts by default
 		if ( true/*options.all*/ ) {
 			packages['production.js'] = currentPackage;
 		}
 		
-		// do a first pass to determine if there's anything we shouldn't compress
-		opener.each('js', function( stl, text, i ) {
-			if ( stl.compress === false ) {
-				canCompressTogether = false;
-			}
-		});
 		// if nothing can't be compressed, compress whole app in one step
 
 		// for each steal we find
@@ -81,15 +81,28 @@ steal('steal/build').then(function( steal ) {
 
 			// clean out any remove-start style comments
 			text = scripts.clean(text);
-
+			
 			// if we should compress the script, compress it
-			if ( !canCompressTogether && (stl.compress !== false || options.all) ) {
-				text = compressor(text, true);
+			if ( stl.compress !== false || options.all ) {
+				currentPackage.scripts.push("'"+stl.rootSrc+"'")
+				// put the result in the package
+				currentCollection.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
+			} 
+			else { // compress is false, don't compress it
+				var compressed = compressCollection(currentCollection);
+				currentCollection = [];
+				currentPackage.src.push(compressed);
+			
+				// add the uncompressed script to the package
+				currentPackage.scripts.push("'"+stl.rootSrc+"'");
+				currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
+				
 			}
-			currentPackage.scripts.push("'"+stl.rootSrc+"'")
-			// put the result in the package
-			currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
 		});
+		
+		var compressed = compressCollection(currentCollection);
+		currentCollection = [];
+		currentPackage.src.push(compressed);
 
 		steal.print("");
 
@@ -103,13 +116,9 @@ steal('steal/build').then(function( steal ) {
 					dependencyStr += "steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']});\n";
 				}
 				var compressed = packages[p].src.join("\n");
-				if(canCompressTogether){
-					compressed = compressor(compressed, true);
-				}
 				//save them
 				new steal.File(options.to + p).save(loading+dependencyStr+compressed);
-				steal.print("SCRIPT BUNDLE > " + options.to + p + 
-					(canCompressTogether? "(compressed in single step)": ""));
+				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
 	});

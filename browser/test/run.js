@@ -7,9 +7,13 @@ steal('steal/test/test.js', function(s) {
 	var browserTest = function(type){
 			s.test.test(type, function(){
 				load('steal/rhino/rhino.js')
-				steal("steal/browser/"+type, function(){
+				var path = "steal/browser/"+type;
+				if(type == "selenium"){
+					path = "funcunit/selenium"
+				}
+				steal(path, function(){
 					var browser = new steal.browser[type]({
-//						print: true
+						print: true
 					});
 					browser
 						.bind('myevent', function(data){

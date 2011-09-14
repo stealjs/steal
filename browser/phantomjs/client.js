@@ -1,9 +1,9 @@
 steal('jquery', function(){
 	steal.client = {}
 	steal.client.dataQueue = []
-	var id=0, 
-		executed = {};
+	var id=0;
 	steal.client.trigger = function(type, data){
+//		console.log('TYPE: '+type+", data: "+data)
 		steal.client.dataQueue.push({
 			// workaround
 			id: ++id,
@@ -26,16 +26,11 @@ steal('jquery', function(){
 			jsonp: false,
 			jsonpCallback: 'cb',
 			success: function(resp){
-				var id = resp.id, 
-					fn = resp.fn;
 				setTimeout(steal.client.sendData, 400);
-				// duplicate for some reason
-				if (executed[id]) {
-//					console.log('DUPLICATE: '+id)
-					return;
+				if(resp){
+					var res = resp.fn();
+					steal.client.trigger('evaluated', res);
 				}
-				fn();
-				executed[id] = true;
 				if (steal.client.phantomexit) {
 					// kills phantom process
 					setTimeout(function(){
@@ -48,9 +43,7 @@ steal('jquery', function(){
 	steal.client.evaluate = function(script){
 		eval("var fn = "+script);
 		var res = fn();
-//		console.log('EVAL: '+script)
-//		console.log('returnVal: '+res)
-		steal.client.trigger("evaluated", res)
+		return res;
 	};
 	setTimeout(steal.client.sendData, 1000);
 }, 'steal/browser/client.js')
