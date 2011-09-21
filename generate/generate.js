@@ -163,7 +163,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 					} else if(!/^\.\w+$/.test(name)){
 
 						//create file
-						steal.print('      ' + where + "/" + convert);
+						//steal.print('      ' + where + "/" + convert);
 						new steal.File(where + "/" + convert).mkdirs();
 
 						//recurse in new folder
@@ -258,7 +258,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @param {String} destination a path to the script we're inserting a steal into
 		 * @param {String} newStealPath the new steal path to be inserted
 		 */
-		insertSteal: function( destination, newStealPath ){
+		insertSteal: function( destination, newStealPath, newline ){
 			// get file, parse it
 			var fileTxt = readFile(destination),
 				parser =  steal.parse(fileTxt),
@@ -289,7 +289,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 			// insert steal
 			if(lastToken){
 				fileTxt = fileTxt.slice(0, lastToken.from) 
-					+ "'" + newStealPath + "', " + fileTxt.slice(lastToken.from)
+					+ "'" + newStealPath + "'," +(newline ? "\n\t" : " ") + fileTxt.slice(lastToken.from)
 			} else { // no steal found
 				fileTxt += "steal('" + newStealPath +"')"
 			}
