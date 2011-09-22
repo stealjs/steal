@@ -23,7 +23,6 @@ steal('steal/test/test.js', function( s ) {
 		});
 		s.test.clear();
 	})
-	return;
 	
 	s.test.test("less packages correctly", function(){
 		load('steal/rhino/rhino.js')

@@ -119,8 +119,8 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				//save them
 				new steal.File(options.to + p).save(loading+dependencyStr+compressed);
 				var end = new Date(),
-					time = (end-start)
-				print(time+' MS')
+					time = (end-start);
+				steal.print(time+' MS')
 				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
