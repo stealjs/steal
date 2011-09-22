@@ -825,8 +825,12 @@
 			steal.require(this.options,this.orig, function load_calling_loaded(script){
 				self.loaded(script);
 			}, function(error, src){
-				clearTimeout(self.completeTimeout)
-				throw "steal.js : "+self.options.src+" not completed"
+				if (!self.options.optional){
+					clearTimeout(self.completeTimeout);
+					throw "steal.js : "+self.options.src+" not completed";
+				}else{
+					self.loaded("");
+				}
 			});
 			
 		}
