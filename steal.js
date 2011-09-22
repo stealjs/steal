@@ -382,10 +382,9 @@
 	 */
 	function steal() {
 		//set the inital
-		var args = makeArray(arguments);
-		steal.before(args);
+		steal.before(arguments);
 		pending.push.apply(pending,  arguments);
-		steal.after(args);
+		steal.after(arguments);
 		return steal;
 	};
 	
