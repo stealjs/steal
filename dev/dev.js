@@ -82,7 +82,7 @@ steal.dev = {
 	},
 	_logger:function(type, arr){
 		if(console.log.apply){
-			console[type].apply(null, arr)
+			console[type].apply(console, arr)
 		} else {
 			console[type](arr)
 		}
