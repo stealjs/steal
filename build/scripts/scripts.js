@@ -1,4 +1,4 @@
-steal('steal/build').then(function( steal ) {
+steal('steal/build', 'steal/parse').then(function( steal ) {
 
 	/**
 	 * Builds JavaScripts
@@ -13,6 +13,7 @@ steal('steal/build').then(function( steal ) {
 	 */
 	var scripts = (steal.build.builders.scripts = function( opener, options, dependencies ) {
 		steal.print("\nBUILDING SCRIPTS --------------- ");
+		var start = new Date();
 		
 		// get the compressor
 		var compressor = scripts.compressors[options.compressor || "localClosure"](),
@@ -33,6 +34,8 @@ steal('steal/build').then(function( steal ) {
 				// grab the previous currentCollection and compress it, then add it to currentPackage
 				if (currentCollection.length) {
 					var compressed = currentCollection.join("\n");
+					// clean out any remove-start style comments
+					compressed = scripts.clean(compressed);
 					compressed = compressor(compressed, true);
 					currentCollection = [];
 					return compressed;
@@ -78,9 +81,6 @@ steal('steal/build').then(function( steal ) {
 				}
 				currentPackage = packages[pack];
 			}
-
-			// clean out any remove-start style comments
-			text = scripts.clean(text);
 			
 			// if we should compress the script, compress it
 			if ( stl.compress !== false || options.all ) {
@@ -118,6 +118,9 @@ steal('steal/build').then(function( steal ) {
 				var compressed = packages[p].src.join("\n");
 				//save them
 				new steal.File(options.to + p).save(loading+dependencyStr+compressed);
+				var end = new Date(),
+					time = (end-start);
+				steal.print(time+' MS')
 				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
@@ -125,7 +128,25 @@ steal('steal/build').then(function( steal ) {
 	
 	// removes  dev comments from text
 	scripts.clean = function( text ) {
-		return String(java.lang.String(text).replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", "").replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\\w+)[\n\s\r]*\\([^\\)]*\\)", ""));
+		var parsedTxt = String(java.lang.String(text)
+			.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", "")),
+			positions = [],
+		   	p = steal.parse(parsedTxt),
+		    tokens, i, position;
+
+		while (tokens = p.until(["steal", ".", "dev", ".", "log", "("], ["steal", ".", "dev", ".", "warn", "("])) {
+			var end = p.partner("(");
+			positions.push({
+				start: tokens[0].from,
+				end: end.to
+			})
+		}
+		// go through in reverse order
+		for (i = positions.length - 1; i >= 0; i--) {
+			position = positions[i];
+			parsedTxt = parsedTxt.substring(0, position.start) + parsedTxt.substring(position.end)
+		}
+		return parsedTxt;
 	};
 
 	//various compressors

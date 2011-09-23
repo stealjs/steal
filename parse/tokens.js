@@ -48,7 +48,10 @@ String.prototype.tokens = function (prefix, suffix) {
             type: type,
             value: value,
             from: from,
-            to: i
+            to: i,
+			toString: function(){
+				return "Type: "+type+", value: "+value+", from: "+from+", to: "+i;
+			}
         };
 		
     };
