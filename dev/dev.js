@@ -53,9 +53,9 @@ steal.dev = {
 		if(steal.options.logLevel < 2){
 			Array.prototype.unshift.call(arguments, 'steal.js WARN:');
 			if ( window.console && console.warn ) {
-				console.warn.apply(null, arguments);
-			} if ( window.console && console.log ) {
-				console.log.apply(null, arguments);
+				console.warn( Array.prototype.slice.call(arguments) );
+			} else if ( window.console && console.log ) {
+				console.log( Array.prototype.slice.call(arguments) );
 			} else if ( window.opera && window.opera.postError ) {
 				opera.postError("steal.js WARNING: " + out);
 			}
@@ -73,7 +73,7 @@ steal.dev = {
 		if (steal.options.logLevel < 1) {
 			if (window.console && console.log) {
 				Array.prototype.unshift.call(arguments, 'steal.js INFO:');
-				console.log.apply(null, arguments);
+				console.log( Array.prototype.slice.call(arguments) );
 			}
 			else if (window.opera && window.opera.postError) {
 				opera.postError("steal.js INFO: " + out);
