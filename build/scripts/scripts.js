@@ -30,13 +30,16 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 			// concatenated scripts waiting to be compressed
 			currentCollection = [],
 			 
-			compressCollection = function(currentCollection){
+			// keep track of lines for error reporting
+			currentLineMap = [],
+			
+			compressCollection = function(currentCollection, currentLineMap){
 				// grab the previous currentCollection and compress it, then add it to currentPackage
 				if (currentCollection.length) {
 					var compressed = currentCollection.join("\n");
 					// clean out any remove-start style comments
 					compressed = scripts.clean(compressed);
-					compressed = compressor(compressed, true);
+					compressed = compressor(compressed, true, currentLineMap);
 					currentCollection = [];
 					return compressed;
 				}
@@ -87,20 +90,24 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				currentPackage.scripts.push("'"+stl.rootSrc+"'")
 				// put the result in the package
 				currentCollection.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
+				currentLineMap.push({
+					src: stl.rootSrc,
+					lines: text.match(/\n/g).length+2
+				})
 			} 
 			else { // compress is false, don't compress it
-				var compressed = compressCollection(currentCollection);
+				var compressed = compressCollection(currentCollection, currentLineMap);
 				currentCollection = [];
+				currentLineMap = [];
 				currentPackage.src.push(compressed);
 			
 				// add the uncompressed script to the package
 				currentPackage.scripts.push("'"+stl.rootSrc+"'");
 				currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
-				
 			}
 		});
 		
-		var compressed = compressCollection(currentCollection);
+		var compressed = compressCollection(currentCollection, currentLineMap);
 		currentCollection = [];
 		currentPackage.src.push(compressed);
 
@@ -219,7 +226,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 		localClosure: function() {
 			//was unable to use SS import method, so create a temp file
 			steal.print("steal.compress - Using Google Closure app");
-			return function( src, quiet ) {
+			return function( src, quiet, currentLineMap ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					filename = "tmp" + rnd + ".js",
 					tmpFile = new steal.File(filename);
@@ -227,41 +234,47 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				tmpFile.save(src);
 
 				var outBaos = new java.io.ByteArrayOutputStream(),
-					output = new java.io.PrintStream(outBaos);
+					output = new java.io.PrintStream(outBaos),
+					options = {
+						err: '',
+						output: output
+					};
 				if ( quiet ) {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--warning_level", "QUIET", "--js", filename, {
-						output: output
-					});
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
+						"--warning_level", "QUIET", "--js", filename, options);
 				} else {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", filename, {
-						output: output
-					});
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
+						"--js", filename, options);
 				}
-				tmpFile.remove();
-
-				return outBaos.toString();
-			};
-		},
-		localClosure: function() {
-			//was unable to use SS import method, so create a temp file
-			steal.print("steal.compress - Using Google Closure app");
-			return function( src, quiet ) {
-				var rnd = Math.floor(Math.random() * 1000000 + 1),
-					filename = "tmp" + rnd + ".js",
-					tmpFile = new steal.File(filename);
-
-				tmpFile.save(src);
-
-				var outBaos = new java.io.ByteArrayOutputStream(),
-					output = new java.io.PrintStream(outBaos);
-				if ( quiet ) {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--warning_level", "QUIET", "--js", filename, {
-						output: output
-					});
-				} else {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", filename, {
-						output: output
-					});
+				// print(options.err);
+				// if there's an error, go through the lines and find the right location
+				if(/ERROR/.test(options.err)){
+					var errMatch;
+					while(errMatch = /\:(\d+)\:\sERROR/g.exec(options.err)){
+						var lineNbr = parseInt(errMatch[1], 10),
+							found = false, item, 
+							lineCount = 0,
+							i = 0, 
+							realLine;
+						while(!found){
+							item = currentLineMap[i];
+							lineCount += item.lines;
+							if(lineCount >= lineNbr){
+								found = true;
+								realLine = lineNbr-(lineCount-item.lines);
+							}
+							i++;
+						}
+						
+						print('ERROR in '+item.src+' at line '+realLine+':\n');
+						var text = readFile(item.src),
+							split = text.split(/\n/),
+							start = realLine - 2,
+							end = realLine + 2;
+						if(start < 0) start = 0;
+						if(end > split.length - 1) end = split.length - 1;
+						print(split.slice(start, end).join('\n')+'\n')
+					}
 				}
 				tmpFile.remove();
 
