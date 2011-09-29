@@ -93,9 +93,10 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			}
 			this.server.sendJS(script);
 		},
-		evaluate: function(fn){
+		// for now, only one arg, and it has to be a string
+		evaluate: function(fn, arg){
 			var evalText = fn.toString().replace(/\n|\r\n/g,""),
-				scriptText = "return steal.client.evaluate('"+evalText+"');";
+				scriptText = "return steal.client.evaluate('"+evalText+"', '"+arg+"');";
 				
 			this.sendJS(scriptText);
 			this.attr("evaluateInProgress", true);

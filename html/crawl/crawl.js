@@ -61,7 +61,7 @@ steal.html.crawl = function(url, opts){
 				
 				// get the next link
 				this.evaluate(function(nextHash){
-					window.location.hash = "Foo"
+					window.location.hash = nextHash;
 				}, next);
 				// always wait 20ms
 				java.lang.Thread.currentThread().sleep(30); 
@@ -81,7 +81,7 @@ steal.extend(steal.html.crawl, {
 			var getHash = function(href){
 				var index = href.indexOf("#!");
 				if(index > -1){
-					return href.substr(index);
+					return href.substr(index+2);
 				}
 			};
 			var links = document.getElementsByTagName('a'),

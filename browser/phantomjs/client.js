@@ -40,9 +40,9 @@ steal('jquery', function(){
 			}
 		})
 	}
-	steal.client.evaluate = function(script){
+	steal.client.evaluate = function(script, arg){
 		eval("var fn = "+script);
-		var res = fn();
+		var res = fn(arg);
 		return res;
 	};
 	setTimeout(steal.client.sendData, 1000);
