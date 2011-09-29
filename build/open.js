@@ -116,7 +116,8 @@ steal(function(s){
 				},
 				// the 
 				steal: newSteal,
-				url: url
+				url: url,
+				firstSteal : init
 			})
 		}
 		

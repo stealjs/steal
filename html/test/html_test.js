@@ -8,7 +8,7 @@ steal('steal/test/test.js', function( s ) {
 		load('steal/rhino/rhino.js')
 		
 		steal('steal/html/crawl', function(){
-			steal.html.crawl("steal/html/test/page.html#Hello+World!", 
+			steal.html.crawl("steal/html/test/page.html#!Hello+World!", 
 			{
 				out: 'steal/html/test/out',
 				browser: 'phantomjs'
@@ -17,11 +17,11 @@ steal('steal/test/test.js', function( s ) {
 		
 		// test there are 2 pages
 		var txt = readFile('steal/html/test/out/Hello+World!.html')
-		s.test.ok(txt.indexOf('<div id="out"><p>#Hello+World!</p></div>') != -1, "hello world generated correctly");
+		s.test.ok(txt.indexOf('<div id="out"><p>#!Hello+World!</p></div>') != -1, "hello world generated correctly");
 		
 		// test opening page1, it has the right div
 		var txt = readFile('steal/html/test/out/Foo.html')
-		s.test.ok(txt.indexOf('<div id="out"><p>#Foo</p></div>') != -1, "foo generated correctly");
+		s.test.ok(txt.indexOf('<div id="out"><p>#!Foo</p></div>') != -1, "foo generated correctly");
 		
 		// remove generated pages
 		s.test.deleteDir('steal/html/test/out');

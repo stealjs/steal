@@ -163,7 +163,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 					} else if(!/^\.\w+$/.test(name)){
 
 						//create file
-						steal.print('      ' + where + "/" + convert);
+						//steal.print('      ' + where + "/" + convert);
 						new steal.File(where + "/" + convert).mkdirs();
 
 						//recurse in new folder
@@ -258,38 +258,51 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @param {String} destination a path to the script we're inserting a steal into
 		 * @param {String} newStealPath the new steal path to be inserted
 		 */
-		insertSteal: function( destination, newStealPath ){
+		insertSteal: function( destination, newStealPath, newline ){
 			// get file, parse it
 			var fileTxt = readFile(destination),
 				parser =  steal.parse(fileTxt),
 				tokens = [],
 				lastToken,
 				token,
-				duplicate = false;
+				duplicate = false,
+				cur;
 
 			// parse until steal(
 			while (token = parser.until(["steal", "("], [".","then","("])) {
+				//print("M = " + token.value, token.type, token.from, token.to)
 				if (token) {
-					parser.partner("(", function(token){
-						if (token.type == "name" || token.type == "string") {
-							lastToken = token;
-						}
-						if (token.type === "string" && token.value === newStealPath) { // duplicate
+					while( (cur = parser.moveNext() ) && ( cur.value === "," || cur.type === "string" ) ) {
+			      		//print("TOKEN = " + cur.value, cur.type, cur.from, cur.to);
+						//if (cur.type == "name" || cur.type == "string") {
+						//	lastToken = cur;
+						//}
+						if (cur.type === "string" && cur.value === newStealPath) { // duplicate
 							duplicate = true;
 						}
-//						print("TOKEN = " + token.value, token.type, token.from, token.to)
-					})
+					}
+					lastToken = cur;
+					break;
 				}
 				if (duplicate) {
-					throw {type: "DUPLICATE"}
+					throw "DUPLICATE "+newStealPath
 				}
 			}
 			
 			
 			// insert steal
 			if(lastToken){
-				fileTxt = fileTxt.slice(0, lastToken.from) 
-					+ "'" + newStealPath + "', " + fileTxt.slice(lastToken.from)
+				//print("TOKEN = " + lastToken.value, lastToken.type, lastToken.from, lastToken.to);
+				if(lastToken.value == ")") {
+					
+					fileTxt = fileTxt.slice(0, lastToken.from) 
+						+ ", "+(newline ? "\n\t" : "")+"'" + newStealPath + "'" + fileTxt.slice(lastToken.from)
+					
+				} else {
+					fileTxt = fileTxt.slice(0, lastToken.from) 
+					+ "'" + newStealPath + "'," +(newline ? "\n\t" : " ") + fileTxt.slice(lastToken.from)
+				}
+				
 			} else { // no steal found
 				fileTxt += "steal('" + newStealPath +"')"
 			}

@@ -216,8 +216,7 @@ steal.parse = function(str){
 				while (token = this.moveNext() ) {
 					for(i =0; i< patterns.length; i++){
 						var pattern = patterns[i];
-	
-						if( token.type !== "string" && like( pattern[patternMatchPosition[i]], token) ){
+						if( token.type !== "string" && like( pattern[patternMatchPosition[i].length], token) ){
 							patternMatchPosition[i].push(token);
 							if(patternMatchPosition[i].length === pattern.length){
 								return patternMatchPosition[i];

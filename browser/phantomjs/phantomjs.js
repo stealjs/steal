@@ -59,7 +59,9 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			})
 		},
 		_processData: function(data){
-			var d = decodeURIComponent(unescape(data));
+			var a = decodeURIComponent(data);
+			// print("_processData0: "+a)
+			var d = unescape(a);
 //			print("_processData: "+d)
 			eval("var res = "+d)
 			// parse data into res
@@ -93,9 +95,10 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			}
 			this.server.sendJS(script);
 		},
-		evaluate: function(fn){
+		// for now, only one arg, and it has to be a string
+		evaluate: function(fn, arg){
 			var evalText = fn.toString().replace(/\n|\r\n/g,""),
-				scriptText = "return steal.client.evaluate('"+evalText+"');";
+				scriptText = "return steal.client.evaluate('"+evalText+"', '"+arg+"');";
 				
 			this.sendJS(scriptText);
 			this.attr("evaluateInProgress", true);
