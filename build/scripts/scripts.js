@@ -133,6 +133,45 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 		}
 	});
 	
+	/**
+	 * Create package's content.
+	 * 
+	 * @param {Array} files like:
+	 * 
+	 *     [{rootSrc: "jquery/jquery.js", content: "var a;"}]
+	 * 
+	 * @param {Object} dependencies like:
+	 * 
+	 *      {"package/package.js": ['jquery/jquery.js']}
+	 */
+	scripts.makePackage = function(files, dependencies){
+		var loadingCalls = [];
+		files.forEach(function(file){
+			loadingCalls.push(file.rootSrc)
+		});
+		
+		//create the dependencies ...
+		var dependencyCalls = [];
+		for (var key in dependencies){
+			dependencyCalls.push( 
+				"steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']})"
+			)
+		}
+		
+		// make 'loading'
+		
+		
+		//write it ...
+		var code = ["steal.loading('"+loadingCalls.join("','")+"')"];
+		
+		code.push.apply(code, dependencyCalls);
+		
+		files.forEach(function(file){
+			code.push( file.content, "steal.loaded('"+file.rootSrc+"')" );
+		})
+		return code.join(";\n")+"\n"
+	}
+	
 	// removes  dev comments from text
 	scripts.clean = function( text ) {
 		var parsedTxt = String(java.lang.String(text)

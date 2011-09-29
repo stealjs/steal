@@ -639,7 +639,7 @@
 				} else{ // already have this steal
 					stel = steals[rootSrc];
 					// extend the old stolen file with any new options
-					extend(stel.options, options)
+					extend(stel.options, typeof options === "string" ? {} : options)
 				}
 			}
 			
@@ -814,7 +814,7 @@
 			
 		},
 		/**
-		 * When the script loads, 
+		 * Loads this steal
 		 */
 		load: function(returnScript) {
 			if(this.loading || this.isLoaded){
@@ -1723,7 +1723,7 @@ request = function(options, success, error){
 		return stel.options ? stel.options.rootSrc : "CONTAINER"
 	}
 
-	/**
+	/*
 	steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id)
 	})
@@ -1782,8 +1782,15 @@ request = function(options, success, error){
 	
 	// after a steal is created, if its been loaded already and has a "has", mark those files as loaded
 	steal.p.make = after(steal.p.make, function(stel){
-		if(stel.isLoaded && stel.options.has){
-			stel.loadHas();
+		// if we have things
+		if( stel.options.has ) {
+			// if we have loaded this already (and we are adding has's)
+			if( stel.isLoaded ) {
+				stel.loadHas();
+			} else {
+				// have to mark has as loading 
+				steal.loading.apply(steal,stel.options.has)
+			}
 		}
 		return stel;
 	}, true)
@@ -1794,9 +1801,10 @@ request = function(options, success, error){
 			this.loadHas();
 		}
 	})
-	
+
 	steal.p.
 		/**
+		 * @hide
 		 * Goes through the array of files listed in this.options.has, marks them all as loaded.  
 		 * This is used for files like production.css, which, once they load, need to mark the files they 
 		 * contain as loaded.
