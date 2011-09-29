@@ -56,7 +56,7 @@ steal.html.load = function(url, callback){
 				return document.documentElement.innerHTML;
 			}),
 			total = docType+"\n"+html;
-//		print(" HTML: "+total)
+		// print(" HTML: "+total)
 		callback.call(this, total)
 	})
 	.open(url)

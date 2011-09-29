@@ -40,38 +40,44 @@ steal.html.crawl = function(url, opts){
 	steal.File(opts.out).mkdirs();
 	
 	steal.html.load(url, function(html){
-		// called every time the page is 'ready'
-//		steal.html.onready(function(html){
-			// write HTML to file
-			var hash = this.evaluate(function(){
-				return window.location.hash.substr(1);
-			})
-			print("  > "+ opts.out+"/"+hash+".html")
-			// write out the page
-			steal.File(opts.out+"/"+hash+".html").save(html);
-			var next = steal.html.crawl.addLinks(this);
-			
+		// add this url to cache so it doesn't generate twice
+		var index = url.indexOf("#!"), 
+			link = url.substr(index+1);
+		found[link] = true;
+		// write HTML to file
+		var hash = this.evaluate(function(){
+			return window.location.hash.substr(2);
+		})
+		// if hash is empty, rename it to index
+		if( hash === "" ) {
+			hash = "index";
+		}
+		print("  > "+ opts.out+"/"+hash+".html")
+		// write out the page
+		steal.File(opts.out+"/"+hash+".html").save(html);
+		var next = steal.html.crawl.addLinks(this);
+		
 
-			if(next){
-				
-				print("  "+next)
-				this.evaluate(function(){
-					steal.html.wait();
-				})
-				
-				// get the next link
-				this.evaluate(function(nextHash){
-					window.location.hash = nextHash;
-				}, next);
-				// always wait 20ms
-				java.lang.Thread.currentThread().sleep(30); 
-				this.evaluate(function(){
-					steal.html.ready();
-				});
-			}
-			else {
-				this.close()
-			}
+		if(next){
+			
+			print("  "+next)
+			this.evaluate(function(){
+				steal.html.wait();
+			})
+			
+			// get the next link
+			this.evaluate(function(nextHash){
+				window.location.hash = nextHash;
+			}, next);
+			// always wait 20ms
+			java.lang.Thread.currentThread().sleep(30); 
+			this.evaluate(function(){
+				steal.html.ready();
+			});
+		}
+		else {
+			this.close()
+		}
 	})
 }
 
@@ -81,7 +87,7 @@ steal.extend(steal.html.crawl, {
 			var getHash = function(href){
 				var index = href.indexOf("#!");
 				if(index > -1){
-					return href.substr(index+2);
+					return href.substr(index+1);
 				}
 			};
 			var links = document.getElementsByTagName('a'),

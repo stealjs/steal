@@ -59,7 +59,9 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			})
 		},
 		_processData: function(data){
-			var d = decodeURIComponent(unescape(data));
+			var a = decodeURIComponent(data);
+			// print("_processData0: "+a)
+			var d = unescape(a);
 //			print("_processData: "+d)
 			eval("var res = "+d)
 			// parse data into res

@@ -3,7 +3,7 @@ steal('jquery', function(){
 	steal.client.dataQueue = []
 	var id=0;
 	steal.client.trigger = function(type, data){
-//		console.log('TYPE: '+type+", data: "+data)
+		// console.log('TYPE: '+type+", data: "+data)
 		steal.client.dataQueue.push({
 			// workaround
 			id: ++id,
@@ -18,7 +18,7 @@ steal('jquery', function(){
 		var q = steal.client.dataQueue;
 		steal.client.dataQueue = [];
 		var params = encodeURIComponent(JSON.stringify(q));
-//		console.log('SENDING: '+params)
+		// console.log('SENDING: '+params)
 		$.ajax({
 			url: "http://localhost:5555?" + params,
 			cache: false,
