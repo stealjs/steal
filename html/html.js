@@ -36,28 +36,11 @@ steal.html = function(urlo, opts){
 };
 
 steal.html.load = function(url, callback){
-	var getDocType  = function(url){
-		var content;
-		if(steal.File(url).domain() === null){
-			content = readFile(steal.File(url).clean());
-		} else {
-			content = readUrl(url);
-		}
-		var docTypes = content.match( /<!doctype[^>]+>/i );
-		return docTypes ? docTypes[0] : "";
-	};
-	
 	var browser = new steal.browser.phantomjs({
 		print: true
 	})
-	browser.bind('pageready', function(){
-		var docType = getDocType(url),
-			html = this.evaluate(function(){
-				return document.documentElement.innerHTML;
-			}),
-			total = docType+"\n"+html;
-		// print(" HTML: "+total)
-		callback.call(this, total)
+	browser.bind('pageready', function(hash){
+		callback.call(this, hash)
 	})
 	.open(url)
 };
