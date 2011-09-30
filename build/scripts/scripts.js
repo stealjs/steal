@@ -90,10 +90,12 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				currentPackage.scripts.push("'"+stl.rootSrc+"'")
 				// put the result in the package
 				currentCollection.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
-				currentLineMap.push({
-					src: stl.rootSrc,
-					lines: text.match(/\n/g).length+2
-				})
+				if(options.compressor === "localClosure"){ // only closure needs lineNumbers
+					currentLineMap.push({
+						src: stl.rootSrc,
+						lines: text.match(/\n/g).length+2
+					})
+				}
 			} 
 			else { // compress is false, don't compress it
 				var compressed = compressCollection(currentCollection, currentLineMap);
