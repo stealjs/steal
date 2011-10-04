@@ -184,7 +184,8 @@ steal.parse = function(str){
 			 * until("function",")") -> looks for function or  )
 			 * until(["foo",".","bar"]) -> looks for foo.bar
 			 * 
-			 * @return {Array} an array of tokens of the matches
+			 * @return {Array} an array of tokens of the matches.  The last item in the array
+			 * is the last part matched.
 			 */
 			until: function(){
 				var token, 

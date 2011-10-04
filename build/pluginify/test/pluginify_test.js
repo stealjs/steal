@@ -1,9 +1,11 @@
-// load('steal/compress/test/run.js')
+// load('steal/build/pluginify/test/pluginify_test.js')
 /**
  * Tests compressing a very basic page and one that is using steal
  */
 load('steal/rhino/rhino.js')
-steal('steal/test','steal/build', 'steal/build/pluginify').then( function( s ) {
+steal('steal/test','steal/build', 'steal/build/pluginify', function( s ) {
+	
+	
 	STEALPRINT = false;
 	s.test.module("steal/build/pluginify")
 	

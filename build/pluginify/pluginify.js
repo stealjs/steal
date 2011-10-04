@@ -41,14 +41,20 @@ steal('steal/parse','steal/build/scripts').then(
 		};
 		
 		//		steal.win().build_in_progress = true;
-		var out = [], str, i, inExclude = function(path){
-			for (var i = 0; i < opts.exclude.length; i++) {
-				if (path.indexOf(opts.exclude[i]) > -1) {
-					return true;
+		var out = [], 
+			str, 
+			i, 
+			inExclude = function(path){
+				for (var i = 0; i < opts.exclude.length; i++) {
+					if (path.indexOf(opts.exclude[i]) > -1) {
+						return true;
+					}
 				}
-			}
-			return false;
-		}, pageSteal, steals = [];
+				return false;
+			}, 
+			pageSteal, 
+			steals = [];
+			
 		steal.build.open("steal/rhino/empty.html", {}, function(opener){
 			opener.each('js', function(stl, text, i){
 				if (!inExclude(stl.rootSrc)) {
@@ -97,7 +103,9 @@ steal('steal/parse','steal/build/scripts').then(
 		}
 	};
 	s.build.pluginify.getFunction = function(content, ith){
-		var p = steal.parse(content), token, funcs = [];
+		var p = steal.parse(content), 
+			token, 
+			funcs = [];
 		
 		while (token = p.moveNext()) {
 			//print(token.value)
@@ -116,6 +124,7 @@ steal('steal/parse','steal/build/scripts').then(
 	};
 	//gets a function from steal
 	var stealPull = function(p, content, cb){
+		debugger;
 		var token = p.next(), startToken, endToken;
 		if (!token || (token.value != "." && token.value != "(")) {
 			// we said steal .. but we don't care
@@ -127,11 +136,12 @@ steal('steal/parse','steal/build/scripts').then(
 		if (token.value == ".") {
 			p.until("(")
 		}
-		token = p.until("function", ")");
-		
-		if (token.value == "function") {
-		
-			startToken = p.until("{");
+		var tokens = p.until("function", ")");
+		if (tokens && tokens[0].value == "function") {
+			
+			token = tokens[0];
+			
+			startToken = p.until("{")[0];
 			
 			endToken = p.partner("{");
 			cb(content.substring(token.from, endToken.to))
