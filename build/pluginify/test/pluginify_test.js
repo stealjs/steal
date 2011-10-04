@@ -52,4 +52,17 @@ steal('steal/test','steal/build', 'steal/build/pluginify', function( s ) {
 		
 	});
 	
+	s.test.test("pluginify function", function(t){
+		s.build.pluginify("jquery/controller",{
+			nojquery: true,
+			out: "steal/build/pluginify/test/controller.js"
+		})
+		
+		steal.build.open("steal/build/pluginify/test/controller.html", function(opener){
+			
+		})
+		
+		s.test.wait("jQuery.Controller");
+		s.test.ok(true, "controller exists")
+	})
 });

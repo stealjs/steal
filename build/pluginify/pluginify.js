@@ -1,29 +1,43 @@
 // usage: 
-// js steal\scripts\pluginify.js funcunit/functional -destination funcunit/dist/funcunit.js
+// js steal\scripts\pluginify.js funcunit/functional -out funcunit/dist/funcunit.js
 // js steal\scripts\pluginify.js jquery/controller
 // js steal\scripts\pluginify.js jquery/event/drag -exclude jquery/lang/vector/vector.js jquery/event/livehack/livehack.js
+
+// _args = ['jquery/controller']; load('steal/pluginifyjs')
 
 steal('steal/parse','steal/build/scripts').then(
  function(s) {
 
 	/**
+	 * @function steal.build.pluginify
+	 * @parent steal.build
+	 * 
 	 * Builds a 'steal-less' version of your application.  To use this, files that use steal must
 	 * have their code within a callback function.
 	 * 
 	 *     js steal\pluginify jquery\controller -nojquery
 	 *   
 	 * @param {Object} plugin
-	 * @param {Object} opts
+	 * @param {Object} opts options include:
+	 * 
+	 *   - out - where to put the generated file
+	 *   - exclude - an array of files to exclude
+	 *   - nojquery - exclude jquery
+	 *   - global - what the callback to steal functions should be.  Defaults to jQuery as $.
+	 *   - compress - compress the file
 	 */
 	s.build.pluginify = function(plugin, opts){
-		print("" + plugin + " >");
-		var jq = true, othervar, opts = steal.opts(opts, {
-			"destination": 1,
-			"exclude": -1,
-			"nojquery": 0,
-			"global": 0,
-			"compress": 0
-		}), destination = opts.destination || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
+		s.print("" + plugin + " >");
+		var jq = true, 
+			othervar, 
+			opts = steal.opts(opts, {
+				"out": 1,
+				"exclude": -1,
+				"nojquery": 0,
+				"global": 0,
+				"compress": 0
+			}), 
+			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 		
 		opts.exclude = !opts.exclude ? [] : (steal.isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 		
@@ -36,7 +50,7 @@ steal('steal/parse','steal/build/scripts').then(
 		rhinoLoader = {
 			callback: function(s){
 				s.pluginify = true;
-				s(plugin);
+				//s(plugin);
 			}
 		};
 		
@@ -55,21 +69,22 @@ steal('steal/parse','steal/build/scripts').then(
 			pageSteal, 
 			steals = [];
 			
-		steal.build.open("steal/rhino/empty.html", {}, function(opener){
+		steal.build.open("steal/rhino/empty.html", {startFile : plugin}, function(opener){
 			opener.each('js', function(stl, text, i){
+				//print("p  "+stl.rootSrc)
 				if (!inExclude(stl.rootSrc)) {
 				
-					var content = steal.build.pluginify.content(stl, opts.global ? opts.global : "jQuery", text);
+					var content = s.build.pluginify.content(stl, opts.global ? opts.global : "jQuery", text);
 					if (content) {
-						print("  > " + stl.rootSrc)
-						out.push(steal.build.builders.scripts.clean(content));
+						s.print("  > " + stl.rootSrc)
+						out.push(s.build.builders.scripts.clean(content));
 					}
 				}
 				else {
-					print("  Ignoring " + stl.rootSrc)
+					s.print("  Ignoring " + stl.rootSrc)
 				}
 			})
-		});
+		}, true);
 		
 		var output = out.join(";\n");
 		if (opts.compress) {
@@ -78,8 +93,8 @@ steal('steal/parse','steal/build/scripts').then(
 			output = compressor(output);
 		}
 		
-		print("--> " + destination);
-		new steal.File(destination).save(output);
+		s.print("--> " + where);
+		new steal.File(where).save(output);
 		
 		//keeps track of which 'then' we are in with steal
 		var funcCount = {};
@@ -87,23 +102,29 @@ steal('steal/parse','steal/build/scripts').then(
 	}
 	//gets content from a steal
 	s.build.pluginify.content = function(steal, param, opener){
-		if (steal.func) {
+		debugger;
+		if (steal.buildType == 'fn') {
 			// if it's a function, go to the file it's in ... pull out the content
-			var index = funcCount[steal.path] || 0, contents = readFile(steal.path);
-			funcCount[steal.path]++;
+			var index = funcCount[steal.rootSrc] || 0, contents = readFile(steal.rootSrc);
+			funcCount[steal.rootSrc]++;
 			return "(" + s.build.pluginify.getFunction(contents, index) + ")(" + param + ")";
 		}
 		else {
-			var content = readFile(steal.rootSrc+".js");
+			var content = readFile(steal.rootSrc);
 			if (/steal[.\(]/.test(content)) {
-				return "(" + s.build.pluginify.getFunction(content, 0) + ")(" + param + ")";
+				
+				content = s.build.pluginify.getFunction(content, 0)
+				
+				if(content){
+					content =  "(" + content + ")(" + param + ")";
+				}
 			}
 			//make sure steal isn't in here
 			return content;
 		}
 	};
 	s.build.pluginify.getFunction = function(content, ith){
-		var p = steal.parse(content), 
+		var p = s.parse(content), 
 			token, 
 			funcs = [];
 		
