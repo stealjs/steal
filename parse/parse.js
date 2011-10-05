@@ -166,6 +166,7 @@ steal.parse = function(str){
 							count--;
 							//print("  -"+count+" "+prev+" "+last)
 							if(count === 0){
+								cb && cb(token);
 								return token;
 							}
 						}else if(token.value === "/"){

@@ -22,97 +22,99 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		/**
 		 * @plugin steal/generate
 		 * @parent stealjs
+		 * 
 		 * The Generate plugin makes building code generators crazy easy.
 		 * StealJS comes with its own app generator.  JavaScriptMVC has more complex generators.
-		 * <h2>Steal Generators</h2>
-		 * <ul>
-		 * <li><code>app</code> - creates an application structure, build and clean scripts.
+		 * 
+		 * ## Steal Generators
+		 * 
+		 * ### app
+		 * 
+		 * Creates an application structure, build and clean scripts.
+		 * 
 		 * @codestart text
 		 * js steal/generate/app <i>path/to/app</i> [OPTIONS]
 		 * @codeend
-		 * <dl>
-		 * <dt>path/to/app</dt>
-		 * <dd>The lowercase path you want your application in. 
-		 * </dd>
-		 * </dl>
-		 * </li>
-		 * </ul>
-		 * <h2>JavaScriptMVC Generators</h3>
-		 * <ul>
-		 * <li><code>app</code> - creates a JavaScriptMVC application structure.
+		 * 
+		 *   - path/to/app - The lowercase path you want your application in. 
+		 * 
+		 * ## JavaScriptMVC Generators
+		 * 
+		 * ### app
+		 * 
+		 * Creates a JavaScriptMVC application structure.
+		 * 
 		 * @codestart text
 		 * js jquery/generate/app <i>path/to/app</i> [OPTIONS]
 		 * @codeend
-		 * <dl>
-		 * <dt>path/to/app</dt>
-		 * <dd>The lowercase path you want your application in. Keep application names short because they 
-		 * are used as namespaces.  The last part of the path will be taken to be your application's name.
-		 * </dd>
-		 * </dl>
-		 * </li>
-		 * <li style='padding-top: 10px;'><code>controller</code> - creates a JavaScriptMVC [jQuery.Controller].
-		 * @codestart text
-		 * js jquery/generate/controller <i>App.Controllers.Name</i> [OPTIONS]
-		 * @codeend
-		 * <dl>
-		 * <dt>App.Controllers.Name</dt>
-		 * <dd>The namespaced name of your controller.  For example, if your controller is named
-		 * <code>Cookbook.Controllers.Recipe</code>, the generator will create 
-		 * <code>cookbook/controllers/recipe_controller.js</code>. 
-		 * </dd>
-		 * </dl>
-		 * </li>
 		 * 
-		 * <li style='padding-top: 10px;'><code>model</code> - creates a JavaScriptMVC [jQuery.Model].
+		 *   - path/to/app - The lowercase path you want your application 
+		 *     in. Keep application names short because they 
+		 *     are used as namespaces.  The last part of the path 
+		 *     will be taken to be your application's name.
+		 * 
+		 * ### controller
+		 * 
+		 * Creates a [jQuery.Controller $.Controller] and test files.
+		 * 
+		 * @codestart text
+		 * js jquery/generate/controller <i>App.Videos</i> [OPTIONS]
+		 * @codeend
+		 * 
+		 *   - App.Videos - The namespaced name of your controller.  For 
+		 *     example, if your controller is 
+		 *     named <code>Cookbook.Recipes</code>, the generator will 
+		 *     create  <code>cookbook/recipes.js</code>. 
+		 * 
+		 * ### model
+		 * 
+		 * Creates a [jQuery.Model] and test files.
+		 * 
 		 * @codestart text
 		 * js jquery/generate/model <i>App.Models.Name</i> [TYPE] [OPTIONS]
 		 * @codeend
-		 * <dl>
-		 * <dt>App.Models.Name</dt>
-		 * <dd>The namespaced name of your model.  For example, if your model is named
-		 * <code>Cookbook.Models.Recipe</code>, the generator will create 
-		 * <code>cookbook/models/recipe.js</code>. 
-		 * </dd>
-		 * </dl>
-		 * </li>
 		 * 
-		 * <li style='padding-top: 10px;'><code>page</code> - creates a page that loads steal.js and an application.
+		 *   - App.Models.Name - The namespaced name of your 
+		 *     model. For example, if your model is 
+		 *     named <code>Cookbook.Models.Recipe</code>, the 
+		 *     generator will 
+		 *     create <code>cookbook/models/recipe.js</code>. 
+		 * 
+		 * ### page
+		 * 
+		 * Creates a page that loads steal.js and an application.
+		 * 
 		 * @codestart text
 		 * js jquery/generate/model <i>path/to/app</i> <i>path/to/page.html</i>
 		 * @codeend
-		 * <dl>
-		 * <dt>path/to/app</dt>
-		 * <dd>The path to your apps folder. 
-		 * </dd>
-		 * <dt>path/to/page.html</dt>
-		 * <dd>The path to the page you want to create. 
-		 * </dd>
-		 * </dl>
-		 * </li>
 		 * 
-		 * <li style='padding-top: 10px;'><code>plugin</code> - creates a JavaScriptMVC plugin file and folder structure.
+		 *   - path/to/app - The path to your apps folder. 
+		 *   - path/to/page.html - The path to the page you want to create. 
+		 * 
+		 * ### plugin
+		 * 
+		 * Use plugin to create a file and 
+		 * folder structure for basic jQuery plugins.
+		 * 
 		 * @codestart text
 		 * js jquery/generate/plugin <i>path/to/plugin</i> [OPTIONS]
 		 * @codeend
-		 * <dl>
-		 * <dt>path/to/plugin</dt>
-		 * <dd>The path to where you want your plugin.  This also should be the namespace and name of
-		 * whatever JavaScript object created.  Check out mxui for examples.
-		 * </dd>
-		 * </dl>
-		 * </li>
-		 * <li style='padding-top: 10px;'><code>scaffold</code> - creates the controllers, models, and fixtures used
+		 * 
+		 *   - path/to/plugin - The path to where you want 
+		 *   your plugin. 
+		 *   
+		 * 
+		 * ### scaffold
+		 * 
+		 * Creates the controllers, models, and fixtures used
 		 * to provide basic CRUD functionality..
+		 * 
 		 * @codestart text
 		 * js jquery/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
 		 * @codeend
-		 * <dl>
-		 * <dt>App.Models.ModelName</dt>
-		 * <dd>The model resource you want to add CRUD functionality to.
-		 * </dd>
-		 * </dl>
-		 * </li>
-		 * </ul>
+		 * 
+		 *   - App.Models.ModelName - The model resource you want to add CRUD functionality to.
+		 * 
 		 * 
 		 * <h2>The Generator Function</h2>
 		 * <p>Renders a folders contents with EJS and data and then copies it to another folder.</p>
@@ -223,13 +225,13 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 				token;
 
 			// parse until function(){
-			while (token = parser.until(["function", "(", ")"])) {
-				if (token) {
+			while (tokens = parser.until(["function", "(", ")"])) {
+				if (tokens) {
 					parser.partner("{", function(token){
 						if (token.value == "}") {
 							lastToken = token;
 						}
-//						print("TOKEN = " + token.value, token.type, token.from, token.to)
+						// print("TOKEN = " + token.value, token.type, token.from, token.to)
 					})
 				}
 			}
@@ -238,12 +240,16 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 			// insert steal
 			if(lastToken){
 				fileTxt = fileTxt.slice(0, lastToken.from) 
-					+ newCode + "\n" + fileTxt.slice(lastToken.from)
+					+ newCode + "\n" + fileTxt.slice(lastToken.from);
+				steal.File(destination).save(fileTxt);
+				steal.print('      ' + destination + ' (code added)');
+			} else {
+				steal.print('      ' + destination + ' (error adding)');
 			}
 			
-			steal.print('      ' + destination + ' (code added)');
+			
 			// save back to original file destination
-			steal.File(destination).save(fileTxt);
+			
 		},
 		/**
 		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
