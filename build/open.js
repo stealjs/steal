@@ -1,7 +1,7 @@
 steal(function(s){
 	var touched = {},
 		//recursively goes through dependencies
-		breadth = function(stl, CB){
+		breadth = function(stl, CB, depth){
 			// load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 
@@ -16,7 +16,7 @@ steal(function(s){
 					var steals = depends.splice(0,i);
 					
 					// load all these steals, and their dependencies
-					loadset(steals, CB);
+					loadset(steals, CB, depth);
 					
 					// does it need to load the depend itself?
 					
@@ -30,29 +30,49 @@ steal(function(s){
 			
 			// if there's a remainder, load them
 			if(depends.length){
-				loadset(depends, CB);
+				loadset(depends, CB, depth);
 			}
 		  
 		},
 		// loads each steal 'in parallel', then 
 		// loads their dependencies one after another
-		loadset = function(steals, CB){
+		loadset = function(steals, CB, depth){
+			// doing depth first
+			if(depth){
+				// do dependencies first
+				iterate(steals, CB, depth)
+				
+				// then mark
+				touch(steals, CB);
+			} else {
+				touch(steals, CB);
+				iterate(steals, CB, depth)
+			}
+		},
+		touch = function(steals, CB){
 			for(var i =0; i < steals.length; i++){
-				//print("  Touching "+steals[i].path)
+				// print("  Touching "+steals[i].options.rootSrc)
 				if(!touched[steals[i].options.rootSrc]){
+					
 					CB( steals[i] );
 					touched[steals[i].options.rootSrc] = true;
 				}
 				
 			}
+		},
+		iterate = function(steals, CB, depth){
 			for(var i =0; i < steals.length; i++){
-				breadth(steals[i], CB)
+				breadth(steals[i], CB, depth)
 			}
 		},
 		window = (function() {
 			return this;
 		}).call(null, 0),
-		loadScriptText = steal.build.loadScriptText;
+		loadScriptText = steal.build.loadScriptText,
+		// gets deepest dependencies first
+		depth = function(){
+			
+		};
 	/**
 	 * @function open
 	 * 
@@ -68,7 +88,7 @@ steal(function(s){
 	 * the content for a certain tag slightly easier.
 	 * 
 	 */ 
-	steal.build.open = function( url, stealData, cb ) {
+	steal.build.open = function( url, stealData, cb, depth ) {
 		var scripts = [],
 
 			// save and remove the old steal
@@ -112,7 +132,7 @@ steal(function(s){
 						if(filter(stealer)){
 							func(stealer.options, stealer.options.text || loadScriptText(stealer.options) )
 						}
-					});
+					}, depth );
 				},
 				// the 
 				steal: newSteal,

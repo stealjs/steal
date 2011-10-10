@@ -2,7 +2,18 @@ steal('steal/html', function(){
 
 var queue = [],
 	found = {},
-	s = steal;
+	pageData,
+	s = steal,
+	getDocType  = function(url){
+		var content;
+		if(steal.File(url).domain() === null){
+			content = readFile(steal.File(url).clean());
+		} else {
+			content = readUrl(url);
+		}
+		var docTypes = content.match( /<!doctype[^>]+>/i );
+		return docTypes ? docTypes[0] : "";
+	};
 /**
  * @function steal.html.crawl
  * @parent steal.html
@@ -39,41 +50,31 @@ steal.html.crawl = function(url, opts){
 	
 	steal.File(opts.out).mkdirs();
 	
-	steal.html.load(url, function(html){
+	steal.html.load(url, function(hash){
+		var docType = getDocType(url),
+			data = steal.html.crawl.getPageData(this),
+			total = docType+"\n"+data.html;
+		// print(" HTML: "+total)
 		// add this url to cache so it doesn't generate twice
-		var index = url.indexOf("#!"), 
-			link = url.substr(index+1);
-		found[link] = true;
-		// write HTML to file
-		var hash = this.evaluate(function(){
-			return window.location.hash.substr(2);
-		})
+		hash = hash.substr(2);
+		found[hash] = true;
 		// if hash is empty, rename it to index
 		if( hash === "" ) {
 			hash = "index";
 		}
 		print("  > "+ opts.out+"/"+hash+".html")
 		// write out the page
-		steal.File(opts.out+"/"+hash+".html").save(html);
-		var next = steal.html.crawl.addLinks(this);
+		steal.File(opts.out+"/"+hash+".html").save(data.html);
+		var next = steal.html.crawl.addLinks();
 		
 
 		if(next){
 			
-			print("  "+next)
-			this.evaluate(function(){
-				steal.html.wait();
-			})
-			
+			// print("  "+next)
 			// get the next link
 			this.evaluate(function(nextHash){
 				window.location.hash = nextHash;
 			}, next);
-			// always wait 20ms
-			java.lang.Thread.currentThread().sleep(30); 
-			this.evaluate(function(){
-				steal.html.ready();
-			});
 		}
 		else {
 			this.close()
@@ -82,8 +83,11 @@ steal.html.crawl = function(url, opts){
 }
 
 steal.extend(steal.html.crawl, {
-	getLinks : function(browser){
-		var urls = browser.evaluate(function(){
+	getLinks: function(){
+		return pageData.urls;
+	},
+	getPageData : function(browser){
+		pageData = browser.evaluate(function(){
 			var getHash = function(href){
 				var index = href.indexOf("#!");
 				if(index > -1){
@@ -99,12 +103,16 @@ steal.extend(steal.html.crawl, {
 					urls.push( hash );
 				}
 			}
-			return urls;
+			var html = document.documentElement.innerHTML;
+			return {
+				urls: urls, 
+				html: html
+			};
 		});
-		return urls;
+		return pageData;
 	},
-	addLinks : function(browser){
-		var links = this.getLinks(browser),
+	addLinks : function(){
+		var links = this.getLinks(),
 			link;
 		// add links that haven't already been added
 		for(var i=0; i < links.length; i++){

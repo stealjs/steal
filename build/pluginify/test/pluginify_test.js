@@ -1,9 +1,11 @@
-// load('steal/compress/test/run.js')
+// load('steal/build/pluginify/test/pluginify_test.js')
 /**
  * Tests compressing a very basic page and one that is using steal
  */
 load('steal/rhino/rhino.js')
-steal('steal/test','steal/build', 'steal/build/pluginify').then( function( s ) {
+steal('steal/test','steal/build', 'steal/build/pluginify', function( s ) {
+	
+	
 	STEALPRINT = false;
 	s.test.module("steal/build/pluginify")
 	
@@ -50,4 +52,17 @@ steal('steal/test','steal/build', 'steal/build/pluginify').then( function( s ) {
 		
 	});
 	
+	s.test.test("pluginify function", function(t){
+		s.build.pluginify("jquery/controller",{
+			nojquery: true,
+			out: "steal/build/pluginify/test/controller.js"
+		})
+		
+		steal.build.open("steal/build/pluginify/test/controller.html", function(opener){
+			
+		})
+		
+		s.test.wait("jQuery.Controller");
+		s.test.ok(true, "controller exists")
+	})
 });

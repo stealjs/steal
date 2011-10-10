@@ -18,7 +18,7 @@ steal(function(){
 	steal.html.ready = function(){
 		count--;
 		if(count <= 0 && steal.client){
-			steal.client.trigger("pageready")
+			steal.client.trigger("pageready", window.location.hash)
 		}
 	};
 
