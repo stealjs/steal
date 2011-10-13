@@ -143,8 +143,6 @@ steal("steal/get/json.js",
 		 * 
 		 *     //gets.json
 		 * 
-		 * ## API
-		 * 
 		 * @param {String} name the name of the project (ex:  'funcunit')
 		 * @return {String} the url of the repository (ex: 'http://github.com/jupiterjs/funcunit')
 		 */
@@ -292,9 +290,6 @@ steal("steal/get/json.js",
 		 *       "jquery/controller/controller",
 		 *       {getter: steal.get.git})
 		 * 
-		 * 
-		 * ## API
-		 * 
 		 * @param {Object} url the 'human' folder name
 		 * @param {Object} path a folder on the local filesystem to put the contents of the folder in. Must end in /.
 		 * @param {Object} options options to configure the downloading.  It has the following properties:
@@ -358,8 +353,6 @@ steal("steal/get/json.js",
 		 *         "https://github.com/jupiterjs/jquerymx/blob/master/controller/controller.js",
 		 *         "jquery/controller/controller.js",
 		 *         {getter: steal.get.git})
-		 * 
-		 * ## API 
 		 * 
 		 * @param {Object} url
 		 * @param {Object} path
