@@ -1,5 +1,5 @@
-steal( 'resources/example' )				// Loads 'resources/example.js'
-	.then( '<%= application_name %>.css' )			// Loads '<%= application_name %>.css'
+steal( './<%= application_name %>.css'  ) // Loads '<%= application_name %>.css'
+	.then( 'resources/example' ) // Loads 'resources/example.js'		
 	.then(
 		'steal/less',
 		'steal/coffee' )					// Loads 'steal/less/less.js' and 'steal/coffee/coffee.js'
