@@ -421,7 +421,9 @@
 		}
 	}
 	extend(File.prototype,
-	/* @prototype */
+	/**
+	 * @prototype
+	 */ 
 	{
 		/**
 		 * Removes hash and params
