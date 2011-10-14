@@ -2009,12 +2009,12 @@ if (support.interactive) {
 						ignore: true
 					});
 				}
-				//if you have a startFile load it
+				if( steal.options.startFiles ){
+					steals.push.apply(steals, steal.options.startFiles)
+				}
+				
 				if (steal.options.startFile) {
-					//steal(steal.options.startFile);
 					steals.push(steal.options.startFile)
-				//steal._start = new steal.fn.init(steal.options.startFile);
-				//steal.queue(steal._start);
 				}
 				
 				if (steals.length) {

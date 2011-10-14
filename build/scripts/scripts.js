@@ -289,32 +289,33 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				}
 				// print(options.err);
 				// if there's an error, go through the lines and find the right location
-				if(/ERROR/.test(options.err)){
-					var errMatch;
-					while(errMatch = /\:(\d+)\:\sERROR/g.exec(options.err)){
-						var lineNbr = parseInt(errMatch[1], 10),
-							found = false, item, 
-							lineCount = 0,
-							i = 0, 
-							realLine;
-						while(!found){
-							item = currentLineMap[i];
-							lineCount += item.lines;
-							if(lineCount >= lineNbr){
-								found = true;
-								realLine = lineNbr-(lineCount-item.lines);
+				if( /ERROR/.test(options.err) ){
+					if (!currentLineMap) {
+						print(options.error)
+					}
+					else {
+					
+						var errMatch;
+						while (errMatch = /\:(\d+)\:\sERROR/g.exec(options.err)) {
+							var lineNbr = parseInt(errMatch[1], 10), found = false, item, lineCount = 0, i = 0, realLine;
+							while (!found) {
+								item = currentLineMap[i];
+								lineCount += item.lines;
+								if (lineCount >= lineNbr) {
+									found = true;
+									realLine = lineNbr - (lineCount - item.lines);
+								}
+								i++;
 							}
-							i++;
+							
+							print('ERROR in ' + item.src + ' at line ' + realLine + ':\n');
+							var text = readFile(item.src), split = text.split(/\n/), start = realLine - 2, end = realLine + 2;
+							if (start < 0) 
+								start = 0;
+							if (end > split.length - 1) 
+								end = split.length - 1;
+							print(split.slice(start, end).join('\n') + '\n')
 						}
-						
-						print('ERROR in '+item.src+' at line '+realLine+':\n');
-						var text = readFile(item.src),
-							split = text.split(/\n/),
-							start = realLine - 2,
-							end = realLine + 2;
-						if(start < 0) start = 0;
-						if(end > split.length - 1) end = split.length - 1;
-						print(split.slice(start, end).join('\n')+'\n')
 					}
 				}
 				tmpFile.remove();

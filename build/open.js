@@ -130,7 +130,7 @@ steal(function(s){
 					breadth(init, function(stealer){
 						
 						if(filter(stealer)){
-							func(stealer.options, stealer.options.text || loadScriptText(stealer.options) )
+							func(stealer.options, stealer.options.text || loadScriptText(stealer.options), stealer )
 						}
 					}, depth );
 				},

@@ -7,7 +7,9 @@
 
 steal('steal/parse','steal/build/scripts').then(
  function(s) {
-
+	var isArray = function(arr){
+		return Object.prototype.toString.call(arr)=== "[object Array]"
+	}
 	/**
 	 * @function steal.build.pluginify
 	 * @parent steal.build
@@ -39,7 +41,7 @@ steal('steal/parse','steal/build/scripts').then(
 			}), 
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 		
-		opts.exclude = !opts.exclude ? [] : (steal.isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
+		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 		
 		if (opts.nojquery) {
 			jq = false;
@@ -102,7 +104,6 @@ steal('steal/parse','steal/build/scripts').then(
 	}
 	//gets content from a steal
 	s.build.pluginify.content = function(steal, param, opener){
-		debugger;
 		if (steal.buildType == 'fn') {
 			// if it's a function, go to the file it's in ... pull out the content
 			var index = funcCount[steal.rootSrc] || 0, contents = readFile(steal.rootSrc);
@@ -145,7 +146,6 @@ steal('steal/parse','steal/build/scripts').then(
 	};
 	//gets a function from steal
 	var stealPull = function(p, content, cb){
-		debugger;
 		var token = p.next(), startToken, endToken;
 		if (!token || (token.value != "." && token.value != "(")) {
 			// we said steal .. but we don't care
