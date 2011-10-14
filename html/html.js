@@ -7,7 +7,7 @@ steal(function(){
  * @parent stealjs
  * Loads a page in Envjs and gets it's HTML when it's ready.
  * 
- * http://code.google.com/web/ajaxcrawling/docs/getting-started.html
+ * Designed to solve [http://code.google.com/web/ajaxcrawling/docs/getting-started.html AJAX crawling for Google].
  * 
  *     <meta name="fragment" content="!">
  * 

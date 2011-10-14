@@ -17,7 +17,8 @@ var queue = [],
 /**
  * @function steal.html.crawl
  * @parent steal.html
- * Loads an ajax driven page and generates the html for google to crawl.
+ * Loads an ajax driven page and generates the html for google to crawl. Check out the [ajaxy tutorial] 
+ * for a more complete walkthrough.
  * 
  * This crawler indexes an entire Ajax site.  It
  * 
@@ -39,6 +40,18 @@ var queue = [],
  *  
  * You can change where the contents of the file are writen to by changing
  * the second parameter passed to <code>crawl</code>.
+ * 
+ * By default uses EnvJS, but you can use PhantomJS for more advanced pages:
+
+@codestart
+steal('steal/html/crawl', function(){
+	steal.html.crawl("ajaxy/ajaxy.html", 
+	{
+		out: 'ajaxy/out',
+		browser: 'phantomjs'
+	})
+})
+@codeend
  * 
  * @param {Object} url the starting page to crawl
  * @param {String|Object} opts the location to put the crawled content.
