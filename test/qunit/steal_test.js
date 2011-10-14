@@ -10,7 +10,6 @@ module("steal")
 		return document.getElementById(id);
 	};
 	
-	module("steal");
 	
 	
 

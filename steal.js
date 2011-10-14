@@ -1031,7 +1031,7 @@
 		one : function(event, listener){
 			steal.bind(event,function(){
 				listener.apply(this, arguments);
-				steal.unbind(arguments.callee);
+				steal.unbind(event, arguments.callee);
 			});
 			return steal;
 		},
