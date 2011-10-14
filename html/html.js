@@ -1,5 +1,7 @@
-steal('steal/browser/phantomjs', function(){
+steal(function(){
 
+	var s = steal;
+	
 /**
  * @function steal.html
  * @parent stealjs
@@ -22,27 +24,29 @@ steal('steal/browser/phantomjs', function(){
  */
 steal.html = function(urlo, opts){
 	
-	var options = opts;
-	steal.html.load(urlo, function(html){
-		if(typeof opts === "function"){
-			opts(html)
-		} else {
-			print(html)
-		}
-	})
+	var options = opts,
+		browser = opts.browser || "envjs";
+	
+		steal.html.load(urlo, browser, function(html){
+			if(typeof opts === "function"){
+				opts(html)
+			} else {
+				print(html)
+			}
+		})
 
-	
-	
 };
 
-steal.html.load = function(url, callback){
-	var browser = new steal.browser.phantomjs({
-		print: true
-	})
-	browser.bind('pageready', function(hash){
-		callback.call(this, hash)
-	})
-	.open(url)
+steal.html.load = function(url, browserType, callback){
+	steal('steal/browser/'+browserType, function(){
+		var browser = new s.browser[browserType]({
+			print: true
+		})
+		browser.bind('pageready', function(hash){
+			callback.call(this, hash)
+		})
+		.open(url)
+	});
 };
 
-});
+})

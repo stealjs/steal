@@ -6,8 +6,8 @@ var queue = [],
 	s = steal,
 	getDocType  = function(url){
 		var content;
-		if(steal.File(url).domain() === null){
-			content = readFile(steal.File(url).clean());
+		if(s.File(url).domain() === null){
+			content = readFile(s.File(url).clean());
 		} else {
 			content = readUrl(url);
 		}
@@ -47,12 +47,12 @@ steal.html.crawl = function(url, opts){
 	if(typeof opts == 'string'){
 		opts = {out: opts}
 	}
+	var browserType = opts.browser || 'envjs';
+	s.File(opts.out).mkdirs();
 	
-	steal.File(opts.out).mkdirs();
-	
-	steal.html.load(url, function(hash){
+	s.html.load(url, browserType, function(hash){
 		var docType = getDocType(url),
-			data = steal.html.crawl.getPageData(this),
+			data = s.html.crawl.getPageData(this),
 			total = docType+"\n"+data.html;
 		// print(" HTML: "+total)
 		// add this url to cache so it doesn't generate twice
@@ -64,8 +64,8 @@ steal.html.crawl = function(url, opts){
 		}
 		print("  > "+ opts.out+"/"+hash+".html")
 		// write out the page
-		steal.File(opts.out+"/"+hash+".html").save(data.html);
-		var next = steal.html.crawl.addLinks();
+		s.File(opts.out+"/"+hash+".html").save(data.html);
+		var next = s.html.crawl.addLinks();
 		
 
 		if(next){

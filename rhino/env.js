@@ -1606,7 +1606,7 @@ Envjs.uri = function(path, base, allow) {
 
     // if path is absolute, then just normalize and return
     if (path.match('^[a-zA-Z]+://')) {
-        return urlparse.urlnormalize(path);
+        return urlparse.urlnormalize(path, allow);
     }
 
     // if path is a Windows style absolute path (C:\foo\bar\index.html)

@@ -31,8 +31,8 @@ steal('steal/browser', function(){
 			// restore steal
 			steal = this.curSteal;
 		},
-		evaluate: function(fn){
-			return fn();
+		evaluate: function(fn, arg){
+			return fn(arg);
 		},
 		injectJS: function(file){
 			load(file);
