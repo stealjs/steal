@@ -2,7 +2,8 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	var page,
 		expectedId = 1;
 	steal.browser.phantomjs = function(options){
-		steal.browser.call(this, options, 'phantomjs')
+		steal.browser.call(this, options, 'phantomjs');
+		this._startServer();
 	}
 	steal.extend(steal.browser.phantomjs, {
 		defaults:  {

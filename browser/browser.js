@@ -37,7 +37,7 @@
 			options = options || {};
 			// this uses dashes in place of slashes because safari decodeURIComponent doesn't work with slashes
 			// its transformed back in steal.js
-			this.clientPath = "steal-browser-"+this.type;
+			this.clientPath = "steal/browser/"+this.type;
 			for(var option in steal.browser[type].defaults){
 				if(typeof options[option] === "undefined"){
 					options[option] = steal.browser[type].defaults[option]
@@ -46,14 +46,6 @@
 			this.options = options;
 			print('starting steal.browser.' + this.type)
 			this._events = {};
-			this._startServer();
-			this.bind('clientloaded', function(){
-				// if they don't bind to this event, just make document ready fire right away
-				this.evaluate(function(){
-					$.holdReady(false);
-				})
-			})
-			// driver should start the server if there is one (selenium/jstestdriver)
 		}
 	};
 	
@@ -114,7 +106,7 @@
 		// if there are already params, appends them, otherwise, adds params
 		_appendParamsToUrl: function(url){
 			// should be & separated, but but in phantomjs prevents that url from being read, so we use a comma
-			var params = "mode=commandline,client=" + encodeURIComponent(this.clientPath), 
+			var params = "steal[browser]=" + this.type + "&steal[startFiles]=" + encodeURIComponent(this.clientPath+"/client.js"), 
 				searchMatch = url.match(/(\?[^\#]*)[\#]?/),
 				hashMatch = url.match(/(\#.*)/),
 				hrefMatch = url.match(/([^\#|\?]*)[\#|\?]?/);
