@@ -1499,7 +1499,7 @@ request = function(options, success, error){
 		after: function(){
 			if(! currentCollection ){
 				currentCollection = new steal.p.init();
-				// keep a reference in case it dissappears 
+				// keep a reference in case it disappears 
 				
 				var cur = currentCollection,
 					go = function(){
