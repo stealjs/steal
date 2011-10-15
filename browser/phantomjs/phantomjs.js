@@ -2,7 +2,8 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	var page,
 		expectedId = 1;
 	steal.browser.phantomjs = function(options){
-		steal.browser.call(this, options, 'phantomjs')
+		steal.browser.call(this, options, 'phantomjs');
+		this._startServer();
 	}
 	steal.extend(steal.browser.phantomjs, {
 		defaults:  {
@@ -28,7 +29,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			page = this._getPageUrl(page);
 			var verbose = this.options.print;
 			this.launcher = spawn(function(){
-				var cmd = "phantomjs steal/browser/phantomjs/launcher.js "+page+(verbose?  " -verbose": "");
+				var cmd = "phantomjs steal/browser/phantomjs/launcher.js "+'"'+page+'"'+(verbose?  " -verbose": "");
 				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
 					runCommand("cmd", "/C", cmd)
 				}

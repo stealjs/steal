@@ -1,4 +1,4 @@
-steal('steal/html/client.js','jquery').then(function(){
+steal('steal/html','jquery').then(function(){
 	steal.html.wait();
 	var showHash = function(){
 		$('#out').html("<p>"+window.location.hash+"</p>");

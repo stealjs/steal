@@ -20,7 +20,6 @@ steal('steal/browser', function(){
 	
 	steal.browser.envjs.prototype = new steal.browser();
 	steal.extend(steal.browser.envjs.prototype, {
-		_startServer: function(){},
 		open: function(page){
 			page = this._getPageUrl(page);
 			this.curSteal = steal;

@@ -26,13 +26,6 @@ steal('steal/test/test.js', function(s) {
 						.bind('triggered', function(data){
 							s.test.ok(true, 'injectJS works');
 						})
-						// triggered after steal/browser/selenium/client.js has loaded
-						.bind('clientloaded', function(){
-							this.injectJS('steal/browser/test/trigger.js')
-							this.evaluate(function(){
-								$.holdReady(false);
-							})
-						})
 						.bind('done', function(){
 							this.close();
 						})
@@ -42,8 +35,8 @@ steal('steal/test/test.js', function(s) {
 				})
 			})
 		}, 
-		browsers = ["selenium", "phantomjs", "envjs"]
-//		browsers = ["phantomjs"]
+		browsers = ["selenium", "phantomjs", "envjs"];
+		// browsers = ["phantomjs"]
 		
 	for(var i=0; i<browsers.length; i++){
 		browserTest(browsers[i])

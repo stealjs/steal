@@ -1497,7 +1497,7 @@ request = function(options, success, error){
 		after: function(){
 			if(! currentCollection ){
 				currentCollection = new steal.p.init();
-				// keep a reference in case it dissappears 
+				// keep a reference in case it disappears 
 				
 				var cur = currentCollection,
 					go = function(){
@@ -1895,9 +1895,6 @@ if (support.interactive) {
 	});
 	
 }
-
-	// ===========  STEAL.BROWSERS ==========
-	win.location && /mode=commandline/.test(win.location.search) && steal(decodeURIComponent(win.location.search).replace(/-/g, "/").match(/client=([\w|\/]+)/)[1]+"/client.js")
 	
 	// ===========  OPTIONS ==========
 	
@@ -1965,6 +1962,18 @@ if (support.interactive) {
 			if(typeof oldsteal == 'object'){
 				extend(steal.options, oldsteal);
 			}
+			
+			// if it looks like steal[xyz]=bar, add those to the options
+			var search = win.location && decodeURIComponent(win.location.search);
+			search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+				// support array like params
+				var commaSeparated = val.split(",");
+				if(commaSeparated.length > 1){
+					val = commaSeparated;
+				}
+				steal.options[prop] = val;
+			});
+			
 			// CALCULATE CURRENT LOCATION OF THINGS ...
 			steal.rootUrl(steal.options.rootUrl);
 			
@@ -2008,6 +2017,9 @@ if (support.interactive) {
 					});
 				}
 				if( steal.options.startFiles ){
+					if(typeof steal.options.startFiles === "string"){
+						steal.options.startFiles = [steal.options.startFiles];
+					}
 					steals.push.apply(steals, steal.options.startFiles)
 				}
 				
