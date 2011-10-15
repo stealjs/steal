@@ -1966,8 +1966,8 @@ if (support.interactive) {
 			}
 			
 			// if it looks like steal[xyz]=bar, add those to the options
-			var search = win.location.search;
-			search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+			var search = win.location && win.location.search;
+			search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
 				// support array like params
 				var commaSeparated = val.split(",");
 				if(commaSeparated.length > 1){
