@@ -190,8 +190,8 @@
 						continue;
 					}
 					if ( newMe.isDirectory() ) {
-						newYou.mkdirs();
-						new steal.File(""+newMe.path).copyTo(newYou.path, ignore)
+						newYou.mkdir();
+						new steal.File(newMe.path).copyTo(newYou.path, ignore)
 					} else {
 						copy(newMe, newYou)
 					}
