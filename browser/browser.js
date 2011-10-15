@@ -102,11 +102,11 @@
 		 * @param {String} file
 		 */
 		injectJS: function(file){},
-		// adds commandline=true&browser=selenium
+		// adds steal[browser]=phantomjs&steal[startFiles]=steal/browser/phantomjs/client.js
 		// if there are already params, appends them, otherwise, adds params
 		_appendParamsToUrl: function(url){
 			// should be & separated, but but in phantomjs prevents that url from being read, so we use a comma
-			var params = "steal[browser]=" + this.type + "&steal[startFiles]=" + encodeURIComponent(this.clientPath+"/client.js"), 
+			var params = "steal[browser]=" + this.type + "&steal[startFiles]=" + this.clientPath+"/client.js", 
 				searchMatch = url.match(/(\?[^\#]*)[\#]?/),
 				hashMatch = url.match(/(\#.*)/),
 				hrefMatch = url.match(/([^\#|\?]*)[\#|\?]?/);

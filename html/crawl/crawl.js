@@ -44,7 +44,7 @@ var queue = [],
  * By default uses EnvJS, but you can use PhantomJS for more advanced pages:
 
 @codestart
-steal('steal/html/crawl', function(){
+steal('steal/html', function(){
 	steal.html.crawl("ajaxy/ajaxy.html", 
 	{
 		out: 'ajaxy/out',
