@@ -14,32 +14,33 @@ steal(function(){
 			steal.client.phantomexit = true;
 		}
 	}
-	steal.client.sendData = function(){
-		var q = steal.client.dataQueue;
-		steal.client.dataQueue = [];
-		var params = encodeURIComponent(JSON.stringify(q));
-		// console.log('SENDING: '+params)
-		$.ajax({
-			url: "http://localhost:5555?" + params,
-			cache: false,
-			dataType: 'jsonp',
-			jsonp: false,
-			jsonpCallback: 'cb',
-			success: function(resp){
-				setTimeout(steal.client.sendData, 400);
-				if(resp){
-					var res = resp.fn();
-					steal.client.trigger('evaluated', res);
-				}
-				if (steal.client.phantomexit) {
-					// kills phantom process
-					setTimeout(function(){
-						alert('phantomexit')
-					}, 500)
-				}
-			}
-		})
-	}
+	window.cb = function(data){
+          var resp;
+          eval("resp = "+data);
+          setTimeout(steal.client.sendData, 400);
+          if(resp){
+               var res = resp.fn();
+               steal.client.trigger('evaluated', res);
+          }
+          if (steal.client.phantomexit) {
+               // kills phantom process
+               setTimeout(function(){
+                    alert('phantomexit')
+               }, 500)
+          }
+     };
+    
+     steal.client.sendData = function(){
+          var q = steal.client.dataQueue;
+          steal.client.dataQueue = [];
+          var params = encodeURIComponent(JSON.stringify(q));
+         
+          steal.require({
+               src : "http://localhost:5555?"+params+"&_="+Math.random(),
+               type: "js"
+          },{}, function(){});
+         
+     }
 	steal.client.evaluate = function(script, arg){
 		eval("var fn = "+script);
 		var res = fn(arg);
