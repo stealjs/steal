@@ -3,11 +3,11 @@ steal('steal/build').then(function() {
     return this;
   }).call(null, 0);
 
-  var modifyCss = function(css, str) {
-    str = str || Date.now().toString();
+  var modifyCss = function(css, v) {
+    v = v || Date.now().toString();
 
-    css = css.replace(/url\(['"]*([^"')]*)['"]*\)/g, function(match) {
-      return match.substring(0, match.length - 1) + '?v=' + str + ')';
+    css = css.replace(/url\((['"]*)([^"'\)]*)['"]*\)/g, function(str, p1, p2) {
+      return 'url(' + p1 + p2 + '?v=' + v + p1 + ')';
     });
 
     return css;
