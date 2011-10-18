@@ -938,9 +938,7 @@
 				return steal;
 			}
 		},
-		browser: {
-			rhino: win.load && win.readUrl && win.readFile
-		},
+		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
 		 * Configurable options
@@ -1713,7 +1711,7 @@ request = function(options, success, error){
 	
 	// =========== DEBUG =========
 	
-	if(steal.browser.rhino && typeof console == 'undefined'){
+	if(steal.isRhino && typeof console == 'undefined'){
 		console = {
 			log: function(){
 				print.apply(null, arguments)

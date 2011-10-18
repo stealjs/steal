@@ -14,9 +14,7 @@ steal(function(){
 			steal.client.phantomexit = true;
 		}
 	}
-	window.cb = function(data){
-          var resp;
-          eval("resp = "+data);
+	window.cb = function(resp){
           setTimeout(steal.client.sendData, 400);
           if(resp){
                var res = resp.fn();
