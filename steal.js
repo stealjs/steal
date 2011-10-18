@@ -1,23 +1,26 @@
 (function(){
 	
-	var // String constants (for better minification)
-		win = (function(){return this}).call(null),
+	// Gets the window (even if there is none)
+	var win = (function(){return this}).call(null),
+		// String constants (for better minification)
 		STR_ONLOAD = "onload",
 		STR_ONERROR = "onerror",
 		STR_ONREADYSTATECHANGE = "onreadystatechange",
 		STR_REMOVE_CHILD = "removeChild",
 		STR_CREATE_ELEMENT = 'createElement',
 		STR_GET_BY_TAG = 'getElementsByTagName',
+		
+		// the document ( might not exist in rhino )
 		doc = win.document,
-		noop = function(){},
-		stateCheck = /loaded|complete/,
-		// creates a script tag with an optional type
-		scriptTag = function(type) {
+		
+		// creates a script tag
+		scriptTag = function() {
 			var start = doc[STR_CREATE_ELEMENT]('script');
-			start.type = type || 'text/javascript';
+			start.type = 'text/javascript';
 			return start;
 		},
 		// a function that returns the head element
+		// creates and caches the lookup if necessary
 		head = function() {
 			var d = doc,
 				de = d.documentElement,
@@ -40,31 +43,37 @@
 			}
 			return d;
 		},
-		makeArray = function(args){
-			var arr= [];
-			each(args, function(i, str){arr.push(str)});
-			return arr;
-		},
+		// a jQuery-like $.each
 		each = function(arr, cb){
 			for(var i =0, len = arr.length; i <len; i++){
 				cb.call(arr[i],i,arr[i])
 			}
+			return arr;
 		},
+		// makes an array of things
+		makeArray = function(args){
+			return each([], function(i, str){arr[i] = str});
+		},
+		// testing support for various browser behaviors
 		support = {
+			// does onerror work in script tags?
 			error: doc && (function(){
 				var script = scriptTag();
 				script.setAttribute( "onerror", "return;" );
-				if (typeof script["onerror"] === "function") {
-					return true;
-				}
-				else 
-					return "onerror" in script;
+				return typeof script["onerror"] === "function" ?
+					true : "onerror" in script
 			})(),
+			// If scripts support interactive ready state.
+			// This is set later.
 			interactive: false
 			
 		},
+		// a startup function that will be called when steal is ready
 		startup = function(){},
+		// the old steal value
 		oldsteal = win.steal,
+		// if oldsteal is an object
+		// we use it as options to configure steal
 		opts = typeof oldsteal == 'object' ? oldsteal : {};
 		
 	// =============================== STEAL ===============================
@@ -381,10 +390,9 @@
 	 * @return {steal} the steal object for chaining
 	 */
 	function steal() {
-		//set the inital
+		// convert arguments into an array
 		var args = makeArray(arguments);
-		steal.before(args);
-		pending.push.apply(pending,  arguments);
+		pending.push.apply(pending,  args);
 		steal.after(args);
 		return steal;
 	};
@@ -1255,7 +1263,8 @@ var cleanUp = function(script) {
 		
 	head()[ STR_REMOVE_CHILD ]( script );
 };
-var lastInserted;
+var lastInserted,
+	stateCheck = /loaded|complete/;
 steal.type("js", function(options,original, success, error){
 	var script = scriptTag(), deps;
 	if (options.text) {
