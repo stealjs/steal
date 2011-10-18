@@ -10,7 +10,7 @@
 		STR_GET_BY_TAG = 'getElementsByTagName',
 		doc = win.document,
 		noop = function(){},
-		stealCheck  = /steal\.(production\.)?js/,
+		stealCheck  = /steal\.(production\.)?js.*/,
 		stateCheck = /loaded|complete/,
 		// creates a script tag with an optional type
 		scriptTag = function(type) {
