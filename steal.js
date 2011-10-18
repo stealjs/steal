@@ -52,7 +52,9 @@
 		},
 		// makes an array of things
 		makeArray = function(args){
-			return each([], function(i, str){arr[i] = str});
+			var arr = [];
+			each(args, function(i, str){arr[i] = str});
+			return arr;
 		},
 		// testing support for various browser behaviors
 		support = {
@@ -66,7 +68,6 @@
 			// If scripts support interactive ready state.
 			// This is set later.
 			interactive: false
-			
 		},
 		// a startup function that will be called when steal is ready
 		startup = function(){},
@@ -393,7 +394,10 @@
 		// convert arguments into an array
 		var args = makeArray(arguments);
 		pending.push.apply(pending,  args);
+		// steal.after is called everytime steal is called
+		// it kicks off loading these files
 		steal.after(args);
+		// return steal for chaining
 		return steal;
 	};
 	
@@ -413,60 +417,62 @@
 	 * @param {String} path 
 	 */
 	steal.File = function( path ) {
+		// if new was not used, use it.
 		if ( this.constructor != steal.File ) {
 			return new steal.File(path);
 		}
+		// save the path
 		this.path = typeof path == 'string'? path : path.path;
 	};
+	// alias steal.File to File
 	var File = steal.File,
+	
+		// a reference to the current file
 		curFile;
-		
+	
+	// get and sets the current file
 	File.cur = function(newCurFile){
 		if(newCurFile !== undefined){
 			curFile = File(newCurFile);
 		}else{
 			return curFile || File("");
 		}
-	}
+	};
+	
 	extend(File.prototype,
 	/**
 	 * @prototype
 	 */ 
 	{
-		/**
-		 * Removes hash and params
-		 * @return {String}
-		 */
+		// Removes hash and querystring
 		clean: function() {
 			return this.path.match(/([^\?#]*)/)[1];
 		},
+		// gets the files extension
 		ext : function(){
 			var match = this.clean().match(/\.([\w\d]+)$/)
 			return match ? match[1] : "";
 		},
-		/**
-		 * Returns everything before the last /
-		 */
+		// Returns everything before the last /
 		dir: function() {
-			var last = this.clean().lastIndexOf('/'),
-				dir = (last != -1) ? this.clean().substring(0, last) : '',
-				parts = dir !== '' && dir.match(/^(https?:\/|file:\/)$/);
-			return parts && parts[1] ? this.clean() : dir;
+			// remove any query string
+			var cleaned = this.clean(),
+				// get the last /
+				last = cleaned.lastIndexOf('/'),
+			    // if there is a last /, get everything up to that point
+				dir = (last != -1) ? cleaned.substring(0, last) : '';
+			// make sure we aren't left with just https/ or file:/
+			return /^(https?:\/|file:\/)$/.test(dir) ? cleaned : dir;
 		},
-		/**
-		 * Returns everything after the last /
-		 */
+		// Returns everything after the last /
 		filename: function() {
 			var cleaned = this.clean(),
 				last = cleaned.lastIndexOf('/'),
-				filename = (last != -1) ? cleaned.substring(last+1, cleaned.length) : cleaned,
-				parts = filename.match(/^(https?:\/|file:\/)$/);
-			return parts && parts[1] ? cleaned : filename;
+				filename = (last != -1) ? cleaned.substring(last+1, cleaned.length) : cleaned;
+			return /^(https?:\/|file:\/)$/.test(filename) ? cleaned : filename;
 		},
-		/**
-		 * Returns the domain for the current path.
-		 * Returns null if the domain is a file.
-		 */
+		// Returns the domain for the current path.
+		// Returns null if the domain is a file.
 		domain: function() {
 			var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
 			return http ? http[1] : null;
@@ -484,27 +490,33 @@
 
 		/**
 		 * Returns the path of this file referenced from another url or path.
-		 * @codestart
-		 * new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
-		 * @codeend
+		 * 
+		 *     new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
+		 * 
 		 * @param {String} url
 		 * @param {Boolean} expand if the path should be expanded
 		 * @return {String} 
 		 */
 		joinFrom: function( url, expand ) {
 			var u = File(url);
+			
+			// if this.path is absolutely referenced
 			if ( this.protocol() ) { //if we are absolutely referenced
+				
 				//try to shorten the path as much as possible:
 				var firstDomain = this.domain(),
 					secondDomain = u.domain();
+				
+				// if domains are equal, shorten
 				if ( firstDomain && firstDomain == secondDomain ) {
-					// if there is no domain, we are on the file system
-					return firstDomain ? this.afterDomain() :
-						this.toReferenceFromSameDomain(url);
+					
+					return this.toReferenceFromSameDomain(url);
 				} else {
+					// if there is no domain or not equal, use our path
 					return this.path;
 				}
-
+			
+			// the path is the same as the folder the page is in
 			} else if ( url === steal.pageUrl().dir() && !expand ) {
 
 				return this.path;
@@ -512,6 +524,7 @@
 			} else if ( this.isLocalAbsolute() ) { // we are a path like /page.js
 
 				return (u.domain() ? u.protocol() + "//" + u.domain() : "" )+ this.path;
+				
 			} else  { //we have 2 relative paths, remove folders with every ../
 				
 				if ( url === '' ) {
@@ -540,15 +553,11 @@
 				return urls.concat(paths).join('/');
 			}
 		},
-		/**
-		 * Returns true if the file is relative to a domain or a protocol
-		 */
+		// Returns true if the file is relative to a domain or a protocol
 		relative: function() {
 			return this.path.match(/^(https?:|file:|\/)/) === null;
 		},
-		/**
-		 * Returns the part of the path that is after the domain part
-		 */
+		// Returns the part of the path that is after the domain part
 		afterDomain: function() {
 			return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];
 		},
@@ -597,10 +606,10 @@
 		 * 
 		 * We want everything relative to steal's root so the same app can work in multiple pages.
 		 * 
-		 *  ./files/a.js = steals a.js
-			./files/a = a/a.js
-			files/a = //files/a/a.js
-			files/a.js = loads //files/a.js
+		 * ./files/a.js = steals a.js
+		 * ./files/a = a/a.js
+		 * files/a = //files/a/a.js
+		 * files/a.js = loads //files/a.js
 		 */
 		normalize: function() {
 
@@ -898,10 +907,9 @@
 				steal.root = File(src);
 				
 				// set cur with the location
-				
 				var cleaned = steal.pageUrl(),
 					loc = cleaned.join(src);
-//				File.cur(cleaned)
+
 				File.cur( cleaned.toReferenceFromSameDomain(loc) );
 				return steal;
 			} else {
@@ -944,9 +952,7 @@
 				return steal;
 			}
 		},
-		browser: {
-			rhino: win.load && win.readUrl && win.readFile
-		},
+		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
 		 * Configurable options
@@ -1011,15 +1017,6 @@
 				arguments : [function(){}].concat(makeArray( arguments ) )
 			return steal.apply(win, args );
 		},
-		callOnArgs: function( f ) {
-			return function() {
-				for ( var i = 0; i < arguments.length; i++ ) {
-					f(arguments[i]);
-				}
-				return steal;
-			};
-
-		},
 		/**
 		 * Listens to events on Steal
 		 * @param {String} event
@@ -1072,17 +1069,14 @@
 		loading : function(){
 			// we don't use IE's interactive script functionality while production scripts are loading
 			useInteractive = false;
-			for(var i =0; i< arguments.length;i++){
-				var stel = steal.p.make( arguments[i] );
+			each(arguments, function(i, arg){
+				var stel = steal.p.make( arg );
 				stel.loading = true;
-			}
-
+			});
 		},
 		// called when a script has loaded via production
 		loaded: function(name){
-			//get other steals
-			//basically create each one ... mark it as loading
-			//  load each one
+			// create the steal, mark it as loading, then as loaded
 			var stel = steal.p.make( name );
 			stel.loading = true;
 			stel.loaded()
@@ -1255,15 +1249,19 @@
 
 // =============================== TYPES ===============================
 
+// a clean up script that prevents memory leaks and removes the
+// script
 var cleanUp = function(script) {
-	script[ STR_ONREADYSTATECHANGE ]
-		= script[ STR_ONLOAD ]
-		= script[STR_ONERROR]
-		= null;
-		
-	head()[ STR_REMOVE_CHILD ]( script );
-};
-var lastInserted,
+		script[ STR_ONREADYSTATECHANGE ]
+			= script[ STR_ONLOAD ]
+			= script[STR_ONERROR]
+			= null;
+			
+		head()[ STR_REMOVE_CHILD ]( script );
+	},
+	// the last inserted script, needed for IE
+	lastInserted,
+	// if the state is done
 	stateCheck = /loaded|complete/;
 steal.type("js", function(options,original, success, error){
 	var script = scriptTag(), deps;
@@ -1297,14 +1295,10 @@ steal.type("js", function(options,original, success, error){
 		script.onSuccess = success;
 	}
 		
-	try {
-		// running from filesystem in IE, this script tag doesn't show up until after it executes
-		lastInserted = script;
-		head().insertBefore(script, head().firstChild);
-	} catch(e){
-		console.log(e)
-	}
 	
+	lastInserted = script;
+	head().insertBefore(script, head().firstChild);
+
 	if (options.text) {
 		success();
 		cleanUp(script);
@@ -1504,26 +1498,31 @@ request = function(options, success, error){
 	// use for going through the pending queue
 	// 
 	extend(steal,{
-		before : function(){ },
+		// called after steals are added to the pending queue
 		after: function(){
+			// if we don't have a current 'top' steal
+			// we create one and set it up
+			// to start loading its dependencies (the current pending steals)
 			if(! currentCollection ){
 				currentCollection = new steal.p.init();
-				// keep a reference in case it disappears 
 				
+				// keep a reference in case it disappears 
 				var cur = currentCollection,
+					// runs when a steal is starting
 					go = function(){
-					
-						// let anyone listening to a start, start
+						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
 						when(cur,"complete", function(){
 							steal.trigger("end", cur);
 						});
 						cur.loaded();
 					};
-				// this needs to change for old way ....
+				// if we are in rhino, start loading dependencies right away
 				if(!win.setTimeout){
 					go()
 				}else{
+					// otherwise wait a small timeout to make 
+					// sure we get all steals in the current file
 					setTimeout(go,0)
 				}
 			}
@@ -1720,7 +1719,7 @@ request = function(options, success, error){
 	
 	// =========== DEBUG =========
 	
-	if(steal.browser.rhino && typeof console == 'undefined'){
+	if(steal.isRhino && typeof console == 'undefined'){
 		console = {
 			log: function(){
 				print.apply(null, arguments)
@@ -1909,26 +1908,26 @@ if (support.interactive) {
 	
 	// ===========  OPTIONS ==========
 	
-	var getStealScriptSrc = function(){
-		if(!doc){
-			return;
-		}
-		var scripts = doc[STR_GET_BY_TAG]("script"),
-			stealReg = /steal\.(production\.)?js/,
-			i = 0,
-			len = scripts.length;
-
-		
-		//find the steal script and setup initial paths.
-		for ( ; i < len; i++ ) {
-			var src = scripts[i].src;
-			if ( src && stealReg.test(src) ) { //if script has steal.js
-				return scripts[i];
+	var stealCheck  = /steal\.(production\.)?js.*/,
+		getStealScriptSrc = function(){
+			if(!doc){
+				return;
 			}
-
-		}
-		return;
-	};
+			var scripts = doc[STR_GET_BY_TAG]("script"),
+				i = 0,
+				len = scripts.length;
+	
+			
+			//find the steal script and setup initial paths.
+			for ( ; i < len; i++ ) {
+				var src = scripts[i].src;
+				if ( src && stealCheck.test(src) ) { //if script has steal.js
+					return scripts[i];
+				}
+	
+			}
+			return;
+		};
 	steal.getScriptOptions = function(script){
 			var script = script || getStealScriptSrc(),
 				src,
@@ -1938,7 +1937,7 @@ if (support.interactive) {
 				
 			if(script){
 				var src = script.src,
-					start =  src.replace(/steal(\.production)?\.js.*/,"");
+					start =  src.replace(stealCheck,"");
 				if(/steal\/$/.test(start)){
 					options.rootUrl = start.substr(0, start.length - 6);
 				} else {
@@ -1952,11 +1951,9 @@ if (support.interactive) {
 					scriptOptions = src.split('?')[1];
 					commaSplit = scriptOptions.split(",");
 					
-					if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
+					if ( commaSplit[0] ) {
 						options.startFile = commaSplit[0];
-					} else if ( commaSplit[0] ) {
-						options.app = commaSplit[0];
-					}
+					} 
 					if ( commaSplit[1] && steal.options.env != "production" ) {
 						options.env = commaSplit[1];
 					}
@@ -1968,10 +1965,11 @@ if (support.interactive) {
 		};
 	
 	startup = after(startup, function(){
-			extend(steal.options, steal.getScriptOptions());
+			var options = steal.options;
+			extend(options, steal.getScriptOptions());
 			// a steal that existed before this steal
 			if(typeof oldsteal == 'object'){
-				extend(steal.options, oldsteal);
+				extend(options, oldsteal);
 			}
 			
 			// if it looks like steal[xyz]=bar, add those to the options
@@ -1982,60 +1980,59 @@ if (support.interactive) {
 				if(commaSeparated.length > 1){
 					val = commaSeparated;
 				}
-				steal.options[prop] = val;
+				options[prop] = val;
 			});
 			
 			// CALCULATE CURRENT LOCATION OF THINGS ...
-			steal.rootUrl(steal.options.rootUrl);
+			steal.rootUrl(options.rootUrl);
 			
 			// CLEAN UP OPTIONS
-			if ( steal.options.app ) {
-				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
+			// make startFile have .js ending
+			if(options.startFile.indexOf(".") == '-1'){
+				options.startFile = options.startFile + "/" + options.startFile.match(/[^\/]+$/)[0] + ".js";
 			}
-			if(!steal.options.logLevel){
-				steal.options.logLevel = 0;
+			
+			if(!options.logLevel){
+				options.logLevel = 0;
 			}
 
 			//calculate production location;
-			if (!steal.options.production && steal.options.startFile ) {
-				steal.options.production = File(steal.options.startFile).dir() + '/production.js';
+			if (!options.production && options.startFile ) {
+				options.production = File(options.startFile).dir() + '/production.js';
 			}
-			if ( steal.options.production ) {
-				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
+			if ( options.production ) {
+				options.production = options.production + (options.production.indexOf('.js') == -1 ? '.js' : '');
 			}
+			each(options.loaded || [], function(i, stel){
+				steal.loaded(stel)
+			})
 			//we only load things with force = true
-			if (steal.options.env == 'production' && steal.options.loadProduction) {
-				if (steal.options.production) {
+			if (options.env == 'production' && options.loadProduction) {
+				if (options.production) {
 					//steal(steal.options.startFile);
 					steal({
-						src: steal.options.production,
+						src: options.production,
 						force: true
 					});
 				}
-				if(steal.options.loaded){
-					for(var i=0; i<steal.options.loaded.length; i++){
-						steal.loaded(steal.options.loaded[i]);
-					}
-				}
-				
 			}
 			else {
 				var steals = [];
-				if (steal.options.loadDev !== false) {
+				if (options.loadDev !== false) {
 					steals.push({
 						src: 'steal/dev/dev.js',
 						ignore: true
 					});
 				}
-				if( steal.options.startFiles ){
-					if(typeof steal.options.startFiles === "string"){
-						steal.options.startFiles = [steal.options.startFiles];
+				if( options.startFiles ){
+					if(typeof options.startFiles === "string"){
+						options.startFiles = [options.startFiles];
 					}
-					steals.push.apply(steals, steal.options.startFiles)
+					steals.push.apply(steals, options.startFiles)
 				}
 				
-				if (steal.options.startFile) {
-					steals.push(steal.options.startFile)
+				if (options.startFile) {
+					steals.push(options.startFile)
 				}
 				
 				if (steals.length) {
