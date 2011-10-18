@@ -10,6 +10,7 @@
 		STR_GET_BY_TAG = 'getElementsByTagName',
 		doc = win.document,
 		noop = function(){},
+		stealCheck  = /steal\.(production\.)?js/,
 		stateCheck = /loaded|complete/,
 		// creates a script tag with an optional type
 		scriptTag = function(type) {
@@ -51,17 +52,18 @@
 			}
 		},
 		support = {
+			// error messages
 			error: doc && (function(){
 				var script = scriptTag();
 				script.setAttribute( "onerror", "return;" );
 				if (typeof script["onerror"] === "function") {
 					return true;
-				}
-				else 
+				} else {
 					return "onerror" in script;
+				}
 			})(),
+			// interactive (IE)
 			interactive: false
-			
 		},
 		startup = function(){},
 		oldsteal = win.steal,
@@ -589,10 +591,10 @@
 		 * 
 		 * We want everything relative to steal's root so the same app can work in multiple pages.
 		 * 
-		 *  ./files/a.js = steals a.js
-			./files/a = a/a.js
-			files/a = //files/a/a.js
-			files/a.js = loads //files/a.js
+		 * ./files/a.js = steals a.js
+		 * ./files/a = a/a.js
+		 * files/a = //files/a/a.js
+		 * files/a.js = loads //files/a.js
 		 */
 		normalize: function() {
 
@@ -1905,7 +1907,6 @@ if (support.interactive) {
 			return;
 		}
 		var scripts = doc[STR_GET_BY_TAG]("script"),
-			stealReg = /steal\.(production\.)?js/,
 			i = 0,
 			len = scripts.length;
 
@@ -1913,7 +1914,7 @@ if (support.interactive) {
 		//find the steal script and setup initial paths.
 		for ( ; i < len; i++ ) {
 			var src = scripts[i].src;
-			if ( src && stealReg.test(src) ) { //if script has steal.js
+			if ( src && stealCheck.test(src) ) { //if script has steal.js
 				return scripts[i];
 			}
 
@@ -1929,7 +1930,7 @@ if (support.interactive) {
 				
 			if(script){
 				var src = script.src,
-					start =  src.replace(/steal(\.production)?\.js.*/,"");
+					start =  src.replace(stealCheck,"");
 				if(/steal\/$/.test(start)){
 					options.rootUrl = start.substr(0, start.length - 6);
 				} else {
