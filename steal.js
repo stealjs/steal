@@ -1988,7 +1988,7 @@ if (support.interactive) {
 			
 			// CLEAN UP OPTIONS
 			// make startFile have .js ending
-			if(options.startFile.indexOf(".") == '-1'){
+			if(options.startFile && options.startFile.indexOf(".") == '-1'){
 				options.startFile = options.startFile + "/" + options.startFile.match(/[^\/]+$/)[0] + ".js";
 			}
 			
