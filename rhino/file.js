@@ -238,6 +238,10 @@
 			var file = new java.io.File(this.path);
 			file["delete"]();
 		},
+		isDirectory: function() {
+			var file = new java.io.File(this.path);
+			return file.isDirectory();
+		},
 		removeDir: function() {
 			var me = new java.io.File(this.path)
 			if ( me.exists() ) {
