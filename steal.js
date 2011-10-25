@@ -1879,6 +1879,11 @@ if (support.interactive) {
 	// This is used for packaged scripts.  As the packaged script executes, we grab the 
 	// dependencies that has come so far and assign them to the loaded script
 	steal.loaded = before(steal.loaded, function(name){
+		// This next line is used for steals[] not being set correctly in IE.
+		// The use case breaking is placing "production.css" within the steal.loaded property manually, causing:
+		//   steals["production.css"].options.src -> where steals["production.css"] is undefined.
+		if(!steals[name]) { return; }
+
 		var src = steals[name].options.src,
 			interactive = getCachedInteractiveScript(),
 			interactiveSrc = interactive.src;
