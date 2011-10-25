@@ -238,9 +238,9 @@
 			var file = new java.io.File(this.path);
 			file["delete"]();
 		},
-		isDirectory: function() {
+		isFile: function() {
 			var file = new java.io.File(this.path);
-			return file.isDirectory();
+			return file.isFile();
 		},
 		removeDir: function() {
 			var me = new java.io.File(this.path)
