@@ -38,9 +38,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				if (currentCollection.length) {
 					var compressed = currentCollection.join("\n");
 					// clean out any remove-start style comments
-					print("cleaning ...")
 					compressed = scripts.clean(compressed);
-					print("done cleaning ..")
 					compressed = compressor(compressed, true, currentLineMap);
 					currentCollection = [];
 					return compressed;
@@ -92,7 +90,6 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				currentPackage.scripts.push("'"+stl.rootSrc+"'")
 				// put the result in the package
 				currentCollection.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
-				print("adding to map")
 				if(options.compressor === "localClosure"){ // only closure needs lineNumbers
 					currentLineMap.push({
 						src: stl.rootSrc,
@@ -111,9 +108,8 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
 			}
 		});
-		print("DONE HERE ....")
+		
 		var compressed = compressCollection(currentCollection, currentLineMap);
-		print("compressed")
 		currentCollection = [];
 		currentPackage.src.push(compressed);
 
@@ -138,8 +134,6 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 			}
 		}
 	});
-	
-	
 	
 	/**
 	 * Create package's content.
@@ -187,7 +181,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 			positions = [],
 		   	p = steal.parse(parsedTxt),
 		    tokens, i, position;
-		print("parsed ...")
+
 		while (tokens = p.until(["steal", ".", "dev", ".", "log", "("], ["steal", ".", "dev", ".", "warn", "("])) {
 			var end = p.partner("(");
 			positions.push({
@@ -271,7 +265,6 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 			};
 		},
 		localClosure: function() {
-			print("?")
 			//was unable to use SS import method, so create a temp file
 			steal.print("steal.compress - Using Google Closure app");
 			return function( src, quiet, currentLineMap ) {
@@ -301,15 +294,10 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 						print(options.error)
 					}
 					else {
-						print("HERE")
+					
 						var errMatch;
 						while (errMatch = /\:(\d+)\:\sERROR/g.exec(options.err)) {
-							var lineNbr = parseInt(errMatch[1], 10), 
-								found = false, 
-								item, 
-								lineCount = 0, 
-								i = 0, 
-								realLine;
+							var lineNbr = parseInt(errMatch[1], 10), found = false, item, lineCount = 0, i = 0, realLine;
 							while (!found) {
 								item = currentLineMap[i];
 								lineCount += item.lines;
