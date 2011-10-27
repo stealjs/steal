@@ -18,7 +18,7 @@ steal('steal/build').then(function( steal ) {
 			currentPackage = [];
 
 		opener.each('css', function( link, text, i ) {
-			steal.print(link.src)
+			// steal.print(link.src)
 			scriptsConverted.push(link.rootSrc)
 
 			var loc = steal.File(pageFolder).join(link.src),
@@ -61,7 +61,7 @@ steal('steal/build').then(function( steal ) {
 				var imagePath = steal.File(part).joinFrom(cssLoc),
 					fin = steal.File(imagePath).toReferenceFromSameDomain(prodLocation);
 				//print("  -> "+imagePath);
-				steal.print("  " + part + " > " + fin);
+				// steal.print("  " + part + " > " + fin);
 				return "url(" + fin + ")";
 			});
 		return newCSss;

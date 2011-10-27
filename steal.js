@@ -1575,7 +1575,7 @@ request = function(options, success, error){
 	// =============================== ERROR HANDLING ===============================
 	
 	steal.p.load = after(steal.p.load, function(stel){
-		if(win.document && !this.completed && !this.completeTimeout && 
+		if(win.document && !this.completed && !this.completeTimeout && !steal.isRhino &&
 			(this.options.protocol == "file:" || !support.error)){
 			var self = this;
 			this.completeTimeout = setTimeout(function(){
