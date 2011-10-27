@@ -278,6 +278,16 @@
 	 *
 	 * ## Other Info
 	 * 
+	 * ### Exclude Code Blocks From Production
+	 *
+	 * To exclude code blocks from being included in 
+	 * production builds, add the following around
+	 * the code blocks.
+	 *
+	 *     //@steal-remove-start
+	 *         code to be removed at build
+	 *     //@steal-remove-end
+	 * 
 	 * ### Lookup Paths
 	 * 
 	 * By default steal loads resources relative 
