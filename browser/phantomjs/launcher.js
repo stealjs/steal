@@ -10,6 +10,7 @@
 	page.onResourceRequested = function (req) {
 //		console.log('Request ' + JSON.stringify(req, undefined, 4));
 	};
+	// TODO move this to console.log, make it crazier
 	page.onAlert = function(msg){
 		if(msg=="phantomexit"){
 			phantom.exit()

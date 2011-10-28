@@ -1,7 +1,17 @@
 (function(){
 	/**
-	 * steal.browser is an abstraction layer for browser drivers.  There is currently support for 
-	 * envjs, phantomjs, and selenium.  Each driver implements an API that includes open, bind, trigger, 
+	 * @class steal.browser
+	 * @parent StealJS
+	 * 
+	 * `steal.browser` is an interface for browser drivers.  There is currently support for 
+	 * envjs, phantomjs, and selenium.  Each driver implements an API that allows steal to:
+	 * 
+	 *   - [steal.browser.prototype.open open] - open a page
+	 *   - [steal.browser.prototype.bind bind] - listen to events
+	 *   - [steal.browser.prototype.trigger trigger] - send events
+	 *   -
+	 * 
+	 * that includes open, bind, trigger, 
 	 * evaluate, and injectJS.  There is also a small client component that is loaded by steal.js.
 	 * 
 	 * The initial bootstrap of steal.browser works like this:
@@ -18,42 +28,85 @@
 	 * 5. Document ready is fired on the client, and the application starts up.  Its important to note 
 	 * that any app using steal.browser can't trigger browser events until after document.ready.  This is 
 	 * required because the server needs to have a chance to load its own code and prevent race conditions.
+	 * 
 	 * @param {Object} options
 	 */
-	steal.browser = function(options){
-		if (options) {
+	steal.browser = function(options, type){
+		this.type = type;
+		if (type) {
+			options = options || {};
+			// this uses dashes in place of slashes because safari decodeURIComponent doesn't work with slashes
+			// its transformed back in steal.js
+			this.clientPath = "steal/browser/"+this.type;
+			for(var option in steal.browser[type].defaults){
+				if(typeof options[option] === "undefined"){
+					options[option] = steal.browser[type].defaults[option]
+				}
+			}
+			this.options = options;
 			print('starting steal.browser.' + this.type)
 			this._events = {};
-			this.bind('clientloaded', function(){
-				// if they don't bind to this event, just make document ready fire right away
-				this.evaluate(function(){
-					$.holdReady(false);
-				})
-			})
-			// driver should start the server if there is one (selenium/jstestdriver)
 		}
 	};
 	
 	// generic steal.browser API
 	// each driver defines their own methods for these
-	steal.extend(steal.browser.prototype, {
-		// open the page and start listening for data sent by steal.client
-		open: function(page){},
+	steal.extend(
+	/**
+	 * @prototype
+	 */
+	steal.browser.prototype, {
+		/**
+		 * Opens a page
+		 * 
+		 *     new steal.browser.phantom()
+		 *         .open()
+		 * 
+		 * @param {String} url the url of the page.
+		 */
+		open: function(url){},
+		/**
+		 * Listen to 'steal' events.
+		 * @param {Object} eventName
+		 * @param {Object} fn
+		 */
 		bind: function(eventName, fn){
 			this._events[eventName] = fn;
 			return this;
 		},
+		/**
+		 * Send a 'steal' event.
+		 * @param {Object} eventName
+		 * @param {Object} data
+		 */
 		trigger: function(eventName, data){
 			var handler = this._events[eventName];
 			handler && handler.call(this, data);
 		},
-		// shut down server or just kill the browser instance
+		/**
+		 * shut down server or just kill the browser instance
+		 */
 		close: function(){},
-		// adds commandline=true&browser=selenium
+		/**
+		 * Calls a function with the supplied arguments.
+		 * 
+		 *     
+		 * 
+		 * 
+		 * @param {Function} fn A javascript function. It 
+		 * @param {Array} args 
+		 */
+		evaluate : function(fn, args){},
+		/**
+		 * Loads a JavaScript file in a browser.
+		 * @param {String} file
+		 */
+		injectJS: function(file){},
+		// adds steal[browser]=phantomjs&steal[startFiles]=steal/browser/phantomjs/client.js
 		// if there are already params, appends them, otherwise, adds params
 		_appendParamsToUrl: function(url){
 			// should be & separated, but but in phantomjs prevents that url from being read, so we use a comma
-			var params = "mode=commandline,browser=" + this.type, 
+			var params = "steal[browser]=" + this.type + "&steal[startFiles]=" + this.clientPath+"/client.js", 
 				searchMatch = url.match(/(\?[^\#]*)[\#]?/),
 				hashMatch = url.match(/(\#.*)/),
 				hrefMatch = url.match(/([^\#|\?]*)[\#|\?]?/);
@@ -71,7 +124,8 @@
 			
 			//convert spaces to %20.
 			var newPage = /http:/.test(page) ? page: page.replace(/ /g,"%20");
+			newPage = this._appendParamsToUrl(newPage);
 			return newPage;
-		},
+		}
 	})
 })()

@@ -1,6 +1,6 @@
-steal('jquery', function(){
+steal(function(){
 	steal.client = {};
 	steal.client.trigger = function(type, data){
 		Envjs.trigger(type, data);
 	};
-}, 'steal/browser/client.js')
+})

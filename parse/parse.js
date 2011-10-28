@@ -166,6 +166,7 @@ steal.parse = function(str){
 							count--;
 							//print("  -"+count+" "+prev+" "+last)
 							if(count === 0){
+								cb && cb(token);
 								return token;
 							}
 						}else if(token.value === "/"){
@@ -184,7 +185,8 @@ steal.parse = function(str){
 			 * until("function",")") -> looks for function or  )
 			 * until(["foo",".","bar"]) -> looks for foo.bar
 			 * 
-			 * @return {Array} an array of tokens of the matches
+			 * @return {Array} an array of tokens of the matches.  The last item in the array
+			 * is the last part matched.
 			 */
 			until: function(){
 				var token, 
@@ -216,8 +218,7 @@ steal.parse = function(str){
 				while (token = this.moveNext() ) {
 					for(i =0; i< patterns.length; i++){
 						var pattern = patterns[i];
-	
-						if( token.type !== "string" && like( pattern[patternMatchPosition[i]], token) ){
+						if( token.type !== "string" && like( pattern[patternMatchPosition[i].length], token) ){
 							patternMatchPosition[i].push(token);
 							if(patternMatchPosition[i].length === pattern.length){
 								return patternMatchPosition[i];

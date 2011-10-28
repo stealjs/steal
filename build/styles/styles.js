@@ -61,7 +61,7 @@ steal('steal/build').then(function( steal ) {
 				var imagePath = steal.File(part).joinFrom(cssLoc),
 					fin = steal.File(imagePath).toReferenceFromSameDomain(prodLocation);
 				//print("  -> "+imagePath);
-				steal.print("  " + part + " > " + fin);
+				// steal.print("  " + part + " > " + fin);
 				return "url(" + fin + ")";
 			});
 		return newCSss;

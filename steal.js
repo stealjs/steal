@@ -1,23 +1,26 @@
 (function(){
 	
-	var // String constants (for better minification)
-		win = (function(){return this}).call(null),
+	// Gets the window (even if there is none)
+	var win = (function(){return this}).call(null),
+		// String constants (for better minification)
 		STR_ONLOAD = "onload",
 		STR_ONERROR = "onerror",
 		STR_ONREADYSTATECHANGE = "onreadystatechange",
 		STR_REMOVE_CHILD = "removeChild",
 		STR_CREATE_ELEMENT = 'createElement',
 		STR_GET_BY_TAG = 'getElementsByTagName',
+		
+		// the document ( might not exist in rhino )
 		doc = win.document,
-		noop = function(){},
-		stateCheck = /loaded|complete/,
-		// creates a script tag with an optional type
-		scriptTag = function(type) {
+		
+		// creates a script tag
+		scriptTag = function() {
 			var start = doc[STR_CREATE_ELEMENT]('script');
-			start.type = type || 'text/javascript';
+			start.type = 'text/javascript';
 			return start;
 		},
 		// a function that returns the head element
+		// creates and caches the lookup if necessary
 		head = function() {
 			var d = doc,
 				de = d.documentElement,
@@ -40,31 +43,38 @@
 			}
 			return d;
 		},
-		makeArray = function(args){
-			var arr= [];
-			each(args, function(i, str){arr.push(str)});
-			return arr;
-		},
+		// a jQuery-like $.each
 		each = function(arr, cb){
 			for(var i =0, len = arr.length; i <len; i++){
 				cb.call(arr[i],i,arr[i])
 			}
+			return arr;
 		},
+		// makes an array of things
+		makeArray = function(args){
+			var arr = [];
+			each(args, function(i, str){arr[i] = str});
+			return arr;
+		},
+		// testing support for various browser behaviors
 		support = {
+			// does onerror work in script tags?
 			error: doc && (function(){
 				var script = scriptTag();
 				script.setAttribute( "onerror", "return;" );
-				if (typeof script["onerror"] === "function") {
-					return true;
-				}
-				else 
-					return "onerror" in script;
+				return typeof script["onerror"] === "function" ?
+					true : "onerror" in script
 			})(),
+			// If scripts support interactive ready state.
+			// This is set later.
 			interactive: false
-			
 		},
+		// a startup function that will be called when steal is ready
 		startup = function(){},
+		// the old steal value
 		oldsteal = win.steal,
+		// if oldsteal is an object
+		// we use it as options to configure steal
 		opts = typeof oldsteal == 'object' ? oldsteal : {};
 		
 	// =============================== STEAL ===============================
@@ -268,6 +278,16 @@
 	 *
 	 * ## Other Info
 	 * 
+	 * ### Exclude Code Blocks From Production
+	 *
+	 * To exclude code blocks from being included in 
+	 * production builds, add the following around
+	 * the code blocks.
+	 *
+	 *     //@steal-remove-start
+	 *         code to be removed at build
+	 *     //@steal-remove-end
+	 * 
 	 * ### Lookup Paths
 	 * 
 	 * By default steal loads resources relative 
@@ -381,11 +401,13 @@
 	 * @return {steal} the steal object for chaining
 	 */
 	function steal() {
-		//set the inital
+		// convert arguments into an array
 		var args = makeArray(arguments);
-		steal.before(args);
-		pending.push.apply(pending,  arguments);
+		pending.push.apply(pending,  args);
+		// steal.after is called everytime steal is called
+		// it kicks off loading these files
 		steal.after(args);
+		// return steal for chaining
 		return steal;
 	};
 	
@@ -405,58 +427,62 @@
 	 * @param {String} path 
 	 */
 	steal.File = function( path ) {
+		// if new was not used, use it.
 		if ( this.constructor != steal.File ) {
 			return new steal.File(path);
 		}
+		// save the path
 		this.path = typeof path == 'string'? path : path.path;
 	};
+	// alias steal.File to File
 	var File = steal.File,
+	
+		// a reference to the current file
 		curFile;
-		
+	
+	// get and sets the current file
 	File.cur = function(newCurFile){
 		if(newCurFile !== undefined){
 			curFile = File(newCurFile);
 		}else{
 			return curFile || File("");
 		}
-	}
+	};
+	
 	extend(File.prototype,
-	/* @prototype */
+	/**
+	 * @prototype
+	 */ 
 	{
-		/**
-		 * Removes hash and params
-		 * @return {String}
-		 */
+		// Removes hash and querystring
 		clean: function() {
 			return this.path.match(/([^\?#]*)/)[1];
 		},
+		// gets the files extension
 		ext : function(){
 			var match = this.clean().match(/\.([\w\d]+)$/)
 			return match ? match[1] : "";
 		},
-		/**
-		 * Returns everything before the last /
-		 */
+		// Returns everything before the last /
 		dir: function() {
-			var last = this.clean().lastIndexOf('/'),
-				dir = (last != -1) ? this.clean().substring(0, last) : '',
-				parts = dir !== '' && dir.match(/^(https?:\/|file:\/)$/);
-			return parts && parts[1] ? this.clean() : dir;
+			// remove any query string
+			var cleaned = this.clean(),
+				// get the last /
+				last = cleaned.lastIndexOf('/'),
+			    // if there is a last /, get everything up to that point
+				dir = (last != -1) ? cleaned.substring(0, last) : '';
+			// make sure we aren't left with just https/ or file:/
+			return /^(https?:\/|file:\/)$/.test(dir) ? cleaned : dir;
 		},
-		/**
-		 * Returns everything after the last /
-		 */
+		// Returns everything after the last /
 		filename: function() {
 			var cleaned = this.clean(),
 				last = cleaned.lastIndexOf('/'),
-				filename = (last != -1) ? cleaned.substring(last+1, cleaned.length) : cleaned,
-				parts = filename.match(/^(https?:\/|file:\/)$/);
-			return parts && parts[1] ? cleaned : filename;
+				filename = (last != -1) ? cleaned.substring(last+1, cleaned.length) : cleaned;
+			return /^(https?:\/|file:\/)$/.test(filename) ? cleaned : filename;
 		},
-		/**
-		 * Returns the domain for the current path.
-		 * Returns null if the domain is a file.
-		 */
+		// Returns the domain for the current path.
+		// Returns null if the domain is a file.
 		domain: function() {
 			var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
 			return http ? http[1] : null;
@@ -474,27 +500,33 @@
 
 		/**
 		 * Returns the path of this file referenced from another url or path.
-		 * @codestart
-		 * new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
-		 * @codeend
+		 * 
+		 *     new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
+		 * 
 		 * @param {String} url
 		 * @param {Boolean} expand if the path should be expanded
 		 * @return {String} 
 		 */
 		joinFrom: function( url, expand ) {
 			var u = File(url);
+			
+			// if this.path is absolutely referenced
 			if ( this.protocol() ) { //if we are absolutely referenced
+				
 				//try to shorten the path as much as possible:
 				var firstDomain = this.domain(),
 					secondDomain = u.domain();
+				
+				// if domains are equal, shorten
 				if ( firstDomain && firstDomain == secondDomain ) {
-					// if there is no domain, we are on the file system
-					return firstDomain ? this.afterDomain() :
-						this.toReferenceFromSameDomain(url);
+					
+					return this.toReferenceFromSameDomain(url);
 				} else {
+					// if there is no domain or not equal, use our path
 					return this.path;
 				}
-
+			
+			// the path is the same as the folder the page is in
 			} else if ( url === steal.pageUrl().dir() && !expand ) {
 
 				return this.path;
@@ -502,6 +534,7 @@
 			} else if ( this.isLocalAbsolute() ) { // we are a path like /page.js
 
 				return (u.domain() ? u.protocol() + "//" + u.domain() : "" )+ this.path;
+				
 			} else  { //we have 2 relative paths, remove folders with every ../
 				
 				if ( url === '' ) {
@@ -530,15 +563,11 @@
 				return urls.concat(paths).join('/');
 			}
 		},
-		/**
-		 * Returns true if the file is relative to a domain or a protocol
-		 */
+		// Returns true if the file is relative to a domain or a protocol
 		relative: function() {
 			return this.path.match(/^(https?:|file:|\/)/) === null;
 		},
-		/**
-		 * Returns the part of the path that is after the domain part
-		 */
+		// Returns the part of the path that is after the domain part
 		afterDomain: function() {
 			return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];
 		},
@@ -587,10 +616,10 @@
 		 * 
 		 * We want everything relative to steal's root so the same app can work in multiple pages.
 		 * 
-		 *  ./files/a.js = steals a.js
-			./files/a = a/a.js
-			files/a = //files/a/a.js
-			files/a.js = loads //files/a.js
+		 * ./files/a.js = steals a.js
+		 * ./files/a = a/a.js
+		 * files/a = //files/a/a.js
+		 * files/a.js = loads //files/a.js
 		 */
 		normalize: function() {
 
@@ -639,7 +668,7 @@
 				} else{ // already have this steal
 					stel = steals[rootSrc];
 					// extend the old stolen file with any new options
-					extend(stel.options, options)
+					extend(stel.options, typeof options === "string" ? {} : options)
 				}
 			}
 			
@@ -814,7 +843,7 @@
 			
 		},
 		/**
-		 * When the script loads, 
+		 * Loads this steal
 		 */
 		load: function(returnScript) {
 			if(this.loading || this.isLoaded){
@@ -888,10 +917,9 @@
 				steal.root = File(src);
 				
 				// set cur with the location
-				
 				var cleaned = steal.pageUrl(),
 					loc = cleaned.join(src);
-//				File.cur(cleaned)
+
 				File.cur( cleaned.toReferenceFromSameDomain(loc) );
 				return steal;
 			} else {
@@ -934,9 +962,7 @@
 				return steal;
 			}
 		},
-		browser: {
-			rhino: win.load && win.readUrl && win.readFile
-		},
+		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
 		 * Configurable options
@@ -1001,15 +1027,6 @@
 				arguments : [function(){}].concat(makeArray( arguments ) )
 			return steal.apply(win, args );
 		},
-		callOnArgs: function( f ) {
-			return function() {
-				for ( var i = 0; i < arguments.length; i++ ) {
-					f(arguments[i]);
-				}
-				return steal;
-			};
-
-		},
 		/**
 		 * Listens to events on Steal
 		 * @param {String} event
@@ -1029,7 +1046,7 @@
 		one : function(event, listener){
 			steal.bind(event,function(){
 				listener.apply(this, arguments);
-				steal.unbind(arguments.callee);
+				steal.unbind(event, arguments.callee);
 			});
 			return steal;
 		},
@@ -1062,17 +1079,14 @@
 		loading : function(){
 			// we don't use IE's interactive script functionality while production scripts are loading
 			useInteractive = false;
-			for(var i =0; i< arguments.length;i++){
-				var stel = steal.p.make( arguments[i] );
+			each(arguments, function(i, arg){
+				var stel = steal.p.make( arg );
 				stel.loading = true;
-			}
-
+			});
 		},
 		// called when a script has loaded via production
 		loaded: function(name){
-			//get other steals
-			//basically create each one ... mark it as loading
-			//  load each one
+			// create the steal, mark it as loading, then as loaded
 			var stel = steal.p.make( name );
 			stel.loading = true;
 			stel.loaded()
@@ -1245,15 +1259,20 @@
 
 // =============================== TYPES ===============================
 
+// a clean up script that prevents memory leaks and removes the
+// script
 var cleanUp = function(script) {
-	script[ STR_ONREADYSTATECHANGE ]
-		= script[ STR_ONLOAD ]
-		= script[STR_ONERROR]
-		= null;
-		
-	head()[ STR_REMOVE_CHILD ]( script );
-};
-var lastInserted;
+		script[ STR_ONREADYSTATECHANGE ]
+			= script[ STR_ONLOAD ]
+			= script[STR_ONERROR]
+			= null;
+			
+		head()[ STR_REMOVE_CHILD ]( script );
+	},
+	// the last inserted script, needed for IE
+	lastInserted,
+	// if the state is done
+	stateCheck = /loaded|complete/;
 steal.type("js", function(options,original, success, error){
 	var script = scriptTag(), deps;
 	if (options.text) {
@@ -1286,14 +1305,10 @@ steal.type("js", function(options,original, success, error){
 		script.onSuccess = success;
 	}
 		
-	try {
-		// running from filesystem in IE, this script tag doesn't show up until after it executes
-		lastInserted = script;
-		head().insertBefore(script, head().firstChild);
-	} catch(e){
-		console.log(e)
-	}
 	
+	lastInserted = script;
+	head().insertBefore(script, head().firstChild);
+
 	if (options.text) {
 		success();
 		cleanUp(script);
@@ -1493,26 +1508,31 @@ request = function(options, success, error){
 	// use for going through the pending queue
 	// 
 	extend(steal,{
-		before : function(){ },
+		// called after steals are added to the pending queue
 		after: function(){
+			// if we don't have a current 'top' steal
+			// we create one and set it up
+			// to start loading its dependencies (the current pending steals)
 			if(! currentCollection ){
 				currentCollection = new steal.p.init();
-				// keep a reference in case it dissappears 
 				
+				// keep a reference in case it disappears 
 				var cur = currentCollection,
+					// runs when a steal is starting
 					go = function(){
-					
-						// let anyone listening to a start, start
+						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
 						when(cur,"complete", function(){
 							steal.trigger("end", cur);
 						});
 						cur.loaded();
 					};
-				// this needs to change for old way ....
+				// if we are in rhino, start loading dependencies right away
 				if(!win.setTimeout){
 					go()
 				}else{
+					// otherwise wait a small timeout to make 
+					// sure we get all steals in the current file
 					setTimeout(go,0)
 				}
 			}
@@ -1565,7 +1585,7 @@ request = function(options, success, error){
 	// =============================== ERROR HANDLING ===============================
 	
 	steal.p.load = after(steal.p.load, function(stel){
-		if(win.document && !this.completed && !this.completeTimeout && 
+		if(win.document && !this.completed && !this.completeTimeout && !steal.isRhino &&
 			(this.options.protocol == "file:" || !support.error)){
 			var self = this;
 			this.completeTimeout = setTimeout(function(){
@@ -1709,7 +1729,7 @@ request = function(options, success, error){
 	
 	// =========== DEBUG =========
 	
-	if(steal.browser.rhino && typeof console == 'undefined'){
+	if(steal.isRhino && typeof console == 'undefined'){
 		console = {
 			log: function(){
 				print.apply(null, arguments)
@@ -1723,7 +1743,7 @@ request = function(options, success, error){
 		return stel.options ? stel.options.rootSrc : "CONTAINER"
 	}
 
-	/**
+	/*
 	steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id)
 	})
@@ -1782,8 +1802,15 @@ request = function(options, success, error){
 	
 	// after a steal is created, if its been loaded already and has a "has", mark those files as loaded
 	steal.p.make = after(steal.p.make, function(stel){
-		if(stel.isLoaded && stel.options.has){
-			stel.loadHas();
+		// if we have things
+		if( stel.options.has ) {
+			// if we have loaded this already (and we are adding has's)
+			if( stel.isLoaded ) {
+				stel.loadHas();
+			} else {
+				// have to mark has as loading 
+				steal.loading.apply(steal,stel.options.has)
+			}
 		}
 		return stel;
 	}, true)
@@ -1794,9 +1821,10 @@ request = function(options, success, error){
 			this.loadHas();
 		}
 	})
-	
+
 	steal.p.
 		/**
+		 * @hide
 		 * Goes through the array of files listed in this.options.has, marks them all as loaded.  
 		 * This is used for files like production.css, which, once they load, need to mark the files they 
 		 * contain as loaded.
@@ -1892,32 +1920,29 @@ if (support.interactive) {
 	});
 	
 }
-
-	// ===========  STEAL.BROWSERS ==========
-	win.location && /mode=commandline/.test(win.location.search) && steal("steal/browser/"+win.location.search.match(/browser=(\w+)/)[1]+"/client.js")
 	
 	// ===========  OPTIONS ==========
 	
-	var getStealScriptSrc = function(){
-		if(!doc){
-			return;
-		}
-		var scripts = doc[STR_GET_BY_TAG]("script"),
-			stealReg = /steal\.(production\.)?js/,
-			i = 0,
-			len = scripts.length;
-
-		
-		//find the steal script and setup initial paths.
-		for ( ; i < len; i++ ) {
-			var src = scripts[i].src;
-			if ( src && stealReg.test(src) ) { //if script has steal.js
-				return scripts[i];
+	var stealCheck  = /steal\.(production\.)?js.*/,
+		getStealScriptSrc = function(){
+			if(!doc){
+				return;
 			}
-
-		}
-		return;
-	};
+			var scripts = doc[STR_GET_BY_TAG]("script"),
+				i = 0,
+				len = scripts.length;
+	
+			
+			//find the steal script and setup initial paths.
+			for ( ; i < len; i++ ) {
+				var src = scripts[i].src;
+				if ( src && stealCheck.test(src) ) { //if script has steal.js
+					return scripts[i];
+				}
+	
+			}
+			return;
+		};
 	steal.getScriptOptions = function(script){
 			var script = script || getStealScriptSrc(),
 				src,
@@ -1927,7 +1952,7 @@ if (support.interactive) {
 				
 			if(script){
 				var src = script.src,
-					start =  src.replace(/steal(\.production)?\.js.*/,"");
+					start =  src.replace(stealCheck,"");
 				if(/steal\/$/.test(start)){
 					options.rootUrl = start.substr(0, start.length - 6);
 				} else {
@@ -1941,11 +1966,9 @@ if (support.interactive) {
 					scriptOptions = src.split('?')[1];
 					commaSplit = scriptOptions.split(",");
 					
-					if ( commaSplit[0] && commaSplit[0].lastIndexOf('.js') > 0 ) {
+					if ( commaSplit[0] ) {
 						options.startFile = commaSplit[0];
-					} else if ( commaSplit[0] ) {
-						options.app = commaSplit[0];
-					}
+					} 
 					if ( commaSplit[1] && steal.options.env != "production" ) {
 						options.env = commaSplit[1];
 					}
@@ -1957,59 +1980,74 @@ if (support.interactive) {
 		};
 	
 	startup = after(startup, function(){
-			extend(steal.options, steal.getScriptOptions());
+			var options = steal.options;
+			extend(options, steal.getScriptOptions());
 			// a steal that existed before this steal
 			if(typeof oldsteal == 'object'){
-				extend(steal.options, oldsteal);
+				extend(options, oldsteal);
 			}
+			
+			// if it looks like steal[xyz]=bar, add those to the options
+			var search = win.location && decodeURIComponent(win.location.search);
+			search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+				// support array like params
+				var commaSeparated = val.split(",");
+				if(commaSeparated.length > 1){
+					val = commaSeparated;
+				}
+				options[prop] = val;
+			});
+			
 			// CALCULATE CURRENT LOCATION OF THINGS ...
-			steal.rootUrl(steal.options.rootUrl);
+			steal.rootUrl(options.rootUrl);
 			
 			// CLEAN UP OPTIONS
-			if ( steal.options.app ) {
-				steal.options.startFile = steal.options.app + "/" + steal.options.app.match(/[^\/]+$/)[0] + ".js";
+			// make startFile have .js ending
+			if(options.startFile && options.startFile.indexOf(".") == '-1'){
+				options.startFile = options.startFile + "/" + options.startFile.match(/[^\/]+$/)[0] + ".js";
 			}
-			if(!steal.options.logLevel){
-				steal.options.logLevel = 0;
+			
+			if(!options.logLevel){
+				options.logLevel = 0;
 			}
 
 			//calculate production location;
-			if (!steal.options.production && steal.options.startFile ) {
-				steal.options.production = File(steal.options.startFile).dir() + '/production.js';
+			if (!options.production && options.startFile ) {
+				options.production = File(options.startFile).dir() + '/production.js';
 			}
-			if ( steal.options.production ) {
-				steal.options.production = steal.options.production + (steal.options.production.indexOf('.js') == -1 ? '.js' : '');
+			if ( options.production ) {
+				options.production = options.production + (options.production.indexOf('.js') == -1 ? '.js' : '');
 			}
+			each(options.loaded || [], function(i, stel){
+				steal.loaded(stel)
+			})
 			//we only load things with force = true
-			if (steal.options.env == 'production' && steal.options.loadProduction) {
-				if (steal.options.production) {
+			if (options.env == 'production' && options.loadProduction) {
+				if (options.production) {
 					//steal(steal.options.startFile);
 					steal({
-						src: steal.options.production,
+						src: options.production,
 						force: true
 					});
 				}
-				if(steal.options.loaded){
-					for(var i=0; i<steal.options.loaded.length; i++){
-						steal.loaded(steal.options.loaded[i]);
-					}
-				}
-				
 			}
 			else {
 				var steals = [];
-				if (steal.options.loadDev !== false) {
+				if (options.loadDev !== false) {
 					steals.push({
 						src: 'steal/dev/dev.js',
 						ignore: true
 					});
 				}
-				//if you have a startFile load it
-				if (steal.options.startFile) {
-					//steal(steal.options.startFile);
-					steals.push(steal.options.startFile)
-				//steal._start = new steal.fn.init(steal.options.startFile);
-				//steal.queue(steal._start);
+				if( options.startFiles ){
+					if(typeof options.startFiles === "string"){
+						options.startFiles = [options.startFiles];
+					}
+					steals.push.apply(steals, options.startFiles)
+				}
+				
+				if (options.startFile) {
+					steals.push(options.startFile)
 				}
 				
 				if (steals.length) {

@@ -2,11 +2,23 @@ steal('steal/html', function(){
 
 var queue = [],
 	found = {},
-	s = steal;
+	pageData,
+	s = steal,
+	getDocType  = function(url){
+		var content;
+		if(s.File(url).domain() === null){
+			content = readFile(s.File(url).clean());
+		} else {
+			content = readUrl(url);
+		}
+		var docTypes = content.match( /<!doctype[^>]+>/i );
+		return docTypes ? docTypes[0] : "";
+	};
 /**
  * @function steal.html.crawl
  * @parent steal.html
- * Loads an ajax driven page and generates the html for google to crawl.
+ * Loads an ajax driven page and generates the html for google to crawl. Check out the [ajaxy tutorial] 
+ * for a more complete walkthrough.
  * 
  * This crawler indexes an entire Ajax site.  It
  * 
@@ -29,6 +41,18 @@ var queue = [],
  * You can change where the contents of the file are writen to by changing
  * the second parameter passed to <code>crawl</code>.
  * 
+ * By default uses EnvJS, but you can use PhantomJS for more advanced pages:
+
+@codestart
+steal('steal/html', function(){
+	steal.html.crawl("ajaxy/ajaxy.html", 
+	{
+		out: 'ajaxy/out',
+		browser: 'phantomjs'
+	})
+})
+@codeend
+ * 
  * @param {Object} url the starting page to crawl
  * @param {String|Object} opts the location to put the crawled content.
  */
@@ -36,52 +60,47 @@ steal.html.crawl = function(url, opts){
 	if(typeof opts == 'string'){
 		opts = {out: opts}
 	}
+	var browserType = opts.browser || 'envjs';
+	s.File(opts.out).mkdirs();
 	
-	steal.File(opts.out).mkdirs();
-	
-	steal.html.load(url, function(html){
-		// called every time the page is 'ready'
-//		steal.html.onready(function(html){
-			// write HTML to file
-			var hash = this.evaluate(function(){
-				return window.location.hash.substr(1);
-			})
-			print("  > "+ opts.out+"/"+hash+".html")
-			// write out the page
-			steal.File(opts.out+"/"+hash+".html").save(html);
-			var next = steal.html.crawl.addLinks(this);
-			
+	s.html.load(url, browserType, function(hash){
+		var docType = getDocType(url),
+			data = s.html.crawl.getPageData(this),
+			total = docType+"\n<html lang='en'>\n"+data.html+"\n</html>";
+		// print(" HTML: "+total)
+		// add this url to cache so it doesn't generate twice
+		hash = hash.substr(2);
+		found[hash] = true;
+		print("  > "+ opts.out+"/"+hash+".html")
+		// write out the page
+		s.File(opts.out+"/"+hash+".html").save(total);
+		var next = s.html.crawl.addLinks();
+		
 
-			if(next){
-				
-				print("  "+next)
-				this.evaluate(function(){
-					steal.html.wait();
-				})
-				
-				// get the next link
-				this.evaluate(function(nextHash){
-					window.location.hash = "Foo"
-				}, next);
-				// always wait 20ms
-				java.lang.Thread.currentThread().sleep(30); 
-				this.evaluate(function(){
-					steal.html.ready();
-				});
-			}
-			else {
-				this.close()
-			}
+		if(next){
+			
+			// print("  "+next)
+			// get the next link
+			this.evaluate(function(nextHash){
+				window.location.hash = nextHash;
+			}, next);
+		}
+		else {
+			this.close()
+		}
 	})
 }
 
 steal.extend(steal.html.crawl, {
-	getLinks : function(browser){
-		var urls = browser.evaluate(function(){
+	getLinks: function(){
+		return pageData.urls;
+	},
+	getPageData : function(browser){
+		pageData = browser.evaluate(function(){
 			var getHash = function(href){
 				var index = href.indexOf("#!");
 				if(index > -1){
-					return href.substr(index);
+					return href.substr(index+1);
 				}
 			};
 			var links = document.getElementsByTagName('a'),
@@ -93,12 +112,16 @@ steal.extend(steal.html.crawl, {
 					urls.push( hash );
 				}
 			}
-			return urls;
+			var html = document.documentElement.innerHTML;
+			return {
+				urls: urls, 
+				html: html
+			};
 		});
-		return urls;
+		return pageData;
 	},
-	addLinks : function(browser){
-		var links = this.getLinks(browser),
+	addLinks : function(){
+		var links = this.getLinks(),
 			link;
 		// add links that haven't already been added
 		for(var i=0; i < links.length; i++){

@@ -9,6 +9,9 @@ steal('steal/test','steal/parse').then( function( s ) {
 	s.test.module("steal/parse")
 	
 	s.test.test("parse", function(t){
+		var js = readFile('steal/parse/test/trailslash.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
 		var js = readFile('jquery/class/class.js');
 		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
 		
@@ -48,10 +51,10 @@ steal('steal/test','steal/parse').then( function( s ) {
 		var parser = steal.parse(readFile('steal/parse/test/stealCode1.js')),
 			tokens = [];
 
-		parser.until(["steal",".","plugins","("]);
+		parser.until(["steal","("]);
 		parser.partner("(", function(token){
 			tokens.push(token);
-			//print("TOKEN = "+token.value, token.type)
+//			print("TOKEN = "+token.value, token.type)
 		})
 		
 		t.equals(tokens[0].value,"foo/bar");
@@ -64,12 +67,14 @@ steal('steal/test','steal/parse').then( function( s ) {
 		var parser = steal.parse(readFile('steal/parse/test/dev.js')),
 			tokens = [];
 
-		parser.until(["steal",".","dev",".","log","("]);
+		var tok = parser.until(["steal",".","dev",".","log","("]);
 		parser.partner("(", function(token){
 			tokens.push(token);
+//			print("TOKEN = "+token.value, token.type)
+			
 		})
 		
-		t.equals(tokens[0].value,"()");
+		t.equals(tokens[0].value,"hi()");
 		
 	});
 

@@ -10,7 +10,6 @@ module("steal")
 		return document.getElementById(id);
 	};
 	
-	module("steal");
 	
 	
 
@@ -628,7 +627,7 @@ test("File.ext", function(){
 		var options = steal.getScriptOptions(script);
 		
 		equals(options.rootUrl, url,"root url is right");
-		equals(options.app,"foo","app right");
+		equals(options.startFile,"foo","app right");
 		
 		script.src = "../steal.js?bar.js";
 

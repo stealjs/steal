@@ -7,9 +7,13 @@ steal('steal/test/test.js', function(s) {
 	var browserTest = function(type){
 			s.test.test(type, function(){
 				load('steal/rhino/rhino.js')
-				steal("steal/browser/"+type, function(){
+				var path = "steal/browser/"+type;
+				if(type == "selenium"){
+					path = "funcunit/selenium"
+				}
+				steal(path, function(){
 					var browser = new steal.browser[type]({
-//						print: true
+						print: true
 					});
 					browser
 						.bind('myevent', function(data){
@@ -22,13 +26,6 @@ steal('steal/test/test.js', function(s) {
 						.bind('triggered', function(data){
 							s.test.ok(true, 'injectJS works');
 						})
-						// triggered after steal/browser/selenium/client.js has loaded
-						.bind('clientloaded', function(){
-							this.injectJS('steal/browser/test/trigger.js')
-							this.evaluate(function(){
-								$.holdReady(false);
-							})
-						})
 						.bind('done', function(){
 							this.close();
 						})
@@ -38,8 +35,8 @@ steal('steal/test/test.js', function(s) {
 				})
 			})
 		}, 
-		browsers = ["selenium", "phantomjs", "envjs"]
-//		browsers = ["phantomjs"]
+		// browsers = ["selenium", "phantomjs", "envjs"];
+		browsers = ["phantomjs"]
 		
 	for(var i=0; i<browsers.length; i++){
 		browserTest(browsers[i])

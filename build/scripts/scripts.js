@@ -1,4 +1,4 @@
-steal('steal/build').then(function( steal ) {
+steal('steal/build', 'steal/parse').then(function( steal ) {
 
 	/**
 	 * Builds JavaScripts
@@ -13,11 +13,8 @@ steal('steal/build').then(function( steal ) {
 	 */
 	var scripts = (steal.build.builders.scripts = function( opener, options, dependencies ) {
 		steal.print("\nBUILDING SCRIPTS --------------- ");
+		var start = new Date();
 		
-		if(options.all !== false){
-			options.all = true;
-		}
-
 		// get the compressor
 		var compressor = scripts.compressors[options.compressor || "localClosure"](),
 
@@ -30,20 +27,29 @@ steal('steal/build').then(function( steal ) {
 				src : []
 			}, 
 			
-			// there's no scripts that shouldn't be compressed
-			canCompressTogether = options.all;
+			// concatenated scripts waiting to be compressed
+			currentCollection = [],
+			 
+			// keep track of lines for error reporting
+			currentLineMap = [],
+			
+			compressCollection = function(currentCollection, currentLineMap){
+				// grab the previous currentCollection and compress it, then add it to currentPackage
+				if (currentCollection.length) {
+					var compressed = currentCollection.join("\n");
+					// clean out any remove-start style comments
+					compressed = scripts.clean(compressed);
+					compressed = compressor(compressed, true, currentLineMap);
+					currentCollection = [];
+					return compressed;
+				}
+			};
 
 		// compress all scripts by default
 		if ( true/*options.all*/ ) {
 			packages['production.js'] = currentPackage;
 		}
 		
-		// do a first pass to determine if there's anything we shouldn't compress
-		opener.each('js', function( stl, text, i ) {
-			if ( stl.compress === false ) {
-				canCompressTogether = false;
-			}
-		});
 		// if nothing can't be compressed, compress whole app in one step
 
 		// for each steal we find
@@ -78,18 +84,34 @@ steal('steal/build').then(function( steal ) {
 				}
 				currentPackage = packages[pack];
 			}
-
-			// clean out any remove-start style comments
-			text = scripts.clean(text);
-
+			
 			// if we should compress the script, compress it
-			if ( !canCompressTogether && (stl.compress !== false || options.all) ) {
-				text = compressor(text, true);
+			if ( stl.compress !== false || options.all ) {
+				currentPackage.scripts.push("'"+stl.rootSrc+"'")
+				// put the result in the package
+				currentCollection.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
+				if(options.compressor === "localClosure"){ // only closure needs lineNumbers
+					currentLineMap.push({
+						src: stl.rootSrc,
+						lines: text.match(/\n/g).length+2
+					})
+				}
+			} 
+			else { // compress is false, don't compress it
+				var compressed = compressCollection(currentCollection, currentLineMap);
+				currentCollection = [];
+				currentLineMap = [];
+				currentPackage.src.push(compressed);
+			
+				// add the uncompressed script to the package
+				currentPackage.scripts.push("'"+stl.rootSrc+"'");
+				currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
 			}
-			currentPackage.scripts.push("'"+stl.rootSrc+"'")
-			// put the result in the package
-			currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
 		});
+		
+		var compressed = compressCollection(currentCollection, currentLineMap);
+		currentCollection = [];
+		currentPackage.src.push(compressed);
 
 		steal.print("");
 
@@ -103,20 +125,76 @@ steal('steal/build').then(function( steal ) {
 					dependencyStr += "steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']});\n";
 				}
 				var compressed = packages[p].src.join("\n");
-				if(canCompressTogether){
-					compressed = compressor(compressed, true);
-				}
 				//save them
 				new steal.File(options.to + p).save(loading+dependencyStr+compressed);
-				steal.print("SCRIPT BUNDLE > " + options.to + p + 
-					(canCompressTogether? "(compressed in single step)": ""));
+				var end = new Date(),
+					time = (end-start);
+				steal.print(time+' MS')
+				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
 	});
 	
+	/**
+	 * Create package's content.
+	 * 
+	 * @param {Array} files like:
+	 * 
+	 *     [{rootSrc: "jquery/jquery.js", content: "var a;"}]
+	 * 
+	 * @param {Object} dependencies like:
+	 * 
+	 *      {"package/package.js": ['jquery/jquery.js']}
+	 */
+	scripts.makePackage = function(files, dependencies){
+		var loadingCalls = [];
+		files.forEach(function(file){
+			loadingCalls.push(file.rootSrc)
+		});
+		
+		//create the dependencies ...
+		var dependencyCalls = [];
+		for (var key in dependencies){
+			dependencyCalls.push( 
+				"steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']})"
+			)
+		}
+		
+		// make 'loading'
+		
+		
+		//write it ...
+		var code = ["steal.loading('"+loadingCalls.join("','")+"')"];
+		
+		code.push.apply(code, dependencyCalls);
+		
+		files.forEach(function(file){
+			code.push( file.content, "steal.loaded('"+file.rootSrc+"')" );
+		})
+		return code.join(";\n")+"\n"
+	}
+	
 	// removes  dev comments from text
 	scripts.clean = function( text ) {
-		return String(java.lang.String(text).replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", "").replaceAll("steal[\n\s\r]*\.[\n\s\r]*dev[\n\s\r]*\.[\n\s\r]*(\\w+)[\n\s\r]*\\([^\\)]*\\)", ""));
+		var parsedTxt = String(java.lang.String(text)
+			.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", "")),
+			positions = [],
+		   	p = steal.parse(parsedTxt),
+		    tokens, i, position;
+
+		while (tokens = p.until(["steal", ".", "dev", ".", "log", "("], ["steal", ".", "dev", ".", "warn", "("])) {
+			var end = p.partner("(");
+			positions.push({
+				start: tokens[0].from,
+				end: end.to
+			})
+		}
+		// go through in reverse order
+		for (i = positions.length - 1; i >= 0; i--) {
+			position = positions[i];
+			parsedTxt = parsedTxt.substring(0, position.start) + parsedTxt.substring(position.end)
+		}
+		return parsedTxt;
 	};
 
 	//various compressors
@@ -189,7 +267,7 @@ steal('steal/build').then(function( steal ) {
 		localClosure: function() {
 			//was unable to use SS import method, so create a temp file
 			steal.print("steal.compress - Using Google Closure app");
-			return function( src, quiet ) {
+			return function( src, quiet, currentLineMap ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					filename = "tmp" + rnd + ".js",
 					tmpFile = new steal.File(filename);
@@ -197,41 +275,48 @@ steal('steal/build').then(function( steal ) {
 				tmpFile.save(src);
 
 				var outBaos = new java.io.ByteArrayOutputStream(),
-					output = new java.io.PrintStream(outBaos);
+					output = new java.io.PrintStream(outBaos),
+					options = {
+						err: '',
+						output: output
+					};
 				if ( quiet ) {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--warning_level", "QUIET", "--js", filename, {
-						output: output
-					});
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
+						"--warning_level", "QUIET", "--js", filename, options);
 				} else {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", filename, {
-						output: output
-					});
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
+						"--js", filename, options);
 				}
-				tmpFile.remove();
-
-				return outBaos.toString();
-			};
-		},
-		localClosure: function() {
-			//was unable to use SS import method, so create a temp file
-			steal.print("steal.compress - Using Google Closure app");
-			return function( src, quiet ) {
-				var rnd = Math.floor(Math.random() * 1000000 + 1),
-					filename = "tmp" + rnd + ".js",
-					tmpFile = new steal.File(filename);
-
-				tmpFile.save(src);
-
-				var outBaos = new java.io.ByteArrayOutputStream(),
-					output = new java.io.PrintStream(outBaos);
-				if ( quiet ) {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--warning_level", "QUIET", "--js", filename, {
-						output: output
-					});
-				} else {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", filename, {
-						output: output
-					});
+				// print(options.err);
+				// if there's an error, go through the lines and find the right location
+				if( /ERROR/.test(options.err) ){
+					if (!currentLineMap) {
+						print(options.error)
+					}
+					else {
+					
+						var errMatch;
+						while (errMatch = /\:(\d+)\:\sERROR/g.exec(options.err)) {
+							var lineNbr = parseInt(errMatch[1], 10), found = false, item, lineCount = 0, i = 0, realLine;
+							while (!found) {
+								item = currentLineMap[i];
+								lineCount += item.lines;
+								if (lineCount >= lineNbr) {
+									found = true;
+									realLine = lineNbr - (lineCount - item.lines);
+								}
+								i++;
+							}
+							
+							print('ERROR in ' + item.src + ' at line ' + realLine + ':\n');
+							var text = readFile(item.src), split = text.split(/\n/), start = realLine - 2, end = realLine + 2;
+							if (start < 0) 
+								start = 0;
+							if (end > split.length - 1) 
+								end = split.length - 1;
+							print(split.slice(start, end).join('\n') + '\n')
+						}
+					}
 				}
 				tmpFile.remove();
 

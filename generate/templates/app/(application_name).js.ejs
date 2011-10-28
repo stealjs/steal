@@ -1,7 +1,4 @@
-steal( 'resources/example' )				// Loads 'resources/example.js'
-	.then( '<%= application_name %>.css' )			// Loads '<%= application_name %>.css'
-	.then(
-		'steal/less',
-		'steal/coffee' )					// Loads 'steal/less/less.js' and 'steal/coffee/coffee.js'
-	.then('resources/example.coffee',	// Loads 'resources/example.coffee'
-		'resources/example.less');		// Loads 'resources/example.less'
+steal( './<%= application_name %>.css',       
+       '<%= path %>/plugin',
+	   'steal/coffee')
+.then( './<%= application_name %>.coffee' );

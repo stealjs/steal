@@ -1,3 +1,6 @@
+if(steal.options.browser){
+	steal('steal/browser/test/trigger.js');
+};
 steal('jquery', function(){
 	$(document).ready(function(){
 		MyCo = {};

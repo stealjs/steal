@@ -93,7 +93,7 @@
 		 */
 		joinFrom: function( url, expand ) {
 			if ( this.isDomainAbsolute() ) {
-				var u = new File(url);
+				var u = new steal.File(url);
 				if ( this.domain() && this.domain() == u.domain() ) return this.afterDomain();
 				else if ( this.domain() == u.domain() ) { // we are from a file
 					return this.toReferenceFromSameDomain(url);
@@ -101,7 +101,7 @@
 			} else if ( url == steal.pageDir && !expand ) {
 				return this.path;
 			} else if ( this.isLocalAbsolute() ) {
-				var u = new File(url);
+				var u = new steal.File(url);
 				if (!u.domain() ) return this.path;
 				return u.protocol() + "//" + u.domain() + this.path;
 			}
@@ -237,6 +237,10 @@
 		remove: function() {
 			var file = new java.io.File(this.path);
 			file["delete"]();
+		},
+		isFile: function() {
+			var file = new java.io.File(this.path);
+			return file.isFile();
 		},
 		removeDir: function() {
 			var me = new java.io.File(this.path)
