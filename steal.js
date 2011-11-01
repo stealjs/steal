@@ -1068,7 +1068,13 @@
 			}
 		},
 		trigger : function(event, arg){
-			each(events[event] || [], function(i,f){
+			var arr = events[event] || [];
+				copy = [];
+			// array items might be removed during each iteration (with unbind), so we iterate over a copy
+			for(var i =0, len = arr.length; i <len; i++){
+				copy[i] = arr[i];
+			}
+			each(copy, function(i,f){
 				f(arg);
 			})
 		},
