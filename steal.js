@@ -278,6 +278,16 @@
 	 *
 	 * ## Other Info
 	 * 
+	 * ### Exclude Code Blocks From Production
+	 *
+	 * To exclude code blocks from being included in 
+	 * production builds, add the following around
+	 * the code blocks.
+	 *
+	 *     //@steal-remove-start
+	 *         code to be removed at build
+	 *     //@steal-remove-end
+	 * 
 	 * ### Lookup Paths
 	 * 
 	 * By default steal loads resources relative 
@@ -1058,7 +1068,13 @@
 			}
 		},
 		trigger : function(event, arg){
-			each(events[event] || [], function(i,f){
+			var arr = events[event] || [];
+				copy = [];
+			// array items might be removed during each iteration (with unbind), so we iterate over a copy
+			for(var i =0, len = arr.length; i <len; i++){
+				copy[i] = arr[i];
+			}
+			each(copy, function(i,f){
 				f(arg);
 			})
 		},
@@ -1575,7 +1591,7 @@ request = function(options, success, error){
 	// =============================== ERROR HANDLING ===============================
 	
 	steal.p.load = after(steal.p.load, function(stel){
-		if(win.document && !this.completed && !this.completeTimeout && 
+		if(win.document && !this.completed && !this.completeTimeout && !steal.isRhino &&
 			(this.options.protocol == "file:" || !support.error)){
 			var self = this;
 			this.completeTimeout = setTimeout(function(){
@@ -1897,6 +1913,11 @@ if (support.interactive) {
 	// This is used for packaged scripts.  As the packaged script executes, we grab the 
 	// dependencies that has come so far and assign them to the loaded script
 	steal.loaded = before(steal.loaded, function(name){
+		// This next line is used for steals[] not being set correctly in IE.
+		// The use case breaking is placing "production.css" within the steal.loaded property manually, causing:
+		//   steals["production.css"].options.src -> where steals["production.css"] is undefined.
+		if(!steals[name]) { return; }
+
 		var src = steals[name].options.src,
 			interactive = getCachedInteractiveScript(),
 			interactiveSrc = interactive.src;

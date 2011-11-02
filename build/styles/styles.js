@@ -61,7 +61,7 @@ steal('steal/build').then(function( steal ) {
 				var imagePath = steal.File(part).joinFrom(cssLoc),
 					fin = steal.File(imagePath).toReferenceFromSameDomain(prodLocation);
 				//print("  -> "+imagePath);
-				steal.print("  " + part + " > " + fin);
+				// steal.print("  " + part + " > " + fin);
 				return "url(" + fin + ")";
 			});
 		return newCSss;
@@ -80,4 +80,4 @@ steal('steal/build').then(function( steal ) {
         var e = Math.floor(Math.log(bytes)/Math.log(1024));
         return (bytes/Math.pow(1024,Math.floor(e))).toFixed(1)+' '+s[e];
     };
-},'steal/build/styles/cssmin.js');
+},'steal/build/styles/cssmin.js','steal/build/styles/fingerprint.js');

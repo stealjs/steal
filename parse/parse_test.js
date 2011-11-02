@@ -9,6 +9,9 @@ steal('steal/test','steal/parse').then( function( s ) {
 	s.test.module("steal/parse")
 	
 	s.test.test("parse", function(t){
+		var js = readFile('steal/parse/test/trailslash.js');
+		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
+		
 		var js = readFile('jquery/class/class.js');
 		var tokens = js.tokens('=<>!+-*&|/%^', '=<>&|');
 		
