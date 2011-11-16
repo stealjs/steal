@@ -55,7 +55,7 @@ String.prototype.tokens = function (prefix, suffix) {
 				return "Type: "+type+", value: "+value+", from: "+from+", to: "+i;
 			},
 			error : function(message){
-				throw "steal/parse/token.js "+message + " with "+this.value+".\n"+self.substr(this.from-20, 70)
+				throw "steal/parse/tokens.js "+message + " with "+this.value+".\n"+self.substr(this.from-20, 70)
 			}
         };
 		
@@ -105,7 +105,7 @@ String.prototype.tokens = function (prefix, suffix) {
 
 // name.
 
-        } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+        } else if (c === '_' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
             str = c;
             i += 1;
             for (;;) {
@@ -182,7 +182,6 @@ String.prototype.tokens = function (prefix, suffix) {
                 str += c;
                 for (;;) {
                     c = this.charAt(i);
-					// load('steal/rhino/rhino.js'); steal('steal/parse'); var f = readFile('mj/core/resources/uuid.js'); steal.parse(f);
                     if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f' ))) {
                         break;
                     }
