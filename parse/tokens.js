@@ -176,6 +176,21 @@ String.prototype.tokens = function (prefix, suffix) {
                     c = this.charAt(i);
                 } while (c >= '0' && c <= '9');
             }
+// if its an x, its a hex number
+			if( c == 'x' ) {
+                i += 1;
+                str += c;
+                for (;;) {
+                    c = this.charAt(i);
+					// load('steal/rhino/rhino.js'); steal('steal/parse'); var f = readFile('mj/core/resources/uuid.js'); steal.parse(f);
+                    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f' ))) {
+                        break;
+                    }
+                    i += 1;
+                    str += c;
+                }
+			}
+
 
 // Make sure the next character is not a letter.
 
