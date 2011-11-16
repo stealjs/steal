@@ -182,7 +182,7 @@ String.prototype.tokens = function (prefix, suffix) {
                 str += c;
                 for (;;) {
                     c = this.charAt(i);
-                    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f' ))) {
+                    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f' ) || (c >= 'A' && c <= 'F' ))) {
                         break;
                     }
                     i += 1;
