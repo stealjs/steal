@@ -42,7 +42,7 @@ SET ARGS=%ARGS:,''=%
 SET ARGS=%ARGS: =%
 SET ARGS=%ARGS%]
 set ARGS=%ARGS:\=/%
-java -Xmx228m -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
+java -Xmx512m -Xss1024k -cp %CP% org.mozilla.javascript.tools.shell.Main -opt -1 -e _args=%ARGS% -e load('%FILENAME%')
 
 if "%ERRORLEV%"=="1" (
 	if errorlevel 1 exit 1

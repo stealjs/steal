@@ -2,6 +2,7 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 	var page,
 		expectedId = 1;
 	steal.browser.phantomjs = function(options){
+		this.kill();
 		steal.browser.call(this, options, 'phantomjs');
 		this._startServer();
 	}
@@ -52,13 +53,11 @@ steal('steal/browser', 'steal/browser/utils/rhinoServer.js', function(){
 			this.browserOpen = false;
 		},
 		kill: function(){
-			spawn(function(){
-				if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
-					runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
-				} else { // mac
-					runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9 &> /dev/null")
-				}
-			})
+			if (java.lang.System.getProperty("os.name").indexOf("Windows") != -1) {
+				runCommand("cmd", "/C", 'taskkill /f /fi "Imagename eq phantomjs.exe" > NUL')
+			} else { // mac
+				runCommand("sh", "-c", "ps aux | awk '/phantomjs\\/launcher/ {print$2}' | xargs kill -9 &> /dev/null")
+			}
 		},
 		_processData: function(data){
 			var a = decodeURIComponent(data);

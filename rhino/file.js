@@ -201,6 +201,9 @@
 			copy(me, you)
 			return this;
 		},
+		moveTo: function(dest){
+			return new java.io.File(this.path).renameTo(new java.io.File(dest));
+		},
 		setExecutable: function(){
 			var me = new java.io.File(this.path)
 			me.setExecutable(true);

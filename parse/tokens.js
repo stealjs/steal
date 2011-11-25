@@ -55,7 +55,7 @@ String.prototype.tokens = function (prefix, suffix) {
 				return "Type: "+type+", value: "+value+", from: "+from+", to: "+i;
 			},
 			error : function(message){
-				throw "steal/parse/token.js "+message + " with "+this.value+".\n"+self.substr(this.from-20, 70)
+				throw "steal/parse/tokens.js "+message + " with "+this.value+".\n"+self.substr(this.from-20, 70)
 			}
         };
 		
@@ -105,7 +105,7 @@ String.prototype.tokens = function (prefix, suffix) {
 
 // name.
 
-        } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+        } else if (c === '_' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
             str = c;
             i += 1;
             for (;;) {
@@ -176,6 +176,20 @@ String.prototype.tokens = function (prefix, suffix) {
                     c = this.charAt(i);
                 } while (c >= '0' && c <= '9');
             }
+// if its an x, its a hex number
+			if( c == 'x' ) {
+                i += 1;
+                str += c;
+                for (;;) {
+                    c = this.charAt(i);
+                    if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f' ) || (c >= 'A' && c <= 'F' ))) {
+                        break;
+                    }
+                    i += 1;
+                    str += c;
+                }
+			}
+
 
 // Make sure the next character is not a letter.
 
