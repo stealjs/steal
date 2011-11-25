@@ -6,7 +6,6 @@
 		STR_ONLOAD = "onload",
 		STR_ONERROR = "onerror",
 		STR_ONREADYSTATECHANGE = "onreadystatechange",
-		STR_REMOVE_CHILD = "removeChild",
 		STR_CREATE_ELEMENT = 'createElement',
 		STR_GET_BY_TAG = 'getElementsByTagName',
 		
@@ -67,7 +66,8 @@
 			})(),
 			// If scripts support interactive ready state.
 			// This is set later.
-			interactive: false
+			interactive: false,
+			attachEvent : doc && scriptTag().attachEvent
 		},
 		// a startup function that will be called when steal is ready
 		startup = function(){},
@@ -439,6 +439,11 @@
 		}
 	};
 	
+	var fullurl = /^([A-Za-z]+)?(:?\/\/)([0-9.\-A-Za-z]*)(?::(\d+))?(.*)$/;
+	// path, query, fragment
+	var parse_leftovers = /([^?#]*)?(?:\?([^#]*))?(?:#(.*))?$/;
+	
+
 	extend(File.prototype,
 	/**
 	 * @prototype
@@ -642,6 +647,12 @@
 		id = 0,
 		steals = {};
 
+	// this is for methods on a 'steal instance'.  A file can be in one of a few states:
+	// created - the steal instance is created, but we haven't started loading it yet
+	//           this happens when thens are used
+	// loading - (loading=true) By calling load, this will tell steal to load a file
+	// loaded - (isLoaded=true) The file has been run, but its dependency files have been completed
+	// complete - all of this files dependencies have loaded and completed.
 	steal.p = {
 		// adds a new steal and throws an error if the script doesn't load
 		// this also checks the steals map
@@ -666,7 +677,9 @@
 		},
 		init: function( options ) {
 			this.dependencies = [];
+			// id for debugging
 			this.id = (++id);
+			
 			// if we have no options, we are the global init ... set ourselves up ...
 			if(!options){ //global init cur ...
 				this.options = {};
@@ -718,38 +731,50 @@
 		 */
 
 		loaded: function(script){
-			var myqueue, stel, 
+			var myqueue, 
+				stel, 
 				src = (script && script.src) || this.options.src,
 				rootSrc = this.options.rootSrc;
-			//check if jQuery has been loaded
-			//mark yourself as current
+			
+			//set yourself as the current file
 			File.cur(rootSrc);
 			
+			// mark yourself as 'loaded'.  
 			this.isLoaded = true;
 			
-			// only works in IE
+			// If we are IE, get the queue from interactives
 			// TODO move this out of this function
 			if (support.interactive && src) {
 				myqueue = interactives[src];
 			}
+			// is there a case in IE where, this makes sense?
+			// in other browsers, the queue of items to load is
+			// what is in pending
 			if(!myqueue){
 				myqueue = pending.slice(0);
 				pending = [];
 			}
 			
-			// if we have nothing, mark us as complete
+			// if we have nothing, mark us as complete (resolve if deferred)
 			if(!myqueue.length){
 				this.complete();
 				return;
 			}
 			
-			// now we have to figure out how to wire up our steals
+			// now we have to figure out how to wire up our pending steals
 			var self = this,
 				set = [],
-				joiner, // the current 
+				// the current
+				joiner,  
 				initial = [],
+				
 				isProduction = steal.options.env == 'production',
+				
 				files = [],
+				
+				// a helper that basically does a join
+				// when everything in arr's func method is called,
+				// call func2 on obj
 				whenEach = function(arr, func, obj, func2){
 					var big = [obj, func2];
 					each(arr, function(i, item){
@@ -757,6 +782,8 @@
 					});
 					when.apply(steal, big);
 				},
+				// a helper that does the oposite of a join.  When
+				// obj's func method is called, call func2 on all items.
 				whenThe = function(obj, func, items, func2){
 					each(items, function(i, item){
 						when(obj, func, item, func2)
@@ -765,8 +792,10 @@
 			
 			
 			//now go through what you stole and hook everything up
+			//BUT, we go through backwards
 			each(myqueue.reverse(), function(i, item){
-				//check for ignored before even making ...
+				
+				//in production, ignore ignored items (like steal/dev
 				if(isProduction && item.ignore){
 					return;
 				}
@@ -781,15 +810,17 @@
 				if(stel.waits === false){ // file
 					// on the current 
 					files.push(stel);
+				
 				}else{ // function
 					
 					// essentially have to bind current files to call previous joiner's load
 					// and to wait for current stel's complete
 					
-					if(!joiner){
+					if(!joiner){ // if no previous joiner, then we are at the start of a file
 						
-						// when they are complete, complete me
-						whenEach(files.length ? files.concat(stel) : [stel], "complete", self, "complete");
+						// when they are complete, complete the file
+						whenEach( files.concat(stel), "complete", self, "complete");
+						
 						// if there was a function then files, then end, function loads all files
 						if(files.length){
 							whenThe(stel,"complete", files ,"load")
@@ -797,29 +828,29 @@
 						
 					} else { //   function,  file1, file2, file3, joiner function
 						
-						whenEach(files.length ? files.concat(stel) : [stel], "complete", joiner, "load");
+						whenEach(files.concat(stel) , "complete", joiner, "load");
 						
 						// make stel complete load files
 						whenThe(stel,"complete", files.length ? files : [joiner] ,"load")
 						
-						
-						
 					}
+					// the joiner is the previous thing
 					joiner = stel;
 					files = [];
 					
 				}
 			});
 			
+			// now we should be left with the starting files
 			if(files.length){
-				//we have initial files
+				// we have initial files
 				// if there is a joiner, we need to load it when the initial files are complete
 				if(joiner){
 					whenEach(files, "complete", joiner, "load");
 				} else {
 					whenEach(files, "complete", self, "complete");
 				}
-				// reverse it
+				// reverse it back and load each initial file
 				each(files.reverse(), function(){
 					this.load();
 				});
@@ -827,25 +858,26 @@
 				// we have inital function
 				joiner.load()
 			} else {
+				// we had nothing
 				self.complete();
 			}
 
-			
 		},
 		/**
 		 * Loads this steal
 		 */
 		load: function(returnScript) {
+			// if we are already loading / loaded
 			if(this.loading || this.isLoaded){
 				return;
 			}
 			this.loading = true;
 			var self = this;
 			// get yourself
-			steal.require(this.options,this.orig, function load_calling_loaded(script){
+			steal.require(this.options, function load_calling_loaded(script){
 				self.loaded(script);
 			}, function(error, src){
-				clearTimeout(self.completeTimeout)
+				win.clearTimeout && win.clearTimeout(self.completeTimeout)
 				throw "steal.js : "+self.options.src+" not completed"
 			});
 			
@@ -1079,6 +1111,7 @@
 			// create the steal, mark it as loading, then as loaded
 			var stel = steal.p.make( name );
 			stel.loading = true;
+			convert(stel, "complete")
 			stel.loaded()
 			return steal;
 		}
@@ -1214,11 +1247,10 @@
 	 *   - Finally the "js" type converter is called, which inserts the JavaScript in the page as a script tag that is executed. 
 	 * 
 	 * @param {Object} options the steal options for this file, including path information
-	 * @param {Object} original the original argument passed to steal, which might be a path or a function
 	 * @param {Function} success a method to call when the file is converted and processed successfully
 	 * @param {Function} error a method called if the conversion fails or the file doesn't exist
 	 */
-	require = function(options, original, success, error){
+	require = function(options, success, error){
 		// get the type
 		var type = types[options.type],
 			converters;
@@ -1230,16 +1262,16 @@
 		} else  {
 			converters = [options.type]
 		}
-		require(options, original, converters, success, error)
+		require(options, converters, success, error)
 	};
-	function require(options, original, converters, success, error){
+	function require(options, converters, success, error){
 		
 		var type = types[converters.shift()];
 		
-		type.require(options, original, function require_continue_check(){
+		type.require(options, function require_continue_check(){
 			// if we have more types to convert
 			if(converters.length){
-				require(options, original, converters, success, error)
+				require(options, converters, success, error)
 			} else { // otherwise this is the final
 				success.apply(this, arguments);
 			}
@@ -1257,27 +1289,32 @@ var cleanUp = function(script) {
 			= script[STR_ONERROR]
 			= null;
 			
-		head()[ STR_REMOVE_CHILD ]( script );
+		head().removeChild( script );
 	},
 	// the last inserted script, needed for IE
 	lastInserted,
 	// if the state is done
 	stateCheck = /loaded|complete/;
-steal.type("js", function(options,original, success, error){
-	var script = scriptTag(), deps;
+steal.type("js", function(options, success, error){
+	// create a script tag
+	var script = scriptTag(), 
+		deps;
+	// if we have text, just set and insert text
 	if (options.text) {
 		// insert
 		script.text = options.text;
 		
 	}
 	else {
+		
 		var callback = function(evt){
-				if (!script.readyState || stateCheck.test(script.readyState)) {
-					cleanUp(script);
-					success(script);
-				}
+			if (!script.readyState || stateCheck.test(script.readyState)) {
+				cleanUp(script);
+				success(script);
 			}
-		if (script.attachEvent) {
+		}
+		// listen to loaded
+		if (support.attachEvent) {
 			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
 		} else {
 			script[STR_ONLOAD] = callback;
@@ -1285,7 +1322,7 @@ steal.type("js", function(options,original, success, error){
 		
 		// error handling doesn't work on firefox on the filesystem
 		if (support.error && error && options.protocol !== "file:") {
-			if(script.attachEvent){
+			if(support.attachEvent){
 				script.attachEvent(STR_ONERROR, error);
 			} else {
 				script[ STR_ONERROR ] = error;
@@ -1295,20 +1332,21 @@ steal.type("js", function(options,original, success, error){
 		script.onSuccess = success;
 	}
 		
-	
+	// insert the script
 	lastInserted = script;
 	head().insertBefore(script, head().firstChild);
 
+	// if text, just call success right away, and clean up
 	if (options.text) {
 		success();
 		cleanUp(script);
 	}
 });
 
-steal.type("fn", function(options,original, success, error){
+steal.type("fn", function(options, success, error){
 	success(options.fn());
 });
-steal.type("text", function(options, original, success, error){
+steal.type("text", function(options, success, error){
 	steal.request(options, function(text){
 		options.text = text;
 		success(text);
@@ -1320,7 +1358,7 @@ var cssCount = 0,
 	lastSheet,
 	lastSheetOptions;
 
-steal.type("css", function css_type(options, original, success, error){
+steal.type("css", function css_type(options, success, error){
 	if(options.text){ // less
 		var css  = doc[STR_CREATE_ELEMENT]('style');
 		css.type = 'text/css';
@@ -1726,14 +1764,14 @@ request = function(options, success, error){
 			}
 		}
 	}
-	var name = function(stel){
+	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
 		return stel.options ? stel.options.rootSrc : "CONTAINER"
 	}
 
-	/*
+	
 	steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id)
 	})
