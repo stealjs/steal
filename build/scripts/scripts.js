@@ -138,7 +138,8 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				steal.print("SCRIPT BUNDLE > " + options.to + p);
 			}
 		}
-	});
+	}),
+		stealDevTest = /steal\.dev/;
 	
 	/**
 	 * Create package's content.
@@ -185,21 +186,25 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 			.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", ""));
 		
 		// the next part is slow, try to skip if possible
-		// if theres not a standalone "log" or "warn", skip
+		// if theres not a standalone steal.dev, skip
 
-		var logOrWarnMatch = parsedTxt.match(/[^\w]log[^\w]|[^\w]warn[^\w]/g),
-			nbrLogsOrWarns = logOrWarnMatch? logOrWarnMatch.length: 0,
-			consoleLogsMatch = parsedTxt.match(/console\.log/g),
-			nbrConsoleLogs = consoleLogsMatch? consoleLogsMatch.length: 0,
-			// more than one log or warn, not equal to number of instances
-			hasLogsOrWarn = (nbrLogsOrWarns > 0) && nbrConsoleLogs != nbrLogsOrWarns;
-		if(!hasLogsOrWarn ) {
+		if(! stealDevTest.test(parsedTxt) ) {
 			return parsedTxt;
 		}	
 		
 		var positions = [],
-		   	p = steal.parse(parsedTxt),
-		    tokens, i, position;
+		   	p,
+		    tokens, 
+			i, 
+			position;
+
+		try{
+			p = steal.parse(parsedTxt);
+		} catch(e){
+			print("Parsing problem");
+			print(e);
+			return parsedTxt;
+		}
 
 		while (tokens = p.until(["steal", ".", "dev", ".", "log", "("], ["steal", ".", "dev", ".", "warn", "("])) {
 			var end = p.partner("(");
