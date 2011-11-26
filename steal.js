@@ -1122,12 +1122,17 @@
 				stel.loading = true;
 			});
 		},
+		// a dummy function to add things to after the stel is created, but before 
+		// loaded is called
+		preloaded : function(){},
 		// called when a script has loaded via production
 		loaded: function(name){
 			// create the steal, mark it as loading, then as loaded
 			var stel = steal.p.make( name );
 			stel.loading = true;
-			convert(stel, "complete")
+			convert(stel, "complete");
+			
+			steal.preloaded(stel);
 			stel.loaded()
 			return steal;
 		}
@@ -1914,6 +1919,7 @@ var interactiveScript,
 		}
 		
 		if(script = getInteractiveScript()){
+			interactiveScript = script;
 			return script;
 		}
 		
@@ -1937,28 +1943,28 @@ if (support.interactive) {
 		if (!interactive || !interactive.src || /steal\.(production\.)*js/.test(interactive.src)) {
 			return;
 		}
+		// get the source of the script
 		var src = interactive.src;
+		// create an array to hold all steal calls for this script
 		if (!interactives[src]) {
 			interactives[src] = []
 		}
+		// add to the list of steals for this script tag
 		if (src) {
 			interactives[src].push.apply(interactives[src], pending);
 			pending = [];
-			interactiveScript = interactive;
 		}
 	})
 	
 	// This is used for packaged scripts.  As the packaged script executes, we grab the 
-	// dependencies that has come so far and assign them to the loaded script
-	steal.loaded = before(steal.loaded, function(name){
-		// This next line is used for steals[] not being set correctly in IE.
-		// The use case breaking is placing "production.css" within the steal.loaded property manually, causing:
-		//   steals["production.css"].options.src -> where steals["production.css"] is undefined.
-		if(!steals[name]) { return; }
-
-		var src = steals[name].options.src,
-			interactive = getCachedInteractiveScript(),
-			interactiveSrc = interactive.src;
+	// dependencies that have come so far and assign them to the loaded script
+	steal.preloaded = before(steal.preloaded, function(stel){
+		// get the src name
+		var src = stel.options.src,
+			// and the src of the current interactive script
+			interactiveSrc = getCachedInteractiveScript().src;
+		
+		
 		interactives[src] = interactives[interactiveSrc];
 		interactives[interactiveSrc] = null;
 	});
