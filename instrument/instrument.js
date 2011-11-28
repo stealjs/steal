@@ -28,7 +28,7 @@ var shouldIgnore = function(file){
 	return false;
 }
 var origJSConverter = steal.types.js.require;
-steal.type("js", function(options, original, success, error){
+steal.type("js", function(options, success, error){
 	var files = getCoverageObject(),
 		fileName = options.rootSrc,
 		instrumentation = files[fileName],
