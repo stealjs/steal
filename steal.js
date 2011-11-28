@@ -1110,7 +1110,7 @@
 	
 	// =============================== TYPE SYSTEM ===============================
 	
-	var types= {};
+	var types = steal.types = {};
 	
 	
 	steal.
@@ -1986,7 +1986,8 @@ if (support.interactive) {
 		};
 	
 	startup = after(startup, function(){
-			var options = steal.options;
+			var options = steal.options, 
+				startFiles = [];
 			extend(options, steal.getScriptOptions());
 			// a steal that existed before this steal
 			if(typeof oldsteal == 'object'){
@@ -2027,6 +2028,26 @@ if (support.interactive) {
 			each(options.loaded || [], function(i, stel){
 				steal.loaded(stel)
 			})
+			
+			if(typeof options.startFiles === "string"){
+				startFiles.push(options.startFiles);
+			}
+			else if(options.startFiles && options.startFiles.length){
+				startFiles = options.startFiles;
+			}
+			// if instrument is set, or my parent has it set (for apps with frames)
+			if ( options.instrument || (typeof top === 'object' && top.opener && top.opener.steal && top.opener.steal.options.instrument) ) {
+				startFiles.unshift({
+					src: "steal/instrument",
+					waits: true
+				});
+			}
+			var steals = [];
+			// need to load startFiles in dev or production mode (to run funcunit in production)
+			if( startFiles.length ){
+				steal.options.startFiles = startFiles;
+				steals.push.apply(steals, startFiles)
+			}
 			//we only load things with force = true
 			if (options.env == 'production' && options.loadProduction) {
 				if (options.production) {
@@ -2038,27 +2059,19 @@ if (support.interactive) {
 				}
 			}
 			else {
-				var steals = [];
 				if (options.loadDev !== false) {
 					steals.push({
 						src: 'steal/dev/dev.js',
 						ignore: true
 					});
 				}
-				if( options.startFiles ){
-					if(typeof options.startFiles === "string"){
-						options.startFiles = [options.startFiles];
-					}
-					steals.push.apply(steals, options.startFiles)
-				}
 				
 				if (options.startFile) {
 					steals.push(options.startFile)
 				}
-				
-				if (steals.length) {
-					steal.apply(null, steals);
-				}
+			}
+			if (steals.length) {
+				steal.apply(null, steals);
 			}
 	});
 	
