@@ -38,7 +38,7 @@ steal({
 	 * @return {steal} returns the steal function.
 	 */
 	
-	steal.type("coffee js", function(options, original, success, error){
+	steal.type("coffee js", function(options, success, error){
 		options.text = CoffeeScript.compile(options.text);
 		success();
 	});

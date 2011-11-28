@@ -39,7 +39,7 @@ steal({src: "./less_engine.js",ignore: true},function(){
 	 * 
 	 */
 	
-	steal.type("less css", function(options, original, success, error){
+	steal.type("less css", function(options, success, error){
 		var pathParts = options.src.split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 		new (less.Parser)({

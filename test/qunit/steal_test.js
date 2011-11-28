@@ -128,14 +128,18 @@ test("steal one file with different cur", function(){
 		equals(REQUIRED,"steal", "loaded the file")
 	})
 });
+
+test("parts", function(){
 	
-test("domain", function() {
+})
+
+test("file domain", function() {
 	equals(null, new steal.File("file://C:/Development").domain(), "problems from file")
 	equals('something.com', new steal.File('http://something.com/asfdkl;a').domain(), "something.com is the correct http domain.")
 	equals('127.0.0.1:3006', new steal.File('https://127.0.0.1:3006/asdf').domain(), "something.com is the correct https domain.")
 })
 
-test("joinFrom", function() {
+test("file joinFrom", function() {
 	var result;
 	equals(
 	steal.File('a/b.c').joinFrom('/d/e'), "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
@@ -386,7 +390,7 @@ test("File.ext", function(){
 		steal.require({
 			src : src('steal/test/files/require.js'),
 			type: "js"
-		},{}, function(){
+		}, function(){
 			start();
 			ok(REQUIRED, "loaded the file")
 		})
@@ -397,7 +401,7 @@ test("File.ext", function(){
 		steal.require({
 			src : src('steal/test/files/require.css'),
 			type: "css"
-		},{}, function(){
+		}, function(){
 			setTimeout(function(){
 				start();
 				ok( bId('qunit-header').clientHeight > 65, "Client height changed to "+bId('qunit-header').clientHeight );
@@ -410,7 +414,7 @@ test("File.ext", function(){
 	test("require weirdType", function(){
 		stop();
 		
-		steal.type("foo js", function(options, original, success, error){
+		steal.type("foo js", function(options, success, error){
 			var parts = options.text.split(" ")
 			options.text = parts[0]+"='"+parts[1]+"'";
 			success();
@@ -419,7 +423,7 @@ test("File.ext", function(){
 		steal.require({
 			src : src('steal/test/files/require.foo'),
 			type: "foo"
-		},{}, function(){
+		}, function(){
 			start();
 			equals(REQUIRED,"FOO", "loaded the file")
 			
@@ -434,7 +438,7 @@ test("File.ext", function(){
 		
 		steal.rootUrl("../");
 		
-		steal.type("foo js", function(options, original, success, error){
+		steal.type("foo js", function(options, success, error){
 			var parts = options.text.split(" ")
 			options.text = parts[0]+"='"+parts[1]+"'";
 			success();

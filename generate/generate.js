@@ -203,8 +203,8 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * }
 		 */
 		convert: function( name ) {
-			var className = name.match(/[^\.]*$/)[0]; //Customer
-			var appName = name.split(".")[0]; //Customer
+			var className = name.match(/[^\.]*$/)[0], //Customer
+				appName = name.split(".")[0]; //Customer
 			return {
 				underscore: generate.underscore(className),
 				plugin : generate.underscore(name.replace(/\./g, "_")),
@@ -215,6 +215,16 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 				plural: steal.Inflector.pluralize(generate.underscore(className)),
 				appName: generate.underscore(appName)
 			};
+		},
+		// creates a class-like name
+		toClass : function(name, joiner){
+			var upper = function(parts){
+				for(var i =0; i < parts.length; i++){
+					parts[i] = parts[i].charAt(0).toUpperCase()+parts[i].substr(1)
+				}
+				return parts
+			}
+			return upper(name.split('/') ).join(joiner || '.')
 		},
 		insertCode: function( destination, newCode ){
 			// get file, parse it

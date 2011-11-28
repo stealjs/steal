@@ -4,7 +4,7 @@
 	
 	win.steal = {
 		types : {
-			"js" : function(options, orig, success){
+			"js" : function(options, success){
 				if(options.text){
 					eval(text)
 				}else{
