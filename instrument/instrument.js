@@ -39,7 +39,7 @@ steal.type("js", function(options, success, error){
 			eval(code);
 			success();
 		}
-	if(shouldIgnore(fileName)){
+	if(shouldIgnore(fileName) || location.host !== steal.File(options.originalSrc).domain()){
 		return origJSConverter.apply(this, arguments);
 	}	
 	if(instrumentation){
@@ -52,10 +52,10 @@ steal.type("js", function(options, success, error){
 		// check cache first
 		var fileHash = hashCode(xhr.responseText),
 			instrumentation = cache.get(fileName, fileHash);
-		// if(!code){
+		if(!instrumentation){
 			instrumentation = steal.instrument.addInstrumentation(xhr.responseText, fileName);
 			cache.set(options.rootSrc, fileHash, instrumentation);
-		// }
+		}
 		if(!files[fileName]){
 			files[fileName] = instrumentation;
 		}
@@ -83,7 +83,12 @@ var cache = {
 				hash: hash,
 				instrumented: instrumented
 			})
-			window.localStorage["stealInstrument:"+fileName] = stringified;
+			try {
+				window.localStorage["stealInstrument:"+fileName] = stringified;
+			} catch (e) {
+		 		// no more space
+			}
+
 		}
 	}
 };
