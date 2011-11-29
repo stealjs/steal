@@ -24,7 +24,7 @@ test("steal one js", function(){
 	// doesn't this imply the next ...
 	steal.rootUrl("../../");
 		 
-	stop(1000);
+	stop();
 	
 	steal("./files/steal.js", function(){
 		start();
@@ -36,7 +36,7 @@ test("steal one function", function(){
 	steal.rootUrl("../../")
 		.cur("foo/bar.js");
 	
-	stop(1000);
+	stop();
 	steal(function(){
 		start();
 		ok(true, "function called")
@@ -47,7 +47,7 @@ test("steal one function", function(){
 test("loading plugin from jmvcroot", function(){
 	PLUGINLOADED = false;
 	DEPENCENCYLOADED = false;
-	stop(1000);
+	stop();
 	steal.rootUrl("../../").then('steal/test/files/plugin',function(){
 		equals(PLUGINLOADED, true)
 		equals(DEPENCENCYLOADED, true)
@@ -58,7 +58,7 @@ test("loading plugin from jmvcroot", function(){
 // unless the path has nothing on it, it should add a .js to the end and load the literal file
 test("not using extension", function(){
 	REQUIRED = false;
-	stop(1000);
+	stop();
 	steal.rootUrl("../../").then('./files/require',function(){
 		equals(REQUIRED, true);
 	start();
@@ -67,7 +67,7 @@ test("not using extension", function(){
 	
 test("loading file from jmvcroot", function(){
 	REQUIRED = false;
-	stop(1000);
+	stop();
 	steal.rootUrl("../../").then('steal/test/files/require.js',function(){
 		equals(REQUIRED, true)
 		start();
@@ -76,7 +76,7 @@ test("loading file from jmvcroot", function(){
 
 test("loading two files", function(){
 	ORDER = [];
-	stop(1000);
+	stop();
 	steal.rootUrl("../../").then('./files/file1.js',function(){
 		same(ORDER,[1,2,"then2","then1"])
 		start();
@@ -87,7 +87,7 @@ test("steal one file with different rootUrl", function(){
 	// doesn't this imply the next ...
 	steal.rootUrl("../");
 	REQUIRED = undefined;
-	stop(1000);
+	stop();
 	
 	// still loading relative to the page
 	steal("./files/steal.js", function(){
@@ -98,7 +98,7 @@ test("steal one file with different rootUrl", function(){
 
 test("loading same file twice", function(){
 	ORDER = [];
-	stop(1000);
+	stop();
 	steal.rootUrl("../../").then('./files/duplicate.js', './files/duplicate.js',function(){
 		same(ORDER,[1])
 		start();
@@ -107,7 +107,7 @@ test("loading same file twice", function(){
 
 test("loading same file twice with absolute paths", function(){
 	ORDER = [];
-	stop(1000);
+	stop();
 	steal.rootUrl("../../").then('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
 		same(ORDER,[1])
 		start();
@@ -120,7 +120,7 @@ test("steal one file with different cur", function(){
 	steal.rootUrl("../../")
 		.cur("foo/bar.js");
 	REQUIRED = undefined;
-	stop(1000);
+	stop();
 	
 	// still loading relative to the page
 	steal("../steal/test/files/steal.js", function(){
@@ -338,7 +338,7 @@ test("File.ext", function(){
 	})
 
 	test("request async", function(){
-		stop(1000);
+		stop();
 		var count = 0;
 		steal.request({
 			src : src('steal/test/files/something.txt?' + Math.random())  // add random to force IE to behave
@@ -434,7 +434,7 @@ test("File.ext", function(){
 	// because require won't add buildType.  Require just gets stuff
 	// and that is how it should stay.
 	test("buildType set", function(){
-		stop(10000);
+		stop();
 		
 		steal.rootUrl("../");
 		
@@ -492,7 +492,7 @@ test("File.ext", function(){
 				path: "ob5"
 			}
 		
-		stop(1000);
+		stop();
 		steal.when(ob1,"loaded", ob2,"loaded" ,ob3,"complete");
 		ob1.loaded();
 		ob2.loaded();
@@ -535,7 +535,7 @@ test("File.ext", function(){
 				path: "ob5"
 			};
 			
-		stop(1000);
+		stop();
 		steal.when(ob1,"loaded", ob2,"loaded" ,ob3,"complete");
 		
 		setTimeout(function(){

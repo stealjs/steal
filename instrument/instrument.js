@@ -27,6 +27,12 @@ var shouldIgnore = function(file){
 	}
 	return false;
 }
+// stolen from jQuery
+var globalEval = function(data){
+	( window.execScript || function( data ) {
+				window[ "eval" ].call( window, data );
+			} )( data );
+}
 var origJSConverter = steal.types.js.require;
 steal.type("js", function(options, success, error){
 	var files = getCoverageObject(),
@@ -36,7 +42,8 @@ steal.type("js", function(options, success, error){
 			var code = instrumentation.instrumentedCode;
 			// console.log(xhr.responseText);
 			// console.log(code)
-			eval(code);
+			// use globalEval so anything declared as a var is a global
+			globalEval(code);
 			success();
 		}
 	if(shouldIgnore(fileName) || location.host !== steal.File(options.originalSrc).domain()){
@@ -70,11 +77,14 @@ var cache = {
 			var val = window.localStorage["stealInstrument:"+fileName];
 			if(val){
 				var obj = JSON.parse(val);
+				// console.log(fileName, 'saved hash', obj.hash, 'current hash', hash)
 				if(obj.hash === hash){
+					// console.log('hit', fileName)
 					return obj.instrumented;
 				}
 			}
 		}
+		// console.log('miss', fileName)
 		return false;
 	},
 	set: function(fileName, hash, instrumented){
@@ -86,6 +96,7 @@ var cache = {
 			try {
 				window.localStorage["stealInstrument:"+fileName] = stringified;
 			} catch (e) {
+				// console.log('NO MORE SPACE!')
 		 		// no more space
 			}
 
@@ -97,9 +108,9 @@ var cache = {
 var hashCode = function(text){
 	var hash = 0, 
 		mychar;
-	if (this.length == 0) return hash;
-	for (i = 0; i < this.length; i++) {
-		mychar = this.charCodeAt(i);
+	if (text.length == 0) return hash;
+	for (i = 0; i < text.length; i++) {
+		mychar = text.charCodeAt(i);
 		hash = ((hash<<5)-hash)+mychar;
 		hash = hash & hash; // Convert to 32bit integer
 	}
@@ -225,7 +236,6 @@ steal.instrument.compileStats = function(){
 		blocks: totalBlocks
 	}
 	stats.total = total;
-	debugger;
 	return stats;
 }
 var pctToString = function(num){
