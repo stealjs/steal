@@ -2079,13 +2079,16 @@ if (support.interactive) {
 			else if(options.startFiles && options.startFiles.length){
 				startFiles = options.startFiles;
 			}
-			// if instrument is set, or my parent has it set (for apps with frames)
-			if ( options.instrument || (typeof top === 'object' && top.opener && top.opener.steal && top.opener.steal.options.instrument) ) {
-				startFiles.unshift({
-					src: "steal/instrument",
-					waits: true
-				});
-			}
+			// selenium throws access denied error when try to access opener.steal from console window
+			try{
+				// if instrument is set, or my parent has it set (for apps with frames)
+				if ( options.instrument || (typeof top === 'object' && top.opener && top.opener.steal && top.opener.steal.options.instrument) ) {
+					startFiles.unshift({
+						src: "steal/instrument",
+						waits: true
+					});
+				}
+			}catch(e){}
 			var steals = [];
 			// need to load startFiles in dev or production mode (to run funcunit in production)
 			if( startFiles.length ){

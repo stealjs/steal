@@ -27,6 +27,9 @@ var shouldIgnore = function(file){
 	}
 	return false;
 }
+// QUnit.done = function(){
+	// console.log("ok")
+// }
 // stolen from jQuery
 var globalEval = function(data){
 	( window.execScript || function( data ) {
@@ -59,10 +62,10 @@ steal.type("js", function(options, success, error){
 		// check cache first
 		var fileHash = hashCode(xhr.responseText),
 			instrumentation = cache.get(fileName, fileHash);
-		if(!instrumentation){
+		// if(!instrumentation){
 			instrumentation = steal.instrument.addInstrumentation(xhr.responseText, fileName);
-			cache.set(options.rootSrc, fileHash, instrumentation);
-		}
+			// cache.set(options.rootSrc, fileHash, instrumentation);
+		// }
 		if(!files[fileName]){
 			files[fileName] = instrumentation;
 		}
@@ -230,18 +233,15 @@ steal.instrument.compileStats = function(){
 		totalBlocksHit += stats.files[fileName].blocks*stats.files[fileName].blockCoverage;
 	}
 	var total = {
-		lineCoverage: pctToString(totalLinesHit/totalLines),
-		blockCoverage: pctToString(totalBlocksHit/totalBlocks),
+		lineCoverage: totalLinesHit/totalLines,
+		blockCoverage: totalBlocksHit/totalBlocks,
 		lines: totalLines,
 		blocks: totalBlocks
 	}
 	stats.total = total;
 	return stats;
 }
-var pctToString = function(num){
-	return num;
-	// return (Math.round(num*1000)/1000).toString();
-}
+
 var lineCoverage = function(data, blocksUsed) {
 	var linesUsed = {},
 		blockMap,
@@ -258,17 +258,16 @@ var lineCoverage = function(data, blocksUsed) {
 			if(blocksUsed[i] > 0){
 				lineHits++;
 			}
-			lines++;
 		}
 	}
-	var lineCoverage = lineHits/lines,
+	var lineCoverage = lineHits/data.nbrLines,
 		blockCoverage = blockHits/data.nbrBlocks;
 	return {
 		linesUsed: linesUsed,
 		src: data.code,
-		lineCoverage: pctToString(lineCoverage),
-		blockCoverage: pctToString(blockCoverage),
-		lines: lines,
+		lineCoverage: lineCoverage,
+		blockCoverage: blockCoverage,
+		lines: data.nbrLines,
 		blocks: data.nbrBlocks
 	}
 };
@@ -306,8 +305,13 @@ steal.instrument.addInstrumentation = function(scriptContent, fileName) {
   // object that keeps track of which line numbers correspond to which block numbers: {1: [2, 3, 4], 2: [5, 8, 9]}
   var blockMap = {};
   
+  var lineCount = 0;
+  
   var commands = [];
 
+if(/cur_styles/.test(fileName)){
+	debugger;
+}
   for (var j = 0; j < tokens.length; j++) {
     var trimmedToken = trim(tokens[j]);
     if (trimmedToken != '') {
@@ -329,7 +333,8 @@ steal.instrument.addInstrumentation = function(scriptContent, fileName) {
             '__s("'+fileName+'", '+blockNumber+')');
         isCommand = false;
       } else if (concreteToken.indexOf('%BRT_BLOCK_END%') != -1) {
-        var blockNumber = blockStack.pop();
+        blockStack.pop();
+        var blockNumber = blockStack[blockStack.length-1];
         concreteToken = concreteToken.replace('%BRT_BLOCK_END%',
             '//BRT_BLOCK_END:' + blockNumber);
         isCommand = false;
@@ -338,6 +343,7 @@ steal.instrument.addInstrumentation = function(scriptContent, fileName) {
       if (isCommand) {
 	    if (trimmedToken.indexOf('}') != 0) { // if line starts with }, don't include it
 	      blockMap[blockNumber].push(counter);
+	      lineCount++;
 	    }
 	    commands.push(concreteToken)
       	counter++;
@@ -351,6 +357,7 @@ steal.instrument.addInstrumentation = function(scriptContent, fileName) {
   return {
   	fileName: fileName,
   	nbrBlocks: blockCounter,
+  	nbrLines: lineCount,
   	blockMap: blockMap,
   	instrumentedCode: instrumentedContent.join("\n"),
   	code: commands.join("\n")
