@@ -6,13 +6,8 @@
 steal.instrument = {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
-	ignores: steal.options.instrumentIgnore || (steal.parentWindow().steal.options.instrumentIgnore) || []
+	ignores: steal.options.instrumentIgnore || steal.parentWindow().steal.options.instrumentIgnore || []
 };
-
-// defaults to this if nothing provided
-if(!steal.options.instrumentIgnore){
-	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
-}
 
 if(typeof steal.instrument.ignores === "string"){
 	steal.instrument.ignores = [steal.instrument.ignores];
@@ -20,7 +15,7 @@ if(typeof steal.instrument.ignores === "string"){
 
 // defaults to this if nothing provided
 if(!steal.instrument.ignores.length){
-	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","mxui", "*/test","*_test.js"]
+	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
 }
 
 // true if the path starts the same as something in the ignores array
