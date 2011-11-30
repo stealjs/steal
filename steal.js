@@ -2107,7 +2107,7 @@ if (support.interactive) {
 			}
 			else {
 				if (options.loadDev !== false) {
-					steals.push({
+					steals.unshift({
 						src: 'steal/dev/dev.js',
 						ignore: true
 					});
