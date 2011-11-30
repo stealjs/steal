@@ -11,7 +11,7 @@ steal.instrument = {
 
 // defaults to this if nothing provided
 if(!steal.options.instrumentIgnore){
-	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js"]
+	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
 }
 
 if(typeof steal.instrument.ignores === "string"){
