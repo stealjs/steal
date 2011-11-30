@@ -9,6 +9,11 @@ steal.instrument = {
 	ignores: steal.options.instrumentIgnore || (top.opener && top.opener.steal.options.instrumentIgnore) || []
 };
 
+// defaults to this if nothing provided
+if(!steal.options.instrumentIgnore){
+	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js"]
+}
+
 if(typeof steal.instrument.ignores === "string"){
 	steal.instrument.ignores = [steal.instrument.ignores];
 }
@@ -46,7 +51,9 @@ steal.type("js", function(options, success, error){
 			globalEval(code);
 			success();
 		}
-	if(shouldIgnore(fileName) || location.host !== steal.File(options.originalSrc).domain()){
+	if(shouldIgnore(fileName) || 
+		location.host !== steal.File(options.originalSrc).domain() ||  
+		options.type != "js"){
 		return origJSConverter.apply(this, arguments);
 	}	
 	if(instrumentation){
@@ -306,9 +313,6 @@ steal.instrument.addInstrumentation = function(scriptContent, fileName) {
   
   var commands = [];
 
-if(/cur_styles/.test(fileName)){
-	debugger;
-}
   for (var j = 0; j < tokens.length; j++) {
     var trimmedToken = trim(tokens[j]);
     if (trimmedToken != '') {
