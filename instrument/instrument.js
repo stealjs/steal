@@ -9,6 +9,11 @@ steal.instrument = {
 	ignores: steal.options.instrumentIgnore || (steal.parentWindow().steal.options.instrumentIgnore) || []
 };
 
+// defaults to this if nothing provided
+if(!steal.options.instrumentIgnore){
+	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
+}
+
 if(typeof steal.instrument.ignores === "string"){
 	steal.instrument.ignores = [steal.instrument.ignores];
 }
