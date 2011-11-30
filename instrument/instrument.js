@@ -27,9 +27,6 @@ var shouldIgnore = function(file){
 	}
 	return false;
 }
-// QUnit.done = function(){
-	// console.log("ok")
-// }
 // stolen from jQuery
 var globalEval = function(data){
 	( window.execScript || function( data ) {
