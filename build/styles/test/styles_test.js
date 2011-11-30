@@ -28,8 +28,7 @@ steal('steal/test', function( s ) {
 				s.test.clear();
 				s.test.remove('steal/build/styles/test/production.css')
 			});
-	})
-
+	});
 
 	s.test.test("min multiline comment", function(){
 		load('steal/rhino/rhino.js');
@@ -57,5 +56,21 @@ steal('steal/test', function( s ) {
 		s.test.equals(prod,"h1{border:solid 1px black}", "only one css");
 			
 		s.test.clear();
-	})
+	});
+	
+	s.test.test("ensure that data urls aren't relocated", function(){
+		load('steal/rhino/rhino.js');
+		steal('steal/build',
+			'steal/build/styles',
+			function(){
+				steal.build('steal/build/styles/test/dataurls/dataurls.html',
+					{to: 'steal/build/styles/test/dataurls'});
+			});
+		
+		var prod = readFile('steal/build/styles/test/dataurls/production.css').replace(/\r|\n/g,"");
+		
+		s.test.ok(prod.match(/url\(data:image\/gif/), "data protocol wasn't relocated");
+		
+		s.test.clear();
+	});
 });

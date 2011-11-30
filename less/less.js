@@ -40,11 +40,15 @@ steal({src: "./less_engine.js",ignore: true},function(){
 	 */
 	
 	steal.type("less css", function(options, success, error){
-		var pathParts = options.src.split('/');
-		pathParts[pathParts.length - 1] = ''; // Remove filename
+		var paths = [];
+		if (!steal.isRhino) {
+			var pathParts = options.src.split('/');
+			pathParts[pathParts.length - 1] = ''; // Remove filename
+			paths = [pathParts.join('/')];
+		}
 		new (less.Parser)({
             optimization: less.optimization,
-            paths: [pathParts.join('/')]
+            paths: paths
         }).parse(options.text, function (e, root) {
 			options.text = root.toCSS();
 			success();
