@@ -6,16 +6,16 @@
 steal.instrument = {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
-	ignores: steal.options.instrumentIgnore || (top.opener && top.opener.steal.options.instrumentIgnore) || []
+	ignores: steal.options.instrumentIgnore || (steal.parentWindow().steal.options.instrumentIgnore) || []
 };
-
-// defaults
-if(!steal.instrument.ignores.length){
-	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js"]
-}
 
 if(typeof steal.instrument.ignores === "string"){
 	steal.instrument.ignores = [steal.instrument.ignores];
+}
+
+// defaults to this if nothing provided
+if(!steal.instrument.ignores.length){
+	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","mxui", "*/test","*_test.js"]
 }
 
 // true if the path starts the same as something in the ignores array
@@ -125,15 +125,7 @@ var hashCode = function(text){
 }
 
 var getCoverageObject = function(fileName, data){
-	var win = window;
-	try {
-	  if (typeof top === 'object' && top !== null && typeof top.opener === 'object' && top.opener !== null && top.opener.steal && top.opener.steal.instrument) {
-	    // this is a browser window that was opened from another window
-		win = top.opener;
-	  }
-	}
-	catch (e) {}
-	
+	var win = steal.parentWindow();
 	return win.steal.instrument.files;
 }
 

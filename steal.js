@@ -1135,6 +1135,23 @@
 			steal.preloaded(stel);
 			stel.loaded()
 			return steal;
+		},
+		// return the parent steal window
+		// useful for situations where a parent window opens other windows (funcunit)
+		parentWindow: function(){
+			var parent = win;
+			// selenium throws access denied error when try to access opener.steal from console window
+			try{
+				// if instrument is set, or my parent has it set (for apps with frames)
+				if(parent.top.opener && parent.top.opener.steal){
+					parent = parent.top.opener;
+				}
+				else if(parent.top.opener.selenium) {
+					// TODO move this to the selenium browser plugin
+					parent = parent.top.opener.selenium.browserbot.getCurrentWindow()
+				}
+			} catch(e){}
+			return parent;
 		}
 	});
 	
@@ -2079,16 +2096,12 @@ if (support.interactive) {
 			else if(options.startFiles && options.startFiles.length){
 				startFiles = options.startFiles;
 			}
-			// selenium throws access denied error when try to access opener.steal from console window
-			try{
-				// if instrument is set, or my parent has it set (for apps with frames)
-				if ( options.instrument || (typeof top === 'object' && top.opener && top.opener.steal && top.opener.steal.options.instrument) ) {
-					startFiles.unshift({
-						src: "steal/instrument",
-						waits: true
-					});
-				}
-			}catch(e){}
+			if ( options.instrument || (steal.parentWindow().steal.options.instrument) ) {
+				startFiles.unshift({
+					src: "steal/instrument",
+					waits: true
+				});
+			}
 			var steals = [];
 			// need to load startFiles in dev or production mode (to run funcunit in production)
 			if( startFiles.length ){
