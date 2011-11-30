@@ -18,16 +18,13 @@ steal('steal/build').then(function( steal ) {
 			currentPackage = [];
 
 		opener.each('css', function( link, text, i ) {
-			steal.print(link.src)
+			steal.print("   " + link.rootSrc)
 			scriptsConverted.push(link.rootSrc)
-
-			var loc = steal.File(pageFolder).join(link.src),
-				converted = convert(text, loc, folder);
-			
+			var converted = convert(text, link.rootSrc, folder);
 			currentPackage.push(converted)
-
 		});
 		steal.print("")
+		
 		if ( currentPackage.length ) {
 			steal.print("STYLE BUNDLE > " + folder + "/production.css")
             //now that we have all the css minify and save it
@@ -49,26 +46,25 @@ steal('steal/build').then(function( steal ) {
 	var convert = function( css, cssLocation, prodLocation ) {
 		//how do we go from prod to css
 		var cssLoc = new steal.File(cssLocation).dir(),
-			newCSss = css.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
+			newCSS = css.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
 
 				//check if url is relative
-				if (!isRelative(part) ) {
+				if (isAbsoluteOrData(part) ) {
 					return whole
 				}
 
 				//it's a relative path from cssLocation, need to convert to
 				// prodLocation
-				var imagePath = steal.File(part).joinFrom(cssLoc),
-					fin = steal.File(imagePath).toReferenceFromSameDomain(prodLocation);
-				//print("  -> "+imagePath);
+				var rootImagePath = steal.File(part).joinFrom(cssLoc),
+					fin = steal.File(rootImagePath).toReferenceFromSameDomain(prodLocation);
+				//print("  -> "+rootImagePath);
 				// steal.print("  " + part + " > " + fin);
 				return "url(" + fin + ")";
 			});
-		return newCSss;
+		return newCSS;
 	},
-	isRelative = function( part ) {
-		// http://, https://, / 
-		return !/^(http:\/\/|https:\/\/|\/)/.test(part)
+	isAbsoluteOrData = function( part ) {
+		return /^(data:|http:\/\/|https:\/\/|\/)/.test(part)
 	},
     calcSavings = function(raw_len, minified_len) {
         var diff_len = raw_len - minified_len, x = Math.pow(10,1);
