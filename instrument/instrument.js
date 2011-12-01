@@ -159,19 +159,8 @@ extend(steal.instrument, {
 			lines: data.nbrLines,
 			blocks: data.nbrBlocks
 		}
-	}
-});
-
-if(typeof steal.instrument.ignores === "string"){
-	steal.instrument.ignores = [steal.instrument.ignores];
-}
-
-// defaults to this if nothing provided
-if(!steal.instrument.ignores.length){
-	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
-}
-
-steal.type("js", function(options, success, error){
+	},
+	jsConvert: function(options, success, error){
 		var files = utils.parentWin().steal.instrument.files,
 			fileName = options.rootSrc,
 			instrumentation = files[fileName],
@@ -204,27 +193,37 @@ steal.type("js", function(options, success, error){
 			if(!files[fileName]){
 				files[fileName] = instrumentation;
 			}
-			setupCoverage(instrumentation.fileName, instrumentation.nbrBlocks);
+			steal.instrument._setupCoverage(instrumentation.fileName, instrumentation.nbrBlocks);
 			processInstrumentation(instrumentation);
 		});
-	})
-
-// only keep track in top window
-window.__s = function(fileName, blockNbr){
-	var cov = utils.parentWin().steal.instrument.files;
-	cov[fileName].blocksCovered[blockNbr-1]++;
-}
-
-// only keep track in top window
-// total statements per file
-// fileName, lines
-var setupCoverage = function(fileName, totalBlocks){
-	var cov = utils.parentWin().steal.instrument.files;
-	cov[fileName].blocksCovered = [];
-	for(var i=0; i<totalBlocks; i++){
-		cov[fileName].blocksCovered.push(0)
+	},
+	blockRun: function(fileName, blockNbr){
+		// only keep track in top window
+		var cov = utils.parentWin().steal.instrument.files;
+		cov[fileName].blocksCovered[blockNbr-1]++;
+	},
+	// only keep track in top window
+	// total statements per file
+	// fileName, lines
+	_setupCoverage: function(fileName, totalBlocks){
+		var cov = utils.parentWin().steal.instrument.files;
+		cov[fileName].blocksCovered = [];
+		for(var i=0; i<totalBlocks; i++){
+			cov[fileName].blocksCovered.push(0)
+		}
 	}
+});
+
+if(typeof steal.instrument.ignores === "string"){
+	steal.instrument.ignores = [steal.instrument.ignores];
 }
 
+// defaults to this if nothing provided
+if(!steal.instrument.ignores.length){
+	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
+}
+
+steal.type("js", steal.instrument.jsConvert)
+window.__s = steal.instrument.blockRun;
 
 })
