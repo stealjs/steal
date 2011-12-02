@@ -1,12 +1,21 @@
+steal.options.instrumentIgnore = ["funcunit"];
 steal("funcunit/qunit")
 .then("steal/instrument").then(function(){
 
 module("parse");
-// 127.0.0.1:8020/jmvc/funcunit/funcunit.html?steal[startFiles]=funcunit/coverage/parse/parse.js
 test("parse testing works", function(){
-	steal("steal/instrument/test/tabs_test.js", function(){
-	// steal("funcunit/browser/resources/json.js", function(){
-		
+	stop();
+	steal("steal/instrument/test/code.js", function(){
+		var file = steal.instrument.files["steal/instrument/test/code.js"]
+		equals(file.nbrBlocks, 3)
+		equals(file.nbrLines, 4)
+		equals(file.blocksCovered[0], 1)
+		equals(file.blocksCovered[1], 1)
+		equals(file.blocksCovered[2], 0)
+		var stats = steal.instrument.compileStats();
+		equals(stats.total.lineCoverage, 0.75)
+		equals(stats.total.blockCoverage, 2/3)
+		start();
 	})
 });
 
