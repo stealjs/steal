@@ -1,8 +1,89 @@
-// disclaimers
-// - this is very slow in FF, but very fast in chrome
-// - in FF if you use this with funcunit apps that have steals inside a script tag
-//   it won't instrument those scripts (this works in chrome though)
-// - this might not work correctly with iframes
+
+/**
+ * @class steal.instrument
+ * @parent stealjs
+ * @plugin steal/instrument
+ * @test steal/instrument/qunit.html
+ * 
+ * Instruments JavaScript code blocks.  As the code runs, a block counter object keeps track 
+ * of which blocks of code were run per file.  This information can be used to determine code 
+ * coverage statistics.
+ * 
+ * ## Usage
+ * 
+ * To turn on instrumentation, simply load a page with the steal option instrument set to true.  One way 
+ * to do this is to open any page with steal[instrument]=true in the URL, like 
+ * http://localhost/mypage.html?steal[instrument]=true.
+ * 
+ * ## Ignoring files
+ * 
+ * If you want to tell steal.instrument to ignore certain directories, files, or file patterns, add a 
+ * steal option called instrumentIgnore.  This is an array of strings which are used to ignore files.  For 
+ * example: http://localhost/mypage.html?steal[instrument]=true&steal[instrumentIgnore]=jquery,*_test.js
+ * 
+ * The * is a wildcard character.  The above example would ignore any files in the jquery directory, along with 
+ * any file ending in _test.js.  Ignored files are stolen normally, without any instrumentation.
+ * 
+ * By default, if no ignores are passed, the following is ignored: ["jquery","funcunit","steal","documentjs","*\/test","*_test.js", "mxui"]
+ * 
+ * To ignore nothing, pass false, like http://localhost/mypage.html?steal[instrument]=true&steal[instrumentIgnore]=false
+ * 
+ * ## How it works
+ * 
+ * steal.instrument works by adding a custom JS converter.  When an instrumented file is stolen, it:
+ * 
+ * 1. Is loaded via AJAX (hence cross domain files are ignored, since the AJAX request would fail)
+ * 2. The text from the file is parsed, using the JS parser written by Mihai Bazon
+ * 3. The text from the file is rebuilt from the parse tree.  At the start of any block of code, a line like 
+ * __s("foo.js", 3) is added.  When this block runs, this function call will increment the counter for block 3 
+ * in foo.js.
+ * 4. This text is then eval-ed in global scope.
+ * 
+ * To make this as fast as possible, localStorage is used where possible.  Instrumented files are cached in 
+ * localStorage with a hash representing their contents.  Next run, this cache is checked first.  If the file has changed, 
+ * the hash will change and invalidate the cache.  Otherwise, the cached file is eval-ed.
+ * 
+ * If the app opens a popup window or iframe, these children frames will all be loaded with instrumentation turned on also.  
+ * Each instrumented file is stored in a global object on the opener window, so if children steal the same file, those files will 
+ * use the stored version.  This is useful for FuncUnit runs, where child apps are loaded multiple times.
+ * 
+ * ## Reporting coverage results
+ * 
+ * When you're ready to calculate results and show them, call steal.instrument.compileStats.  This function inspects all the block 
+ * counters, calculates statistics for each file and total statistics for the collection of all files.  Each file has its:
+ * 
+ * 1. src - not matching the real source because its rebuild from the parse tree
+ * 2. linesUsed - an object representing which lines were run in the src.  Each key in the key-value map is a line number.  
+ * Each value is the counter for how many times that line was run.  Non-statements are skipped.
+ * 3. lineCoverage - percent of lines run
+ * 4. blockCoverage - percent of blocks run
+ * 5. lines - number of total lines
+ * 6. blocks - number of total blocks
+ * 
+ * FuncUnit has a plugin in funcunit/coverage that uses these stats and builds a reporting view, showing 
+ * percentages and which lines were run for each file.
+ * 
+ * ## Disclaimers
+ * 
+ * - steal.instrument is very slow in Firefox, but very fast in Chrome.
+ * - If you use steal.instrument with apps that steal inside a script tag, these scripts won't 
+ * be instrumented when running in Firefox (it works in Chrome).  The reason 
+ * is the order in which this script is executed happens before steal/instrument can be loaded.  
+ * If this is an important case, you can manually load the plugin yourself before any code.  An example of this:
+ * 
+ * @codestart
+ * &lt;script type='text/javascript'&gt;
+ *   steal('app', function(){
+ * 	   // code
+ *   })
+ * &lt;/script&gt;
+ * @codeend
+ * 
+ * - Remote files (not on the same domain) are skipped because they can't be loaded via AJAX.
+ * 
+ */
+
+
 
 steal.instrument = {};
 steal("./parser.js").then("./process.js", "./utils.js", function(){
@@ -19,6 +100,19 @@ extend(steal.instrument, {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
 	ignores: steal.options.instrumentIgnore || utils.parentWin().steal.options.instrumentIgnore || [],
+	/**
+	 * Calculates block and line coverage information about each file and the entire collection.  Call this 
+	 * when you are ready to display a coverage report, like:
+	 * 
+	 * @codestart
+	 * QUnit.done = function(){
+	 *   var coverage = steal.instrument.compileStats();
+	 *   // show report
+	 * }
+	 * @codeend
+	 * 
+	 * @return {Object} an object with coverage information about each file and the project as a whole
+	 */
 	compileStats: function(){
 		var cov = utils.parentWin().steal.instrument.files;
 		var stats = {
