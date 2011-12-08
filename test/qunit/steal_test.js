@@ -284,10 +284,11 @@ test("File.isDomainAbsolute()", function() {
 	ok(!result, "/a/b/c/d/e domain is absolute.");
 })
 
-test("File.afterDomain", function() {
-	result = new steal.File("http://abc.com/d/e").afterDomain();
-	equals(result, "/d/e", "/d/e is the correct after domain result.");
-})
+// this function was moved to steal/rhino/file.js
+// test("File.afterDomain", function() {
+	// result = new steal.File("http://abc.com/d/e").afterDomain();
+	// equals(result, "/d/e", "/d/e is the correct after domain result.");
+// })
 
 test("File.toReferenceFromSameDomain()", function() {
 	result = new steal.File("http://abc.com/d/e").toReferenceFromSameDomain("http://abc.com/d/e/f/g/h");

@@ -449,10 +449,6 @@
 		}
 	};
 	
-	var fullurl = /^([A-Za-z]+)?(:?\/\/)([0-9.\-A-Za-z]*)(?::(\d+))?(.*)$/;
-	// path, query, fragment
-	var parse_leftovers = /([^?#]*)?(?:\?([^#]*))?(?:#(.*))?$/;
-	
 
 	extend(File.prototype,
 	/**
@@ -572,10 +568,6 @@
 		relative: function() {
 			return this.path.match(/^(https?:|file:|\/)/) === null;
 		},
-		// Returns the part of the path that is after the domain part
-		afterDomain: function() {
-			return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];
-		},
 		/**
 		 * Returns the relative path between two paths with common folders.
 		 * @codestart
@@ -607,13 +599,6 @@
 		protocol: function() {
 			var match = this.path.match(/^(https?:|file:)/);
 			return match && match[0];
-		},
-
-
-		getAbsolutePath: function() {
-			var dir = File.cur().dir(),
-				fwd = File(dir);
-			return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : dir;
 		},
 		/**
 		 * For a given path, a given working directory, and file location, update the path so 
@@ -1431,13 +1416,11 @@ steal.type("css", function css_type(options, success, error){
 });
 
 // Overwrite
-(function(){
-	if(opts.types){
-		for(var type in opts.types){
-			steal.type(type, opts.types[type]);
-		}
+if(opts.types){
+	for(var type in opts.types){
+		steal.type(type, opts.types[type]);
 	}
-}());
+}
 
 
 // =============================== HELPERS ===============================
@@ -1778,13 +1761,6 @@ request = function(options, success, error){
 	
 	// =========== DEBUG =========
 	
-	if(steal.isRhino && typeof console == 'undefined'){
-		console = {
-			log: function(){
-				print.apply(null, arguments)
-			}
-		}
-	}
 	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
