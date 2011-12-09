@@ -265,9 +265,11 @@ extend(steal.instrument, {
 				utils.globalEval(code);
 				success();
 			}
-		if(utils.shouldIgnore(fileName) || 
-			location.host !== steal.File(options.originalSrc).domain() ||  
-			options.type != "js"){
+		if(utils.shouldIgnore(fileName) ||  
+			options.type != "js" || 
+			// if both are file: URLs its fine, otherwise make sure its the same domain
+			(!(location.protocol == "file:" && steal.File(options.originalSrc).protocol() == "file:") &&
+				location.host !== steal.File(options.originalSrc).domain())){
 			return origJSConverter.apply(this, arguments);
 		}	
 		if(instrumentation){
