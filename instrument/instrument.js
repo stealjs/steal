@@ -120,7 +120,7 @@ extend(steal.instrument, {
 			total: {}
 		};
 		for(var fileName in cov){
-			var lines = steal.instrument.lineCoverage(steal.instrument.files[fileName], cov[fileName].blocksCovered);
+			var lines = steal.instrument.lineCoverage(cov[fileName], cov[fileName].blocksCovered);
 			stats.files[fileName] = lines;
 		}
 		var totalLines = 0,
