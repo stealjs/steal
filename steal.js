@@ -1526,7 +1526,9 @@ request = function(options, success, error){
 	 * 		steal.packages('tasks','dashboard','fileman');
 	 * 
 	 */
-	steal.packages = function(){  };
+	steal.packages = function(){
+		return this;
+	};
 	
 	//  =============================== Extensions ==============================
 	
@@ -1852,7 +1854,7 @@ request = function(options, success, error){
 			}
 		}
 	}
-	var name = function(stel){
+	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
@@ -1909,7 +1911,7 @@ request = function(options, success, error){
 				return cb;
 			}
 		}
-	};
+	};*/
 	
 	// =========== HAS ARRAY STUFF ============
 	// Logic that deals with files that have collections of other files within them.  This is usually a production.css file, 
