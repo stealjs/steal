@@ -781,16 +781,6 @@
 						when(obj, func, item, func2)
 					})
 				},
-				map = function(arr, cb){
-					var ret = [];
-					for (var i =0, length = arr.length; i < length; i++ ) {
-						var val = cb( arr[ i ], i );
-						if ( val ) {
-							ret[ ret.length ] = val;
-						}
-					}
-					return ret.concat.apply( [], ret );
-				},
 				stealInstances = [];
 
 			// iterate through the collection and add all the 'needs' before fetching...
@@ -805,13 +795,9 @@
 				
 				//has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
-
-				if(stel.options.needs){
-					stealInstances.push.apply(stealInstances, map(stel.options.needs, function(raw){
-						// add waits to the new steal need...
-						return extend(steal.p.make(raw), { waits: true });
-					}));
-				}
+				each(stel.options.needs || [], function(i, raw){
+						stealInstances.push( extend(steal.p.make(raw), { waits: true }) );
+				});
 			});
 			
 			each(stealInstances, function(i, stel){
@@ -1004,7 +990,11 @@
 		options : {
 			env : 'development',
 			// TODO: document this
-			loadProduction : true
+			loadProduction : true,
+			needs : {
+				less: 'steal/less/less.js',
+				coffee: 'steal/coffee/coffee.js'
+			}
 		},
 		/**
 		 * @hide
@@ -1513,24 +1503,6 @@ request = function(options, success, error){
 	
 	//  =============================== Extensions ==============================
 	
-	// key/value pairs of name and src of engine name and src
-	// example: { 'less': '/steal/less/less.js' }
-	var extensions = {
-		'less': 'steal/less/less.js',
-		'coffee': 'steal/coffee/coffee.js'
-	};
-	
-	/**
-	 * Adds an extension to the extension mappings lib.
-	 * @param {String} name of engine
-	 * @param {String} src to engine
-	 */
-	steal.addExtensionEngine = function(name, src){
-		if(!extensions[name]){
-			extensions[name] = src;
-		}
-	};
-	
 	/**
 	 * Modifies 'needs' property after 'makeOptions' to add
 	 * necessary depedencies for the file extensions.
@@ -1538,12 +1510,12 @@ request = function(options, success, error){
 	steal.makeOptions = after(steal.makeOptions,function(raw){
 		raw.ext = File(raw.src).ext();
 
-		if(extensions[raw.ext]){
+		if(steal.options.needs[raw.ext]){
 			if(!raw.needs){
 				raw.needs = [];
 			}
 			
-			raw.needs.push(extensions[raw.ext]);
+			raw.needs.push(steal.options.needs[raw.ext]);
 		}
 	});
 

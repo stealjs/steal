@@ -678,4 +678,26 @@ test("ready", function(){
 	
 });
 
+test("needs", function(){
+	stop();
+	
+	steal.rootUrl("../../").then({
+		src: "steal/test/files/needs.js",
+		needs: ["steal/test/files/needed.js"]
+	});
+});
+
+test("needs options", function(){
+	stop();
+	steal.options.needs.needs = 'steal/test/files/needstype.js'
+	
+	steal.rootUrl("../../").then('steal/test/files/needs.needs',
+		function(){
+		
+		equals(NEEDS,"FOO")
+		start();
+		
+	});
+});
+
 })
