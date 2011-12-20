@@ -449,10 +449,6 @@
 		}
 	};
 	
-	var fullurl = /^([A-Za-z]+)?(:?\/\/)([0-9.\-A-Za-z]*)(?::(\d+))?(.*)$/;
-	// path, query, fragment
-	var parse_leftovers = /([^?#]*)?(?:\?([^#]*))?(?:#(.*))?$/;
-	
 
 	extend(File.prototype,
 	/**
@@ -572,10 +568,6 @@
 		relative: function() {
 			return this.path.match(/^(https?:|file:|\/)/) === null;
 		},
-		// Returns the part of the path that is after the domain part
-		afterDomain: function() {
-			return this.path.match(/https?:\/\/[^\/]*(.*)/)[1];
-		},
 		/**
 		 * Returns the relative path between two paths with common folders.
 		 * @codestart
@@ -607,13 +599,6 @@
 		protocol: function() {
 			var match = this.path.match(/^(https?:|file:)/);
 			return match && match[0];
-		},
-
-
-		getAbsolutePath: function() {
-			var dir = File.cur().dir(),
-				fwd = File(dir);
-			return fwd.relative() ? fwd.joinFrom(steal.root.path, true) : dir;
 		},
 		/**
 		 * For a given path, a given working directory, and file location, update the path so 
@@ -796,16 +781,6 @@
 						when(obj, func, item, func2)
 					})
 				},
-				map = function(arr, cb){
-					var ret = [];
-					for (var i =0, length = arr.length; i < length; i++ ) {
-						var val = cb( arr[ i ], i );
-						if ( val ) {
-							ret[ ret.length ] = val;
-						}
-					}
-					return ret.concat.apply( [], ret );
-				},
 				stealInstances = [];
 
 			// iterate through the collection and add all the 'needs' before fetching...
@@ -820,13 +795,9 @@
 				
 				//has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
-
-				if(stel.options.needs){
-					stealInstances.push.apply(stealInstances, map(stel.options.needs, function(raw){
-						// add waits to the new steal need...
-						return extend(steal.p.make(raw), { waits: true });
-					}));
-				}
+				each(stel.options.needs || [], function(i, raw){
+						stealInstances.push( extend(steal.p.make(raw), { waits: true }) );
+				});
 			});
 			
 			each(stealInstances, function(i, stel){
@@ -1019,7 +990,11 @@
 		options : {
 			env : 'development',
 			// TODO: document this
-			loadProduction : true
+			loadProduction : true,
+			needs : {
+				less: 'steal/less/less.js',
+				coffee: 'steal/coffee/coffee.js'
+			}
 		},
 		/**
 		 * @hide
@@ -1450,13 +1425,11 @@ steal.type("css", function css_type(options, success, error){
 });
 
 // Overwrite
-(function(){
-	if(opts.types){
-		for(var type in opts.types){
-			steal.type(type, opts.types[type]);
-		}
+if(opts.types){
+	for(var type in opts.types){
+		steal.type(type, opts.types[type]);
 	}
-}());
+}
 
 
 // =============================== HELPERS ===============================
@@ -1526,29 +1499,9 @@ request = function(options, success, error){
 	 * 		steal.packages('tasks','dashboard','fileman');
 	 * 
 	 */
-	steal.packages = function(){
-		return this;
-	};
+	steal.packages = function(){  };
 	
 	//  =============================== Extensions ==============================
-	
-	// key/value pairs of name and src of engine name and src
-	// example: { 'less': '/steal/less/less.js' }
-	var extensions = {
-		'less': 'steal/less/less.js',
-		'coffee': 'steal/coffee/coffee.js'
-	};
-	
-	/**
-	 * Adds an extension to the extension mappings lib.
-	 * @param {String} name of engine
-	 * @param {String} src to engine
-	 */
-	steal.addExtensionEngine = function(name, src){
-		if(!extensions[name]){
-			extensions[name] = src;
-		}
-	};
 	
 	/**
 	 * Modifies 'needs' property after 'makeOptions' to add
@@ -1557,12 +1510,12 @@ request = function(options, success, error){
 	steal.makeOptions = after(steal.makeOptions,function(raw){
 		raw.ext = File(raw.src).ext();
 
-		if(extensions[raw.ext]){
+		if(steal.options.needs[raw.ext]){
 			if(!raw.needs){
 				raw.needs = [];
 			}
 			
-			raw.needs.push(extensions[raw.ext]);
+			raw.needs.push(steal.options.needs[raw.ext]);
 		}
 	});
 
@@ -1847,13 +1800,6 @@ request = function(options, success, error){
 	
 	// =========== DEBUG =========
 	
-	if(steal.isRhino && typeof console == 'undefined'){
-		console = {
-			log: function(){
-				print.apply(null, arguments)
-			}
-		}
-	}
 	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
@@ -1871,7 +1817,7 @@ request = function(options, success, error){
 	})
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
-	})
+	})*/
 
 	// ============= WINDOW LOAD ========
 	var addEvent = function(elem, type, fn) {
@@ -1911,7 +1857,7 @@ request = function(options, success, error){
 				return cb;
 			}
 		}
-	};*/
+	};
 	
 	// =========== HAS ARRAY STUFF ============
 	// Logic that deals with files that have collections of other files within them.  This is usually a production.css file, 

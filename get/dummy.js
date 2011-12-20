@@ -2,7 +2,7 @@
 steal(function(s){
 	
 	s.dummy = function(code){
-		print("I SHOULD NOT BE RUNNING >>>!")
+		
 		var args = [], 
 			arg;
 			

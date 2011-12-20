@@ -18,22 +18,22 @@
  * ## Ignoring files
  * 
  * If you want to tell steal.instrument to ignore certain directories, files, or file patterns, add a 
- * steal option called instrumentIgnore.  This is an array of strings which are used to ignore files.  For 
- * example: http://localhost/mypage.html?steal[instrument]=true&steal[instrumentIgnore]=jquery,*_test.js
+ * list of patterns to the steal instrument param value.  This param accepts an array of strings which are used to ignore files.  For 
+ * example: http://localhost/mypage.html?steal[instrument]=jquery,*_test.js.
  * 
  * The * is a wildcard character.  The above example would ignore any files in the jquery directory, along with 
  * any file ending in _test.js.  Ignored files are stolen normally, without any instrumentation.
  * 
- * By default, if no ignores are passed, the following is ignored: ["jquery","funcunit","steal","documentjs","*\/test","*_test.js", "mxui"]
+ * To ignore all JMVC and test directories, pass !jmvc steal[instrument]=!jmvc, which ignores "jquery","funcunit","steal","documentjs","*\/test","*_test.js", "mxui"
  * 
- * To ignore nothing, pass false, like http://localhost/mypage.html?steal[instrument]=true&steal[instrumentIgnore]=false
+ * To ignore nothing, pass true, like http://localhost/mypage.html?steal[instrument]=true
  * 
  * ## How it works
  * 
  * steal.instrument works by adding a custom JS converter.  When an instrumented file is stolen, it:
  * 
  * 1. Is loaded via AJAX (hence cross domain files are ignored, since the AJAX request would fail)
- * 2. The text from the file is parsed, using the JS parser written by Mihai Bazon
+ * 2. The text from the file is parsed, using the JS parser written by Mihai Bazon for the [https://github.com/mishoo/UglifyJS UglifyJS project]
  * 3. The text from the file is rebuilt from the parse tree.  At the start of any block of code, a line like 
  * __s("foo.js", 3) is added.  When this block runs, this function call will increment the counter for block 3 
  * in foo.js.
@@ -99,7 +99,7 @@ var utils = steal.instrument.utils,
 extend(steal.instrument, {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
-	ignores: steal.options.instrumentIgnore || utils.parentWin().steal.options.instrumentIgnore || [],
+	ignores: steal.options.instrument || utils.parentWin().steal.options.instrument || [],
 	/**
 	 * Calculates block and line coverage information about each file and the entire collection.  Call this 
 	 * when you are ready to display a coverage report, like:
@@ -120,7 +120,7 @@ extend(steal.instrument, {
 			total: {}
 		};
 		for(var fileName in cov){
-			var lines = steal.instrument.lineCoverage(steal.instrument.files[fileName], cov[fileName].blocksCovered);
+			var lines = steal.instrument.lineCoverage(cov[fileName], cov[fileName].blocksCovered);
 			stats.files[fileName] = lines;
 		}
 		var totalLines = 0,
@@ -265,9 +265,11 @@ extend(steal.instrument, {
 				utils.globalEval(code);
 				success();
 			}
-		if(utils.shouldIgnore(fileName) || 
-			location.host !== steal.File(options.originalSrc).domain() ||  
-			options.type != "js"){
+		if(utils.shouldIgnore(fileName) ||  
+			options.type != "js" || 
+			// if both are file: URLs its fine, otherwise make sure its the same domain
+			(!(location.protocol == "file:" && steal.File(options.originalSrc).protocol() == "file:") &&
+				location.host !== steal.File(options.originalSrc).domain())){
 			return origJSConverter.apply(this, arguments);
 		}	
 		if(instrumentation){
@@ -313,8 +315,12 @@ if(typeof steal.instrument.ignores === "string"){
 }
 
 // defaults to this if nothing provided
-if(!steal.instrument.ignores.length){
-	steal.instrument.ignores = ["jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui"]
+for(var i=0; i<steal.instrument.ignores.length; i++){
+	if(steal.instrument.ignores[i] === "!jmvc"){
+		// remove it and add jmvc files
+		steal.instrument.ignores.splice(i, 1, "jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui");
+		
+	}
 }
 
 steal.type("js", steal.instrument.jsConvert)

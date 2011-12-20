@@ -1,4 +1,4 @@
-steal.options.instrumentIgnore = ["funcunit"];
+steal.options.instrument = ["funcunit"];
 steal("funcunit/qunit")
 .then("steal/instrument").then(function(){
 
