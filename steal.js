@@ -762,11 +762,8 @@
 				// the current
 				joiner,  
 				initial = [],
-				
 				isProduction = steal.options.env == 'production',
-				
 				files = [],
-				
 				// a helper that basically does a join
 				// when everything in arr's func method is called,
 				// call func2 on obj
@@ -783,24 +780,44 @@
 					each(items, function(i, item){
 						when(obj, func, item, func2)
 					})
-				};
-			
-			
-			//now go through what you stole and hook everything up
-			//BUT, we go through backwards
+				},
+				map = function(arr, cb){
+					var ret = [];
+					for (var i =0, length = arr.length; i < length; i++ ) {
+						var val = cb( arr[ i ], i );
+						if ( val ) {
+							ret[ ret.length ] = val;
+						}
+					}
+					return ret.concat.apply( [], ret );
+				},
+				stealInstances = [];
+
+			// iterate through the collection and add all the 'needs' before fetching...
 			each(myqueue.reverse(), function(i, item){
-				
-				//in production, ignore ignored items (like steal/dev
+					
 				if(isProduction && item.ignore){
 					return;
 				}
-				
+					
 				// make a steal object
-				stel = steal.p.make( item );
+				stel = steal.p.make(item);
+				
+				//has to happen before 'needs' for when reversed...
+				stealInstances.push(stel);
+
+				if(stel.options.needs){
+					stealInstances.push.apply(stealInstances, map(stel.options.needs, function(raw){
+						// add waits to the new steal need...
+						return extend(steal.p.make(raw), { waits: true });
+					}));
+				}
+			});
+			
+			each(stealInstances, function(i, stel){
 				
 				// add it as a dependency, circular are not allowed
-				self.dependencies.unshift(stel)
-				
+				self.dependencies.unshift(stel);
 				
 				if(stel.waits === false){ // file
 					// on the current 
@@ -829,10 +846,10 @@
 						whenThe(stel,"complete", files.length ? files : [joiner] ,"load")
 						
 					}
+					
 					// the joiner is the previous thing
 					joiner = stel;
 					files = [];
-					
 				}
 			});
 			
@@ -1334,7 +1351,9 @@ steal.type("js", function(options, success, error){
 				script[ STR_ONERROR ] = error;
 			}
 		}
+		
 		script.src = options.src;
+		//script.async = false;
 		script.onSuccess = success;
 	}
 		
@@ -1478,7 +1497,55 @@ request = function(options, success, error){
 };
 
 
+	//  ============================== Packages ===============================
 
+	/**
+	 * Packages handles defining components for deferred downloading.
+	 *
+	 * This is a empty function used to prevent 'undefined' during
+	 * development mode.  At production build time, the build script
+	 * will read this for defining the packages.
+	 * 
+	 * 		steal.packages('tasks','dashboard','fileman');
+	 * 
+	 */
+	steal.packages = function(){  };
+	
+	//  =============================== Extensions ==============================
+	
+	// key/value pairs of name and src of engine name and src
+	// example: { 'less': '/steal/less/less.js' }
+	var extensions = {
+		'less': 'steal/less/less.js',
+		'coffee': 'steal/coffee/coffee.js'
+	};
+	
+	/**
+	 * Adds an extension to the extension mappings lib.
+	 * @param {String} name of engine
+	 * @param {String} src to engine
+	 */
+	steal.addExtensionEngine = function(name, src){
+		if(!extensions[name]){
+			extensions[name] = src;
+		}
+	};
+	
+	/**
+	 * Modifies 'needs' property after 'makeOptions' to add
+	 * necessary depedencies for the file extensions.
+	 */
+	steal.makeOptions = after(steal.makeOptions,function(raw){
+		raw.ext = File(raw.src).ext();
+
+		if(extensions[raw.ext]){
+			if(!raw.needs){
+				raw.needs = [];
+			}
+			
+			raw.needs.push(extensions[raw.ext]);
+		}
+	});
 
 	//  =============================== MAPPING ===============================
 	var insertMapping = function(p){
