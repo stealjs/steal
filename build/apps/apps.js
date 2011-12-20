@@ -17,157 +17,13 @@ steal('steal/build', function( steal ) {
 
 	// recursively goes through steals and their dependencies.
 	
-	// only add files to files, but recurse through fns
-	var addDependencies = function( steel, files, app ) {
-		// check if a fn ...
+	
 		
-		var rootSrc = steel.options.rootSrc,
-			buildType = steel.options.buildType;
-		
-		
-		//add self to files
-		if (!files[rootSrc] ) {
-
-			var source = steel.options.text ||  readFile( steel.options.rootSrc );
-			if ( steel.buildType != 'fn' && steal.build.types[buildType] ) {
-
-				source = steal.build.types[buildType]({
-					text: source,
-					id: steal.cleanId( rootSrc )
-				});
-				print(" converting " + rootSrc + " ");
-			} else {
-				print(" compressing " + rootSrc + " ");
-
-			}
-			if(steel.options.buildType == 'js' && !steel.options.text) {
-				source = steal.build.builders.scripts.clean(source);
-				source = "" + steal.build.compressor(source, true);
-			}
-			
-			//need to convert to other types.
-
-			files[rootSrc] = {
-				path: rootSrc,
-				apps: [],
-				dependencies: {},
-				size: source.length,
-				packaged: false,
-				source: source
-			}
-		}
-
-		var data = files[rootSrc];
-		// don't add the same app more than once
-		if(data.apps.indexOf(app) == -1){
-			data.apps.push(app);
-		}
-		for ( var d = 0; d < steel.dependencies.length; d++ ) {
-			var dependency = steel.dependencies[d];
-			if ( dependency.dependencies && dependency.options.buildType != 'fn' && ! dependency.options.ignore) { //this dependency was actually loaded
-				data.dependencies[dependency.options.rootSrc] = addDependencies(dependency, files, app);
-			}
-		}
-		return data;
-	},
-		/**
-		 * Adds an order to a directed acyclic graph 
-		 * @param {Object} appFiles
-		 */
-		orderFiles = function( appFiles ) {
-			var order = 0
-
-			function visit( f ) {
-				if ( f.order === undefined ) {
-					for ( var name in f.dependencies ) {
-						visit( f.dependencies[name] )
-					}
-					f.order = (order++);
-				}
-			}
-			for ( var d = 0; d < appFiles.length; d++ ) {
-				visit(appFiles[d])
-			}
-		},
-		/**
-		 * @hide
-		 * Goes through the files
-		 * @param {Object} files
-		 * @return {Object} like:
-		 * 
-		 * {
-		 *   // apps that need this
-		 *   apps : ['cookbook','mxui/grid','mxui/data/list'],
-		 *   files : [{file1}, {file2}]
-		 * }
-		 */
-		getMostShared = function( files ) {
-			
-			// an array of objects
-			var shared = []; // count
-			
-			for ( var fileName in files ) {
-				
-				var file = files[fileName];
-				
-				
-				if ( file.packaged ) {
-					continue;
-				}
-				
-				if (!shared[file.apps.length] ) {
-					shared[file.apps.length] = {};
-				}
-				
-				//how many apps it is shared in (5?)
-				var level = shared[file.apps.length]; 
-
-				var appsName = file.apps.sort().join();
-
-
-
-				if (!level[appsName] ) {
-					
-					level[appsName] = {
-						totalSize: 0,
-						files: [],
-						apps: file.apps
-					};
-					
-				}
-				//add file, the count is how many files are shared among this many apps
-				level[appsName].files.push(file);
-				level[appsName].totalSize += file.size;
-			}
-			
-			if (!shared.length ) {
-				return null;
-			}
-			//get the most
-			var mostShared = shared.pop(),
-				mostSize = 0,
-				most;
-				
-				
-			for ( var apps in mostShared ) {
-				if ( mostShared[apps].totalSize > mostSize ) {
-					most = mostShared[apps];
-					mostSize = most.totalSize;
-				}
-			}
-			//mark files 
-			for ( var i = 0; i < most.files.length; i++ ) {
-				var f = most.files[i];
-				f.packaged = true;
-			}
-			return most;
-		}
 		/**
 		 * 
 		 * 
 		 */
 		steal.build.apps = function( list, options ) {
-			
 			
 			options = steal.opts(options || {}, {
 				//compress everything, regardless of what you find
@@ -222,14 +78,12 @@ steal('steal/build', function( steal ) {
 				} else {
 					makePackages();
 				}
-				
-				
 			},
 			makePackages = function(){
 				print("Making packages")
 				//add an order so we can sort them nicely
 				
-				orderFiles(appFiles);
+				apps.orderFiles(appFiles);
 	
 				// will be set to the biggest group
 				var pack,
@@ -257,7 +111,7 @@ steal('steal/build', function( steal ) {
 				}
 	
 				//while there are files left to be packaged, get the most shared and largest package
-				while ((pack = getMostShared(files))) {
+				while ((pack = apps.getMostShared(files))) {
 					print('\njoining shared by ' + pack.apps.join(", "))
 	
 					
@@ -320,5 +174,182 @@ steal('steal/build', function( steal ) {
 			};
 			callNext();
 			
+		};
+		
+		
+		// only add files to files, but recurse through fns
+	steal.extend(steal.build.apps, {
+		/**
+		 * 
+		 * @param {Object} steel
+		 * @param {Object} files - a files mapping object that looks like
+		 * 
+		 *     {
+		 *        "jquery/controller/controller.js" : {
+		 *           path: "jquery/controller/controller.js", // path of file
+		 *  		 apps: [], // the apps this is on
+		 *  		 dependencies: {
+		 *  		   "jquery/class/class.js" : {}
+		 *  		 }, // 
+		 *  		 size: source.length,
+		 *  		 packaged: false,
+		 *  		 source: source
+		 *        }
+		 *     }
+		 *     
+		 * order gets added later
+		 * 
+		 * @param {Object} app - 
+		 */
+		addDependencies: function( steel, files, app ) {
+			// check if a fn ...
+			
+			var rootSrc = steel.options.rootSrc,
+				buildType = steel.options.buildType;
+			
+			
+			//add self to files
+			if ( !files[rootSrc] ) {
+				
+				print(" compressing " + rootSrc + " ");
+				
+				//clean and minifify everything right away ...
+				if( steel.options.buildType != 'fn' ) {
+					// some might not have source yet
+					var source = steel.options.text ||  readFile( rootSrc );
+					source = steal.build.builders[buildType].clean(source);
+					steel.options.text = steal.build.builders[buildType].minify(source);
+				}
+				
+				//need to convert to other types.
+	
+				files[rootSrc] = {
+					steal: steel.options,
+					apps: [],
+					dependencies: {},
+					packaged: false
+				}
+			}
+	
+			var data = files[rootSrc];
+			// don't add the same app more than once
+			if(data.apps.indexOf(app) == -1){
+				data.apps.push(app);
+			}
+			steel.dependencies.forEach(function(dependency){
+				if ( dependency.dependencies && 
+				     dependency.options.buildType != 'fn' && 
+					 !dependency.options.ignore) {
+					 	
+					data.dependencies[dependency.options.rootSrc] = arguments.callee(dependency, files, app);
+				}
+			})
+			
+			return data;
+		},
+		
+		orderFiles: function( appFiles ) {
+			var order = 0
+
+			function visit( f ) {
+				if ( f.order === undefined ) {
+					for ( var name in f.dependencies ) {
+						visit( f.dependencies[name] )
+					}
+					f.order = (order++);
+				}
+			}
+			for ( var d = 0; d < appFiles.length; d++ ) {
+				visit(appFiles[d])
+			}
+		},
+		/**
+		 * @hide
+		 * Goes through the files
+		 * @param {Object} files
+		 * @return {Object} like:
+		 * 
+		 * {
+		 *   // apps that need this
+		 *   apps : ['cookbook','mxui/grid','mxui/data/list'],
+		 *   files : [{file1}, {file2}]
+		 * }
+		 */
+		getMostShared: function( files ) {
+			
+			// an array of objects
+			var shared = []; // count
+			
+			
+			// go through each file
+			// find the 'most' shared one
+			// package that
+			for ( var fileName in files ) {
+				
+				var file = files[fileName];
+				
+				
+				if ( file.packaged ) {
+					continue;
+				}
+				// shared is like:
+				// {
+				//    1: {
+				//       'foo' : 
+				//    },
+				//    2 : {
+				//       'foo,bar' : {totalSize: 1231, files: [], apps: ['foo','bar']}
+				//       'bar,car': 
+				//    }
+				if (!shared[file.apps.length] ) {
+					shared[file.apps.length] = {};
+				}
+				
+				//how many apps it is shared in (5?)
+				var level = shared[file.apps.length]; 
+
+				var appsName = file.apps.sort().join();
+
+
+
+				if (!level[appsName] ) {
+					//
+					level[appsName] = {
+						totalSize: 0,
+						files: [],
+						apps: file.apps
+					};
+					
+				}
+				//add file, the count is how many files are shared among this many apps
+				level[appsName].files.push(file);
+				level[appsName].totalSize += file.size;
+			}
+			
+			if (!shared.length ) {
+				return null;
+			}
+			//get the most
+			var mostShared = shared.pop(),
+				mostSize = 0,
+				most;
+				
+				
+			for ( var apps in mostShared ) {
+				if ( mostShared[apps].totalSize > mostSize ) {
+					most = mostShared[apps];
+					mostSize = most.totalSize;
+				}
+			}
+			//mark files 
+			for ( var i = 0; i < most.files.length; i++ ) {
+				var f = most.files[i];
+				f.packaged = true;
+			}
+			return most;
 		}
+	})
+	
+		
+		
 })

@@ -164,4 +164,4 @@ steal(function( steal ) {
 	
 	
 
-}).then('steal/build/open.js');
+}).then('steal/build/open');
