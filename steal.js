@@ -1499,7 +1499,7 @@ request = function(options, success, error){
 	 * 		steal.packages('tasks','dashboard','fileman');
 	 * 
 	 */
-	steal.packages = function(){  };
+	steal.packages = function(){ return this; };
 	
 	//  =============================== Extensions ==============================
 	
