@@ -2,15 +2,7 @@ steal('steal/build', function( steal ) {
 
 /**
  * 
- * Files : a map of fileName to :
- * {
- *   path: rootSrc,
- *   apps: [],
- *   dependencies: {},
- *   size: source.length,
- *   packaged: false,
- *   source: source
- * }
+ * ### shared
  */
 	
 // { "//foo.js" : {} }
@@ -31,18 +23,9 @@ steal('steal/build', function( steal ) {
 				//folder to build to, defaults to the folder the page is in
 				to: 1
 			});
+			
 			// set the compressor globally
 			steal.build.compressor = steal.build.builders.scripts.compressors[options.compressor || "localClosure"]();
-
-			//a list of files hashed by their path
-			var files = {},
-
-				//keeps track of the packages an app needs
-				apps = {},
-
-				//a list of the apps (top most dependencies)
-				appFiles = [];
-
 			//set defaults
 			options.depth = options.depth || 2;
 			options.to = options.to || "packages/"
@@ -52,18 +35,29 @@ steal('steal/build', function( steal ) {
 				var dir = dest.dir();
 				dest.mkdir();
 			}
+			
+			//a list of files hashed by their path
+			var files = {},
+
+				//keeps track of the packages an app needs
+				appNames = [],
+
+				//a list of the apps (top most dependencies)
+				appFiles = [];
+
+			
 
 			//go through, open each app, and make dependency graph
 			
-			var make = function(app){
-				var startFile = app + "/" + steal.File(app).basename() + ".js"
+			var make = function(appName){
+				var startFile = appName + "/" + steal.File(appName).basename() + ".js"
 
 				steal.build.open('steal/rhino/blank.html', {
 						startFile: startFile
 				}, function(opener){
 					
-					appFiles.push(  addDependencies(opener.firstSteal.dependencies[1], files, app )  );
-					apps[app] = [];
+					appFiles.push(  addDependencies(opener.firstSteal.dependencies[1], files, appName )  );
+					appNames.push(appName);
 
 					callNext();
 				})
@@ -79,99 +73,7 @@ steal('steal/build', function( steal ) {
 					makePackages();
 				}
 			},
-			makePackages = function(){
-				print("Making packages")
-				//add an order so we can sort them nicely
-				
-				apps.orderFiles(appFiles);
-	
-				// will be set to the biggest group
-				var pack,
-					//the package number
-					packageCount = 0,
-					/*
-					 * Packages that an app should have
-					 * {
-					 *   'cookbook' : ['packages/0.js']
-					 * } 
-					 */
-					appsPackages = {},
-					/*
-					 * Files a package has
-					 * {
-					 *   'packages/0.js' : ['jquery/jquery.js']
-					 * }
-					 */
-					packagesFiles = {};
-					;
-	
-				// make an array for each app in appsPackages
-				for(var appName in apps){
-					appsPackages[appName] = [];
-				}
-	
-				//while there are files left to be packaged, get the most shared and largest package
-				while ((pack = apps.getMostShared(files))) {
-					print('\njoining shared by ' + pack.apps.join(", "))
-	
-					
-					var appsName = pack.apps[0],
-					// the name of the file we are making.  
-					//  If there is only one app it's an app's production.js
-					//  If there are multiple apps, it's a package
-						saveFile = pack.apps.length == 1 ? 
-										appsName + "/production.js" : 
-										"packages/" + packageCount + ".js"
-					
-					// if there's multiple apps (it's a package), add this to appsPackages for each app
-					if( pack.apps.length > 1) {
-						pack.apps.forEach(function(appName){
-							appsPackages[appName].push(saveFile)
-						})
-					}
-					
-					// order the files by when they should be included
-					var ordered = pack.files.sort(function( f1, f2 ) {
-						return f1.order - f2.order;
-					});
-					
-					// add the files to this package
-					packagesFiles[saveFile] =[];
-					
-					// what we will sent to js.makePackage
-					var filesForPackaging = []; 
-					
-					ordered.forEach(function(file){
-						packagesFiles[saveFile].push(file.path);
-						filesForPackaging.push({
-							rootSrc : file.path,
-							content: file.source
-						})
-						print("  " + file.order + ":" + file.path);
-					});
-					
-					// create dependencies object
-					var dependencies = {};
-					if( pack.apps.length == 1) {
-						appsPackages[appsName].forEach(function(packageName){
-							dependencies[packageName] = packagesFiles[packageName].slice(0)
-						})
-					}
-					
-					//the source of the package
-					var source = steal.build.builders.scripts.makePackage(filesForPackaging, dependencies)
-	
-					
-	
-					//save the file
-					print("saving " + saveFile);
-					steal.File(saveFile).save( source );
-	
-					
-					packageCount++;
-				}
-
-			};
+			;
 			callNext();
 			
 		};
@@ -180,104 +82,145 @@ steal('steal/build', function( steal ) {
 		// only add files to files, but recurse through fns
 	steal.extend(steal.build.apps, {
 		/**
+		 * Gets a steal instance and recursively sets up a __files__ object with 
+		 * __file__ objects for each steal that represents a resource (not a function).
 		 * 
-		 * @param {Object} steel
-		 * @param {Object} files - a files mapping object that looks like
+		 * A __file__ object is a recursive mapping of a steal 
+		 * instances's options and dependencies.  Different apps have different
+		 * steal instances for the same resource.  This _should_ be merging those attributes
+		 * and maintaining a collection of the apps the file exists on.
 		 * 
 		 *     {
-		 *        "jquery/controller/controller.js" : {
-		 *           path: "jquery/controller/controller.js", // path of file
-		 *  		 apps: [], // the apps this is on
-		 *  		 dependencies: {
-		 *  		   "jquery/class/class.js" : {}
-		 *  		 }, // 
-		 *  		 size: source.length,
-		 *  		 packaged: false,
-		 *  		 source: source
-		 *        }
+		 *       // the apps this steal is on
+		 *       appsNames: [], 
+		 *       dependencyFileNames: [ "jquery/class/class.js" ], 
+		 *       packaged: false,
+		 *       stealOpts: steal.options
 		 *     }
-		 *     
-		 * order gets added later
 		 * 
-		 * @param {Object} app - 
+		 * A __files__ object maps each file's location to a file.
+		 * 
+		 *     {
+		 *       "jquery/controller/controller.js" : file1,
+		 *       "jquery/class/class.js" : file2
+		 *     }
+		 * 
+		 * @param {steal} steel a steal instance
+		 * @param {Object} files the files mapping that gets filled out
+		 * @param {String} appName the appName
+		 * @return {file} the root dependency file for this application
 		 */
-		addDependencies: function( steel, files, app ) {
+		addDependencies: function( steel, files, appName ) {
 			// check if a fn ...
 			
 			var rootSrc = steel.options.rootSrc,
-				buildType = steel.options.buildType;
-			
-			
-			//add self to files
-			if ( !files[rootSrc] ) {
+				buildType = steel.options.buildType,
 				
-				print(" compressing " + rootSrc + " ");
+				file = maker(files, rootSrc, function(){
 				
-				//clean and minifify everything right away ...
-				if( steel.options.buildType != 'fn' ) {
-					// some might not have source yet
-					var source = steel.options.text ||  readFile( rootSrc );
-					source = steal.build.builders[buildType].clean(source);
-					steel.options.text = steal.build.builders[buildType].minify(source);
-				}
-				
-				//need to convert to other types.
-	
-				files[rootSrc] = {
-					steal: steel.options,
-					apps: [],
-					dependencies: {},
-					packaged: false
-				}
-			}
-	
-			var data = files[rootSrc];
-			// don't add the same app more than once
-			if(data.apps.indexOf(app) == -1){
-				data.apps.push(app);
+					print(" compressing " + rootSrc + " ");
+					
+					//clean and minifify everything right away ...
+					if( steel.options.buildType != 'fn' ) {
+						// some might not have source yet
+						var source = steel.options.text ||  readFile( rootSrc );
+						source = steal.build.builders[buildType].clean(source);
+						steel.options.text = steal.build.builders[buildType].minify(source);
+					}
+					
+					// this becomes data
+					return {
+						// todo, might need to merge options
+						// what if we should not 'steal' it?
+						stealOpts: steel.options,
+						appNames: [],
+						dependencyFileNames: [],
+						packaged: false
+					}
+					
+				})
+
+			// don't add the same appName more than once
+			if(file.appNames.indexOf(appName) == -1){
+				file.appNames.push(appName);
 			}
 			steel.dependencies.forEach(function(dependency){
 				if ( dependency.dependencies && 
 				     dependency.options.buildType != 'fn' && 
 					 !dependency.options.ignore) {
-					 	
-					data.dependencies[dependency.options.rootSrc] = arguments.callee(dependency, files, app);
+					 
+					file.dependencyFileNames.push(dependency.options.rootSrc)
+					 
+					arguments.callee(dependency, files, appName);
 				}
-			})
+			});
 			
-			return data;
+			return file;
 		},
 		
-		orderFiles: function( appFiles ) {
+		orderFiles: function( appFiles, files ) {
 			var order = 0
 
 			function visit( f ) {
 				if ( f.order === undefined ) {
-					for ( var name in f.dependencies ) {
-						visit( f.dependencies[name] )
-					}
+					f.dependencyFileNames.forEach(function(fileName){
+						visit( files[fileName] )
+					})
 					f.order = (order++);
 				}
 			}
-			for ( var d = 0; d < appFiles.length; d++ ) {
-				visit(appFiles[d])
-			}
+			appFiles.forEach(function(file){
+				visit(file)
+			});
 		},
 		/**
 		 * @hide
-		 * Goes through the files
-		 * @param {Object} files
-		 * @return {Object} like:
 		 * 
-		 * {
-		 *   // apps that need this
-		 *   apps : ['cookbook','mxui/grid','mxui/data/list'],
-		 *   files : [{file1}, {file2}]
-		 * }
+		 * Goes through the files, makes a __shared__ array of 
+		 * __sharedSets__. Each
+		 * sharedSet is a collection of __sharings__.  It then
+		 * takes the last __sharedSet__, finds the __sharing__
+		 * with the largest totalSize, and returns that
+		 * __sharing__.
+		 * 
+		 * A __sharing__ is a collection of files that are shared between some
+		 * set of applications.  A 2-order sharing might look like:
+		 * 
+		 *     {totalSize: 1231, files: [file1, file2], appNames: ['foo','bar']}
+		 * 
+		 * A sharedSet is collection of sharings that are all shared the 
+		 * same number of times (order).  For example, a sharedSet might have all
+		 * 4-order 'sharings', that is files that are shared between 
+		 * 4 applications.  A 2 order sharedSet might look like:
+		 * 
+		 *     {
+		 *       'foo,bar' : {totalSize: 1231, files: [], appNames: ['foo','bar']}
+		 * 	     'bar,car': : {totalSize: 31231, files: [], appNames: ['bar','car']}
+		 *     }
+		 * 
+		 * The __shared__ array is an collection of sharedSets ordered by the
+		 * order-number (the number of times a file is shared by an application).
+		 * 
+		 * ## How it works
+		 * 
+		 * getMostShared is designed to be called until all files have been
+		 * marked packaged.  Thus, it changes the files by marking files 
+		 * as packaged.
+		 * 
+		 * @param {Object} files - the files object.  
+		 * @return {sharing} The sharing object:
+		 * 
+		 *     {
+		 *       // apps that need this
+		 *       appNames : ['cookbook','mxui/grid','mxui/data/list'],
+		 *       files : [{file1}, {file2}]
+		 *     }
 		 */
 		getMostShared: function( files ) {
 			
-			// an array of objects
+			// create an array of sharedSets
+			// A shared set is 
+			// a collection of 
 			var shared = []; // count
 			
 			
@@ -293,63 +236,196 @@ steal('steal/build', function( steal ) {
 					continue;
 				}
 				// shared is like:
-				// {
+				// [
 				//    1: {
 				//       'foo' : 
 				//    },
 				//    2 : {
-				//       'foo,bar' : {totalSize: 1231, files: [], apps: ['foo','bar']}
+				//       'foo,bar' : {totalSize: 1231, files: [], appNames: ['foo','bar']}
 				//       'bar,car': 
 				//    }
-				if (!shared[file.apps.length] ) {
-					shared[file.apps.length] = {};
-				}
-				
-				//how many apps it is shared in (5?)
-				var level = shared[file.apps.length]; 
-
-				var appsName = file.apps.sort().join();
-
-
-
-				if (!level[appsName] ) {
-					//
-					level[appsName] = {
-						totalSize: 0,
-						files: [],
-						apps: file.apps
-					};
+				//  get an object to represent combinations
+				var sharedSet = maker(shared, file.appNames.length, {}),
 					
-				}
-				//add file, the count is how many files are shared among this many apps
-				level[appsName].files.push(file);
-				level[appsName].totalSize += file.size;
+					// a name for the combo
+					appsName = file.appNames.sort().join(),
+					// a pack is data for a specific appNames combo
+					sharing = maker(sharedSet, appsName, function(){
+						return {
+							totalSize: 0,
+							files: [],
+							appNames: file.appNames
+						}
+					});
+				
+				sharing.files.push(file);
+				sharing.totalSize += file.stealOpts.text.length;
 			}
 			
 			if (!shared.length ) {
 				return null;
 			}
-			//get the most
+			// get the highest shared number
 			var mostShared = shared.pop(),
 				mostSize = 0,
 				most;
 				
-				
+			// go through each app combo, get the one that has
+			// the bigest size
 			for ( var apps in mostShared ) {
 				if ( mostShared[apps].totalSize > mostSize ) {
 					most = mostShared[apps];
 					mostSize = most.totalSize;
 				}
 			}
-			//mark files 
-			for ( var i = 0; i < most.files.length; i++ ) {
-				var f = most.files[i];
+			//mark files as packaged
+			most.files.forEach(function(f){
 				f.packaged = true;
-			}
+			});
+			
 			return most;
+		},
+		/**
+		 * Creates packages that can be downloaded.
+		 * 
+		 * Recursively uses getMostShared to pull out
+		 * the largest __sharing__.  It 
+		 * makes a package of the sharing and marks
+		 * the apps that need that sharing.
+		 * 
+		 * The apps that need the sharing
+		 * 
+		 * packages are mostly dummy things.  
+		 * 
+		 * a production file might steal multiple packages.
+		 * 
+		 * say package A and package B
+		 * 
+		 * say package A has jQuery
+		 * 
+		 * so, the production file has code like:
+		 * 
+		 * steal('jquery')
+		 * 
+		 * It needs to know to not load jQuery
+		 * 
+		 * this is where 'has' comes into place
+		 * 
+		 * steal({src: 'packageA', has: 'jquery'})
+		 * 
+		 * This wires up steal to wait until package A is finished for jQuery.
+		 * 
+		 * So, we need to know all the packages and app needs, and all the things in that package.
+		 * 
+		 * @param {appFiles} appFiles
+		 * @param {files} files
+		 */
+		makePackages: function(appFiles, files){
+			
+			print("Making packages")
+			
+			//add an order number so we can sort them nicely
+			apps.orderFiles(appFiles, files);
+
+			// will be set to the biggest group
+			var sharing,
+				//the package number
+				packageCount = 0,
+				/*
+				 * Packages that an app should have
+				 * {
+				 *   'cookbook' : ['packages/0.js']
+				 * } 
+				 */
+				appsPackages = {},
+				/*
+				 * Files a package has
+				 * {
+				 *   'packages/0.js' : ['jquery/jquery.js']
+				 * }
+				 * this is used to mark all of these
+				 * things as loading, so steal doesn't try to load them
+				 * b/c the package is loading
+				 */
+				packagesFiles = {};
+
+			// make an array for each appName that will contain the packages
+			// it needs to load
+			appFiles.forEach(function(file){
+				appsPackages[file.stealOpts.rootSrc] = [];
+			})
+
+			//while there are files left to be packaged, get the most shared and largest package
+			while ((sharing = apps.getMostShared(files))) {
+				
+				print('\npackaging shared by ' + sharing.apps.join(", "))
+
+				
+				var appsName = sharing.apps[0],
+				//  the name of the file we are making.  
+				//    If there is only one app it's an app's production.js
+				//    If there are multiple apps, it's a package
+					packageName = sharing.apps.length == 1 ? 
+									appsName + "/production.js" : 
+									"packages/" + packageCount + ".js"
+				
+				// if there's multiple apps (it's a package), add this to appsPackages for each app
+				if( sharing.apps.length > 1) {
+					sharing.apps.forEach(function(appName){
+						appsPackages[appName].push(packageName)
+					})
+				}
+				
+				// order the files by when they should be included
+				var ordered = sharing.files.sort(function( f1, f2 ) {
+					return f1.order - f2.order;
+				});
+				
+				// add the files to this package
+				packagesFiles[packageName] =[];
+				
+				// what we will sent to js.makePackage
+				var filesForPackaging = []; 
+				
+				ordered.forEach(function(file){
+					packagesFiles[packageName].push(file.steal.rootSrc);
+					filesForPackaging.push(file.steal)
+					print("  " + file.order + ":" + file.steal.rootSrc);
+				});
+				
+				// create dependencies object
+				var dependencies = {};
+				if( sharing.apps.length == 1) {
+					appsPackages[appsName].forEach(function(packageName){
+						dependencies[packageName] = packagesFiles[packageName].slice(0)
+					})
+				}
+				
+				//the source of the package
+				//
+				var source = steal.build.js.makePackage(filesForPackaging, dependencies)
+
+				
+
+				//save the file
+				print("saving " + packageName);
+				steal.File(packageName).save( source );
+
+				
+				packageCount++;
+			}
+
 		}
 	})
 	
 		
-		
+	var maker = function(root, prop, raw, cb){
+		if(!root[prop]){
+			root[prop] = ( typeof raw === 'object' ?
+				steal.extend({},raw) :
+				raw() );
+		}
+		cb && cb( root[prop] )
+		return root[prop];
+	}
 })

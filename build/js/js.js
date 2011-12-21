@@ -11,7 +11,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 	 *   * __all__ - compress all scripts
 	 * @param {Object} dependencies array of files and the dependencies they contain under the hood
 	 */
-	var js = (steal.build.builders.js = function( opener, options, dependencies ) {
+	var js = (steal.build.js = function( opener, options, dependencies ) {
 		options.compressor = options.compressor || "localClosure";
 		steal.print("\nBUILDING SCRIPTS --------------- ");
 		var start = new Date();
@@ -140,5 +140,84 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 		}
 	});
 	
-	
+	/**
+	 * Create package's content.
+	 * 
+	 * @param {Array} files like:
+	 * 
+	 *     [{rootSrc: "jquery/jquery.js", text: "var a;", baseType: "js"}]
+	 * 
+	 * @param {Object} dependencies like:
+	 * 
+	 *      {"package/package.js": ['jquery/jquery.js']}
+	 *      
+	 * essentially, things that depend on the things in the package will
+	 * wait until the package has been loaded
+	 * 
+	 * @param {String} cssPackage the css package name, added as dependency if
+	 * there is css in files.
+	 * 
+	 * @return {Object} an object with the css and js 
+	 * code that make up this package unminified
+	 * 
+	 *     {
+	 *       js: "steal.loading('plugin1','plugin2', ... )"+
+	 *           "steal({src: 'package/package.js', has: ['jquery/jquery.js']})"+
+	 *           "plugin1 content"+
+	 *           "steal.loaded('plugin1')",
+	 *       css : "concated css content"
+	 *     }
+	 * 
+	 */
+	js.makePackage = function(files, dependencies, cssPackage){
+		
+		// put it somewhere ...
+		// add to dependencies ...
+		
+		// seperate out css and js
+		var jses = [],
+			csses = [];
+		
+		files.forEach(function(file){
+			if(file.buildType == 'js'){
+				jses.push(file)
+			} else if(file.buildType == 'css'){
+				csses.push(file)
+			}
+		})
+		// add to dependencies
+		if(csses.length){
+			dependencies[cssPackage] = csses.map(function(css){
+				return css.rootSrc;
+			})
+		}
+		
+		// this now needs to handle css and such
+		var loadingCalls = jses.map(function(file){
+			return file.rootSrc;
+		});
+		
+		//create the dependencies ...
+		var dependencyCalls = [];
+		for (var key in dependencies){
+			dependencyCalls.push( 
+				"steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']})"
+			)
+		}
+		
+		// make 'loading'
+		var code = ["steal.loading('"+loadingCalls.join("','")+"')"];
+		// add dependencies
+		code.push.apply(code, dependencyCalls);
+		
+		// add js code
+		jses.forEach(function(file){
+			code.push( file.text, "steal.loaded('"+file.rootSrc+"')" );
+		});
+		
+		return {
+			js: code.join(";\n") + "\n",
+			css: csses.map(function(css){ return css.text }).join('\n')
+		}
+	}
 }).then('./jsminify');

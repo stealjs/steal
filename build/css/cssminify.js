@@ -233,11 +233,11 @@ steal(function( steal ) {
 	 * @param {String} source
 	 * @param {Object} options - not used
 	 */
-    steal.build.builders.css.minify = function( source, options ) {
+    steal.build.css.minify = function( source, options ) {
         //remove comments & minify
         return YAHOO.compressor.cssmin(source);
     }
-	steal.build.builders.css.clean = function(source){
+	steal.build.css.clean = function(source){
 		return source;
 	}
 });

@@ -8,7 +8,7 @@ steal('steal/build').then(function( steal ) {
 	 * 
 	 *   - __to__ where the css should be built.
 	 */
-	var css = (steal.build.builders.css = function( opener, options ) {
+	var css = (steal.build.css = function( opener, options ) {
 		steal.print("\nBUILDING STYLES --------------- ");
 		//where we are putting stuff
 		var folder = options.to.substr(0, options.to.length - 1),
