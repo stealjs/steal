@@ -8,17 +8,7 @@ then
   java -cp steal/rhino/js.jar:funcunit/java/selenium-java-client-driver.jar org.mozilla.javascript.tools.shell.Main
   exit 127
 fi
-if [ $1 = "-selenium" ]
-then
-  java -jar funcunit/java/selenium-server-standalone-2.0b3.jar
-  exit 127
-fi
 CP=funcunit/java/selenium-java-client-driver.jar:steal/rhino/js.jar
-if [ $1 = "-mail" ]
-then
-	CP=steal/rhino/mail.jar:funcunit/java/selenium-java-client-driver.jar:steal/rhino/js.jar
-	shift
-fi
 
 ERRORLEV=0
 if [ $1 = "-e" ]
