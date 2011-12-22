@@ -1,197 +1,13 @@
 (function(){
 
-	// D is for deferred
-	(function(global) {
-		function bind(fn, that, ret) {
-			return function() {
-				if (ret) {
-					fn.apply(that, arguments);
-					return ret;
-				}
-				else
-					return fn.apply(that, arguments);
-			};
-		}
-	
-		function D(func) {
-			if (!(this instanceof D))
-				return new D();
-	
-			this.doneFuncs = [];
-			this.failFuncs = [];
-			this.resultArgs = null;
-			this.status = '';
-	
-			// check for option function: call it with this as context and as first parameter, as specified in jQuery api
-			if (func)
-				func.apply(this, [this]);
-		}
-	
-		D.when = function() {
-			if (arguments.length < 2) {
-				var obj = arguments.length ? arguments[0] : undefined;
-				if (obj && (typeof obj.isResolved === 'function' && typeof obj.isRejected === 'function')) {
-					return obj;			
-				}
-				else {
-					return D().resolve(obj);
-				}
-			}
-			else {
-				return (function(args){
-					var df = D(),
-						size = args.length,
-						done = 0,
-						rp = new Array(size);	// resolve params: params of each resolve, we need to track down them to be able to pass them in the correct order if the master needs to be resolved
-	
-					for (var i = 0; i < args.length; i++) {
-						(function(j) {
-							args[j].done(function() { rp[j] = (arguments.length < 2) ? arguments[0] : arguments; if (++done == size) { df.resolve.apply(df, rp); /* console.log(rp); */ }})
-							.fail(function() { df.reject(arguments); });
-						})(i);
-					}
-	
-					return df;
-				})(arguments);
-			}
-		}
-	
-		D.prototype.isResolved = function() {
-			return this.status === 'rs';
-		}
-	
-		D.prototype.isRejected = function() {
-			return this.status === 'rj';
-		}
-	
-
-	
-		D.prototype.reject = function() {
-			return this.rejectWith(this, arguments);
-		}	
-	
-		D.prototype.resolve = function() {
-			return this.resolveWith(this, arguments);
-		}
-	
-		D.prototype.exec = function(context, dst, args, st) {
-			if (this.status !== '')
-				return this;
-	
-			this.status = st;
-	
-			for (var i = 0; i < dst.length; i++)
-				dst[i].apply(context, args);
-	
-			return this;
-		}
-	
-		D.prototype.resolveWith = function(context) {
-			var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
-	
-			return this.exec(context, this.doneFuncs, args, 'rs');
-		}
-	
-		D.prototype.rejectWith = function(context) {
-			var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
-	
-			return this.exec(context, this.failFuncs, args, 'rj');
-		}
-	
-		D.prototype.done = function() {
-			for (var i = 0; i < arguments.length; i++) {
-				// skip any undefined or null arguments
-				if (!arguments[i])
-					continue;
-	
-				if (arguments[i].constructor === Array ) {
-					var arr = arguments[i];
-					for (var j = 0; j < arr.length; j++) {
-						// immediately call the function if the deferred has been resolved
-						if (this.status === 'rs')
-							arr[j].apply(this, this.resultArgs);
-	
-						this.doneFuncs.push(arr[j]);
-					}
-				}
-				else {
-					// immediately call the function if the deferred has been resolved
-					if (this.status === 'rs')
-						arguments[i].apply(this, this.resultArgs);
-	
-					this.doneFuncs.push(arguments[i]);
-				}
-			}
-			
-			return this;
-		}
-	
-		D.prototype.fail = function(func) {
-			for (var i = 0; i < arguments.length; i++) {
-				// skip any undefined or null arguments
-				if (!arguments[i])
-					continue;
-	
-				if (arguments[i].constructor === Array ) {
-					var arr = arguments[i];
-					for (var j = 0; j < arr.length; j++) {
-						// immediately call the function if the deferred has been resolved
-						if (this.status === 'rj')
-							arr[j].apply(this, this.resultArgs);
-	
-						this.failFuncs.push(arr[j]);
-					}
-				}
-				else {
-					// immediately call the function if the deferred has been resolved
-					if (this.status === 'rj')
-						arguments[i].apply(this, this.resultArgs);
-	
-					this.failFuncs.push(arguments[i]);
-				}
-			}
-	
-			return this;
-		}
-	
-		D.prototype.always = function() {
-			if (arguments.length > 0 && arguments[0])
-				this.done(arguments[0]).fail(arguments[0]);
-	
-			return this;
-		}
-	
-		D.prototype.then = function() {
-			// fail function(s)
-			if (arguments.length > 1 && arguments[1])
-				this.fail(arguments[1]);
-	
-			// done function(s)
-			if (arguments.length > 0 && arguments[0])
-				this.done(arguments[0]);
-	
-			return this;
-		}
-	
-		global.Deferred = D;
-	})(window);
-
-
 	// Gets the window (even if there is none)
 	var win = (function(){return this}).call(null),
-		// String constants (for better minification)
-		STR_ONLOAD = "onload",
-		STR_ONERROR = "onerror",
-		STR_ONREADYSTATECHANGE = "onreadystatechange",
-		STR_CREATE_ELEMENT = 'createElement',
-		STR_GET_BY_TAG = 'getElementsByTagName',
-		
 		// the document ( might not exist in rhino )
 		doc = win.document,
 		
 		// creates a script tag
 		scriptTag = function() {
-			var start = doc[STR_CREATE_ELEMENT]('script');
+			var start = doc.createElement('script');
 			start.type = 'text/javascript';
 			return start;
 		},
@@ -200,10 +16,10 @@
 		head = function() {
 			var d = doc,
 				de = d.documentElement,
-				heads = d[STR_GET_BY_TAG]("head"),
+				heads = d.getElementsByTagName("head"),
 				hd = heads[0];
 			if (! hd ) {
-				hd = d[STR_CREATE_ELEMENT]('head');
+				hd = d.createElement('head');
 				de.insertBefore(hd, de.firstChild);
 			}
 			// replace head so it runs fast next time.
@@ -226,17 +42,12 @@
 			}
 			return arr;
 		},
-		map = function(arr, cb){
-			var arr2 = [];
-			each(arr, function(){
-				arr2.push(cb.call(this, this))
-			})
-			return arr2;
-		},
-		// makes an array of things
-		makeArray = function(args){
+		// makes an array of things, or a mapping of things
+		map = function(args, cb){
 			var arr = [];
-			each(args, function(i, str){arr[i] = str});
+			each(args, function(i, str){
+				arr[i] = cb ? (typeof cb=='string' ? str[cb] : cb.call(str, str)  ) : str
+			});
 			return arr;
 		},
 		// testing support for various browser behaviors
@@ -586,7 +397,7 @@
 	 */
 	function steal() {
 		// convert arguments into an array
-		var args = makeArray(arguments);
+		var args = map(arguments);
 		pending.push.apply(pending,  args);
 		// steal.after is called everytime steal is called
 		// it kicks off loading these files
@@ -595,7 +406,129 @@
 		return steal;
 	};
 	
+	// =============================== Deferred .63 ============================ 
 	
+	var Deferred = function(func) {
+		if (!(this instanceof Deferred))
+			return new Deferred();
+
+		this.doneFuncs = [];
+		this.failFuncs = [];
+		this.resultArgs = null;
+		this.status = '';
+
+		// check for option function: call it with this as context and as first parameter, as specified in jQuery api
+		if (func)
+			func.apply(this, [this]);
+	}
+	
+	Deferred.when = function() {
+		if (arguments.length < 2) {
+			var obj = arguments.length ? arguments[0] : undefined;
+			if (obj && (typeof obj.isResolved === 'function' && typeof obj.isRejected === 'function')) {
+				return obj;			
+			}
+			else {
+				return Deferred().resolve(obj);
+			}
+		}
+		else {
+			
+			var df = Deferred(),
+				size = arguments.length,
+				done = 0,
+				rp = new Array(size);	// resolve params: params of each resolve, we need to track down them to be able to pass them in the correct order if the master needs to be resolved
+
+			each(arguments, function(j, arg){
+				arg.done(function() { rp[j] = (arguments.length < 2) ? arguments[0] : arguments; if (++done == size) { df.resolve.apply(df, rp); }})
+				   .fail(function() { df.reject(arguments); });
+			});
+
+			return df;
+			
+		}
+	}
+
+	Deferred.prototype.isResolved = function() {
+		return this.status === 'rs';
+	}
+
+	Deferred.prototype.isRejected = function() {
+		return this.status === 'rj';
+	}
+
+
+
+	Deferred.prototype.reject = function() {
+		return this.rejectWith(this, arguments);
+	}	
+
+	Deferred.prototype.resolve = function() {
+		return this.resolveWith(this, arguments);
+	}
+
+	Deferred.prototype.exec = function(context, dst, args, st) {
+		if (this.status !== '')
+			return this;
+
+		this.status = st;
+
+		each(dst, function(i, d){
+			d.apply(context, args);
+		});
+
+		return this;
+	}
+	var resolveFunc = function(type, status){
+		return function(context){
+			var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
+			return this.exec(context, this[type], args, status);
+		}
+	},
+	doneFunc = function(type, status){
+		return function(){
+			for (var i = 0; i < arguments.length; i++) {
+			// skip any undefined or null arguments
+				if (!arguments[i])
+					continue;
+	
+				if (arguments[i].constructor === Array ) {
+					arguments.callee.apply(this,arguments[i])
+				}
+				else {
+					// immediately call the function if the deferred has been resolved
+					if (this.status === status)
+						arguments[i].apply(this, this.resultArgs);
+	
+					this[type].push(arguments[i]);
+				}
+			}
+			return this;
+		}
+	};
+	Deferred.prototype.resolveWith = resolveFunc('doneFuncs','rs');
+	Deferred.prototype.rejectWith = resolveFunc('failFuncs','rj');
+	Deferred.prototype.done = doneFunc('doneFuncs','rs');
+	Deferred.prototype.fail = doneFunc('failFuncs','rj')
+
+	Deferred.prototype.always = function() {
+		if (arguments.length > 0 && arguments[0])
+			this.done(arguments[0]).fail(arguments[0]);
+
+		return this;
+	};
+
+	Deferred.prototype.then = function() {
+		// fail function(s)
+		if (arguments.length > 1 && arguments[1])
+			this.fail(arguments[1]);
+
+		// done function(s)
+		if (arguments.length > 0 && arguments[0])
+			this.done(arguments[0]);
+
+		return this;
+	};
 	// =============================== PATHS .8 ============================
 
 // things that matter ... 
@@ -863,7 +796,6 @@
 			if(!options){ //global init cur ...
 				this.options = {};
 				this.waits = false;
-				this.pack = "production.js";
 			} 
 			//handle callback functions	
 			else if ( typeof options == 'function' ) {
@@ -901,10 +833,6 @@
 			this.completed = Deferred();
 		},
 		complete : function(){
-			console.log("completed", this.options.rootSrc)
-			if(!this.options.fn){
-				console.groupEnd(this.options.rootSrc)
-			}
 			this.completed.resolve();
 		},
 		/**
@@ -960,9 +888,7 @@
 				// call func2 on obj
 				//whenEach(files.concat(stel) , "complete", joiner, "execute");
 				whenEach = function(arr, func, obj, func2){
-					var deferreds = map(arr, function(obj){
-						return obj[func]
-					})
+					var deferreds = map(arr, func)
 					if(func2 === 'execute'){
 						deferreds.push(joiner.loaded)
 					}
@@ -1090,16 +1016,9 @@
 		 */
 		load: function(returnScript) {
 			// if we are already loading / loaded
-			
-			
-			
 			if(this.loading || this.loaded.isResolved()){
 				return;
 			}
-			if(!this.options.fn){
-				console.group(this.options.rootSrc)
-			}
-			console.log("loading", this.options.rootSrc, typeof this.options.fn)
 			
 			this.loading = true;
 			
@@ -1110,26 +1029,17 @@
 				self.loaded.resolve();
 			} else {
 				setTimeout(function(){
-					self.loaded.resolve();
-					
+					self.loaded.resolve();		
 				},100)
 			}
-			
-			
-			
-			
-			
-			
 		},
 		execute : function(){
 			if(this.executing){
 				return;
 			}
 			this.executing = true;
-			console.log("executing", this.options.rootSrc, typeof this.options.fn)
 			var self = this;
 			steal.require(this.options, function load_calling_loaded(script){
-				console.log("executed", self.options.rootSrc, typeof  self.options.fn)
 				self.executed(script);
 			}, function(error, src){
 				win.clearTimeout && win.clearTimeout(self.completeTimeout)
@@ -1304,7 +1214,7 @@
 		 */
 		then : function(){
 			var args = typeof arguments[0] == 'function' ? 
-				arguments : [function(){}].concat(makeArray( arguments ) )
+				arguments : [function(){}].concat(map( arguments ) )
 			return steal.apply(win, args );
 		},
 		/**
@@ -1553,9 +1463,9 @@
 // a clean up script that prevents memory leaks and removes the
 // script
 var cleanUp = function(script) {
-		script[ STR_ONREADYSTATECHANGE ]
-			= script[ STR_ONLOAD ]
-			= script[STR_ONERROR]
+		script.onreadystatechange
+			= script.onload
+			= script.onerror
 			= null;
 			
 		head().removeChild( script );
@@ -1584,17 +1494,17 @@ steal.type("js", function(options, success, error){
 		}
 		// listen to loaded
 		if (support.attachEvent) {
-			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
+			script.attachEvent('onreadystatechange', callback)
 		} else {
-			script[STR_ONLOAD] = callback;
+			script.onload = callback;
 		}
 		
 		// error handling doesn't work on firefox on the filesystem
 		if (support.error && error && options.protocol !== "file:") {
 			if(support.attachEvent){
-				script.attachEvent(STR_ONERROR, error);
+				script.attachEvent('onerror', error);
 			} else {
-				script[ STR_ONERROR ] = error;
+				script.onerror = error;
 			}
 		}
 		
@@ -1631,7 +1541,7 @@ var cssCount = 0,
 
 steal.type("css", function css_type(options, success, error){
 	if(options.text){ // less
-		var css  = doc[STR_CREATE_ELEMENT]('style');
+		var css  = doc.createElement('style');
 		css.type = 'text/css';
 		if (css.styleSheet) { // IE
 			css.styleSheet.cssText = options.text;
@@ -1670,7 +1580,7 @@ steal.type("css", function css_type(options, success, error){
 
 		
 		options = options || {};
-		var link = doc[STR_CREATE_ELEMENT]('link');
+		var link = doc.createElement('link');
 		link.rel = options.rel || "stylesheet";
 		link.href = options.src;
 		link.type = 'text/css';
@@ -1850,7 +1760,6 @@ request = function(options, success, error){
 						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
 						cur.completed.then(function(){
-							console.log('end')
 							steal.trigger("end", cur);
 						});
 						cur.executed();
@@ -1948,7 +1857,7 @@ request = function(options, success, error){
 		
 		return changeRet ?
 			function after_CRet(){
-				return after.apply(this,[f.apply(this,arguments)].concat(makeArray(arguments)));
+				return after.apply(this,[f.apply(this,arguments)].concat(map(arguments)));
 			}:
 			function after_Ret(){
 				var ret = f.apply(this,arguments);
@@ -2081,7 +1990,7 @@ var interactiveScript,
 	interactives = {},
 	getInteractiveScript = function(){
 		var i, script,
-		  scripts = doc[STR_GET_BY_TAG]('script');
+		  scripts = doc.getElementsByTagName('script');
 		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
 			if (script.readyState === 'interactive') {
 				return script;
@@ -2154,7 +2063,7 @@ if (support.interactive) {
 			if(!doc){
 				return;
 			}
-			var scripts = doc[STR_GET_BY_TAG]("script"),
+			var scripts = doc.getElementsByTagName("script"),
 				i = 0,
 				len = scripts.length;
 	
