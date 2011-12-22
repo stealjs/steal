@@ -1,7 +1,7 @@
 load("steal/rhino/rhino.js");
 steal('steal/build',
-	  'steal/build/scripts',
-	  'steal/build/styles', 
+	  'steal/build/js',
+	  'steal/build/css', 
 	  'steal/build/apps', 
 	  
 function () {

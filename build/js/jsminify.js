@@ -1,4 +1,4 @@
-steal(function(){
+steal('steal/parse',function(steal){
 	
 	var js = steal.build.js;
 	
@@ -55,9 +55,11 @@ steal(function(){
 	 */
 	js.minify = function(source, options){		
 		// get the compressor
+		options = options || {};
 		var compressor = js.minifiers[options.compressor || "localClosure"]()
+		
 		if(source){
-			 return ""+compressor( source, options.quiet, options.currentLineMap )
+			 return ""+compressor( source, true, options.currentLineMap )
 		} else {
 			return  compressor
 		}
@@ -132,7 +134,7 @@ steal(function(){
 		},
 		localClosure: function() {
 			//was unable to use SS import method, so create a temp file
-			steal.print("steal.compress - Using Google Closure app");
+			//steal.print("steal.compress - Using Google Closure app");
 			return function( src, quiet, currentLineMap ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					filename = "tmp" + rnd + ".js",
@@ -191,8 +193,7 @@ steal(function(){
 					}
 				}
 				tmpFile.remove();
-
-				return outBaos.toString();
+				return ""+outBaos.toString();
 			};
 		},
 		yui: function() {

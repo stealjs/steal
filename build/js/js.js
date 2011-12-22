@@ -1,4 +1,4 @@
-steal('steal/build', 'steal/parse').then(function( steal ) {
+steal('steal/build').then(function( steal ) {
 
 	/**
 	 * Builds JavaScripts
@@ -201,7 +201,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 		var dependencyCalls = [];
 		for (var key in dependencies){
 			dependencyCalls.push( 
-				"steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']})"
+				"steal({src: '"+key+"', waits: true, has: ['"+dependencies[key].join("','")+"']})"
 			)
 		}
 		

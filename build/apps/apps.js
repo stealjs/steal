@@ -15,7 +15,7 @@ steal('steal/build', function( steal ) {
 		 * 
 		 * 
 		 */
-		steal.build.apps = function( list, options ) {
+		var apps = steal.build.apps = function( list, options ) {
 			
 			options = steal.opts(options || {}, {
 				//compress everything, regardless of what you find
@@ -25,7 +25,7 @@ steal('steal/build', function( steal ) {
 			});
 			
 			// set the compressor globally
-			steal.build.compressor = steal.build.builders.scripts.compressors[options.compressor || "localClosure"]();
+			//steal.build.compressor = steal.build.builders.scripts.compressors[options.compressor || "localClosure"]();
 			//set defaults
 			options.depth = options.depth || 2;
 			options.to = options.to || "packages/"
@@ -47,33 +47,39 @@ steal('steal/build', function( steal ) {
 
 			
 
-			//go through, open each app, and make dependency graph
-			
+			// opens an app in a browser
+			// gets the steal instance
+			// passes that to addDependencies which
+			// adds all dependencies to files
 			var make = function(appName){
+				
 				var startFile = appName + "/" + steal.File(appName).basename() + ".js"
-
+				print("Opening " + appName );
 				steal.build.open('steal/rhino/blank.html', {
 						startFile: startFile
 				}, function(opener){
-					
-					appFiles.push(  addDependencies(opener.firstSteal.dependencies[1], files, appName )  );
+					print("  adding dependencies");
+					appFiles.push(  apps.addDependencies(opener.firstSteal.dependencies[1], files, appName )  );
 					appNames.push(appName);
-
+					print(" ")
 					callNext();
 				})
 					
 				
 			},
+			// which app we are on
 			i = 0,
+			// calls make for each app
+			// then calls makePackages once done
 			callNext = function(){
 				if( i< list.length ) {
 					i++;
 					make( list[i-1] );
 				} else {
-					makePackages();
+					apps.makePackages(appFiles, files);
 				}
-			},
-			;
+			};
+			
 			callNext();
 			
 		};
@@ -112,20 +118,18 @@ steal('steal/build', function( steal ) {
 		 */
 		addDependencies: function( steel, files, appName ) {
 			// check if a fn ...
-			
+			//print('addD '+steel.options.rootSrc)
 			var rootSrc = steel.options.rootSrc,
 				buildType = steel.options.buildType,
 				
 				file = maker(files, rootSrc, function(){
-				
-					print(" compressing " + rootSrc + " ");
-					
 					//clean and minifify everything right away ...
 					if( steel.options.buildType != 'fn' ) {
 						// some might not have source yet
+						print("  + "+rootSrc)
 						var source = steel.options.text ||  readFile( rootSrc );
-						source = steal.build.builders[buildType].clean(source);
-						steel.options.text = steal.build.builders[buildType].minify(source);
+						source = steal.build[buildType].clean(source);
+						steel.options.text = steal.build[buildType].minify(source);
 					}
 					
 					// this becomes data
@@ -138,7 +142,7 @@ steal('steal/build', function( steal ) {
 						packaged: false
 					}
 					
-				})
+				});
 
 			// don't add the same appName more than once
 			if(file.appNames.indexOf(appName) == -1){
@@ -146,12 +150,13 @@ steal('steal/build', function( steal ) {
 			}
 			steel.dependencies.forEach(function(dependency){
 				if ( dependency.dependencies && 
+					// don't follow functions
 				     dependency.options.buildType != 'fn' && 
 					 !dependency.options.ignore) {
 					 
 					file.dependencyFileNames.push(dependency.options.rootSrc)
 					 
-					arguments.callee(dependency, files, appName);
+					apps.addDependencies(dependency, files, appName);
 				}
 			});
 			
@@ -259,6 +264,7 @@ steal('steal/build', function( steal ) {
 					});
 				
 				sharing.files.push(file);
+				debugger;
 				sharing.totalSize += file.stealOpts.text.length;
 			}
 			
@@ -272,6 +278,7 @@ steal('steal/build', function( steal ) {
 				
 			// go through each app combo, get the one that has
 			// the bigest size
+			debugger;
 			for ( var apps in mostShared ) {
 				if ( mostShared[apps].totalSize > mostSize ) {
 					most = mostShared[apps];
@@ -320,7 +327,7 @@ steal('steal/build', function( steal ) {
 		 * @param {appFiles} appFiles
 		 * @param {files} files
 		 */
-		makePackages: function(appFiles, files){
+		makePackages: function(appFiles, files) {
 			
 			print("Making packages")
 			
@@ -329,8 +336,6 @@ steal('steal/build', function( steal ) {
 
 			// will be set to the biggest group
 			var sharing,
-				//the package number
-				packageCount = 0,
 				/*
 				 * Packages that an app should have
 				 * {
@@ -352,27 +357,29 @@ steal('steal/build', function( steal ) {
 			// make an array for each appName that will contain the packages
 			// it needs to load
 			appFiles.forEach(function(file){
-				appsPackages[file.stealOpts.rootSrc] = [];
+				appsPackages[file.appNames[0]] = [];
 			})
 
 			//while there are files left to be packaged, get the most shared and largest package
 			while ((sharing = apps.getMostShared(files))) {
 				
-				print('\npackaging shared by ' + sharing.apps.join(", "))
+				print('\npackaging shared by ' + sharing.appNames.join(", "))
 
 				
-				var appsName = sharing.apps[0],
+				var appsName = sharing.appNames[0],
 				//  the name of the file we are making.  
 				//    If there is only one app it's an app's production.js
 				//    If there are multiple apps, it's a package
-					packageName = sharing.apps.length == 1 ? 
-									appsName + "/production.js" : 
-									"packages/" + packageCount + ".js"
+					packageName = sharing.appNames.length == 1 ? 
+									appsName + "/production" : 
+									"packages/" + sharing.appNames.join('-')
+									  .replace(/\//g,'_') 
 				
 				// if there's multiple apps (it's a package), add this to appsPackages for each app
-				if( sharing.apps.length > 1) {
-					sharing.apps.forEach(function(appName){
-						appsPackages[appName].push(packageName)
+				if( sharing.appNames.length > 1) {
+					sharing.appNames.forEach(function(appName){
+						appsPackages[appName].push(packageName+".js") // we might need to do this 
+						// if there is css
 					})
 				}
 				
@@ -382,37 +389,50 @@ steal('steal/build', function( steal ) {
 				});
 				
 				// add the files to this package
-				packagesFiles[packageName] =[];
+				packagesFiles[packageName+".js"] =[];
 				
 				// what we will sent to js.makePackage
+				// the files that will actually get packaged
 				var filesForPackaging = []; 
 				
+				// 
 				ordered.forEach(function(file){
-					packagesFiles[packageName].push(file.steal.rootSrc);
-					filesForPackaging.push(file.steal)
-					print("  " + file.order + ":" + file.steal.rootSrc);
+					// add the files to the packagesFiles
+					packagesFiles[packageName+".js"].push(file.stealOpts.rootSrc);
+					
+					filesForPackaging.push(file.stealOpts)
+					print("  " + file.order + ":" + file.stealOpts.rootSrc);
 				});
 				
 				// create dependencies object
 				var dependencies = {};
-				if( sharing.apps.length == 1) {
+				// only add dependencies for the 'root' objects
+				if( sharing.appNames.length == 1) {
+					// for the packages for this app
 					appsPackages[appsName].forEach(function(packageName){
+						// add this as a dependency
 						dependencies[packageName] = packagesFiles[packageName].slice(0)
 					})
 				}
 				
 				//the source of the package
 				//
-				var source = steal.build.js.makePackage(filesForPackaging, dependencies)
+				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css")
 
 				
 
 				//save the file
-				print("saving " + packageName);
-				steal.File(packageName).save( source );
+				print("saving " + packageName+".js");
+				steal.File(packageName+".js").save( pack.js );
 
-				
-				packageCount++;
+				if(pack.css){
+					print("saving " + packageName+".css");
+					steal.File(packageName+".css").save( pack.css );
+					// I need to tell things that 
+					// have this dependency, that this dependency needs
+					// me
+				}
+				//packageCount++;
 			}
 
 		}
