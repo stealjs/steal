@@ -40,7 +40,26 @@ __this__ = this;
 
 //eg "Mozilla"
 Envjs.appCodeName  = "Envjs";
-
+Envjs.reportError = function(e, fn){
+    var max = 0;
+    for(var name in e){
+      if(name.length > max && name !== 'rhinoException'){
+        max = name.length;
+      }
+    }
+    max++;
+    var space = "\n  "+ new Array(max+2).join(" ");
+    console.log("!!!!!!!!!!! ERROR !!!!!!!!!!!\n");
+    for(var name in e){
+    	if (name === 'rhinoException') {
+    		continue;
+    	}
+		console.log("-"+name+
+			new Array(max-name.length).join(" ")+
+			" = "+
+			(""+e[name]).split("\n").join(space) );
+    }
+}
 //eg "Gecko/20070309 Firefox/2.0.0.3"
 Envjs.appName      = "Netscape";
 
@@ -6791,7 +6810,7 @@ setTimeout = function(fn, time){
                     // eval in global scope
                     eval(fn, null);
                 } catch (e) {
-                    console.log('timer error %s %s', fn, e);
+                    Envjs.reportError(e, fn);
                 } finally {
                     clearInterval(num);
                 }
@@ -6801,7 +6820,7 @@ setTimeout = function(fn, time){
                 try {
                     fn();
                 } catch (e) {
-                    console.log('timer error %s %s', fn, e);
+                    Envjs.reportError(e, fn);
                 } finally {
                     clearInterval(num);
                 }
@@ -6920,7 +6939,7 @@ Envjs.wait = function(wait) {
                 earliest.running = true;
                 nextfn();
             } catch (e) {
-                console.log('timer error %s %s', nextfn, e);
+                Envjs.reportError(e, nextfn);
             } finally {
                 earliest.running = false;
             }
