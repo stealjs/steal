@@ -126,18 +126,26 @@ extend(steal.instrument, {
 		var totalLines = 0,
 			totalLinesHit = 0,
 			totalBlocks = 0,
-			totalBlocksHit = 0,
-			totalLineCoverage,
-			totalBlockCoverage;
+			totalBlocksHit = 0;
 		for(var fileName in stats.files){
 			totalLines += stats.files[fileName].lines;
 			totalBlocks += stats.files[fileName].blocks;
 			totalLinesHit += stats.files[fileName].lines*stats.files[fileName].lineCoverage;
 			totalBlocksHit += stats.files[fileName].blocks*stats.files[fileName].blockCoverage;
 		}
+		var totalLineCoverage = 0,
+			totalBlockCoverage = 0;
+			
+		if(totalLines){
+			totalLineCoverage = totalLinesHit/totalLines;
+		}
+		if(totalBlocks){
+			totalBlockCoverage = totalBlocksHit/totalBlocks;
+		}
+		
 		var total = {
-			lineCoverage: totalLinesHit/totalLines,
-			blockCoverage: totalBlocksHit/totalBlocks,
+			lineCoverage: totalLineCoverage,
+			blockCoverage: totalBlockCoverage,
 			lines: totalLines,
 			blocks: totalBlocks
 		}
