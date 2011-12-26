@@ -59,6 +59,13 @@ Envjs.reportError = function(e, fn){
 			" = "+
 			(""+e[name]).split("\n").join(space) );
     }
+    if(typeof fn === 'string'){
+    	var args = [space+fn];
+    	for(var i = 2; i < arguments.length; i++){
+    	   args.push(arguments[i])
+    	}
+    	console.log.apply(console,args);
+    }
 }
 //eg "Gecko/20070309 Firefox/2.0.0.3"
 Envjs.appName      = "Netscape";
@@ -288,7 +295,8 @@ Envjs.scriptTypes = {
  * @param {Object} e
  */
 Envjs.onScriptLoadError = function(script, e){
-    console.log('error loading script %s %s', script, e);
+	Envjs.reportError(e)
+    //console.log('error loading script %s %s', script, e);
 };
 
 /**
@@ -7547,7 +7555,7 @@ Aspect.around({
                         node.dispatchEvent( event, false );
                     }
                 }catch(e){
-                    console.log('error loading html element %s %e', node, e.toString());
+                    Envjs.reportError(e, 'error loading html element %s %e', node, e.toString());                    
                 }
             }
         }
@@ -7577,6 +7585,7 @@ Aspect.around({
                                 }
                             }catch(e){
                                 console.log('error loading html element %s %e', node, e.toString());
+                                Envjs.reportError(e);
                             }
                         }
                         break;
@@ -23929,6 +23938,7 @@ var __elementPopped__ = function(ns, name, node){
                                         }
                                     }catch(e){
                                         console.log('error loading html element %s %s %s %e', ns, name, node, e.toString());
+                                        Envjs.reportError(e);
                                     }
                                     break;
                                 case 'frame':
@@ -23968,6 +23978,7 @@ var __elementPopped__ = function(ns, name, node){
                                         }
                                     }catch(e){
                                         console.log('error loading html element %s %e', node, e.toString());
+                                        Envjs.reportError(e);
                                     }
                                     /*try{
                                         if (node.src && node.src.length > 0){

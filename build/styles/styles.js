@@ -33,7 +33,8 @@ steal('steal/build').then(function( steal ) {
             steal.print("Nice! "+calcSavings(raw_css.length,minified_css.length));
             steal.File(folder + "/production.css").save(minified_css);
 		} else {
-			steal.print("no styles\n")
+			steal.print("no styles\n");
+			return;
 		}
 		
 		return {
