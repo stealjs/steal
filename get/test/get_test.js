@@ -83,7 +83,7 @@ steal('steal/get',function(rhinoSteal){
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit")
 		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
 		
-		raw = G.git.raw("https://github.com/jupiterjs/funcunit/tree/2.0")
+		raw = G.git.raw("https://github.com/jupiterjs/funcunit/tree/v3.2.1")
 		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
 		
 	});
