@@ -214,14 +214,16 @@ steal(function(s){
 					// if there's timers (like in less) we'll never reach next line 
 					// unless we bind to done here and kill timers
 					window.steal.one('done', doneCb);
+					newSteal = window.steal;
 				}
 			},
 			dontPrintUserAgent: true
 		});
 		
 		// set back steal
-		newSteal = window.steal;
+		
 		window.steal = oldSteal;
+		// TODO: is this needed anymore
 		window.steal._steal = newSteal;
 
 		Envjs.wait();

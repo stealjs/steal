@@ -791,7 +791,7 @@
 				}
 					
 				// make a steal object
-				stel = steal.p.make(item);
+				var stel = steal.p.make(item);
 				
 				//has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
@@ -1499,7 +1499,15 @@ request = function(options, success, error){
 	 * 		steal.packages('tasks','dashboard','fileman');
 	 * 
 	 */
-	steal.packages = function(){ return this; };
+	var packs = [];
+	steal.packages = function(){
+		if(!arguments.length){
+			return packs;
+		} else {
+			packs.push.apply(packs, arguments);
+			return this;
+		}
+	};
 	
 	//  =============================== Extensions ==============================
 	
@@ -1862,9 +1870,11 @@ request = function(options, success, error){
 	// =========== HAS ARRAY STUFF ============
 	// Logic that deals with files that have collections of other files within them.  This is usually a production.css file, 
 	// which when it loads, needs to mark several CSS and LESS files it represents as being "loaded".  This is done 
-	// by the production.js file having steal({src: "production.css", has: ["file1.css", "file2.css"]  
-	
-	// after a steal is created, if its been loaded already and has a "has", mark those files as loaded
+	// by the production.js file having 
+	// steal({src: "production.css", has: ["file1.css", "file2.css"]  
+	// 
+	// after a steal is created, if its been loaded 
+	// already and has a "has", mark those files as loaded
 	steal.p.make = after(steal.p.make, function(stel){
 		// if we have things
 		if( stel.options.has ) {

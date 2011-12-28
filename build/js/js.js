@@ -186,7 +186,7 @@ steal('steal/build').then(function( steal ) {
 			}
 		})
 		// add to dependencies
-		if(csses.length){
+		if(csses.length && cssPackage){
 			dependencies[cssPackage] = csses.map(function(css){
 				return css.rootSrc;
 			})
@@ -217,7 +217,10 @@ steal('steal/build').then(function( steal ) {
 		
 		return {
 			js: code.join(";\n") + "\n",
-			css: csses.map(function(css){ return css.text }).join('\n')
+			css: {
+				srcs: csses.map(function(css){return css.rootSrc;}),
+				code: csses.map(function(css){ return css.text }).join('\n')
+			}
 		}
 	}
 }).then('./jsminify');
