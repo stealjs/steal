@@ -13326,8 +13326,7 @@ steal('jquery/dom/route','jquery/controller', function(){
 steal.loaded('jquery/controller/route/route.js');
 steal.packages('mxui/layout/table_scroll/table_scroll.js',
                'mxui/nav/accordion/accordion.js')
-	.then('jquery/controller/route', function(){
-	console.log('IN CALLBACK')	
+	.then('jquery/controller/route', function(){	
 $.Controller('Route', {
 	"table route" : function(){
 		steal('mxui/layout/table_scroll', function(){
@@ -13343,7 +13342,6 @@ $.Controller('Route', {
 new Route(document.body)
 		
 });
-console.log('RUNNING FILE')
 	
 ;
 steal.loaded('steal/build/packages/test/app.js')

@@ -1579,7 +1579,7 @@ request = function(options, success, error){
 	// =============================== STARTUP ===============================
 	
 	
-	var currentCollection;
+	var rootSteal;
 	
 	// essentially ... we need to know when we are on our first steal
 	// then we need to know when the collection of those steals ends ...
@@ -1592,11 +1592,11 @@ request = function(options, success, error){
 			// if we don't have a current 'top' steal
 			// we create one and set it up
 			// to start loading its dependencies (the current pending steals)
-			if(! currentCollection ){
-				currentCollection = new steal.p.init();
+			if(! rootSteal ){
+				rootSteal = new steal.p.init();
 				
 				// keep a reference in case it disappears 
-				var cur = currentCollection,
+				var cur = rootSteal,
 					// runs when a steal is starting
 					go = function(){
 						// indicates that a collection of steals has started
@@ -1622,8 +1622,8 @@ request = function(options, success, error){
 	
 	// this can probably move above
 	steal.p.complete = before(steal.p.complete, function(){
-		if(this === currentCollection){ // this is the last steal
-			currentCollection = null;
+		if(this === rootSteal){ // this is the last steal
+			rootSteal = null;
 		}
 	});
 	

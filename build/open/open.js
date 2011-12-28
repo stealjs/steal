@@ -111,7 +111,8 @@ steal(function(s){
 	 *         
 	 *   - steal - the steal loaded by the app
 	 *   - url - the html page opened
-	 *   - firstSteal - the 'root' steal instance
+	 *   - rootSteal - the 'root' steal instance
+	 *   - firstSteal - the first steal file
 	 */
 	steal.build.open = function( url, stealData, cb ) {
 		
@@ -133,8 +134,9 @@ steal(function(s){
 		load('steal/rhino/env.js'); //reload every time
 	
 		// what gets called by steal.done
-		// - init the 'master' steal
-		var doneCb = function(init){
+		// rootSteal the 'master' steal
+		var doneCb = function(rootSteal){
+			// get the 'base' steal (what was stolen)
 			
 			// clear timers
 			Envjs.clear();
@@ -181,7 +183,7 @@ steal(function(s){
 					}
 					var items = [];
 					// iterate 
-					iterate(init, function(stealer){
+					iterate(rootSteal, function(stealer){
 						
 						if( filter(stealer) ) {
 							stealer.options.text = stealer.options.text || loadScriptText(stealer.options);
@@ -193,7 +195,8 @@ steal(function(s){
 				// the 
 				steal: newSteal,
 				url: url,
-				firstSteal : init
+				rootSteal : rootSteal,
+				firstSteal : s.build.open.firstSteal(rootSteal)
 			})
 		};
 		
@@ -228,7 +231,16 @@ steal(function(s){
 
 		Envjs.wait();
 	};
-	
+	steal.build.open.firstSteal =function(rootSteal){
+		var stel;
+		for(var i =0; i < rootSteal.dependencies.length; i++){
+			debugger;
+			stel = rootSteal.dependencies[i]
+			if(stel.options.buildType != 'fn' && stel.options.rootSrc != 'steal/dev/dev.js'){
+				return stel;
+			}	
+		}
+	};
 	
 	var loadScriptText = function( options ) {
 		if(options.text){

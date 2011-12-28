@@ -106,15 +106,16 @@ steal('steal/build', 'steal/build/js','steal/build/css',function( steal ) {
 				var curSteal = window.steal,
 					newSteal = window.steal= this.lastSteal;
 				// listen to when this is done
-				window.steal.one("end", function(firstSteal){
+				window.steal.one("end", function(rootSteal){
 					print("  adding dependencies");
-					options.appFiles.push(  apps.addDependencies(firstSteal.dependencies[0], options.files, appName )  );
+					options.appFiles.push(  apps.addDependencies(rootSteal.dependencies[0], options.files, appName )  );
 					
 					// set back steal
 					window.steal = curSteal;
 					callback(options, {
 						steal : newSteal,
-						firstSteal: firstSteal
+						rootSteal: rootSteal,
+						firstSteal: steal.build.open.firstSteal(rootSteal)
 					});
 				})
 				// steal file
@@ -122,7 +123,7 @@ steal('steal/build', 'steal/build/js','steal/build/css',function( steal ) {
 			} else {
 				steal.build.open(html, data, function(opener){
 					print("  adding dependencies");
-					options.appFiles.push(  apps.addDependencies(opener.firstSteal.dependencies[1], options, appName )  );
+					options.appFiles.push(  apps.addDependencies(opener.rootSteal.dependencies[1], options, appName )  );
 					print(" ")
 					callback(options, opener);
 				})
