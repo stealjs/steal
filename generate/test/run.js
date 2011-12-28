@@ -50,7 +50,7 @@ steal('steal/test', "steal/generate")
 		steal.generate.insertSteal(testFile,"bar");
 		
 		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
-			expected = "steal('bar','foo')"
+			expected = "steal('foo','bar')"
 			
 		s.test.equals(res, expected, "insertSteal is working");
 		s.test.remove(testFile)
@@ -78,7 +78,7 @@ steal('steal/test', "steal/generate")
 		steal.generate.insertSteal(testFile,"bar");
 		
 		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
-			expected = "steal('foo').then('bar','zoo');"
+			expected = "steal('foo','bar').then('zoo');"
 			
 		s.test.equals(res, expected, "insertSteal is working");
 		s.test.remove(testFile)
