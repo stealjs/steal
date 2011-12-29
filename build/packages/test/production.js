@@ -1,11 +1,11 @@
-steal.map({"mxui/nav/accordion/accordion.js": "steal/build/packages/test/packages/mxui_nav_accordion_accordion.js", "mxui/layout/table_scroll/table_scroll.js": "steal/build/packages/test/packages/mxui_layout_table_scroll_table_scroll.js"});steal.p.make(
-{"src": "steal/build/packages/test/packages/mxui_layout_table_scroll_table_scroll-mxui_nav_accordion_accordion.js", "needs": []}
+steal.map({"mxui/nav/accordion/accordion.js": "steal/build/packages/test/packages/accordion.js", "mxui/layout/table_scroll/table_scroll.js": "steal/build/packages/test/packages/table_scroll.js"});steal.p.make(
+{"src": "steal/build/packages/test/packages/table_scroll-accordion.js", "needs": []}
 );
 steal.p.make(
-{"src": "steal/build/packages/test/packages/mxui_nav_accordion_accordion.js", "needs": ["steal/build/packages/test/packages/mxui_layout_table_scroll_table_scroll-mxui_nav_accordion_accordion.js"]}
+{"src": "steal/build/packages/test/packages/accordion.js", "needs": ["steal/build/packages/test/packages/table_scroll-accordion.js"]}
 );
 steal.p.make(
-{"src": "steal/build/packages/test/packages/mxui_layout_table_scroll_table_scroll.js", "needs": ["steal/build/packages/test/packages/mxui_layout_table_scroll_table_scroll-mxui_nav_accordion_accordion.js"]}
+{"src": "steal/build/packages/test/packages/table_scroll.js", "needs": ["steal/build/packages/test/packages/table_scroll-accordion.js"]}
 );
 steal.loading('jquery/jquery.js','jquery/lang/string/string.js','jquery/class/class.js','jquery/lang/observe/observe.js','jquery/event/hashchange/hashchange.js','jquery/lang/string/deparam/deparam.js','jquery/dom/route/route.js','jquery/event/event.js','jquery/event/destroyed/destroyed.js','jquery/controller/controller.js','jquery/controller/route/route.js','steal/build/packages/test/app.js');
 /*!
@@ -13326,7 +13326,8 @@ steal('jquery/dom/route','jquery/controller', function(){
 steal.loaded('jquery/controller/route/route.js');
 steal.packages('mxui/layout/table_scroll/table_scroll.js',
                'mxui/nav/accordion/accordion.js')
-	.then('jquery/controller/route', function(){	
+	.then('jquery/controller/route', function(){
+			
 $.Controller('Route', {
 	"table route" : function(){
 		steal('mxui/layout/table_scroll', function(){
@@ -13340,6 +13341,7 @@ $.Controller('Route', {
 	}
 })
 new Route(document.body)
+		
 		
 });
 	

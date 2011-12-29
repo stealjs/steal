@@ -309,7 +309,6 @@ steal('steal/build', 'steal/build/js','steal/build/css',function( steal ) {
 					});
 				
 				sharing.files.push(file);
-				debugger;
 				sharing.totalSize += file.stealOpts.text.length;
 			}
 			

@@ -234,7 +234,6 @@ steal(function(s){
 	steal.build.open.firstSteal =function(rootSteal){
 		var stel;
 		for(var i =0; i < rootSteal.dependencies.length; i++){
-			debugger;
 			stel = rootSteal.dependencies[i]
 			if(stel.options.buildType != 'fn' && stel.options.rootSrc != 'steal/dev/dev.js'){
 				return stel;

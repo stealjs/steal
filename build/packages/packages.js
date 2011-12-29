@@ -33,7 +33,33 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 		apps._open(app, options, function(options, opener){
 			
 			// the folder are build files will go in
-			var to = buildOptions.to || s.File(opener.firstSteal.options.rootSrc).dir();
+			var to = buildOptions.to || s.File(opener.firstSteal.options.rootSrc).dir(),
+				appNamesToName = {},
+				usedNames = {},
+				// a helper function that translates between an 
+				// app's name and where we are building it to
+				appNamesToMake = function(appNames){
+					debugger;
+					//remove js if it's there
+					appNames = appNames.map(function(appName){
+						return appName.replace(".js","")
+					});
+					var expanded = appNames.join('-');
+					// check map
+					if(appNamesToName[expanded]){
+						return appNamesToName[expanded];
+					}
+					// try with just the last part
+					var shortened = appNames.map(function(l){
+						return s.File(l).filename()
+					}).join('-')
+					if(!usedNames[shortened]){
+						usedNames[shortened] = true;
+					return appNamesToName[expanded] = to + "/packages/"+shortened;
+					} else {
+						return appNamesToName[expanded] = to + "/packages/"+expanded.replace(/\//g,'_') ;
+					}
+				};
 			
 			// make the packages folder
 			s.File(to+"/packages").mkdirs();
@@ -78,13 +104,6 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					// mappings of packaged app name to packaging file
 					// this is what overwrites the loading location for packages
 					maps = {},
-					// a helper function that translates between an 
-					// app's name and where we are building it to
-					appNamesToMake = function(appNames){
-						 return to + "/packages/"+
-									appNames.join('-')
-									.replace(/\//g,'_') 
-					},
 					// a list of shares, we go through the list twice
 					// b/c it is easier to populate makes
 					// once we have gone through each share.
@@ -111,27 +130,29 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 						print("  + "+f.stealOpts.rootSrc)
 					})
 					s.print(" ")
+					
 					s.File(packageName+".js").save( pack.js );
 					
+					// make this steal instance
 					makes[packageName+".js"] = {
 						src: packageName+".js",
-						//has: sharing.files.map(function(f){
-						//	return f.stealOpts.rootSrc
-						//}),
 						needs :[]
 					}
+					// if we have css
 					if(pack.css && pack.css.srcs.length){
 						// write
-						
+						// tell the js it needs this css
 						makes[packageName+".js"].needs.push(packageName+".css")
+						// make the css
 						makes[packageName+".css"] = {
 							src: packageName+".css",
 							has: pack.css.srcs
 						};
 						
 					}
-					// add to needs if css
+					
 					shares.push(sharing);
+					// add to maps
 					if(isPackage){
 						maps[sharing.appNames[0]+".js"] = packageName+".js";
 					}
