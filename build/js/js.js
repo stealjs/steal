@@ -179,6 +179,20 @@ steal('steal/build').then(function( steal ) {
 			csses = [];
 		
 		files.forEach(function(file){
+			if ( file.packaged === false ) {
+
+				steal.print('   not packaging ' + file.rootSrc);
+				
+				return;
+			}
+			
+			// ignore
+			if ( file.ignore ) {
+				steal.print('   ignoring ' + file.rootSrc);
+				return;
+			}
+			
+			
 			if(file.buildType == 'js'){
 				jses.push(file)
 			} else if(file.buildType == 'css'){

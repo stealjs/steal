@@ -39,7 +39,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				// a helper function that translates between an 
 				// app's name and where we are building it to
 				appNamesToMake = function(appNames){
-					debugger;
+					
 					//remove js if it's there
 					appNames = appNames.map(function(appName){
 						return appName.replace(".js","")
@@ -109,7 +109,8 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					// once we have gone through each share.
 					shares = [];
 				
-				s.print("Making Packages\n")
+				s.print("Making Packages\n");
+				
 				while(sharing = apps.getMostShared(options.files)){
 					
 					// is it a 'end' package
@@ -120,6 +121,8 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					var pack = build.js.makePackage(sharing.files.map(function(f){
 						return f.stealOpts;
 					}));
+					
+					// 
 					if(isPackage){
 						s.print("  Package: "+packageName)
 					} else {
@@ -154,6 +157,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					shares.push(sharing);
 					// add to maps
 					if(isPackage){
+						// this should be the real file
 						maps[sharing.appNames[0]+".js"] = packageName+".js";
 					}
 				}
