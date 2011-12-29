@@ -1025,12 +1025,36 @@
 			var self = this;
 			// get yourself
 			// do tricky pre-loading
-			if(steal.options.type == 'fn'){
+			if ( this.options.type == 'fn' || !doc ) {
 				self.loaded.resolve();
 			} else {
-				setTimeout(function(){
-					self.loaded.resolve();		
-				},100)
+
+				// TODO Cache this stuffs.
+				var tag = ( 'MozAppearance' in doc.documentElement.style ) ?
+							"object" : 
+							"img",
+					el = doc.createElement( tag ),
+					done = false,
+					onload = function() {
+						if ( ! done && ( ! el.readyState || /^l|c|u/.test( el.readyState ))) {
+							done = true;
+
+							console.log("Done", self.options.rootSrc);
+							self.loaded.resolve();
+							if ( tag == "object" ) {
+								head().removeChild( el );
+								el.onerror = el.onload = el.onreadystatechange = null;
+							}
+						}
+					};
+
+				el.src = el.data = self.options.src;
+				el.onerror = el.onload = el.onreadystatechange = onload;
+
+				if ( tag == "object" ) {
+					el.width = el.height = 0;
+					head().insertBefore( el, head().firstChild );
+				}
 			}
 		},
 		execute : function(){
@@ -1280,53 +1304,14 @@
 				stel.loading = true;
 			});
 		},
-		/**
-		 * @hide
-		 * Checks the readystate of a file to see if its ready
-		 */
-		isFileReady : function( readyState ) {
-			// if there's no readystate property, that means the file is ready
-			// in a standards compliant browser. If there is a readystate, this
-			// means we're in IE and it should be either "loaded", "complete" 
-			// or "uninitialized".
-			// http://msdn.microsoft.com/en-us/library/bb268229(v=vs.85).aspx
-			return ( ! readyState || /^l|c|u/.test( readyState ) );
-		},
-		/**
-		 * Preloads a stel so it can be instantly executed from a browser's
-		 */
-		preloaded : function( stel ) {
-			var tag = ( 'MozAppearance' in doc.documentElement.style ) ?
-						"object" : 
-						"img",
-				el = doc[STR_CREATE_ELEMENT]( tag ),
-				done = false,
-				onload = function() {
-					if ( ! done && steal.isFileReady( el.readyState )) {
-						done = true;
-						if ( tag == "object" ) {
-							doc.body.removeChild( el );
-							el.onerror = el.onload = el.onreadystatechange = null;
-						}
-					}
-				};
-
-			el.src = stel.options.src;
-			el.onerror = el.onload = el.onreadystatechange = onload;
-
-			if ( tag == "object" ) {
-				doc.body.appendChild( el );
-			}
-		},
 		// called when a script has loaded via production
-		loaded: function(name){
+		loaded: function(name) {
 			// create the steal, mark it as loading, then as loaded
 			var stel = steal.p.make( name );
 			stel.loading = true;
-			convert(stel, "complete");
-			
+			//convert(stel, "complete");
 			steal.preloaded(stel);
-			stel.loaded()
+			stel.executed()
 			return steal;
 		}
 	});
