@@ -1280,9 +1280,44 @@
 				stel.loading = true;
 			});
 		},
-		// a dummy function to add things to after the stel is created, but before 
-		// loaded is called
-		preloaded : function(){},
+		/**
+		 * @hide
+		 * Checks the readystate of a file to see if its ready
+		 */
+		isFileReady : function( readyState ) {
+			// if there's no readystate property, that means the file is ready
+			// in a standards compliant browser. If there is a readystate, this
+			// means we're in IE and it should be either "loaded", "complete" 
+			// or "uninitialized".
+			// http://msdn.microsoft.com/en-us/library/bb268229(v=vs.85).aspx
+			return ( ! readyState || /^l|c|u/.test( readyState ) );
+		},
+		/**
+		 * Preloads a stel so it can be instantly executed from a browser's
+		 */
+		preloaded : function( stel ) {
+			var tag = ( 'MozAppearance' in doc.documentElement.style ) ?
+						"object" : 
+						"img",
+				el = doc[STR_CREATE_ELEMENT]( tag ),
+				done = false,
+				onload = function() {
+					if ( ! done && steal.isFileReady( el.readyState )) {
+						done = true;
+						if ( tag == "object" ) {
+							doc.body.removeChild( el );
+							el.onerror = el.onload = el.onreadystatechange = null;
+						}
+					}
+				};
+
+			el.src = stel.options.src;
+			el.onerror = el.onload = el.onreadystatechange = onload;
+
+			if ( tag == "object" ) {
+				doc.body.appendChild( el );
+			}
+		},
 		// called when a script has loaded via production
 		loaded: function(name){
 			// create the steal, mark it as loading, then as loaded
