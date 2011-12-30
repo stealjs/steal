@@ -1,20 +1,13 @@
 (function(){
-	
+
 	// Gets the window (even if there is none)
 	var win = (function(){return this}).call(null),
-		// String constants (for better minification)
-		STR_ONLOAD = "onload",
-		STR_ONERROR = "onerror",
-		STR_ONREADYSTATECHANGE = "onreadystatechange",
-		STR_CREATE_ELEMENT = 'createElement',
-		STR_GET_BY_TAG = 'getElementsByTagName',
-		
 		// the document ( might not exist in rhino )
 		doc = win.document,
 		
 		// creates a script tag
 		scriptTag = function() {
-			var start = doc[STR_CREATE_ELEMENT]('script');
+			var start = doc.createElement('script');
 			start.type = 'text/javascript';
 			return start;
 		},
@@ -23,10 +16,10 @@
 		head = function() {
 			var d = doc,
 				de = d.documentElement,
-				heads = d[STR_GET_BY_TAG]("head"),
+				heads = d.getElementsByTagName("head"),
 				hd = heads[0];
 			if (! hd ) {
-				hd = d[STR_CREATE_ELEMENT]('head');
+				hd = d.createElement('head');
 				de.insertBefore(hd, de.firstChild);
 			}
 			// replace head so it runs fast next time.
@@ -49,10 +42,12 @@
 			}
 			return arr;
 		},
-		// makes an array of things
-		makeArray = function(args){
+		// makes an array of things, or a mapping of things
+		map = function(args, cb){
 			var arr = [];
-			each(args, function(i, str){arr[i] = str});
+			each(args, function(i, str){
+				arr[i] = cb ? (typeof cb=='string' ? str[cb] : cb.call(str, str)  ) : str
+			});
 			return arr;
 		},
 		// testing support for various browser behaviors
@@ -402,7 +397,7 @@
 	 */
 	function steal() {
 		// convert arguments into an array
-		var args = makeArray(arguments);
+		var args = map(arguments);
 		pending.push.apply(pending,  args);
 		// steal.after is called everytime steal is called
 		// it kicks off loading these files
@@ -411,7 +406,129 @@
 		return steal;
 	};
 	
+	// =============================== Deferred .63 ============================ 
 	
+	var Deferred = function(func) {
+		if (!(this instanceof Deferred))
+			return new Deferred();
+
+		this.doneFuncs = [];
+		this.failFuncs = [];
+		this.resultArgs = null;
+		this.status = '';
+
+		// check for option function: call it with this as context and as first parameter, as specified in jQuery api
+		if (func)
+			func.apply(this, [this]);
+	}
+	
+	Deferred.when = function() {
+		if (arguments.length < 2) {
+			var obj = arguments.length ? arguments[0] : undefined;
+			if (obj && (typeof obj.isResolved === 'function' && typeof obj.isRejected === 'function')) {
+				return obj;			
+			}
+			else {
+				return Deferred().resolve(obj);
+			}
+		}
+		else {
+			
+			var df = Deferred(),
+				size = arguments.length,
+				done = 0,
+				rp = new Array(size);	// resolve params: params of each resolve, we need to track down them to be able to pass them in the correct order if the master needs to be resolved
+
+			each(arguments, function(j, arg){
+				arg.done(function() { rp[j] = (arguments.length < 2) ? arguments[0] : arguments; if (++done == size) { df.resolve.apply(df, rp); }})
+				   .fail(function() { df.reject(arguments); });
+			});
+
+			return df;
+			
+		}
+	}
+
+	Deferred.prototype.isResolved = function() {
+		return this.status === 'rs';
+	}
+
+	Deferred.prototype.isRejected = function() {
+		return this.status === 'rj';
+	}
+
+
+
+	Deferred.prototype.reject = function() {
+		return this.rejectWith(this, arguments);
+	}	
+
+	Deferred.prototype.resolve = function() {
+		return this.resolveWith(this, arguments);
+	}
+
+	Deferred.prototype.exec = function(context, dst, args, st) {
+		if (this.status !== '')
+			return this;
+
+		this.status = st;
+
+		each(dst, function(i, d){
+			d.apply(context, args);
+		});
+
+		return this;
+	}
+	var resolveFunc = function(type, status){
+		return function(context){
+			var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
+			return this.exec(context, this[type], args, status);
+		}
+	},
+	doneFunc = function(type, status){
+		return function(){
+			for (var i = 0; i < arguments.length; i++) {
+			// skip any undefined or null arguments
+				if (!arguments[i])
+					continue;
+	
+				if (arguments[i].constructor === Array ) {
+					arguments.callee.apply(this,arguments[i])
+				}
+				else {
+					// immediately call the function if the deferred has been resolved
+					if (this.status === status)
+						arguments[i].apply(this, this.resultArgs);
+	
+					this[type].push(arguments[i]);
+				}
+			}
+			return this;
+		}
+	};
+	Deferred.prototype.resolveWith = resolveFunc('doneFuncs','rs');
+	Deferred.prototype.rejectWith = resolveFunc('failFuncs','rj');
+	Deferred.prototype.done = doneFunc('doneFuncs','rs');
+	Deferred.prototype.fail = doneFunc('failFuncs','rj')
+
+	Deferred.prototype.always = function() {
+		if (arguments.length > 0 && arguments[0])
+			this.done(arguments[0]).fail(arguments[0]);
+
+		return this;
+	};
+
+	Deferred.prototype.then = function() {
+		// fail function(s)
+		if (arguments.length > 1 && arguments[1])
+			this.fail(arguments[1]);
+
+		// done function(s)
+		if (arguments.length > 0 && arguments[0])
+			this.done(arguments[0]);
+
+		return this;
+	};
 	// =============================== PATHS .8 ============================
 
 // things that matter ... 
@@ -679,7 +796,6 @@
 			if(!options){ //global init cur ...
 				this.options = {};
 				this.waits = false;
-				this.pack = "production.js";
 			} 
 			//handle callback functions	
 			else if ( typeof options == 'function' ) {
@@ -712,9 +828,12 @@
 				this.waits = this.options.waits || false;
 				this.unique = true;
 			}
+			this.loaded = Deferred();
+			//this.executed = Deferred();
+			this.completed = Deferred();
 		},
 		complete : function(){
-			this.completed = true;
+			this.completed.resolve();
 		},
 		/**
 		 * @hide
@@ -725,7 +844,7 @@
 		 *   - this is where all the actions is
 		 */
 
-		loaded: function(script){
+		executed: function(script){
 			var myqueue, 
 				stel, 
 				src = (script && script.src) || this.options.src,
@@ -767,19 +886,42 @@
 				// a helper that basically does a join
 				// when everything in arr's func method is called,
 				// call func2 on obj
+				//whenEach(files.concat(stel) , "complete", joiner, "execute");
 				whenEach = function(arr, func, obj, func2){
-					var big = [obj, func2];
-					each(arr, function(i, item){
-						big.unshift(item, func)
-					});
-					when.apply(steal, big);
+					var deferreds = map(arr, func)
+					if(func2 === 'execute'){
+						deferreds.push(joiner.loaded)
+					}
+					return Deferred.when.apply(Deferred, deferreds).then(function(){
+						if(typeof obj[func2] == 'function'){
+							obj[func2]()
+						} else {
+							obj[func2].resolve();
+						}
+						
+					})
 				},
 				// a helper that does the oposite of a join.  When
 				// obj's func method is called, call func2 on all items.
+				// whenThe(stel,"completed", files ,"execute")
 				whenThe = function(obj, func, items, func2){
-					each(items, function(i, item){
-						when(obj, func, item, func2)
-					})
+					if( func2 == 'execute'){
+						
+						each(items, function(i, item){
+							Deferred.when(obj[func], item.loaded).then(function() {
+								item[func2]();
+							})
+						})
+						
+					} else {
+						obj[func].then(function(){
+						each(items, function(i, item){
+								item[func2]
+							})
+						})
+					}
+					
+					
 				},
 				stealInstances = [];
 
@@ -805,6 +947,9 @@
 				// add it as a dependency, circular are not allowed
 				self.dependencies.unshift(stel);
 				
+				// start pre - loading everything right away
+				stel.load();
+				
 				if(stel.waits === false){ // file
 					// on the current 
 					files.push(stel);
@@ -814,22 +959,23 @@
 					// essentially have to bind current files to call previous joiner's load
 					// and to wait for current stel's complete
 					
-					if(!joiner){ // if no previous joiner, then we are at the start of a file
+					if(!joiner){ // if no previous joiner, then we are at the end of a file
 						
 						// when they are complete, complete the file
-						whenEach( files.concat(stel), "complete", self, "complete");
+						whenEach( files.concat(stel), "completed", self, "completed");
 						
 						// if there was a function then files, then end, function loads all files
 						if(files.length){
-							whenThe(stel,"complete", files ,"load")
+							
+							whenThe(stel,"completed", files ,"execute")
 						}
 						
 					} else { //   function,  file1, file2, file3, joiner function
 						
-						whenEach(files.concat(stel) , "complete", joiner, "load");
+						whenEach(files.concat(stel) , "completed", joiner, "execute");
 						
 						// make stel complete load files
-						whenThe(stel,"complete", files.length ? files : [joiner] ,"load")
+						whenThe(stel,"completed", files.length ? files : [joiner] ,"execute")
 						
 					}
 					
@@ -844,17 +990,21 @@
 				// we have initial files
 				// if there is a joiner, we need to load it when the initial files are complete
 				if(joiner){
-					whenEach(files, "complete", joiner, "load");
+					whenEach(files, "completed", joiner, "execute"); // problem
 				} else {
-					whenEach(files, "complete", self, "complete");
+					whenEach(files, "completed", self, "completed");
 				}
 				// reverse it back and load each initial file
-				each(files.reverse(), function(){
-					this.load();
+				each(files.reverse(), function(i, f){
+					f.loaded.then(function(){
+						f.execute();
+					});
 				});
 			} else if(joiner){
 				// we have inital function
-				joiner.load()
+				joiner.loaded.then(function(){
+					joiner.execute();
+				})
 			} else {
 				// we had nothing
 				self.complete();
@@ -866,19 +1016,59 @@
 		 */
 		load: function(returnScript) {
 			// if we are already loading / loaded
-			if(this.loading || this.isLoaded){
+			if(this.loading || this.loaded.isResolved()){
 				return;
 			}
+			
 			this.loading = true;
+			
 			var self = this;
 			// get yourself
+			// do tricky pre-loading
+			if ( this.options.type == 'fn' || !doc ) {
+				self.loaded.resolve();
+			} else {
+
+				// TODO Cache this stuffs.
+				var tag = ( 'MozAppearance' in doc.documentElement.style ) ?
+							"object" : 
+							"img",
+					el = doc.createElement( tag ),
+					done = false,
+					onload = function() {
+						if ( ! done && ( ! el.readyState || /^l|c|u/.test( el.readyState ))) {
+							done = true;
+
+							console.log("Done", self.options.rootSrc);
+							self.loaded.resolve();
+							if ( tag == "object" ) {
+								head().removeChild( el );
+								el.onerror = el.onload = el.onreadystatechange = null;
+							}
+						}
+					};
+
+				el.src = el.data = self.options.src;
+				el.onerror = el.onload = el.onreadystatechange = onload;
+
+				if ( tag == "object" ) {
+					el.width = el.height = 0;
+					head().insertBefore( el, head().firstChild );
+				}
+			}
+		},
+		execute : function(){
+			if(this.executing){
+				return;
+			}
+			this.executing = true;
+			var self = this;
 			steal.require(this.options, function load_calling_loaded(script){
-				self.loaded(script);
+				self.executed(script);
 			}, function(error, src){
 				win.clearTimeout && win.clearTimeout(self.completeTimeout)
 				throw "steal.js : "+self.options.src+" not completed"
 			});
-			
 		}
 
 	};
@@ -1048,7 +1238,7 @@
 		 */
 		then : function(){
 			var args = typeof arguments[0] == 'function' ? 
-				arguments : [function(){}].concat(makeArray( arguments ) )
+				arguments : [function(){}].concat(map( arguments ) )
 			return steal.apply(win, args );
 		},
 		/**
@@ -1114,18 +1304,14 @@
 				stel.loading = true;
 			});
 		},
-		// a dummy function to add things to after the stel is created, but before 
-		// loaded is called
-		preloaded : function(){},
 		// called when a script has loaded via production
-		loaded: function(name){
+		loaded: function(name) {
 			// create the steal, mark it as loading, then as loaded
 			var stel = steal.p.make( name );
 			stel.loading = true;
-			convert(stel, "complete");
-			
+			//convert(stel, "complete");
 			steal.preloaded(stel);
-			stel.loaded()
+			stel.executed()
 			return steal;
 		}
 	});
@@ -1297,9 +1483,9 @@
 // a clean up script that prevents memory leaks and removes the
 // script
 var cleanUp = function(script) {
-		script[ STR_ONREADYSTATECHANGE ]
-			= script[ STR_ONLOAD ]
-			= script[STR_ONERROR]
+		script.onreadystatechange
+			= script.onload
+			= script.onerror
 			= null;
 			
 		head().removeChild( script );
@@ -1328,17 +1514,17 @@ steal.type("js", function(options, success, error){
 		}
 		// listen to loaded
 		if (support.attachEvent) {
-			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
+			script.attachEvent('onreadystatechange', callback)
 		} else {
-			script[STR_ONLOAD] = callback;
+			script.onload = callback;
 		}
 		
 		// error handling doesn't work on firefox on the filesystem
 		if (support.error && error && options.protocol !== "file:") {
 			if(support.attachEvent){
-				script.attachEvent(STR_ONERROR, error);
+				script.attachEvent('onerror', error);
 			} else {
-				script[ STR_ONERROR ] = error;
+				script.onerror = error;
 			}
 		}
 		
@@ -1375,7 +1561,7 @@ var cssCount = 0,
 
 steal.type("css", function css_type(options, success, error){
 	if(options.text){ // less
-		var css  = doc[STR_CREATE_ELEMENT]('style');
+		var css  = doc.createElement('style');
 		css.type = 'text/css';
 		if (css.styleSheet) { // IE
 			css.styleSheet.cssText = options.text;
@@ -1414,7 +1600,7 @@ steal.type("css", function css_type(options, success, error){
 
 		
 		options = options || {};
-		var link = doc[STR_CREATE_ELEMENT]('link');
+		var link = doc.createElement('link');
 		link.rel = options.rel || "stylesheet";
 		link.href = options.src;
 		link.type = 'text/css';
@@ -1601,10 +1787,10 @@ request = function(options, success, error){
 					go = function(){
 						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
-						when(cur,"complete", function(){
+						cur.completed.then(function(){
 							steal.trigger("end", cur);
 						});
-						cur.loaded();
+						cur.executed();
 					};
 				// if we are in rhino, start loading dependencies right away
 				if(!win.setTimeout){
@@ -1699,7 +1885,7 @@ request = function(options, success, error){
 		
 		return changeRet ?
 			function after_CRet(){
-				return after.apply(this,[f.apply(this,arguments)].concat(makeArray(arguments)));
+				return after.apply(this,[f.apply(this,arguments)].concat(map(arguments)));
 			}:
 			function after_Ret(){
 				var ret = f.apply(this,arguments);
@@ -1707,104 +1893,8 @@ request = function(options, success, error){
 				return ret;
 			}
 	}
-	
-	// converts a function to work with when
-	function convert(ob, func){
-			
-		var oldFunc = ob[func];
-		
-		// if we don't have callbacks
-		if(!ob[func].callbacks){
-			//replace start with a function that will call ob2's method
-			ob[func] = function(){
-				var me = arguments.callee,
-					ret;
-				
-				// call the original function
-				ret = oldFunc.apply(ob,arguments);
-				
-				var cbs = me.callbacks,
-					len = cbs.length;
-				
-				//mark as called so any callees added to this caller will
-				//automatically get called
-				me.called = true;
-				// call other callbacks
-				for(var i =0; i < len; i++){
-					cbs[i].called()
-				}
-				return ret;
-				
-			}
-			ob[func].callbacks = [];
-		}
 
-		return ob[func];
-	};
 	
-	// maintains 
-	function join(obj, meth){
-		this.obj = obj;
-		this.meth = meth;
-		convert(obj, meth);
-		this.calls = 0
-	};
-	
-	extend(join.prototype,{
-		called : function(){
-			this.calls--;
-			this.go();
-		},
-		// adds functions that will call this join
-		add : function(obj, meth){
-			// converts the function to be able to call 
-			// this join
-			var f = convert(obj, meth);
-			if(!f.called){
-				
-				// adds us to the callback ... the callback will call
-				// called
-				f.callbacks.push(this);
-				this.calls++;
-			}
-		},
-		// call go every time the funtion is called
-		
-		go : function(){
-			if(this.calls === 0){
-				this.obj[this.meth]()
-			}
-		}
-	})
-	// chains two functions.  When the first one is called,
-	//   it calls the second function.
-	//   If the second function has multiple callers, it waits until all have been called
-	// 
-	//   when(parent,"start", steal, "start")
-	//
-	function when(){
-		// handle if we get called with a function
-		var args = makeArray(arguments),
-			last = args[args.length -1];
-			
-		if(typeof last === 'function' ){
-			args[args.length -1] = {
-				'fn' : last
-			}
-			args.push("fn");
-		};
-		
-		var waitMeth = args.pop(), 
-			waitObj = args.pop(),
-			joined = new join(waitObj, waitMeth); 
-		
-		for(var i =0; i < args.length; i = i+2){
-			joined.add(args[i], args[i+1])
-		}
-		
-		// call right away if it should
-		joined.go();
-	}
 	
 	// =========== DEBUG =========
 	
@@ -1838,20 +1928,20 @@ request = function(options, success, error){
 		}
 	};
 	var loaded = {
-		load : function(){},
-		end : function(){}
+		load : Deferred(),
+		end : Deferred()
 	};
 	
 	var firstEnd = false;
 	addEvent(win, "load", function(){
-		loaded.load();
+		loaded.load.resolve();
 	});
 	steal.one("end", function(collection){
-		loaded.end();
+		loaded.end.resolve();
 		firstEnd = collection;
 		steal.trigger("done", firstEnd)
 	})
-	when(loaded,"load",loaded,"end", function(){
+	Deferred.when(loaded.load, loaded.end).then(function(){
 		steal.trigger("ready")
 		steal.isReady = true;
 	});
@@ -1930,7 +2020,7 @@ var interactiveScript,
 	interactives = {},
 	getInteractiveScript = function(){
 		var i, script,
-		  scripts = doc[STR_GET_BY_TAG]('script');
+		  scripts = doc.getElementsByTagName('script');
 		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
 			if (script.readyState === 'interactive') {
 				return script;
@@ -2003,7 +2093,7 @@ if (support.interactive) {
 			if(!doc){
 				return;
 			}
-			var scripts = doc[STR_GET_BY_TAG]("script"),
+			var scripts = doc.getElementsByTagName("script"),
 				i = 0,
 				len = scripts.length;
 	
@@ -2146,8 +2236,11 @@ if (support.interactive) {
 			}
 	});
 	
+
 	
-	steal.when = when;
+	
+	
+	//steal.when = when;
 	// make steal public
 	win.steal = steal;
 	
