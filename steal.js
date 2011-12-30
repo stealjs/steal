@@ -1310,7 +1310,6 @@
 			var stel = steal.p.make( name );
 			stel.loading = true;
 			//convert(stel, "complete");
-			steal.preloaded(stel);
 			stel.executed()
 			return steal;
 		}
@@ -1788,7 +1787,9 @@ request = function(options, success, error){
 						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
 						cur.completed.then(function(){
+							rootSteal = null;
 							steal.trigger("end", cur);
+							
 						});
 						cur.executed();
 					};
@@ -1804,13 +1805,6 @@ request = function(options, success, error){
 		},
 		_before : before,
 		_after: after
-	});
-	
-	// this can probably move above
-	steal.p.complete = before(steal.p.complete, function(){
-		if(this === rootSteal){ // this is the last steal
-			rootSteal = null;
-		}
 	});
 	
 	
