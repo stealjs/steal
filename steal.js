@@ -390,7 +390,7 @@
 	 *    
 	 *     steal('jquery', 'foo',function(){
 	 *       // jquery and foo have finished loading
-	 *       // and runing
+	 *       // and running
 	 *     })
 	 * 
 	 * @return {steal} the steal object for chaining
@@ -543,216 +543,196 @@
 	 * Takes a path
 	 * @param {String} path 
 	 */
-	steal.File = function( path ) {
-		// if new was not used, use it.
-		if ( this.constructor != steal.File ) {
-			return new steal.File(path);
+	var URI = function(url){
+		if(this.constructor !== URI){
+			return new URI(url)
 		}
-		// save the path
-		this.path = typeof path == 'string'? path : path.path;
-	};
-	// alias steal.File to File
-	var File = steal.File,
-	
-		// a reference to the current file
-		curFile;
-	
-	// get and sets the current file
-	File.cur = function(newCurFile){
-		if(newCurFile !== undefined){
-			curFile = File(newCurFile);
-		}else{
-			return curFile || File("");
+		this.parts = URI.parse(url ? ""+url : "");
+	},
+		parser = {
+			"#" : "fragment",
+			"?" : "query"
+		};
+		
+	URI.parse = function(string) {
+	    var pos, t, parts = {};
+		for(var name in parser){
+			pos = string.indexOf(name);
+		    if (pos > -1) {
+		        // escaping?
+		        parts[parser[name]] = string.substring(pos + 1) || null;
+		        string = string.substring(0, pos);
+		    }
 		}
-	};
+	    // extract fragment
+	    
+	    // extract protocol
+	    pos = string.indexOf('://');
+	    if (pos > -1) {
+	        parts.protocol = string.substring(0, pos);
+	        string = string.substring(pos + 3);
+	        
+			
+			var pos = string.indexOf('/');
+			if (pos === -1) {
+			    pos = string.length;
+			}
+			
+			t = string.substring(0, pos);
+			parts.host = t || null;
+			
+			if (parts.host && string.substring(pos)[0] !== '/') {
+			    pos++;
+			    string = "/" + string;
+			}
+			
+			string = string.substring(pos) || '/';
+	    }
+	    
+	    // what's left must be the path
+	    parts.path = string;
 	
+	    // and we're done
+	    return parts;
+	};
+	// the current file location, relative from
 
-	extend(File.prototype,
+	var root = URI();
+	// the current url (relative to root, which is relative from page)
+	// normalize joins from this 
+	// 
+	URI.cur = URI();
+	// typically the path to steal's root folder
+	// this is some folder you want things referenced from
+	URI.root = function(relativeURI){
+		if (relativeURI !== undefined) {
+			root = URI(relativeURI);
+			
+			// set cur with the location
+			var cleaned = URI.page.dir(),
+				loc = cleaned.join(relativeURI);
+
+			// cur now points to the 'root' location, but from the page
+			URI.cur = loc.pathTo(cleaned) //cleaned.toReferenceFromSameDomain(loc);
+		} 
+		return root;
+	};
+	// the path to 
+	URI.page = URI(win.location ?  win.location.href : ""); // 
+	var p = URI.prototype;
+	p.dir = function(){
+		var lastSlash = this.parts.path.lastIndexOf("/")
+		return URI(this.domain()+ (lastSlash != -1 ? this.parts.path.substring(0, lastSlash) : '' ))
+	}
+	p.filename = function(){
+		var path = this.parts.path,
+			lastSlash = path.lastIndexOf("/");
+		return this.domain() + (lastSlash != -1 ? path.substring(lastSlash+1, path.length) : '' );
+	}
+	p.ext = function(){
+		var match = this.filename().match(/\.([\w\d]+)$/)
+		return match ? match[1] : "";
+	}
+	p.domain = function(){
+		return this.parts.protocol? this.parts.protocol+"://"+this.parts.host : "";
+	};
+	// if we have a domain, and the uri does not share the domain, or we are on the filesystem
+	// returns if self is cross domain from uri
+	p.isCrossDomain = function(uri){
+		uri = URI(uri || window.location.href );
+		var domain = this.domain(),
+			uriDomain = uri.domain()
+		return (domain && uriDomain && domain != uriDomain) || this.parts.protocol === 'file'
+			|| ( domain && !uriDomain );
+	};
+	p.isRelativeToDomain = function(){
+		return this.parts.path.indexOf('/') == 0;
+	}
+	p.hash = function(){
+		return this.fragment ? "#"+this.fragment : ""
+	}
+	p.search = function(){
+		return this.query ? "?"+this.query : ""
+	}
+	p.join = function(uri, min){
+		uri = URI(uri);
+		if(uri.isCrossDomain(this)){
+			return uri;
+		}
+		if ( uri.isRelativeToDomain() ) {
+			return URI(this.domain()+uri)
+		}
+		// at this point we either 
+		// - have the same domain
+		// - this has a domain but uri does not
+		// - both don't have domains
+		var domain = this.domain(),
+			left = this.parts.path ? (this.parts.path).split("/") : [],
+			right = uri.parts.path.split("/"),
+			part = right[0];
+		//if we are joining from a folder like cookbook/, remove the last empty part
+		if ( this.parts.path.match(/\/$/) ) {
+			left.pop();
+		}
+		while ( part == '..' && left.length > 0 ) {
+			// if we've emptied out, folders, just break
+			// leaving any additional ../s
+			if(! left.pop() ){ 
+				break;
+			}
+			right.shift();
+			
+			part = right[0];
+		}
+		return URI(domain+left.concat(right).join('/'))
+	}
 	/**
-	 * @prototype
-	 */ 
-	{
-		// Removes hash and querystring
-		clean: function() {
-			return this.path.match(/([^\?#]*)/)[1];
-		},
-		// gets the files extension
-		ext : function(){
-			var match = this.clean().match(/\.([\w\d]+)$/)
-			return match ? match[1] : "";
-		},
-		// Returns everything before the last /
-		dir: function() {
-			// remove any query string
-			var cleaned = this.clean(),
-				// get the last /
-				last = cleaned.lastIndexOf('/'),
-			    // if there is a last /, get everything up to that point
-				dir = (last != -1) ? cleaned.substring(0, last) : '';
-			// make sure we aren't left with just https/ or file:/
-			return /^(https?:\/|file:\/)$/.test(dir) ? cleaned : dir;
-		},
-		// Returns everything after the last /
-		filename: function() {
-			var cleaned = this.clean(),
-				last = cleaned.lastIndexOf('/'),
-				filename = (last != -1) ? cleaned.substring(last+1, cleaned.length) : cleaned;
-			return /^(https?:\/|file:\/)$/.test(filename) ? cleaned : filename;
-		},
-		// Returns the domain for the current path.
-		// Returns null if the domain is a file.
-		domain: function() {
-			var http = this.path.match(/^(?:https?:\/\/)([^\/]*)/);
-			return http ? http[1] : null;
-		},
-		/**
-		 * Joins a url onto a path.  One way of understanding this is that your File object represents your current location, and calling join() is analogous to "cd" on a command line.
-		 * @codestart
-		 * new steal.File("d/e").join("../a/b/c"); // Yields the path "d/a/b/c"
-		 * @codeend
-		 * @param {String} url
-		 */
-		join: function( url ) {
-			return File(url).joinFrom(this.path);
-		},
-
-		/**
-		 * Returns the path of this file referenced from another url or path.
-		 * 
-		 *     new steal.File('a/b.c').joinFrom('/d/e')//-> /d/e/a/b.c
-		 * 
-		 * @param {String} url
-		 * @param {Boolean} expand if the path should be expanded
-		 * @return {String} 
-		 */
-		joinFrom: function( url, expand ) {
-			var u = File(url);
-			
-			// if this.path is absolutely referenced
-			if ( this.protocol() ) { //if we are absolutely referenced
-				
-				//try to shorten the path as much as possible:
-				var firstDomain = this.domain(),
-					secondDomain = u.domain();
-				
-				// if domains are equal, shorten
-				if ( firstDomain && firstDomain == secondDomain ) {
-					
-					return this.toReferenceFromSameDomain(url);
-				} else {
-					// if there is no domain or not equal, use our path
-					return this.path;
-				}
-			
-			// the path is the same as the folder the page is in
-			} else if ( url === steal.pageUrl().dir() && !expand ) {
-
-				return this.path;
-
-			} else if ( this.isLocalAbsolute() ) { // we are a path like /page.js
-
-				return (u.domain() ? u.protocol() + "//" + u.domain() : "" )+ this.path;
-				
-			} else  { //we have 2 relative paths, remove folders with every ../
-				
-				if ( url === '' ) {
-					return this.path.replace(/\/$/, '');
-				}
-				
-				var urls = url.split('/'),
-					paths = this.path.split('/'),
-					path = paths[0];
-				
-				//if we are joining from a folder like cookbook/, remove the last empty part
-				if ( url.match(/\/$/) ) {
-					urls.pop();
-				}
-				// for each .. remove one folder
-				while ( path == '..' && paths.length > 0 ) {
-					// if we've emptied out, folders, just break
-					// leaving any additional ../s
-					if(! urls.pop() ){ 
-						break;
-					}
-					paths.shift();
-					
-					path = paths[0];
-				}
-				return urls.concat(paths).join('/');
-			}
-		},
-		// Returns true if the file is relative to a domain or a protocol
-		relative: function() {
-			return this.path.match(/^(https?:|file:|\/)/) === null;
-		},
-		/**
-		 * Returns the relative path between two paths with common folders.
-		 * @codestart
-		 * new steal.File('a/b/c/x/y').toReferenceFromSameDomain('a/b/c/d/e')//-> ../../x/y
-		 * @codeend
-		 * @param {Object} url
-		 * @return {String} 
-		 */
-		toReferenceFromSameDomain: function( url ) {
-			var parts = this.path.split('/'),
-				other_parts = url.split('/'),
-				result = '';
-			while ( parts.length > 0 && other_parts.length > 0 && parts[0] == other_parts[0] ) {
-				parts.shift();
-				other_parts.shift();
-			}
-			each(other_parts, function(){ result += '../'; })
-			return result + parts.join('/');
-		},
-		/**
-		 * Is the file on the same domain as our page.
-		 */
-		isCrossDomain: function() {
-			return this.isLocalAbsolute() ? false : this.domain() != File(win.location.href).domain();
-		},
-		isLocalAbsolute: function() {
-			return this.path.indexOf('/') === 0;
-		},
-		protocol: function() {
-			var match = this.path.match(/^(https?:|file:)/);
-			return match && match[0];
-		},
-		/**
-		 * For a given path, a given working directory, and file location, update the path so 
-		 * it points to a location relative to steal's root.
-		 * 
-		 * We want everything relative to steal's root so the same app can work in multiple pages.
-		 * 
-		 * ./files/a.js = steals a.js
-		 * ./files/a = a/a.js
-		 * files/a = //files/a/a.js
-		 * files/a.js = loads //files/a.js
-		 */
-		normalize: function() {
-
-			var current = File.cur().dir(),
-				//if you are cross domain from the page, and providing a path that doesn't have an domain
-				path = this.path;
-			if (/^\/\//.test(this.path)) { //if path is rooted from steal's root (DEPRECATED) 
-				path = this.path.substr(2);
-			} 
-			else if (/^\.\//.test(this.path)) { // should be relative
-				this.path = this.path.substr(2);
-				path = this.joinFrom(current);
-				this.path = "./" + this.path;
-			}
-			else if (/^[^\.|\/]/.test(this.path)) {}
-			else {
-				if (this.relative() ||
-				File.cur().isCrossDomain() && //if current file is on another domain and
-				!this.protocol()) { //this file doesn't have a protocol
-					path = this.joinFrom(current);
-				}
-			}
-			
-			return path;
+	 * For a given path, a given working directory, and file location, update the path so 
+	 * it points to a location relative to steal's root.
+	 * 
+	 * We want everything relative to steal's root so the same app can work in multiple pages.
+	 * 
+	 * ./files/a.js = steals a.js
+	 * ./files/a = a/a.js
+	 * files/a = //files/a/a.js
+	 * files/a.js = loads //files/a.js
+	 */
+	p.normalize= function() {
+		var cur = URI.cur.dir(),
+			path = this.parts.path;
+		if (path.indexOf("//") == 0) { //if path is rooted from steal's root (DEPRECATED) 
+			path = URI(path.substr(2));
+		} 
+		else if (path.indexOf("./") == 0) { // should be relative
+			path = cur.join(path.substr(2));
 		}
-	});
+		// only if we start with ./ or have a /foo should we join from cur
+		else if (this.isRelative() ) {
+			path = cur.join(path)
+		}
+		return path;
+	};
+	p.isRelative = function(){
+		return /^[\.|\/]/.test(this.parts.path )
+	}
+	p.toString = function(){
+		return this.domain()+this.parts.path+this.search()+this.hash();
+	}
+	// a min path from 2 urls that share the same domain
+	p.pathTo = function(uri){
+		uri = URI(uri);
+		var uriParts = uri.parts.path.split('/'),
+			thisParts = this.parts.path.split('/'),
+			result = '';
+		while ( uriParts.length > 0 && thisParts.length > 0 && uriParts[0] == thisParts[0] ) {
+			uriParts.shift();
+			thisParts.shift();
+		}
+		each(thisParts, function(){ result += '../'; })
+		return URI(result + uriParts.join('/'));
+	};
+	steal.URI = URI;
+	// --- END URI
 	
 	var pending = [],
 		s = steal,
@@ -799,18 +779,18 @@
 			} 
 			//handle callback functions	
 			else if ( typeof options == 'function' ) {
-				var path = File.cur().path;
+				var uri = URI.cur;
 				
 				this.options = {
 					fn : function() {
 					
 						//set the path ..
-						File.cur(path);
+						URI.cur = uri;
 						
 						// call the function, someday soon this will be requireJS-like
 						options(steal.send || win.jQuery || steal); 
 					},
-					rootSrc: path,
+					rootSrc: uri,
 					orig: options,
 					type: "fn"
 				}
@@ -851,7 +831,7 @@
 				rootSrc = this.options.rootSrc;
 			
 			//set yourself as the current file
-			File.cur(rootSrc);
+			URI.cur = URI(rootSrc);
 			
 			// mark yourself as 'loaded'.  
 			this.isLoaded = true;
@@ -1025,7 +1005,7 @@
 			var self = this;
 			// get yourself
 			// do tricky pre-loading
-			if ( this.options.type == 'fn' || !doc ) {
+			if (true ||  this.options.type == 'fn' || !doc ) {
 				self.loaded.resolve();
 			} else {
 
@@ -1042,8 +1022,12 @@
 							console.log("Done", self.options.rootSrc);
 							self.loaded.resolve();
 							if ( tag == "object" ) {
-								head().removeChild( el );
+								
 								el.onerror = el.onload = el.onreadystatechange = null;
+								setTimeout(function(){
+									head().removeChild( el );
+								},1)
+								
 							}
 						}
 					};
@@ -1082,96 +1066,8 @@
 	 *  @static
 	 */
 	extend(steal,{
-		/**
-		 * @attribute root
-		 * The location of the steal folder.
-		 */
-		root : File(""),
-		/**
-		 * Gets or sets the path from the current page to 
-		 * steal's (or JavaScriptMVC's) root folder.  When passed a src, it sets the root folder. 
-		 * Otherwise, it returns the path to the root folder.
-		 * 
-		 * This is the path from which 
-		 * all plugins are stolen.  When you steal a plugin like steal("jquery/controller"), 
-		 * the plugin path is joined with this rootUrl to create a full path 
-		 * to the controller.js file.
-		 * 
-		 * By default, the rootUrl is calculated from the
-		 * steal script and the window location.  For example, if the 
-		 * script tag looks like this:
-		 * 
-		 *     <script type='text/javascript' src='../../steal/steal.js?ui/app'></script>
-		 * 
-		 * rootUrl will be set to "../../".
-		 * Setting the rootUrl can be useful if you want to have
-		 * steal.js in a different location.
-		 * 
-		 * ## Example
-		 * 
-		 * The following sets steal root to a different folder.
-		 * 
-		 *     steal.rootUrl("../../jmvc/")
-		 * 
-		 * This appends  <code>"../../jmvc"</code> to paths
-		 * loaded from [steal.static.root].  In some strange cases this might be desirable if 
-		 * plugin folders are in a different location from the steal directory. 
-		 * 
-		 * It also sets the current url to this directory so the first calls to steal work relative to the root JMVC directory.
-		 * 
-		 * @param {String} [src] a relative path from the current page to the root directory of JMVC, like ../../
-		 * @return {String} returns the last path passed to rootUrl
-		 */
-		rootUrl : function(src){
-			if (src !== undefined) {
-				steal.root = File(src);
-				
-				// set cur with the location
-				var cleaned = steal.pageUrl(),
-					loc = cleaned.join(src);
-
-				File.cur( cleaned.toReferenceFromSameDomain(loc) );
-				return steal;
-			} else {
-				return steal.root.path;
-			}
-		},
+		each : each,
 		extend : extend,
-		/**
-		 * @function pageUrl
-		 * Gets or sets the location of the page using 
-		 * steal.  This defaults to the window's location.
-		 * 
-		 * However, sometimes it is necessary to 
-		 * have steal believe it is making requests from
-		 * another page.
-		 * 
-		 * @param {String} [newPage] a path to the page using steal (probably the windows location)
-		 * @return {steal.File} returns the last path to a page passed to pageUrl, converted to a steal.File object 
-		 */
-		pageUrl : function(newPage){
-			if(newPage){
-				page = File( File(newPage).clean() );
-				return steal;
-			} else{
-				return page || File("");
-			}
-		},
-		//gets and sets which page steal thinks it's at
-		// TODO: make location change-able ...
-		/**
-		 * Gets the currently running script location.
-		 * 
-		 * @return String
-		 */
-		cur: function( file ) {
-			if (file === undefined) {
-				return File.cur();
-			} else {
-				File.cur(file);
-				return steal;
-			}
-		},
 		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
@@ -1200,32 +1096,31 @@
 		 * @param {Object} options
 		 */
 		makeOptions : function(options){
-			
-			var ext = File(options.src).ext();
+			// convert it to a uri
+			var src = options.src = URI(options.src);
+			var ext = src.ext();
 			if (!ext) {
 				// if first character of path is a . or /, just load this file
-				if (options.src.indexOf(".") == 0 || options.src.indexOf("/") == 0) {
-					options.src = options.src + ".js"
+				if ( src.isRelative() ) {
+					src.parts.path = src.parts.path + ".js"
 				}
 				// else, load as a plugin
 				else {
-					options.src = options.src + "/" + File(options.src).filename() + ".js";
+					src.parts.path = src.parts.path + "/" + src.filename() + ".js";
 				}
 			}
 			
-			var orig = options.src,
+			var orig = ''+src,
 				// path relative to the current files path
 				// this is done relative to jmvcroot
-				normalized = steal.File(orig).normalize(),
-				protocol = steal.File(options.src).protocol();
-				
+				normalized = URI(orig).normalize();
+			
+			console.log(orig, '    '+normalized, '   '+URI.root()+'')
 			extend(options,{
-				originalSrc : options.src,
+				originalSrc : orig,
 				rootSrc : normalized,
 				// path from the page
-				src : steal.root.join(normalized),
-				// "file:" or "http:" depending on what protocol the request uses
-				protocol: protocol || (doc? location.protocol: "file:")
+				src : URI.root().join(normalized)
 			});
 			options.originalSrc = options.src;
 			
@@ -1316,11 +1211,6 @@
 	});
 	
 	var events = {};
-	startup = before(startup, function(){
-		
-		steal.pageUrl(win.location ?  win.location.href : "");
-		
-	})
 	
 	
 	// =============================== TYPE SYSTEM ===============================
@@ -1421,7 +1311,7 @@
 		// if it's a string, get it's extension and check if
 		// it is a registered type, if it is ... set the type
 		if(!raw.type){
-			var ext = File(raw.src).ext();
+			var ext = URI(raw.src).ext();
 			if(!ext && !types[ext]){
 				ext = "js";
 			}
@@ -1519,7 +1409,7 @@ steal.type("js", function(options, success, error){
 		}
 		
 		// error handling doesn't work on firefox on the filesystem
-		if (support.error && error && options.protocol !== "file:") {
+		if (support.error && error && options.src.parts.protocol !== "file") {
 			if(support.attachEvent){
 				script.attachEvent('onerror', error);
 			} else {
@@ -1584,8 +1474,7 @@ steal.type("css", function css_type(options, success, error){
 				lastSheetOptions = options;
 				cssCount++;
 			} else {
-				var relative = File(options.src).joinFrom(
-					File(lastSheetOptions.src).dir());
+				var relative = ''+URI(lastSheetOptions.src).join(options.src);
 					
 				lastSheet.addImport( relative );
 				cssCount++;
@@ -1701,7 +1590,7 @@ request = function(options, success, error){
 	 * necessary depedencies for the file extensions.
 	 */
 	steal.makeOptions = after(steal.makeOptions,function(raw){
-		raw.ext = File(raw.src).ext();
+		raw.ext = raw.src.ext();
 
 		if(steal.options.needs[raw.ext]){
 			if(!raw.needs){
@@ -1725,15 +1614,15 @@ request = function(options, success, error){
 				return p.replace(mapName, map.path);
 			}
 		}
-		return p;
+		return URI(p);
 	};
-	File.prototype.mapJoin = function( url ){
+	URI.prototype.mapJoin = function( url ){
 		url = insertMapping(url);
-		return File(url).joinFrom(this.path);
+		return this.join(url);
 	};
 	// modifies src
 	steal.makeOptions = after(steal.makeOptions,function(raw){
-		raw.src = steal.root.join(raw.rootSrc = insertMapping(raw.rootSrc));
+		raw.src = URI.root().join(raw.rootSrc = insertMapping(raw.rootSrc));
 	});
 	
 	//root mappings to other locations
@@ -1842,10 +1731,9 @@ request = function(options, success, error){
 	})();
 	
 	// =============================== ERROR HANDLING ===============================
-	
 	steal.p.load = after(steal.p.load, function(stel){
 		if(win.document && !this.completed && !this.completeTimeout && !steal.isRhino &&
-			(this.options.protocol == "file:" || !support.error)){
+			(this.options.src.parts.protocol == "file" || !support.error)){
 			var self = this;
 			this.completeTimeout = setTimeout(function(){
 				throw "steal.js : "+self.options.src+" not completed"
@@ -1989,12 +1877,12 @@ request = function(options, success, error){
 		 */
 		loadHas = function(){
 			var stel, i,
-				current = File.cur();
+				current = URI.cur();
 			
 			// mark everything in has loaded
 			for(i=0; i<this.options.has.length; i++){
 				// don't want the current file to change, since we're just marking files as loaded
-				File.cur(current)
+				URI.cur = URI(current);
 				stel = steal.p.make( this.options.has[i] );
 				// need to set up a "complete" callback for this file, so later waits know its already 
 				// been completed
@@ -2159,7 +2047,7 @@ if (support.interactive) {
 			});
 			
 			// CALCULATE CURRENT LOCATION OF THINGS ...
-			steal.rootUrl(options.rootUrl);
+			URI.root(options.rootUrl);
 			
 			// CLEAN UP OPTIONS
 			// make startFile have .js ending
@@ -2173,7 +2061,7 @@ if (support.interactive) {
 
 			//calculate production location;
 			if (!options.production && options.startFile ) {
-				options.production = File(options.startFile).dir() + '/production.js';
+				options.production = URI(options.startFile).dir() + '/production.js';
 			}
 			if ( options.production ) {
 				options.production = options.production + (options.production.indexOf('.js') == -1 ? '.js' : '');
