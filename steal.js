@@ -4,23 +4,34 @@
 	var win = (function(){return this}).call(null),
 		// the document ( might not exist in rhino )
 		doc = win.document,
-		
+		docEl = doc.documentElement,
+		// a jQuery-like $.each
+		each = function(arr, cb) {
+			for(var i =0, len = arr.length; i <len; i++){
+				cb.call(arr[i],i,arr[i])
+			}
+			return arr;
+		},
+		isString = function( o ) {
+			return typeof o == "string";
+		},
+		isFn = function( o ) {
+			return typeof o == "function";
+		},
 		// creates a script tag
 		scriptTag = function() {
-			var start = doc.createElement('script');
-			start.type = 'text/javascript';
+			var start = doc.createElement("script");
+			start.type = "text/javascript";
 			return start;
 		},
 		// a function that returns the head element
 		// creates and caches the lookup if necessary
 		head = function() {
-			var d = doc,
-				de = d.documentElement,
-				heads = d.getElementsByTagName("head"),
+			var heads = doc.getElementsByTagName("head"),
 				hd = heads[0];
 			if (! hd ) {
-				hd = d.createElement('head');
-				de.insertBefore(hd, de.firstChild);
+				hd = doc.createElement("head");
+				docEl.insertBefore(hd, docEl.firstChild);
 			}
 			// replace head so it runs fast next time.
 			head = function(){
@@ -35,18 +46,11 @@
 			}
 			return d;
 		},
-		// a jQuery-like $.each
-		each = function(arr, cb){
-			for(var i =0, len = arr.length; i <len; i++){
-				cb.call(arr[i],i,arr[i])
-			}
-			return arr;
-		},
 		// makes an array of things, or a mapping of things
 		map = function(args, cb){
 			var arr = [];
 			each(args, function(i, str){
-				arr[i] = cb ? (typeof cb=='string' ? str[cb] : cb.call(str, str)  ) : str
+				arr[i] = cb ? ( isString( cb ) ? str[cb] : cb.call(str, str)  ) : str
 			});
 			return arr;
 		},
@@ -56,7 +60,7 @@
 			error: doc && (function(){
 				var script = scriptTag();
 				script.setAttribute( "onerror", "return;" );
-				return typeof script["onerror"] === "function" ?
+				return isFn( script.onerror ) ?
 					true : "onerror" in script
 			})(),
 			// If scripts support interactive ready state.
@@ -70,7 +74,7 @@
 		oldsteal = win.steal,
 		// if oldsteal is an object
 		// we use it as options to configure steal
-		opts = typeof oldsteal == 'object' ? oldsteal : {};
+		opts = typeof oldsteal == "object" ? oldsteal : {};
 		
 	// =============================== STEAL ===============================
 
@@ -415,7 +419,7 @@
 		this.doneFuncs = [];
 		this.failFuncs = [];
 		this.resultArgs = null;
-		this.status = '';
+		this.status = "";
 
 		// check for option function: call it with this as context and as first parameter, as specified in jQuery api
 		if (func)
@@ -425,7 +429,7 @@
 	Deferred.when = function() {
 		if (arguments.length < 2) {
 			var obj = arguments.length ? arguments[0] : undefined;
-			if (obj && (typeof obj.isResolved === 'function' && typeof obj.isRejected === 'function')) {
+			if (obj && ( isFn( obj.isResolved ) && isFn( obj.isRejected ))) {
 				return obj;			
 			}
 			else {
@@ -450,11 +454,11 @@
 	}
 
 	Deferred.prototype.isResolved = function() {
-		return this.status === 'rs';
+		return this.status === "rs";
 	}
 
 	Deferred.prototype.isRejected = function() {
-		return this.status === 'rj';
+		return this.status === "rj";
 	}
 
 
@@ -468,7 +472,7 @@
 	}
 
 	Deferred.prototype.exec = function(context, dst, args, st) {
-		if (this.status !== '')
+		if (this.status !== "")
 			return this;
 
 		this.status = st;
@@ -506,10 +510,10 @@
 			return this;
 		}
 	};
-	Deferred.prototype.resolveWith = resolveFunc('doneFuncs','rs');
-	Deferred.prototype.rejectWith = resolveFunc('failFuncs','rj');
-	Deferred.prototype.done = doneFunc('doneFuncs','rs');
-	Deferred.prototype.fail = doneFunc('failFuncs','rj')
+	Deferred.prototype.resolveWith = resolveFunc("doneFuncs","rs");
+	Deferred.prototype.rejectWith = resolveFunc("failFuncs","rj");
+	Deferred.prototype.done = doneFunc("doneFuncs","rs");
+	Deferred.prototype.fail = doneFunc("failFuncs","rj")
 
 	Deferred.prototype.always = function() {
 		if (arguments.length > 0 && arguments[0])
@@ -567,13 +571,13 @@
 	    // extract fragment
 	    
 	    // extract protocol
-	    pos = string.indexOf('://');
+	    pos = string.indexOf("://");
 	    if (pos > -1) {
 	        parts.protocol = string.substring(0, pos);
 	        string = string.substring(pos + 3);
 	        
 			
-			var pos = string.indexOf('/');
+			var pos = string.indexOf("/");
 			if (pos === -1) {
 			    pos = string.length;
 			}
@@ -581,12 +585,12 @@
 			t = string.substring(0, pos);
 			parts.host = t || null;
 			
-			if (parts.host && string.substring(pos)[0] !== '/') {
+			if (parts.host && string.substring(pos)[0] !== "/") {
 			    pos++;
 			    string = "/" + string;
 			}
 			
-			string = string.substring(pos) || '/';
+			string = string.substring(pos) || "/";
 	    }
 	    
 	    // what's left must be the path
@@ -625,7 +629,7 @@
 	var p = URI.prototype;
 	p.dir = function(){
 		var lastSlash = this.parts.path.lastIndexOf("/")
-		return URI(this.domain()+ (lastSlash != -1 ? this.parts.path.substring(0, lastSlash) : '' ))
+		return URI(this.domain()+ (lastSlash != -1 ? this.parts.path.substring(0, lastSlash) : "" ))
 	}
 	p.filename = function(){
 		var path = this.parts.path,
@@ -645,11 +649,11 @@
 		uri = URI(uri || window.location.href );
 		var domain = this.domain(),
 			uriDomain = uri.domain()
-		return (domain && uriDomain && domain != uriDomain) || this.parts.protocol === 'file'
+		return (domain && uriDomain && domain != uriDomain) || this.parts.protocol === "file"
 			|| ( domain && !uriDomain );
 	};
 	p.isRelativeToDomain = function(){
-		return this.parts.path.indexOf('/') == 0;
+		return this.parts.path.indexOf("/") == 0;
 	}
 	p.hash = function(){
 		return this.fragment ? "#"+this.fragment : ""
@@ -677,7 +681,7 @@
 		if ( this.parts.path.match(/\/$/) ) {
 			left.pop();
 		}
-		while ( part == '..' && left.length > 0 ) {
+		while ( part == ".." && left.length > 0 ) {
 			// if we've emptied out, folders, just break
 			// leaving any additional ../s
 			if(! left.pop() ){ 
@@ -687,7 +691,7 @@
 			
 			part = right[0];
 		}
-		return URI(domain+left.concat(right).join('/'))
+		return URI(domain+left.concat(right).join("/"))
 	}
 	/**
 	 * For a given path, a given working directory, and file location, update the path so 
@@ -724,15 +728,15 @@
 	// a min path from 2 urls that share the same domain
 	p.pathTo = function(uri){
 		uri = URI(uri);
-		var uriParts = uri.parts.path.split('/'),
-			thisParts = this.parts.path.split('/'),
-			result = '';
+		var uriParts = uri.parts.path.split("/"),
+			thisParts = this.parts.path.split("/"),
+			result = "";
 		while ( uriParts.length > 0 && thisParts.length > 0 && uriParts[0] == thisParts[0] ) {
 			uriParts.shift();
 			thisParts.shift();
 		}
-		each(thisParts, function(){ result += '../'; })
-		return URI(result + uriParts.join('/'));
+		each(thisParts, function(){ result += "../"; })
+		return URI(result + uriParts.join("/"));
 	};
 	steal.URI = URI;
 	// --- END URI
@@ -764,7 +768,7 @@
 				} else{ // already have this steal
 					stel = steals[rootSrc];
 					// extend the old stolen file with any new options
-					extend(stel.options, typeof options === "string" ? {} : options)
+					extend(stel.options, isString( options ) ? {} : options)
 				}
 			}
 			
@@ -781,7 +785,7 @@
 				this.waits = false;
 			} 
 			//handle callback functions	
-			else if ( typeof options == 'function' ) {
+			else if ( isFn( options )) {
 				var uri = URI.cur;
 				
 				this.options = {
@@ -806,7 +810,7 @@
 				this.orig = options;
 
 				this.options = steal.makeOptions(extend({},
-					typeof options == 'string' ? { src: options } : options));
+					isString( options ) ? { src: options } : options));
 
 				this.waits = this.options.waits || false;
 				this.unique = true;
@@ -867,7 +871,7 @@
 				// the current
 				joiner,  
 				initial = [],
-				isProduction = steal.options.env == 'production',
+				isProduction = steal.options.env == "production",
 				files = [],
 				// a helper that basically does a join
 				// when everything in arr's func method is called,
@@ -875,11 +879,11 @@
 				//whenEach(files.concat(stel) , "complete", joiner, "execute");
 				whenEach = function(arr, func, obj, func2){
 					var deferreds = map(arr, func)
-					if(func2 === 'execute'){
+					if(func2 === "execute"){
 						deferreds.push(joiner.loaded)
 					}
 					return Deferred.when.apply(Deferred, deferreds).then(function(){
-						if(typeof obj[func2] == 'function'){
+						if( isFn( obj[func2] )){
 							obj[func2]()
 						} else {
 							obj[func2].resolve();
@@ -891,7 +895,7 @@
 				// obj's func method is called, call func2 on all items.
 				// whenThe(stel,"completed", files ,"execute")
 				whenThe = function(obj, func, items, func2){
-					if( func2 == 'execute'){
+					if( func2 == "execute"){
 						
 						each(items, function(i, item){
 							Deferred.when(obj[func], item.loaded).then(function() {
@@ -1011,12 +1015,12 @@
 			var self = this;
 			// get yourself
 			// do tricky pre-loading
-			if (true ||  this.options.type == 'fn' || !doc ) {
+			if (true ||  this.options.type == "fn" || !doc ) {
 				self.loaded.resolve();
 			} else {
 
 				// TODO Cache this stuffs.
-				var tag = ( 'MozAppearance' in doc.documentElement.style ) ?
+				var tag = ( "MozAppearance" in docEl.style ) ?
 							"object" : 
 							"img",
 					el = doc.createElement( tag ),
@@ -1079,12 +1083,12 @@
 		 * Configurable options
 		 */
 		options : {
-			env : 'development',
+			env : "development",
 			// TODO: document this
 			loadProduction : true,
 			needs : {
-				less: 'steal/less/less.js',
-				coffee: 'steal/coffee/coffee.js'
+				less: "steal/less/less.js",
+				coffee: "steal/coffee/coffee.js"
 			}
 		},
 		/**
@@ -1115,7 +1119,7 @@
 				}
 			}
 			
-			var orig = ''+src,
+			var orig = ""+src,
 				// path relative to the current files path
 				// this is done relative to jmvcroot
 				normalized = URI(orig).normalize();
@@ -1136,7 +1140,7 @@
 		 * files passed to the arguments.
 		 */
 		then : function(){
-			var args = typeof arguments[0] == 'function' ? 
+			var args = isFn( arguments[0] )? 
 				arguments : [function(){}].concat(map( arguments ) )
 			return steal.apply(win, args );
 		},
@@ -1350,7 +1354,7 @@
 		// if this has converters, make it get the text first, then pass it to the type
 		if(type.convert.length){
 			converters = type.convert.slice(0);
-			converters.unshift('text', options.type)
+			converters.unshift("text", options.type)
 		} else  {
 			converters = [options.type]
 		}
@@ -1407,7 +1411,7 @@ steal.type("js", function(options, success, error){
 		}
 		// listen to loaded
 		if (support.attachEvent) {
-			script.attachEvent('onreadystatechange', callback)
+			script.attachEvent("onreadystatechange", callback)
 		} else {
 			script.onload = callback;
 		}
@@ -1415,7 +1419,7 @@ steal.type("js", function(options, success, error){
 		// error handling doesn't work on firefox on the filesystem
 		if (support.error && error && options.src.parts.protocol !== "file") {
 			if(support.attachEvent){
-				script.attachEvent('onerror', error);
+				script.attachEvent("onerror", error);
 			} else {
 				script.onerror = error;
 			}
@@ -1454,8 +1458,8 @@ var cssCount = 0,
 
 steal.type("css", function css_type(options, success, error){
 	if(options.text){ // less
-		var css  = doc.createElement('style');
-		css.type = 'text/css';
+		var css  = doc.createElement("style");
+		css.type = "text/css";
 		if (css.styleSheet) { // IE
 			css.styleSheet.cssText = options.text;
 		} else {
@@ -1478,7 +1482,7 @@ steal.type("css", function css_type(options, success, error){
 				lastSheetOptions = options;
 				cssCount++;
 			} else {
-				var relative = ''+URI(lastSheetOptions.src).join(options.src);
+				var relative = ""+URI(lastSheetOptions.src).join(options.src);
 					
 				lastSheet.addImport( relative );
 				cssCount++;
@@ -1492,10 +1496,10 @@ steal.type("css", function css_type(options, success, error){
 
 		
 		options = options || {};
-		var link = doc.createElement('link');
+		var link = doc.createElement("link");
 		link.rel = options.rel || "stylesheet";
 		link.href = options.src;
-		link.type = 'text/css';
+		link.type = "text/css";
 		head().appendChild(link);
 	}
 	
@@ -1533,7 +1537,7 @@ request = function(options, success, error){
 			if ( request.readyState === 4 )  {
 				if ( request.status === 500 || request.status === 404 || 
 					 request.status === 2 || 
-					 (request.status === 0 && request.responseText === '') ) {
+					 (request.status === 0 && request.responseText === "") ) {
 					error && error();
 					clean();
 				} else {
@@ -1545,7 +1549,7 @@ request = function(options, success, error){
 		};
 		
 	request.open("GET", options.src, options.async === false ? false : true);
-	request.setRequestHeader('Content-type', contentType);
+	request.setRequestHeader("Content-type", contentType);
 	if ( request.overrideMimeType ) {
 		request.overrideMimeType(contentType);
 	}
@@ -1641,7 +1645,7 @@ request = function(options, success, error){
 	 * @return {steal}
 	 */
 	map = function(from, to){
-		if(typeof from == "string"){
+		if( isString( from ) ){
 			steal.mappings[from] = {
 				test : new RegExp("^("+from+")([/.]|$)"),
 				path: to
@@ -1724,7 +1728,7 @@ request = function(options, success, error){
 		});
 		
 		// once the current batch is done, fire ready if it hasn't already been done
-		steal.bind('end', function(){
+		steal.bind("end", function(){
 			if (jQueryIncremented && !ready) {
 				jQ.ready(true);
 				ready = true;
@@ -1906,16 +1910,16 @@ var interactiveScript,
 	interactives = {},
 	getInteractiveScript = function(){
 		var i, script,
-		  scripts = doc.getElementsByTagName('script');
+		  scripts = doc.getElementsByTagName("script");
 		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
-			if (script.readyState === 'interactive') {
+			if (script.readyState === "interactive") {
 				return script;
 			}
 		}
 	},
 	getCachedInteractiveScript = function() {
 		var scripts, i, script;
-		if (interactiveScript && interactiveScript.readyState === 'interactive') {
+		if (interactiveScript && interactiveScript.readyState === "interactive") {
 			return interactiveScript;
 		}
 		
@@ -1925,7 +1929,7 @@ var interactiveScript,
 		}
 		
 		// check last inserted
-		if(lastInserted && lastInserted.readyState == 'interactive'){
+		if(lastInserted && lastInserted.readyState == "interactive"){
 			return lastInserted;
 		}
 	
@@ -2012,9 +2016,9 @@ if (support.interactive) {
 				if ( /steal\.production\.js/.test(src) ) {
 					options.env = "production";
 				}
-				if ( src.indexOf('?') !== -1 ) {
+				if ( src.indexOf("?") !== -1 ) {
 					
-					scriptOptions = src.split('?')[1];
+					scriptOptions = src.split("?")[1];
 					commaSplit = scriptOptions.split(",");
 					
 					if ( commaSplit[0] ) {
@@ -2035,7 +2039,7 @@ if (support.interactive) {
 				startFiles = [];
 			extend(options, steal.getScriptOptions());
 			// a steal that existed before this steal
-			if(typeof oldsteal == 'object'){
+			if(typeof oldsteal == "object"){
 				extend(options, oldsteal);
 			}
 			
@@ -2055,7 +2059,7 @@ if (support.interactive) {
 			
 			// CLEAN UP OPTIONS
 			// make startFile have .js ending
-			if(options.startFile && options.startFile.indexOf(".") == '-1'){
+			if(options.startFile && options.startFile.indexOf(".") == "-1"){
 				options.startFile = options.startFile + "/" + options.startFile.match(/[^\/]+$/)[0] + ".js";
 			}
 			
@@ -2065,16 +2069,16 @@ if (support.interactive) {
 
 			//calculate production location;
 			if (!options.production && options.startFile ) {
-				options.production = URI(options.startFile).dir() + '/production.js';
+				options.production = URI(options.startFile).dir() + "/production.js";
 			}
 			if ( options.production ) {
-				options.production = options.production + (options.production.indexOf('.js') == -1 ? '.js' : '');
+				options.production = options.production + (options.production.indexOf(".js") == -1 ? ".js" : "");
 			}
 			each(options.loaded || [], function(i, stel){
 				steal.loaded(stel)
 			})
 			
-			if(typeof options.startFiles === "string"){
+			if( isString( options.startFiles )){
 				startFiles.push(options.startFiles);
 			}
 			else if(options.startFiles && options.startFiles.length){
@@ -2096,7 +2100,7 @@ if (support.interactive) {
 				});
 			}
 			//we only load things with force = true
-			if (options.env == 'production' && options.loadProduction) {
+			if (options.env == "production" && options.loadProduction) {
 				if (options.production) {
 					//steal(steal.options.startFile);
 					steal({
@@ -2108,7 +2112,7 @@ if (support.interactive) {
 			else {
 				if (options.loadDev !== false) {
 					steals.unshift({
-						src: 'steal/dev/dev.js',
+						src: "steal/dev/dev.js",
 						ignore: true
 					});
 				}
