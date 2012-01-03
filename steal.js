@@ -738,7 +738,8 @@
 		each(thisParts, function(){ result += "../"; })
 		return URI(result + uriParts.join("/"));
 	};
-	steal.URI = URI;
+	// temp add steal.File for backward compat
+	steal.File = steal.URI = URI;
 	// --- END URI
 	
 	var pending = [],
@@ -1313,7 +1314,7 @@
 	// because one file has JS and another does not?
 	// we could check if it matches something with .js because foo.less.js SHOULD
 	// be rare
-	steal.p.load = before(steal.p.load, function(){
+	steal.p.execute = before(steal.p.execute, function(){
 		var raw = this.options;
 		
 		// if it's a string, get it's extension and check if
