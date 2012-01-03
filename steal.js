@@ -608,12 +608,15 @@
 		if (relativeURI !== undefined) {
 			root = URI(relativeURI);
 			
-			// set cur with the location
-			var cleaned = URI.page.dir(),
+			// the current folder-location of the page http://foo.com/bar/card
+			var cleaned = URI.page,
+				// the absolute location or root
 				loc = cleaned.join(relativeURI);
-
+			
 			// cur now points to the 'root' location, but from the page
 			URI.cur = loc.pathTo(cleaned) //cleaned.toReferenceFromSameDomain(loc);
+			steal.root = root;
+			return steal;
 		} 
 		return root;
 	};
@@ -830,9 +833,12 @@
 				src = (script && script.src) || this.options.src,
 				rootSrc = this.options.rootSrc;
 			
-			//set yourself as the current file
-			URI.cur = URI(rootSrc);
-			
+			//set yourself as the current file 
+			if( this.options.rootSrc ){
+				URI.cur = URI(rootSrc);
+			} else {
+				// you are the master, set yourself as the page
+			}
 			// mark yourself as 'loaded'.  
 			this.isLoaded = true;
 			
@@ -1875,7 +1881,7 @@ request = function(options, success, error){
 		 */
 		loadHas = function(){
 			var stel, i,
-				current = URI.cur();
+				current = URI.cur;
 			
 			// mark everything in has loaded
 			for(i=0; i<this.options.has.length; i++){
