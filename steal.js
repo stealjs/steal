@@ -734,7 +734,8 @@
 		each(thisParts, function(){ result += '../'; })
 		return URI(result + uriParts.join('/'));
 	};
-	steal.URI = URI;
+	// temp add steal.File for backward compat
+	steal.File = steal.URI = URI;
 	// --- END URI
 	
 	var pending = [],
