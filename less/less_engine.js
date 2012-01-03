@@ -1,5 +1,5 @@
 //
-// LESS - Leaner CSS v1.1.3
+// LESS - Leaner CSS v1.1.6
 // http://lesscss.org
 // 
 // Copyright (c) 2009-2011, Alexis Sellier
@@ -135,13 +135,23 @@ if (!String.prototype.trim) {
 }
 var less, tree;
 
-if (typeof(window) === 'undefined') {
+if (typeof environment === "object" && ({}).toString.call(environment) === "[object Environment]") {
+    // Rhino
+    // Details on how to detect Rhino: https://github.com/ringo/ringojs/issues/88
+    less = {};
+    tree = less.tree = {};
+    less.mode = 'rhino';
+} else if (typeof(window) === 'undefined') {
+    // Node.js
     less = exports,
-    tree = require('less/tree');
+    tree = require('./tree');
+    less.mode = 'node';
 } else {
+    // Browser
     if (typeof(window.less) === 'undefined') { window.less = {} }
     less = window.less,
     tree = window.less.tree = {};
+    less.mode = 'browser';
 }
 //
 // less.js - parser
@@ -462,7 +472,9 @@ less.Parser = function Parser(env) {
                             ]
                         };
                     }
-                    if (options.compress) {
+                    if (options.yuicompress && less.mode === 'node') {
+                        return require('./cssmin').compressor.cssmin(css);
+                    } else if (options.compress) {
                         return css.replace(/(\s)+/g, "$1");
                     } else {
                         return css;
@@ -611,7 +623,15 @@ less.Parser = function Parser(env) {
                 //
                 keyword: function () {
                     var k;
-                    if (k = $(/^[A-Za-z-]+/)) { return new(tree.Keyword)(k) }
+
+                    if (k = $(/^[_A-Za-z-][_A-Za-z0-9-]*/)) { 
+                        if (tree.colors.hasOwnProperty(k)) {
+                            // detect named color
+                            return new(tree.Color)(tree.colors[k].slice(1));
+                        } else {
+                            return new(tree.Keyword)(k) 
+                        }
+                    }
                 },
 
                 //
@@ -627,7 +647,7 @@ less.Parser = function Parser(env) {
                 call: function () {
                     var name, args, index = i;
 
-                    if (! (name = /^([\w-]+|%)\(/.exec(chunks[j]))) return;
+                    if (! (name = /^([\w-]+|%|progid:[\w\.]+)\(/.exec(chunks[j]))) return;
 
                     name = name[1].toLowerCase();
 
@@ -647,7 +667,7 @@ less.Parser = function Parser(env) {
                 arguments: function () {
                     var args = [], arg;
 
-                    while (arg = $(this.expression)) {
+                    while (arg = $(this.entities.assignment) || $(this.expression)) {
                         args.push(arg);
                         if (! $(',')) { break }
                     }
@@ -657,6 +677,19 @@ less.Parser = function Parser(env) {
                     return $(this.entities.dimension) ||
                            $(this.entities.color) ||
                            $(this.entities.quoted);
+                },
+
+                // Assignments are argument entities for calls.
+                // They are present in ie filter properties as shown below.
+                //
+                //     filter: progid:DXImageTransform.Microsoft.Alpha( *opacity=50* )
+                //
+
+                assignment: function () {
+                    var key, value;
+                    if ((key = $(/^\w+(?=\s?=)/i)) && $('=') && (value = $(this.entity))) {
+                        return new(tree.Assignment)(key, value);
+                    }
                 },
 
                 //
@@ -732,7 +765,7 @@ less.Parser = function Parser(env) {
                     var value, c = input.charCodeAt(i);
                     if ((c > 57 || c < 45) || c === 47) return;
 
-                    if (value = $(/^(-?\d*\.?\d+)(px|%|em|pc|ex|in|deg|s|ms|pt|cm|mm|rad|grad|turn)?/)) {
+                    if (value = $(/^(-?\d*\.?\d+)(px|%|em|rem|pc|ex|in|deg|s|ms|pt|cm|mm|rad|grad|turn)?/)) {
                         return new(tree.Dimension)(value[1], value[2]);
                     }
                 },
@@ -805,7 +838,7 @@ less.Parser = function Parser(env) {
                     if (s !== '.' && s !== '#') { return }
 
                     while (e = $(/^[#.](?:[\w-]|\\(?:[a-fA-F0-9]{1,6} ?|[^a-fA-F0-9]))+/)) {
-                        elements.push(new(tree.Element)(c, e));
+                        elements.push(new(tree.Element)(c, e, i));
                         c = $('>');
                     }
                     $('(') && (args = $(this.entities.arguments)) && $(')');
@@ -922,9 +955,14 @@ less.Parser = function Parser(env) {
                 var e, t, c;
 
                 c = $(this.combinator);
-                e = $(/^(?:[.#]?|:*)(?:[\w-]|\\(?:[a-fA-F0-9]{1,6} ?|[^a-fA-F0-9]))+/) || $('*') || $(this.attribute) || $(/^\([^)@]+\)/);
+                e = $(/^(?:\d+\.\d+|\d+)%/) || $(/^(?:[.#]?|:*)(?:[\w-]|\\(?:[a-fA-F0-9]{1,6} ?|[^a-fA-F0-9]))+/) ||
+                    $('*') || $(this.attribute) || $(/^\([^)@]+\)/);
 
-                if (e) { return new(tree.Element)(c, e) }
+                if (e) { return new(tree.Element)(c, e, i) }
+
+                if (c.value && c.value.charAt(0) === '&') {
+                    return new(tree.Element)(c, null, i);
+                }
             },
 
             //
@@ -939,10 +977,18 @@ less.Parser = function Parser(env) {
             combinator: function () {
                 var match, c = input.charAt(i);
 
-                if (c === '>' || c === '&' || c === '+' || c === '~') {
+                if (c === '>' || c === '+' || c === '~') {
                     i++;
                     while (input.charAt(i) === ' ') { i++ }
                     return new(tree.Combinator)(c);
+                } else if (c === '&') {
+                    match = '&';
+                    i++;
+                    if(input.charAt(i) === ' ') {
+                        match = '& ';
+                    }
+                    while (input.charAt(i) === ' ') { i++ }
+                    return new(tree.Combinator)(match);
                 } else if (c === ':' && input.charAt(i + 1) === ':') {
                     i += 2;
                     while (input.charAt(i) === ' ') { i++ }
@@ -1012,16 +1058,11 @@ less.Parser = function Parser(env) {
                 var selectors = [], s, rules, match;
                 save();
 
-                if (match = /^([.#: \w-]+)[\s\n]*\{/.exec(chunks[j])) {
-                    i += match[0].length - 1;
-                    selectors = [new(tree.Selector)([new(tree.Element)(null, match[1])])];
-                } else {
-                    while (s = $(this.selector)) {
-                        selectors.push(s);
-                        $(this.comment);
-                        if (! $(',')) { break }
-                        $(this.comment);
-                    }
+                while (s = $(this.selector)) {
+                    selectors.push(s);
+                    $(this.comment);
+                    if (! $(',')) { break }
+                    $(this.comment);
                 }
 
                 if (selectors.length > 0 && (rules = $(this.block))) {
@@ -1089,7 +1130,7 @@ less.Parser = function Parser(env) {
 
                 if (value = $(this['import'])) {
                     return value;
-                } else if (name = $(/^@media|@page|@-[-a-z]+/)) {
+                } else if (name = $(/^@media|@page/) || $(/^@(?:-webkit-|-moz-|-o-|-ms-)[a-z0-9-]+/) || $('keyframes')) {
                     types = ($(/^[^{]+/) || '').trim();
                     if (rules = $(this.block)) {
                         return new(tree.Directive)(name + " " + types, rules);
@@ -1156,7 +1197,7 @@ less.Parser = function Parser(env) {
             multiplication: function () {
                 var m, a, op, operation;
                 if (m = $(this.operand)) {
-                    while ((op = ($('/') || $('*'))) && (a = $(this.operand))) {
+                    while (!peek(/^\/\*/) && (op = ($('/') || $('*'))) && (a = $(this.operand))) {
                         operation = new(tree.Operation)(op, [operation || m, a]);
                     }
                     return operation || m;
@@ -1216,7 +1257,7 @@ less.Parser = function Parser(env) {
     };
 };
 
-if (typeof(window) !== 'undefined') {
+if (less.mode === 'browser' || less.mode === 'rhino') {
     //
     // Used by `@import` directives
     //
@@ -1319,6 +1360,13 @@ tree.functions = {
         hsl.a = clamp(hsl.a);
         return hsla(hsl);
     },
+    fade: function (color, amount) {
+        var hsl = color.toHSL();
+
+        hsl.a = amount.value / 100;
+        hsl.a = clamp(hsl.a);
+        return hsla(hsl);
+    },
     spin: function (color, amount) {
         var hsl = color.toHSL();
         var hue = (hsl.h + amount.value) % 360;
@@ -1370,16 +1418,29 @@ tree.functions = {
         return new(tree.Quoted)('"' + str + '"', str);
     },
     round: function (n) {
+        return this._math('round', n);
+    },
+    ceil: function (n) {
+        return this._math('ceil', n);
+    },
+    floor: function (n) {
+        return this._math('floor', n);
+    },
+    _math: function (fn, n) {
         if (n instanceof tree.Dimension) {
-            return new(tree.Dimension)(Math.round(number(n)), n.unit);
+            return new(tree.Dimension)(Math[fn](number(n)), n.unit);
         } else if (typeof(n) === 'number') {
-            return Math.round(n);
+            return Math[fn](n);
         } else {
-	    throw {
+            throw {
                 error: "RuntimeError",
                 message: "math functions take numbers as parameters"
             };
         }
+    },
+    argb: function (color) {
+        return new(tree.Anonymous)(color.toARGB());
+
     }
 };
 
@@ -1404,7 +1465,158 @@ function clamp(val) {
     return Math.min(1, Math.max(0, val));
 }
 
-})(require('less/tree'));
+})(require('./tree'));
+(function (tree) {
+    tree.colors = {
+        'aliceblue':'#f0f8ff',
+        'antiquewhite':'#faebd7',
+        'aqua':'#00ffff',
+        'aquamarine':'#7fffd4',
+        'azure':'#f0ffff',
+        'beige':'#f5f5dc',
+        'bisque':'#ffe4c4',
+        'black':'#000000',
+        'blanchedalmond':'#ffebcd',
+        'blue':'#0000ff',
+        'blueviolet':'#8a2be2',
+        'brown':'#a52a2a',
+        'burlywood':'#deb887',
+        'cadetblue':'#5f9ea0',
+        'chartreuse':'#7fff00',
+        'chocolate':'#d2691e',
+        'coral':'#ff7f50',
+        'cornflowerblue':'#6495ed',
+        'cornsilk':'#fff8dc',
+        'crimson':'#dc143c',
+        'cyan':'#00ffff',
+        'darkblue':'#00008b',
+        'darkcyan':'#008b8b',
+        'darkgoldenrod':'#b8860b',
+        'darkgray':'#a9a9a9',
+        'darkgrey':'#a9a9a9',
+        'darkgreen':'#006400',
+        'darkkhaki':'#bdb76b',
+        'darkmagenta':'#8b008b',
+        'darkolivegreen':'#556b2f',
+        'darkorange':'#ff8c00',
+        'darkorchid':'#9932cc',
+        'darkred':'#8b0000',
+        'darksalmon':'#e9967a',
+        'darkseagreen':'#8fbc8f',
+        'darkslateblue':'#483d8b',
+        'darkslategray':'#2f4f4f',
+        'darkslategrey':'#2f4f4f',
+        'darkturquoise':'#00ced1',
+        'darkviolet':'#9400d3',
+        'deeppink':'#ff1493',
+        'deepskyblue':'#00bfff',
+        'dimgray':'#696969',
+        'dimgrey':'#696969',
+        'dodgerblue':'#1e90ff',
+        'firebrick':'#b22222',
+        'floralwhite':'#fffaf0',
+        'forestgreen':'#228b22',
+        'fuchsia':'#ff00ff',
+        'gainsboro':'#dcdcdc',
+        'ghostwhite':'#f8f8ff',
+        'gold':'#ffd700',
+        'goldenrod':'#daa520',
+        'gray':'#808080',
+        'grey':'#808080',
+        'green':'#008000',
+        'greenyellow':'#adff2f',
+        'honeydew':'#f0fff0',
+        'hotpink':'#ff69b4',
+        'indianred':'#cd5c5c',
+        'indigo':'#4b0082',
+        'ivory':'#fffff0',
+        'khaki':'#f0e68c',
+        'lavender':'#e6e6fa',
+        'lavenderblush':'#fff0f5',
+        'lawngreen':'#7cfc00',
+        'lemonchiffon':'#fffacd',
+        'lightblue':'#add8e6',
+        'lightcoral':'#f08080',
+        'lightcyan':'#e0ffff',
+        'lightgoldenrodyellow':'#fafad2',
+        'lightgray':'#d3d3d3',
+        'lightgrey':'#d3d3d3',
+        'lightgreen':'#90ee90',
+        'lightpink':'#ffb6c1',
+        'lightsalmon':'#ffa07a',
+        'lightseagreen':'#20b2aa',
+        'lightskyblue':'#87cefa',
+        'lightslategray':'#778899',
+        'lightslategrey':'#778899',
+        'lightsteelblue':'#b0c4de',
+        'lightyellow':'#ffffe0',
+        'lime':'#00ff00',
+        'limegreen':'#32cd32',
+        'linen':'#faf0e6',
+        'magenta':'#ff00ff',
+        'maroon':'#800000',
+        'mediumaquamarine':'#66cdaa',
+        'mediumblue':'#0000cd',
+        'mediumorchid':'#ba55d3',
+        'mediumpurple':'#9370d8',
+        'mediumseagreen':'#3cb371',
+        'mediumslateblue':'#7b68ee',
+        'mediumspringgreen':'#00fa9a',
+        'mediumturquoise':'#48d1cc',
+        'mediumvioletred':'#c71585',
+        'midnightblue':'#191970',
+        'mintcream':'#f5fffa',
+        'mistyrose':'#ffe4e1',
+        'moccasin':'#ffe4b5',
+        'navajowhite':'#ffdead',
+        'navy':'#000080',
+        'oldlace':'#fdf5e6',
+        'olive':'#808000',
+        'olivedrab':'#6b8e23',
+        'orange':'#ffa500',
+        'orangered':'#ff4500',
+        'orchid':'#da70d6',
+        'palegoldenrod':'#eee8aa',
+        'palegreen':'#98fb98',
+        'paleturquoise':'#afeeee',
+        'palevioletred':'#d87093',
+        'papayawhip':'#ffefd5',
+        'peachpuff':'#ffdab9',
+        'peru':'#cd853f',
+        'pink':'#ffc0cb',
+        'plum':'#dda0dd',
+        'powderblue':'#b0e0e6',
+        'purple':'#800080',
+        'red':'#ff0000',
+        'rosybrown':'#bc8f8f',
+        'royalblue':'#4169e1',
+        'saddlebrown':'#8b4513',
+        'salmon':'#fa8072',
+        'sandybrown':'#f4a460',
+        'seagreen':'#2e8b57',
+        'seashell':'#fff5ee',
+        'sienna':'#a0522d',
+        'silver':'#c0c0c0',
+        'skyblue':'#87ceeb',
+        'slateblue':'#6a5acd',
+        'slategray':'#708090',
+        'slategrey':'#708090',
+        'snow':'#fffafa',
+        'springgreen':'#00ff7f',
+        'steelblue':'#4682b4',
+        'tan':'#d2b48c',
+        'teal':'#008080',
+        'thistle':'#d8bfd8',
+        'tomato':'#ff6347',
+        'turquoise':'#40e0d0',
+        'violet':'#ee82ee',
+        'wheat':'#f5deb3',
+        'white':'#ffffff',
+        'whitesmoke':'#f5f5f5',
+        'yellow':'#ffff00',
+        'yellowgreen':'#9acd32'
+    };
+})(require('./tree'));
 (function (tree) {
 
 tree.Alpha = function (val) {
@@ -1421,7 +1633,7 @@ tree.Alpha.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Anonymous = function (string) {
@@ -1434,8 +1646,24 @@ tree.Anonymous.prototype = {
     eval: function () { return this }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
+
+tree.Assignment = function (key, val) {
+    this.key = key;
+    this.value = val;
+};
+tree.Assignment.prototype = {
+    toCSS: function () {
+        return this.key + '=' + (this.value.toCSS ? this.value.toCSS() : this.value);
+    },
+    eval: function (env) {
+        if (this.value.eval) { this.value = this.value.eval(env) }
+        return this;
+    }
+};
+
+})(require('../tree'));(function (tree) {
 
 //
 // A function call node.
@@ -1479,7 +1707,7 @@ tree.Call.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 //
 // RGB Colors - #ff0014, #eee
@@ -1495,11 +1723,6 @@ tree.Color = function (rgb, a) {
         this.rgb = rgb;
     } else if (rgb.length == 6) {
         this.rgb = rgb.match(/.{2}/g).map(function (c) {
-            return parseInt(c, 16);
-        });
-    } else if (rgb.length == 8) {
-        this.alpha = parseInt(rgb.substring(0,2), 16) / 255.0;
-        this.rgb = rgb.substr(2).match(/.{2}/g).map(function (c) {
             return parseInt(c, 16);
         });
     } else {
@@ -1573,11 +1796,19 @@ tree.Color.prototype = {
             h /= 6;
         }
         return { h: h * 360, s: s, l: l, a: a };
+    },
+    toARGB: function () {
+        var argb = [Math.round(this.alpha * 255)].concat(this.rgb);
+        return '#' + argb.map(function (i) {
+            i = Math.round(i);
+            i = (i > 255 ? 255 : (i < 0 ? 0 : i)).toString(16);
+            return i.length === 1 ? '0' + i : i;
+        }).join('');
     }
 };
 
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Comment = function (value, silent) {
@@ -1591,7 +1822,7 @@ tree.Comment.prototype = {
     eval: function () { return this }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 //
@@ -1625,7 +1856,7 @@ tree.Dimension.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Directive = function (name, value) {
@@ -1658,13 +1889,14 @@ tree.Directive.prototype = {
     rulesets: function () { return tree.Ruleset.prototype.rulesets.apply(this.ruleset) }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
-tree.Element = function (combinator, value) {
+tree.Element = function (combinator, value, index) {
     this.combinator = combinator instanceof tree.Combinator ?
                       combinator : new(tree.Combinator)(combinator);
-    this.value = value.trim();
+    this.value = value ? value.trim() : "";
+    this.index = index;
 };
 tree.Element.prototype.toCSS = function (env) {
     return this.combinator.toCSS(env || {}) + this.value;
@@ -1673,6 +1905,8 @@ tree.Element.prototype.toCSS = function (env) {
 tree.Combinator = function (value) {
     if (value === ' ') {
         this.value = ' ';
+    } else if (value === '& ') {
+        this.value = '& ';
     } else {
         this.value = value ? value.trim() : "";
     }
@@ -1682,6 +1916,7 @@ tree.Combinator.prototype.toCSS = function (env) {
         ''  : '',
         ' ' : ' ',
         '&' : '',
+        '& ' : ' ',
         ':' : ' :',
         '::': '::',
         '+' : env.compress ? '+' : ' + ',
@@ -1690,7 +1925,7 @@ tree.Combinator.prototype.toCSS = function (env) {
     }[this.value];
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Expression = function (value) { this.value = value };
@@ -1713,7 +1948,7 @@ tree.Expression.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 //
 // CSS @import node
@@ -1734,12 +1969,12 @@ tree.Import = function (path, imports) {
 
     // The '.less' extension is optional
     if (path instanceof tree.Quoted) {
-        this.path = /\.(le?|c)ss$/.test(path.value) ? path.value : path.value + '.less';
+        this.path = /\.(le?|c)ss(\?.*)?$/.test(path.value) ? path.value : path.value + '.less';
     } else {
         this.path = path.value.value || path.value;
     }
 
-    this.css = /css$/.test(this.path);
+    this.css = /css(\?.*)?$/.test(this.path);
 
     // Only pre-compile .less files
     if (! this.css) {
@@ -1790,7 +2025,7 @@ tree.Import.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.JavaScript = function (string, index, escaped) {
@@ -1840,7 +2075,7 @@ tree.JavaScript.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 
 (function (tree) {
 
@@ -1850,7 +2085,7 @@ tree.Keyword.prototype = {
     toCSS: function () { return this.value }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.mixin = {};
@@ -1956,7 +2191,7 @@ tree.mixin.Definition.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Operation = function (op, operands) {
@@ -1988,7 +2223,7 @@ tree.operate = function (op, a, b) {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Quoted = function (str, content, escaped, i) {
@@ -2017,7 +2252,7 @@ tree.Quoted.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Rule = function (name, value, important, index) {
@@ -2055,7 +2290,7 @@ tree.Shorthand.prototype = {
     eval: function () { return this }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Ruleset = function (selectors, rules) {
@@ -2148,7 +2383,7 @@ tree.Ruleset.prototype = {
             if (rule !== self) {
                 for (var j = 0; j < rule.selectors.length; j++) {
                     if (match = selector.match(rule.selectors[j])) {
-                        if (selector.elements.length > 1) {
+                        if (selector.elements.length > rule.selectors[j].elements.length) {
                             Array.prototype.push.apply(rules, rule.find(
                                 new(tree.Selector)(selector.elements.slice(1)), self));
                         } else {
@@ -2178,11 +2413,7 @@ tree.Ruleset.prototype = {
             if (context.length === 0) {
                 paths = this.selectors.map(function (s) { return [s] });
             } else {
-                for (var s = 0; s < this.selectors.length; s++) {
-                    for (var c = 0; c < context.length; c++) {
-                        paths.push(context[c].concat([this.selectors[s]]));
-                    }
-                }
+                this.joinSelectors( paths, context, this.selectors );
             }
         }
 
@@ -2232,9 +2463,46 @@ tree.Ruleset.prototype = {
         css.push(rulesets);
 
         return css.join('') + (env.compress ? '\n' : '');
+    },
+
+    joinSelectors: function (paths, context, selectors) {
+        for (var s = 0; s < selectors.length; s++) {
+            this.joinSelector(paths, context, selectors[s]);
+        }
+    },
+
+    joinSelector: function (paths, context, selector) {
+        var before = [], after = [], beforeElements = [],
+            afterElements = [], hasParentSelector = false, el;
+
+        for (var i = 0; i < selector.elements.length; i++) {
+            el = selector.elements[i];
+            if (el.combinator.value.charAt(0) === '&') {
+                hasParentSelector = true;
+            }
+            if (hasParentSelector) afterElements.push(el);
+            else                   beforeElements.push(el);
+        }
+
+        if (! hasParentSelector) {
+            afterElements = beforeElements;
+            beforeElements = [];
+        }
+
+        if (beforeElements.length > 0) {
+            before.push(new(tree.Selector)(beforeElements));
+        }
+
+        if (afterElements.length > 0) {
+            after.push(new(tree.Selector)(afterElements));
+        }
+
+        for (var c = 0; c < context.length; c++) {
+            paths.push(before.concat(context[c]).concat(after));
+        }
     }
 };
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Selector = function (elements) {
@@ -2244,11 +2512,20 @@ tree.Selector = function (elements) {
     }
 };
 tree.Selector.prototype.match = function (other) {
-    if (this.elements[0].value === other.elements[0].value) {
-        return true;
-    } else {
+    var len  = this.elements.length,
+        olen = other.elements.length,
+        max  = Math.min(len, olen);
+
+    if (len < olen) {
         return false;
+    } else {
+        for (var i = 0; i < max; i++) {
+            if (this.elements[i].value !== other.elements[i].value) {
+                return false;
+            }
+        }
     }
+    return true;
 };
 tree.Selector.prototype.toCSS = function (env) {
     if (this._css) { return this._css }
@@ -2262,15 +2539,15 @@ tree.Selector.prototype.toCSS = function (env) {
     }).join('');
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
-tree.URL = function (val, paths) {
+tree.URL = function (val, paths, normalize) {
     if (val.data) {
         this.attrs = val;
     } else {
         // Add the base path if the URL is relative and we are in the browser
-        if (!/^(?:https?:\/|file:\/|data:\/)?\//.test(val.value) && paths.length > 0 && typeof(window) !== 'undefined') {
+        if (normalize && typeof(window) !== 'undefined' && !/^(?:https?:\/\/|file:\/\/|data:|\/)/.test(val.value) && paths.length > 0) {
             val.value = paths[0] + (val.value.charAt(0) === '/' ? val.value.slice(1) : val.value);
         }
         this.value = val;
@@ -2283,11 +2560,11 @@ tree.URL.prototype = {
                                     : this.value.toCSS()) + ")";
     },
     eval: function (ctx) {
-        return this.attrs ? this : new(tree.URL)(this.value.eval(ctx), this.paths);
+        return this.attrs ? this : new(tree.URL)(this.value.eval(ctx), this.paths, true);
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Value = function (value) {
@@ -2311,7 +2588,7 @@ tree.Value.prototype = {
     }
 };
 
-})(require('less/tree'));
+})(require('../tree'));
 (function (tree) {
 
 tree.Variable = function (name, index) { this.name = name, this.index = index };
@@ -2335,14 +2612,14 @@ tree.Variable.prototype = {
     }
 };
 
-})(require('less/tree'));
-require('less/tree').find = function (obj, fun) {
+})(require('../tree'));
+require('./tree').find = function (obj, fun) {
     for (var i = 0, r; i < obj.length; i++) {
         if (r = fun.call(obj, obj[i])) { return r }
     }
     return null;
 };
-require('less/tree').jsify = function (obj) {
+require('./tree').jsify = function (obj) {
     if (Array.isArray(obj.value) && (obj.value.length > 1)) {
         return '[' + obj.value.map(function (v) { return v.toCSS(false) }).join(', ') + ']';
     } else {
@@ -2452,8 +2729,14 @@ function loadStyles() {
     for (var i = 0; i < styles.length; i++) {
         if (styles[i].type.match(typePattern)) {
             new(less.Parser)().parse(styles[i].innerHTML || '', function (e, tree) {
-                styles[i].type      = 'text/css';
-                styles[i].innerHTML = tree.toCSS();
+                var css = tree.toCSS();
+                var style = styles[i];
+                try {
+                    style.innerHTML = css;
+                } catch (_) {
+                    style.styleSheets.cssText = css;
+                }
+                style.type = 'text/css';
             });
         }
     }
@@ -2578,7 +2861,7 @@ function xhr(url, type, callback, errback) {
     xhr.send(null);
 
     if (isFileProtocol) {
-        if (xhr.status === 0) {
+        if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
             callback(xhr.responseText);
         } else {
             errback(xhr.status, url);
