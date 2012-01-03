@@ -627,7 +627,7 @@
 	p.filename = function(){
 		var path = this.parts.path,
 			lastSlash = path.lastIndexOf("/");
-		return this.domain() + (lastSlash != -1 ? path.substring(lastSlash+1, path.length) : '' );
+		return (lastSlash != -1 ? path.substring(lastSlash+1, path.length) : path );
 	}
 	p.ext = function(){
 		var match = this.filename().match(/\.([\w\d]+)$/)
@@ -1019,7 +1019,6 @@
 						if ( ! done && ( ! el.readyState || /^l|c|u/.test( el.readyState ))) {
 							done = true;
 
-							console.log("Done", self.options.rootSrc);
 							self.loaded.resolve();
 							if ( tag == "object" ) {
 								
@@ -1115,7 +1114,6 @@
 				// this is done relative to jmvcroot
 				normalized = URI(orig).normalize();
 			
-			console.log(orig, '    '+normalized, '   '+URI.root()+'')
 			extend(options,{
 				originalSrc : orig,
 				rootSrc : normalized,

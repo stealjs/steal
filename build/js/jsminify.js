@@ -115,7 +115,7 @@ steal('steal/parse',function(steal){
 			return function( src, quiet ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					origFileName = "tmp" + rnd + ".js",
-					origFile = new steal.File(origFileName);
+					origFile = new steal.URI(origFileName);
 
 				origFile.save(src);
 
@@ -138,7 +138,7 @@ steal('steal/parse',function(steal){
 			return function( src, quiet, currentLineMap ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					filename = "tmp" + rnd + ".js",
-					tmpFile = new steal.File(filename);
+					tmpFile = new steal.URI(filename);
 
 				tmpFile.save(src);
 
@@ -203,7 +203,7 @@ steal('steal/parse',function(steal){
 			return function( src ) {
 				var rnd = Math.floor(Math.random() * 1000000 + 1),
 					filename = "tmp" + rnd + ".js",
-					tmpFile = new steal.File(filename);
+					tmpFile = new steal.URI(filename);
 
 				tmpFile.save(src);
 

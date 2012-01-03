@@ -1,7 +1,7 @@
 steal.packages('mxui/layout/table_scroll/table_scroll.js',
                'mxui/nav/accordion/accordion.js')
 	.then('jquery/controller/route', function(){
-			
+
 $.Controller('Route', {
 	"table route" : function(){
 		steal('mxui/layout/table_scroll', function(){

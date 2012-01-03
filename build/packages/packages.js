@@ -33,7 +33,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 		apps._open(app, options, function(options, opener){
 			
 			// the folder are build files will go in
-			var to = buildOptions.to || s.File(opener.firstSteal.options.rootSrc).dir(),
+			var to = buildOptions.to || ""+s.URI(opener.firstSteal.options.rootSrc).dir(),
 				appNamesToName = {},
 				usedNames = {},
 				// a helper function that translates between an 
@@ -51,7 +51,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					}
 					// try with just the last part
 					var shortened = appNames.map(function(l){
-						return s.File(l).filename()
+						return s.URI(l).filename()
 					}).join('-')
 					if(!usedNames[shortened]){
 						usedNames[shortened] = true;
@@ -62,7 +62,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				};
 			
 			// make the packages folder
-			s.File(to+"/packages").mkdirs();
+			s.URI(to+"/packages").mkdirs();
 			
 			// get packages loaded, packages need to be rootSrc style url
 			var packages = opener.steal.packages(),
@@ -134,7 +134,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					})
 					s.print(" ")
 					
-					s.File(packageName+".js").save( pack.js );
+					s.URI(packageName+".js").save( pack.js );
 					
 					// make this steal instance
 					makes[packageName+".js"] = {
@@ -195,7 +195,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				}
 				
 				mapCode = "steal.map("+s.toJSON(maps)+");"
-				s.File(to+"/production.js").save(
+				s.URI(to+"/production.js").save(
 					mapCode+makeCode.join('\n')+"\n"+pack.js
 				)
 			});

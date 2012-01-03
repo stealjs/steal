@@ -131,7 +131,7 @@ steal('steal/build').then(function( steal ) {
 				}
 				var compressed = packages[p].src.join("\n");
 				//save them
-				new steal.File(options.to + p).save(loading+dependencyStr+compressed);
+				new steal.URI(options.to + p).save(loading+dependencyStr+compressed);
 				var end = new Date(),
 					time = (end-start);
 				steal.print(time+' MS')
