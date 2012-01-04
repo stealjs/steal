@@ -6,11 +6,19 @@
 		doc = win.document,
 		docEl = doc.documentElement,
 		// a jQuery-like $.each
-		each = function(arr, cb) {
-			for(var i =0, len = arr.length; i <len; i++){
-				cb.call(arr[i],i,arr[i])
+		each = function(o, cb) {
+			var i, len;
+			// weak array detection
+			if ( o.pop ) {
+				for ( i = 0, len = o.length; i <len; i++) {
+					cb.call(o[i],i,o[i], o)
+				}
+			} else {
+				for( i in o ) {
+					cb.call(o[i],i,o[i], o)
+				}
 			}
-			return arr;
+			return o;
 		},
 		isString = function( o ) {
 			return typeof o == "string";
@@ -44,9 +52,9 @@
 		},
 		// extends one object with another
 		extend = function( d, s ) {
-			for ( var p in s ) {
-				d[p] = s[p];
-			}
+			each(s, function( k ) {
+				d[k] = s[k];
+			});
 			return d;
 		},
 		// makes an array of things, or a mapping of things
@@ -494,22 +502,20 @@
 	},
 	doneFunc = function(type, status){
 		return function(){
-			for (var i = 0; i < arguments.length; i++) {
-			// skip any undefined or null arguments
-				if (!arguments[i])
-					continue;
-	
-				if (arguments[i].constructor === Array ) {
-					arguments.callee.apply(this,arguments[i])
-				}
-				else {
+			var self = this;
+			each(arguments, function( i, v, args ) {
+				if ( ! v )
+					return;
+				if ( v.constructor === Array ) {
+					args.callee.apply(self, v)
+				} else {
 					// immediately call the function if the deferred has been resolved
-					if (this.status === status)
-						arguments[i].apply(this, this.resultArgs);
+					if (self.status === status)
+						v.apply(this, this.resultArgs);
 	
-					this[type].push(arguments[i]);
+					self[type].push(v);
 				}
-			}
+			});
 			return this;
 		}
 	};
@@ -551,195 +557,177 @@
 	 * @param {String} path 
 	 */
 	var URI = function(url){
-		if(this.constructor !== URI){
-			return new URI(url)
-		}
-		this.parts = URI.parse(url ? ""+url : "");
-	},
-		parser = {
-			"#" : "fragment",
-			"?" : "query"
+			if(this.constructor !== URI){
+				return new URI(url)
+			}
+			this.parts = URI.parse(url ? ""+url : "");
 		};
-		
-	URI.parse = function(string) {
-	    var pos, t, parts = {};
-		for(var name in parser){
-			pos = string.indexOf(name);
-		    if (pos > -1) {
-		        // escaping?
-		        parts[parser[name]] = string.substring(pos + 1) || null;
-		        string = string.substring(0, pos);
-		    }
-		}
-	    // extract fragment
-	    
-	    // extract protocol
-	    pos = string.indexOf("://");
-	    if (pos > -1) {
-	        parts.protocol = string.substring(0, pos);
-	        string = string.substring(pos + 3);
-	        
-			
-			var pos = string.indexOf("/");
-			if (pos === -1) {
-			    pos = string.length;
-			}
-			
-			t = string.substring(0, pos);
-			parts.host = t || null;
-			
-			if (parts.host && string.substring(pos)[0] !== "/") {
-			    pos++;
-			    string = "/" + string;
-			}
-			
-			string = string.substring(pos) || "/";
-	    }
-	    
-	    // what's left must be the path
-	    parts.path = string;
-	
-	    // and we're done
-	    return parts;
-	};
-	// the current file location, relative from
-
-	var root = URI();
 	// the current url (relative to root, which is relative from page)
 	// normalize joins from this 
 	// 
-	URI.cur = URI();
-	// typically the path to steal's root folder
-	// this is some folder you want things referenced from
-	URI.root = function(relativeURI){
-		if (relativeURI !== undefined) {
-			root = URI(relativeURI);
-			
-			// the current folder-location of the page http://foo.com/bar/card
-			var cleaned = URI.page,
-				// the absolute location or root
-				loc = cleaned.join(relativeURI);
-			
-			// cur now points to the 'root' location, but from the page
-			URI.cur = loc.pathTo(cleaned) //cleaned.toReferenceFromSameDomain(loc);
-			steal.root = root;
-			return steal;
-		} 
-		return root;
-	};
-	// the path to 
-	URI.page = URI(win.location ?  win.location.href : ""); // 
-	var p = URI.prototype;
-	p.dir = function(){
-		var parts = this.parts.path.split("/");
-		parts.pop();
-		return URI(this.domain() + parts.join("/"))
-	}
-	p.filename = function(){
-		return this.parts.path.split("/").pop();
-	}
-	p.ext = function(){
-		var filename = this.filename();
-		return ~ filename.indexOf(".") ? filename.split(".").pop() : "";
-	}
-	p.domain = function(){
-		return this.parts.protocol? this.parts.protocol+"://"+this.parts.host : "";
-	};
-	// if we have a domain, and the uri does not share the domain, or we are on the filesystem
-	// returns if self is cross domain from uri
-	p.isCrossDomain = function( uri ) {
-		uri = URI( uri || window.location.href );
-		var domain = this.domain(),
-			uriDomain = uri.domain()
-		return (domain && uriDomain && domain != uriDomain) || this.parts.protocol === "file"
-			|| ( domain && !uriDomain );
-	};
-	p.isRelativeToDomain = function(){
-		return this.parts.path.indexOf("/") == 0;
-	}
-	p.hash = function(){
-		return this.fragment ? "#"+this.fragment : ""
-	}
-	p.search = function(){
-		return this.query ? "?"+this.query : ""
-	}
-	p.join = function(uri, min){
-		uri = URI(uri);
-		if ( uri.isCrossDomain( this )) {
-			return uri;
-		}
-		if ( uri.isRelativeToDomain() ) {
-			return URI( this.domain() + uri )
-		}
-		// at this point we either 
-		// - have the same domain
-		// - this has a domain but uri does not
-		// - both don't have domains
-		var domain = this.domain(),
-			left = this.parts.path ? (this.parts.path).split("/") : [],
-			right = uri.parts.path.split("/"),
-			part = right[0];
-		//if we are joining from a folder like cookbook/, remove the last empty part
-		if ( this.parts.path.match(/\/$/) ) {
-			left.pop();
-		}
-		while ( part == ".." && left.length > 0 ) {
-			// if we've emptied out, folders, just break
-			// leaving any additional ../s
-			if(! left.pop() ){ 
-				break;
+	extend( URI, {
+		// typically the path to steal's root folder
+		// this is some folder you want things referenced from
+		root : function(relativeURI){
+			if (relativeURI !== undefined) {
+				root = URI(relativeURI);
+				
+				// the current folder-location of the page http://foo.com/bar/card
+				var cleaned = URI.page,
+					// the absolute location or root
+					loc = cleaned.join(relativeURI);
+				
+				// cur now points to the 'root' location, but from the page
+				URI.cur = loc.pathTo(cleaned) //cleaned.toReferenceFromSameDomain(loc);
+				steal.root = root;
+				return steal;
+			} 
+			return root;
+		},
+		parse : function(string) {
+			var uriParts = string.split("?"),
+				uri = uriParts.shift(),
+				queryParts = uriParts.join("").split("#"),
+				protoParts = uri.split("://"),
+				parts = {
+					query : "?" + queryParts.shift(),
+					fragment : "#" + queryParts.join("#")
+				},
+				pathParts;
+
+			if ( protoParts[1] ) {
+				parts.protocol = protoParts.shift();
+				pathParts = protoParts[0].split("/");
+				parts.host = pathParts.shift();
+				parts.path = "/" + pathParts.join("/");
+			} else {
+				parts.path = protoParts[0];
 			}
-			right.shift();
-			
-			part = right[0];
+			return parts;
 		}
-		return URI(domain+left.concat(right).join("/"))
-	}
+	});
+	
+	URI.page = URI( win.location && location.href );
+	URI.cur = URI();
+
 	/**
-	 * For a given path, a given working directory, and file location, update the path so 
-	 * it points to a location relative to steal's root.
-	 * 
-	 * We want everything relative to steal's root so the same app can work in multiple pages.
-	 * 
-	 * ./files/a.js = steals a.js
-	 * ./files/a = a/a.js
-	 * files/a = //files/a/a.js
-	 * files/a.js = loads //files/a.js
+	 * @hide
+	 * @prototype
 	 */
-	p.normalize= function() {
-		var cur = URI.cur.dir(),
-			path = this.parts.path;
-		if (path.indexOf("//") == 0) { //if path is rooted from steal's root (DEPRECATED) 
-			path = URI(path.substr(2));
-		} 
-		else if (path.indexOf("./") == 0) { // should be relative
-			path = cur.join(path.substr(2));
+	extend( URI.prototype, {
+		dir : function(){
+			var parts = this.parts.path.split("/");
+			parts.pop();
+			return URI(this.domain() + parts.join("/"))
+		},
+		filename : function(){
+			return this.parts.path.split("/").pop();
+		},
+		ext : function(){
+			var filename = this.filename();
+			return ~ filename.indexOf(".") ? filename.split(".").pop() : "";
+		},
+		domain : function(){
+			return this.parts.protocol ? this.parts.protocol+"://"+this.parts.host : "";
+		},
+		// if we have a domain, and the uri does not share the domain, or we are 
+		// on the filesystem 
+		// returns if self is cross domain from uri
+		isCrossDomain : function( uri ) {
+			uri = URI( uri || win.location.href );
+			var domain = this.domain(),
+				uriDomain = uri.domain()
+			return (domain && uriDomain && domain != uriDomain) || 
+				this.parts.protocol === "file" || 
+				( domain && !uriDomain );
+		},
+		isRelativeToDomain : function(){
+			return this.parts.path.indexOf("/") == 0;
+		},
+		hash : function(){
+			return this.fragment ? "#"+this.fragment : ""
+		},
+		search : function(){
+			return this.query ? "?"+this.query : ""
+		},
+		join : function(uri, min){
+			uri = URI(uri);
+			if ( uri.isCrossDomain( this )) {
+				return uri;
+			}
+			if ( uri.isRelativeToDomain() ) {
+				return URI( this.domain() + uri )
+			}
+			// at this point we either 
+			// - have the same domain
+			// - this has a domain but uri does not
+			// - both don't have domains
+			var left = this.parts.path ? this.parts.path.split("/") : [],
+				right = uri.parts.path.split("/"),
+				part = right[0];
+			//if we are joining from a folder like cookbook/, remove the last empty part
+			if ( this.parts.path.match(/\/$/) ) {
+				left.pop();
+			}
+			while ( part == ".." && left.length > 0 ) {
+				// if we've emptied out, folders, just break
+				// leaving any additional ../s
+				if(! left.pop() ){ 
+					break;
+				}
+				right.shift();
+				
+				part = right[0];
+			}
+			return URI( this.domain() + left.concat( right ).join("/") );
+		},
+		/**
+		 * For a given path, a given working directory, and file location, update the 
+		 * path so it points to a location relative to steal's root.
+		 * 
+		 * We want everything relative to steal's root so the same app can work in 
+		 * multiple pages.
+		 * 
+		 * ./files/a.js = steals a.js
+		 * ./files/a = a/a.js
+		 * files/a = //files/a/a.js
+		 * files/a.js = loads //files/a.js
+		 */
+		normalize : function() {
+			var cur = URI.cur.dir(),
+				path = this.parts.path;
+			if (path.indexOf("//") == 0) { //if path is rooted from steal's root (DEPRECATED) 
+				path = URI(path.substr(2));
+			} 
+			else if (path.indexOf("./") == 0) { // should be relative
+				path = cur.join(path.substr(2));
+			}
+			// only if we start with ./ or have a /foo should we join from cur
+			else if (this.isRelative() ) {
+				path = cur.join(path)
+			}
+			return path;
+		},
+		isRelative : function(){
+			return  /^[\.|\/]/.test(this.parts.path )
+		},
+		toString : function(){
+			return this.domain()+this.parts.path+this.search()+this.hash();
+		},
+		// a min path from 2 urls that share the same domain
+		pathTo : function(uri){
+			uri = URI(uri);
+			var uriParts = uri.parts.path.split("/"),
+				thisParts = this.parts.path.split("/"),
+				result = [];
+			while ( uriParts.length && thisParts.length && uriParts[0] == thisParts[0] ) {
+				uriParts.shift();
+				thisParts.shift();
+			}
+			each(thisParts, function(){ result.push("../") })
+			return URI(result.join("") + uriParts.join("/"));
 		}
-		// only if we start with ./ or have a /foo should we join from cur
-		else if (this.isRelative() ) {
-			path = cur.join(path)
-		}
-		return path;
-	};
-	p.isRelative = function(){
-		return /^[\.|\/]/.test(this.parts.path )
-	}
-	p.toString = function(){
-		return this.domain()+this.parts.path+this.search()+this.hash();
-	}
-	// a min path from 2 urls that share the same domain
-	p.pathTo = function(uri){
-		uri = URI(uri);
-		var uriParts = uri.parts.path.split("/"),
-			thisParts = this.parts.path.split("/"),
-			result = [];
-		while ( uriParts.length && thisParts.length && uriParts[0] == thisParts[0] ) {
-			uriParts.shift();
-			thisParts.shift();
-		}
-		each(thisParts, function(){ result.push("../") })
-		return URI(result.join("") + uriParts.join("/"));
-	};
+	});
 	// temp add steal.File for backward compat
 	steal.File = steal.URI = URI;
 	// --- END URI
@@ -835,7 +823,7 @@
 		 *   - this is where all the actions is
 		 */
 
-		executed: function(script){
+		executed: function( script ) {
 			var myqueue, 
 				stel, 
 				src = (script && script.src) || this.options.src,
@@ -858,13 +846,13 @@
 			// is there a case in IE where, this makes sense?
 			// in other browsers, the queue of items to load is
 			// what is in pending
-			if(!myqueue){
+			if ( ! myqueue ) {
 				myqueue = pending.slice(0);
 				pending = [];
 			}
 			
 			// if we have nothing, mark us as complete (resolve if deferred)
-			if(!myqueue.length){
+			if ( ! myqueue.length ) {
 				this.complete();
 				return;
 			}
@@ -907,13 +895,17 @@
 							})
 						})
 						
-					} else {
+					}
+
+					// TODO: Ask Justin what this branch is for.
+					/** / else {
 						obj[func].then(function(){
-						each(items, function(i, item){
+							each(items, function(i, item){
 								item[func2]
 							})
 						})
 					}
+					/**/ 
 					
 					
 				},
@@ -1019,15 +1011,13 @@
 			var self = this;
 			// get yourself
 			// do tricky pre-loading
-			if (true ||  this.options.type == "fn" || !doc ) {
+			if ( this.options.type == "fn" || ! doc ) {
 				self.loaded.resolve();
 			} else {
-
-				// TODO Cache this stuffs.
 				var el = doc.createElement( preloadElem ),
 					done = false,
 					onload = function() {
-						if ( ! done && ( ! el.readyState || /^l|c|u/.test( el.readyState ))) {
+						if ( ! done && ( ! el.readyState || stateCheck.test( el.readyState ))) {
 							done = true;
 
 							self.loaded.resolve();
@@ -1410,7 +1400,7 @@ var cleanUp = function( elem ) {
 	// the last inserted script, needed for IE
 	lastInserted,
 	// if the state is done
-	stateCheck = /^l|c/;
+	stateCheck = /^loade|c|u/;
 steal.type("js", function(options, success, error){
 	// create a script tag
 	var script = scriptTag(),
@@ -1487,12 +1477,12 @@ steal.type("css", function(options, success, error) {
 		if ( createSheet ) {
 			// IE has a 31 sheet and 31 import per sheet limit
 			if(cssCount == 0){
-				lastSheet = document.createStyleSheet(options.src);
+				lastSheet = doc.createStyleSheet(options.src);
 				lastSheetOptions = options;
 				cssCount++;
 			} else {
 				var relative = "" + URI(lastSheetOptions.src).join(options.src);
-					
+
 				lastSheet.addImport( relative );
 				cssCount++;
 				if(cssCount == 30){
@@ -2019,7 +2009,7 @@ if (support.interactive) {
 				options.env = "production";
 			}
 
-			if ( ~ src.indexOf("?")) {
+			if ( src.indexOf("?") > -1 ) {
 				
 				scriptOptions = src.split("?")[1];
 				commaSplit = scriptOptions.split(",");
