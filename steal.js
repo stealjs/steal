@@ -1,9 +1,7 @@
-(function(){
+(function( win ) {
 
-	// Gets the window (even if there is none)
-	var win = (function(){return this}).call(null),
-		// the document ( might not exist in rhino )
-		doc = win.document,
+	// the document ( might not exist in rhino )
+	var doc = win.document,
 		docEl = doc.documentElement,
 		// a jQuery-like $.each
 		each = function(o, cb) {
@@ -38,8 +36,7 @@
 		// a function that returns the head element
 		// creates and caches the lookup if necessary
 		head = function() {
-			var heads = getElementsByTagName("head"),
-				hd = heads[0];
+			var hd = getElementsByTagName("head")[0];
 			if (! hd ) {
 				hd = doc.createElement("head");
 				docEl.insertBefore(hd, docEl.firstChild);
@@ -423,8 +420,8 @@
 	
 	// =============================== Deferred .63 ============================ 
 	
-	var Deferred = function(func) {
-		if (!(this instanceof Deferred))
+	var Deferred = function( func ) {
+		if ( ! ( this instanceof Deferred ))
 			return new Deferred();
 
 		this.doneFuncs = [];
@@ -432,68 +429,46 @@
 		this.resultArgs = null;
 		this.status = "";
 
-		// check for option function: call it with this as context and as first parameter, as specified in jQuery api
-		if (func)
-			func.apply(this, [this]);
+		// check for option function: call it with this as context and as first 
+		// parameter, as specified in jQuery api
+		func && func.call(this, this);
 	}
 	
 	Deferred.when = function() {
-		if (arguments.length < 2) {
-			var obj = arguments.length ? arguments[0] : undefined;
+		var args = map( arguments );
+		if (args.length < 2) {
+			var obj = args[0];
 			if (obj && ( isFn( obj.isResolved ) && isFn( obj.isRejected ))) {
 				return obj;			
-			}
-			else {
+			} else {
 				return Deferred().resolve(obj);
 			}
-		}
-		else {
+		} else {
 			
 			var df = Deferred(),
-				size = arguments.length,
+				size = args.length,
 				done = 0,
-				rp = new Array(size);	// resolve params: params of each resolve, we need to track down them to be able to pass them in the correct order if the master needs to be resolved
+				// resolve params: params of each resolve, we need to track down 
+				// them to be able to pass them in the correct order if the master 
+				// needs to be resolved
+				rp = new Array(size);
 
-			each(arguments, function(j, arg){
-				arg.done(function() { rp[j] = (arguments.length < 2) ? arguments[0] : arguments; if (++done == size) { df.resolve.apply(df, rp); }})
-				   .fail(function() { df.reject(arguments); });
+			each(args, function(j, arg){
+				arg.done(function() {
+					rp[j] = (arguments.length < 2) ? arguments[0] : arguments;
+					if (++done == size) {
+						df.resolve.apply(df, rp);
+					}
+				}).fail(function() {
+					df.reject(arguments);
+				});
 			});
 
 			return df;
 			
 		}
 	}
-
-	Deferred.prototype.isResolved = function() {
-		return this.status === "rs";
-	}
-
-	Deferred.prototype.isRejected = function() {
-		return this.status === "rj";
-	}
-
-
-
-	Deferred.prototype.reject = function() {
-		return this.rejectWith(this, arguments);
-	}	
-
-	Deferred.prototype.resolve = function() {
-		return this.resolveWith(this, arguments);
-	}
-
-	Deferred.prototype.exec = function(context, dst, args, st) {
-		if (this.status !== "")
-			return this;
-
-		this.status = st;
-
-		each(dst, function(i, d){
-			d.apply(context, args);
-		});
-
-		return this;
-	}
+	
 	var resolveFunc = function(type, status){
 		return function(context){
 			var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
@@ -519,29 +494,62 @@
 			return this;
 		}
 	};
-	Deferred.prototype.resolveWith = resolveFunc("doneFuncs","rs");
-	Deferred.prototype.rejectWith = resolveFunc("failFuncs","rj");
-	Deferred.prototype.done = doneFunc("doneFuncs","rs");
-	Deferred.prototype.fail = doneFunc("failFuncs","rj")
 
-	Deferred.prototype.always = function() {
-		if (arguments.length > 0 && arguments[0])
-			this.done(arguments[0]).fail(arguments[0]);
+	extend( Deferred.prototype, {
 
-		return this;
-	};
+		resolveWith : resolveFunc("doneFuncs","rs"),
+		rejectWith : resolveFunc("failFuncs","rj"),
+		done : doneFunc("doneFuncs","rs"),
+		fail : doneFunc("failFuncs","rj"),
+		always : function() {
+			if (arguments.length > 0 && arguments[0])
+				this.done(arguments[0]).fail(arguments[0]);
 
-	Deferred.prototype.then = function() {
-		// fail function(s)
-		if (arguments.length > 1 && arguments[1])
-			this.fail(arguments[1]);
+			return this;
+		},
 
-		// done function(s)
-		if (arguments.length > 0 && arguments[0])
-			this.done(arguments[0]);
+		then : function() {
+			// fail function(s)
+			if (arguments.length > 1 && arguments[1])
+				this.fail(arguments[1]);
 
-		return this;
-	};
+			// done function(s)
+			if (arguments.length > 0 && arguments[0])
+				this.done(arguments[0]);
+
+			return this;
+		},
+
+		isResolved : function() {
+			return this.status === "rs";
+		},
+
+		isRejected : function() {
+			return this.status === "rj";
+		},
+
+		reject : function() {
+			return this.rejectWith(this, arguments);
+		},
+
+		resolve : function() {
+			return this.resolveWith(this, arguments);
+		},
+
+		exec : function(context, dst, args, st) {
+			if (this.status !== "")
+				return this;
+
+			this.status = st;
+
+			each(dst, function(i, d){
+				d.apply(context, args);
+			});
+
+			return this;
+		}
+	});
+
 	// =============================== PATHS .8 ============================
 
 // things that matter ... 
@@ -556,12 +564,12 @@
 	 * Takes a path
 	 * @param {String} path 
 	 */
-	var URI = function(url){
-			if(this.constructor !== URI){
-				return new URI(url)
-			}
-			this.parts = URI.parse(url ? ""+url : "");
-		};
+	var URI = function( url ) {
+		if ( this.constructor !== URI ) {
+			return new URI( url );
+		}
+		this.parts = URI.parse( url ? "" + url : "" );
+	};
 	// the current url (relative to root, which is relative from page)
 	// normalize joins from this 
 	// 
@@ -715,7 +723,7 @@
 			return this.domain()+this.parts.path+this.search()+this.hash();
 		},
 		// a min path from 2 urls that share the same domain
-		pathTo : function(uri){
+		pathTo : function( uri ) {
 			uri = URI(uri);
 			var uriParts = uri.parts.path.split("/"),
 				thisParts = this.parts.path.split("/"),
@@ -747,15 +755,17 @@
 	steal.p = {
 		// adds a new steal and throws an error if the script doesn't load
 		// this also checks the steals map
-		make: function(options){
+		make: function( options ) {
 			
-			var stel = new steal.p.init(options),
+			var stel = new steal.p.init( options ),
 				rootSrc = stel.options.rootSrc;
 			
-			if(stel.unique && rootSrc){
+			if ( stel.unique && rootSrc ) {
 				// the .js is b/c we are not adding that automatically until
 				// load because we defer 'type' determination until then
-				if(!steals[rootSrc] && ! steals[rootSrc+".js"]){  //if we haven't loaded it before
+				//
+				// if we haven't loaded it before
+				if ( ! steals[rootSrc] && ! steals[rootSrc + ".js"] ) {
 					steals[rootSrc] = stel;
 				} else{ // already have this steal
 					stel = steals[rootSrc];
@@ -797,16 +807,17 @@
 				this.waits = true;
 				this.unique = false;
 			} else {
-				
+
 				// save the original options
 				this.orig = options;
 
-				this.options = steal.makeOptions(extend({},
-					isString( options ) ? { src: options } : options));
+				this.options = steal.makeOptions( extend({},
+					isString( options ) ? { src: options } : options ));
 
 				this.waits = this.options.waits || false;
 				this.unique = true;
 			}
+
 			this.loaded = Deferred();
 			//this.executed = Deferred();
 			this.completed = Deferred();
@@ -826,15 +837,15 @@
 		executed: function( script ) {
 			var myqueue, 
 				stel, 
-				src = (script && script.src) || this.options.src,
+				src = ( script && script.src) || this.options.src,
 				rootSrc = this.options.rootSrc;
 			
 			//set yourself as the current file 
-			if( this.options.rootSrc ){
-				URI.cur = URI(rootSrc);
-			} else {
+			if ( this.options.rootSrc ) {
+				URI.cur = URI( rootSrc );
+			} //else {
 				// you are the master, set yourself as the page
-			}
+			//}
 			// mark yourself as 'loaded'.  
 			this.isLoaded = true;
 			
@@ -869,7 +880,7 @@
 				// when everything in arr's func method is called,
 				// call func2 on obj
 				//whenEach(files.concat(stel) , "complete", joiner, "execute");
-				whenEach = function(arr, func, obj, func2){
+				whenEach = function( arr, func, obj, func2 ) {
 					var deferreds = map(arr, func)
 					if(func2 === "execute"){
 						deferreds.push(joiner.loaded)
@@ -886,7 +897,7 @@
 				// a helper that does the oposite of a join.  When
 				// obj's func method is called, call func2 on all items.
 				// whenThe(stel,"completed", files ,"execute")
-				whenThe = function(obj, func, items, func2){
+				whenThe = function( obj, func, items, func2 ) {
 					if( func2 == "execute"){
 						
 						each(items, function(i, item){
@@ -911,20 +922,23 @@
 				},
 				stealInstances = [];
 
-			// iterate through the collection and add all the 'needs' before fetching...
+			// iterate through the collection and add all the 'needs' 
+			// before fetching...
 			each(myqueue.reverse(), function(i, item){
 					
-				if(isProduction && item.ignore){
+				if ( isProduction && item.ignore ) {
 					return;
 				}
 					
 				// make a steal object
 				var stel = steal.p.make(item);
 				
-				//has to happen before 'needs' for when reversed...
+				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
-				each(stel.options.needs || [], function(i, raw){
-						stealInstances.push( extend(steal.p.make(raw), { waits: true }) );
+				each(stel.options.needs || [], function( i, raw ) {
+					stealInstances.push( extend(steal.p.make(raw), {
+						waits: true 
+					}));
 				});
 			});
 			
@@ -936,11 +950,11 @@
 				// start pre - loading everything right away
 				stel.load();
 				
-				if(stel.waits === false){ // file
+				if ( stel.waits === false ) { // file
 					// on the current 
 					files.push(stel);
 				
-				}else{ // function
+				} else { // function
 					
 					// essentially have to bind current files to call previous joiner's load
 					// and to wait for current stel's complete
@@ -972,9 +986,10 @@
 			});
 			
 			// now we should be left with the starting files
-			if(files.length){
+			if ( files.length ) {
 				// we have initial files
-				// if there is a joiner, we need to load it when the initial files are complete
+				// if there is a joiner, we need to load it when the initial files 
+				// are complete
 				if(joiner){
 					whenEach(files, "completed", joiner, "execute"); // problem
 				} else {
@@ -1008,8 +1023,8 @@
 			
 			this.loading = true;
 			
-			var self = this;
 			// get yourself
+			var self = this;
 			// do tricky pre-loading
 			if ( this.options.type == "fn" || ! doc ) {
 				self.loaded.resolve();
@@ -1037,10 +1052,10 @@
 			}
 		},
 		execute : function(){
-			if ( ! this.executing ) {
-				this.executing = true;
-				var self = this;
-				steal.require( this.options, function( script ) {
+			var self = this;
+			if ( ! self.executing ) {
+				self.executing = true;
+				steal.require( self.options, function( script ) {
 					self.executed(script);
 				}, function( error, src ) {
 					win.clearTimeout && clearTimeout( self.completeTimeout )
@@ -1139,10 +1154,10 @@
 				events[event] = [] 
 			}
 			var special = steal.events[event]
-			if(special && special.add){
+			if ( special && special.add ) {
 				listener = special.add( listener );
 			}
-			listener && events[event].push(listener);
+			listener && events[event].push( listener );
 			return steal;
 		},
 		one : function( event, listener ) {
@@ -1170,14 +1185,10 @@
 		},
 		trigger : function(event, arg){
 			var arr = events[event] || [];
-				copy = [];
 			// array items might be removed during each iteration (with unbind), 
 			// so we iterate over a copy
-			each( arr, function(i, a ) {
-				copy[i] = a;
-			});
-			each(copy, function(i,f){
-				f(arg);
+			each( map( arr ), function(i,f){
+				f( arg );
 			})
 		},
 		/**
@@ -1411,7 +1422,7 @@ steal.type("js", function(options, success, error){
 			}
 		};
 	// if we have text, just set and insert text
-	if (options.text) {
+	if ( options.text ) {
 		// insert
 		script.text = options.text;
 		
@@ -1506,16 +1517,18 @@ steal.type("css", function(options, success, error) {
 });
 
 // Overwrite
-if(opts.types){
-	for(var type in opts.types){
-		steal.type(type, opts.types[type]);
-	}
+if ( opts.types ) {
+	each( opts.types, function( key, value ) {
+		steal.type( key, value );
+	});
 }
 
 
 // =============================== HELPERS ===============================
 var factory = function() {
-	return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+	return win.ActiveXObject ? 
+		new ActiveXObject("Microsoft.XMLHTTP") : 
+		new XMLHttpRequest();
 };
 
 
@@ -1542,7 +1555,6 @@ request = function(options, success, error){
 					success(request.responseText);
 				}
 				clean();
-				return;
 			} 
 		};
 	request.open("GET", options.src, ! ( options.async === false));
@@ -1578,6 +1590,7 @@ request = function(options, success, error){
 	 */
 	var packs = [];
 	steal.packages = function(){
+		
 		if(!arguments.length){
 			return packs;
 		} else {
@@ -1607,21 +1620,18 @@ request = function(options, success, error){
 	//  =============================== MAPPING ===============================
 	var insertMapping = function(p){
 		// don't worry about // rooted paths
-		var mapName,
-			map;
+		var map;
 			
 		// go through mappings
-		for(var mapName in steal.mappings){
-			map = steal.mappings[mapName]
-			if(map.test.test(p)){ 
-				return p.replace(mapName, map.path);
+		each(steal.mappings, function( key, value ) {
+			if ( value.test.test( p )) { 
+				return p.replace(key, value.path);
 			}
-		}
+		});
 		return URI(p);
 	};
 	URI.prototype.mapJoin = function( url ){
-		url = insertMapping(url);
-		return this.join(url);
+		return this.join( insertMapping( url ));
 	};
 	// modifies src
 	steal.makeOptions = after(steal.makeOptions,function(raw){
@@ -1646,9 +1656,7 @@ request = function(options, success, error){
 				path: to
 			};
 		} else { // its an object
-			for(var key in from){
-				steal.map(key, from[key]);
-			}
+			each( form, steal.map );
 		}
 		return this;
 	}
@@ -1686,12 +1694,12 @@ request = function(options, success, error){
 						cur.executed();
 					};
 				// if we are in rhino, start loading dependencies right away
-				if(!win.setTimeout){
-					go()
-				}else{
+				if ( win.setTimeout ) {
 					// otherwise wait a small timeout to make 
 					// sure we get all steals in the current file
-					setTimeout(go,0)
+					setTimeout( go, 0 )
+				} else {
+					go()
 				}
 			}
 		},
@@ -1735,10 +1743,10 @@ request = function(options, success, error){
 	
 	// =============================== ERROR HANDLING ===============================
 	steal.p.load = after(steal.p.load, function(stel){
-		if(win.document && !this.completed && !this.completeTimeout && !steal.isRhino &&
-			(this.options.src.parts.protocol == "file" || !support.error)){
-			var self = this;
-			this.completeTimeout = setTimeout(function(){
+		var self = this;
+		if( doc && ! self.completed && ! self.completeTimeout && !steal.isRhino &&
+			(self.options.src.parts.protocol == "file" || !support.error)){
+			self.completeTimeout = setTimeout(function(){
 				throw "steal.js : "+self.options.src+" not completed"
 			},5000);
 		}
@@ -1864,7 +1872,8 @@ request = function(options, success, error){
 		return stel;
 	}, true)
 	
-	// if we're about to mark a file as loaded, mark its "has" array files as loaded also
+	// if we're about to mark a file as loaded, mark its "has" array files as 
+	// loaded also
 	steal.p.loaded = before(steal.p.loaded, function(){
 		if(this.options.has){
 			this.loadHas();
@@ -1904,16 +1913,16 @@ var interactiveScript,
 	// key is script name, value is array of pending items
 	interactives = {},
 	getInteractiveScript = function(){
-		var i, script,
-		  scripts = getElementsByTagName("script");
-		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
-			if (script.readyState === "interactive") {
-				return script;
+		var scripts = getElementsByTagName("script"),
+			i = scripts.length;
+		while ( i-- ) {
+			if (scripts[i].readyState === "interactive") {
+				return scripts[i];
 			}
 		}
 	},
 	getCachedInteractiveScript = function() {
-		var scripts, i, script;
+		var script;
 		if (interactiveScript && interactiveScript.readyState === "interactive") {
 			return interactiveScript;
 		}
@@ -2122,4 +2131,4 @@ if (support.interactive) {
 	
 	startup();
 	
-})()
+})( this )

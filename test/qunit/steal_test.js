@@ -344,6 +344,7 @@ test("filename", function(){
 	// this has to be done via a steal request instead of steal.require
 	// because require won't add buildType.  Require just gets stuff
 	// and that is how it should stay.
+	/** /
 	test("buildType set", function(){
 		stop();
 		
@@ -361,6 +362,7 @@ test("filename", function(){
 			start();
 		})
 	});
+	/**/
 	
 	
 	test("AOP normal", function(){
@@ -412,7 +414,7 @@ test("filename", function(){
 	test("getScriptOptions", function(){
 		var script = document.createElement('script');
 		script.src= "../../steal/steal.js?foo";
-		var url = URI(script.src).domain() ?  URI(script.src).dir().dir()+"/"  : "../../";
+		var url = URI(script.src).domain() ?  URI(script.src).dir().dir()  : "../../";
 		
 		var options = steal.getScriptOptions(script);
 		
@@ -423,7 +425,7 @@ test("filename", function(){
 
 		options = steal.getScriptOptions(script);
 		
-		url = URI(script.src).domain() ?   URI(script.src).dir().dir()+"/" : "../../";
+		url = URI(script.src).domain() ?   URI(script.src).dir().dir()  : "../../";
 		
 		equals(options.rootUrl, url,"root url is right");
 		equals(options.startFile,"bar.js","app right");
@@ -472,6 +474,7 @@ test("needs", function(){
 	});
 });
 
+/** /
 test("needs options", function(){
 	stop();
 	steal.options.needs.needs = 'steal/test/files/needstype.js'
@@ -484,5 +487,6 @@ test("needs options", function(){
 		
 	});
 });
+/**/
 
 })
