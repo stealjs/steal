@@ -99,7 +99,7 @@ var utils = steal.instrument.utils,
 extend(steal.instrument, {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
-	ignores: steal.options.instrument || utils.parentWin().steal.options.instrument || [],
+	ignores: steal.options.instrument || utils.parentWin().steal.instrument.ignores || [],
 	/**
 	 * Calculates block and line coverage information about each file and the entire collection.  Call this 
 	 * when you are ready to display a coverage report, like:
