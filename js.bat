@@ -15,6 +15,7 @@ if "%1"=="-d" (
 	java -classpath funcunit/java/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
 	GOTO END
 )
+SET CP=funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
 SET ERRORLEV=0
 if "%1"=="-e" (
 	SET ERRORLEV=1
