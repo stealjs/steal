@@ -2,14 +2,14 @@
 
 	// the document ( might not exist in rhino )
 	var doc = win.document,
-		docEl = doc.documentElement,
+		docEl = doc && doc.documentElement,
 		// a jQuery-like $.each
 		each = function(o, cb) {
 			var i, len;
 
 			// weak array detection, but we only use this internally so don't
 			// pass it weird stuff
-			if ( o.pop ) {
+			if ( o.pop || o.callee ) {
 				for ( i = 0, len = o.length; i <len; i++) {
 					cb.call(o[i],i,o[i], o)
 				}
@@ -52,7 +52,8 @@
 		},
 		// extends one object with another
 		extend = function( d, s ) {
-			each(s, function( k ) {
+			// only extend if we have something to extend
+			s && each(s, function( k ) {
 				d[k] = s[k];
 			});
 			return d;
@@ -574,7 +575,7 @@
 			return new URI( url );
 		}
 		extend(this, URI.parse( "" + url ));
-	};
+	}, root;
 	// the current url (relative to root, which is relative from page)
 	// normalize joins from this 
 	// 
@@ -595,7 +596,7 @@
 				steal.root = root;
 				return steal;
 			} 
-			return root;
+			return root || URI("");
 		},
 		parse : function(string) {
 			var uriParts = string.split("?"),
@@ -752,7 +753,7 @@
 		s = steal,
 		id = 0,
 		steals = {},
-		preloadElem = "MozAppearance" in docEl.style ? "object" : "img";
+		preloadElem = docEl ? "MozAppearance" in docEl.style ? "object" : "img" : null;
 
 
 	/**
@@ -931,7 +932,7 @@
 							URI.cur = uri;
 							
 							// call the function, someday soon this will be requireJS-like
-							options(steal.send || win.jQuery || steal); 
+							return options(steal.send || win.jQuery || steal); 
 						},
 						rootSrc: uri,
 						orig: options,
@@ -2014,11 +2015,13 @@ if (support.interactive) {
 
 	steal.getScriptOptions = function( script ) {
 		script = script || getStealScriptSrc();
-		// lol options regex
-		var matches = /(.+?)(steal\/)?steal\.(production\.)?js\??(.+)?(?:,(.+))?/.exec( script.src ),
-			options = {};
 		
 		if ( script ) {
+			
+			// lol options regex
+			var matches = /(.+?)(steal\/)?steal\.(production\.)?js\??(.+)?(?:,(.+))?/.exec( script.src ),
+				options = {};
+			
 			options.rootUrl =  matches[2] ? 
 				matches[1] : 
 				matches[1] + "../";
@@ -2091,15 +2094,17 @@ if (support.interactive) {
 		
 		// try-catching this so we dont have to build up to the iframe
 		// instrumentation check
-		try {
-			if ( options.instrument || ( ! options.browser && win.top.opener.steal.options.instrument )) {
-				// force startFiles to load before instrument
-				steals.push(noop, {
-					src: "steal/instrument",
-					waits: true
-				});
-			}
-		} catch (e){}
+		
+		if ( options.instrument || ( ! options.browser && 
+			win.top && win.top.opener && 
+			win.top.opener.steal && win.top.opener.steal.options.instrument )) {
+			// force startFiles to load before instrument
+			steals.push(noop, {
+				src: "steal/instrument",
+				waits: true
+			});
+		}
+		
 		
 		// we only load things with force = true
 		if ( options.env == "production" && options.loadProduction && options.production ) {
