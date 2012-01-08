@@ -1642,11 +1642,13 @@ request = function( options, success, error ) {
 	//  =============================== MAPPING ===============================
 	var insertMapping = function(p){
 		// go through mappings
-		each(steal.mappings, function( key, value ) {
+		var key, value
+		for(key in steal.mappings){
+			value = steal.mappings[key]
 			if ( value.test.test( p )) { 
 				return p.replace(key, value.path);
 			}
-		});
+		}
 		return URI(p);
 	};
 
@@ -1674,7 +1676,7 @@ request = function( options, success, error ) {
 		 * @param {String} [to] where you want to map this folder too.  Ex: 'http://foo.cdn/bar'
 		 * @return {steal}
 		 */
-		map : function(from, to){
+		map: function(from, to){
 			if ( isString( from )) {
 				steal.mappings[from] = {
 					test : new RegExp("^("+from+")([/.]|$)"),
