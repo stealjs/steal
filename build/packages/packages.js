@@ -9,6 +9,7 @@
 
 
 steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
+
 	var apps = steal.build.apps,
 		build = steal.build;
 	
@@ -179,7 +180,8 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				// and maps
 				
 				// sort masterFiles
-				print("Making "+to+"/production.js")
+				print("Making "+to+"/production.js");
+				
 				var pack = build.js.makePackage(masterFiles.sort(function( f1, f2 ) {
 					return f1.order - f2.order;
 				}).map(function(f){return f.stealOpts}));

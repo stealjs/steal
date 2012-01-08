@@ -9,7 +9,7 @@
 
 			// weak array detection, but we only use this internally so don't
 			// pass it weird stuff
-			if ( o.pop || o.callee ) {
+			if ( typeof o.length == 'number' ) {
 				for ( i = 0, len = o.length; i <len; i++) {
 					cb.call(o[i],i,o[i], o)
 				}
@@ -1290,7 +1290,7 @@
 			
 			// get yourself
 			var self = this;
-			if ( this.options.type == "fn" || ! doc ) {
+			if ( this.options.type == "fn" || steal.isRhino ) {
 				self.loaded.resolve();
 			} else {
 				// do tricky pre-loading
@@ -1675,7 +1675,7 @@ request = function( options, success, error ) {
 					path: to
 				};
 			} else { // its an object
-				each( form, steal.map );
+				each( from, steal.map );
 			}
 			return this;
 		},
@@ -1693,9 +1693,11 @@ request = function( options, success, error ) {
 				var cur = rootSteal,
 					// runs when a steal is starting
 					go = function(){
+						
 						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
 						cur.completed.then(function(){
+							
 							rootSteal = null;
 							steal.trigger("end", cur);
 							
@@ -1855,8 +1857,8 @@ request = function( options, success, error ) {
 	
 	// =========== DEBUG =========
 	
-	/** / 
-	var name = function(stel){
+	
+	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
@@ -1868,13 +1870,13 @@ request = function( options, success, error ) {
 		console.log("load", name(this), this.loading, this.id)
 	})
 	
-	steal.p.loaded = before(steal.p.loaded, function(){
-		console.log("loaded", name(this), this.id)
+	steal.p.executed = before(steal.p.executed, function(){
+		console.log("executed", name(this), this.id)
 	})
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
-	})
-	/**/
+	})*/
+
 
 	// ============= WINDOW LOAD ========
 	var addEvent = function(elem, type, fn) {
@@ -2019,7 +2021,7 @@ if (support.interactive) {
 		if ( script ) {
 			
 			// lol options regex
-			var matches = /(.+?)(steal\/)?steal\.(production\.)?js\??(.+)?(?:,(.+))?/.exec( script.src ),
+			var matches = /(.+?)(steal\/)?steal\.(production\.)?js\??([^,]+)?(?:,(.+))?/.exec( script.src ),
 				options = {};
 			
 			options.rootUrl =  matches[2] ? 
