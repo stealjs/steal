@@ -27,9 +27,12 @@
 			return typeof o == "function";
 		},
 		noop = function() {},
+		createElement = function(nodeName){
+			return doc.createElement(nodeName)
+		},
 		// creates a script tag
 		scriptTag = function() {
-			var start = doc.createElement("script");
+			var start = createElement("script");
 			start.type = "text/javascript";
 			return start;
 		},
@@ -41,7 +44,7 @@
 		head = function() {
 			var hd = getElementsByTagName("head")[0];
 			if (! hd ) {
-				hd = doc.createElement("head");
+				hd = createElement("head");
 				docEl.insertBefore(hd, docEl.firstChild);
 			}
 			// replace head so it runs fast next time.
@@ -81,11 +84,9 @@
 		},
 		// a startup function that will be called when steal is ready
 		startup = noop,
-		// the old steal value
-		oldsteal = win.steal,
 		// if oldsteal is an object
 		// we use it as options to configure steal
-		opts = typeof oldsteal == "object" ? oldsteal : {};
+		opts = typeof win.steal == "object" ? win.steal : {};
 		
 	// =============================== STEAL ===============================
 
@@ -743,6 +744,21 @@
 		},
 		mapJoin : function( url ) {
 			return this.join( insertMapping( url ));
+		},
+		// helper to go from jquery to jquery/jquery.js
+		addJS : function(){
+			var ext = this.ext();
+			if ( ! ext ) {
+				// if first character of path is a . or /, just load this file
+				if ( this.isRelative() ) {
+					this.path += ".js"
+				}
+				// else, load as a plugin
+				else {
+					this.path += "/" + this.filename() + ".js";
+				}
+			}
+			return this;
 		}
 	});
 	// temp add steal.File for backward compat
@@ -779,7 +795,8 @@
 			needs : {
 				less: "steal/less/less.js",
 				coffee: "steal/coffee/coffee.js"
-			}
+			},
+			logLevel : 0
 		},
 		/**
 		 * @hide
@@ -796,18 +813,7 @@
 		 */
 		makeOptions : function(options){
 			// convert it to a uri
-			var src = options.src = URI(options.src),
-				ext = src.ext();
-			if ( ! ext ) {
-				// if first character of path is a . or /, just load this file
-				if ( src.isRelative() ) {
-					src.path += ".js"
-				}
-				// else, load as a plugin
-				else {
-					src.path += "/" + src.filename() + ".js";
-				}
-			}
+			var src = options.src = URI(options.src).addJS();
 			
 			var orig = src,
 				// path relative to the current files path
@@ -1294,7 +1300,7 @@
 				self.loaded.resolve();
 			} else {
 				// do tricky pre-loading
-				var el = doc.createElement( preloadElem ),
+				var el = createElement( preloadElem ),
 					done = false,
 					onload = function() {
 						if ( ! done && ( ! el.readyState || stateCheck.test( el.readyState ))) {
@@ -1490,7 +1496,7 @@ each( extend( {
 	},
 	"css" : function(options, success, error) {
 		if ( options.text ) { // less
-			var css  = doc.createElement("style");
+			var css  = createElement("style");
 			css.type = "text/css";
 			if (css.styleSheet) { // IE
 				css.styleSheet.cssText = options.text;
@@ -1528,7 +1534,7 @@ each( extend( {
 
 			
 			options = options || {};
-			var link = doc.createElement("link");
+			var link = createElement("link");
 			link.rel = options.rel || "stylesheet";
 			link.href = options.src;
 			link.type = "text/css";
@@ -2041,56 +2047,51 @@ if (support.interactive) {
 	};
 	
 	startup = after(startup, function(){
-		var options = steal.options, 
-			startFiles = [],
-			startFile;
-		extend(options, steal.getScriptOptions());
-		// a steal that existed before this steal
-		if ( typeof oldsteal == "object" ) {
-			extend( options, oldsteal );
-		}
+		var options = steal.options;
 		
-		// if it looks like steal[xyz]=bar, add those to the options
+		// A: GET OPTIONS
+		
+		// 1. get script options
+		extend(options, steal.getScriptOptions());
+		
+		// 2. options from a steal object that existed before this steal
+		extend( options, opts );
+		
+		// 3. if url looks like steal[xyz]=bar, add those to the options
+		// does this ened to be supported anywhere?
 		var search = win.location && decodeURIComponent(win.location.search);
 		search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
 			options[prop] = ~ val.indexOf(",") ? val.split(",") : val;
 		});
 		
+		// B: DO THINGS WITH OPTIONS
+		
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		URI.root( options.rootUrl );
 		
-		// CLEAN UP OPTIONS
-		// make startFile have .js ending
-		startFile = options.startFile;
-		if ( startFile && startFile.indexOf(".") < 0 ) {
-			options.startFile = startFile + "/" + startFile.split("/").pop() + ".js";
-		}
-		
-		options.logLevel = options.logLevel || 0;
+		// make sure startFile and production look right
+		if(options.startFile){
+			options.startFile = URI(options.startFile).addJS()+"";
+			if(!options.production){
+				options.production = URI(options.startFile).dir() + "/production.js";
+			}
+		}		
 
-		//calculate production location;
-		if (!options.production && options.startFile ) {
-			options.production = URI(options.startFile).dir() + "/production.js";
-		}
-		if ( options.production && options.production.indexOf(".js") < 0 ) {
-			options.production += ".js";
-		}
+		// mark things that have already been loaded
 		each(options.loaded || [], function(i, stel){
 			steal.loaded(stel)
 		})
+		// immediate steals we do
+		var steals = [];
 		
-		if ( isString( options.startFiles )) {
-			startFiles.push( options.startFiles );
-		} else if ( options.startFiles && options.startFiles.length ) {
-			startFiles = options.startFiles;
+		// add start files first
+		if(options.startFiles){
+			/// this can be a string or an array
+			steals.push.apply(steals, isString( options.startFiles ) ? 
+				[options.startFiles] : options.startFiles)
+			options.startFiles = steals.slice(0)
 		}
 
-		var steals = [];
-		// need to load startFiles in dev or production mode (to run funcunit in production)
-		if ( startFiles.length ) {
-			steal.options.startFiles = startFiles;
-			steals.push.apply(steals, startFiles)
-		}
 		// either instrument is in this page (if we're the window opened from 
 		// steal.browser), or its opener has it
 		
@@ -2106,7 +2107,6 @@ if (support.interactive) {
 				waits: true
 			});
 		}
-		
 		
 		// we only load things with force = true
 		if ( options.env == "production" && options.loadProduction && options.production ) {
