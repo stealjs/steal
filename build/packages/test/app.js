@@ -1,10 +1,12 @@
-steal.packages('mxui/layout/table_scroll/table_scroll.js',
+steal.packages('steal/build/packages/test/table_scroll.js',
                'mxui/nav/accordion/accordion.js')
-	.then('jquery/controller/route', function(){
+	.then('jquery/controller/route',
+		'jquery/view/ejs')
+	.then('./ejs.ejs', function(){
 
 $.Controller('Route', {
 	"table route" : function(){
-		steal('mxui/layout/table_scroll', function(){
+		steal('steal/build/packages/test/table_scroll.js', function(){
 			$('#table').mxui_layout_table_scroll()
 		})
 	},
@@ -14,7 +16,7 @@ $.Controller('Route', {
 		})
 	}
 })
-new Route(document.body)
+new Route(document.body);
 		
 		
 });

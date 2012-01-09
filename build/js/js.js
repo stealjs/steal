@@ -232,7 +232,7 @@ steal('steal/build').then(function( steal ) {
 		return {
 			js: code.join(";\n") + "\n",
 			css: {
-				srcs: csses.map(function(css){return css.rootSrc;}),
+				srcs: csses.map(function(css){return css.rootSrc+'';}),
 				code: csses.map(function(css){ return css.text }).join('\n')
 			}
 		}

@@ -964,7 +964,7 @@
 				}
 
 				this.loaded = Deferred();
-				//this.executed = Deferred();
+				this.run = Deferred();
 				this.completed = Deferred();
 			}
 		},
@@ -1122,7 +1122,7 @@
 				// you are the master, set yourself as the page
 			//}
 			// mark yourself as 'loaded'.  
-			this.isLoaded = true;
+			this.run.resolve();
 			
 			// If we are IE, get the queue from interactives
 			// TODO move this out of this function
@@ -1300,7 +1300,7 @@
 			
 			// get yourself
 			var self = this;
-			if ( this.options.type == "fn" || steal.isRhino ) {
+			if ( true || this.options.type == "fn" || steal.isRhino ) {
 				self.loaded.resolve();
 			} else {
 				// do tricky pre-loading
@@ -1357,7 +1357,7 @@
 	// because one file has JS and another does not?
 	// we could check if it matches something with .js because foo.less.js SHOULD
 	// be rare
-	stealProto.load = before(stealProto.load, function() {
+	stealProto.execute = before(stealProto.execute, function() {
 		var raw = this.options;
 		
 		// if it's a string, get it's extension and check if
@@ -1583,7 +1583,7 @@ request = function( options, success, error ) {
 				clean();
 			} 
 		};
-	request.open("GET", options.src, ! ( options.async === false));
+	request.open("GET", options.src+'', ! ( options.async === false));
 	request.setRequestHeader("Content-type", contentType);
 	if ( request.overrideMimeType ) {
 		request.overrideMimeType(contentType);
@@ -1791,7 +1791,7 @@ request = function( options, success, error ) {
 			// if we have things
 			if( stel.options.has ) {
 				// if we have loaded this already (and we are adding has's)
-				if( stel.isLoaded ) {
+				if( stel.run.isResolved() ) {
 					stel.loadHas();
 				} else {
 					// have to mark has as loading 
@@ -1801,9 +1801,9 @@ request = function( options, success, error ) {
 			return stel;
 		}, true),
 	
-		// if we're about to mark a file as loaded, mark its "has" array files as 
-		// loaded also
-		loaded : before(stealProto.loaded, function(){
+		// if we're about to mark a file as executed, mark its "has" array files as 
+		// executed also
+		executed : before(stealProto.executed, function(){
 			if(this.options.has){
 				this.loadHas();
 			}
@@ -1824,10 +1824,8 @@ request = function( options, success, error ) {
 				// don't want the current file to change, since we're just marking files as loaded
 				URI.cur = URI(current);
 				stel = stealProto.make( has );
-				// need to set up a "complete" callback for this file, so later waits know its already 
-				// been completed
-				convert(stel, "complete")
-				stel.loaded();
+				
+				stel.executed();
 			});
 				
 		}
