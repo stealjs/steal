@@ -1,7 +1,7 @@
 steal.packages('steal/build/packages/test/table_scroll.js',
                'mxui/nav/accordion/accordion.js')
 	.then('jquery/controller/route',
-		'jquery/view/ejs')
+		'jquery/view/ejs','./app.css')
 	.then('./ejs.ejs', function(){
 
 $.Controller('Route', {
