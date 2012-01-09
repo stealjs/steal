@@ -665,6 +665,10 @@
 		search : function(){
 			return this.query ? "?"+this.query : ""
 		},
+		// like join, but returns a string
+		add : function(uri){
+			return this.join(uri)+'';
+		},
 		join : function(uri, min){
 			uri = URI(uri);
 			if ( uri.isCrossDomain( this )) {
@@ -1353,7 +1357,7 @@
 	// because one file has JS and another does not?
 	// we could check if it matches something with .js because foo.less.js SHOULD
 	// be rare
-	stealProto.execute = before(stealProto.execute, function() {
+	stealProto.load = before(stealProto.load, function() {
 		var raw = this.options;
 		
 		// if it's a string, get it's extension and check if
@@ -1735,9 +1739,9 @@ request = function( options, success, error ) {
 			ready = false;
 		
 		// check if jQuery loaded after every script load ...
-		stealProto.loaded = before(stealProto.loaded, function() {
+		stealProto.executed = before(stealProto.executed, function() {
 	
-			var $ = jQuery;
+			var $ = win.jQuery;
 			if ($ && "readyWait" in $) {
 				
 				//Increment jQuery readyWait if ncecessary.
