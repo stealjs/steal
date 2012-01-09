@@ -23,6 +23,9 @@
 		isString = function( o ) {
 			return typeof o == "string";
 		},
+		isObject = function( o ) {
+			return Object( o ) === o;
+		},
 		isFn = function( o ) {
 			return typeof o == "function";
 		},
@@ -64,7 +67,7 @@
 		// makes an array of things, or a mapping of things
 		map = function( args, cb ) {
 			var arr = [];
-			each(args, function(i, str){
+			each(args, function( i, str ){
 				arr.push( cb ? ( isString( cb ) ? str[cb] : cb.call( str, str )) : str )
 			});
 			return arr;
@@ -86,7 +89,7 @@
 		startup = noop,
 		// if oldsteal is an object
 		// we use it as options to configure steal
-		opts = typeof win.steal == "object" ? win.steal : {};
+		opts = isObject( win.steal ) ? win.steal : {};
 		
 	// =============================== STEAL ===============================
 
@@ -774,6 +777,9 @@
 		id = 0,
 		steals = {},
 		preloadElem = docEl ? "MozAppearance" in docEl.style ? "object" : "img" : null;
+		stealError = function( str ) {
+			throw "steal.js : " + str;
+		};
 
 
 	/**
@@ -787,6 +793,10 @@
 	extend(steal, {
 		each : each,
 		extend : extend,
+		error : stealError,
+		isString : isString,
+		isFn: isFn,
+		isObject: isObject,
 		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
@@ -1292,7 +1302,7 @@
 		 */
 		load: function(returnScript) {
 			// if we are already loading / loaded
-			if(this.loading || this.loaded.isResolved()){
+			if ( this.loading || this.loaded.isResolved()){
 				return;
 			}
 			
@@ -1334,7 +1344,7 @@
 					self.executed(script);
 				}, function( error, src ) {
 					win.clearTimeout && clearTimeout( self.completeTimeout )
-					throw "steal.js : " + self.options.src + " not completed"
+					stealError( self.options.src + " not completed" );
 				});
 			}
 		}
@@ -1370,7 +1380,7 @@
 			raw.type = ext;
 		}
 		if ( ! types[raw.type] ) {
-			throw "steal.js - type " + raw.type + " has not been loaded.";
+			stealError( raw.type + " has not been loaded." );
 		}
 		var converters =  types[raw.type].convert;
 		raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
@@ -1771,7 +1781,7 @@ request = function( options, success, error ) {
 			if( doc && ! self.completed && ! self.completeTimeout && !steal.isRhino &&
 				(self.options.src.protocol == "file" || !support.error)){
 				self.completeTimeout = setTimeout(function(){
-					throw "steal.js : "+self.options.src+" not completed"
+					stealError( self.options.src + " not completed" );
 				},5000);
 			}
 		}),
