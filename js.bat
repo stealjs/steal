@@ -15,16 +15,22 @@ if "%1"=="-d" (
 	java -classpath funcunit/java/selenium-java-client-driver.jar;steal/rhino/js.jar org.mozilla.javascript.tools.debugger.Main
 	GOTO END
 )
+SET CP=funcunit/java/selenium-java-client-driver.jar;steal\rhino\js.jar
 SET ERRORLEV=0
 if "%1"=="-e" (
 	SET ERRORLEV=1
-	SHIFT /0
+	SHIFT /1
 )
 SET ARGS=[
 SET FILENAME=%1
 SET FILENAME=%FILENAME:\=/%
 ::haven't seen any way to loop through all args yet, so for now this goes through arg 2-7
-for /f "tokens=2,3,4,5,6,7 delims= " %%a in ("%*") do SET ARGS=!ARGS!'%%a','%%b','%%c','%%d','%%e','%%f'
+
+if "%ERRORLEV%"=="1" (
+	for /f "tokens=3,4,5,6,7,8 delims= " %%a in ("%*") do SET ARGS=!ARGS!'%%a','%%b','%%c','%%d','%%e','%%f'
+) ELSE (
+	for /f "tokens=2,3,4,5,6,7 delims= " %%a in ("%*") do SET ARGS=!ARGS!'%%a','%%b','%%c','%%d','%%e','%%f'
+)
 ::remove the empty args
 :: for %%a in (",''=") do ( call set ARGS=%%ARGS:%%~a%% )
 SET ARGS=%ARGS:,''=%
