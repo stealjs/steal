@@ -25,7 +25,7 @@ SET ARGS=[
 SET FILENAME=%1
 SET FILENAME=%FILENAME:\=/%
 ::haven't seen any way to loop through all args yet, so for now this goes through arg 2-7
-
+::dos sucks and for some reason this structure doesn't respect the shift, so we branch
 if "%ERRORLEV%"=="1" (
 	for /f "tokens=3,4,5,6,7,8 delims= " %%a in ("%*") do SET ARGS=!ARGS!'%%a','%%b','%%c','%%d','%%e','%%f'
 ) ELSE (
