@@ -184,9 +184,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				print("Making "+to+"/production.js");
 				
 				var pack = build.js.makePackage(
-					masterFiles.sort(function( f1, f2 ) {
-						return f1.order - f2.order;
-					}).map(function(f){return f.stealOpts}),
+					masterFiles.map(function(f){return f.stealOpts}),
 					{},to+"/production.css");
 				
 				// prepend maps and makes ...
@@ -201,7 +199,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				
 				mapCode = "steal.map("+s.toJSON(maps)+");"
 				s.URI(to+"/production.js").save(
-					mapCode+makeCode.join('\n')+"\n"+pack.js
+					build.js.minify( mapCode+makeCode.join('\n')+"\n"+pack.js )
 				)
 				if(pack.css && pack.css.srcs.length){
 					print("       "+to+"/production.css");
