@@ -519,6 +519,7 @@
 
 		then : function() {
 			var args = map( arguments );
+			console.log("steal.then: ", args );
 			// fail function(s)
 			if (args.length > 1 && args[1])
 				this.fail(args[1]);
