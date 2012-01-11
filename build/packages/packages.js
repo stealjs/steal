@@ -11,7 +11,8 @@
 steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 
 	var apps = steal.build.apps,
-		build = steal.build;
+		build = steal.build, 
+		packages =
 	
 	/**
 	 * builds an app, and pulls out packages
@@ -29,7 +30,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 			minify : false
 		};
 		buildOptions = buildOptions || {};
-		
+		buildOptions.depth = buildOptions.depth || Infinity;
 		// open the core app
 		apps._open(app, options, function(options, opener){
 			
@@ -66,7 +67,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 			s.URI(to+"/packages").mkdirs();
 			
 			// get packages loaded, packages need to be rootSrc style url
-			var packages = opener.steal.packages(),
+			var packs = opener.steal.packages(),
 				// will house the master app's files (so we can build them later)
 				masterFiles = [];
 				
@@ -87,7 +88,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 			options.minify = true;
 			
 			// open packages and add their dependencies 
-			apps.open(packages, options, function(options){
+			apps.open(packs, options, function(options){
 				
 				// order files 
 				apps.order(options);
@@ -163,7 +164,10 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 						maps[sharing.appNames[0]+".js"] = packageName+".js";
 					}
 				}
-				//
+				// handle depth
+				
+				//packages.flatten(shares, 2);
+		
 				shares.forEach(function(sharing){
 					var isPackage = sharing.appNames.length == 1,
 						sharePackageName = appNamesToMake(sharing.appNames);
@@ -208,6 +212,120 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 			});
 		});
 	}
+	s.extend(packages,{
+		/**
+		 * Flattens the list of shares until each script has a minimal depth
+		 * @param {Object} shares
+		 * @param {Object} depth
+		 */
+		flatten : function(shares, depth){
+			while(packages.maxDepth(shares) >= depth){
+				var min = packages.min(shares);
+				packages.merge(shares, min);
+			}
+		},
+		/**
+		 * 
+		 * @param {Object} shares
+		 * @param {Object} min
+		 *     
+		 *     diff : diff, 
+		 *     a: i, - the 'higher' one that will be merged into
+		 *     b: j  - the 'lower' share
+		 */
+		merge : function(shares, min){
+			var lower = shares[min.b],
+				upper = shares[min.a];
+			// remove old one
+			shares.splice(min.a,1);
+			
+			// merge in files
+			lower.files = upper.files.concat(lower.files)
+			
+			// merge in apps
+			var apps = packages.appsHash(lower);
+			upper.appNames.forEach(function(appName){
+				if(!apps[appName]){
+					lower.appNames.push(appName);
+				}
+			})
+		},
+		/**
+		 * Goes through and figures out which package has the greatest depth
+		 */
+		maxDepth: function(shares){
+			var packageDepths = {},
+				max = 0;
+			shares.forEach(function(share){
+				share.appNames.forEach(function(appName){
+					packageDepths[appName] = (packageDepths[appName] ? 1 : packageDepths[appName] +1 );
+					max = Math.max(packageDepths[appName], max)
+				});
+			});
+			return max;
+		},
+		/**
+		 * Goes through every combination of shares and returns the one with the smallest difference
+		 * @param {Object} shares
+		 */
+		min: function(shares){
+			var min = {diff : Infinity};
+			for(var i = 0; i < shares.length; i++){
+				var shareA = shares[i];
+				
+				for(var j = i+1; j < shares.length; j++){
+					var shareB = shares[j],
+						diff = packages.difference(shareA, shareB);
+					if(diff < min.diff){
+						min = {
+							diff : diff,
+							a: i,
+							b: j
+						}
+					}
+				}
+			}
+			return min.diff === Inifinity ? null : min;
+		},
+		// returns a difference between two shareds
+		difference: function(sharedA, sharedB){
+			// figure out the files in A that are not in B and vice versa
+			
+			return packages.diff(sharedA, sharedB) + packages.diff(sharedB, sharedA);
+		},
+		/**
+		 * returns a hash of the app names for quick checking
+		 */
+		appsHash : function(shared){
+			var apps = {};
+			shared.appNames.forEach(function(name){
+				apps[name] = true;
+			})
+			return apps
+		},
+		// return a difference between one share and another
+		diff: function(sharedA, sharedB){
+			// the apps in A
+			var apps = packages.appsHash(sharedA);
+			
+			// go through b's files, add files that are not in apps
+			var size = 0;
+			
+			sharedB.files.forEach(function(file){
+				// check if the file is in an app not in apps
+				var inApp = true;
+				file.appNames.each(function(appName){
+					if(!apps[appName]){
+						inApp = false;
+					}
+				})
+				if(!inApp){
+					size += file.stealOpts.text.length
+				}
+			});
+			return size;
+		}
+	})
 	
 	
 });
