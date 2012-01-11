@@ -491,7 +491,7 @@
 				} else {
 					// immediately call the function if the deferred has been resolved
 					if (self.status === status)
-						v.apply(this, this.resultArgs);
+						v.apply(this, this.resultArgs || []);
 	
 					self[type].push(v);
 				}
@@ -773,8 +773,7 @@
 	var pending = [],
 		s = steal,
 		id = 0,
-		steals = {},
-		preloadElem = docEl ? "MozAppearance" in docEl.style ? "object" : "img" : null;
+		steals = {};
 
 
 	/**
@@ -788,6 +787,7 @@
 	extend(steal, {
 		each : each,
 		extend : extend,
+		Deferred : Deferred,
 		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
@@ -1292,40 +1292,14 @@
 		 * Loads this steal
 		 */
 		load: function(returnScript) {
+			var self = this;
 			// if we are already loading / loaded
-			if(this.loading || this.loaded.isResolved()){
+			if(self.loading || self.loaded.isResolved()){
 				return;
 			}
 			
-			this.loading = true;
-			
-			// get yourself
-			var self = this;
-			if ( true || this.options.type == "fn" || steal.isRhino ) {
-				self.loaded.resolve();
-			} else {
-				// do tricky pre-loading
-				var el = createElement( preloadElem ),
-					done = false,
-					onload = function() {
-						if ( ! done && ( ! el.readyState || stateCheck.test( el.readyState ))) {
-							done = true;
-
-							self.loaded.resolve();
-							if ( preloadElem == "object" ) {
-								cleanUp( el );
-							}
-						}
-					};
-
-				el.src = el.data = self.options.src;
-				el.onerror = el.onload = el.onreadystatechange = onload;
-
-				if ( preloadElem == "object" ) {
-					el.width = el.height = 0;
-					head().insertBefore( el, head().firstChild );
-				}
-			}
+			self.loading = true;
+			self.loaded.resolve();
 		},
 		execute : function(){
 			var self = this;
