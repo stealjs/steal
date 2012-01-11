@@ -129,6 +129,15 @@ test("steal one file with different cur", function(){
 	})
 });
 
+test("loading one file then another", function(){
+	stop();
+	steal.URI.root("../../").then('./files/require.js').then('./files/needed.js',function(){
+		start();
+		ok(REQUIRED, "loaded the first file")
+		ok(needed, "loaded the second file")
+	})
+})
+
 var URI = steal.URI;
 
 module("uri");
