@@ -129,15 +129,6 @@ test("steal one file with different cur", function(){
 	})
 });
 
-test("loading one file then another", function(){
-	stop();
-	steal.URI.root("../../").then('./files/require.js').then('./files/needed.js',function(){
-		start();
-		ok(REQUIRED, "loaded the first file")
-		ok(needed, "loaded the second file")
-	})
-})
-
 var URI = steal.URI;
 
 module("uri");
@@ -427,7 +418,7 @@ test("filename", function(){
 		
 		var options = steal.getScriptOptions(script);
 		
-		equals(options.rootUrl+'', url+'/',"root url is right");
+		equals(options.rootUrl+'', url,"root url is right");
 		equals(options.startFile+'',"foo","app right");
 		
 		script.src = "../steal.js?bar.js";
@@ -436,7 +427,7 @@ test("filename", function(){
 		
 		url = URI(script.src).domain() ?   URI(script.src).dir().dir()  : "../../";
 		
-		equals(options.rootUrl+'', url+'/',"root url is right");
+		equals(options.rootUrl+'', url,"root url is right");
 		equals(options.startFile+'',"bar.js","app right");
 		
 	})

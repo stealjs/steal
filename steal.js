@@ -730,9 +730,6 @@
 		isRelative : function(){
 			return  /^[\.|\/]/.test(this.path )
 		},
-		toString : function(){
-			return this.domain()+this.path+this.search()+this.hash();
-		},
 		// a min path from 2 urls that share the same domain
 		pathTo : function( uri ) {
 			uri = URI(uri);
@@ -754,17 +751,21 @@
 			var ext = this.ext();
 			if ( ! ext ) {
 				// if first character of path is a . or /, just load this file
-				if ( this.isRelative() ) {
-					this.path += ".js"
+				if ( ! this.isRelative() ) {
+					this.path += "/" + this.filename();
 				}
-				// else, load as a plugin
-				else {
-					this.path += "/" + this.filename() + ".js";
-				}
+				this.path += ".js"
 			}
 			return this;
 		}
 	});
+
+	// This can't be added to the prototype using extend because
+	// then for some reason IE < 9 won't recognize it.
+	URI.prototype.toString = function(){
+		return this.domain()+this.path+this.search()+this.hash();
+	};
+
 	// temp add steal.File for backward compat
 	steal.File = steal.URI = URI;
 	// --- END URI
@@ -2074,8 +2075,9 @@ if (support.interactive) {
 		URI.root( options.rootUrl );
 		
 		// make sure startFile and production look right
-		if(options.startFile){
-			options.startFile = URI(options.startFile).addJS()+"";
+		if ( options.startFile ) {
+			options.startFile = "" +  URI( options.startFile ).addJS()
+			console.log( options.startFile );
 			if(!options.production){
 				options.production = URI(options.startFile).dir() + "/production.js";
 			}
