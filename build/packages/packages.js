@@ -85,7 +85,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 			options.newPage = false;
 			
 			// minify each file we load
-			options.minify = true;
+			options.minify = false;
 			
 			// open packages and add their dependencies 
 			apps.open(packs, options, function(options){
@@ -138,7 +138,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					if(isPackage){
 						s.print("  Package: "+packageName+ (hasCSS ? " js/css" : "" ) )
 					} else {
-						s.print("  Shared Package: "+packageName)
+						s.print("  Shared Package: "+packageName+ (hasCSS ? " js/css" : "" ))
 					}
 					
 					sharing.files.forEach(function(f){
@@ -164,6 +164,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 							has: pack.css.srcs
 						};
 						s.URI(packageName+".css").save( pack.css.code );
+						sharing.hasCSS = true;
 					}
 					
 					
@@ -187,6 +188,14 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 							var packageName = appNamesToMake([appName])
 							makes[packageName+".js"].needs
 								.push(sharePackageName+".js")
+							
+							// add css
+							if(sharing.hasCSS){
+								makes[packageName+".js"].needs
+									.push(sharePackageName+".css")
+							}
+							// also needs css!
+							
 						})
 					}
 				});
@@ -212,7 +221,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				
 				mapCode = "steal.map("+s.toJSON(maps)+");"
 				s.URI(to+"/production.js").save(
-					build.js.minify( mapCode+makeCode.join('\n')+"\n"+pack.js )
+					/*build.js.minify(*/ mapCode+makeCode.join('\n')+"\n"+pack.js /*)*/
 				)
 				if(pack.css && pack.css.srcs.length){
 					print("       "+to+"/production.css");
@@ -377,58 +386,3 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 	})
 	var p = packages;
 });
-/**
- waste is entire file, but added only to the 
- apps in A that are not in B.
- 
- Goal is to minimize waste across all
- apps
- 
- so go through each package combo,
- mark what it would add to each app.
- 
- Pick the one that is the smallest.
- 
- Keep base level for app.
- 
- Need an array of current waste values for 
- each app.
- 
- When going through, keep track of 
- lowest total waste value (current waste 
- value + new waste).
- 
- 
- But WAIT
- 
- a combo will add waste to many apps
- we need to account for that
- 
- do we want lowest average waste?
- 
- :-(
- 
- yes, lowest average
- 
- 
- for min, just go through each file, if it's not in all
- it wastes files not in apps that it is in.
- 
- 
- steal.preload("am-fm.js") -> steal({})
- 
- steal("am-fm.js", function(){})
- 
- steal.packages("")
- if(steal.options.env == 'production' || steal.isRhino){
- 
- steal('steal/preload', function(){
-   steal.preload("table_scroll")
- })
- 
- }
- steal('jquery/controller')
- 
- 
- 
- */
