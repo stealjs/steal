@@ -111,10 +111,19 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					// once we have gone through each share.
 					shares = [];
 				
-				s.print("Making Packages\n");
 				
+				
+				
+				s.print("Getting Packages");
 				while(sharing = apps.getMostShared(options.files)){
-					
+					shares.push(sharing);
+				};
+				
+				packages.flatten(shares, 3);
+				
+				
+				s.print("\nMaking Packages");
+				shares.forEach(function(sharing){
 					// is it a 'end' package
 					var isPackage = sharing.appNames.length == 1,
 						packageName = appNamesToMake(sharing.appNames);
@@ -157,17 +166,17 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 						s.URI(packageName+".css").save( pack.css.code );
 					}
 					
-					shares.push(sharing);
+					
 					// add to maps
 					if(isPackage){
 						// this should be the real file
 						maps[sharing.appNames[0]+".js"] = packageName+".js";
 					}
-				}
+				})
 				// handle depth
 				
-				//packages.flatten(shares, 2);
-		
+				
+				
 				shares.forEach(function(sharing){
 					var isPackage = sharing.appNames.length == 1,
 						sharePackageName = appNamesToMake(sharing.appNames);
@@ -219,28 +228,43 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 		 * @param {Object} depth
 		 */
 		flatten : function(shares, depth){
-			while(packages.maxDepth(shares) >= depth){
+			// make waste object
+			// mark the size
+			while(packages.maxDepth(shares) > depth){
 				var min = packages.min(shares);
 				packages.merge(shares, min);
 			}
 		},
 		/**
+		 * Merges 2 shares contents.  Shares are expected to be in the order
+		 * getMostShared removes them ... by lowest depenency first.
+		 * We should merge into the 'lower' dependency.
 		 * 
 		 * @param {Object} shares
 		 * @param {Object} min
 		 *     
-		 *     diff : diff, 
-		 *     a: i, - the 'higher' one that will be merged into
-		 *     b: j  - the 'lower' share
+		 *     diff : {app1 : waste, app2 : waste, _waste: 0}, 
+		 *     lower: i, - the 'lower' share whos contents will be merged into, and contents should run first
+		 *     higher: j  - the 'higher' share
 		 */
 		merge : function(shares, min){
-			var lower = shares[min.b],
-				upper = shares[min.a];
-			// remove old one
-			shares.splice(min.a,1);
+			var lower = shares[min.lower],
+				upper = shares[min.higher],
+				shortName = packages.shortName;
 			
-			// merge in files
-			lower.files = upper.files.concat(lower.files)
+			s.print("\n  Flattening "+shortName(upper.appNames)+">"+
+				shortName(lower.appNames)/*+"=" + min.diff._waste*/)
+			for(var appName in min.diff){
+				if(appName !== '_waste' && min.diff[appName]){
+					s.print("  + "+min.diff[appName]+" "+shortName([appName]))
+				}
+			}
+			
+			// remove old one
+			shares.splice(min.higher,1);
+			
+			// merge in files, lowers should run first
+			lower.files = lower.files.concat(upper.files)
 			
 			// merge in apps
 			var apps = packages.appsHash(lower);
@@ -249,6 +273,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					lower.appNames.push(appName);
 				}
 			})
+			//lower.waste = min.diff;
 		},
 		/**
 		 * Goes through and figures out which package has the greatest depth
@@ -258,40 +283,53 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				max = 0;
 			shares.forEach(function(share){
 				share.appNames.forEach(function(appName){
-					packageDepths[appName] = (packageDepths[appName] ? 1 : packageDepths[appName] +1 );
+					packageDepths[appName] = (!packageDepths[appName] ? 1 : packageDepths[appName] +1 );
 					max = Math.max(packageDepths[appName], max)
 				});
 			});
 			return max;
 		},
 		/**
-		 * Goes through every combination of shares and returns the one with the smallest difference
+		 * Goes through every combination of shares and returns the one with the smallest difference.
+		 * Shares can have a waste property that has how much waste the share currently has 
+		 * accumulated.
 		 * @param {Object} shares
+		 * @return {min}
+		 *     {
+		 *       waste : 123213, // the amount of waste in the composite share
+		 *       lower : share, // the more base share, whos conents should be run first
+		 *       higher: share // the less base share, whos contents should run later
+		 *     }
 		 */
 		min: function(shares){
-			var min = {diff : Infinity};
+			var min = {diff: {
+				_waste: Infinity
+			}};
 			for(var i = 0; i < shares.length; i++){
 				var shareA = shares[i];
-				
+				if( shareA.appNames.length == 1 ){
+					continue;
+				}
 				for(var j = i+1; j < shares.length; j++){
 					var shareB = shares[j],
-						diff = packages.difference(shareA, shareB);
-					if(diff < min.diff){
+						diff;
+					
+					if( shareB.appNames.length == 1 ){
+						continue;
+					}
+					
+					diff = packages.diff(shareA, shareB);
+					
+					if(diff._waste < min.diff._waste){
 						min = {
 							diff : diff,
-							a: i,
-							b: j
+							lower: i,
+							higher: j
 						}
 					}
 				}
 			}
-			return min.diff === Inifinity ? null : min;
-		},
-		// returns a difference between two shareds
-		difference: function(sharedA, sharedB){
-			// figure out the files in A that are not in B and vice versa
-			
-			return packages.diff(sharedA, sharedB) + packages.diff(sharedB, sharedA);
+			return min.waste === Infinity ? null : min;
 		},
 		/**
 		 * returns a hash of the app names for quick checking
@@ -304,28 +342,93 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 			return apps
 		},
 		// return a difference between one share and another
+		// essentially, which apps will have the waste incured by loading
+		// b
 		diff: function(sharedA, sharedB){
-			// the apps in A
-			var apps = packages.appsHash(sharedA);
 			
-			// go through b's files, add files that are not in apps
-			var size = 0;
+			// combine files ....
+			var files = sharedA.files.concat(sharedB.files),
+				apps = {},
+				totalWaste = 0;
 			
-			sharedB.files.forEach(function(file){
-				// check if the file is in an app not in apps
-				var inApp = true;
-				file.appNames.each(function(appName){
-					if(!apps[appName]){
-						inApp = false;
+			files.forEach(function(file){
+				file.appNames.forEach(function(appName){
+					apps[appName] = 0;
+				})
+			});
+			
+			for(var appName in apps){
+				files.forEach(function(file){
+					// check file's appName
+					if(file.appNames.indexOf(appName) == -1){
+						apps[appName] += file.stealOpts.text.length
 					}
 				})
-				if(!inApp){
-					size += file.stealOpts.text.length
-				}
-			});
-			return size;
+				totalWaste += apps[appName];
+			}
+			apps._waste = totalWaste;
+			return apps;
+		},
+		shortName : function(appNames){
+			return appNames.map(function(l){
+						return s.URI(l).filename()
+					}).join('-')
 		}
 	})
-	
-	
+	var p = packages;
 });
+/**
+ waste is entire file, but added only to the 
+ apps in A that are not in B.
+ 
+ Goal is to minimize waste across all
+ apps
+ 
+ so go through each package combo,
+ mark what it would add to each app.
+ 
+ Pick the one that is the smallest.
+ 
+ Keep base level for app.
+ 
+ Need an array of current waste values for 
+ each app.
+ 
+ When going through, keep track of 
+ lowest total waste value (current waste 
+ value + new waste).
+ 
+ 
+ But WAIT
+ 
+ a combo will add waste to many apps
+ we need to account for that
+ 
+ do we want lowest average waste?
+ 
+ :-(
+ 
+ yes, lowest average
+ 
+ 
+ for min, just go through each file, if it's not in all
+ it wastes files not in apps that it is in.
+ 
+ 
+ steal.preload("am-fm.js") -> steal({})
+ 
+ steal("am-fm.js", function(){})
+ 
+ steal.packages("")
+ if(steal.options.env == 'production' || steal.isRhino){
+ 
+ steal('steal/preload', function(){
+   steal.preload("table_scroll")
+ })
+ 
+ }
+ steal('jquery/controller')
+ 
+ 
+ 
+ */
