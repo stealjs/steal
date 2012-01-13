@@ -140,7 +140,7 @@ steal('steal/build', 'steal/build/js','steal/build/css',function( steal ) {
 		 * 
 		 *     {
 		 *       // the apps this steal is on
-		 *       appsNames: [], 
+		 *       appNames: [], 
 		 *       dependencyFileNames: [ "jquery/class/class.js" ], 
 		 *       packaged: false,
 		 *       stealOpts: steal.options
