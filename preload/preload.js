@@ -5,18 +5,24 @@
 		isGecko			= "MozAppearance" in document.documentElement.style,
 		URI				= steal.URI,
 		preloadScript	= function( src, callback ) {
-			var deferred = new Deferred(),
+			var deferred = preloading[ src ] || new Deferred(),
 				complete = function() {
-					deferred.resolve( src );
+					delete preloading[src];
+					setTimeout(function() {
+						deferred.resolve( src );
+					}, 0);
 				};
-			if ( isGecko ) {
-				steal.request({
-					src: src
-				}, complete );
-			} else {
-				elem = new Image();
-				elem.onload = elem.onerror = complete;
-				elem.src = src;
+			if ( ! ( src in preloading )) {
+				preloading[ src ] = deferred;
+				if ( isGecko ) {
+					steal.request({
+						src: src
+					}, complete );
+				} else {
+					elem = document.createElement("img");
+					elem.onload = elem.onerror = complete;
+					elem.src = src;
+				}
 			}
 			return deferred;
 		},
@@ -32,13 +38,12 @@
 		},
 		resolveUris = function( srcs ) {
 			return map( srcs, function( src ) {
-				var uri = URI( src );
-				return uri.ext() ?
-					src : 
-					uri.path + "/" + uri.path + ".js" + "?" + uri.query;
+				return "" + URI.root().join(  URI( src ).addJS().normalize() );
 			});
 		},
-		Deferred = steal.Deferred;
+		preloading = {},
+		Deferred = steal.Deferred,
+		origLoad = steal.p.load;
 
 	extend( steal, {
 		preload: function() {
@@ -49,6 +54,30 @@
 					deferred.resolve.apply( deferred, arguments );
 				});
 			return deferred;
+		}
+	});
+
+	extend(steal.p, {
+		/**
+		 * This clobbers the original steal.load function to make sure we don't
+		 * load something twice.
+		 */
+		load: function( returnScript ) {
+			var self = this,
+				src;
+			if ( self.options && self.options.buildType !== "fn" ) {
+				src = "" + self.options.src;
+				if ( src in preloading ) {
+					preloading[ src ].done(function() {
+						self.loading = true;
+						self.loaded.resolve();
+					});
+				} else {
+					origLoad.apply( self, arguments );
+				}
+			} else {
+				origLoad.apply( self, arguments );
+			}
 		}
 	});
 

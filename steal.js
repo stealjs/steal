@@ -698,7 +698,9 @@
 				
 				part = right[0];
 			}
-			return URI( this.domain() + left.concat( right ).join("/") );
+			return extend( URI( this.domain() + left.concat( right ).join("/") ), {
+				query: uri.query
+			});
 		},
 		/**
 		 * For a given path, a given working directory, and file location, update the 
@@ -715,16 +717,17 @@
 		normalize : function() {
 			var cur = URI.cur.dir(),
 				path = this.path;
-			if (path.indexOf("//") == 0) { //if path is rooted from steal's root (DEPRECATED) 
+			//if path is rooted from steal's root (DEPRECATED) 
+			if (path.indexOf("//") == 0) {
 				path = URI(path.substr(2));
-			} 
-			else if (path.indexOf("./") == 0) { // should be relative
-				path = cur.join(path.substr(2));
+			} else if (path.indexOf("./") == 0) { // should be relative
+				path = cur.join( path.substr(2) );
 			}
 			// only if we start with ./ or have a /foo should we join from cur
 			else if (this.isRelative() ) {
 				path = cur.join(path)
 			}
+			path.query = this.query;
 			return path;
 		},
 		isRelative : function(){
@@ -1294,7 +1297,7 @@
 		load: function(returnScript) {
 			var self = this;
 			// if we are already loading / loaded
-			if(self.loading || self.loaded.isResolved()){
+			if ( self.loading || self.loaded.isResolved() ) {
 				return;
 			}
 			
@@ -2051,7 +2054,6 @@ if (support.interactive) {
 		// make sure startFile and production look right
 		if ( options.startFile ) {
 			options.startFile = "" +  URI( options.startFile ).addJS()
-			console.log( options.startFile );
 			if(!options.production){
 				options.production = URI(options.startFile).dir() + "/production.js";
 			}

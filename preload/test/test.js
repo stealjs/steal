@@ -4,21 +4,30 @@ steal(
 ).then(function() {
 	
 	module("Preload")
+	var time = (+new Date);
 	asyncTest( "Requesting two.js which takes two seconds to load.", function() {
 
-		steal.preload("two?sleep=2").done(function() {
+		// Preload these which takes two seconds
+		steal.preload(
+			"./mock/one?sleep=1&bust=" + time,
+			"./mock/two?sleep=2&bust=" + time
+		).done(function() {
 
 			ok( ! window.two, "two.js doesn't exist yet.");
-
-			steal("./two/two?sleep=2").then(function() {
-
-				setTimeout(function(){
-					ok( window.two, "Steal loaded two.js instantly from cache.");
-					start();
-				}, 2500);
-
-			});
+			
+			// Execute two which should happen near instantly
+			steal(
+				"./mock/one?sleep=1&bust=" + time,
+				"./mock/two?sleep=2&bust=" + time
+			);
 		});
+		
+		// Check if window.two exists after 2.5 seconds
+		setTimeout(function(){
+				ok( window.two, "Steal loaded two.js instantly from cache.");
+				ok( window.one, "Steal loaded two.js instantly from cache.");
+				start();
+		}, 3000);
 
 	});
 
