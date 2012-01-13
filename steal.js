@@ -723,7 +723,7 @@
 			}
 			// only if we start with ./ or have a /foo should we join from cur
 			else if (this.isRelative() ) {
-				path = cur.join(path)
+				path = cur.join(this.domain() + path)
 			}
 			return path;
 		},
