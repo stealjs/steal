@@ -36,7 +36,7 @@ steal(function(){
           steal.require({
                src : "http://localhost:5555?"+params+"&_="+Math.random(),
                type: "js"
-          },{}, function(){});
+          },function(){});
          
      }
 	steal.client.evaluate = function(script, arg){
