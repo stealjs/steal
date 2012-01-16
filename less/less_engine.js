@@ -138,8 +138,9 @@ var less, tree;
 if (typeof environment === "object" && ({}).toString.call(environment) === "[object Environment]") {
     // Rhino
     // Details on how to detect Rhino: https://github.com/ringo/ringojs/issues/88
-    less = {};
-    tree = less.tree = {};
+    if (typeof(window.less) === 'undefined') { window.less = {} }
+    less = window.less;
+    tree = window.less.tree = {};
     less.mode = 'rhino';
 } else if (typeof(window) === 'undefined') {
     // Node.js
@@ -149,7 +150,7 @@ if (typeof environment === "object" && ({}).toString.call(environment) === "[obj
 } else {
     // Browser
     if (typeof(window.less) === 'undefined') { window.less = {} }
-    less = window.less,
+    less = window.less;
     tree = window.less.tree = {};
     less.mode = 'browser';
 }
