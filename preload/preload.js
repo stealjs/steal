@@ -64,17 +64,12 @@
 		 */
 		load: function( returnScript ) {
 			var self = this,
-				src;
-			if ( self.options && self.options.buildType !== "fn" ) {
 				src = "" + self.options.src;
-				if ( src in preloading ) {
-					preloading[ src ].done(function() {
-						self.loading = true;
-						self.loaded.resolve();
-					});
-				} else {
-					origLoad.apply( self, arguments );
-				}
+			if ( self.options && self.options.buildType !== "fn" && src in preloading ) {
+				preloading[ src ].done(function() {
+					self.loading = true;
+					self.loaded.resolve();
+				});
 			} else {
 				origLoad.apply( self, arguments );
 			}
