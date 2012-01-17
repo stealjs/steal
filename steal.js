@@ -491,7 +491,7 @@
 				} else {
 					// immediately call the function if the deferred has been resolved
 					if (self.status === status)
-						v.apply(this, this.resultArgs);
+						v.apply(this, this.resultArgs || []);
 	
 					self[type].push(v);
 				}
@@ -698,7 +698,9 @@
 				
 				part = right[0];
 			}
-			return URI( this.domain() + left.concat( right ).join("/") );
+			return extend( URI( this.domain() + left.concat( right ).join("/") ), {
+				query: uri.query
+			});
 		},
 		/**
 		 * For a given path, a given working directory, and file location, update the 
@@ -715,16 +717,17 @@
 		normalize : function() {
 			var cur = URI.cur.dir(),
 				path = this.path;
-			if (path.indexOf("//") == 0) { //if path is rooted from steal's root (DEPRECATED) 
+			//if path is rooted from steal's root (DEPRECATED) 
+			if (path.indexOf("//") == 0) {
 				path = URI(path.substr(2));
-			} 
-			else if (path.indexOf("./") == 0) { // should be relative
-				path = cur.join(path.substr(2));
+			} else if (path.indexOf("./") == 0) { // should be relative
+				path = cur.join( path.substr(2) );
 			}
 			// only if we start with ./ or have a /foo should we join from cur
 			else if (this.isRelative() ) {
 				path = cur.join(this.domain() + path)
 			}
+			path.query = this.query;
 			return path;
 		},
 		isRelative : function(){
@@ -773,8 +776,7 @@
 	var pending = [],
 		s = steal,
 		id = 0,
-		steals = {},
-		preloadElem = docEl ? "MozAppearance" in docEl.style ? "object" : "img" : null;
+		steals = {};
 
 
 	/**
@@ -788,6 +790,7 @@
 	extend(steal, {
 		each : each,
 		extend : extend,
+		Deferred : Deferred,
 		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
@@ -1292,40 +1295,14 @@
 		 * Loads this steal
 		 */
 		load: function(returnScript) {
+			var self = this;
 			// if we are already loading / loaded
-			if(this.loading || this.loaded.isResolved()){
+			if ( self.loading || self.loaded.isResolved() ) {
 				return;
 			}
 			
-			this.loading = true;
-			
-			// get yourself
-			var self = this;
-			if ( true || this.options.type == "fn" || steal.isRhino ) {
-				self.loaded.resolve();
-			} else {
-				// do tricky pre-loading
-				var el = createElement( preloadElem ),
-					done = false,
-					onload = function() {
-						if ( ! done && ( ! el.readyState || stateCheck.test( el.readyState ))) {
-							done = true;
-
-							self.loaded.resolve();
-							if ( preloadElem == "object" ) {
-								cleanUp( el );
-							}
-						}
-					};
-
-				el.src = el.data = self.options.src;
-				el.onerror = el.onload = el.onreadystatechange = onload;
-
-				if ( preloadElem == "object" ) {
-					el.width = el.height = 0;
-					head().insertBefore( el, head().firstChild );
-				}
-			}
+			self.loading = true;
+			self.loaded.resolve();
 		},
 		execute : function(){
 			var self = this;
@@ -2077,7 +2054,6 @@ if (support.interactive) {
 		// make sure startFile and production look right
 		if ( options.startFile ) {
 			options.startFile = "" +  URI( options.startFile ).addJS()
-			console.log( options.startFile );
 			if(!options.production){
 				options.production = URI(options.startFile).dir() + "/production.js";
 			}
