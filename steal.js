@@ -657,7 +657,7 @@
 				( domain && !uriDomain );
 		},
 		isRelativeToDomain : function(){
-			return this.path.indexOf("/") == 0;
+			return !this.path.indexOf("/");
 		},
 		hash : function(){
 			return this.fragment ? "#"+this.fragment : ""
@@ -718,9 +718,9 @@
 			var cur = URI.cur.dir(),
 				path = this.path;
 			//if path is rooted from steal's root (DEPRECATED) 
-			if (path.indexOf("//") == 0) {
+			if (!path.indexOf("//")) {
 				path = URI(path.substr(2));
-			} else if (path.indexOf("./") == 0) { // should be relative
+			} else if (!path.indexOf("./")) { // should be relative
 				path = cur.join( path.substr(2) );
 			}
 			// only if we start with ./ or have a /foo should we join from cur
@@ -1438,6 +1438,7 @@ each( extend( {
 					success(script);
 				}
 			};
+			
 		// if we have text, just set and insert text
 		if ( options.text ) {
 			// insert
@@ -1497,23 +1498,20 @@ each( extend( {
 		} else {
 			if ( createSheet ) {
 				// IE has a 31 sheet and 31 import per sheet limit
-				if(cssCount == 0){
+				if(!cssCount++){
 					lastSheet = doc.createStyleSheet(options.src);
 					lastSheetOptions = options;
 					cssCount++;
 				} else {
-					var relative = "" + URI(lastSheetOptions.src).join(options.src);
-
+					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
 					lastSheet.addImport( relative );
-					cssCount++;
 					if(cssCount == 30){
 						cssCount = 0;
 					}
 				}
-				success()
+				success();
 				return;
 			}
-
 			
 			options = options || {};
 			var link = createElement("link");
@@ -1549,11 +1547,12 @@ request = function( options, success, error ) {
 			request = check = clean = null;
 		},
 		check = function(){
-			var status = request.status;
+			var status;
 			if ( request.readyState === 4 )  {
+				status = request.status;
 				if ( status === 500 || status === 404 || 
 					 status === 2 || 
-					 (status === 0 && request.responseText === "") ) {
+					 (!status && request.responseText === "") ) {
 					error && error();
 				} else {
 					success(request.responseText);
@@ -2123,4 +2122,4 @@ if (support.interactive) {
 	
 	startup();
 	
-})( this )
+})( this );
