@@ -932,11 +932,6 @@
 		rootUrl : function(src){
 			if (src !== undefined) {
 				steal.root = File(src);
-				if (!steal.root.protocol()){
-					// IE won't normalize a relative path in a script tag, so if we've been given a relative root url,
-					// we forcibly join from the page's base url
-					steal.root = File(steal.root.joinFrom(steal.pageUrl().dir(), true));
-				}
 				
 				// set cur with the location
 				var cleaned = steal.pageUrl(),
