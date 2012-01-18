@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Plugin Test</title>
+    <script src="../bootstrap.js"></script>
+    <script src="dynamicToString-tests.js"></script>
+</head>
+<body>
+    <h1>Dynamic Plugin Test</h1>
+    <p>Tests a plugin that has plugin.dynamic set to true, and it is used as
+    part of require('') call that needs to be found via Function.prototype.toString
+    dependency scanning. The dynamic plugin should only be called once in this case,
+    not one time for the dependency to pass to the function and then another for
+    the require call inside the function.</p>
+    <p>Check console for messages</p>
+</body>
+</html>

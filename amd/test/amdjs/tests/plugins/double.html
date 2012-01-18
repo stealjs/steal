@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Double Plugin Call Test</title>
+    <script src="../bootstrap.js"></script>
+    <script>
+    var master = new doh.Deferred(),
+        count = 0;
+
+    function done() {
+        count += 1;
+        if (count === 2) {
+            master.callback(true);
+        }
+    }
+
+    doh.register(
+        "doublePluginCall",
+        [
+            {
+                name: "doublePluginCall",
+                timeout: 5000,
+                runTest: function() {
+                    return master;
+                }
+            }
+        ]
+    );
+    doh.run();
+
+    go(['double!foo'], function (foo) {
+        if (foo === 'x') {
+            done();
+        }
+    });
+
+    go(['double!foo'], function (foo) {
+        if (foo === 'x') {
+            done();
+        }
+    });
+
+    </script>
+</head>
+<body>
+    <h1>Double Plugin Call Test</h1>
+    <p>Tests that the same value is returned for two calls to a plugin.</p>
+    <p>Check console for messages</p>
+</body>
+</html>

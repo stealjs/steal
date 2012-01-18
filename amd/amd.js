@@ -85,8 +85,14 @@
 		// cases to handle:
 		// define ("foo", ["bar", "lol", "wat"], function() {});
 		// define ("foo", ["bar", "lol", "wat"], {});
+		// TODO define(["bar", "lol", "wat"], function() {});
 		define: function( id, dependencies, factory ) {
-
+			/*
+			var id = isString(arguments[0]) ? arguments[0] : steal.cur().path, 
+				dependencies = defaultModules,
+				factory = arguments[2] || arguments[1] || arguments[0];
+			*/
+			
 			var resolveCallback = function() {
 				console.log( "define callback", arguments, this );
 					var exports = {},
