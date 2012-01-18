@@ -169,7 +169,7 @@ steal('steal/build').then(function( steal ) {
 	 *     }
 	 * 
 	 */
-	js.makePackage = function(files, dependencies, cssPackage){
+	js.makePackage = function(files, cssPackage, dependencies){
 		
 		// put it somewhere ...
 		// add to dependencies ...
@@ -200,7 +200,7 @@ steal('steal/build').then(function( steal ) {
 			}
 		})
 		// add to dependencies
-		if(csses.length && cssPackage){
+		if(csses.length && dependencies){
 			dependencies[cssPackage] = csses.map(function(css){
 				return css.rootSrc;
 			})
@@ -213,7 +213,7 @@ steal('steal/build').then(function( steal ) {
 		
 		//create the dependencies ...
 		var dependencyCalls = [];
-		for (var key in dependencies){
+		for (var key in (dependencies || null)){
 			dependencyCalls.push( 
 				"steal({src: '"+key+"', waits: true, has: ['"+dependencies[key].join("','")+"']})"
 			)
@@ -231,10 +231,7 @@ steal('steal/build').then(function( steal ) {
 		
 		return {
 			js: code.join(";\n") + "\n",
-			css: {
-				srcs: csses.map(function(css){return css.rootSrc+'';}),
-				code: csses.map(function(css){ return css.text }).join('\n')
-			}
+			css: steal.build.css.makePackage(csses, cssPackage)
 		}
 	}
 }).then('./jsminify');

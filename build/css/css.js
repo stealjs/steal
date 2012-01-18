@@ -41,7 +41,28 @@ steal('steal/build').then(function( steal ) {
 			dependencies: scriptsConverted
 		}
 	});
-
+	/**
+	 * 
+	 * @param {Object} steals
+	 * @param {Object} where
+	 */
+	css.makePackage = function(steals, where){
+		if(!steals || !steals.length){
+			return null;
+		}
+		var directory = steal.File(where).dir()
+		var srcs = [];
+		var codez = [];
+		steals.forEach(function(stealOpts){
+			codez.push(convert(stealOpts.text, stealOpts.rootSrc, directory))
+			srcs.push(stealOpts.rootSrc+'')
+		});
+		
+		return {
+			srcs: srcs,
+			code : codez.join('\n')
+		}
+	}
 	//used to convert css referencs in one file so they will make sense from prodLocation
 	var convert = function( css, cssLocation, prodLocation ) {
 		//how do we go from prod to css
@@ -52,13 +73,11 @@ steal('steal/build').then(function( steal ) {
 				if (isAbsoluteOrData(part) ) {
 					return whole
 				}
-
 				//it's a relative path from cssLocation, need to convert to
 				// prodLocation
-				var rootImagePath = steal.File(part).joinFrom(cssLoc),
-					fin = steal.File(rootImagePath).toReferenceFromSameDomain(prodLocation);
-				//print("  -> "+rootImagePath);
-				// steal.print("  " + part + " > " + fin);
+				var rootImagePath = steal.URI(cssLoc).join(part),
+					fin = steal.File(prodLocation).pathTo(rootImagePath);
+					
 				return "url(" + fin + ")";
 			});
 		return newCSS;

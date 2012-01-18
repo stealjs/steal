@@ -131,8 +131,8 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					// create package
 					var pack = build.js.makePackage(sharing.files.map(function(f){
 						return f.stealOpts;
-					})),
-						hasCSS = pack.css && pack.css.srcs.length;
+					}), packageName+".css"),
+						hasCSS = pack.css;
 					
 					// 
 					if(isPackage){
@@ -207,7 +207,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				
 				var pack = build.js.makePackage(
 					masterFiles.map(function(f){return f.stealOpts}),
-					{},to+"/production.css");
+					to+"/production.css",{});
 				
 				// prepend maps and makes ...
 				// make makes
@@ -223,7 +223,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				s.URI(to+"/production.js").save(
 					/*build.js.minify(*/ mapCode+makeCode.join('\n')+"\n"+pack.js /*)*/
 				)
-				if(pack.css && pack.css.srcs.length){
+				if(pack.css){
 					print("       "+to+"/production.css");
 					s.URI(to+"/production.css").save( pack.css.code );
 				}
