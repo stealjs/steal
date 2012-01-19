@@ -1445,9 +1445,9 @@ request = function(options, success, error){
 		check = function(){
 			if ( request.readyState === 4 )  {
 				if ( request.status === 500 || request.status === 404 || 
-					 request.status === 2 || 
+					 request.status === 2 || request.status < 0 || 
 					 (request.status === 0 && request.responseText === '') ) {
-					error && error();
+					error && error(request.status);
 					clean();
 				} else {
 					success(request.responseText);
@@ -1470,9 +1470,11 @@ request = function(options, success, error){
 		request.send(null);
 	}
 	catch (e) {
-		console.error(e);
-		error && error();
-		clean();
+		if (clean) {
+			console.error(e);
+			error && error();
+			clean();
+		}
 	}
 			 
 };
