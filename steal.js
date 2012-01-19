@@ -1818,7 +1818,9 @@ request = function( options, success, error ) {
 		loadHas : function(){
 			var stel, i,
 				current = URI.cur;
-			
+			if(this.options.buildType == 'js'){
+				return;
+			}
 			// mark everything in has loaded
 			each(this.options.has, function( i, has ) {
 				// don't want the current file to change, since we're just marking files as loaded
