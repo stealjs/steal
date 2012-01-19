@@ -2075,7 +2075,7 @@ if (support.interactive) {
 
 		// mark things that have already been loaded
 		each(options.loaded || [], function(i, stel){
-			steal.loaded(stel)
+			steal.executed(stel)
 		})
 		// immediate steals we do
 		var steals = [];
