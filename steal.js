@@ -747,7 +747,7 @@
 			return URI(result.join("") + uriParts.join("/"));
 		},
 		mapJoin : function( url ) {
-			return this.join( insertMapping( url ));
+			return this.join( URI( url ).insertMapping() );
 		},
 		// helper to go from jquery to jquery/jquery.js
 		addJS : function(){
@@ -900,17 +900,17 @@
 		 * @hide
 		 * Used to tell steal that it is loading a number of plugins
 		 */
-		loading : function() {
+		has: function() {
 			// we don't use IE's interactive script functionality while 
 			// production scripts are loading
 			useInteractive = false;
 			each(arguments, function(i, arg) {
 				var stel = stealProto.make( arg );
-				stel.loading = true;
+				stel.loading = stel.executing = true;
 			});
 		},
 		// called when a script has loaded via production
-		loaded: function(name) {
+		executed: function(name) {
 			// create the steal, mark it as loading, then as loaded
 			var stel = stealProto.make( name );
 			stel.loading = true;
@@ -1180,7 +1180,7 @@
 					if( func2 == "execute"){
 						
 						each(items, function(i, item){
-							Deferred.when(obj[func], item.loaded).then(function() {
+							Deferred.when(obj[func]).then(function() {
 								item[func2]();
 							})
 						})
@@ -1227,7 +1227,7 @@
 				self.dependencies.unshift(stel);
 				
 				// start pre - loading everything right away
-				stel.load();
+				//stel.load();
 				
 				if ( stel.waits === false ) { // file
 					// on the current 
@@ -1254,9 +1254,21 @@
 						whenEach(files.concat(stel) , "completed", joiner, "execute");
 						
 						// make stel complete load files
-						whenThe(stel,"completed", files.length ? files : [joiner] ,"execute")
+						whenThe(stel,"completed", files.length ? files : [joiner], "execute")
 						
 					}
+
+					/**/
+					if ( joiner ) {
+						joiner.load()
+					}
+					/**/
+					if ( files.length ) {
+						each(files, function( i, file ) {
+							file.load();
+						});
+					}
+					/**/
 					
 					// the joiner is the previous thing
 					joiner = stel;
@@ -1270,21 +1282,18 @@
 				// if there is a joiner, we need to load it when the initial files 
 				// are complete
 				if(joiner){
+					joiner.load();
 					whenEach(files, "completed", joiner, "execute"); // problem
 				} else {
 					whenEach(files, "completed", self, "completed");
 				}
 				// reverse it back and load each initial file
 				each(files.reverse(), function(i, f){
-					f.loaded.then(function(){
-						f.execute();
-					});
+					f.execute();
 				});
 			} else if(joiner){
 				// we have inital function
-				joiner.loaded.then(function(){
-					joiner.execute();
-				})
+				joiner.execute();
 			} else {
 				// we had nothing
 				self.complete();
@@ -1304,8 +1313,11 @@
 			self.loading = true;
 			self.loaded.resolve();
 		},
-		execute : function(){
+		execute: function(){
 			var self = this;
+			if ( ! self.loaded.isResolved() ) {
+				self.loaded.resolve();
+			}
 			if ( ! self.executing ) {
 				self.executing = true;
 				steal.require( self.options, function( script ) {
@@ -1621,16 +1633,17 @@ request = function( options, success, error ) {
 	});
 
 	//  =============================== MAPPING ===============================
-	var insertMapping = function(p){
+	URI.prototype.insertMapping = function(){
 		// go through mappings
-		var key, value
-		for(key in steal.mappings){
+		var orig = "" + this,
+			key, value;
+		for ( key in steal.mappings ) {
 			value = steal.mappings[key]
-			if ( value.test.test( p )) { 
-				return p.replace(key, value.path);
+			if ( value.test.test( orig )) { 
+				return orig.replace(key, value.path);
 			}
 		}
-		return URI(p);
+		return URI( orig );
 	};
 
 	// =============================== STARTUP ===============================
@@ -1644,7 +1657,7 @@ request = function( options, success, error ) {
 	extend(steal, {
 		// modifies src
 		makeOptions : after(steal.makeOptions,function(raw){
-			raw.src = URI.root().join(raw.rootSrc = insertMapping(raw.rootSrc));
+			raw.src = URI.root().join(raw.rootSrc = URI( raw.rootSrc ).insertMapping());
 		}),
 
 		//root mappings to other locations
@@ -1660,7 +1673,7 @@ request = function( options, success, error ) {
 		map: function(from, to){
 			if ( isString( from )) {
 				steal.mappings[from] = {
-					test : new RegExp("^("+from+")([/.]|$)"),
+					test : new RegExp("^(\/?"+from+")([/.]|$)"),
 					path: to
 				};
 			} else { // its an object
@@ -1772,7 +1785,7 @@ request = function( options, success, error ) {
 					stel.loadHas();
 				} else {
 					// have to mark has as loading 
-					steal.loading.apply(steal,stel.options.has)
+					steal.has.apply(steal,stel.options.has)
 				}
 			}
 			return stel;
@@ -1845,11 +1858,12 @@ request = function( options, success, error ) {
 	// =========== DEBUG =========
 	
 	
-	/*var name = function(stel){
+	/** /
+	var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
-		return stel.options ? stel.options.rootSrc : "CONTAINER"
+		return stel.options ? stel.options.rootSrc + "": "CONTAINER"
 	}
 
 	
@@ -1862,7 +1876,8 @@ request = function( options, success, error ) {
 	})
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
-	})*/
+	})
+	/**/
 
 
 	// ============= WINDOW LOAD ========
@@ -2121,5 +2136,7 @@ if (support.interactive) {
 	win.steal = steal;
 	
 	startup();
+
+	win.steals = steals;
 	
 })( this );

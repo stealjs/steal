@@ -90,7 +90,7 @@ steal('steal/build').then(function( steal ) {
 			if ( stl.compress !== false || options.all ) {
 				currentPackage.scripts.push("'"+stl.rootSrc+"'")
 				// put the result in the package
-				text += ";\nsteal.loaded('"+stl.rootSrc+"');";
+				text += ";\nsteal.executed('"+stl.rootSrc+"');";
 				if(options.compressor === "localClosure"){ // only closure needs lineNumbers
 					text = js.clean(text, stl.rootSrc); // have to remove steal.dev stuff for accurate line nbrs
 					var lines = text.match(/\n/g).length + 1,
@@ -110,7 +110,7 @@ steal('steal/build').then(function( steal ) {
 			
 				// add the uncompressed script to the package
 				currentPackage.scripts.push("'"+stl.rootSrc+"'");
-				currentPackage.src.push(text+";\nsteal.loaded('"+stl.rootSrc+"');");
+				currentPackage.src.push(text+";\nsteal.executed('"+stl.rootSrc+"');");
 			}
 		});
 		
@@ -220,13 +220,13 @@ steal('steal/build').then(function( steal ) {
 		}
 		
 		// make 'loading'
-		var code = ["steal.loading('"+loadingCalls.join("','")+"')"];
+		var code = ["steal.has('"+loadingCalls.join("','")+"')"];
 		// add dependencies
 		code.push.apply(code, dependencyCalls);
 		
 		// add js code
 		jses.forEach(function(file){
-			code.push( file.text, "steal.loaded('"+file.rootSrc+"')" );
+			code.push( file.text, "steal.executed('"+file.rootSrc+"')" );
 		});
 		
 		return {

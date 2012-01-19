@@ -8,9 +8,7 @@
 			var deferred = preloading[ src ] || new Deferred(),
 				complete = function() {
 					delete preloading[src];
-					setTimeout(function() {
-						deferred.resolve( src );
-					}, 0);
+					deferred.resolve( src );
 				};
 			if ( ! ( src in preloading )) {
 				preloading[ src ] = deferred;
@@ -38,7 +36,7 @@
 		},
 		resolveUris = function( srcs ) {
 			return map( srcs, function( src ) {
-				return "" + URI.root().join(  URI( src ).addJS().normalize() );
+				return URI.root().join(  URI( URI( src ).addJS().normalize()).insertMapping() );
 			});
 		},
 		preloading = {},
@@ -57,6 +55,7 @@
 		}
 	});
 
+	
 	extend(steal.p, {
 		/**
 		 * This clobbers the original steal.load function to make sure we don't

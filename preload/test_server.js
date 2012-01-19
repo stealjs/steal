@@ -44,6 +44,6 @@ app.get("/steal/preload/test/mock/*", function( req, res, next ) {
 });
 
 // Routes
-app.listen(3000);
+app.listen(3001);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
-exec("open http://localhost:3000/steal/preload/test/index.html");
+exec("open http://localhost:3001/steal/preload/test/index.html");
