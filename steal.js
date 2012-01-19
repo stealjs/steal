@@ -508,7 +508,7 @@
 		fail : doneFunc("failFuncs","rj"),
 		always : function() {
 			var args = map(arguments);
-			if (args.length > 0 && args[0])
+			if (args.length && args[0])
 				this.done(args[0]).fail(args[0]);
 
 			return this;
@@ -521,7 +521,7 @@
 				this.fail(args[1]);
 
 			// done function(s)
-			if (args.length > 0 && args[0])
+			if (args.length && args[0])
 				this.done(args[0]);
 
 			return this;
@@ -688,7 +688,7 @@
 			if ( this.path.match(/\/$/) ) {
 				left.pop();
 			}
-			while ( part == ".." && left.length > 0 ) {
+			while ( part == ".." && left.length) {
 				// if we've emptied out, folders, just break
 				// leaving any additional ../s
 				if(! left.pop() ){ 
@@ -1089,6 +1089,7 @@
 				// load because we defer 'type' determination until then
 				//
 				// if we haven't loaded it before
+				
 				if ( ! steals[rootSrc] && ! steals[rootSrc + ".js"] ) {
 					steals[rootSrc] = stel;
 				} else{ // already have this steal
@@ -1296,22 +1297,22 @@
 				joiner.execute();
 			} else {
 				// we had nothing
-				self.complete();
+				this.complete();
 			}
+			
 
 		},
 		/**
 		 * Loads this steal
 		 */
 		load: function(returnScript) {
-			var self = this;
 			// if we are already loading / loaded
-			if ( self.loading || self.loaded.isResolved() ) {
+			if ( this.loading || this.loaded.isResolved() ) {
 				return;
 			}
 			
-			self.loading = true;
-			self.loaded.resolve();
+			this.loading = true;
+			this.loaded.resolve();
 		},
 		execute: function(){
 			var self = this;
@@ -1497,7 +1498,7 @@ each( extend( {
 				css.styleSheet.cssText = options.text;
 			} else {
 				(function (node) {
-					if (css.childNodes.length > 0) {
+					if (css.childNodes.length) {
 						if (css.firstChild.nodeValue !== node.nodeValue) {
 							css.replaceChild(node, css.firstChild);
 						}
@@ -2074,7 +2075,7 @@ if (support.interactive) {
 		}		
 
 		// mark things that have already been loaded
-		each(options.loaded || [], function(i, stel){
+		each(options.executed || [], function(i, stel){
 			steal.executed(stel)
 		})
 		// immediate steals we do
