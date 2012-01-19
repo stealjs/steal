@@ -123,8 +123,8 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				while(sharing = apps.getMostShared(options.files)){
 					shares.push(sharing);
 				};
-				
-				packages.flatten(shares, 3);
+				print(shares.length)
+				packages.flatten(shares, 3000);
 				
 				
 				s.print("\nMaking Packages");
@@ -137,7 +137,9 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					var pack = build.js.makePackage(sharing.files.map(function(f){
 						return f.stealOpts;
 					}), packageName+".css"),
-						hasCSS = pack.css;
+						hasCSS = pack.css,
+						has = [];
+					
 					
 					// 
 					if(isPackage){
@@ -148,6 +150,9 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					
 					sharing.files.forEach(function(f){
 						print("  + "+f.stealOpts.rootSrc)
+						if(f.stealOpts.buildType == 'js'){
+							has.push(f.stealOpts.rootSrc+'')
+						}
 					})
 					s.print(" ")
 					
@@ -156,7 +161,8 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					// make this steal instance
 					makes[packageName+".js"] = {
 						src: packageName+".js",
-						needs :[]
+						needs :[],
+						has : has
 					}
 					// if we have css
 					if(hasCSS){
@@ -224,7 +230,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 						");")
 				}
 				
-				mapCode = "steal.map("+s.toJSON(maps)+");"
+				mapCode = "steal.packages("+s.toJSON(maps)+");"
 				s.URI(to+"/production.js").save( filterCode(mapCode+makeCode.join('\n')+"\n"+pack.js, 'js') );
 				if(pack.css){
 					print("       "+to+"/production.css");

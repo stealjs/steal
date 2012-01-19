@@ -1212,7 +1212,10 @@
 					
 				// make a steal object
 				var stel = stealProto.make(item);
-				
+				if(packHash[stel.options.rootSrc] && stel.options.type !== 'fn'){ // if we are production, and this is a package, mark as loading, but steal package?
+					steal.has(stel.options.rootSrc);
+					stel = stealProto.make(packHash[stel.options.rootSrc]);
+				}
 				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
 				each(stel.options.needs || [], function( i, raw ) {
@@ -1259,17 +1262,17 @@
 						
 					}
 
-					/**/
+					/* */
 					if ( joiner ) {
 						joiner.load()
 					}
-					/**/
+					/* */
 					if ( files.length ) {
 						each(files, function( i, file ) {
 							file.load();
 						});
 					}
-					/**/
+					/* */
 					
 					// the joiner is the previous thing
 					joiner = stel;
@@ -1604,13 +1607,19 @@ request = function( options, success, error ) {
 	 * 		steal.packages('tasks','dashboard','fileman');
 	 * 
 	 */
-	var packs = [];
-	steal.packages = function(){
+	var packs = [],
+		packHash = {};
+	steal.packages = function(map){
 		
 		if(!arguments.length){
 			return packs;
 		} else {
-			packs.push.apply(packs, arguments);
+			if(typeof map == 'string'){
+				packs.push.apply(packs, arguments);
+			} else {
+				packHash = map;
+			}
+			
 			return this;
 		}
 	};
@@ -1785,7 +1794,7 @@ request = function( options, success, error ) {
 				if( stel.run.isResolved() ) {
 					stel.loadHas();
 				} else {
-					// have to mark has as loading 
+					// have to mark has as loading (so we don't try to get them)
 					steal.has.apply(steal,stel.options.has)
 				}
 			}
@@ -1859,8 +1868,8 @@ request = function( options, success, error ) {
 	// =========== DEBUG =========
 	
 	
-	/** /
-	var name = function(stel){
+	
+	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
@@ -1877,8 +1886,8 @@ request = function( options, success, error ) {
 	})
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
-	})
-	/**/
+	})*/
+
 
 
 	// ============= WINDOW LOAD ========
