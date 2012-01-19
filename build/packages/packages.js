@@ -61,6 +61,11 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					} else {
 						return appNamesToName[expanded] = to + "/packages/"+expanded.replace(/\//g,'_') ;
 					}
+				},
+				filterCode = function(code, type) {
+					return buildOptions.minify
+						? build[type].minify(code)
+						: code;
 				};
 			
 			// make the packages folder
@@ -146,7 +151,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 					})
 					s.print(" ")
 					
-					s.URI(packageName+".js").save( pack.js );
+					s.URI(packageName+".js").save( filterCode(pack.js, 'js') );
 					
 					// make this steal instance
 					makes[packageName+".js"] = {
@@ -163,7 +168,7 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 							src: packageName+".css",
 							has: pack.css.srcs
 						};
-						s.URI(packageName+".css").save( pack.css.code );
+						s.URI(packageName+".css").save( filterCode(pack.css.code, 'css') );
 						sharing.hasCSS = true;
 					}
 					
@@ -220,12 +225,10 @@ steal('steal/build','steal/build/apps','steal/get/json.js',function(s){
 				}
 				
 				mapCode = "steal.map("+s.toJSON(maps)+");"
-				s.URI(to+"/production.js").save(
-					/*build.js.minify(*/ mapCode+makeCode.join('\n')+"\n"+pack.js /*)*/
-				)
+				s.URI(to+"/production.js").save( filterCode(mapCode+makeCode.join('\n')+"\n"+pack.js, 'js') );
 				if(pack.css){
 					print("       "+to+"/production.css");
-					s.URI(to+"/production.css").save( pack.css.code );
+					s.URI(to+"/production.css").save( filterCode(pack.css.code, 'css') );
 				}
 			});
 		});
