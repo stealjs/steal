@@ -1219,9 +1219,8 @@
 				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
 				each(stel.options.needs || [], function( i, raw ) {
-					stealInstances.push( extend(stealProto.make(raw), {
-						waits: true 
-					}));
+					//TODO: Justin take a look at this ... this is a bad fix!!
+					stealInstances.push( stealProto.make(raw), stealProto.make(function(){}) ) ;
 				});
 			});
 			
