@@ -85,7 +85,7 @@ steal('steal/build').then('steal/clean/beautify.js','steal/clean/jslint.js','ste
 	 * <h2>Ignoring Files</h2>
 	 * To ignore a file from your application, mark it as clean with a comment like:
 	 * @codestart
-	 * //@steal-clean
+	 * //!steal-clean
 	 * @codeend
 	 * <h2>The steal.clean function</h2>
 	 * <p>Takes a relative path to a file on the filesystem;
@@ -131,7 +131,7 @@ steal('steal/build').then('steal/clean/beautify.js','steal/clean/jslint.js','ste
 			}
 		}else{
 			var folder = steal.File(url).dir(),
-				clean = /\/\/@steal-clean/
+				clean = /\/\/!steal-clean/
 			//folder
 			
 			steal.build.open(url, function(files){

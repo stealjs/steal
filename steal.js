@@ -284,9 +284,9 @@
 	 * production builds, add the following around
 	 * the code blocks.
 	 *
-	 *     //@steal-remove-start
+	 *     //!steal-remove-start
 	 *         code to be removed at build
-	 *     //@steal-remove-end
+	 *     //!steal-remove-end
 	 * 
 	 * ### Lookup Paths
 	 * 
