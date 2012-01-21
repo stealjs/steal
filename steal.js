@@ -284,9 +284,9 @@
 	 * production builds, add the following around
 	 * the code blocks.
 	 *
-	 *     //@steal-remove-start
+	 *     //!steal-remove-start
 	 *         code to be removed at build
-	 *     //@steal-remove-end
+	 *     //!steal-remove-end
 	 * 
 	 * ### Lookup Paths
 	 * 
@@ -1445,9 +1445,9 @@ request = function(options, success, error){
 		check = function(){
 			if ( request.readyState === 4 )  {
 				if ( request.status === 500 || request.status === 404 || 
-					 request.status === 2 || 
+					 request.status === 2 || request.status < 0 || 
 					 (request.status === 0 && request.responseText === '') ) {
-					error && error();
+					error && error(request.status);
 					clean();
 				} else {
 					success(request.responseText);
@@ -1470,9 +1470,11 @@ request = function(options, success, error){
 		request.send(null);
 	}
 	catch (e) {
-		console.error(e);
-		error && error();
-		clean();
+		if (clean) {
+			console.error(e);
+			error && error();
+			clean();
+		}
 	}
 			 
 };
@@ -1916,7 +1918,7 @@ if (support.interactive) {
 	steal.after = after(steal.after, function(){
 		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-		if (!interactive || !interactive.src || /steal\.(production\.)*js/.test(interactive.src)) {
+		if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
 			return;
 		}
 		// get the source of the script

@@ -73,7 +73,10 @@ steal.html.crawl = function(url, opts){
 		found[hash] = true;
 		print("  > "+ opts.out+"/"+hash+".html")
 		// write out the page
-		s.File(opts.out+"/"+hash+".html").save(total);
+		var outf = s.File(opts.out+"/"+hash+".html");
+		s.File(outf.dir()).mkdirs();
+		outf.save(total);
+		
 		var next = s.html.crawl.addLinks();
 		
 

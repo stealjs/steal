@@ -14,15 +14,13 @@ steal('steal/test/test.js', function( s ) {
 					out: 'steal/html/test/out',
 					browser: type
 				})
-			})
+			});
 			
-			// test there are 2 pages
-			var txt = readFile('steal/html/test/out/Hello+World!.html')
-			s.test.ok(txt.indexOf('<div id="out"><p>#!Hello+World!</p></div>') != -1, "hello world generated correctly");
-			
-			// test opening page1, it has the right div
-			var txt = readFile('steal/html/test/out/Foo.html')
-			s.test.ok(txt.indexOf('<div id="out"><p>#!Foo</p></div>') != -1, "foo generated correctly");
+			// test for the expected pages
+			['Hello+World!', 'Foo', 'Bar/Baz'].forEach(function(page){
+				var txt = readFile('steal/html/test/out/' + page + '.html')
+				s.test.ok(txt.indexOf('<div id="out"><p>#!' + page + '</p></div>') != -1, page + " generated correctly");
+			});
 			
 			// remove generated pages
 			s.test.deleteDir('steal/html/test/out');

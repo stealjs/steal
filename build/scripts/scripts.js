@@ -183,7 +183,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 	// removes  dev comments from text
 	scripts.clean = function( text, file ) {
 		var parsedTxt = String(java.lang.String(text)
-			.replaceAll("(?s)\/\/@steal-remove-start(.*?)\/\/@steal-remove-end", ""));
+			.replaceAll("(?s)\/\/!steal-remove-start(.*?)\/\/!steal-remove-end", ""));
 		
 		// the next part is slow, try to skip if possible
 		// if theres not a standalone steal.dev, skip
