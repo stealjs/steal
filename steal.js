@@ -692,7 +692,7 @@
 						File.cur(path);
 						
 						// call the function, someday soon this will be requireJS-like
-						options(steal.send || win.jQuery || steal); 
+						options(steal.send || win.jQuery || win.Zepto || steal); 
 					},
 					rootSrc: path,
 					orig: options,
