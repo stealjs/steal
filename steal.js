@@ -86,7 +86,16 @@
 		startup = noop,
 		// if oldsteal is an object
 		// we use it as options to configure steal
-		opts = typeof win.steal == "object" ? win.steal : {};
+		opts = typeof win.steal == "object" ? win.steal : {},
+		// adds a suffix to the url for cache busting
+		addSuffix = function(str){
+			if(opts.suffix){
+				str = (str + '').indexOf('?') > -1 ? 
+						str + "&" + opts.suffix :
+						str + "?" + opts.suffix;
+			}
+			return str;
+		};
 		
 	// =============================== STEAL ===============================
 
@@ -1469,7 +1478,7 @@ each( extend( {
 				script.onerror = error;
 			}
 			
-			script.src = options.src;
+			script.src = options.src = addSuffix(options.src);
 			//script.async = false;
 			script.onSuccess = success;
 		}
@@ -1530,7 +1539,7 @@ each( extend( {
 			options = options || {};
 			var link = createElement("link");
 			link.rel = options.rel || "stylesheet";
-			link.href = options.src;
+			link.href = addSuffix(options.src);
 			link.type = "text/css";
 			head().appendChild(link);
 		}
