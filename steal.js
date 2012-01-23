@@ -1516,7 +1516,6 @@ each( extend( {
 				if(!cssCount++){
 					lastSheet = doc.createStyleSheet(options.src);
 					lastSheetOptions = options;
-					cssCount++;
 				} else {
 					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
 					lastSheet.addImport( relative );
