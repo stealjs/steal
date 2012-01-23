@@ -11,7 +11,6 @@ module("steal")
 	};
 	
 	
-	
 if(window !== window.parent && window.parent.QUnit){
 	var methods = ["module", "test", "start", "stop", "equals", "ok", "same", "equal", "expect"];
 	for(var i=0; i<methods.length; i++){
