@@ -918,12 +918,18 @@
 				stel.loading = stel.executing = true;
 			});
 		},
+		
+		// a dummy function to add things to after the stel is created, but before executed is called
+		preexecuted : function(){},
+		
 		// called when a script has loaded via production
 		executed: function(name) {
 			// create the steal, mark it as loading, then as loaded
 			var stel = stealProto.make( name );
 			stel.loading = true;
 			//convert(stel, "complete");
+			
+			steal.preexecuted(stel);
 			stel.executed()
 			return steal;
 		},
@@ -2004,7 +2010,7 @@ if (support.interactive) {
 	
 	// This is used for packaged scripts.  As the packaged script executes, we grab the 
 	// dependencies that have come so far and assign them to the loaded script
-	steal.preloaded = before(steal.preloaded, function(stel){
+	steal.preexecuted = before(steal.preexecuted, function(stel){
 		// get the src name
 		var src = stel.options.src,
 			// and the src of the current interactive script
