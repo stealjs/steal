@@ -2064,13 +2064,18 @@ if (support.interactive) {
 				steals.push.apply(steals, startFiles)
 			}
 			// either instrument is in this page (if we're the window opened from steal.browser), or its opener has it
-			if ( options.instrument || (!options.browser && win.top && win.top.opener && 
-					win.top.opener.steal && win.top.opener.steal.options.instrument) ) {
-				// force startFiles to load before instrument
-				steals.push(function(){}, {
-					src: "steal/instrument",
-					waits: true
-				});
+			try {
+				if ( options.instrument || (!options.browser && win.top && win.top.opener && 
+						win.top.opener.steal && win.top.opener.steal.options.instrument) ) {
+					// force startFiles to load before instrument
+					steals.push(function(){}, {
+						src: "steal/instrument",
+						waits: true
+					});
+				}
+			} catch(e){
+				// This would throw permission denied if 
+				// the child window was from a different domain
 			}
 			//we only load things with force = true
 			if (options.env == 'production' && options.loadProduction) {
