@@ -330,6 +330,11 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 								error = errMatch[2];
 							while (!found) {
 								item = currentLineMap[i];
+								if (!item) {
+								        steal.print("Invalid line: lineNumber=" + lineNbr + ", error=" + options.err);
+								        // optional
+								        throw new Error("Invalid line in currentLineMap, lineNumber=" + lineNbr + ", error=" + options.err);
+								}
 								lineCount += item.lines;
 								if (lineCount >= lineNbr) {
 									found = true;
