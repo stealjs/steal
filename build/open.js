@@ -164,7 +164,7 @@ steal(function(s){
 			afterScriptLoad: {
 				// prevent $(document).ready from being called even though load is fired
 				"jquery.js": function( script ) {
-					jQuery.readyWait++;
+					window.jQuery && jQuery.readyWait++;
 				},
 				"steal.js": function(script){
 					// if there's timers (like in less) we'll never reach next line 

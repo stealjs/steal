@@ -37,11 +37,13 @@ steal('steal/parse','steal/build/scripts').then(
 				"exclude": -1,
 				"nojquery": 0,
 				"global": 0,
-				"compress": 0
+				"compress": 0,
+				"onefunc" : 0
 			}), 
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 		
 		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
+		opts.global = opts.global || "jQuery";
 		
 		if (opts.nojquery) {
 			jq = false;
@@ -76,7 +78,7 @@ steal('steal/parse','steal/build/scripts').then(
 				//print("p  "+stl.rootSrc)
 				if (!inExclude(stl.rootSrc)) {
 				
-					var content = s.build.pluginify.content(stl, opts.global ? opts.global : "jQuery", text);
+					var content = s.build.pluginify.content(stl, opts, text);
 					if (content) {
 						s.print("  > " + stl.rootSrc)
 						out.push(s.build.builders.scripts.clean(content));
@@ -89,6 +91,9 @@ steal('steal/parse','steal/build/scripts').then(
 		}, true);
 		
 		var output = out.join(";\n");
+		if(opts.onefunc){
+			output = "(function(Can){"+ output+ "})("+opts.global+")";
+		}
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
 			var compressor = steal.build.builders.scripts.compressors[compressorName]()
@@ -103,20 +108,23 @@ steal('steal/parse','steal/build/scripts').then(
 		
 	}
 	//gets content from a steal
-	s.build.pluginify.content = function(steal, param, opener){
+	s.build.pluginify.content = function(steal, opts, opener){
+		var param = opts.global;
+		
 		if (steal.buildType == 'fn') {
 			// if it's a function, go to the file it's in ... pull out the content
 			var index = funcCount[steal.rootSrc] || 0, contents = readFile(steal.rootSrc);
 			funcCount[steal.rootSrc]++;
-			return "(" + s.build.pluginify.getFunction(contents, index) + ")(" + param + ")";
+			var contents = s.build.pluginify.getFunction(contents, index, opts.onefunc);
+			return opts.onefunc ? contents : "(" + contents + ")(" + param + ")";
 		}
 		else {
 			var content = readFile(steal.rootSrc);
 			if (/steal[.\(]/.test(content)) {
 				
-				content = s.build.pluginify.getFunction(content, 0)
+				content = s.build.pluginify.getFunction(content, 0, opts.onefunc)
 				
-				if(content){
+				if(content && !opts.onefunc){
 					content =  "(" + content + ")(" + param + ")";
 				}
 			}
@@ -124,7 +132,7 @@ steal('steal/parse','steal/build/scripts').then(
 			return content;
 		}
 	};
-	s.build.pluginify.getFunction = function(content, ith){
+	s.build.pluginify.getFunction = function(content, ith, onewrap){
 		var p = s.parse(content), 
 			token, 
 			funcs = [];
@@ -136,7 +144,7 @@ steal('steal/parse','steal/build/scripts').then(
 					case "steal":
 						stealPull(p, content, function(func){
 							funcs.push(func)
-						});
+						}, onewrap);
 						break;
 				}
 			}
@@ -145,7 +153,7 @@ steal('steal/parse','steal/build/scripts').then(
 		
 	};
 	//gets a function from steal
-	var stealPull = function(p, content, cb){
+	var stealPull = function(p, content, cb, onewrap){
 		var token = p.next(), startToken, endToken;
 		if (!token || (token.value != "." && token.value != "(")) {
 			// we said steal .. but we don't care
@@ -165,14 +173,14 @@ steal('steal/parse','steal/build/scripts').then(
 			startToken = p.until("{")[0];
 			
 			endToken = p.partner("{");
-			cb(content.substring(token.from, endToken.to))
+			cb(content.substring(onewrap ? startToken.from+1 :token.from, onewrap ? endToken.to-1 : endToken.to))
 			//print("CONTENT\n"+  );
 			p.moveNext();
 		}
 		else {
 		
 		}
-		stealPull(p, content, cb);
+		stealPull(p, content, cb, onewrap);
 		
 	};
 });
