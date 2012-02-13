@@ -640,8 +640,8 @@ test("File.ext", function(){
 		
 		var options = steal.getScriptOptions(script);
 		
-		equals(options.rootUrl, url,"root url is right");
-		equals(options.startFile,"foo","app right");
+		equals(options.rootUrl+'', url+'',"root url is right");
+		equals(options.startFile+'',"foo","app right");
 		
 		script.src = "../steal.js?bar.js";
 
@@ -649,8 +649,8 @@ test("File.ext", function(){
 		
 		url = F(script.src).protocol() ?   F( F(script.src).dir() ).dir()+"/" : "../../";
 		
-		equals(options.rootUrl, url,"root url is right");
-		equals(options.startFile,"bar.js","app right");
+		equals(options.rootUrl+'', url+'',"root url is right");
+		equals(options.startFile+'',"bar.js","app right");
 		
 	})
 
