@@ -161,8 +161,8 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 		//create the dependencies ...
 		var dependencyCalls = [];
 		for (var key in dependencies){
-			dependencyCalls.push( 
-				"steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']})"
+			dependencyCalls.push(
+				"{src: '"+key+"', has: ['"+dependencies[key].join("','")+"']}"
 			)
 		}
 		
@@ -172,12 +172,12 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 		//write it ...
 		var code = ["steal.loading('"+loadingCalls.join("','")+"')"];
 		
-		code.push.apply(code, dependencyCalls);
+		code.push('steal(\n' + dependencyCalls.join(',\n') + '\n).then(function(){\n');
 		
 		files.forEach(function(file){
 			code.push( file.content, "steal.loaded('"+file.rootSrc+"')" );
 		})
-		return code.join(";\n")+"\n"
+		return code.join(";\n")+"})\n"
 	}
 	
 	// removes  dev comments from text

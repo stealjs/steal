@@ -53,6 +53,7 @@ steal('steal/build', function( steal ) {
 				dependencies: {},
 				size: source.length,
 				packaged: false,
+                buildType: steel.options.buildType,
 				source: source
 			}
 		}
@@ -242,6 +243,7 @@ steal('steal/build', function( steal ) {
 					 * } 
 					 */
 					appsPackages = {},
+                    appsCssPackages = {},
 					/*
 					 * Files a package has
 					 * {
@@ -254,6 +256,7 @@ steal('steal/build', function( steal ) {
 				// make an array for each app in appsPackages
 				for(var appName in apps){
 					appsPackages[appName] = [];
+					appsCssPackages[appName] = [];
 				}
 	
 				//while there are files left to be packaged, get the most shared and largest package
@@ -267,14 +270,23 @@ steal('steal/build', function( steal ) {
 					//  If there are multiple apps, it's a package
 						saveFile = pack.apps.length == 1 ? 
 										appsName + "/production.js" : 
-										"packages/" + packageCount + ".js"
+										"packages/" + packageCount + ".js",
+                        saveCssFile = pack.apps.length == 1 ?
+                                appsName + "/production.css" :
+                                "packages/" + packageCount + ".css";
 					
 					// if there's multiple apps (it's a package), add this to appsPackages for each app
 					if( pack.apps.length > 1) {
 						pack.apps.forEach(function(appName){
-							appsPackages[appName].push(saveFile)
+							appsPackages[appName].push(saveFile);
+							appsCssPackages[appName].push(saveCssFile);
 						})
 					}
+                    else {
+                        pack.apps.forEach(function(appName){
+                            appsCssPackages[appName].push(saveCssFile);
+                        })
+                    }
 					
 					// order the files by when they should be included
 					var ordered = pack.files.sort(function( f1, f2 ) {
@@ -283,16 +295,27 @@ steal('steal/build', function( steal ) {
 					
 					// add the files to this package
 					packagesFiles[saveFile] =[];
+                    packagesFiles[saveCssFile] =[];
 					
 					// what we will sent to js.makePackage
-					var filesForPackaging = []; 
+					var filesForPackaging = [];
+                    var cssFilesForPackaging = [];
 					
 					ordered.forEach(function(file){
-						packagesFiles[saveFile].push(file.path);
-						filesForPackaging.push({
-							rootSrc : file.path,
-							content: file.source
-						})
+                        if (file.buildType == "js") {
+						    packagesFiles[saveFile].push(file.path);
+                            filesForPackaging.push({
+                                rootSrc : file.path,
+                                content: file.source
+                            })
+                        }
+                        else if (file.buildType == "css") {
+                            packagesFiles[saveCssFile].push(file.path);
+                            cssFilesForPackaging.push({
+                                rootSrc : file.path,
+                                content: file.source
+                            })
+                        }
 						print("  " + file.order + ":" + file.path);
 					});
 					
@@ -304,14 +327,37 @@ steal('steal/build', function( steal ) {
 						})
 					}
 					
+                    var cssDependencies = {};
+                    if( pack.apps.length == 1) {
+                        appsCssPackages[appsName].forEach(function(packageName){
+                            cssDependencies[packageName] = packagesFiles[packageName].slice(0)
+                        })
+                    }
+
 					//the source of the package
-					var source = steal.build.builders.scripts.makePackage(filesForPackaging, dependencies)
 	
 					
 	
-					//save the file
+					var source = steal.build.builders.scripts.makePackage(filesForPackaging, dependencies);
+					var cssSource = steal.build.builders.styles.makePackage(cssFilesForPackaging, cssDependencies);
+
+                    // generate css loader for required css packages
+                    for (var key in cssDependencies){
+                        if (cssDependencies[key].length >= 1) {
+                            var cssLoader = ["steal({src:'"+key+"',",
+                                             "has: ['"+cssDependencies[key].join("','")+"']}",
+                                             ");\n"];
+                            source = cssLoader.join("") + source;
+                        }
+                    }
+
+
+                    //save the file
 					print("saving " + saveFile);
 					steal.File(saveFile).save( source );
+
+                    print("saving " + saveCssFile);
+                    steal.File(saveCssFile).save( cssSource );
 	
 					
 					packageCount++;
