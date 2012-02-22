@@ -953,7 +953,7 @@
 		has: function() {
 			// we don't use IE's interactive script functionality while
 			// production scripts are loading
-			useInteractive = false;
+			support.interactive = false;
 			each(arguments, function(i, arg) {
 				var stel = Resource.make( arg );
 				stel.loading = stel.executing = true;
@@ -2000,18 +2000,12 @@ var interactiveScript,
 		}
 	},
 	getCachedInteractiveScript = function() {
-		var script;
-		if (interactiveScript && interactiveScript.readyState === "interactive") {
-			return interactiveScript;
-		}
-
-			return null;
-		};
-
 		// check last inserted
 		if(lastInserted && lastInserted.readyState == "interactive"){
 			return lastInserted;
 		}
+		return null;
+	};
 
 
 support.interactive = doc && !!getInteractiveScript();
@@ -2021,6 +2015,12 @@ if (support.interactive) {
 
 	// after steal is called, check which script is "interactive" (for IE)
 	steal.after = after(steal.after, function(){
+		
+		// check if disabled by steal.loading()
+		if (!support.interactive) {
+			return;
+		}
+			
 		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
 		if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
@@ -2050,6 +2050,12 @@ if (support.interactive) {
 		// This is used for packaged scripts.  As the packaged script executes, we grab the
 		// dependencies that have come so far and assign them to the loaded script
 		steal.preloaded = before(steal.preloaded, function(stel){
+
+			// check if disabled by steal.loading()
+			if (!support.interactive) {
+				return;
+			}
+
 			// get the src name
 			var src = stel.options.src,
 				// and the src of the current interactive script
