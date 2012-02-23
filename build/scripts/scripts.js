@@ -155,29 +155,41 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 	scripts.makePackage = function(files, dependencies){
 		var loadingCalls = [];
 		files.forEach(function(file){
+            // Add modules within this package, to tell steal
+            // that we are already loading them.
 			loadingCalls.push(file.rootSrc)
 		});
 		
 		//create the dependencies ...
-		var dependencyCalls = [];
+		var dependencyCalls = [],
+            dependencyLoadingCalls = [];
 		for (var key in dependencies){
-			dependencyCalls.push(
-				"{src: '"+key+"', has: ['"+dependencies[key].join("','")+"']}"
-			)
+            // Add each package that this package needs to load
+            dependencyCalls.push("'"+key+"'");
+            // Add the modules within those packages, so we can tell
+            // steal that we are already loading them.
+            dependencyLoadingCalls.push.apply(dependencyLoadingCalls, dependencies[key]);
 		}
 		
 		// make 'loading'
 		
 		
 		//write it ...
-		var code = ["steal.loading('"+loadingCalls.join("','")+"')"];
-		
-		code.push('steal(\n' + dependencyCalls.join(',\n') + '\n).then(function(){\n');
-		
+		var loadingHeader = ("steal.loading('"+loadingCalls.join("','")+"');\n"
+                             + "steal.loading('"+dependencyLoadingCalls.join("','")+"');\n\n");
+
+        var code = [];
 		files.forEach(function(file){
 			code.push( file.content, "steal.loaded('"+file.rootSrc+"')" );
-		})
-		return code.join(";\n")+"})\n"
+		});
+        code = code.join("\n;\n");
+
+        if (dependencyCalls.length >= 1) {
+            code = ('steal(' + dependencyCalls.join(',') + ').then(function(){\n'
+                    + code
+                    + "\n\n});\n\n");
+        }
+		return loadingHeader + code
 	}
 	
 	// removes  dev comments from text
