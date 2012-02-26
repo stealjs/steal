@@ -1005,7 +1005,7 @@
 		makeOptions : function(options){
 			
 			var ext = File(options.src).ext();
-			if (!ext) {
+			if (!ext && !options.type) {
 				// if first character of path is a . or /, just load this file
 				if (options.src.indexOf(".") == 0 || options.src.indexOf("/") == 0) {
 					options.src = options.src + ".js"
