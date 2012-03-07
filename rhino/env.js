@@ -24815,6 +24815,9 @@ Navigator = function(){
         get platform(){
             return Envjs.platform;
         },
+        get language(){
+            return "en-US";
+        },
         get plugins(){
             return [];
         },
