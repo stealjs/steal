@@ -315,7 +315,7 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 				// if there's an error, go through the lines and find the right location
 				if( /ERROR/.test(options.err) ){
 					if (!currentLineMap) {
-						print(options.error)
+						print(options.err)
 					}
 					else {
 					
