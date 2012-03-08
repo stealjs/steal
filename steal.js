@@ -368,12 +368,15 @@
 	 *  - __ignore__ {*Boolean default=false*} - true if this resource should
 	 *    not be built into a production file and not loaded in
 	 *    production.  This is great for script that should only be available
-	 *    in development mode.
+	 *    in development mode.  This script is loaded during compression, but not 
+	 *    added to the bundled script.
 	 *  
 	 *  - __packaged__ {*Boolean default=true*} - true if the script should be built
 	 *    into the production file. false if the script should not be built
 	 *    into the production file, but still loaded.  This is useful for 
-	 *    loading 'packages'.
+	 *    loading 'packages'.  This script is loaded during compression, but not 
+	 *    added to the bundled script.  The difference with ignore is packaged still 
+	 *    steals this file while production mode, from an external script. 
 	 * 
 	 *  - __type__ {*String default="js"*} - the type of the resource.  This 
 	 *    is typically inferred from the src.
@@ -868,6 +871,13 @@
 			}
 			this.loading = true;
 			var self = this;
+			
+			// used for the canjs build because env.js barfs on mootools/dojo/yui
+			if(this.options._skip){
+				self.loaded();
+				return;
+			}
+			
 			// get yourself
 			steal.require(this.options, function load_calling_loaded(script){
 				self.loaded(script);
@@ -1021,7 +1031,7 @@
 				// this is done relative to jmvcroot
 				normalized = steal.File(orig).normalize(),
 				protocol = steal.File(options.src).protocol();
-				
+			
 			extend(options,{
 				originalSrc : options.src,
 				rootSrc : normalized,
@@ -1285,199 +1295,205 @@
 	};
 
 
-// =============================== TYPES ===============================
-
-// a clean up script that prevents memory leaks and removes the
-// script
-var cleanUp = function(script) {
-		script[ STR_ONREADYSTATECHANGE ]
-			= script[ STR_ONLOAD ]
-			= script[STR_ONERROR]
-			= null;
-			
-		head().removeChild( script );
-	},
-	// the last inserted script, needed for IE
-	lastInserted,
-	// if the state is done
-	stateCheck = /loaded|complete/;
-steal.type("js", function(options, success, error){
-	// create a script tag
-	var script = scriptTag(), 
-		deps;
-	// if we have text, just set and insert text
-	if (options.text) {
-		// insert
-		script.text = options.text;
-		
-	}
-	else {
-		
-		var callback = function(evt){
-			if (!script.readyState || stateCheck.test(script.readyState)) {
-				cleanUp(script);
-				success(script);
-			}
-		}
-		// listen to loaded
-		if (support.attachEvent) {
-			script.attachEvent(STR_ONREADYSTATECHANGE, callback)
-		} else {
-			script[STR_ONLOAD] = callback;
-		}
-		
-		// error handling doesn't work on firefox on the filesystem
-		if (support.error && error && options.protocol !== "file:") {
-			if(support.attachEvent){
-				script.attachEvent(STR_ONERROR, error);
-			} else {
-				script[ STR_ONERROR ] = error;
-			}
-		}
-		script.src = options.src;
-		script.onSuccess = success;
-	}
-		
-	// insert the script
-	lastInserted = script;
-	head().insertBefore(script, head().firstChild);
-
-	// if text, just call success right away, and clean up
-	if (options.text) {
-		success();
-		cleanUp(script);
-	}
-});
-
-steal.type("fn", function(options, success, error){
-	success(options.fn());
-});
-steal.type("text", function(options, success, error){
-	steal.request(options, function(text){
-		options.text = text;
-		success(text);
-	}, error)
-});
-
-var cssCount = 0,
-	createSheet = doc && doc.createStyleSheet,
-	lastSheet,
-	lastSheetOptions;
-
-steal.type("css", function css_type(options, success, error){
-	if(options.text){ // less
-		var css  = doc[STR_CREATE_ELEMENT]('style');
-		css.type = 'text/css';
-		if (css.styleSheet) { // IE
-			css.styleSheet.cssText = options.text;
-		} else {
-			(function (node) {
-				if (css.childNodes.length > 0) {
-					if (css.firstChild.nodeValue !== node.nodeValue) {
-						css.replaceChild(node, css.firstChild);
-					}
-				} else {
-					css.appendChild(node);
-				}
-			})(doc.createTextNode(options.text));
-		}
-		head().appendChild(css);
-	} else {
-		if( createSheet ){
-			// IE has a 31 sheet and 31 import per sheet limit
-			if(cssCount == 0){
-				lastSheet = document.createStyleSheet(options.src);
-				lastSheetOptions = options;
-				cssCount++;
-			} else {
-				var relative = File(options.src).joinFrom(
-					File(lastSheetOptions.src).dir());
-					
-				lastSheet.addImport( relative );
-				cssCount++;
-				if(cssCount == 30){
-					cssCount = 0;
-				}
-			}
-			success()
-			return;
-		}
-
-		
-		options = options || {};
-		var link = doc[STR_CREATE_ELEMENT]('link');
-		link.rel = options.rel || "stylesheet";
-		link.href = options.src;
-		link.type = 'text/css';
-		head().appendChild(link);
-	}
+	// =============================== TYPES ===============================
 	
-	success();
-});
-
-// Overwrite
-if(opts.types){
-	for(var type in opts.types){
-		steal.type(type, opts.types[type]);
-	}
-}
-
-
-// =============================== HELPERS ===============================
-var factory = function() {
-	return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
-};
-
-
-steal.
-/**
- * Performs an XHR request
- * @param {Object} options
- * @param {Function} success
- * @param {Function} error
- */
-request = function(options, success, error){
-	var request = new factory(),
-		contentType = (options.contentType || "application/x-www-form-urlencoded; charset=utf-8"),
-		clean = function(){
-			request = check = clean = null;
+	// a clean up script that prevents memory leaks and removes the
+	// script
+	
+	var cleanUp = function(script) {
+			script[ STR_ONREADYSTATECHANGE ]
+				= script[ STR_ONLOAD ]
+				= script[STR_ONERROR]
+				= null;
+				
+			head().removeChild( script );
 		},
-		check = function(){
-			if ( request.readyState === 4 )  {
-				if ( request.status === 500 || request.status === 404 || 
-					 request.status === 2 || request.status < 0 || 
-					 (request.status === 0 && request.responseText === '') ) {
-					error && error(request.status);
-					clean();
-				} else {
-					success(request.responseText);
-					clean();
-				}
-				return;
-			} 
-		};
+		// the last inserted script, needed for IE
+		lastInserted,
+		// if the state is done
+		stateCheck = /loaded|complete/;
 		
-	request.open("GET", options.src, options.async === false ? false : true);
-	request.setRequestHeader('Content-type', contentType);
-	if ( request.overrideMimeType ) {
-		request.overrideMimeType(contentType);
-	}
+	steal.type("js", function(options, success, error){
+		// create a script tag
+		var script = scriptTag(), 
+			deps;
+		// if we have text, just set and insert text
+		if (options.text) {
+			// insert
+			script.text = options.text;
+			
+		}
+		else {
+			
+			var callback = function(evt){
+				if (!script.readyState || stateCheck.test(script.readyState)) {
+					cleanUp(script);
+					success(script);
+				}
+			}
+			// listen to loaded
+			if (support.attachEvent) {
+				script.attachEvent(STR_ONREADYSTATECHANGE, callback)
+			} else {
+				script[STR_ONLOAD] = callback;
+			}
+			
+			// error handling doesn't work on firefox on the filesystem
+			if (support.error && error && options.protocol !== "file:") {
+				if(support.attachEvent){
+					script.attachEvent(STR_ONERROR, error);
+				} else {
+					script[ STR_ONERROR ] = error;
+				}
+			}
+			script.src = options.src;
+			script.onSuccess = success;
+		}
+			
+		// insert the script
+		lastInserted = script;
+		head().insertBefore(script, head().firstChild);
 	
-	request.onreadystatechange = function(){
-	  check();                                                               
-	}
-	try {
-		request.send(null);
-	}
-	catch (e) {
-		if (clean) {
-			console.error(e);
-			error && error();
-			clean();
+		// if text, just call success right away, and clean up
+		if (options.text) {
+			success();
+			cleanUp(script);
+		}
+	});
+	
+	steal.type("fn", function(options, success, error){
+		var ret;
+		if(!steal.options.skipCallbacks){
+			ret = options.fn();
+		}
+		success(ret);
+	});
+	steal.type("text", function(options, success, error){
+		steal.request(options, function(text){
+			options.text = text;
+			success(text);
+		}, error)
+	});
+	
+	var cssCount = 0,
+		createSheet = doc && doc.createStyleSheet,
+		lastSheet,
+		lastSheetOptions;
+	
+	steal.type("css", function css_type(options, success, error){
+		if(options.text){ // less
+			var css  = doc[STR_CREATE_ELEMENT]('style');
+			css.type = 'text/css';
+			if (css.styleSheet) { // IE
+				css.styleSheet.cssText = options.text;
+			} else {
+				(function (node) {
+					if (css.childNodes.length > 0) {
+						if (css.firstChild.nodeValue !== node.nodeValue) {
+							css.replaceChild(node, css.firstChild);
+						}
+					} else {
+						css.appendChild(node);
+					}
+				})(doc.createTextNode(options.text));
+			}
+			head().appendChild(css);
+		} else {
+			if( createSheet ){
+				// IE has a 31 sheet and 31 import per sheet limit
+				if(cssCount == 0){
+					lastSheet = document.createStyleSheet(options.src);
+					lastSheetOptions = options;
+					cssCount++;
+				} else {
+					var relative = File(options.src).joinFrom(
+						File(lastSheetOptions.src).dir());
+						
+					lastSheet.addImport( relative );
+					cssCount++;
+					if(cssCount == 30){
+						cssCount = 0;
+					}
+				}
+				success()
+				return;
+			}
+	
+			
+			options = options || {};
+			var link = doc[STR_CREATE_ELEMENT]('link');
+			link.rel = options.rel || "stylesheet";
+			link.href = options.src;
+			link.type = 'text/css';
+			head().appendChild(link);
+		}
+		
+		success();
+	});
+	
+	// Overwrite
+	if(opts.types){
+		for(var type in opts.types){
+			steal.type(type, opts.types[type]);
 		}
 	}
-			 
-};
+	
+	
+	// =============================== HELPERS ===============================
+	var factory = function() {
+		return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+	};
+	
+	
+	steal.
+	/**
+	 * Performs an XHR request
+	 * @param {Object} options
+	 * @param {Function} success
+	 * @param {Function} error
+	 */
+	request = function(options, success, error){
+		var request = new factory(),
+			contentType = (options.contentType || "application/x-www-form-urlencoded; charset=utf-8"),
+			clean = function(){
+				request = check = clean = null;
+			},
+			check = function(){
+				if ( request.readyState === 4 )  {
+					if ( request.status === 500 || request.status === 404 || 
+						 request.status === 2 || request.status < 0 || 
+						 (request.status === 0 && request.responseText === '') ) {
+						error && error(request.status);
+						clean();
+					} else {
+						success(request.responseText);
+						clean();
+					}
+					return;
+				} 
+			};
+			
+		request.open("GET", options.src, options.async === false ? false : true);
+		request.setRequestHeader('Content-type', contentType);
+		if ( request.overrideMimeType ) {
+			request.overrideMimeType(contentType);
+		}
+		
+		request.onreadystatechange = function(){
+		  check();                                                               
+		}
+		try {
+			request.send(null);
+		}
+		catch (e) {
+			if (clean) {
+				console.error(e);
+				error && error();
+				clean();
+			}
+		}
+				 
+	};
 
 
 
@@ -1878,76 +1894,76 @@ request = function(options, success, error){
 	// dependencies of another, steal needs to check which is the currently "interactive" script.
 	
 
-var interactiveScript, 
-	// key is script name, value is array of pending items
-	interactives = {},
-	getInteractiveScript = function(){
-		var i, script,
-		  scripts = doc[STR_GET_BY_TAG]('script');
-		for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
-			if (script.readyState === 'interactive') {
+	var interactiveScript, 
+		// key is script name, value is array of pending items
+		interactives = {},
+		getInteractiveScript = function(){
+			var i, script,
+			  scripts = doc[STR_GET_BY_TAG]('script');
+			for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
+				if (script.readyState === 'interactive') {
+					return script;
+				}
+			}
+		},
+		getCachedInteractiveScript = function() {
+			var scripts, i, script;
+			if (interactiveScript && interactiveScript.readyState === 'interactive') {
+				return interactiveScript;
+			}
+			
+			if(script = getInteractiveScript()){
+				interactiveScript = script;
 				return script;
 			}
-		}
-	},
-	getCachedInteractiveScript = function() {
-		var scripts, i, script;
-		if (interactiveScript && interactiveScript.readyState === 'interactive') {
-			return interactiveScript;
-		}
+			
+			// check last inserted
+			if(lastInserted && lastInserted.readyState == 'interactive'){
+				return lastInserted;
+			}
 		
-		if(script = getInteractiveScript()){
-			interactiveScript = script;
-			return script;
-		}
+			return null;
+		};
 		
-		// check last inserted
-		if(lastInserted && lastInserted.readyState == 'interactive'){
-			return lastInserted;
-		}
+	support.interactive = doc && !!getInteractiveScript();
 	
-		return null;
-	};
 	
-support.interactive = doc && !!getInteractiveScript();
-
-
-if (support.interactive) {
-
-	// after steal is called, check which script is "interactive" (for IE)
-	steal.after = after(steal.after, function(){
-		var interactive = getCachedInteractiveScript();
-		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-		if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
-			return;
-		}
-		// get the source of the script
-		var src = interactive.src;
-		// create an array to hold all steal calls for this script
-		if (!interactives[src]) {
-			interactives[src] = []
-		}
-		// add to the list of steals for this script tag
-		if (src) {
-			interactives[src].push.apply(interactives[src], pending);
-			pending = [];
-		}
-	})
+	if (support.interactive) {
 	
-	// This is used for packaged scripts.  As the packaged script executes, we grab the 
-	// dependencies that have come so far and assign them to the loaded script
-	steal.preloaded = before(steal.preloaded, function(stel){
-		// get the src name
-		var src = stel.options.src,
-			// and the src of the current interactive script
-			interactiveSrc = getCachedInteractiveScript().src;
+		// after steal is called, check which script is "interactive" (for IE)
+		steal.after = after(steal.after, function(){
+			var interactive = getCachedInteractiveScript();
+			// if no interactive script, this is a steal coming from inside a steal, let complete handle it
+			if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
+				return;
+			}
+			// get the source of the script
+			var src = interactive.src;
+			// create an array to hold all steal calls for this script
+			if (!interactives[src]) {
+				interactives[src] = []
+			}
+			// add to the list of steals for this script tag
+			if (src) {
+				interactives[src].push.apply(interactives[src], pending);
+				pending = [];
+			}
+		})
 		
+		// This is used for packaged scripts.  As the packaged script executes, we grab the 
+		// dependencies that have come so far and assign them to the loaded script
+		steal.preloaded = before(steal.preloaded, function(stel){
+			// get the src name
+			var src = stel.options.src,
+				// and the src of the current interactive script
+				interactiveSrc = getCachedInteractiveScript().src;
+			
+			
+			interactives[src] = interactives[interactiveSrc];
+			interactives[interactiveSrc] = null;
+		});
 		
-		interactives[src] = interactives[interactiveSrc];
-		interactives[interactiveSrc] = null;
-	});
-	
-}
+	}
 	
 	// ===========  OPTIONS ==========
 	
