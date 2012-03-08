@@ -195,7 +195,7 @@
 					}
 					if ( newMe.isDirectory() ) {
 						newYou.mkdir();
-						new steal.File(newMe.path).copyTo(newYou.path, ignore)
+						(new steal.File( "" + newMe.path )).copyTo("" + newYou.path, ignore)
 					} else {
 						copy(newMe, newYou)
 					}
