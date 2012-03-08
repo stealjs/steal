@@ -27,6 +27,7 @@ steal('steal/parse','steal/build/scripts').then(
 	 *   - nojquery - exclude jquery
 	 *   - global - what the callback to steal functions should be.  Defaults to jQuery as $.
 	 *   - compress - compress the file
+	 *   - skipCallbacks - don't run any of the code in steal callbacks (used for canjs build)
 	 */
 	s.build.pluginify = function(plugin, opts){
 		s.print("" + plugin + " >");
@@ -38,7 +39,8 @@ steal('steal/parse','steal/build/scripts').then(
 				"nojquery": 0,
 				"global": 0,
 				"compress": 0,
-				"onefunc" : 0
+				"onefunc" : 0,
+				"skipCallbacks" : 0
 			}), 
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 		
@@ -62,9 +64,10 @@ steal('steal/parse','steal/build/scripts').then(
 		var out = [], 
 			str, 
 			i, 
-			inExclude = function(path){
+			inExclude = function(stl){
+				var path = stl.rootSrc;
 				for (var i = 0; i < opts.exclude.length; i++) {
-					if (path.indexOf(opts.exclude[i]) > -1) {
+					if (path.indexOf(opts.exclude[i]) > -1 || stl._skip) {
 						return true;
 					}
 				}
@@ -73,10 +76,10 @@ steal('steal/parse','steal/build/scripts').then(
 			pageSteal, 
 			steals = [];
 			
-		steal.build.open("steal/rhino/empty.html", {startFile : plugin}, function(opener){
+		steal.build.open("steal/rhino/empty.html", {startFile : plugin, skipCallbacks: opts.skipCallbacks}, function(opener){
 			opener.each('js', function(stl, text, i){
 				//print("p  "+stl.rootSrc)
-				if (!inExclude(stl.rootSrc)) {
+				if (!inExclude(stl)) {
 				
 					var content = s.build.pluginify.content(stl, opts, text);
 					if (content) {
@@ -92,7 +95,7 @@ steal('steal/parse','steal/build/scripts').then(
 		
 		var output = out.join(";\n");
 		if(opts.onefunc){
-			output = "(function(Can){"+ output+ "})("+opts.global+")";
+			output = "(function(can){"+ output+ "})("+opts.global+")";
 		}
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
