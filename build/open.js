@@ -167,6 +167,9 @@ steal(function(s){
 					window.jQuery && jQuery.readyWait++;
 				},
 				"steal.js": function(script){
+					// a flag to tell steal we're in "build" mode
+					// this is used to completely ignore files with the "ignore" flag set
+					window.steal.isBuilding = true;
 					// if there's timers (like in less) we'll never reach next line 
 					// unless we bind to done here and kill timers
 					window.steal.one('done', doneCb);
@@ -185,6 +188,10 @@ steal(function(s){
 	
 	
 	var loadScriptText = function( options ) {
+		if(options._skip){ // if we skip this script, we don't care about its contents
+			return "";
+		}
+		
 		if(options.text){
 			return options.text;
 		}
