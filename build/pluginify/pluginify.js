@@ -95,7 +95,7 @@ steal('steal/parse','steal/build/scripts').then(
 		
 		var output = out.join(";\n");
 		if(opts.onefunc){
-			output = "(function(can){"+ output+ "})("+opts.global+")";
+			output = "(function(can, window, undefined){"+ output+ "})("+opts.global+", this )";
 		}
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
