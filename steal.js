@@ -873,7 +873,7 @@
 			var self = this;
 			
 			// used for the canjs build because env.js barfs on mootools/dojo/yui
-			if(this.options._skip){
+			if(steal.isBuilding && this.options._skip){
 				self.loaded();
 				return;
 			}
