@@ -882,13 +882,26 @@
 			steal.require(this.options, function load_calling_loaded(script){
 				self.loaded(script);
 			}, function(error, src){
+				var abortFlag = self.options.abort,
+					errorCb = self.options.error;
+
+				// if an error callback was provided, fire it
+				if(errorCb){
+					errorCb.call(self.options);
+				}
+
 				win.clearTimeout && win.clearTimeout(self.completeTimeout)
+
+				// if abort: false, register the script as loaded, and don't throw
+				if(abortFlag === false){
+					self.loaded();
+					return;
+				}
 				throw "steal.js : "+self.options.src+" not completed"
 			});
-			
 		}
-
 	};
+
 	steal.p.init.prototype = steal.p;
 	/**
 	 * @add steal

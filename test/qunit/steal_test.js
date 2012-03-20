@@ -687,4 +687,26 @@ test("ready", function(){
 	
 });
 
+test("error callback", function(){
+	stop();
+	expect(1);
+
+	steal({src: "./does_not_exist.js",
+			abort: false,
+			error: function(){
+				ok(true, "executed error callback");
+				start();
+			}});
+});
+
+test("don't abort on error", function(){
+	stop();
+	expect(1);
+
+	steal({src: "./does_not_exist.js", abort: false}, function(){
+		ok(true, "still executed callback");
+		start();
+	});
+});
+
 })
