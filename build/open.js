@@ -9,27 +9,36 @@ steal(function(s){
 		// stl - a steal
 		// CB - a callback for each steal
 		// depth - true if it should be depth first search, defaults to breadth
-		iterate = function(stl, CB, depth){
+		// includeFns - true if it should include functions in the iterator
+		iterate = function(stl, CB, depth, includeFns){
 			// load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 
 
 			// this goes through the scripts until it finds one that waits for 
 			// everything before it to complete
+			// console.log('OPEN', name(stl), stl.id, "depends on", depends.length)
+			if(includeFns){
+				if(!depends.length){
+					touch([stl], CB)
+				}
+			}
 			while(i < depends.length){
-				
 				if(depends[i].waits){
 					// once we found something like this ...
-					
-					var steals = depends.splice(0,i);
+					if(includeFns){
+						var steals = depends.splice(0,i+1),
+							curStl = steals[steals.length-1];
+					} else {
+						var steals = depends.splice(0,i),
+							curStl = depends.shift();
+					}
 					
 					// load all these steals, and their dependencies
-					loadset(steals, CB, depth);
-					
-					// does it need to load the depend itself?
+					loadset(steals, CB, depth, includeFns);
 					
 					// load any dependencies 
-					loadset(depends.shift().dependencies, CB)
+					loadset(curStl.dependencies, CB, null, includeFns);
 					i=0;
 				}else{
 					i++;
@@ -38,39 +47,40 @@ steal(function(s){
 			
 			// if there's a remainder, load them
 			if(depends.length){
-				loadset(depends, CB, depth);
+				loadset(depends, CB, depth, includeFns);
 			}
 		  
 		},
 		// loads each steal 'in parallel', then 
 		// loads their dependencies one after another
-		loadset = function(steals, CB, depth){
+		loadset = function(steals, CB, depth, includeFns){
 			// doing depth first
 			if(depth){
 				// do dependencies first
-				eachSteal(steals, CB, depth)
+				eachSteal(steals, CB, depth, includeFns)
 				
 				// then mark
 				touch(steals, CB);
 			} else {
 				touch(steals, CB);
-				eachSteal(steals, CB, depth)
+				eachSteal(steals, CB, depth, includeFns)
 			}
 		},
 		touch = function(steals, CB){
 			for(var i =0; i < steals.length; i++){
-				// print("  Touching "+steals[i].options.rootSrc)
-				if(!touched[steals[i].options.rootSrc]){
-					
+				var uniqueId = steals[i].id;
+				// print("  Touching "+uniqueId, name(steals[i]))
+				if(!touched[uniqueId]){
 					CB( steals[i] );
-					touched[steals[i].options.rootSrc] = true;
+					touched[uniqueId] = true;
 				}
 				
 			}
 		},
-		eachSteal = function(steals, CB, depth){
+		eachSteal = function(steals, CB, depth, includeFns){
 			for(var i =0; i < steals.length; i++){
-				iterate(steals[i], CB, depth)
+				// print("  eachsteal ",name(steals[i]))
+				iterate(steals[i], CB, depth, includeFns)
 			}
 		},
 		window = (function() {
@@ -87,11 +97,12 @@ steal(function(s){
 	 *   opening the page with Envjs
 	 *   setting back rhino steal, saving envjs's steal as steal._steal;
 	 * @param {String} url the html page to open
+	 * @param {String} url the html page to open
 	 * @return {Object} an object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 * 
 	 */ 
-	steal.build.open = function( url, stealData, cb, depth ) {
+	steal.build.open = function( url, stealData, cb, depth, includeFns ) {
 		
 		
 		var // save and remove the old steal
@@ -140,11 +151,10 @@ steal(function(s){
 					}
 					
 					iterate(init, function(stealer){
-						
 						if(filter(stealer)){
 							func(stealer.options, stealer.options.text || loadScriptText(stealer.options), stealer )
 						}
-					}, depth );
+					}, depth, includeFns );
 				},
 				// the 
 				steal: newSteal,
@@ -188,6 +198,9 @@ steal(function(s){
 	
 	
 	var loadScriptText = function( options ) {
+		if(options.fn){
+			return options.orig.toString();
+		}
 		if(options._skip){ // if we skip this script, we don't care about its contents
 			return "";
 		}

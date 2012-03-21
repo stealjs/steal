@@ -712,7 +712,7 @@
 				this.options = steal.makeOptions(extend({},
 					typeof options == 'string' ? { src: options } : options));
 
-				this.waits = this.options.waits || false;
+				this.waits = this.orig.waits || false;
 				this.unique = true;
 			}
 		},
@@ -1063,8 +1063,24 @@
 		 * files passed to the arguments.
 		 */
 		then : function(){
-			var args = typeof arguments[0] == 'function' ? 
-				arguments : [function(){}].concat(makeArray( arguments ) )
+			var args;
+			// if its a fn, it already waits
+			if(typeof arguments[0] == 'function'){
+				args = arguments;
+			}
+			else {
+				// otherwise, if its a string, convert it to an object
+				args = makeArray( arguments );
+				// args = [function(){}].concat(makeArray( arguments ) )
+				if(typeof args[0] == 'string'){
+					args[0] = {
+						src: args[0]
+					};
+				}
+				// make the first one wait
+				args[0].waits = true;
+			}
+			
 			return steal.apply(win, args );
 		},
 		/**
@@ -1791,8 +1807,8 @@
 	}
 	
 	// =========== DEBUG =========
-	
-	/*var name = function(stel){
+	/*
+	var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
 			return stel.options.orig.toString().substr(0,50)
 		}
