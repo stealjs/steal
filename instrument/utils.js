@@ -39,7 +39,11 @@ steal.instrument.utils = {
 			ignore;
 		for(var i=0; i<steal.instrument.ignores.length; i++){
 			ignore = steal.instrument.ignores[i];
-			ignore = ignore.replace("*", ".*")
+			// if a string ends in .js and doesn't have a /, assume its a file name and add the asterisk
+			if(/\.js$/.test(ignore) && !/\//.test(ignore) && !/\*/.test(ignore)){
+				ignore = "*"+ignore;
+			}
+			ignore = ignore.replace("*", ".*");
 			ignoreRegex = new RegExp("^"+ignore);
 			if(ignoreRegex.test(file)){
 				return true;
