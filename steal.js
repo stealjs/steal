@@ -2110,8 +2110,8 @@
 			}
 			// either instrument is in this page (if we're the window opened from steal.browser), or its opener has it
 			try {
-				if ( options.instrument || (!options.browser && win.top && win.top.opener && 
-						win.top.opener.steal && win.top.opener.steal.options.instrument) ) {
+				if ((win.top && win.top.opener && win.top.opener.steal && win.top.opener.steal.instrument) || 
+					(win.top && win.top.steal && win.top.steal.instrument) ) {
 					// force startFiles to load before instrument
 					steals.push(function(){}, {
 						src: "steal/instrument",

@@ -11,22 +11,26 @@
  * 
  * ## Usage
  * 
- * To turn on instrumentation, simply load a page with the steal option instrument set to true.  One way 
- * to do this is to open any page with steal[instrument]=true in the URL, like 
- * http://localhost/mypage.html?steal[instrument]=true.
+ * To turn on instrumentation, steal this plugin and set the files you want to ignore, then resume 
+ * stealing files, which will be instrumented:
+ * 
+ *     steal("steal/instrument", function(){ 
+ *     	  steal.instrument.ignores = ["steal", "myignores"] 
+ *     })
+ *     .then("./some_file.js")
  * 
  * ## Ignoring files
  * 
- * If you want to tell steal.instrument to ignore certain directories, files, or file patterns, add a 
- * list of patterns to the steal instrument param value.  This param accepts an array of strings which are used to ignore files.  For 
- * example: http://localhost/mypage.html?steal[instrument]=jquery,*_test.js.
+ * If you want to tell steal.instrument to ignore certain directories, files, or file patterns, set 
+ * steal.instrument.ignores, an array of strings which are used to ignore files.  For 
+ * example:
+ * 
+ *     steal.instrument.ignores = ["jquery","*_test.js."]
  * 
  * The * is a wildcard character.  The above example would ignore any files in the jquery directory, along with 
  * any file ending in _test.js.  Ignored files are stolen normally, without any instrumentation.
  * 
- * To ignore all JMVC and test directories, pass !jmvc steal[instrument]=!jmvc, which ignores "jquery","funcunit","steal","documentjs","*\/test","*_test.js", "mxui"
- * 
- * To ignore nothing, pass true, like http://localhost/mypage.html?steal[instrument]=true
+ * To ignore all JMVC and test directories, use !jmvc, which ignores "jquery","funcunit","steal","documentjs","*\/test","*_test.js", "mxui"
  * 
  * ## How it works
  * 
@@ -99,7 +103,8 @@ var utils = steal.instrument.utils,
 extend(steal.instrument, {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
-	ignores: steal.options.instrument || utils.parentWin().steal.instrument.ignores || [],
+	// to define which files are ignored, steal("steal/instrument", function(){ steal.instrument.ignores = ["steal", "myignores"] })
+	ignores: utils.parentWin().steal.instrument.ignores || ["steal/instrument"],
 	/**
 	 * Calculates block and line coverage information about each file and the entire collection.  Call this 
 	 * when you are ready to display a coverage report, like:
