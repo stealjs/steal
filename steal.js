@@ -1069,16 +1069,19 @@
 				args = arguments;
 			}
 			else {
-				// otherwise, if its a string, convert it to an object
-				args = makeArray( arguments );
-				// args = [function(){}].concat(makeArray( arguments ) )
-				if(typeof args[0] == 'string'){
-					args[0] = {
-						src: args[0]
-					};
-				}
-				// make the first one wait
-				args[0].waits = true;
+				// TODO get this working, not sure why but its causing some out of order loading
+				// // otherwise, if its a string, convert it to an object
+				// args = makeArray( arguments );
+				// if(typeof args[0] == 'string'){
+					// args[0] = {
+						// src: args[0]
+					// };
+				// }
+				// // make the first one wait
+				// args[0].waits = true;
+				
+				
+				args = [function(){}].concat(makeArray( arguments ) )
 			}
 			
 			return steal.apply(win, args );
