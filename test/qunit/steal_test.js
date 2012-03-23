@@ -687,24 +687,42 @@ test("ready", function(){
 	
 });
 
-test("error callback", function(){
-	stop();
-	expect(1);
+// the tests below disable the global qunit error handler, otherwise
+// they would cause failed assertions
 
-	steal({src: "./does_not_exist.js",
-			abort: false,
-			error: function(){
-				ok(true, "executed error callback");
-				start();
-			}});
+var oldOnError;
+
+module("steal errors", {
+	setup: function(){
+		oldOnError = window.onerror;
+		window.onerror = function(){};
+	},
+	teardown: function(){
+		window.onerror = oldOnError;
+	}
 });
 
 test("don't abort on error", function(){
 	stop();
 	expect(1);
 
-	steal({src: "./does_not_exist.js", abort: false}, function(){
-		ok(true, "still executed callback");
+	steal({src: "./does_not_exist1.js", abort: false}, function(){
+		ok(true, "executed steal fn");
+		start();
+	});
+});
+
+test("runs error callback", function(){
+	stop();
+	expect(2);
+
+	steal({src: "./does_not_exist2.js",
+		abort: false,
+		error: function(){
+			ok(true, "executed error callback");
+		}
+	}, function(){
+		ok(true, "executed steal fn");
 		start();
 	});
 });
