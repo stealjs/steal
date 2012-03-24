@@ -27,6 +27,7 @@ steal('steal/parse','steal/build/scripts').then(
 	 *   - nojquery - exclude jquery
 	 *   - global - what the callback to steal functions should be.  Defaults to jQuery as $.
 	 *   - compress - compress the file
+	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
 	 *   - skipCallbacks - don't run any of the code in steal callbacks (used for canjs build)
 	 */
 	s.build.pluginify = function(plugin, opts){
@@ -40,6 +41,7 @@ steal('steal/parse','steal/build/scripts').then(
 				"global": 0,
 				"compress": 0,
 				"onefunc" : 0,
+				"wrapInner": 0,
 				"skipCallbacks" : 0
 			}), 
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
@@ -102,6 +104,9 @@ steal('steal/parse','steal/build/scripts').then(
 		}, true, true);
 		
 		var output = out.join(";\n");
+		if(opts.wrapInner && opts.wrapInner.length === 2){
+			output = opts.wrapInner[0] + output + opts.wrapInner[1];
+		}
 		if(opts.onefunc){
 			output = "(function(can, window, undefined){"+ output+ "})("+opts.global+", this )";
 		}
