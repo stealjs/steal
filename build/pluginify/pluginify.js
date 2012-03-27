@@ -40,10 +40,11 @@ steal('steal/parse','steal/build/scripts').then(
 				"nojquery": 0,
 				"global": 0,
 				"compress": 0,
-				"onefunc" : 0,
+				"onefunc": 0,
 				"wrapInner": 0,
-				"skipCallbacks" : 0
-			}), 
+				"skipCallbacks": 0,
+				"standAlone": 0
+			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 		
 		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
@@ -89,7 +90,8 @@ steal('steal/parse','steal/build/scripts').then(
 					return;
 				}
 				// print(stl.rootSrc, stl.buildType);
-				if (!inExclude(stl)) {
+				if ((opts.standAlone && stl.rootSrc === plugin)
+					|| (!opts.standAlone && !inExclude(stl))) {
 				
 					var content = s.build.pluginify.content(stl, opts, text);
 					if (content) {
