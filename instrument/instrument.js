@@ -99,7 +99,7 @@ var utils = steal.instrument.utils,
 extend(steal.instrument, {
 	// keep track of all current instrumentation data (also stored in localStorage)
 	files: {},
-	ignores: steal.options.instrument || utils.parentWin().steal.options.instrument || [],
+	ignores: steal.options.instrument || utils.parentWin().steal.instrument.ignores || [],
 	/**
 	 * Calculates block and line coverage information about each file and the entire collection.  Call this 
 	 * when you are ready to display a coverage report, like:
@@ -126,18 +126,26 @@ extend(steal.instrument, {
 		var totalLines = 0,
 			totalLinesHit = 0,
 			totalBlocks = 0,
-			totalBlocksHit = 0,
-			totalLineCoverage,
-			totalBlockCoverage;
+			totalBlocksHit = 0;
 		for(var fileName in stats.files){
 			totalLines += stats.files[fileName].lines;
 			totalBlocks += stats.files[fileName].blocks;
 			totalLinesHit += stats.files[fileName].lines*stats.files[fileName].lineCoverage;
 			totalBlocksHit += stats.files[fileName].blocks*stats.files[fileName].blockCoverage;
 		}
+		var totalLineCoverage = 0,
+			totalBlockCoverage = 0;
+			
+		if(totalLines){
+			totalLineCoverage = totalLinesHit/totalLines;
+		}
+		if(totalBlocks){
+			totalBlockCoverage = totalBlocksHit/totalBlocks;
+		}
+		
 		var total = {
-			lineCoverage: totalLinesHit/totalLines,
-			blockCoverage: totalBlocksHit/totalBlocks,
+			lineCoverage: totalLineCoverage,
+			blockCoverage: totalBlockCoverage,
 			lines: totalLines,
 			blocks: totalBlocks
 		}
@@ -256,7 +264,8 @@ extend(steal.instrument, {
 	},
 	jsConvert: function(options, success, error){
 		var files = utils.parentWin().steal.instrument.files,
-			fileName = options.rootSrc,
+			file = options.rootSrc,
+			fileName = file.path,
 			instrumentation = files[fileName],
 			processInstrumentation = function(instrumentation){
 				var code = instrumentation.instrumentedCode;
@@ -265,19 +274,16 @@ extend(steal.instrument, {
 				utils.globalEval(code);
 				success();
 			}
-		if(utils.shouldIgnore(fileName) ||  
-			options.type != "js" || 
-			// if both are file: URLs its fine, otherwise make sure its the same domain
-			(!(location.protocol == "file:" && steal.File(options.originalSrc).protocol() == "file:") &&
-				location.host !== steal.File(options.originalSrc).domain())){
+		
+		if(utils.shouldIgnore(fileName) || file.ext() != "js"){
 			return origJSConverter.apply(this, arguments);
-		}	
+		}
+		
 		if(instrumentation){
 			processInstrumentation(instrumentation)
 			return;
 		}
-		
-		
+
 		steal.request(options, function(text){
 			// check cache first
 			var fileHash = utils.hashCode(text),
@@ -318,7 +324,7 @@ if(typeof steal.instrument.ignores === "string"){
 for(var i=0; i<steal.instrument.ignores.length; i++){
 	if(steal.instrument.ignores[i] === "!jmvc"){
 		// remove it and add jmvc files
-		steal.instrument.ignores.splice(i, 1, "jquery","funcunit","steal","documentjs","*/test","*_test.js", "mxui");
+		steal.instrument.ignores.splice(i, 1, "jquery","funcunit","steal","documentjs","*/test","*_test.js", "*funcunit.js", "mxui");
 		
 	}
 }
