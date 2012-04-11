@@ -304,9 +304,9 @@
 	 * production builds, add the following around
 	 * the code blocks.
 	 *
-	 *     //@steal-remove-start
+	 *     //!steal-remove-start
 	 *         code to be removed at build
-	 *     //@steal-remove-end
+	 *     //!steal-remove-end
 	 * 
 	 * ### Lookup Paths
 	 * 
@@ -961,7 +961,7 @@
 							URI.cur = uri;
 							
 							// call the function, someday soon this will be requireJS-like
-							return options(steal.send || win.jQuery || steal); 
+							return options(steal.send || win.jQuery || win.Zepto || steal); 
 						},
 						rootSrc: uri,
 						orig: options,
@@ -1235,7 +1235,7 @@
 				stealInstances.push(stel);
 				each(stel.options.needs || [], function( i, raw ) {
 					//TODO: Justin take a look at this ... this is a bad fix!!
-					stealInstances.push( stealProto.make(raw), stealProto.make(function(){}) ) ;
+					stealInstances.push( stealProto.make(function(){}), stealProto.make(raw) ) ;
 				});
 			});
 			
@@ -1580,9 +1580,9 @@ request = function( options, success, error ) {
 			if ( request.readyState === 4 )  {
 				status = request.status;
 				if ( status === 500 || status === 404 || 
-					 status === 2 || 
+					 status === 2 || request.status < 0 ||
 					 (!status && request.responseText === "") ) {
-					error && error();
+					error && error(request.status);
 				} else {
 					success(request.responseText);
 				}
@@ -1600,9 +1600,11 @@ request = function( options, success, error ) {
 		request.send(null);
 	}
 	catch (e) {
-		console.error(e);
-		error && error();
-		clean();
+		if (clean) {
+			console.error(e);
+			error && error();
+			clean();
+		}
 	}
 			 
 };
@@ -1831,15 +1833,16 @@ request = function( options, success, error ) {
 		loadHas : function(){
 			var stel, i,
 				current = URI.cur;
+
 			if(this.options.buildType == 'js'){
 				return;
 			}
+			
 			// mark everything in has loaded
 			each(this.options.has, function( i, has ) {
 				// don't want the current file to change, since we're just marking files as loaded
 				URI.cur = URI(current);
 				stel = stealProto.make( has );
-				
 				stel.executed();
 			});
 				
@@ -1992,7 +1995,7 @@ if (support.interactive) {
 	steal.after = after(steal.after, function(){
 		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-		if (!interactive || !interactive.src || /steal\.(production\.)*js/.test(interactive.src)) {
+		if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
 			return;
 		}
 		// get the source of the script
@@ -2119,14 +2122,19 @@ if (support.interactive) {
 		// try-catching this so we dont have to build up to the iframe
 		// instrumentation check
 		
-		if ( options.instrument || ( ! options.browser && 
-			win.top && win.top.opener && 
-			win.top.opener.steal && win.top.opener.steal.options.instrument )) {
-			// force startFiles to load before instrument
-			steals.push(noop, {
-				src: "steal/instrument",
-				waits: true
-			});
+		try {
+			if ( options.instrument || ( ! options.browser && 
+				win.top && win.top.opener && 
+				win.top.opener.steal && win.top.opener.steal.options.instrument )) {
+				// force startFiles to load before instrument
+				steals.push(noop, {
+					src: "steal/instrument",
+					waits: true
+				});
+			}
+		} catch(e){
+			// This would throw permission denied if 
+			// the child window was from a different domain
 		}
 		
 		// we only load things with force = true
