@@ -10,8 +10,8 @@ module("steal")
 		return document.getElementById(id);
 	};
 	
-	
-if(window !== window.parent && window.parent.QUnit){
+// TODO IE runs out of memory here. Check why
+if(window !== window.parent && window.parent.QUnit && !$.browser.msie){
 	var methods = ["module", "test", "start", "stop", "equals", "ok", "same", "equal", "expect"];
 	for(var i=0; i<methods.length; i++){
 		(function(method){
@@ -723,6 +723,18 @@ test("runs error callback", function(){
 		}
 	}, function(){
 		ok(true, "executed steal fn");
+		start();
+	});
+});
+
+test("Loading multiple CSS files and absolute in IE", function() {
+	stop();
+	expect(2);
+	steal('./one.css', 'steal/test/two.css').then(function() {
+		var h5 = $('<h5>');
+		$('#qunit-test-area').append(h5);
+		equal(h5.css('text-decoration'), 'underline', 'Set text decoration of two.css');
+		equal(h5.css('font-style'), 'italic', 'Font style set from one.css');
 		start();
 	});
 });
