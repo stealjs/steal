@@ -1405,8 +1405,7 @@
 	
 	var cssCount = 0,
 		createSheet = doc && doc.createStyleSheet,
-		lastSheet,
-		lastSheetOptions;
+		lastSheet;
 	
 	steal.type("css", function css_type(options, success, error){
 		if(options.text){ // less
@@ -1434,9 +1433,7 @@
 					cssCount = 0;
 				}
 
-				var relative = File(options.src).joinFrom(
-					File(options.src).dir());
-				lastSheet.addImport( relative )
+				lastSheet.addImport(options.src);
 				cssCount++;
 			} else {
 				options = options || {};
