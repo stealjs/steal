@@ -691,10 +691,11 @@ test("loading multiple css file from jmvcroot", function(){
 	steal.rootUrl("../../");
 	stop();
 
-	steal("steal/test/bluecss/blue.css", "steal/test/redcss/red.css").then(function(){
-		$("#qunit-test-area").append("<div id='blue'>loading multiple css file from jmvcroot - Blue</div><div id='red'>loading multiple css file from jmvcroot - Red</div>");
+	$("#qunit-test-area").append("<div id='blue'>loading multiple css file from jmvcroot - Blue</div>" +
+		"<div id='red'>loading multiple css file from jmvcroot - Red</div>");
 
-		setTimeout(function(){
+	steal("steal/test/bluecss/blue.css", "steal/test/redcss/red.css").then(function(){
+		setTimeout(function() {
 			equals($('#blue').css("width"), "777px", "width applied using blue.css");
 			equals($('#red').css("width"), "888px", "width applied using red.css");
 
@@ -710,7 +711,7 @@ test("loading multiple css file from jmvcroot", function(){
 				equals(count, 2, "blue.css and red.css loaded")
 			}
 			start();
-		}, 2000);
+		}, 1000);
 	});
 });
 
@@ -750,18 +751,6 @@ test("runs error callback", function(){
 		}
 	}, function(){
 		ok(true, "executed steal fn");
-		start();
-	});
-});
-
-test("Loading multiple CSS files and absolute in IE", function() {
-	stop();
-	expect(2);
-	steal('./one.css', 'steal/test/two.css').then(function() {
-		var h5 = $('<h5>');
-		$('#qunit-test-area').append(h5);
-		equal(h5.css('text-decoration'), 'underline', 'Set text decoration of two.css');
-		equal(h5.css('font-style'), 'italic', 'Font style set from one.css');
 		start();
 	});
 });
