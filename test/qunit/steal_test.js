@@ -9,8 +9,8 @@ module("steal")
 	bId = function(id){
 		return document.getElementById(id);
 	};
-	
-	
+
+
 if(window !== window.parent && window.parent.QUnit){
 	var methods = ["module", "test", "start", "stop", "equals", "ok", "same", "equal", "expect"];
 	for(var i=0; i<methods.length; i++){
@@ -23,7 +23,7 @@ if(window !== window.parent && window.parent.QUnit){
 }
 
 // testing new steal API
-	
+
 
 test("packages", function(){
 	same(packagesStolen,["0","1","2", "uses"],"defined works right")
@@ -32,9 +32,9 @@ test("packages", function(){
 test("steal one js", function(){
 	// doesn't this imply the next ...
 	steal.rootUrl("../../");
-		 
+
 	stop();
-	
+
 	steal("./files/steal.js", function(){
 		start();
 		equals(REQUIRED,"steal", "loaded the file")
@@ -44,15 +44,15 @@ test("steal one js", function(){
 test("steal one function", function(){
 	steal.rootUrl("../../")
 		.cur("foo/bar.js");
-	
+
 	stop();
 	steal(function(){
 		start();
 		ok(true, "function called")
 	})
 })
-	
-	
+
+
 test("loading plugin from jmvcroot", function(){
 	PLUGINLOADED = false;
 	DEPENCENCYLOADED = false;
@@ -63,7 +63,7 @@ test("loading plugin from jmvcroot", function(){
 	start();
 	})
 })
-	
+
 // unless the path has nothing on it, it should add a .js to the end and load the literal file
 test("not using extension", function(){
 	REQUIRED = false;
@@ -73,7 +73,7 @@ test("not using extension", function(){
 	start();
 	})
 })
-	
+
 test("loading file from jmvcroot", function(){
 	REQUIRED = false;
 	stop();
@@ -97,7 +97,7 @@ test("steal one file with different rootUrl", function(){
 	steal.rootUrl("../");
 	REQUIRED = undefined;
 	stop();
-	
+
 	// still loading relative to the page
 	steal("./files/steal.js", function(){
 		start();
@@ -130,7 +130,7 @@ test("steal one file with different cur", function(){
 		.cur("foo/bar.js");
 	REQUIRED = undefined;
 	stop();
-	
+
 	// still loading relative to the page
 	steal("../steal/test/files/steal.js", function(){
 		start();
@@ -139,7 +139,7 @@ test("steal one file with different cur", function(){
 });
 
 test("parts", function(){
-	
+
 })
 
 test("file domain", function() {
@@ -179,8 +179,8 @@ test("file joinFrom", function() {
 
 	result = new steal.File('/a/b.c').joinFrom('');
 	equals(result, "/a/b.c", "/a/b.c is correctly joined.");
-	
-	
+
+
 	result = new steal.File('../../up.js').joinFrom('cookbook/')
 	equals(result, "../up.js", "up.js is correctly joined.")
 })
@@ -344,7 +344,7 @@ test("File.ext", function(){
 	test("rootSrc", function(){
 		steal.rootUrl("../abc/");
 		equals( steal.File.cur().path , "../../qunit.html", "cur changed right");
-		
+
 	})
 
 	test("request async", function(){
@@ -360,7 +360,7 @@ test("File.ext", function(){
 		if(!/file/.test(location.protocol))
 			equals(count, 0);
 	});
-	
+
 	test("request async error", function(){
 		stop();
 		var count = 0;
@@ -378,7 +378,7 @@ test("File.ext", function(){
 		if(!/file/.test(location.protocol))
 			equals(count, 0);
 	});
-	
+
 	test("request sync", function(){
 		stop();
 		var count = 0;
@@ -392,9 +392,9 @@ test("File.ext", function(){
 		})
 		equals(count, 1);
 	});
-	
-	
-	
+
+
+
 	test("require JS", function(){
 		stop();
 		steal.require({
@@ -405,7 +405,7 @@ test("File.ext", function(){
 			ok(REQUIRED, "loaded the file")
 		})
 	});
-	
+
 	test("require CSS", function(){
 		stop();
 		steal.require({
@@ -416,38 +416,38 @@ test("File.ext", function(){
 				start();
 				ok( bId('qunit-header').clientHeight > 65, "Client height changed to "+bId('qunit-header').clientHeight );
 			},1000)
-			
-			
+
+
 		})
 	});
-	
+
 	test("require weirdType", function(){
 		stop();
-		
+
 		steal.type("foo js", function(options, success, error){
 			var parts = options.text.split(" ")
 			options.text = parts[0]+"='"+parts[1]+"'";
 			success();
 		});
-		
+
 		steal.require({
 			src : src('steal/test/files/require.foo'),
 			type: "foo"
 		}, function(){
 			start();
 			equals(REQUIRED,"FOO", "loaded the file")
-			
+
 		})
 	});
-			
+
 	// this has to be done via a steal request instead of steal.require
 	// because require won't add buildType.  Require just gets stuff
 	// and that is how it should stay.
 	test("buildType set", function(){
 		stop();
-		
+
 		steal.rootUrl("../");
-		
+
 		steal.type("foo js", function(options, success, error){
 			var parts = options.text.split(" ")
 			options.text = parts[0]+"='"+parts[1]+"'";
@@ -460,13 +460,13 @@ test("File.ext", function(){
 			start();
 		})
 	});
-	
+
 	test("when", function(){
 		//start  1.loaded 2.loaded -> 3.complete
 		//in 3   2.loaded -> 4.complete
 		//in 4   3.complete -> 5.complete
 		//
-		
+
 		var count = 0,
 			ob1 = {
 				loaded : function(){},
@@ -488,7 +488,7 @@ test("File.ext", function(){
 				complete : function(){
 					count++;
 					equals(count, 2, "complete called again")
-					
+
 					steal.when(ob3,"complete",ob5,"complete");
 				},
 				path: "ob4"
@@ -501,14 +501,14 @@ test("File.ext", function(){
 				},
 				path: "ob5"
 			}
-		
+
 		stop();
 		steal.when(ob1,"loaded", ob2,"loaded" ,ob3,"complete");
 		ob1.loaded();
 		ob2.loaded();
-		
+
 	});
-	
+
 	test("when Async", function(){
 		var count = 0,
 			ob1 = {
@@ -531,7 +531,7 @@ test("File.ext", function(){
 				complete : function(){
 					count++;
 					equals(count, 2, "complete called again")
-					
+
 					steal.when(ob3,"complete",ob5,"complete");
 				},
 				path: "ob4"
@@ -544,29 +544,29 @@ test("File.ext", function(){
 				},
 				path: "ob5"
 			};
-			
+
 		stop();
 		steal.when(ob1,"loaded", ob2,"loaded" ,ob3,"complete");
-		
+
 		setTimeout(function(){
 			ob1.loaded();
 		},10)
 		setTimeout(function(){
 			ob2.loaded();
 		},10)
-		
+
 	});
-	
+
 	test("when nothing is waiting", 1, function(){
 		var ob = {
 			complete : function(){
 				ok(true, "run right away")
 			}
 		};
-		
+
 		steal.when(ob, "complete");
 	});
-	
+
 	test("AOP normal", function(){
 		var order = [],
 			before = function(){
@@ -585,7 +585,7 @@ test("File.ext", function(){
 		after();
 		same(order, [0,1,2,3])
 	})
-	
+
 	test("AOP adjust", function(){
 		var order = [],
 			before = function(arg){
@@ -611,7 +611,7 @@ test("File.ext", function(){
 		equal(res,"ChangedRet","updated return");
 		same(order, [0,1,2,3])
 	})
-	
+
 	// c should load whenever something its waiting on completes
 	test("deadlocked whens", function(){
 		expect(1)
@@ -626,39 +626,39 @@ test("File.ext", function(){
 					ok(true, "didn't deadlock")
 				}
 			}
-		
+
 		steal.when(a, "complete", c, "load")
 		steal.when(b, "complete", c, "load")
 		b.complete();
 	})
-	
+
 	test("getScriptOptions", function(){
 		var script = document.createElement('script'),
 			F = steal.File;
 		script.src= "../../steal/steal.js?foo";
 		var url = F(script.src).protocol() ?  F( F(script.src).dir() ).dir()+"/"  : "../../";
-		
+
 		var options = steal.getScriptOptions(script);
-		
+
 		equals(options.rootUrl+'', url+'',"root url is right");
 		equals(options.startFile+'',"foo","app right");
-		
+
 		script.src = "../steal.js?bar.js";
 
 		options = steal.getScriptOptions(script);
-		
+
 		url = F(script.src).protocol() ?   F( F(script.src).dir() ).dir()+"/" : "../../";
-		
+
 		equals(options.rootUrl+'', url+'',"root url is right");
 		equals(options.startFile+'',"bar.js","app right");
-		
+
 	})
 
 test("css", function(){
 	document.getElementById("qunit-test-area").innerHTML = ("<div id='makeBlue'>Blue</div><div id='makeGreen'>Green</div>");
 	equals(document.getElementById("makeBlue").clientWidth, 100, "relative in loaded");
 	equals(document.getElementById("makeGreen").clientWidth, 50, "relative up loaded");
-	
+
 	// we'd have to check the imports.
 	if(!document.createStyleSheet){
 		var els = document.getElementsByTagName('link'),
@@ -684,7 +684,34 @@ test("ready", function(){
 		start()
 		ok(true,'ready was called')
 	})
-	
+
+});
+
+test("loading multiple css file from jmvcroot", function(){
+	steal.rootUrl("../../");
+	stop();
+
+	steal("steal/test/bluecss/blue.css", "steal/test/redcss/red.css").then(function(){
+		$("#qunit-test-area").append("<div id='blue'>loading multiple css file from jmvcroot - Blue</div><div id='red'>loading multiple css file from jmvcroot - Red</div>");
+
+		setTimeout(function(){
+			equals($('#blue').css("width"), "777px", "width applied using blue.css");
+			equals($('#red').css("width"), "888px", "width applied using red.css");
+
+			// we'd have to check the imports.
+			if(!document.createStyleSheet){
+				var els = document.getElementsByTagName('link'),
+				count = 0;
+				for(var i =0; i< els.length; i++){
+					if(els[i].href.indexOf('blue.css') > -1 || els[i].href.indexOf('red.css') > -1){
+						count++;
+					}
+				}
+				equals(count, 2, "blue.css and red.css loaded")
+			}
+			start();
+		}, 2000);
+	});
 });
 
 // the tests below disable the global qunit error handler, otherwise
