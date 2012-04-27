@@ -1,5 +1,27 @@
-steal({src: "./less_engine.js",ignore: true},function(){
-	
+steal({src: "./less_engine.js",ignore: true}, function(){
+
+	// Some monkey patching of the LESS AST
+	// For our builds we NEVER want the parser to add paths to any URL
+	// The original implementation used to append the current path
+	// when running in Rhino
+	less.tree.URL = function (val, paths) {
+		if (val.data) {
+			this.attrs = val;
+		} else {
+			this.value = val;
+			this.paths = paths;
+		}
+	};
+	less.tree.URL.prototype = {
+		toCSS: function () {
+			return "url(" + (this.attrs ? 'data:' + this.attrs.mime + this.attrs.charset + this.attrs.base64 + this.attrs.data
+				: this.value.toCSS()) + ")";
+		},
+		eval: function (ctx) {
+			return this.attrs ? this : new(less.tree.URL)(this.value.eval(ctx), this.paths);
+		}
+	};
+
 	/**
 	 * @page steal.less Less
 	 * @parent steal.static.type
@@ -47,12 +69,6 @@ steal({src: "./less_engine.js",ignore: true},function(){
             paths: [pathParts.join('/')]
         }).parse(options.text, function (e, root) {
 			options.text = root.toCSS();
-			if(window && window.location) {
-				// Less turns relative into absolute URLs by adding the folder of
-				// window.location.href. We don't need this in a production build.
-				options.text = options.text.replace(
-					new steal.File(window.location.href).dir() + '/', '', 'gi');
-			}
 			success();
 		});
 	});
