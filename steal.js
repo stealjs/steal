@@ -1264,6 +1264,10 @@
 	steal.p.load = before(steal.p.load, function(){
 		var raw = this.options;
 		
+		// if we are already loading / loaded
+		if(this.loading || this.isLoaded){
+			return;
+		} 
 		// if it's a string, get it's extension and check if
 		// it is a registered type, if it is ... set the type
 		if(!raw.type){
