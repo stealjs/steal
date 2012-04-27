@@ -60,9 +60,33 @@ steal('steal/build').then(function( steal ) {
 					fin = steal.File(rootImagePath).toReferenceFromSameDomain(prodLocation);
 				//print("  -> "+rootImagePath);
 				// steal.print("  " + part + " > " + fin);
-				return "url(" + fin + ")";
+				return "url(" + prettyUrl(fin) + ")";
 			});
 		return newCSS;
+	},
+	/**
+	 * Makes relative URLs prettier e.g. turns
+	 *
+	 * > ./../../path/to/../something////./image.png
+	 *
+	 * into
+	 *
+	 * > ../../path/something/image.png
+	 *
+	 */
+	prettyUrl = function(path) {
+		var parts = path.split('/'),
+			normalized = [],
+			current;
+		for(var i = 0; i < parts.length; i++) {
+			current = parts[i];
+			if(normalized.length && normalized[normalized.length - 1] != '..' && current == '..') {
+				normalized.pop();
+			} else if(current && current != '.') {
+				normalized.push(current);
+			}
+		}
+		return normalized.join('/');
 	},
 	isAbsoluteOrData = function( part ) {
 		return /^(data:|http:\/\/|https:\/\/|\/)/.test(part)
