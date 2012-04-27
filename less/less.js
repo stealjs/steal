@@ -4,23 +4,18 @@ steal({src: "./less_engine.js",ignore: true}, function(){
 		// Some monkey patching of the LESS AST
 		// For production builds we NEVER want the parser to add paths to a url(),
 		// the CSS postprocessor is doing that already.
-		less.tree.URL = function (val, paths) {
-			if (val.data) {
-				this.attrs = val;
-			} else {
-				this.value = val;
-				this.paths = paths;
-			}
-		};
-		less.tree.URL.prototype = {
-			toCSS: function () {
-				return "url(" + (this.attrs ? 'data:' + this.attrs.mime + this.attrs.charset + this.attrs.base64 + this.attrs.data
-					: this.value.toCSS()) + ")";
-			},
-			eval: function (ctx) {
-				return this.attrs ? this : new(less.tree.URL)(this.value.eval(ctx), this.paths);
-			}
-		};
+		(function(tree) {
+			var oldProto = tree.URL.prototype;
+			tree.URL = function (val, paths) {
+				if (val.data) {
+					this.attrs = val;
+				} else {
+					this.value = val;
+					this.paths = paths;
+				}
+			};
+			tree.URL.prototype = oldProto;
+		})(less.tree);
 	}
 
 	/**
