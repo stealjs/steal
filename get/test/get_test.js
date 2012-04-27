@@ -70,14 +70,10 @@ steal('steal/get',function(rhinoSteal){
 	_S.test("github.raw", function(t){
 		// a file
 		var raw = G.git.raw("https://github.com/jupiterjs/srchr/tree/master/srchr/disabler/disabler.html");
-		t.equals(raw, "https://github.com/jupiterjs/srchr/raw/master/srchr/disabler/disabler.html", "file");
+		t.equals(raw, "https://raw.github.com/jupiterjs/srchr/master/srchr/disabler/disabler.html", "file");
 		
 		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/blob/master/jScrollPane/jScrollPane.js");
-		t.equals(raw, "https://github.com/secondstory/secondstoryjs-plugins/raw/master/jScrollPane/jScrollPane.js", "file");
-		
-		// folders
-		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/tree/master/jScrollPane/")
-		t.equals(raw,"https://github.com/secondstory/secondstoryjs-plugins/tree/master/jScrollPane/?raw=true","folder")
+		t.equals(raw, "https://raw.github.com/secondstory/secondstoryjs-plugins/master/jScrollPane/jScrollPane.js", "file");
 		
 		// root
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit")
@@ -101,7 +97,7 @@ steal('steal/get',function(rhinoSteal){
 	});
 	
 	_S.test("fetcher.download", function(t){
-		var raw = G.git.raw("https://github.com/jupiterjs/funcunit/blob/master/dependencies.json"),
+		var raw = G.git.raw("https://github.com/jupiterjs/funcunit/master/dependencies.json"),
 			out = "steal/get/test/out.js";
 		
 		

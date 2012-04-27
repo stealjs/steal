@@ -66,9 +66,9 @@ github = s.get.git = {
 			if(info.resource == "/"){ // root level folder
 				return lastCommitUrl(info)
 			} else if( /\/$/.test(url) ) { // a folder
-				return "https://"+info.domain+"/"+info.user+"/"+info.repo+"/tree/"+info.branch+"/"+info.resource+"?raw=true"
+				return "https://raw."+info.domain+"/"+info.user+"/"+info.repo+"/"+info.branch+"/"+info.resource
 			} else { //download url ...
-				return "https://"+info.domain+"/"+info.user+"/"+info.repo+"/raw/"+info.branch+"/"+info.resource
+				return "https://raw."+info.domain+"/"+info.user+"/"+info.repo+"/"+info.branch+"/"+info.resource
 			}
 		},
 		// helper to get info from a github url
