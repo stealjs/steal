@@ -38,15 +38,21 @@ steal({src: "./less_engine.js",ignore: true},function(){
 	 * Less files end with <code>less</code>.
 	 * 
 	 */
-	
 	steal.type("less css", function(options, success, error){
 		var pathParts = options.src.split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
+
 		new (less.Parser)({
             optimization: less.optimization,
             paths: [pathParts.join('/')]
         }).parse(options.text, function (e, root) {
 			options.text = root.toCSS();
+			if(window && window.location) {
+				// Less turns relative into absolute URLs by adding the folder of
+				// window.location.href. We don't need this in a production build.
+				options.text = options.text.replace(
+					new steal.File(window.location.href).dir() + '/', '', 'gi');
+			}
 			success();
 		});
 	});
