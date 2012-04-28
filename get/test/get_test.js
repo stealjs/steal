@@ -75,6 +75,10 @@ steal('steal/get',function(rhinoSteal){
 		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/blob/master/jScrollPane/jScrollPane.js");
 		t.equals(raw, "https://raw.github.com/secondstory/secondstoryjs-plugins/master/jScrollPane/jScrollPane.js", "file");
 		
+		// folders
+		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/tree/master/jScrollPane/")
+		t.equals(raw,"https://github.com/secondstory/secondstoryjs-plugins/tree/master/jScrollPane/","folder")
+		
 		// root
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit")
 		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
@@ -97,11 +101,10 @@ steal('steal/get',function(rhinoSteal){
 	});
 	
 	_S.test("fetcher.download", function(t){
-		var raw = G.git.raw("https://github.com/jupiterjs/funcunit/master/dependencies.json"),
+		var url = "https://github.com/jupiterjs/funcunit/blob/master/dependencies.json",
 			out = "steal/get/test/out.js";
 		
-		
-		G.download(raw,out,{getter: G.git});
+		G.download(url,out,{getter: G.git});
 		
 		var stuff = readFile(out);
 		t.ok(stuff, "there is stuff");
@@ -155,4 +158,3 @@ steal('steal/get',function(rhinoSteal){
 	});
 	
 });
-
