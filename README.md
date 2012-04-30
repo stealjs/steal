@@ -1,5 +1,5 @@
 @page stealjs StealJS
-@parent index 1
+@parent index 3
 
 StealJS is a collection of command line and JavaScript client utilities
 that make building, packaging, and sharing JavaScript applications easy.
