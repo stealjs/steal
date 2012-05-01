@@ -74,17 +74,17 @@ steal('steal/get',function(rhinoSteal){
 		
 		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/blob/master/jScrollPane/jScrollPane.js");
 		t.equals(raw, "https://raw.github.com/secondstory/secondstoryjs-plugins/master/jScrollPane/jScrollPane.js", "file");
-		
+
 		// folders
 		raw = G.git.raw("https://github.com/secondstory/secondstoryjs-plugins/tree/master/jScrollPane/")
-		t.equals(raw,"https://github.com/secondstory/secondstoryjs-plugins/tree/master/jScrollPane/","folder")
+		t.equals(raw.indexOf("https://api.github.com/repos/secondstory/secondstoryjs-plugins/git/trees/"), 0, "folder");
 		
 		// root
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit")
-		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
+		t.equals(raw.indexOf("https://api.github.com/repos/jupiterjs/funcunit/git/trees/"), 0, "root");
 		
 		raw = G.git.raw("https://github.com/jupiterjs/funcunit/tree/v3.2.1")
-		t.equals(raw.indexOf("https://github.com/api/v2/json/tree/show/jupiterjs/funcunit/"), 0, "root");
+		t.equals(raw.indexOf("https://api.github.com/repos/jupiterjs/funcunit/git/trees/"), 0, "root with tag");
 		
 	});
 	
