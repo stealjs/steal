@@ -106,19 +106,32 @@
 				if (!u.domain() ) return this.path;
 				return u.protocol() + "//" + u.domain() + this.path;
 			}
-			else {
+			else { //we have 2 relative paths, remove folders with every ../
 
-				if ( url == '' ) return this.path.replace(/\/$/, '');
-				var urls = url.split('/'),
-					paths = this.path.split('/'),
-					path = paths[0];
-				if ( url.match(/\/$/) ) urls.pop();
-				while ( path == '..' && paths.length > 0 ) {
-					paths.shift();
-					urls.pop();
-					path = paths[0];
-				}
-				return urls.concat(paths).join('/');
+                if ( url === '' ) {
+                    return this.path.replace(/\/$/, '');
+                }
+
+                var urls = url.split('/'),
+                    paths = this.path.split('/'),
+                    path = paths[0];
+
+                //if we are joining from a folder like cookbook/, remove the last empty part
+                if ( url.match(/\/$/) ) {
+                    urls.pop(); 
+                }
+                // for each .. remove one folder
+                while ( path == '..' && paths.length > 0 ) {
+                    // if we've emptied out, folders, just break
+                    // leaving any additional ../s
+                    if(! urls.pop() ){
+                        break;
+                    }
+                    paths.shift();
+
+                    path = paths[0];
+                }
+                return urls.concat(paths).join('/');
 			}
 		},
 		/**
