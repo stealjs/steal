@@ -87,7 +87,11 @@ steal('steal/build').then(function( steal ) {
         files.forEach(function(file){
             code.push( convert(file.content, file.rootSrc, packagePath) );
         })
-        return code.join("\n")+"\n"
+
+        var raw_css = code.join("\n")+"\n",
+            minified_css = styles.min(raw_css);
+
+        return minified_css;
     }
 
 	//used to convert css referencs in one file so they will make sense from prodLocation
