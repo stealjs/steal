@@ -53,8 +53,11 @@ steal('steal/build').then(function( steal ) {
      * @param {Object} dependencies like:
      *
      *      {"package/package.js": ['jquery/jquery.js']}
+     *
+     * @param {String} path of output package, for converting url() expressions
+     *
      */
-    styles.makePackage = function(files, dependencies){
+    styles.makePackage = function(files, dependencies, packagePath){
         var loadingCalls = [];
         files.forEach(function(file){
             loadingCalls.push(file.rootSrc)
@@ -82,7 +85,7 @@ steal('steal/build').then(function( steal ) {
         code.push.apply(code, dependencyCalls);
 
         files.forEach(function(file){
-            code.push( convert(file.content, file.rootSrc, "packages") );
+            code.push( convert(file.content, file.rootSrc, packagePath) );
         })
         return code.join("\n")+"\n"
     }

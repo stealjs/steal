@@ -339,7 +339,9 @@ steal('steal/build', function( steal ) {
 					
 	
 					var source = steal.build.builders.scripts.makePackage(filesForPackaging, dependencies);
-					var cssSource = steal.build.builders.styles.makePackage(cssFilesForPackaging, cssDependencies);
+
+                    var cssPackagePath = steal.File(saveCssFile).dir();
+					var cssSource = steal.build.builders.styles.makePackage(cssFilesForPackaging, cssDependencies, cssPackagePath);
 
                     // generate css loader for required css packages
                     for (var key in cssDependencies){

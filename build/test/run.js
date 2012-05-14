@@ -391,6 +391,68 @@ steal('steal/test/test.js', function( s ) {
             s.test.clear();
         });
     });
+
+
+    s.test.test("multibuild creates CSS packages with converted urls", function(){
+        /**
+         * Setup for multi-build CSS packaging tests
+         *
+         * Project module dependency diagram:
+         *
+         * app_y         app_z
+         *
+         *  ^           7   ^
+         *  |         /     |
+         *  |       /       |
+         *
+         * images_yz     images_z
+         *
+         * This allows us to test:
+         * - a CSS module packaged into an app package, app_z/production.css
+         * - a CSS module packaged into a shared package, packages/0.css
+         */
+
+        load('steal/rhino/rhino.js');
+        steal("steal/build","steal/build/scripts","steal/build/styles", "steal/build/apps").then(function(s2){
+
+            var buildOptions = {
+                compressor: "uglify" // uglify is much faster
+            };
+
+            // @todo: Work out why STEALPRINT doesn't prevent print() statements
+            //        during build
+            STEALPRINT = false;
+
+            s2.build.apps(["steal/build/test/multibuild_urls/app_y",
+                           "steal/build/test/multibuild_urls/app_z"], buildOptions);
+            // Clear after running build
+            s.test.clear();
+
+            // Check image url() in the shared package
+            var contents;
+            contents = readFile("packages/0.css");
+            s.test.equals(
+                    RegExp("url\\(../steal/build/test/multibuild_urls/images_yz/yz.jpg\\)").test(contents),
+                    true,
+                    "should contain correct relative path to yz.jpg from packages/0.css");
+
+            // Check image url() in the app package
+            contents = readFile("steal/build/test/multibuild_urls/app_z/production.css");
+            s.test.equals(
+                    RegExp("url\\(../images_z/z.jpg\\)").test(contents),
+                    true,
+                    "should contain correct relative path to z.jpg from app_z/production.css");
+
+            // Tear down
+            s.test.clear();
+            s.test.remove("steal/build/test/multibuild_urls/app_y/production.js");
+            s.test.remove("steal/build/test/multibuild_urls/app_z/production.js");
+            s.test.remove("steal/build/test/multibuild_urls/app_y/production.css");
+            s.test.remove("steal/build/test/multibuild_urls/app_z/production.css");
+            s.test.remove("packages/0.js");
+            s.test.remove("packages/0.css");
+        });
+    });
 	
 	// Closure doesn't handle these characters, and you should probably be pulling them in from elsewhere.
 	// but I'd still like this to work.
