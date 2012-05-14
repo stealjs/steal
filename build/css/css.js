@@ -61,9 +61,12 @@ steal(function( steal ) {
 			srcs.push(stealOpts.rootSrc+'')
 		});
 		
+		var raw_css = code.join("\n"),
+			minified_css = css.min(raw_css);
+		
 		return {
 			srcs: srcs,
-			code : codez.join('\n')
+			code : minified_css
 		}
 	}
 	//used to convert css referencs in one file so they will make sense from prodLocation
