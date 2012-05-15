@@ -43,6 +43,57 @@ steal('steal/build').then(function( steal ) {
 		}
 	});
 
+    /**
+     * Create package's content.
+     *
+     * @param {Array} files like:
+     *
+     *     [{rootSrc: "plugin/plugin.css", content: ".plugin { font-size: 2em; }"}]
+     *
+     * @param {Object} dependencies like:
+     *
+     *      {"package/package.js": ['jquery/jquery.js']}
+     *
+     * @param {String} path of output package, for converting url() expressions
+     *
+     */
+    styles.makePackage = function(files, dependencies, packagePath){
+        var loadingCalls = [];
+        files.forEach(function(file){
+            loadingCalls.push(file.rootSrc)
+        });
+
+        //create the dependencies ...
+        var dependencyCalls = [];
+        for (var key in dependencies){
+            dependencyCalls.push(
+                    "/* steal({src: '"+key+"', has: ['"+dependencies[key].join("','")+"']}) */"
+            )
+        }
+
+        // make 'loading'
+
+
+        //write it ...
+        var header = "/*\n";
+        loadingCalls.forEach(function(rootSrc){
+            header += " * " + rootSrc + "\n";
+        });
+        header += " */\n";
+
+        var code = [header];
+        code.push.apply(code, dependencyCalls);
+
+        files.forEach(function(file){
+            code.push( convert(file.content, file.rootSrc, packagePath) );
+        })
+
+        var raw_css = code.join("\n")+"\n",
+            minified_css = styles.min(raw_css);
+
+        return minified_css;
+    }
+
 	//used to convert css referencs in one file so they will make sense from prodLocation
 	var convert = function( css, cssLocation, prodLocation ) {
 		//how do we go from prod to css
