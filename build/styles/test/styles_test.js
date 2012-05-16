@@ -73,4 +73,46 @@ steal('steal/test', function( s ) {
 		
 		s.test.clear();
 	});
+
+	s.test.test("ensure urls references updated correctly after building to a different folder", function(){
+		load('steal/rhino/rhino.js');
+
+		// setup where the package will be built to
+		var packagePath = 'test_packages/production.css';
+		var dest = steal.File(packagePath);
+		var packageDir = dest.dir();
+		var packageDirFile = steal.File(packageDir);
+		if(!packageDirFile.exists()){
+			packageDirFile.mkdir();
+		}
+
+		// build the package
+		steal('steal/build',
+			'steal/build/styles',
+			function(){
+				steal.build('steal/build/styles/test/testurls/testurls.html',
+					{to: packageDir});
+			});
+
+		// now, check the paths are what we expect.
+		var prod = readFile(packagePath);
+		s.test.ok(
+			prod.match(new RegExp("url\\(\\.\\./steal/build/styles/test/testurls/child/path/image.png\\)")),
+			"child path reference correct");
+		s.test.ok(
+			prod.match(new RegExp("url\\(\\.\\./steal/build/styles/sibling/path/image.png\\)")),
+			"sibling path reference correct");
+		s.test.ok(
+			prod.match(new RegExp("url\\(\\.\\./\\.\\./outside/jsmvcroot/image.png\\)")),
+			"external path reference correct");
+
+		// cleanup
+		var prodFile = steal.File(packagePath);
+		prodFile.remove();
+		packageDirFile.removeDir();
+		s.test.clear();
+	});
+
+
+
 });

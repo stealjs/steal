@@ -107,15 +107,27 @@
 				return u.protocol() + "//" + u.domain() + this.path;
 			}
 			else {
+				if ( url === '' ) {
+					return this.path.replace(/\/$/, '');
+				}
 
-				if ( url == '' ) return this.path.replace(/\/$/, '');
 				var urls = url.split('/'),
-					paths = this.path.split('/'),
-					path = paths[0];
-				if ( url.match(/\/$/) ) urls.pop();
-				while ( path == '..' && paths.length > 0 ) {
-					paths.shift();
+						paths = this.path.split('/'),
+						path = paths[0];
+
+				//if we are joining from a folder like cookbook/, remove the last empty part
+				if ( url.match(/\/$/) ) {
 					urls.pop();
+				}
+				// for each .. remove one folder
+				while ( path == '..' && paths.length > 0 ) {
+					// if we've emptied out, folders, just break
+					// leaving any additional ../s
+					if(! urls.pop() ){
+						break;
+					}
+					paths.shift();
+
 					path = paths[0];
 				}
 				return urls.concat(paths).join('/');
