@@ -1,0 +1,10 @@
+#a {
+    background-image: url(child/path/image.png);
+}
+#b {
+    background-image: url(../../sibling/path/image.png);
+}
+#c {
+    background-image: url(../../../../../../outside/jsmvcroot/image.png);
+}
+
