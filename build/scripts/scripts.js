@@ -305,10 +305,10 @@ steal('steal/build', 'steal/parse').then(function( steal ) {
 						output: output
 					};
 				if ( quiet ) {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar","--es5mode", "1", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
 						"--warning_level", "QUIET", "--js", filename, options);
 				} else {
-					runCommand("java", "-jar", "steal/build/scripts/compiler.jar","--es5mode", "1", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
+					runCommand("java", "-jar", "steal/build/scripts/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
 						"--js", filename, options);
 				}
 				// print(options.err);
