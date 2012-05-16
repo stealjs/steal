@@ -1,3 +1,4 @@
+@hide
 @page stealjs StealJS
 @parent index 3
 
