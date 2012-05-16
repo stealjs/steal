@@ -1,5 +1,7 @@
-steal("steal/parse/tokens.js")
-	.then('steal/build').then(function(steal){
+steal("steal/parse/tokens.js"/*, 
+	  "steal/parse/regex_identifier.js"*/)
+.then('steal/build')
+.then(function(steal){
 
 var isArray = function( array ) {
   return Object.prototype.toString.call( array ) === "[object Array]";
@@ -158,6 +160,7 @@ steal.parse = function(str){
 				if(this.cur().value != left){
 					this.until(left);
 				}
+				
 				while(token = this.moveNext()){
 					if(token.type == 'operator'){
 						if(token.value === left){
@@ -170,6 +173,7 @@ steal.parse = function(str){
 								return token;
 							}
 						}else if(token.value === "/"){
+						// }else if(token.value === "/" && guessNextIsRegexp(token.value))
 							print("YOU SHOULD NOT BE HERE")
 							this.comment();
 						}
