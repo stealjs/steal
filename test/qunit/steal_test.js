@@ -418,7 +418,7 @@ test("filename", function(){
 		
 		var options = steal.getScriptOptions(script);
 		
-		equals(options.rootUrl+'', url,"root url is right");
+		equals(options.rootUrl+'', url+"","root url is right");
 		equals(options.startFile+'',"foo","app right");
 		
 		script.src = "../steal.js?bar.js";
@@ -427,7 +427,7 @@ test("filename", function(){
 		
 		url = URI(script.src).domain() ?   URI(script.src).dir().dir()  : "../../";
 		
-		equals(options.rootUrl+'', url,"root url is right");
+		equals(options.rootUrl+'', url+"","root url is right");
 		equals(options.startFile+'',"bar.js","app right");
 		
 	})

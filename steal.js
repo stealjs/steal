@@ -565,6 +565,38 @@
 			return this;
 		}
 	});
+	// HELPER METHODS FOR DEFERREDS
+
+	// Used to call a method on an object or resolve a
+	// deferred on it when a group of deferreds is resolved.
+	//
+	//     whenEach(resources,"complete",resource,"execute")
+	var whenEach = function( arr, func, obj, func2 ) {
+		var deferreds = map(arr, func)
+		return Deferred.when.apply(Deferred, deferreds).then(function(){
+			if( isFn( obj[func2] )){
+				obj[func2]()
+			} else {
+				obj[func2].resolve();
+			}
+			
+		})
+	},
+	// Used to call methods on multiple objects when
+	// a single deferred is resolved:
+	// 
+	//     whenThe(resource,"complete",resources,"load")
+	//
+	// TODO: this might be no longer used
+	whenThe = function( obj, func, items, func2 ) {
+
+			each(items, function(i, item){
+				Deferred.when(obj[func]).then(function() {
+					item[func2]();
+				})
+			})
+
+	};
 
 	// =============================== PATHS .8 ============================
 
@@ -784,9 +816,8 @@
 	
 	var pending = [],
 		s = steal,
-		id = 0,
-		steals = {};
-
+		id = 0;
+	
 
 	/**
 	 * @add steal
@@ -854,9 +885,13 @@
 		 */
 		then : function(){
 			var args = map(arguments);
-			return steal.apply( win, isFn( args[0] ) ?
-					args : 
-					[noop].concat( args ));
+			if(typeof args[0] === "string"){
+				args[0] = {src : args[0]}
+			}
+			if(typeof args[0] === "object"){
+				args[0].waits = true;
+			}
+			return steal.apply( win, args);
 		},
 		/**
 		 * Listens to events on Steal
@@ -914,7 +949,7 @@
 			// production scripts are loading
 			useInteractive = false;
 			each(arguments, function(i, arg) {
-				var stel = stealProto.make( arg );
+				var stel = Resource.make( arg );
 				stel.loading = stel.executing = true;
 			});
 		},
@@ -925,67 +960,13 @@
 		// called when a script has loaded via production
 		executed: function(name) {
 			// create the steal, mark it as loading, then as loaded
-			var stel = stealProto.make( name );
+			var stel = Resource.make( name );
 			stel.loading = true;
 			//convert(stel, "complete");
 			
 			steal.preexecuted(stel);
 			stel.executed()
 			return steal;
-		},
-		// this is for methods on a 'steal instance'.  A file can be in one of a few states:
-		// created - the steal instance is created, but we haven't started loading it yet
-		//           this happens when thens are used
-		// loading - (loading=true) By calling load, this will tell steal to load a file
-		// loaded - (isLoaded=true) The file has been run, but its dependency files have been completed
-		// complete - all of this files dependencies have loaded and completed.
-		p : {
-			init: function( options ) {
-				this.dependencies = [];
-				// id for debugging
-				this.id = (++id);
-				
-				// if we have no options, we are the global init ... set ourselves up ...
-				if ( ! options ) { //global init cur ...
-					this.options = {};
-					this.waits = false;
-				} 
-				//handle callback functions	
-				else if ( isFn( options )) {
-					var uri = URI.cur;
-					
-					this.options = {
-						fn : function() {
-						
-							//set the path ..
-							URI.cur = uri;
-							
-							// call the function, someday soon this will be requireJS-like
-							return options(steal.send || win.jQuery || steal); 
-						},
-						rootSrc: uri,
-						orig: options,
-						type: "fn"
-					}
-					// this has nothing to do with 'loading' options
-					this.waits = true;
-					this.unique = false;
-				} else {
-
-					// save the original options
-					this.orig = options;
-
-					this.options = steal.makeOptions( extend({},
-						isString( options ) ? { src: options } : options ));
-
-					this.waits = this.options.waits || false;
-					this.unique = true;
-				}
-
-				this.loaded = Deferred();
-				this.run = Deferred();
-				this.completed = Deferred();
-			}
 		},
 		/**
 		 * Registers a type.  You define the type of the file, the basic type it 
@@ -1086,78 +1067,169 @@
 		},
 		types : {}
 	});
-
-
-	// This is weird... but changing it breaks stuff
-	var stealProto = steal.p.init.prototype = steal.p;
-
-	extend(stealProto, {
-		// adds a new steal and throws an error if the script doesn't load
-		// this also checks the steals map
-		make: function( options ) {
-			
-			var stel = new stealProto.init( options ),
-				rootSrc = stel.options.rootSrc;
-			
-			if ( stel.unique && rootSrc ) {
-				// the .js is b/c we are not adding that automatically until
-				// load because we defer 'type' determination until then
-				//
-				// if we haven't loaded it before
-				
-				if ( ! steals[rootSrc] && ! steals[rootSrc + ".js"] ) {
-					steals[rootSrc] = stel;
-				} else{ // already have this steal
-					stel = steals[rootSrc];
-					// extend the old stolen file with any new options
-					extend(stel.options, isString( options ) ? {} : options)
-				}
-			}
-			
-			return stel;
-		},
+	// ============ RESOURCE ================
+	
+	// a map of resources by resourceID
+	var resources = {};
+	// this is for methods on a 'steal instance'.  A file can be in one of a few states:
+	// created - the steal instance is created, but we haven't started loading it yet
+	//           this happens when thens are used
+	// loading - (loading=true) By calling load, this will tell steal to load a file
+	// loaded - (isLoaded=true) The file has been run, but its dependency files have been completed
+	// complete - all of this files dependencies have loaded and completed.
+	
+	
+	// A Resource is almost anything. It is different from a module
+	// as it doesn't represent some unit of functionality, rather
+	// it represents a unit that can have other units "within" it
+	// as dependencies.  A resource can:
+	//
+	// - load - load the resource to the client so it is available, but don't run it yet
+	// - run - run the code for the resource
+	// - executed - the code has been run for the resource, but all
+	//   dependencies for that resource might not have finished
+	// - completed - all resources within the resource have completed
+	// 
+	// __options__
+	// `options` can be a string, function, or object.
+	// 
+	// __properties__
+	// 
+	// - options - has a number of properties
+	//    - src - a URI to this resource that can be loaded from the current page
+	//    - rootSrc - a URI to this resource relative to the current root URI.
+	//    - type - the type of resource: "fn", "js", "css", etc
+	//    - needs - other resources that must be loaded prior to this resource
+	//    - fn - a callback function to run when executed
+	// - unique - false if this resource should be loaded each time
+	// - waits - this resource should wait until all prior scripts have completed before running
+	// - loaded - a deferred indicating if this resource has been loaded to the client
+	// - run - a deferred indicating if the the code for this resource run
+	// - completed - a deferred indicating if all of this resources dependencies have
+	//   completed
+	// - dependencies - an array of dependencies
+	var Resource = function( options ) {
+		// an array for dependencies, this is 
+		this.dependencies = [];
+		// id for debugging
+		this.id = (++id);
 		
+		// if we have no options, we are the global Resource that
+		// contains all other resources.
+		if ( ! options ) { //global init cur ...
+			this.options = {};
+			this.waits = false;
+		} 
+		//handle callback functions	
+		else if ( isFn( options )) {
+			var uri = URI.cur;
+			
+			this.options = {
+				fn : function() {
+				
+					// Set the URI if there are steals
+					// within the callback.
+					URI.cur = uri;
+					
+					// call the function, someday soon this will be requireJS-like
+					return options(steal.send || win.jQuery || steal); 
+				},
+				rootSrc: uri,
+				orig: options,
+				type: "fn"
+			}
+			// this has nothing to do with 'loading' options
+			this.waits = true;
+			this.unique = false;
+		} else {
+			// save the original options
+			this.orig = options;
+			this.options = steal.makeOptions( extend({},
+				isString( options ) ? { src: options } : options ));
+			
+			this.waits = this.options.waits || false;
+			this.unique = true;
+		}
+		// create the deferreds used to manage state
+		this.loaded = Deferred();
+		this.run = Deferred();
+		this.completed = Deferred();
+	};
+	// `Resource.make` is used to either create
+	// a new resource, or return an existing
+	// resource that matches the options.
+	Resource.make = function( options ) {
+		// create the temporary reasource
+		var resource = new Resource( options ),
+			// use `rootSrc` as the definitive ID
+			rootSrc = resource.options.rootSrc;
+		
+		// assuming this resource should not be created again.
+		if ( resource.unique && rootSrc ) {
+
+			// Check if we already have a resource for this rootSrc
+			// Also check with a .js ending because we defer 'type'
+			// determination until later
+			if ( ! resources[rootSrc] && ! resources[rootSrc + ".js"] ) {
+				// If we haven't loaded, cache the resource
+				resources[rootSrc] = resource;
+			} else { 
+				// Otherwise get the cached resource
+				resource = resources[rootSrc];
+				// If options were passed, copy new properties over.
+				// Don't copy src, etc because those have already
+				// been changed to be the right values;
+				if(!isString( options )){
+					each(["src","rootSrc","originalSrc"], function(i, name){
+						delete options[name];
+					});
+					extend(resource.options, options);
+				}
+				
+			}
+		}
+		
+		return resource;
+	};
+	
+	extend(Resource.prototype, {
+		// Calling complete indicates that all dependencies have
+		// been completed for this resource
 		complete : function(){
 			this.completed.resolve();
 		},
-		/**
-		 * @hide
-		 * After the script has been loaded and run
-		 * 
-		 *   - check what else has been stolen, load them
-		 *   - mark yourself as complete when everything is completed
-		 *   - this is where all the actions is
-		 */
-
+		// After the script has been loaded and run
+		// - checks what has been stolen (in pending)
+		// - wires up pendings steal's deferreds to eventually complete this
+		// - this is where all of steal's complexity is
 		executed: function( script ) {
 			var myqueue, 
 				stel, 
 				src = ( script && script.src) || this.options.src,
 				rootSrc = this.options.rootSrc;
 			
-			//set yourself as the current file 
+			// Set this as the current file so any relative urls
+			// will load from it.
 			if ( this.options.rootSrc ) {
 				URI.cur = URI( rootSrc );
-			} //else {
-				// you are the master, set yourself as the page
-			//}
+			} 
 			// mark yourself as 'loaded'.  
 			this.run.resolve();
 			
-			// If we are IE, get the queue from interactives
-			// TODO move this out of this function
+			// If we are IE, get the queue from interactives.
+			// It in interactives because you can't use onload to know
+			// which script is executing.
 			if (support.interactive && src) {
 				myqueue = interactives[src];
 			}
-			// is there a case in IE where, this makes sense?
-			// in other browsers, the queue of items to load is
+			// In other browsers, the queue of items to load is
 			// what is in pending
 			if ( ! myqueue ) {
 				myqueue = pending.slice(0);
 				pending = [];
 			}
 			
-			// if we have nothing, mark us as complete (resolve if deferred)
+			// if we have nothing, mark us as complete
 			if ( ! myqueue.length ) {
 				this.complete();
 				return;
@@ -1165,56 +1237,9 @@
 			
 			// now we have to figure out how to wire up our pending steals
 			var self = this,
-				set = [],
 				// the current
-				joiner,  
-				initial = [],
 				isProduction = steal.options.env == "production",
-				files = [],
-				// a helper that basically does a join
-				// when everything in arr's func method is called,
-				// call func2 on obj
-				//whenEach(files.concat(stel) , "complete", joiner, "execute");
-				whenEach = function( arr, func, obj, func2 ) {
-					var deferreds = map(arr, func)
-					if(func2 === "execute"){
-						deferreds.push(joiner.loaded)
-					}
-					return Deferred.when.apply(Deferred, deferreds).then(function(){
-						if( isFn( obj[func2] )){
-							obj[func2]()
-						} else {
-							obj[func2].resolve();
-						}
-						
-					})
-				},
-				// a helper that does the oposite of a join.  When
-				// obj's func method is called, call func2 on all items.
-				// whenThe(stel,"completed", files ,"execute")
-				whenThe = function( obj, func, items, func2 ) {
-					if( func2 == "execute"){
-						
-						each(items, function(i, item){
-							Deferred.when(obj[func]).then(function() {
-								item[func2]();
-							})
-						})
-						
-					}
 
-					// TODO: Ask Justin what this branch is for.
-					/** / else {
-						obj[func].then(function(){
-							each(items, function(i, item){
-								item[func2]
-							})
-						})
-					}
-					/**/ 
-					
-					
-				},
 				stealInstances = [];
 
 			// iterate through the collection and add all the 'needs' 
@@ -1224,100 +1249,74 @@
 				if ( isProduction && item.ignore ) {
 					return;
 				}
-					
 				// make a steal object
-				var stel = stealProto.make(item);
+				var stel = Resource.make(item);
 				if(packHash[stel.options.rootSrc] && stel.options.type !== 'fn'){ // if we are production, and this is a package, mark as loading, but steal package?
 					steal.has(stel.options.rootSrc);
-					stel = stealProto.make(packHash[stel.options.rootSrc]);
+					stel = Resource.make(packHash[stel.options.rootSrc]);
 				}
 				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
 				each(stel.options.needs || [], function( i, raw ) {
 					//TODO: Justin take a look at this ... this is a bad fix!!
-					stealInstances.push( stealProto.make(raw), stealProto.make(function(){}) ) ;
+					stealInstances.push( Resource.make(raw), Resource.make(function(){}) ) ;
 				});
 			});
 			
-			each(stealInstances, function(i, stel){
+			// The set of resources before the previous "wait" resource
+			var priorSet = [],
+				// The current set of resources after and including the 
+				// previous "wait" resource
+				set = [],
+				// The first set of resources that we will execute 
+				// right away
+				firstSet = [],
+				// Should we be adding resources to the 
+				// firstSet
+				setFirstSet = true;
+			
+			// Goes through each resource and maintains 
+			// a list of the set of resources
+			// that must be complete before the current 
+			// resource (`priorSet`).
+			each(stealInstances.reverse(), function(i, stel){
 				
 				// add it as a dependency, circular are not allowed
-				self.dependencies.unshift(stel);
+				self.dependencies.shift(stel);
 				
-				// start pre - loading everything right away
-				//stel.load();
-				
-				if ( stel.waits === false ) { // file
-					// on the current 
-					files.push(stel);
-				
-				} else { // function
-					
-					// essentially have to bind current files to call previous joiner's load
-					// and to wait for current stel's complete
-					
-					if(!joiner){ // if no previous joiner, then we are at the end of a file
-						
-						// when they are complete, complete the file
-						whenEach( files.concat(stel), "completed", self, "completed");
-						
-						// if there was a function then files, then end, function loads all files
-						if(files.length){
-							
-							whenThe(stel,"completed", files ,"execute")
-						}
-						
-					} else { //   function,  file1, file2, file3, joiner function
-						
-						whenEach(files.concat(stel) , "completed", joiner, "execute");
-						
-						// make stel complete load files
-						whenThe(stel,"completed", files.length ? files : [joiner], "execute")
-						
-					}
-
-					/* */
-					if ( joiner ) {
-						joiner.load()
-					}
-					/* */
-					if ( files.length ) {
-						each(files, function( i, file ) {
-							file.load();
-						});
-					}
-					/* */
-					
-					// the joiner is the previous thing
-					joiner = stel;
-					files = [];
+				// if there's a wait and it's not the first thing
+				if(stel.waits && set.length){
+					// add the current set to `priorSet`
+					priorSet = priorSet.concat(set);
+					// empty the current set
+					set = [];
+					// we have our firs set of items
+					setFirstSet = false;
 				}
+				// when the priorSet is completed, execute this resource
+				whenEach(priorSet, "completed", stel, "execute");
+				
+				stel.waitedOn = stel.waitedOn ? stel.waitedOn.concat(priorSet) : priorSet.slice(0);
+				
+				// add this steal to the current set
+				set.push(stel);
+				if(setFirstSet){
+					// add this to the first set of things
+					firstSet.push(stel)
+				}
+				// start loading the resource if possible
+				stel.load();
 			});
 			
-			// now we should be left with the starting files
-			if ( files.length ) {
-				// we have initial files
-				// if there is a joiner, we need to load it when the initial files 
-				// are complete
-				if(joiner){
-					joiner.load();
-					whenEach(files, "completed", joiner, "execute"); // problem
-				} else {
-					whenEach(files, "completed", self, "completed");
-				}
-				// reverse it back and load each initial file
-				each(files.reverse(), function(i, f){
-					f.execute();
-				});
-			} else if(joiner){
-				// we have inital function
-				joiner.execute();
-			} else {
-				// we had nothing
-				this.complete();
-			}
+			// when every thing is complete, mark us as completed
+			priorSet = priorSet.concat(set);
+			whenEach(priorSet, "completed", self, "completed");
 			
-
+			// execute the first set of dependencies
+			each(firstSet, function(i, f){
+				f.execute();
+			});
+			
 		},
 		/**
 		 * Loads this steal
@@ -1338,6 +1337,7 @@
 			}
 			if ( ! self.executing ) {
 				self.executing = true;
+				//console.log("GETTING", self.options.src+"")
 				steal.require( self.options, function( script ) {
 					self.executed(script);
 				}, function( error, src ) {
@@ -1365,7 +1365,7 @@
 	// because one file has JS and another does not?
 	// we could check if it matches something with .js because foo.less.js SHOULD
 	// be rare
-	stealProto.execute = before(stealProto.execute, function() {
+	Resource.prototype.execute = before(Resource.prototype.execute, function() {
 		var raw = this.options;
 		
 		// if it's a string, get it's extension and check if
@@ -1485,6 +1485,7 @@ each( extend( {
 			}
 			
 			script.src = options.src = addSuffix(options.src);
+
 			//script.async = false;
 			script.onSuccess = success;
 		}
@@ -1712,7 +1713,7 @@ request = function( options, success, error ) {
 			// we create one and set it up
 			// to start loading its dependencies (the current pending steals)
 			if ( ! rootSteal ) {
-				rootSteal = new stealProto.init();
+				rootSteal = new Resource();
 				
 				// keep a reference in case it disappears 
 				var cur = rootSteal,
@@ -1752,7 +1753,7 @@ request = function( options, success, error ) {
 			ready = false;
 		
 		// check if jQuery loaded after every script load ...
-		stealProto.executed = before(stealProto.executed, function() {
+		Resource.prototype.executed = before(Resource.prototype.executed, function() {
 	
 			var $ = win.jQuery;
 			if ($ && "readyWait" in $) {
@@ -1778,8 +1779,9 @@ request = function( options, success, error ) {
 	})();
 	
 	// =============================== ERROR HANDLING ===============================
-	extend( stealProto, {
-		load : after(stealProto.load, function(stel){
+
+	extend( Resource.prototype, {
+		load : after(Resource.prototype.load, function(stel){
 			var self = this;
 			if( doc && ! self.completed && ! self.completeTimeout && !steal.isRhino &&
 				(self.options.src.protocol == "file" || !support.error)){
@@ -1788,35 +1790,14 @@ request = function( options, success, error ) {
 				},5000);
 			}
 		}),
-		complete : after(stealProto.complete, function(){
+		complete : after(Resource.prototype.complete, function(){
 			this.completeTimeout && clearTimeout(this.completeTimeout)
 		}),
-		// =========== HAS ARRAY STUFF ============
-		// Logic that deals with files that have collections of other files within 
-		// them.  This is usually a production.css file, 
-		// which when it loads, needs to mark several CSS and LESS files it represents 
-		// as being "loaded".  This is done by the production.js file having 
-		// steal({src: "production.css", has: ["file1.css", "file2.css"]  
-		// 
-		// after a steal is created, if its been loaded 
-		// already and has a "has", mark those files as loaded
-		make : after(stealProto.make, function(stel){
-			// if we have things
-			if( stel.options.has ) {
-				// if we have loaded this already (and we are adding has's)
-				if( stel.run.isResolved() ) {
-					stel.loadHas();
-				} else {
-					// have to mark has as loading (so we don't try to get them)
-					steal.has.apply(steal,stel.options.has)
-				}
-			}
-			return stel;
-		}, true),
+		
 	
 		// if we're about to mark a file as executed, mark its "has" array files as 
 		// executed also
-		executed : before(stealProto.executed, function(){
+		executed : before(Resource.prototype.executed, function(){
 			if(this.options.has){
 				this.loadHas();
 			}
@@ -1838,7 +1819,7 @@ request = function( options, success, error ) {
 			each(this.options.has, function( i, has ) {
 				// don't want the current file to change, since we're just marking files as loaded
 				URI.cur = URI(current);
-				stel = stealProto.make( has );
+				stel = Resource.make( has );
 				
 				stel.executed();
 			});
@@ -1846,7 +1827,28 @@ request = function( options, success, error ) {
 		}
 	});
 	
-	
+	// =========== HAS ARRAY STUFF ============
+	// Logic that deals with files that have collections of other files within 
+	// them.  This is usually a production.css file, 
+	// which when it loads, needs to mark several CSS and LESS files it represents 
+	// as being "loaded".  This is done by the production.js file having 
+	// steal({src: "production.css", has: ["file1.css", "file2.css"]  
+	// 
+	// after a steal is created, if its been loaded 
+	// already and has a "has", mark those files as loaded
+	Resource.make = after(Resource.make, function(stel){
+		// if we have things
+		if( stel.options.has ) {
+			// if we have loaded this already (and we are adding has's)
+			if( stel.run.isResolved() ) {
+				stel.loadHas();
+			} else {
+				// have to mark has as loading (so we don't try to get them)
+				steal.has.apply(steal,stel.options.has)
+			}
+		}
+		return stel;
+	}, true);
 	// =============================== AOP ===============================
 	function before(f, before, changeArgs){
 		return changeArgs ? 
@@ -2162,6 +2164,6 @@ if (support.interactive) {
 	
 	startup();
 
-	win.steals = steals;
+	//win.steals = steals;
 	
 })( this );
