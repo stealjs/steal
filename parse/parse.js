@@ -1,6 +1,5 @@
 steal("steal/parse/tokens.js"/*, 
 	  "steal/parse/regex_identifier.js"*/)
-.then('steal/build')
 .then(function(steal){
 
 var isArray = function( array ) {

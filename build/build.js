@@ -88,12 +88,15 @@ steal(function( steal ) {
 	 *       </tr>
 	 *       <tr><td>to</td>
 	 *           <td>The folder to put the production.js and production.css files.</td></tr>
+	 *       <tr><td>minify</td>
+	 *           <td>Defaults to true.</td></tr>
 	 *       <tr><td>all</td>
 	 *       <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
 	 *           scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
 	 *     </table>
 	 */
 	steal.build = function( url, options ) {
+		
 		var dependencies = {}, dep;
 
 		//convert options (which might be an array) into an object
@@ -112,56 +115,15 @@ steal(function( steal ) {
 			options.to += "/";
 		}
 
+		if(typeof options.minify == "undefined"){
+			options.minify = true;
+		}
+		
 		steal.print("Building to " + options.to);
-
-		var opener = steal.build.open(url, {}, function(opener){
-			// iterates through the types of builders.  For now
-			// there are just scripts and styles builders
-			for ( var builder in steal.build.builders ) {
-				if (builder != "scripts") {
-					dep = steal.build.builders[builder](opener, options);
-					if (typeof dep == "object" && dep.name) {
-						dependencies[dep.name] = dep.dependencies;
-					}
-				}
-			}
-			if(steal.build.builders.scripts){
-				steal.build.builders.scripts(opener, options, dependencies);
-			}
-		}, false, true);
-
-		
+		steal.build.packages(url, options);
 		
 	};
-
-	// a place for the builders
-	steal.build.builders = {}; //builders
-	// a helper function that gets the src of a script and returns
-	// the content for that script
-	
-	
-	
-	steal.build.loadScriptText = function( src ) {
-		var text = "",
-			base = "" + window.location,
-			url = src.match(/([^\?#]*)/)[1];
-
-		if ( url.match(/^\/\//) ) {
-			url = steal.root.join(url.substr(2)); //can steal be removed?
-		}
-		url = Envjs.uri(url, base);
-		
-		if ( url.match(/^file\:/) ) {
-			url = url.replace("file:/", "");
-			text = readFile("/" + url);
-		}
-
-		if ( url.match(/^http\:/) ) {
-			text = readUrl(url);
-		}
-		return text;
-	};
 	
 	
 
-}).then('steal/build/open.js');
+}).then('steal/build/open', 'steal/build/packages');

@@ -1,0 +1,42 @@
+<html>
+	<head>
+		<style>
+			#resize {
+				width: 200px;
+				height: 200px;
+				border: solid 1px black;
+			}
+		</style>
+	</head>
+	<body>
+		<a href='#!accordion'>accordion</a>
+		<a href='#!table'>table</a>
+		<a href='#!resize'>resize</a>
+		<a href='#'>reset</a>
+		<div id='accordion'>
+			<h3>First</h3>
+			<div>Content 1</div>
+			<h3>Second</h3>
+			<div>Content 2</div>
+		</div>
+		<div id='wrap'>
+			<table id='table'>
+				<thead>
+					<tr>
+						<th>One</th><th>Two</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr><td>First</td><td>Second</td></tr>
+					<tr><td>1</td><td>2</td></tr>
+					<tr><td>primary</td><td>Secondary</td></tr>
+					<tr><td>First</td><td>Second</td></tr>
+					<tr><td>1</td><td>2</td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div id='resize'></div>
+		<script type='text/javascript'
+			src='../../../../steal/steal.js?steal/build/packages/test/app.js'></script>
+	</body>
+</html>
