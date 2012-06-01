@@ -1,0 +1,1 @@
+steal.packages({});steal.has("steal/build/test/1.js","steal/build/test/2.js","steal/build/test/0.js");steal("./0.js").then(function(){packagesStolen.push("1")},"./2.js");steal.executed("steal/build/test/1.js");packagesStolen.push("2");steal.executed("steal/build/test/2.js");steal(function(){packagesStolen=["0"]});steal.executed("steal/build/test/0.js");

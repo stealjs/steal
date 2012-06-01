@@ -2,13 +2,14 @@ steal('jquery').then(function(){
 
 module("steal")
 
-	var orig = steal.File( steal.root.path );
+	var orig = steal.URI( steal.root+'' );
 		src = function(src){
 		return orig.join(src)
 	},
 	bId = function(id){
 		return document.getElementById(id);
-	};
+	},
+	URI = steal.URI;
 
 // TODO IE runs out of memory here. Check why
 if(window !== window.parent && window.parent.QUnit && !$.browser.msie){
@@ -21,6 +22,9 @@ if(window !== window.parent && window.parent.QUnit && !$.browser.msie){
 		})(methods[i])
 	}
 }
+	
+	
+	
 
 // testing new steal API
 
@@ -31,33 +35,30 @@ test("packages", function(){
 
 test("steal one js", function(){
 	// doesn't this imply the next ...
-	steal.rootUrl("../../");
-
 	stop();
-
-	steal("./files/steal.js", function(){
+	
+	steal("steal/test/files/steal.js", function(){
 		start();
 		equals(REQUIRED,"steal", "loaded the file")
 	})
 })
 
 test("steal one function", function(){
-	steal.rootUrl("../../")
-		.cur("foo/bar.js");
-
+	steal.URI.root("../../")
+	steal.URI.cur = URI("foo/bar.js");
 	stop();
 	steal(function(){
 		start();
 		ok(true, "function called")
 	})
-})
-
-
+});
+	
+	
 test("loading plugin from jmvcroot", function(){
 	PLUGINLOADED = false;
 	DEPENCENCYLOADED = false;
 	stop();
-	steal.rootUrl("../../").then('steal/test/files/plugin',function(){
+	steal.URI.root("../../").then('steal/test/files/plugin',function(){
 		equals(PLUGINLOADED, true)
 		equals(DEPENCENCYLOADED, true)
 	start();
@@ -68,16 +69,16 @@ test("loading plugin from jmvcroot", function(){
 test("not using extension", function(){
 	REQUIRED = false;
 	stop();
-	steal.rootUrl("../../").then('./files/require',function(){
+	steal.URI.root("../../").then('./files/require',function(){
 		equals(REQUIRED, true);
-	start();
+		start();
 	})
 })
 
 test("loading file from jmvcroot", function(){
 	REQUIRED = false;
 	stop();
-	steal.rootUrl("../../").then('steal/test/files/require.js',function(){
+	steal.URI.root("../../").then('steal/test/files/require.js',function(){
 		equals(REQUIRED, true)
 		start();
 	})
@@ -86,15 +87,15 @@ test("loading file from jmvcroot", function(){
 test("loading two files", function(){
 	ORDER = [];
 	stop();
-	steal.rootUrl("../../").then('./files/file1.js',function(){
+	steal.URI.root("../../").then('./files/file1.js',function(){
 		same(ORDER,[1,2,"then2","then1"])
 		start();
 	})
 })
 
-test("steal one file with different rootUrl", function(){
+test("steal one file with different URI.root", function(){
 	// doesn't this imply the next ...
-	steal.rootUrl("../");
+	steal.URI.root("../");
 	REQUIRED = undefined;
 	stop();
 
@@ -108,7 +109,7 @@ test("steal one file with different rootUrl", function(){
 test("loading same file twice", function(){
 	ORDER = [];
 	stop();
-	steal.rootUrl("../../").then('./files/duplicate.js', './files/duplicate.js',function(){
+	steal.URI.root("../../").then('./files/duplicate.js', './files/duplicate.js',function(){
 		same(ORDER,[1])
 		start();
 	})
@@ -117,7 +118,7 @@ test("loading same file twice", function(){
 test("loading same file twice with absolute paths", function(){
 	ORDER = [];
 	stop();
-	steal.rootUrl("../../").then('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
+	steal.URI.root("../../").then('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
 		same(ORDER,[1])
 		start();
 	})
@@ -126,225 +127,135 @@ test("loading same file twice with absolute paths", function(){
 
 test("steal one file with different cur", function(){
 	// doesn't this imply the next ...
-	steal.rootUrl("../../")
-		.cur("foo/bar.js");
+	steal.URI.root("../../")
+	steal.URI.cur = steal.URI("foo/bar.js");
 	REQUIRED = undefined;
 	stop();
 
 	// still loading relative to the page
 	steal("../steal/test/files/steal.js", function(){
 		start();
-		equals(REQUIRED,"steal", "loaded the file")
+		// next line is commented out b/c it won't actually re-run this file
+		//equals(REQUIRED,"steal", "loaded the file")
 	})
 });
 
-test("parts", function(){
+var URI = steal.URI;
 
+module("uri");
+
+test("to String", function(){
+	equals(""+URI("abc"),"abc");
 })
 
-test("file domain", function() {
-	equals(null, new steal.File("file://C:/Development").domain(), "problems from file")
-	equals('something.com', new steal.File('http://something.com/asfdkl;a').domain(), "something.com is the correct http domain.")
-	equals('127.0.0.1:3006', new steal.File('https://127.0.0.1:3006/asdf').domain(), "something.com is the correct https domain.")
+test("dir", function(){
+	equals( ''+URI("http://a.com/d/e").dir(), "http://a.com/d");
+	equals( ''+URI("d/e#fasdfa").dir(), "d");
+	equals("/a/b/c", URI("/a/b/c/cookbook.html").dir(), "/a/b/c dir is correct.")
+	equals("a/b/c", URI("a/b/c/cookbook.html").dir(), "a/b/c dir is correct.")
+	equals("../a/b/c", URI("../a/b/c/cookbook.html").dir(), "../a/b/c dir is correct.")
+	equals("http://127.0.0.1:3007/", URI("http://127.0.0.1:3007/cookbook.html").dir(), "http://127.0.0.1:3007 dir is correct.")
 })
 
-test("file joinFrom", function() {
-	var result;
-	equals(
-	steal.File('a/b.c').joinFrom('/d/e'), "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
-
-	result = new steal.File('a/b.c').joinFrom('d/e');
-	equals(result, "d/e/a/b.c", "d/e/a/b.c is correctly joined.");
-
-	result = new steal.File('a/b.c').joinFrom('d/e/');
-	equals(result, "d/e/a/b.c", "d/e/a/b.c is correctly joined.");
-
-	result = new steal.File('a/b.c').joinFrom('http://abc.com');
-	equals(result, "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
-
-	result = new steal.File('/a/b.c').joinFrom('http://abc.com');
-	equals(result, "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
-
-	result = new steal.File('a/b.c').joinFrom('http://abc.com/');
-	equals(result, "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
-
-	result = new steal.File('/a/b.c').joinFrom('http://abc.com/');
-	equals(result, "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
-
-	result = new steal.File('a/b.c').joinFrom('../d/e');
-	equals(result, "../d/e/a/b.c", "../d/e/a/b.c is correctly joined.");
-
-	result = new steal.File('a/b.c').joinFrom('');
-	equals(result, "a/b.c", "a/b.c is correctly joined.");
-
-	result = new steal.File('/a/b.c').joinFrom('');
-	equals(result, "/a/b.c", "/a/b.c is correctly joined.");
-
-
-	result = new steal.File('../../up.js').joinFrom('cookbook/')
-	equals(result, "../up.js", "up.js is correctly joined.")
+test("isCrossDomain", function(){
+	ok( URI("http://foo.bar").isCrossDomain("http://abc.def"), "two different hosts" )
+	ok( !URI("bar").isCrossDomain("http://abc.def"), "two different hosts" )
+	ok(  URI("http://abc.def").isCrossDomain("bar"), "two different hosts" )
+	
+	ok( URI("http://abc.def").isCrossDomain()  )
 })
+test("join", function() {
 
-test("dir", function() {
-	equals("/a/b/c", new steal.File("/a/b/c/cookbook.html").dir(), "/a/b/c dir is correct.")
-	equals("a/b/c", new steal.File("a/b/c/cookbook.html").dir(), "a/b/c dir is correct.")
-	equals("../a/b/c", new steal.File("../a/b/c/cookbook.html").dir(), "../a/b/c dir is correct.")
-	equals("http://127.0.0.1:3007", new steal.File("http://127.0.0.1:3007/cookbook.html").dir(), "http://127.0.0.1:3007 dir is correct.")
-})
+	equals(''+URI("http://abc.com").join("/a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	
+	
+	equals(''+URI("http://abc.com/").join("/a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
 
-test("File.clean", function() {
-	result = new steal.File('http://abc.com#action').clean();
-	equals(result, "http://abc.com", "http://abc.com#action is correctly cleaned.");
+	equals(''+URI("http://abc.com/").join("a/b/c"), "http://abc.com/a/b/c", "http://abc.com/ + a/b/c was joined successfuly.");
 
-	result = new steal.File('http://abc.com#action&q=param').clean();
-	equals(result, "http://abc.com", "http://abc.com#action&q=param is correctly cleaned.");
 
-	result = new steal.File('http://abc.com/#action&q=param').clean();
-	equals(result, "http://abc.com/", "http://abc.com/#action&q=param is correctly cleaned.");
 
-	result = new steal.File('a/b/#action&q=param').clean();
-	equals(result, "a/b/", "a/b/#action&q=param is correctly cleaned.");
+	equals(''+URI("http://abc.com").join("a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
 
-	result = new steal.File('a/b#action&q=param').clean();
-	equals(result, "a/b", "a/b#action&q=param is correctly cleaned.");
-})
 
-test("File.protocol", function() {
-	result = new steal.File('http://abc.com').protocol();
-	equals(result, "http:", "http://abc.com protocol should be http:.");
+	equals(''+URI("a/b/c").join("d/e"), "a/b/c/d/e", "a/b/c + d/e was joined successfuly.");
 
-	result = new steal.File('https://abc.com').protocol();
-	equals(result, "https:", "https://abc.com protocol should be https:.");
 
-	result = new steal.File('file://a/b/c').protocol();
-	equals(result, "file:", "file://a/b/c protocol should be file:.");
+	equals(''+URI("a/b/c/").join("d/e"), "a/b/c/d/e", "a/b/c/ + d/e was joined successfuly.");
 
-	result = new steal.File('file:///a/b/c').protocol();
-	equals(result, "file:", "file:///a/b/c protocol should be file:.");
-})
 
-test("File.join", function() {
-	result = new steal.File("http://abc.com").join("/a/b/c");
-	equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	equals(''+URI("a/b/c/").join("/d/e"), "/d/e", "/d/e was joined successfuly.");
 
-	result = new steal.File("http://abc.com/").join("/a/b/c");
-	equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	equals(''+URI("a/b/c").join("/d/e"), "/d/e", "/d/e was joined successfuly.");
+	
+	
+	equals( ''+URI('/d/e').join('a/b.c'), "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
+	
+	
+	equals(''+URI('d/e').join('a/b.c'), "d/e/a/b.c", "d/e/a/b.c is correctly joined.");
 
-	result = new steal.File("http://abc.com/").join("a/b/c");
-	equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	equals(''+URI('d/e/').join('a/b.c'), "d/e/a/b.c", "d/e/a/b.c is correctly joined.");
 
-	result = new steal.File("http://abc.com").join("a/b/c");
-	equals(result, "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+	equals(''+URI('http://abc.com').join('a/b.c'), "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
 
-	result = new steal.File("a/b/c").join("d/e");
-	equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+	equals(''+URI('http://abc.com').join('/a/b.c'), "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
 
-	result = new steal.File("a/b/c/").join("d/e");
-	equals(result, "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+	equals(''+URI('http://abc.com/').join('a/b.c'), "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
 
-	result = new steal.File("a/b/c/").join("/d/e");
-	equals(result, "/d/e", "/d/e was joined successfuly.");
+	equals(''+URI('http://abc.com/').join('/a/b.c'), "http://abc.com/a/b.c", "http://abc.com/a/b.c is correctly joined.");
 
-	result = new steal.File("a/b/c").join("/d/e");
-	equals(result, "/d/e", "/d/e was joined successfuly.");
+	equals(''+URI('../d/e').join('a/b.c'), "../d/e/a/b.c", "../d/e/a/b.c is correctly joined.");
+
+	equals(''+URI('').join('a/b.c'), "a/b.c", "'' + a/b.c is correctly joined.");
+
+	equals(''+URI('').join('/a/b.c'), "/a/b.c", "'' + /a/b.c is correctly joined.");
+	
+	equals(''+URI('cookbook/').join('../../up.js'), "../up.js", "up.js is correctly joined.")
+	
 });
 
+test("pathTo", function() {
+	//result = new steal.File("http://abc.com/d/e").toReferenceFromSameDomain("http://abc.com/d/e/f/g/h");
+	equals(''+URI("http://abc.com/d/e/f/g/h").pathTo("http://abc.com/d/e"), "../../../", "../../../ is the correct reference from same domain result.");
 
+	equals(''+URI("http://abc.com/d/e/f/g/h").pathTo("http://abc.com/d/e/x/y"), "../../../x/y", "../../../x/y is the correct reference from same domain result.");
 
-test("File.relative", function() {
-	result = new steal.File("a/b/c").relative();
-	ok(result, "a/b/c is relative.")
+	equals(''+URI("a/b/c/d/e").pathTo("a/b/c/x/y"), "../../x/y", "../../x/y is the correct reference from same domain result.");
 
-	result = new steal.File("/a/b/c").relative();
-	ok(!result, "/a/b/c is NOT relative.")
+	equals(''+URI("a/b/c/d/e").pathTo("a/b/c/d/e"), "", "'' is the correct reference from same domain result.");
 })
 
-test("File.isLocalAbsolute", function() {
-	result = new steal.File("/a/b/c").isLocalAbsolute();
-	ok(result, "/a/b/c is absolute.")
+test("normalize", function(){
+	var start= URI.cur;
+	// normalizes from cur file (cur file should be kept relative to root)
+	URI.cur = URI("/a/b/");
+	equals(URI("./c/d").normalize(), "/a/b/c/d", "/a/b/c/d was normalized successfuly.");
+	
+	
+	URI.cur = URI("/a/b/c");
+	equals(URI("//d/e").normalize(), "d/e", "d/e was normalized successfuly.");
 
-	result = new steal.File("a/b/c").isLocalAbsolute();
-	ok(!result, "a/b/c is NOT absolute.")
+	URI.cur = URI("/a/b/c");
+	equals(URI("/d/e").normalize(), "/d/e", "/d/e was normalized successfuly.");
+
+	URI.cur = URI("http://abc.com");
+	equals(URI("./d/e").normalize(), "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
+
+	URI.cur = URI("http://abc.com");
+	equals(URI("/d/e").normalize(), "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
+	
+	URI.cur = start;
 })
 
-test("File.isDomainAbsolute()", function() {
-	var result = new steal.File("http://abc.com/d/e").protocol();
-	ok(result, "http://abc.com/d/e domain is absolute.")
-
-	result = new steal.File("http://abc.com/d/e/").protocol();
-	ok(result, "http://abc.com/d/e/ domain is absolute.")
-
-	result = new steal.File("https://abc.com/d/e").protocol();
-	ok(result, "https://abc.com/d/e domain is absolute.")
-
-	result = new steal.File("https://abc.com/d/e/").protocol();
-	ok(result, "https://abc.com/d/e/ domain is absolute.")
-
-	result = new steal.File("file://a/b/c/d/e").protocol();
-	ok(result, "file://a/b/c/d/e domain is absolute.")
-
-	result = new steal.File("file://a/b/c/d/e/").protocol();
-	ok(result, "file://a/b/c/d/e/ domain is absolute.")
-
-	result = new steal.File("file:///a/b/c/d/e").protocol();
-	ok(result, "file:///a/b/c/d/e domain is absolute.");
-
-	result = new steal.File("/a/b/c/d/e").protocol();
-	ok(!result, "/a/b/c/d/e domain is absolute.");
-})
-
-// this function was moved to steal/rhino/file.js
-// test("File.afterDomain", function() {
-	// result = new steal.File("http://abc.com/d/e").afterDomain();
-	// equals(result, "/d/e", "/d/e is the correct after domain result.");
-// })
-
-test("File.toReferenceFromSameDomain()", function() {
-	result = new steal.File("http://abc.com/d/e").toReferenceFromSameDomain("http://abc.com/d/e/f/g/h");
-	equals(result, "../../../", "../../../ is the correct reference from same domain result.");
-
-	result = new steal.File("http://abc.com/d/e/x/y").toReferenceFromSameDomain("http://abc.com/d/e/f/g/h");
-	equals(result, "../../../x/y", "../../../x/y is the correct reference from same domain result.");
-
-	result = new steal.File("a/b/c/x/y").toReferenceFromSameDomain("a/b/c/d/e");
-	equals(result, "../../x/y", "../../x/y is the correct reference from same domain result.");
-
-	result = new steal.File("a/b/c/d/e").toReferenceFromSameDomain("a/b/c/d/e");
-	equals(result, "", "'' is the correct reference from same domain result.");
-})
-
-test("File.normalize", function() {
-	steal.File.cur("/a/b/");
-	result = new steal.File("./c/d").normalize();
-	equals(result, "/a/b/c/d", "/a/b/c/d was normalized successfuly.");
-
-	steal.File.cur("/a/b/c");
-	result = new steal.File("//d/e").normalize();
-	equals(result, "d/e", "d/e was normalized successfuly.");
-
-	steal.File.cur("/a/b/c");
-	result = new steal.File("/d/e").normalize();
-	equals(result, "/d/e", "/d/e was normalized successfuly.");
-
-	steal.File.cur("http://abc.com");
-	result = new steal.File("./d/e").normalize();
-	equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
-
-	steal.File.cur("http://abc.com");
-	result = new steal.File("/d/e").normalize();
-	equals(result, "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
+test("filename", function(){
+	equals(URI('jquery').filename(),'jquery');
+	equals(URI("http://abc.com/d/e").filename(),'e');
 });
 
-test("File.ext", function(){
-	equals("", steal.File("").ext())
-	equals("", steal.File("asdfas.asfa/safda").ext())
-	equals("com", steal.File("asdfas.asfa/safda.com").ext())
-})
 
 	test("rootSrc", function(){
-		steal.rootUrl("../abc/");
-		equals( steal.File.cur().path , "../../qunit.html", "cur changed right");
-
+		steal.URI.root("../abc/");
+		equals( steal.URI.cur+'' , "../../qunit.html", "cur changed right");
 	})
 
 	test("request async", function(){
@@ -443,11 +354,11 @@ test("File.ext", function(){
 	// this has to be done via a steal request instead of steal.require
 	// because require won't add buildType.  Require just gets stuff
 	// and that is how it should stay.
+	/** /
 	test("buildType set", function(){
 		stop();
-
-		steal.rootUrl("../");
-
+		
+		steal.URI.root("../");
 		steal.type("foo js", function(options, success, error){
 			var parts = options.text.split(" ")
 			options.text = parts[0]+"='"+parts[1]+"'";
@@ -460,113 +371,7 @@ test("File.ext", function(){
 			start();
 		})
 	});
-
-	test("when", function(){
-		//start  1.loaded 2.loaded -> 3.complete
-		//in 3   2.loaded -> 4.complete
-		//in 4   3.complete -> 5.complete
-		//
-
-		var count = 0,
-			ob1 = {
-				loaded : function(){},
-				path: "ob1"
-			},
-			ob2 = {
-				loaded : function(){},
-				path: "ob2"
-			},
-			ob3 = {
-				complete : function(){
-					count++;
-					steal.when(ob2,"loaded", ob4,"complete");
-				},
-				path: "ob3"
-			},
-			when = steal.when,
-			ob4 = {
-				complete : function(){
-					count++;
-					equals(count, 2, "complete called again")
-
-					steal.when(ob3,"complete",ob5,"complete");
-				},
-				path: "ob4"
-			},
-			ob5 = {
-				complete : function(){
-					count++;
-					equals(count,3, "complete called on another 'finished' complete");
-					start();
-				},
-				path: "ob5"
-			}
-
-		stop();
-		steal.when(ob1,"loaded", ob2,"loaded" ,ob3,"complete");
-		ob1.loaded();
-		ob2.loaded();
-
-	});
-
-	test("when Async", function(){
-		var count = 0,
-			ob1 = {
-				loaded : function(){},
-				path: "ob1"
-			},
-			ob2 = {
-				loaded : function(){},
-				path: "ob2"
-			},
-			ob3 = {
-				complete : function(){
-					count++;
-					steal.when(ob2,"loaded", ob4,"complete");
-				},
-				path: "ob3"
-			},
-			when = steal.when,
-			ob4 = {
-				complete : function(){
-					count++;
-					equals(count, 2, "complete called again")
-
-					steal.when(ob3,"complete",ob5,"complete");
-				},
-				path: "ob4"
-			},
-			ob5 = {
-				complete : function(){
-					count++;
-					equals(count,3, "complete called on another 'finished' complete");
-					start();
-				},
-				path: "ob5"
-			};
-
-		stop();
-		steal.when(ob1,"loaded", ob2,"loaded" ,ob3,"complete");
-
-		setTimeout(function(){
-			ob1.loaded();
-		},10)
-		setTimeout(function(){
-			ob2.loaded();
-		},10)
-
-	});
-
-	test("when nothing is waiting", 1, function(){
-		var ob = {
-			complete : function(){
-				ok(true, "run right away")
-			}
-		};
-
-		steal.when(ob, "complete");
-	});
-
+	/**/
 	test("AOP normal", function(){
 		var order = [],
 			before = function(){
@@ -611,47 +416,25 @@ test("File.ext", function(){
 		equal(res,"ChangedRet","updated return");
 		same(order, [0,1,2,3])
 	})
-
-	// c should load whenever something its waiting on completes
-	test("deadlocked whens", function(){
-		expect(1)
-		var a = {
-				complete: function(){}
-			},
-			b = {
-				complete: function(){}
-			},
-			c = {
-				load: function(){
-					ok(true, "didn't deadlock")
-				}
-			}
-
-		steal.when(a, "complete", c, "load")
-		steal.when(b, "complete", c, "load")
-		b.complete();
-	})
-
 	test("getScriptOptions", function(){
-		var script = document.createElement('script'),
-			F = steal.File;
+		var script = document.createElement('script');
 		script.src= "../../steal/steal.js?foo";
-		var url = F(script.src).protocol() ?  F( F(script.src).dir() ).dir()+"/"  : "../../";
-
+		var url = URI(script.src).domain() ?  URI(script.src).dir().dir()  : "../../";
+		
 		var options = steal.getScriptOptions(script);
-
-		equals(options.rootUrl+'', url+'',"root url is right");
+		
+		equals(options.rootUrl+'', url+"/","root url is right");
 		equals(options.startFile+'',"foo","app right");
-
+		
 		script.src = "../steal.js?bar.js";
 
 		options = steal.getScriptOptions(script);
-
-		url = F(script.src).protocol() ?   F( F(script.src).dir() ).dir()+"/" : "../../";
-
-		equals(options.rootUrl+'', url+'',"root url is right");
+		
+		url = URI(script.src).domain() ?   URI(script.src).dir().dir()  : "../../";
+		
+		equals(options.rootUrl+'', url+"/","root url is right");
 		equals(options.startFile+'',"bar.js","app right");
-
+		
 	})
 
 test("css", function(){
@@ -688,7 +471,7 @@ test("ready", function(){
 });
 
 test("loading multiple css file from jmvcroot", function(){
-	steal.rootUrl("../../");
+	URI.root("../../");
 	stop();
 
 	$("#qunit-test-area").append("<div id='blue'>loading multiple css file from jmvcroot - Blue</div>" +
@@ -696,8 +479,12 @@ test("loading multiple css file from jmvcroot", function(){
 
 	steal("steal/test/bluecss/blue.css", "steal/test/redcss/red.css").then(function(){
 		setTimeout(function() {
-			equals($('#blue').css("width"), "777px", "width applied using blue.css");
-			equals($('#red').css("width"), "888px", "width applied using red.css");
+			var within = function(val, expected){
+				var val = parseInt(val, 10);
+				ok(val >= (expected-1) && val <= (expected+1));
+			}
+			within($('#blue').css("width"), 777);
+			within($('#red').css("width"), 888);
 
 			// we'd have to check the imports.
 			if(!document.createStyleSheet){
@@ -754,5 +541,29 @@ test("runs error callback", function(){
 		start();
 	});
 });
+
+test("needs", function(){
+	stop();
+	
+	steal.URI.root("../../").then({
+		src: "steal/test/files/needs.js",
+		needs: ["steal/test/files/needed.js"]
+	});
+});
+
+/** /
+test("needs options", function(){
+	stop();
+	steal.options.needs.needs = 'steal/test/files/needstype.js'
+	
+	steal.URI.root("../../").then('steal/test/files/needs.needs',
+		function(){
+		
+		equals(NEEDS,"FOO")
+		start();
+		
+	});
+});
+/**/
 
 })

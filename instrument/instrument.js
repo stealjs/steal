@@ -269,7 +269,8 @@ extend(steal.instrument, {
 	},
 	jsConvert: function(options, success, error){
 		var files = utils.parentWin().steal.instrument.files,
-			fileName = options.rootSrc,
+			file = options.rootSrc,
+			fileName = file.path,
 			instrumentation = files[fileName],
 			processInstrumentation = function(instrumentation){
 				var code = instrumentation.instrumentedCode;
@@ -278,19 +279,16 @@ extend(steal.instrument, {
 				utils.globalEval(code);
 				success();
 			}
-		if(utils.shouldIgnore(fileName) ||  
-			options.type != "js" || 
-			// if both are file: URLs its fine, otherwise make sure its the same domain
-			(!(location.protocol == "file:" && steal.File(options.originalSrc).protocol() == "file:") &&
-				location.host !== steal.File(options.originalSrc).domain())){
+		
+		if(utils.shouldIgnore(fileName) || file.ext() != "js"){
 			return origJSConverter.apply(this, arguments);
-		}	
+		}
+		
 		if(instrumentation){
 			processInstrumentation(instrumentation)
 			return;
 		}
-		
-		
+
 		steal.request(options, function(text){
 			// check cache first
 			var fileHash = utils.hashCode(text),
