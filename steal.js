@@ -2199,5 +2199,6 @@ if (support.interactive) {
 
 	//win.steals = steals;
 	win.resources = resources;
+	win.Resource = Resource;
 	
 })( this );

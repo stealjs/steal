@@ -41,7 +41,7 @@
 		},
 		preloading = {},
 		Deferred = steal.Deferred,
-		origLoad = steal.p.load;
+		origLoad = Resource.prototype.load;
 
 	extend( steal, {
 		preload: function() {
@@ -56,7 +56,7 @@
 	});
 
 	
-	extend(steal.p, {
+	extend(Resource.prototype, {
 		/**
 		 * This clobbers the original steal.load function to make sure we don't
 		 * load something twice.
