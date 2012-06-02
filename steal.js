@@ -1548,11 +1548,11 @@ each( extend( {
 			if ( createSheet ) {
 				// IE has a 31 sheet and 31 import per sheet limit
 				if(!cssCount++){
-					lastSheet = doc.createStyleSheet(options.src);
+					lastSheet = doc.createStyleSheet( addSuffix(options.src) );
 					lastSheetOptions = options;
 				} else {
 					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-					lastSheet.addImport( relative );
+					lastSheet.addImport( addSuffix(relative) );
 					if(cssCount == 30){
 						cssCount = 0;
 					}
