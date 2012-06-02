@@ -125,7 +125,7 @@ steal('steal/build/open','steal/build/apps','steal/get/json.js',function(s){
 				while(sharing = apps.getMostShared(options.files)){
 					shares.push(sharing);
 				};
-				packages.flatten(shares, 3000);
+				packages.flatten(shares, buildOptions.depth);
 				
 				
 				s.print("\nMaking Packages");
