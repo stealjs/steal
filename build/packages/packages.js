@@ -225,7 +225,7 @@ steal('steal/build/open','steal/build/apps','steal/get/json.js',function(s){
 				var makeCode = [],
 					mapCode;
 				for(name in makes) {
-					makeCode.push("steal.p.make(",
+					makeCode.push("Resource.make(",
 						s.toJSON(makes[name]),
 						");")
 				}
