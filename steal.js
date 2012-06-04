@@ -2073,27 +2073,53 @@ if (support.interactive) {
 		};
 
 	steal.getScriptOptions = function( script ) {
+
+    var options = {},
+        parts, src, query, startFile, env;
+
 		script = script || getStealScriptSrc();
 		
 		if ( script ) {
-			
-			// lol options regex
-			var matches = /(.+?)(steal\/)?steal\.(production\.)?js\??([^,]+)?(?:,(.+))?/.exec( script.src ),
-				options = {};
-			
-			options.rootUrl =  matches[2] ? 
-				matches[1] : 
-				matches[1] + "../";
-			
-			each({
-				// Object literal's map to matches indexes
-				3: "env", 
-				4: "startFile", 
-				5: "env"
-			}, function( k, v ) {
-				if ( matches[k] ) options[v] = matches[k];
-			});
+
+      // Split on question mark to get query
+      parts = script.src.split("?");
+      src = parts.shift();
+      query = parts.join("?");
+
+      // Split on comma to get startFile and env
+      parts = query.split(",");
+
+      if ( src.indexOf("steal.production") > -1 ) {
+        options.env = "production";
+      }
+
+      // Grab startFile
+      startFile = parts[0];
+
+      if ( startFile ) {
+        if ( startFile.indexOf(".js") == -1 ) {
+          startFile += "/" + startFile.split("/").pop() + ".js";
+        }
+        options.startFile = startFile;
+      }
+
+      // Grab env
+      env = parts[1];
+
+      if ( env ) {
+        options.env = env;
+      }
+
+      // Split on / to get rootUrl
+      parts = src.split("/")
+      parts.pop();
+      if ( parts[ parts.length - 1 ] == "steal" ) {
+        parts.pop();
+      }
+      options.rootUrl = parts.join("/")
+
 		}
+
 		return options;
 	};
 	

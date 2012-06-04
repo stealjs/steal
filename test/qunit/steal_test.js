@@ -416,24 +416,97 @@ test("filename", function(){
 		equal(res,"ChangedRet","updated return");
 		same(order, [0,1,2,3])
 	})
-	test("getScriptOptions", function(){
-		var script = document.createElement('script');
-		script.src= "../../steal/steal.js?foo";
-		var url = URI(script.src).domain() ?  URI(script.src).dir().dir()  : "../../";
-		
-		var options = steal.getScriptOptions(script);
-		
-		equals(options.rootUrl+'', url+"/","root url is right");
-		equals(options.startFile+'',"foo","app right");
-		
-		script.src = "../steal.js?bar.js";
+	test("getScriptOptions", function() {
 
-		options = steal.getScriptOptions(script);
-		
-		url = URI(script.src).domain() ?   URI(script.src).dir().dir()  : "../../";
-		
-		equals(options.rootUrl+'', url+"/","root url is right");
-		equals(options.startFile+'',"bar.js","app right");
+		// Create all the combinations of valid script types
+		var steals = [
+			"steal.js",
+			"steal.production.js",
+			"/steal.js",
+			"/steal.production.js",
+			"/path/to/steal/steal.js",
+			"/path/to/steal/steal.production.js",
+			"../../steal.js",
+			"../../steal.production.js"
+		], startFiles = [
+			"",
+			"foo",
+			"bar.js",
+		], modes = [
+			"",
+			"production",
+			"development"
+		], srcs = [];
+
+		$.each( steals, function( i, stealType ) {
+
+      var env;
+
+      if ( stealType.indexOf("production") > -1 ) {
+        env = "production";
+      }
+
+			srcs.push({
+				src: stealType,
+				rootUrl : undefined,
+				startFile : undefined,
+				env : env
+			});
+
+			$.each( startFiles, function( i, startFile ) {
+
+				var test = {
+					src : [stealType, startFile ].join("?"),
+          rootUrl : undefined,
+				}, expectedStartFile;
+
+				if ( startFile ) {
+					if ( startFile.indexOf(".js") > -1 ) {
+						expectedStartFile = startFile;
+					} else {
+						expectedStartFile = startFile + "/" + startFile + ".js";
+					}
+				} else {
+					expectedStartFile = undefined;
+				}
+
+
+        test.startFile = expectedStartFile;
+        test.env = env;
+
+				srcs.push( test );
+
+				$.each( modes, function( i, mode ) {
+          var test;
+					if ( startFile && mode ) {
+						srcs.push({
+              src : [stealType, [startFile, mode ].join() ].join("?"),
+              rootUrl: undefined,
+              startFile : expectedStartFile,
+              env : mode || env
+            });
+					}
+				});
+			});
+		});
+
+		// Test em!
+		$.each( srcs, function( i, src ) {
+
+			var script = document.createElement('script'),
+          options, uri;
+
+			script.src = src.src;
+			
+      uri = URI( script.src );
+
+
+			options = steal.getScriptOptions( script );
+
+			equals( options.startFile, src.startFile, "Correct startFile on " + src.src );
+			equals( options.env, src.env, "Correct environment on " + src.src );
+
+		});
 		
 	})
 
