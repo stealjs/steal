@@ -864,7 +864,10 @@
 		 */
 		makeOptions : function(options){
 			// convert it to a uri
-			var src = options.src = URI(options.src).addJS();
+			var src = options.src = URI(options.src);
+			if (!options.type) {
+				src = options.src = src.addJS();
+			}
 			
 			var orig = src,
 				// path relative to the current files path
