@@ -1,22 +1,22 @@
-steal.packages({"steal/build/packages/test/table_scroll.js": "steal/build/packages/test/packages/table_scroll.js", "mxui/nav/accordion/accordion.js": "steal/build/packages/test/packages/accordion.js", "mxui/layout/resize/resize.js": "steal/build/packages/test/packages/resize.js"});steal.p.make(
+steal.packages({"steal/build/packages/test/table_scroll.js": "steal/build/packages/test/packages/table_scroll.js", "mxui/nav/accordion/accordion.js": "steal/build/packages/test/packages/accordion.js", "mxui/layout/resize/resize.js": "steal/build/packages/test/packages/resize.js"});Resource.make(
 {"src": "steal/build/packages/test/packages/resize-accordion-table_scroll.js", "needs": [], "has": ["jquery/event/resize/resize.js", "jquery/dom/dom.js", "jquery/dom/cur_styles/cur_styles.js", "jquery/dom/dimensions/dimensions.js"]}
 );
-steal.p.make(
+Resource.make(
 {"src": "steal/build/packages/test/packages/resize-accordion.js", "needs": [], "has": ["jquery/event/livehack/livehack.js", "jquery/lang/vector/vector.js", "jquery/event/drag/drag.js"]}
 );
-steal.p.make(
+Resource.make(
 {"src": "steal/build/packages/test/packages/resize-table_scroll.js", "needs": [], "has": ["mxui/layout/fill/fill.js"]}
 );
-steal.p.make(
+Resource.make(
 {"src": "steal/build/packages/test/packages/table_scroll.js", "needs": ["steal/build/packages/test/packages/table_scroll.css", "steal/build/packages/test/packages/resize-accordion-table_scroll.js", "steal/build/packages/test/packages/resize-table_scroll.js"], "has": ["mxui/util/scrollbar_width/scrollbar_width.js", "mxui/layout/table_fill/table_fill.js", "mxui/layout/table_scroll/table_scroll.js", "steal/build/packages/test/table_scroll.js"]}
 );
-steal.p.make(
+Resource.make(
 {"src": "steal/build/packages/test/packages/table_scroll.css", "has": undefined}
 );
-steal.p.make(
+Resource.make(
 {"src": "steal/build/packages/test/packages/accordion.js", "needs": ["steal/build/packages/test/packages/resize-accordion-table_scroll.js", "steal/build/packages/test/packages/resize-accordion.js"], "has": ["mxui/nav/accordion/accordion.js"]}
 );
-steal.p.make(
+Resource.make(
 {"src": "steal/build/packages/test/packages/resize.js", "needs": ["steal/build/packages/test/packages/resize-accordion-table_scroll.js", "steal/build/packages/test/packages/resize-accordion.js", "steal/build/packages/test/packages/resize-table_scroll.js"], "has": ["mxui/layout/wrap/wrap.js", "mxui/layout/resize/resize.js"]}
 );
 steal.has('steal/build/packages/test/app.js','steal/build/packages/test/ejs.ejs','jquery/view/ejs/ejs.js','jquery/lang/string/rsplit/rsplit.js','jquery/lang/string/string.js','jquery/jquery.js','jquery/view/view.js','jquery/controller/route/route.js','jquery/controller/controller.js','jquery/event/destroyed/destroyed.js','jquery/event/event.js','jquery/class/class.js','jquery/dom/route/route.js','jquery/lang/string/deparam/deparam.js','jquery/event/hashchange/hashchange.js','jquery/lang/observe/observe.js');

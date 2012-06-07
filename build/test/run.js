@@ -5,8 +5,9 @@
 
 load('steal/build/js/js_test.js')
 load('steal/build/open/test/open_test.js')
-load('steal/build/packages/test/packages_test.js')
 load('steal/build/css/test/css_test.js')
+load('steal/build/pluginify/test/pluginify_test.js')
+load('steal/build/packages/test/packages_test.js')
 
 // not working yet below here
 

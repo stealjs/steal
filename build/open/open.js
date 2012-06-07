@@ -18,21 +18,21 @@ steal(function(s){
 			// this goes through the scripts until it finds one that waits for 
 			// everything before it to complete
 			// console.log('OPEN', name(stl), stl.id, "depends on", depends.length)
-			if(includeFns){
-				if(!depends.length){
-					touch([stl], CB)
-				}
-			}
+			// if(includeFns){
+				// if(!depends.length){
+					// touch([stl], CB)
+				// }
+			// }
 			while(i < depends.length){
 				if(depends[i].waits){
 					// once we found something like this ...
-					if(includeFns){
-						var steals = depends.splice(0,i+1),
-							curStl = steals[steals.length-1];
-					} else {
+					// if(includeFns){
+						// var steals = depends.splice(0,i+1),
+							// curStl = steals[steals.length-1];
+					// } else {
 						var steals = depends.splice(0,i),
 							curStl = depends.shift();
-					}
+					// }
 					
 					// load all these steals, and their dependencies
 					loadset(steals, CB, depth, includeFns);
@@ -83,6 +83,9 @@ steal(function(s){
 				iterate(steals[i], CB, depth, includeFns)
 			}
 		},
+		name = function(s){
+			return s.options.src;
+		},
 		window = (function() {
 			return this;
 		}).call(null, 0);
@@ -127,7 +130,6 @@ steal(function(s){
 	 * the content for a certain tag slightly easier.
 	 */
 	steal.build.open = function( url, stealData, cb, depth, includeFns ) {
-		
 		// save and remove the old steal
 		var oldSteal = window.steal || steal,
 			// new steal is the steal opened
@@ -167,7 +169,6 @@ steal(function(s){
 				each: function( filter, depth, func ) {
 					// reset touched
 					touched = {};
-					
 					// move params
 					if ( !func ) {
 						
@@ -178,6 +179,9 @@ steal(function(s){
 						} else if( typeof filter == 'boolean'){
 							func = depth;
 							depth = filter
+							filter = function(){return true;};
+						} else if(arguments.length == 2 && typeof filter == 'function' && typeof depth == 'boolean'){
+							func = filter;
 							filter = function(){return true;};
 						} else {  // filter given, no depth
 							func = depth;
@@ -195,6 +199,7 @@ steal(function(s){
 					}
 					var items = [];
 					// iterate 
+					
 					iterate(rootSteal, function(stealer){
 						
 						if( filter(stealer) ) {

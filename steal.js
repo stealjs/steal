@@ -1521,7 +1521,11 @@ each( extend( {
 		}
 	},
 	"fn" : function(options, success) {
-		success(options.fn());
+		var ret;
+	    if(!options.skipCallbacks){
+			ret = options.fn();
+		}
+		success(ret);
 	},
 	"text" : function(options, success, error){
 		steal.request(options, function(text){
