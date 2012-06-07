@@ -57,7 +57,7 @@ steal('steal/build/css').then(function( steal ) {
 		// if nothing can't be compressed, compress whole app in one step
 
 		// for each steal we find
-		opener.each('js', function( stl, text, i ) {
+		opener.each('js', true, function( stl, text, i ) {
 
 			var out = stl.rootSrc || "!";
 			// if we should ignore it, ignore it

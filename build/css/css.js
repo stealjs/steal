@@ -19,7 +19,7 @@ steal(function( steal ) {
 			scriptsConverted = [],
 			currentPackage = [];
 
-		opener.each('css', function( link, text, i ) {
+		opener.each('css', true, function( link, text, i ) {
 			steal.print("   " + link.rootSrc)
 			scriptsConverted.push(link.rootSrc)
 			var converted = convert(text, link.rootSrc, folder);
