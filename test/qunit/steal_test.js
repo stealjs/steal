@@ -22,9 +22,9 @@ if(window !== window.parent && window.parent.QUnit && !$.browser.msie){
 		})(methods[i])
 	}
 }
-	
-	
-	
+
+
+
 
 // testing new steal API
 
@@ -36,7 +36,7 @@ test("packages", function(){
 test("steal one js", function(){
 	// doesn't this imply the next ...
 	stop();
-	
+
 	steal("steal/test/files/steal.js", function(){
 		start();
 		equals(REQUIRED,"steal", "loaded the file")
@@ -52,8 +52,8 @@ test("steal one function", function(){
 		ok(true, "function called")
 	})
 });
-	
-	
+
+
 test("loading plugin from jmvcroot", function(){
 	PLUGINLOADED = false;
 	DEPENCENCYLOADED = false;
@@ -161,14 +161,14 @@ test("isCrossDomain", function(){
 	ok( URI("http://foo.bar").isCrossDomain("http://abc.def"), "two different hosts" )
 	ok( !URI("bar").isCrossDomain("http://abc.def"), "two different hosts" )
 	ok(  URI("http://abc.def").isCrossDomain("bar"), "two different hosts" )
-	
+
 	ok( URI("http://abc.def").isCrossDomain()  )
 })
 test("join", function() {
 
 	equals(''+URI("http://abc.com").join("/a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
-	
-	
+
+
 	equals(''+URI("http://abc.com/").join("/a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
 
 	equals(''+URI("http://abc.com/").join("a/b/c"), "http://abc.com/a/b/c", "http://abc.com/ + a/b/c was joined successfuly.");
@@ -187,11 +187,11 @@ test("join", function() {
 	equals(''+URI("a/b/c/").join("/d/e"), "/d/e", "/d/e was joined successfuly.");
 
 	equals(''+URI("a/b/c").join("/d/e"), "/d/e", "/d/e was joined successfuly.");
-	
-	
+
+
 	equals( ''+URI('/d/e').join('a/b.c'), "/d/e/a/b.c", "/d/e/a/b.c is correctly joined.");
-	
-	
+
+
 	equals(''+URI('d/e').join('a/b.c'), "d/e/a/b.c", "d/e/a/b.c is correctly joined.");
 
 	equals(''+URI('d/e/').join('a/b.c'), "d/e/a/b.c", "d/e/a/b.c is correctly joined.");
@@ -209,9 +209,9 @@ test("join", function() {
 	equals(''+URI('').join('a/b.c'), "a/b.c", "'' + a/b.c is correctly joined.");
 
 	equals(''+URI('').join('/a/b.c'), "/a/b.c", "'' + /a/b.c is correctly joined.");
-	
+
 	equals(''+URI('cookbook/').join('../../up.js'), "../up.js", "up.js is correctly joined.")
-	
+
 });
 
 test("pathTo", function() {
@@ -230,8 +230,8 @@ test("normalize", function(){
 	// normalizes from cur file (cur file should be kept relative to root)
 	URI.cur = URI("/a/b/");
 	equals(URI("./c/d").normalize(), "/a/b/c/d", "/a/b/c/d was normalized successfuly.");
-	
-	
+
+
 	URI.cur = URI("/a/b/c");
 	equals(URI("//d/e").normalize(), "d/e", "d/e was normalized successfuly.");
 
@@ -243,7 +243,7 @@ test("normalize", function(){
 
 	URI.cur = URI("http://abc.com");
 	equals(URI("/d/e").normalize(), "http://abc.com/d/e", "http://abc.com/d/e was normalized successfuly.");
-	
+
 	URI.cur = start;
 })
 
@@ -357,7 +357,7 @@ test("filename", function(){
 	/** /
 	test("buildType set", function(){
 		stop();
-		
+
 		steal.URI.root("../");
 		steal.type("foo js", function(options, success, error){
 			var parts = options.text.split(" ")
@@ -497,7 +497,7 @@ test("filename", function(){
           options, uri;
 
 			script.src = src.src;
-			
+
       uri = URI( script.src );
 
 
@@ -507,7 +507,7 @@ test("filename", function(){
 			equals( options.env, src.env, "Correct environment on " + src.src );
 
 		});
-		
+
 	})
 
 test("css", function(){
@@ -617,7 +617,7 @@ test("runs error callback", function(){
 
 test("needs", function(){
 	stop();
-	
+
 	steal.URI.root("../../").then({
 		src: "steal/test/files/needs.js",
 		needs: ["steal/test/files/needed.js"]
@@ -628,13 +628,13 @@ test("needs", function(){
 test("needs options", function(){
 	stop();
 	steal.options.needs.needs = 'steal/test/files/needstype.js'
-	
+
 	steal.URI.root("../../").then('steal/test/files/needs.needs',
 		function(){
-		
+
 		equals(NEEDS,"FOO")
 		start();
-		
+
 	});
 });
 /**/
