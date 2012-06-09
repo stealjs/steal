@@ -163,17 +163,17 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 		 * @return {file} the root dependency file for this application
 		 */
 		addDependencies: function( steel, options, appName ) {
-			steel.dependencies.forEach(function(dependency){
-				if ( dependency.dependencies && 
-					// don't follow functions
-				     dependency.options.buildType != 'fn' && 
-					 !dependency.options.ignore) {
-					 
-					// file.dependencyFileNames.push(dependency.options.rootSrc)
-					 
-					apps.addDependencies(dependency, options, appName);
-				}
-			});
+			// steel.dependencies.forEach(function(dependency){
+				// if ( dependency.dependencies && 
+					// // don't follow functions
+				     // dependency.options.buildType != 'fn' && 
+					 // !dependency.options.ignore) {
+// 					 
+					// // file.dependencyFileNames.push(dependency.options.rootSrc)
+// 					 
+					// apps.addDependencies(dependency, options, appName);
+				// }
+			// });
 			// check if a fn ...
 			//steal.print('addD '+steel.options.rootSrc)
 			var rootSrc = steel.options.rootSrc,
@@ -208,7 +208,7 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 			if(file.appNames.indexOf(appName) == -1){
 				file.appNames.push(appName);
 			}
-			steel.dependencies.forEach(function(dependency){
+			steel.dependencies.reverse().forEach(function(dependency){
 				if ( dependency.dependencies && 
 					// don't follow functions
 				     dependency.options.buildType != 'fn' && 
@@ -216,7 +216,7 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 					 
 					file.dependencyFileNames.push(dependency.options.rootSrc)
 					 
-					// apps.addDependencies(dependency, options, appName);
+					apps.addDependencies(dependency, options, appName);
 				}
 			});
 			

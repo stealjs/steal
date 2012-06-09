@@ -1398,8 +1398,11 @@
 			}
 			raw.type = ext;
 		}
-		if ( ! types[raw.type] ) {
+		if ( ! types[raw.type] && steal.options.env == 'development' ) {
 			throw "steal.js - type " + raw.type + " has not been loaded.";
+		} else if ( ! types[raw.type] && steal.options.env == 'production' ) {
+			// if we haven't defined EJS yet and we're in production, its ok, just ignore it
+			return;
 		}
 		var converters =  types[raw.type].convert;
 		raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
