@@ -5,7 +5,7 @@
 
 // _args = ['jquery/controller']; load('steal/pluginifyjs')
 
-steal('steal/parse','steal/build/scripts').then(
+steal('steal/parse','steal/build').then(
  function(s) {
 	var isArray = function(arr){
 		return Object.prototype.toString.call(arr)=== "[object Array]"
@@ -61,12 +61,11 @@ steal('steal/parse','steal/build/scripts').then(
 				s.pluginify = true;
 			}
 		};
-		
 		var out = [], 
 			str, 
 			i, 
 			inExclude = function(stl){
-				var path = stl.rootSrc;
+				var path = ''+stl.rootSrc;
 				for (var i = 0; i < opts.exclude.length; i++) {
 					if (path.indexOf(opts.exclude[i]) > -1 || stl._skip) {
 						return true;
@@ -83,26 +82,26 @@ steal('steal/parse','steal/build/scripts').then(
 			skipCallbacks: opts.skipCallbacks
 		}, function(opener){
 			opener.each(function(stl, text, i){
+				// print("> ",stl.rootSrc)
 				if(stl.buildType === "fn") {
 					fns[stl.rootSrc] = true;
 				}
 				else if(fns[stl.rootSrc] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
 					return;
 				}
-				// print(stl.rootSrc, stl.buildType);
 				if ((opts.standAlone && stl.rootSrc === plugin)
 					|| (!opts.standAlone && !inExclude(stl))) {
 				
 					var content = s.build.pluginify.content(stl, opts, text);
 					if (content) {
 						s.print("  > " + stl.rootSrc)
-						out.push(s.build.builders.scripts.clean(content));
+						out.push(s.build.js.clean(content));
 					}
 				}
 				else {
 					s.print("  Ignoring " + stl.rootSrc)
 				}
-			})
+			}, true)
 		}, true, true);
 		
 		var output = out.join(";\n");
@@ -140,7 +139,6 @@ steal('steal/parse','steal/build/scripts').then(
 			if (/steal[.\(]/.test(content)) {
 				
 				content = s.build.pluginify.getFunction(content, 0, opts.onefunc)
-				
 				if(content && !opts.onefunc){
 					content =  "(" + content + ")(" + param + ")";
 				}
@@ -153,7 +151,6 @@ steal('steal/parse','steal/build/scripts').then(
 		var p = s.parse(content), 
 			token, 
 			funcs = [];
-		
 		while (token = p.moveNext()) {
 			//print(token.value)
 			if (token.type !== "string") {

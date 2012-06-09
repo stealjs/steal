@@ -1,0 +1,6 @@
+.mxui_layout_table_scroll {
+	border: solid 1px black;
+}
+th {
+	background-image: url('../../css/test/upload.PNG');
+}

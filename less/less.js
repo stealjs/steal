@@ -1,23 +1,5 @@
-steal({src: "./less_engine.js",ignore: true}, function(){
-
-	if(steal.isRhino) {
-		// Some monkey patching of the LESS AST
-		// For production builds we NEVER want the parser to add paths to a url(),
-		// the CSS postprocessor is doing that already.
-		(function(tree) {
-			var oldProto = tree.URL.prototype;
-			tree.URL = function (val, paths) {
-				if (val.data) {
-					this.attrs = val;
-				} else {
-					this.value = val;
-					this.paths = paths;
-				}
-			};
-			tree.URL.prototype = oldProto;
-		})(less.tree);
-	}
-
+steal({src: "./less_engine.js",ignore: true},function(){
+	
 	/**
 	 * @page steal.less Less
 	 * @parent steal.static.type
@@ -56,10 +38,10 @@ steal({src: "./less_engine.js",ignore: true}, function(){
 	 * Less files end with <code>less</code>.
 	 * 
 	 */
+	
 	steal.type("less css", function(options, success, error){
 		var pathParts = options.src.split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
-
 		new (less.Parser)({
             optimization: less.optimization,
             paths: [pathParts.join('/')]

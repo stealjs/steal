@@ -16,6 +16,12 @@ steal.test =  {
 		this.testNamespace();
 		return steal;
 	},
+	// compares the file character counts, which is much faster than the string comparison
+	compareFiles: function(expected, actual, msg){
+		var actualJS = readFile(actual),
+			expectedJS = readFile(expected);
+		this.equals(actualJS.length, expectedJS.length, msg);
+	},
 	getWindow: function() {
 		return (function(){return this}).call(null,0)
 	},
