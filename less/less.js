@@ -39,22 +39,22 @@ steal({src: "./less_engine.js",ignore: true}, function(){
 	 * <p>First, create a less file like:</p>
 	 * @codestart css
 	 * @@my_color red
-	 * 
+	 *
 	 * body { color:  @@my_color; }
 	 * @codeend
-	 * 
+	 *
 	 * Save this in a file named <code>red.less</code>.
-	 * 
+	 *
 	 * Next, steal the <code>steal/less</code> plugin, wait for it to finish loading
 	 * (by using [steal.static.then then]) and then load the less file:
-	 * 
+	 *
 	 * @codestart
 	 * steal('steal/less').then('./red.less');
 	 * @codeend
 	 *
 	 * Loads Less files relative to the current file.  It's expected that all
 	 * Less files end with <code>less</code>.
-	 * 
+	 *
 	 */
 	steal.type("less css", function(options, success, error){
 		var pathParts = options.src.path.split('/');
