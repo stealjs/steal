@@ -1,13 +1,13 @@
 // A Rhino-version of steal
 (function(win){
 	
-	if(typeof console == 'undefined'){
+	// if(typeof console == 'undefined'){
 		console = {
 			log: function(){
 				print.apply(null, arguments)
 			}
 		}
-	}
+	// }
 	
 	win.steal = {
 		types : {
