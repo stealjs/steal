@@ -2000,18 +2000,17 @@ var interactiveScript,
 		}
 	},
 	getCachedInteractiveScript = function() {
-		var script;
 		if (interactiveScript && interactiveScript.readyState === "interactive") {
 			return interactiveScript;
 		}
-
-			return null;
-		};
-
+		
 		// check last inserted
-		if(lastInserted && lastInserted.readyState == "interactive"){
+		if(lastInserted && lastInserted.readyState == "interactive") {
 			return lastInserted;
 		}
+		
+		return null;
+	};
 
 
 support.interactive = doc && !!getInteractiveScript();
