@@ -635,13 +635,6 @@
 		 * files passed to the arguments.
 		 */
 		then : function(){
-			var args = map(arguments);
-			if(typeof args[0] === "string"){
-				args[0] = {src : args[0]}
-			}
-			if(typeof args[0] === "object"){
-				args[0].waits = true;
-			}
 			return steal.apply( win, args);
 		},
 		/**
@@ -818,8 +811,6 @@
 		},
 		types : {}
 	});
-
-	
 	// ============ RESOURCE ================
 
 	// a map of resources by resourceID
@@ -868,7 +859,62 @@
 		// id for debugging
 		this.id = (++id);
 
-		this.setOptions(options);
+		// if we have no options, we are the global Resource that
+		// contains all other resources.
+		if ( ! options ) { //global init cur ...
+			this.options = {};
+			this.waits = false;
+		}
+		//handle callback functions
+		else if ( isFn( options )) {
+			var uri = URI.cur,
+				self = this,
+				cur = steal.cur;
+
+			this.options = {
+				fn : function() {
+
+					// Set the URI if there are steals
+					// within the callback.
+					URI.cur = uri;
+
+					// we should get the current "module"
+					// check it's listed dependencies and see
+					// if they have a value
+				
+					var args = map(cur.dependencies, function(dep){
+						if(modules[dep.orig]){
+							return modules[dep.orig];
+						}
+						return dep.value;
+					})
+					
+					
+					var ret = options.apply(cur, args);
+					
+					// if this returns a value, we should register it as a module ...
+					if(ret){
+						// register this module ....
+						cur.value = ret;
+					}
+					return ret;
+				},
+				rootSrc: uri,
+				orig: options,
+				type: "fn"
+			}
+			// this has nothing to do with 'loading' options
+			this.waits = true;
+			this.unique = false;
+		} else {
+			// save the original options
+			this.orig = options;
+			this.options = steal.makeOptions( extend({},
+				isString( options ) ? { src: options } : options ));
+
+			this.waits = this.options.waits || false;
+			this.unique = true;
+		}
 		//console.log("created", this.orig)
 		// create the deferreds used to manage state
 		this.loaded = Deferred();
@@ -911,76 +957,8 @@
 
 		return resource;
 	};
-	
-	// updates the paths of things ...
-	// use modules b/c they are more fuzzy
-	// a module's id stays the same, but a path might change
-	// 
-	Resource.update = function(){
-		for(var rootSrc in resources){
-			if( !resources[resources].loaded.isResolved() ){
-				
-			}
-		}
-	}
+
 	extend(Resource.prototype, {
-		setOptions : function(options){
-			this.orig = options;
-			// if we have no options, we are the global Resource that
-			// contains all other resources.
-			if ( ! options ) { //global init cur ...
-				this.options = {};
-				this.waits = false;
-			}
-			//handle callback functions
-			else if ( isFn( options )) {
-				var uri = URI.cur,
-					self = this,
-					cur = steal.cur;
-	
-				this.options = {
-					fn : function() {
-	
-						// Set the URI if there are steals
-						// within the callback.
-						URI.cur = uri;
-	
-						// we should get the current "module"
-						// check it's listed dependencies and see
-						// if they have a value
-					
-						var args = map(cur.dependencies, function(dep){
-							if(modules[dep.orig]){
-								return modules[dep.orig];
-							}
-							return dep.value;
-						})
-						
-						
-						var ret = options.apply(cur, args);
-						
-						// if this returns a value, we should register it as a module ...
-						if(ret){
-							// register this module ....
-							cur.value = ret;
-						}
-						return ret;
-					},
-					rootSrc: uri,
-					type: "fn"
-				}
-				// this has nothing to do with 'loading' options
-				this.waits = true;
-				this.unique = false;
-			} else {
-				// save the original options
-				this.options = steal.makeOptions( extend({},
-					isString( options ) ? { src: options } : options ));
-	
-				this.waits = this.options.waits || false;
-				this.unique = true;
-			}
-		},
 		// Calling complete indicates that all dependencies have
 		// been completed for this resource
 		complete : function(){
@@ -1487,7 +1465,8 @@ request = function( options, success, error ) {
 	};
 
 	// =============================== STARTUP ===============================
-	var rootSteal = false;
+	var rootResource = false,
+		configResource;
 
 	// essentially ... we need to know when we are on our first steal
 	// then we need to know when the collection of those steals ends ...
@@ -1525,32 +1504,46 @@ request = function( options, success, error ) {
 
 		// called after steals are added to the pending queue
 		after: function(){
+	
+			// 1. in a file - wait until the initial config is done, then load it as the rootResource
+			// 2. in an inline script 
+			//    1. config isn't done ... trap those until config is done, add those to some run afte config is done
+			// 3. steal after first load - load it as the rootResource ...
+			if( !configResource.completed.isResolved()  ) {
+				
+			}
+	
 			// if we don't have a current 'top' steal
 			// we create one and set it up
 			// to start loading its dependencies (the current pending steals)
-			if ( ! rootSteal ) {
-				rootSteal = new Resource();
+			if ( ! rootResource ) {
+				rootResource = new Resource();
 
 				// keep a reference in case it disappears
-				var cur = rootSteal,
+				var cur = rootResource,
 					// runs when a steal is starting
 					go = function(){
-
+						var added = pending.slice(0);
+						pending = now;
+						console.log("GO", added, "ALL",pending.slice(0));
+						
 						// indicates that a collection of steals has started
 						// console.log('start', cur)
 						steal.trigger("start", cur);
 						cur.completed.then(function(){
 							console.log("COMPLETED")
-							rootSteal = null;
+							rootResource = null;
 							steal.trigger("end", cur);
 							// console.log("end", cur)
 
 						});
-						console.log("EXECUTING ...")
+						console.log("EXECUTING ...", pending.slice(0) );
 						cur.executed();
 					};
+				var now = pending.slice(0);
+				pending = [];
 				// if we are in rhino, start loading dependencies right away
-				if ( false && win.setTimeout ) {
+				if ( win.setTimeout ) {
 					// otherwise wait a small timeout to make
 					// sure we get all steals in the current file
 					setTimeout( go, 0 )
@@ -1892,6 +1885,9 @@ if (support.interactive) {
 		return options;
 	};
 
+	
+	var resourcesToLoad = [];
+
 	startup = after(startup, function(){
 		var options = steal.options;
 
@@ -1928,14 +1924,14 @@ if (support.interactive) {
 			steal.executed(stel)
 		})
 		// immediate steals we do
-		var steals = [];
+		var configResources = [];
 
 		// add start files first
 		if(options.startFiles){
 			/// this can be a string or an array
-			steals.push.apply(steals, isString( options.startFiles ) ?
+			configResources.push.apply(steals, isString( options.startFiles ) ?
 				[{src: options.startFiles, waits: true}] : options.startFiles)
-			options.startFiles = steals.slice(0)
+			options.startFiles = configResources.slice(0)
 		}
 
 		// either instrument is in this page (if we're the window opened from
@@ -1949,7 +1945,7 @@ if (support.interactive) {
 				win.top && win.top.opener &&
 				win.top.opener.steal && win.top.opener.steal.options.instrument )) {
 				// force startFiles to load before instrument
-				steals.push(noop, {
+				configResources.push(noop, {
 					src: "steal/instrument",
 					waits: true
 				});
@@ -1966,22 +1962,34 @@ if (support.interactive) {
 				force: true
 			});
 		} else {
-			steals.unshift("stealconfig.js")
+			
 			
 			if (options.loadDev !== false) {
-				steals.unshift({
+				configResources.unshift({
 					src: "steal/dev/dev.js",
 					ignore: true
 				});
 			}
-
+			configResources.unshift("stealconfig.js")
 			if (options.startFile) {
-				steals.push(options.startFile)
+				resourcesToLoad.push(options.startFile)
 			}
 		}
-		if (steals.length) {
-			steal.apply(win, steals);
+		if(configResources.length){
+			pending = configResources;
+			configResource.executed();
+			configResource.completed.then(function(){
+				console.log("ADDING",resourcesToLoad )
+				pending.unshift.apply(pending, resourcesToLoad);
+				
+			})
+		} else {
+			configResource.complete();
+			
 		}
+		//if (steals.length) {
+		//	steal.apply(win, steals);
+		//}
 	});
 
 
@@ -1989,11 +1997,6 @@ if (support.interactive) {
 	var modules = {
 		
 	};
-	
-	// convert resources to modules ...
-	// a function is a module definition piece
-	// you steal(moduleId1, moduleId2, function(module1, module2){});
-	// 
 	win.define = function(moduleId, dependencies, method){
 		if(!dependencies.length){
 			modules[moduleId] = method();

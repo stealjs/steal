@@ -639,4 +639,17 @@ test("needs options", function(){
 });
 /**/
 
+test("modules", function(){
+	
+	steal.URI.root("../../");
+	stop();
+	steal("steal/test/modules/module1.js", function(module1){
+		ok(module1.foo, true)
+		start();
+	})
+	
+})
+
+
+
 })
