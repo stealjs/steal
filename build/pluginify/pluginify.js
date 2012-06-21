@@ -132,7 +132,7 @@ steal('steal/parse','steal/build').then(
 				contents = readFile(steal.rootSrc);
 			funcCount[steal.rootSrc]++;
 			var contents = s.build.pluginify.getFunction(contents, index, opts.onefunc);
-			return opts.onefunc ? contents : "(" + contents + ")(" + param + ")";
+			return opts.onefunc ? contents : ";(" + contents + ")(" + param + ");";
 		}
 		else {
 			var content = readFile(steal.rootSrc);
@@ -140,7 +140,7 @@ steal('steal/parse','steal/build').then(
 				
 				content = s.build.pluginify.getFunction(content, 0, opts.onefunc)
 				if(content && !opts.onefunc){
-					content =  "(" + content + ")(" + param + ")";
+					content =  ";(" + content + ")(" + param + ");";
 				}
 			}
 			//make sure steal isn't in here
