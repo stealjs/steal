@@ -113,7 +113,7 @@ steal('steal/parse','steal/build').then(
 		}
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
-			var compressor = steal.build.builders.scripts.compressors[compressorName]()
+			var compressor = steal.build.js.minifiers[compressorName]()
 			output = compressor(output);
 		}
 		
