@@ -86,10 +86,10 @@
  * - Remote files (not on the same domain) are skipped because they can't be loaded via AJAX.
  * 
  */
+if(!steal.instrument){
+	steal.instrument = {};
+}
 
-
-
-steal.instrument = {};
 steal("./parser.js").then("./process.js", "./utils.js", function(){
 
 var utils = steal.instrument.utils,
