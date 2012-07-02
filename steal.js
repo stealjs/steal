@@ -2194,7 +2194,7 @@ if (support.interactive) {
 		try {
 			if ( options.instrument || ( ! options.browser &&
 				win.top && win.top.opener &&
-				win.top.opener.steal && win.top.opener.steal.options.instrument )) {
+				win.top.opener.steal && win.top.opener.steal.instrument )) {
 				// force startFiles to load before instrument
 				steals.push(noop, {
 					src: "steal/instrument",
