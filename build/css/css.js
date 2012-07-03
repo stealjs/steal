@@ -52,17 +52,17 @@ steal(function( steal ) {
 		if(!steals || !steals.length){
 			return null;
 		}
-		var directory = steal.File(where).dir()
-		var srcs = [];
-		var codez = [];
-		steals.forEach(function(stealOpts){
-			
-			codez.push(convert(stealOpts.text, stealOpts.rootSrc, directory))
+		
+		var directory = steal.File(where).dir(),
+			srcs = code = [];
+		
+		steals.forEach(function(stealOpts){		
+			code.push(convert(stealOpts.text, stealOpts.rootSrc, directory))
 			srcs.push(stealOpts.rootSrc+'')
 		});
 		
 		var raw_css = code.join("\n"),
-			minified_css = css.min(raw_css);
+			minified_css = css.minify(raw_css);
 		
 		return {
 			srcs: srcs,
