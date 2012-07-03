@@ -230,12 +230,9 @@ steal('steal/build/css').then(function( steal ) {
 			code.push( file.text, "steal.executed('"+file.rootSrc+"')" );
 		});
 		
-		var cssPackage = steal.build.css.makePackage(csses, cssPackage),
-			cssCode = cssPackage? cssPackage.code: null;
-		
 		return {
 			js: code.join(";\n") + "\n",
-			css: cssCode
+			css: steal.build.css.makePackage(csses, cssPackage)
 		}
 	}
 }).then('./jsminify');
