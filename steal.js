@@ -1987,29 +1987,37 @@ request = function( options, success, error ) {
 	// Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are
 	// dependencies of another, steal needs to check which is the currently "interactive" script.
 
-var interactiveScript,
-	// key is script name, value is array of pending items
-	interactives = {},
-	getInteractiveScript = function(){
-		var scripts = getElementsByTagName("script"),
-			i = scripts.length;
-		while ( i-- ) {
-			if (scripts[i].readyState === "interactive") {
-				return scripts[i];
+	var interactiveScript, 
+		// key is script name, value is array of pending items
+		interactives = {},
+		getInteractiveScript = function(){
+			var scripts = getElementsByTagName("script"),
+				i = scripts.length;
+			while ( i-- ) {
+				if (scripts[i].readyState === "interactive") {
+					return scripts[i];
+				}
 			}
-		}
-	},
-	getCachedInteractiveScript = function() {
-		// check last inserted
-		if(lastInserted && lastInserted.readyState == "interactive"){
-			return lastInserted;
-		}
-		return null;
-	};
+		},
+		getCachedInteractiveScript = function() {
+			if (interactiveScript && interactiveScript.readyState === 'interactive') {
+				return interactiveScript;
+			}
+			
+			if(interactiveScript = getInteractiveScript()){
+				return interactiveScript;
+			}
+			
+			// check last inserted
+			if(lastInserted && lastInserted.readyState == 'interactive'){
+				return lastInserted;
+			}
+		
+			return null;
+		};
 
 
 support.interactive = doc && !!getInteractiveScript();
-
 
 if (support.interactive) {
 
@@ -2042,29 +2050,18 @@ if (support.interactive) {
 	// This is used for packaged scripts.  As the packaged script executes, we grab the
 	// dependencies that have come so far and assign them to the loaded script
 	steal.preexecuted = before(steal.preexecuted, function(stel){
+		// check if disabled by steal.loading()
+		if (!support.interactive) {
+			return;
+		}
+		
 		// get the src name
 		var src = stel.options.src,
 			// and the src of the current interactive script
 			interactiveSrc = getCachedInteractiveScript().src;
 
-		// This is used for packaged scripts.  As the packaged script executes, we grab the
-		// dependencies that have come so far and assign them to the loaded script
-		steal.preloaded = before(steal.preloaded, function(stel){
-
-			// check if disabled by steal.loading()
-			if (!support.interactive) {
-				return;
-			}
-
-			// get the src name
-			var src = stel.options.src,
-				// and the src of the current interactive script
-				interactiveSrc = getCachedInteractiveScript().src;
-
-
-			interactives[src] = interactives[interactiveSrc];
-			interactives[interactiveSrc] = null;
-		});
+		interactives[src] = interactives[interactiveSrc];
+		interactives[interactiveSrc] = null;
 
 	})
 }
