@@ -264,7 +264,7 @@
 			return this;
 		},
 
-		then : function() {
+		then: function() {
 			var args = map( arguments );
 			// fail function(s)
 			if (args.length > 1 && args[1])
@@ -503,7 +503,7 @@
 		 * files/a = //files/a/a.js
 		 * files/a.js = loads //files/a.js
 		 */
-		normalize : function() {
+		normalize: function() {
 			var cur = URI.cur.dir(),
 				path = this.path;
 			//if path is rooted from steal's root (DEPRECATED)
@@ -599,9 +599,9 @@
 		 * when a 'unique' steal gets added ...
 		 * @param {Object} stel
 		 */
-		add : function(stel){
+		/*add: function(stel){
 			steals[stel.rootSrc] = stel;
-		},
+		},*/
 		/**
 		 * @hide
 		 * Makes options
@@ -609,9 +609,9 @@
 		 */
 		makeOptions : function(options){
 			// convert it to a uri
-			var src = options.src = URI(options.src);
+			var src = options.id = options.id = URI(options.id);
 			if (!options.type) {
-				src = options.src = src.addJS();
+				src = options.id = options.src = src.addJS();
 			}
 
 			var orig = src,
@@ -623,7 +623,8 @@
 				originalSrc : orig,
 				rootSrc : normalized,
 				// path from the page
-				src : URI.root().join( normalized )
+				src : URI.root().join( normalized ),
+				id : normalized
 			});
 			options.originalSrc = options.src;
 
@@ -634,10 +635,10 @@
 		 * have completed loading until loading the
 		 * files passed to the arguments.
 		 */
-		then : function(){
+		then: function(){
 			var args = map(arguments);
 			if(typeof args[0] === "string"){
-				args[0] = {src : args[0]}
+				args[0] = {id : args[0]}
 			}
 			if(typeof args[0] === "object"){
 				args[0].waits = true;
@@ -862,7 +863,7 @@
 	//   completed
 	// - dependencies - an array of dependencies
 	var Resource = function( options ) {
-		console.log("creating resource ... ",options)
+		(""+options).indexOf("util") > 0  && console.log("creating resource ... ",options)
 		// an array for dependencies, this is
 		this.dependencies = [];
 		// id for debugging
@@ -882,25 +883,27 @@
 		// create the temporary reasource
 		var resource = new Resource( options ),
 			// use `rootSrc` as the definitive ID
-			rootSrc = resource.options.rootSrc;
+			id = resource.options.id;
 
 		// assuming this resource should not be created again.
-		if ( resource.unique && rootSrc ) {
+		if ( resource.unique && id ) {
 
 			// Check if we already have a resource for this rootSrc
 			// Also check with a .js ending because we defer 'type'
 			// determination until later
-			if ( ! resources[rootSrc] && ! resources[rootSrc + ".js"] ) {
+			if ( ! resources[id] && ! resources[id + ".js"] ) {
 				// If we haven't loaded, cache the resource
-				resources[rootSrc] = resource;
+				(""+id).indexOf("util") > 0  && console.log("caching", id)
+				resources[id] = resource;
 			} else {
+				(""+id).indexOf("util") > 0  && console.log("using cached", id)
 				// Otherwise get the cached resource
-				resource = resources[rootSrc];
+				resource = resources[id];
 				// If options were passed, copy new properties over.
 				// Don't copy src, etc because those have already
 				// been changed to be the right values;
 				if(!isString( options )){
-					each(["src","rootSrc","originalSrc"], function(i, name){
+					each(["src","rootSrc","originalSrc","id"], function(i, name){
 						delete options[name];
 					});
 					extend(resource.options, options);
@@ -949,12 +952,33 @@
 						// check it's listed dependencies and see
 						// if they have a value
 					
-						var args = map(cur.dependencies, function(dep){
-							if(modules[dep.orig]){
-								return modules[dep.orig];
+						var args = [],
+							found = false,
+							reversed = cur.dependencies.slice(0).reverse(),
+							dep;
+						for( var i = cur.dependencies.length; i >= 0 ; i-- ) {
+							dep = cur.dependencies[i];
+							
+							if( found ) {
+								if(modules[dep.orig]){
+									args.unshift(modules[dep.orig]);
+									// cause jquery might have a wait object
+								}else if(dep.orig && modules[dep.orig.id]) {
+									args.unshift(modules[dep.orig.id]);
+								} else {
+									args.unshift( dep.value );
+								}
+								
+								
+								if( dep.waits && cur.orig === undefined) {
+									break;
+								}
 							}
-							return dep.value;
-						})
+							if(dep === self){
+								found = true;
+							}
+						}
+						
 						
 						
 						var ret = options.apply(cur, args);
@@ -975,7 +999,7 @@
 			} else {
 				// save the original options
 				this.options = steal.makeOptions( extend({},
-					isString( options ) ? { src: options } : options ));
+					isString( options ) ? { id: options } : options ));
 	
 				this.waits = this.options.waits || false;
 				this.unique = true;
@@ -998,6 +1022,8 @@
 
 			// Set this as the current file so any relative urls
 			// will load from it.
+			// rootSrc needs to be the translated path
+			// we need id vs rootSrc ...
 			if ( this.options.rootSrc ) {
 				URI.cur = URI( rootSrc );
 			}
@@ -1516,6 +1542,11 @@ request = function( options, success, error ) {
 					test : new RegExp("^(\/?"+from+")([/.]|$)"),
 					path: to
 				};
+				each(resources, function(id, resource){
+					if(resource.options.type != "fn"){
+						resource.setOptions(resource.orig)
+					}
+				})
 			} else { // its an object
 				each( from, steal.map );
 			}
@@ -1550,10 +1581,23 @@ request = function( options, success, error ) {
 						cur.executed();
 					};
 				// if we are in rhino, start loading dependencies right away
-				if ( false && win.setTimeout ) {
+				if ( win.setTimeout ) {
 					// otherwise wait a small timeout to make
 					// sure we get all steals in the current file
-					setTimeout( go, 0 )
+					console.log(pending.slice(0))
+					var first = pending.slice(0);
+					pending = [];
+					setTimeout( function(){
+						
+						if(typeof pending[0] === "string"){
+							pending[0] = {id : pending[0]}
+						}
+						if(typeof pending[0] === "object"){
+							pending[0].waits = true;
+						}
+						pending.unshift.apply(pending, first);
+						go();
+					}, 0 )
 				} else {
 					go()
 				}
@@ -1934,7 +1978,7 @@ if (support.interactive) {
 		if(options.startFiles){
 			/// this can be a string or an array
 			steals.push.apply(steals, isString( options.startFiles ) ?
-				[{src: options.startFiles, waits: true}] : options.startFiles)
+				[{id: options.startFiles, waits: true}] : options.startFiles)
 			options.startFiles = steals.slice(0)
 		}
 
@@ -1950,7 +1994,7 @@ if (support.interactive) {
 				win.top.opener.steal && win.top.opener.steal.options.instrument )) {
 				// force startFiles to load before instrument
 				steals.push(noop, {
-					src: "steal/instrument",
+					id: "steal/instrument",
 					waits: true
 				});
 			}
@@ -1970,7 +2014,7 @@ if (support.interactive) {
 			
 			if (options.loadDev !== false) {
 				steals.unshift({
-					src: "steal/dev/dev.js",
+					id: "steal/dev/dev.js",
 					ignore: true
 				});
 			}
