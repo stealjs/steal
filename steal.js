@@ -699,7 +699,7 @@
 		has: function() {
 			// we don't use IE's interactive script functionality while
 			// production scripts are loading
-			useInteractive = false;
+			support.interactive = false;
 			each(arguments, function(i, arg) {
 				var stel = Resource.make( arg );
 				stel.loading = stel.executing = true;
@@ -1790,40 +1790,48 @@ request = function( options, success, error ) {
 	// Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are
 	// dependencies of another, steal needs to check which is the currently "interactive" script.
 
-var interactiveScript,
-	// key is script name, value is array of pending items
-	interactives = {},
-	getInteractiveScript = function(){
-		var scripts = getElementsByTagName("script"),
-			i = scripts.length;
-		while ( i-- ) {
-			if (scripts[i].readyState === "interactive") {
-				return scripts[i];
+	var interactiveScript, 
+		// key is script name, value is array of pending items
+		interactives = {},
+		getInteractiveScript = function(){
+			var scripts = getElementsByTagName("script"),
+				i = scripts.length;
+			while ( i-- ) {
+				if (scripts[i].readyState === "interactive") {
+					return scripts[i];
+				}
 			}
-		}
-	},
-	getCachedInteractiveScript = function() {
-		var script;
-		if (interactiveScript && interactiveScript.readyState === "interactive") {
-			return interactiveScript;
-		}
-
+		},
+		getCachedInteractiveScript = function() {
+			if (interactiveScript && interactiveScript.readyState === 'interactive') {
+				return interactiveScript;
+			}
+			
+			if(interactiveScript = getInteractiveScript()){
+				return interactiveScript;
+			}
+			
+			// check last inserted
+			if(lastInserted && lastInserted.readyState == 'interactive'){
+				return lastInserted;
+			}
+		
 			return null;
 		};
 
-		// check last inserted
-		if(lastInserted && lastInserted.readyState == "interactive"){
-			return lastInserted;
-		}
-
 
 support.interactive = doc && !!getInteractiveScript();
-
 
 if (support.interactive) {
 
 	// after steal is called, check which script is "interactive" (for IE)
 	steal.after = after(steal.after, function(){
+		
+		// check if disabled by steal.loading()
+		if (!support.interactive) {
+			return;
+		}
+			
 		var interactive = getCachedInteractiveScript();
 		// if no interactive script, this is a steal coming from inside a steal, let complete handle it
 		if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
@@ -1845,23 +1853,18 @@ if (support.interactive) {
 	// This is used for packaged scripts.  As the packaged script executes, we grab the
 	// dependencies that have come so far and assign them to the loaded script
 	steal.preexecuted = before(steal.preexecuted, function(stel){
+		// check if disabled by steal.loading()
+		if (!support.interactive) {
+			return;
+		}
+		
 		// get the src name
 		var src = stel.options.src,
 			// and the src of the current interactive script
 			interactiveSrc = getCachedInteractiveScript().src;
 
-		// This is used for packaged scripts.  As the packaged script executes, we grab the
-		// dependencies that have come so far and assign them to the loaded script
-		steal.preloaded = before(steal.preloaded, function(stel){
-			// get the src name
-			var src = stel.options.src,
-				// and the src of the current interactive script
-				interactiveSrc = getCachedInteractiveScript().src;
-
-
-			interactives[src] = interactives[interactiveSrc];
-			interactives[interactiveSrc] = null;
-		});
+		interactives[src] = interactives[interactiveSrc];
+		interactives[interactiveSrc] = null;
 
 	})
 }
@@ -1991,7 +1994,7 @@ if (support.interactive) {
 		try {
 			if ( options.instrument || ( ! options.browser &&
 				win.top && win.top.opener &&
-				win.top.opener.steal && win.top.opener.steal.options.instrument )) {
+				win.top.opener.steal && win.top.opener.steal.instrument )) {
 				// force startFiles to load before instrument
 				steals.push(noop, {
 					id: "steal/instrument",

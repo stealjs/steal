@@ -52,18 +52,18 @@ steal(function( steal ) {
 		if(!steals || !steals.length){
 			return null;
 		}
-		var directory = steal.File(where).dir()
-		var srcs = [];
-		var codez = [];
+		
+		var directory = steal.File(where).dir(),
+			srcs = [], codez = [];
+		
 		steals.forEach(function(stealOpts){
-			
 			codez.push(convert(stealOpts.text, stealOpts.rootSrc, directory))
 			srcs.push(stealOpts.rootSrc+'')
 		});
 		
 		return {
 			srcs: srcs,
-			code : codez.join('\n')
+			code : css.minify(codez.join('\n'))
 		}
 	}
 	//used to convert css referencs in one file so they will make sense from prodLocation
