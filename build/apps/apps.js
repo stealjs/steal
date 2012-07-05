@@ -174,10 +174,6 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 						// some might not have source yet
 						steal.print("  + "+rootSrc)
 						var source = steel.options.text ||  readFile( rootSrc );
-						source = steal.build[buildType].clean(source);
-						if(options.minify !== false){
-							source = steal.build[buildType].minify(source);
-						}
 						steel.options.text = source //
 					}
 					
@@ -443,7 +439,6 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 				// the files that will actually get packaged
 				var filesForPackaging = []; 
 				
-				// 
 				sharing.files.forEach(function(file){
 					// add the files to the packagesFiles
 					packagesFiles[packageName+".js"].push(file.stealOpts.rootSrc);
@@ -466,8 +461,6 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 				//the source of the package
 				//
 				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css")
-
-				
 
 				//save the file
 				steal.print("saving " + packageName+".js");

@@ -175,10 +175,28 @@ steal('steal/build/css').then(function( steal ) {
 	js.makePackage = function(files, dependencies, cssPackage){
 		// put it somewhere ...
 		// add to dependencies ...
-		
 		// seperate out css and js
 		var jses = [],
 			csses = [];
+				
+		// if even one file has compress: false, we can't compress the whole package at once
+		var canCompressPackage = true;
+		files.forEach(function(file){
+			if(file.minify === false){
+				canCompressPackage = false;
+			}
+		});
+		if(!canCompressPackage){
+			files.forEach(function(file){
+				if(file.buildType == 'js'){
+					var source = steal.build.js.clean(file.text);
+					if(file.minify !== false){
+						source = steal.build.js.minify(source);
+					}
+					file.text = source;
+				}
+			});
+		}
 		
 		files.forEach(function(file){
 			if ( file.packaged === false ) {
@@ -230,8 +248,15 @@ steal('steal/build/css').then(function( steal ) {
 			code.push( file.text, "steal.executed('"+file.rootSrc+"')" );
 		});
 		
+		var jsCode = code.join(";\n") + "\n";
+		
+		if(canCompressPackage){
+			jsCode = steal.build.js.clean(jsCode);
+			jsCode = steal.build.js.minify(jsCode);
+		}
+		
 		return {
-			js: code.join(";\n") + "\n",
+			js: jsCode,
 			css: steal.build.css.makePackage(csses, cssPackage)
 		}
 	}
