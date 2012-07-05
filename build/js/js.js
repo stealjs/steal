@@ -255,9 +255,11 @@ steal('steal/build/css').then(function( steal ) {
 			jsCode = steal.build.js.minify(jsCode);
 		}
 		
+		var csspackage = steal.build.css.makePackage(csses, cssPackage);
+		
 		return {
 			js: jsCode,
-			css: steal.build.css.makePackage(csses, cssPackage)
+			css: csspackage && csspackage.code
 		}
 	}
 }).then('./jsminify');
