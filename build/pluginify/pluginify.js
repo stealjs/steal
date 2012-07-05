@@ -53,7 +53,7 @@ steal('steal/parse','steal/build').then(
 		if (opts.nojquery) {
 			jq = false;
 			//othervar = opts.nojquery;
-			opts.exclude.push('jquery.js');
+			opts.exclude.push("jquery.js");
 		}
 		opts.exclude.push("steal/dev/")
 		rhinoLoader = {
@@ -65,7 +65,7 @@ steal('steal/parse','steal/build').then(
 			str, 
 			i, 
 			inExclude = function(stl){
-				var path = ''+stl.rootSrc;
+				var path = ""+stl.rootSrc;
 				for (var i = 0; i < opts.exclude.length; i++) {
 					if (path.indexOf(opts.exclude[i]) > -1 || stl._skip) {
 						return true;
@@ -89,7 +89,7 @@ steal('steal/parse','steal/build').then(
 				else if(fns[stl.rootSrc] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
 					return;
 				}
-				if ((opts.standAlone && stl.rootSrc === plugin)
+				if ((opts.standAlone && ( ""+stl.rootSrc ) === plugin )
 					|| (!opts.standAlone && !inExclude(stl))) {
 				
 					var content = s.build.pluginify.content(stl, opts, text);
@@ -126,7 +126,7 @@ steal('steal/parse','steal/build').then(
 	s.build.pluginify.content = function(steal, opts, text){
 		var param = opts.global;
 		
-		if (steal.buildType == 'fn') {
+		if (steal.buildType == "fn") {
 			// if it's a function, go to the file it's in ... pull out the content
 			var index = funcCount[steal.rootSrc] || 0, 
 				contents = readFile(steal.rootSrc);
