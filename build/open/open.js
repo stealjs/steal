@@ -1,5 +1,4 @@
 steal(function(s){
-	
 	// Methods for walking through steal and its dependencies
 	
 	// which steals have been touched in this cycle
@@ -138,6 +137,10 @@ steal(function(s){
 		// remove the current steal
 		delete window.steal;
 		
+		// clean up window in case this is the second time Envjs has opened the page
+		for(var n in window){
+			delete window[n];
+		}
 		// move params
 		if ( typeof stealData == 'object') {
 			window.steal = stealData;
@@ -146,6 +149,8 @@ steal(function(s){
 		}
 		// get envjs
 		load('steal/rhino/env.js'); //reload every time
+		
+		
 	
 		// what gets called by steal.done
 		// rootSteal the 'master' steal
