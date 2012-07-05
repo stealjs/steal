@@ -468,7 +468,7 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 
 				if(pack.css){
 					steal.print("saving " + packageName+".css");
-					steal.File(packageName+".css").save( pack.css );
+					steal.File(packageName+".css").save( pack.css.code );
 					// I need to tell things that 
 					// have this dependency, that this dependency needs
 					// me

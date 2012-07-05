@@ -259,7 +259,7 @@ steal('steal/build/css').then(function( steal ) {
 		
 		return {
 			js: jsCode,
-			css: csspackage && csspackage.code
+			css: csspackage
 		}
 	}
 }).then('./jsminify');
