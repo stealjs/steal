@@ -89,7 +89,7 @@ steal('steal/parse','steal/build').then(
 				else if(fns[stl.rootSrc] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
 					return;
 				}
-				if ((opts.standAlone && ""+stl.rootSrc === plugin)
+				if ((opts.standAlone && ( ""+stl.rootSrc ) === plugin )
 					|| (!opts.standAlone && !inExclude(stl))) {
 				
 					var content = s.build.pluginify.content(stl, opts, text);
