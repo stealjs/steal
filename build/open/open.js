@@ -139,7 +139,10 @@ steal(function(s){
 		
 		// clean up window in case this is the second time Envjs has opened the page
 		for(var n in window){
-			delete window[n];
+			// TODO make this part of steal namespace
+			if(n !== "STEALPRINT"){
+				delete window[n];
+			}
 		}
 		// move params
 		if ( typeof stealData == 'object') {
