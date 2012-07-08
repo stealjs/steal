@@ -195,7 +195,7 @@
 			},
 			_regs : regs
 		});
-})(jQuery);
+})(jQuery);;
 (function( $ ) {
 	/**
 	 * @attribute destroyed
@@ -232,7 +232,7 @@
 		oldClean(elems);
 	};
 
-})(jQuery);
+})(jQuery);;
 (function( $ ) {
 
 	// =============== HELPERS =================
@@ -1012,7 +1012,7 @@
 	proxy = clss.proxy;
 
 
-})(jQuery);
+})(jQuery);;
 (function( $ ) {
 	// ------- HELPER FUNCTIONS  ------
 	
@@ -2101,4 +2101,4 @@
 	});
 	
 
-})(jQuery)
+})(jQuery);

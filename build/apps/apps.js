@@ -460,7 +460,7 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 				
 				//the source of the package
 				//
-				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css")
+				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css", options.exclude)
 
 				//save the file
 				steal.print("saving " + packageName+".js");

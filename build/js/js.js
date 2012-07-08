@@ -160,6 +160,8 @@ steal('steal/build/css').then(function( steal ) {
 	 * @param {String} cssPackage the css package name, added as dependency if
 	 * there is css in files.
 	 * 
+	 * @param {Array} exclude an array of files to exclude from the package
+	 * 
 	 * @return {Object} an object with the css and js 
 	 * code that make up this package unminified
 	 * 
@@ -172,10 +174,11 @@ steal('steal/build/css').then(function( steal ) {
 	 *     }
 	 * 
 	 */
-	js.makePackage = function(files, dependencies, cssPackage){
+	js.makePackage = function(files, dependencies, cssPackage, exclude){
 		// put it somewhere ...
 		// add to dependencies ...
 		// seperate out css and js
+		exclude = exclude || [];
 		var jses = [],
 			csses = [];
 				
@@ -207,7 +210,7 @@ steal('steal/build/css').then(function( steal ) {
 			}
 			
 			// ignore
-			if ( file.ignore ) {
+			if ( file.ignore || (exclude.indexOf(''+file.rootSrc) != -1)) {
 				steal.print('   ignoring ' + file.rootSrc);
 				return;
 			}
