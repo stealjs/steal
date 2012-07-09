@@ -728,7 +728,7 @@
 		executed: function(name) {
 			// create the steal, mark it as loading, then as loaded
 			var stel = Resource.make( name );
-			stel.loading = true;
+			stel.loading = stel.executing = true;
 			//convert(stel, "complete");
 
 			steal.preexecuted(stel);
@@ -1699,8 +1699,7 @@ request = function( options, success, error ) {
 			each(this.options.has, function( i, has ) {
 				// don't want the current file to change, since we're just marking files as loaded
 				URI.cur = URI(current);
-				stel = Resource.make( has );
-				stel.executed();
+				steal.executed(has);
 			});
 
 		}

@@ -38,16 +38,10 @@ steal('steal/test', function( s ) {
 				
 				s.test.equals(
 					res.js,
-					"steal.has('a.js','b.js');\n"+
-					"steal({src: 'package/1.js', waits: true, has: ['jquery/jquery.js']});\n"+
-					"steal({src: 'package/css.css', waits: true, has: ['c.css']});\n"+
-					"a;\n"+
-					"steal.executed('a.js');\n"+
-					"b;\n"+
-					"steal.executed('b.js')\n",
+					'steal.has("a.js","b.js");steal({src:"package/1.js",waits:!0,has:["jquery/jquery.js"]});steal({src:"package/css.css",waits:!0,has:["c.css"]});a;steal.executed("a.js");b;steal.executed("b.js");\n',
 					"js works");
 					
-				s.test.equals(res.css,"c")
+				s.test.equals(res.css.code,"c")
 				
 				s.test.clear();
 			});

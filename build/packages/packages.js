@@ -35,7 +35,6 @@ steal('steal/build/open','steal/build/apps','steal/get/json.js',function(s){
 		buildOptions.depth = buildOptions.depth || Infinity;
 		// open the core app
 		apps._open(app, options, function(options, opener){
-			
 			// the folder are build files will go in
 			var to = buildOptions.to || ""+s.URI(opener.firstSteal.options.rootSrc).dir(),
 				appNamesToName = {},
@@ -137,7 +136,7 @@ steal('steal/build/open','steal/build/apps','steal/get/json.js',function(s){
 					// create package
 					var pack = build.js.makePackage(sharing.files.map(function(f){
 						return f.stealOpts;
-					}), {}, packageName+".css"),
+					}), {}, packageName+".css", buildOptions.exclude),
 						hasCSS = pack.css,
 						has = [];
 					
@@ -215,11 +214,14 @@ steal('steal/build/open','steal/build/apps','steal/get/json.js',function(s){
 				// and maps
 				
 				// sort masterFiles
-				s.print("Making "+to+"/production.js");
+				buildOptions.to = buildOptions.to || ""+s.URI(app).dir();
+				var destJS = ''+steal.URI(buildOptions.to).join('production.js'),
+					destCSS = ''+steal.URI(buildOptions.to).join('production.css');
+				s.print("Making "+destJS);
 				
 				var pack = build.js.makePackage(
 					masterFiles.map(function(f){return f.stealOpts}),
-					{}, to+"/production.css");
+					{}, destCSS, buildOptions.exclude);
 				// prepend maps and makes ...
 				// make makes
 				var makeCode = [],
@@ -230,10 +232,10 @@ steal('steal/build/open','steal/build/apps','steal/get/json.js',function(s){
 						");")
 				}
 				mapCode = "steal.packages("+s.toJSON(maps)+");"
-				s.URI(to+"/production.js").save( filterCode(mapCode+makeCode.join('\n')+"\n"+pack.js, 'js') );
+				s.URI(destJS).save( filterCode(mapCode+makeCode.join('\n')+"\n"+pack.js, 'js') );
 				if(pack.css){
-					s.print("       "+to+"/production.css");
-					s.URI(to+"/production.css").save( filterCode(pack.css.code, 'css') );
+					s.print("       "+destCSS);
+					s.URI(destCSS).save( filterCode(pack.css.code, 'css') );
 				}
 			});
 		});
