@@ -594,7 +594,7 @@ test("don't abort on error", function(){
 	stop();
 	expect(1);
 
-	steal({src: "./does_not_exist1.js", abort: false}, function(){
+	steal({id: "./does_not_exist1.js", abort: false}, function(){
 		ok(true, "executed steal fn");
 		start();
 	});
@@ -604,7 +604,7 @@ test("runs error callback", function(){
 	stop();
 	expect(2);
 
-	steal({src: "./does_not_exist2.js",
+	steal({id: "./does_not_exist2.js",
 		abort: false,
 		error: function(){
 			ok(true, "executed error callback");
@@ -619,7 +619,7 @@ test("needs", function(){
 	stop();
 
 	steal.URI.root("../../").then({
-		src: "steal/test/files/needs.js",
+		id: "steal/test/files/needs.js",
 		needs: ["steal/test/files/needed.js"]
 	});
 });

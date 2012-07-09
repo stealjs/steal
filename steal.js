@@ -576,9 +576,21 @@
 	 *  @static
 	 */
 	extend(steal, {
-		each : each,
-		extend : extend,
-		Deferred : Deferred,
+		idToRootPath: function(id){
+			// 
+		},
+		rootPathToSrc: function(){
+			
+		},
+		rootPathToUrl: function(){
+			
+		},
+		idToOptions: function(){
+			
+		},
+		each: each,
+		extend: extend,
+		Deferred: Deferred,
 		isRhino: win.load && win.readUrl && win.readFile,
 		/**
 		 * @attribute options
@@ -609,6 +621,9 @@
 		 */
 		makeOptions : function(options){
 			// convert it to a uri
+			if(!options.id){
+				throw {message: "no id", options: options}
+			}
 			var src = options.id = options.id = URI(options.id);
 			if (!options.type) {
 				src = options.id = options.src = src.addJS();
@@ -1000,7 +1015,7 @@
 				// save the original options
 				this.options = steal.makeOptions( extend({},
 					isString( options ) ? { id: options } : options ));
-	
+				
 				this.waits = this.options.waits || false;
 				this.unique = true;
 			}

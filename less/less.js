@@ -1,4 +1,4 @@
-steal({src: "./less_engine.js",ignore: true}, function(){
+steal({id: "./less_engine.js",ignore: true}, function(){
 
 	if(steal.isRhino) {
 		// Some monkey patching of the LESS AST
