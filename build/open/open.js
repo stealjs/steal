@@ -1,4 +1,4 @@
-steal(function(s){
+steal('steal',function(s){
 	// Methods for walking through steal and its dependencies
 	
 	// which steals have been touched in this cycle

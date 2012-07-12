@@ -878,7 +878,6 @@
 	//   completed
 	// - dependencies - an array of dependencies
 	var Resource = function( options ) {
-		(""+options).indexOf("util") > 0  && console.log("creating resource ... ",options)
 		// an array for dependencies, this is
 		this.dependencies = [];
 		// id for debugging
@@ -907,11 +906,11 @@
 			// Also check with a .js ending because we defer 'type'
 			// determination until later
 			if ( ! resources[id] && ! resources[id + ".js"] ) {
+				//console.log("caching",id)
 				// If we haven't loaded, cache the resource
-				(""+id).indexOf("util") > 0  && console.log("caching", id)
 				resources[id] = resource;
 			} else {
-				(""+id).indexOf("util") > 0  && console.log("using cached", id)
+				//console.log("using cached", id)
 				// Otherwise get the cached resource
 				resource = resources[id];
 				// If options were passed, copy new properties over.
@@ -1056,7 +1055,6 @@
 			}
 			// In other browsers, the queue of items to load is
 			// what is in pending
-			console.log(this.orig, "queue= ", pending.slice(0))
 			if ( ! myqueue ) {
 				myqueue = pending.slice(0);
 				pending = [];
@@ -1326,7 +1324,7 @@ each( extend( {
 			script.text = options.text;
 
 		} else {
-
+			//console.log("script for",''+options.src)
 			// listen to loaded
 			script.onload = script.onreadystatechange = callback;
 
@@ -1586,20 +1584,20 @@ request = function( options, success, error ) {
 						// console.log('start', cur)
 						steal.trigger("start", cur);
 						cur.completed.then(function(){
-							console.log("COMPLETED")
+							//console.log("COMPLETED")
 							rootSteal = null;
 							steal.trigger("end", cur);
 							// console.log("end", cur)
 
 						});
-						console.log("EXECUTING ...")
+						//console.log("EXECUTING ...")
 						cur.executed();
 					};
 				// if we are in rhino, start loading dependencies right away
 				if ( win.setTimeout ) {
 					// otherwise wait a small timeout to make
 					// sure we get all steals in the current file
-					console.log(pending.slice(0))
+					//console.log(pending.slice(0))
 					var first = pending.slice(0);
 					pending = [];
 					setTimeout( function(){
@@ -1735,21 +1733,22 @@ request = function( options, success, error ) {
 
 
 
-	/*var name = function(stel){
+	var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
-			return stel.options.orig.toString().substr(0,50)
+			return (""+stel.options.orig).substr(0,50)
 		}
 		return stel.options ? stel.options.rootSrc + "": "CONTAINER"
 	}
 
 
-	steal.p.load = before(steal.p.load, function(){
+	/*steal.p.load = before(steal.p.load, function(){
 		console.log("load", name(this), this.loading, this.id)
-	})
+	})*/
 
-	steal.p.executed = before(steal.p.executed, function(){
+	Resource.prototype.executed = before(Resource.prototype.executed, function(){
 		console.log("executed", name(this), this.id)
 	})
+	/*
 	steal.p.complete = before(steal.p.complete, function(){
 		console.log("complete", name(this), this.id)
 	})*/
@@ -1776,7 +1775,7 @@ request = function( options, success, error ) {
 		loaded.load.resolve();
 	});
 	steal.one("end", function(collection){
-		console.log("FIRST?")
+		//console.log("FIRST?")
 		loaded.end.resolve();
 		firstEnd = collection;
 		// console.log("firstEnd", firstEnd);
@@ -2066,9 +2065,26 @@ if (support.interactive) {
 	//steal.when = when;
 	// make steal public
 	win.steal = steal;
+	
+	
+	// make steal loaded
+	define("steal",[],function(){
+		return steal;	
+	});
+	
+	var stealResource = new Resource( "steal" )
+	stealResource.value = steal;
+	stealResource.loaded.resolve();
+	stealResource.run.resolve();
+	stealResource.executing = true;
+	stealResource.completed.resolve();
+	
+	resources[stealResource.options.id] = stealResource;
+	
 	startup();
 	//win.steals = steals;
 	win.resources = resources;
 	win.Resource = Resource;
-
+	
+	
 })( this );

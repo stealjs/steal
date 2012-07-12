@@ -1,6 +1,6 @@
 steal("steal/parse/tokens.js"/*,
-	  "steal/parse/regex_identifier.js"*/)
-.then(function(steal){
+	  "steal/parse/regex_identifier.js"*/,
+	  function(){
 
 var isArray = function( array ) {
   return Object.prototype.toString.call( array ) === "[object Array]";
@@ -49,7 +49,7 @@ like = function(a, b){
  * @param {String} str
  * @return {steal.parse} an object that can be used to pull tokens.
  */
-steal.parse = function(str){
+return  function(str){
 		//print("Breaking up strs")
 		var tokens = str.tokens('=<>!+-*&|/%^', '=<>&|'),
 			tokenNum = 0,

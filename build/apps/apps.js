@@ -2,7 +2,7 @@
 if(!steal.build){
 	steal.build = {};	
 }
-steal('steal/build/js','steal/build/css',function( steal ) {
+steal('steal','steal/build/js','steal/build/css',function( steal ) {
 
 /**
  * 
@@ -112,6 +112,7 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 				// listen to when this is done
 				window.steal.one("end", function(rootSteal){
 					steal.print("  adding dependencies");
+					
 					options.appFiles.push(  apps.addDependencies(rootSteal.dependencies[0], options.files, appName )  );
 					
 					// set back steal
@@ -122,12 +123,14 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 						firstSteal: steal.build.open.firstSteal(rootSteal)
 					});
 				})
+				
 				// steal file
 				window.steal(data.startFile);
 			} else {
 				steal.build.open(html, data, function(opener){
 					steal.print("  adding dependencies");
-					options.appFiles.push(  apps.addDependencies(opener.rootSteal.dependencies[0], options, appName )  );
+					debugger;
+					options.appFiles.push(  apps.addDependencies(opener.rootSteal, options, appName )  );
 					steal.print(" ")
 					callback(options, opener);
 				})
@@ -164,7 +167,8 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 		 */
 		addDependencies: function( steel, options, appName ) {
 			// check if a fn ...
-			//steal.print('addD '+steel.options.rootSrc)
+			//steal.print('addD '+steel.options.rootSrc);
+			
 			var rootSrc = steel.options.rootSrc,
 				buildType = steel.options.buildType,
 				
@@ -479,7 +483,11 @@ steal('steal/build/js','steal/build/css',function( steal ) {
 		}
 	})
 	
-		
+	// sets prop on root if it doesn't exist
+	// root - the object
+	// prop - the property to set some other object as
+	// raw - the data you want to set or a function that returns the object
+	// cb - a callback that gets called with the object
 	var maker = function(root, prop, raw, cb){
 		if(!root[prop]){
 			root[prop] = ( typeof raw === 'object' ?

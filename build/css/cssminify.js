@@ -1,4 +1,4 @@
-steal(function( steal ) {
+steal('steal',function( steal ) {
     /**
      * cssmin.js
      * Author: Stoyan Stefanov - http://phpied.com/

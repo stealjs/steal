@@ -1,4 +1,4 @@
-steal('steal/parse',function(steal){
+steal('steal','steal/parse',function(steal, parse){
 	
 	var js = steal.build.js;
 	
@@ -22,7 +22,7 @@ steal('steal/parse',function(steal){
 			position;
 
 		try{
-			p = steal.parse(parsedTxt);
+			p = parse(parsedTxt);
 		} catch(e){
 			print("Parsing problem");
 			print(e);

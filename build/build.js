@@ -1,7 +1,7 @@
 //used to build a page's script
 /*global steal : false, Envjs : false, jQuery : false*/
 
-steal(function( steal ) {
+steal('steal',function( steal ) {
 	var window = (function() {
 		return this;
 	}).call(null, 0);

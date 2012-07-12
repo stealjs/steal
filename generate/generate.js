@@ -1,10 +1,10 @@
 steal("steal/generate/ejs.js", 'steal/generate/inflector.js', 
-	'steal/parse', 'steal/rhino/prompt.js', function( steal ) {
+	'steal/parse', 'steal/rhino/prompt.js', function( EJS, Inflector, parse ) {
 
 	var render = function( from, to, data ) {
 		var text = readFile(from);
 
-		var res = new steal.EJS({
+		var res = new EJS({
 			text: text,
 			name: from
 		}).render(data);
@@ -212,7 +212,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 				name: name,
 				fullName: name,
 				className: className,
-				plural: steal.Inflector.pluralize(generate.underscore(className)),
+				plural: Inflector.pluralize(generate.underscore(className)),
 				appName: generate.underscore(appName)
 			};
 		},

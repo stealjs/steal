@@ -1,7 +1,7 @@
 if(!steal.build){
 	steal.build = {};	
 }
-steal(function( steal ) {
+steal('steal',function( steal ) {
 	
 	var css = steal.build.css = {};
 	/**
