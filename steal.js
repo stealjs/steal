@@ -1606,7 +1606,7 @@ request = function( options, success, error ) {
 		},
 		check = function(){
 			var status;
-			if ( request.readyState === 4 )  {
+			if ( request && request.readyState === 4 )  {
 				status = request.status;
 				if ( status === 500 || status === 404 ||
 					 status === 2 || request.status < 0 ||
