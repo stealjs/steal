@@ -63,6 +63,7 @@ steal('steal','steal/build/css',function( steal ) {
 		}
 		
 		files.forEach(function(file){
+			print("it "+file.rootSrc)
 			if ( file.packaged === false ) {
 
 				steal.print('   not packaging ' + file.rootSrc);
@@ -81,6 +82,8 @@ steal('steal','steal/build/css',function( steal ) {
 				jses.push(file)
 			} else if(file.buildType == 'css'){
 				csses.push(file)
+			} else {
+				steal.print('no buildType!!')
 			}
 		})
 		// add to dependencies
@@ -92,14 +95,14 @@ steal('steal','steal/build/css',function( steal ) {
 		
 		// this now needs to handle css and such
 		var loadingCalls = jses.map(function(file){
-			return file.rootSrc;
+			return file.id;
 		});
-		
+		print(loadingCalls)
 		//create the dependencies ...
 		var dependencyCalls = [];
 		for (var key in dependencies){
 			dependencyCalls.push( 
-				"steal({src: '"+key+"', waits: true, has: ['"+dependencies[key].join("','")+"']})"
+				"steal({id: '"+key+"', waits: true, has: ['"+dependencies[key].join("','")+"']})"
 			)
 		}
 		// make 'loading'
@@ -109,7 +112,7 @@ steal('steal','steal/build/css',function( steal ) {
 		
 		// add js code
 		jses.forEach(function(file){
-			code.push( file.text, "steal.executed('"+file.rootSrc+"')" );
+			code.push( file.text, "steal.executed('"+file.id+"')" );
 		});
 		
 		var jsCode = code.join(";\n") + "\n";

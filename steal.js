@@ -33,6 +33,75 @@
 		return steal;
 	};
 
+	var stealConfig = {},
+		matchesId = function(loc, id){
+			if(loc === "*"){
+				return true;
+			} else if( id.indexOf(loc) === 0 ){
+				return true;
+			}
+		};
+	steal.config = function(config){
+		extend(stealConfig, config);
+		each(resources, function(id, resource){
+			if(resource.options.type != "fn"){
+				// TODO terrible
+				var buildType = resource.options.buildType;
+				resource.setOptions(resource.orig);
+				resource.options.buildType = buildType;
+			}
+		})
+		return stealConfig;
+	}
+	
+	// returns the "rootSrc" id, something that looks like requireJS
+	// for a given id/path, what is the "REAL" id that should be used
+	// this is where substituation can happen
+	steal.id = function(id, currentWorkingId, type){
+		// id should be like
+		
+		var uri = URI(id);
+		uri = uri.addJS().normalize( currentWorkingId ? new URI(currentWorkingId) : null )
+		// check foo/bar
+		if(!type){
+			type = "js"
+		}
+		if(type == "js"){
+			// if it ends with .js remove it ...
+			// if it ends
+		}
+		// check map config
+		var map = stealConfig.map || {};
+		// always run past 
+		each(map, function(loc, maps){
+			// is the current working id matching loc
+			if( matchesId(loc, currentWorkingId) ){
+				// run maps
+				each(maps, function(part, replaceWith){
+					if((""+uri).indexOf(part) == 0){
+						uri = URI( (""+uri).replace(part, replaceWith) )
+					}
+				})
+			}
+		})
+		// console.log(""+id, currentWorkingId+"", uri+"")
+		return uri;
+	}
+	// for a given ID, where should I find this resource
+	steal.idToUri = function(id, rootUri, type){
+		// this is normalize
+		var paths = stealConfig.paths || {};
+		// always run past 
+		each(paths, function(part, replaceWith){
+			if((""+id).indexOf(part) == 0){
+				id = (""+id).replace(part, replaceWith)
+			}
+		})
+		
+		return URI.root().join(id)
+	}
+
+
 	// ## Helpers ##
 	// The following are a list of helper methods used internally to steal
 	var 
@@ -503,21 +572,22 @@
 		 * files/a = //files/a/a.js
 		 * files/a.js = loads //files/a.js
 		 */
-		normalize: function() {
-			var cur = URI.cur.dir(),
-				path = this.path;
+		normalize: function(cur) {
+			cur = cur ? cur.dir() : URI.cur.dir();
+			var path = this.path,
+				res = URI(path);
 			//if path is rooted from steal's root (DEPRECATED)
 			if (!path.indexOf("//")) {
-				path = URI(path.substr(2));
+				res = URI(path.substr(2));
 			} else if (!path.indexOf("./")) { // should be relative
-				path = cur.join( path.substr(2) );
+				res = cur.join( path.substr(2) );
 			}
 			// only if we start with ./ or have a /foo should we join from cur
 			else if (this.isRelative() ) {
-				path = cur.join(this.domain() + path)
+				res = cur.join(this.domain() + path)
 			}
-			path.query = this.query;
-			return path;
+			res.query = this.query;
+			return res;
 		},
 		isRelative : function(){
 			return  /^[\.|\/]/.test(this.path )
@@ -576,18 +646,6 @@
 	 *  @static
 	 */
 	extend(steal, {
-		idToRootPath: function(id){
-			// 
-		},
-		rootPathToSrc: function(){
-			
-		},
-		rootPathToUrl: function(){
-			
-		},
-		idToOptions: function(){
-			
-		},
 		each: each,
 		extend: extend,
 		Deferred: Deferred,
@@ -619,11 +677,14 @@
 		 * Makes options
 		 * @param {Object} options
 		 */
-		makeOptions : function(options){
+		makeOptions : function(options, curId){
 			// convert it to a uri
 			if(!options.id){
 				throw {message: "no id", options: options}
 			}
+			options.id = steal.id(options.id, curId);
+			
+			/*
 			var src = options.id = options.id = URI(options.id);
 			if (!options.type) {
 				src = options.id = options.src = src.addJS();
@@ -641,7 +702,7 @@
 				src : URI.root().join( normalized ),
 				id : normalized
 			});
-			options.originalSrc = options.src;
+			options.originalSrc = options.src;*/
 
 			return options;
 		},
@@ -882,6 +943,11 @@
 		this.dependencies = [];
 		// id for debugging
 		this.id = (++id);
+		// the original options
+		this.orig = options;
+		// the parent steal's id
+		this.curId = steal.cur && steal.cur.options.id;
+
 
 		this.setOptions(options);
 		//console.log("created", this.orig)
@@ -917,7 +983,7 @@
 				// Don't copy src, etc because those have already
 				// been changed to be the right values;
 				if(!isString( options )){
-					each(["src","rootSrc","originalSrc","id"], function(i, name){
+					each(["id"], function(i, name){
 						delete options[name];
 					});
 					extend(resource.options, options);
@@ -939,10 +1005,11 @@
 				
 			}
 		}
-	}
+	};
+	
 	extend(Resource.prototype, {
 		setOptions : function(options){
-			this.orig = options;
+			
 			// if we have no options, we are the global Resource that
 			// contains all other resources.
 			if ( ! options ) { //global init cur ...
@@ -974,17 +1041,15 @@
 							dep = cur.dependencies[i];
 							
 							if( found ) {
-								if(modules[dep.orig]){
-									args.unshift(modules[dep.orig]);
+								if( modules[dep.options.id] ) {
+									args.unshift( modules[dep.options.id] );
 									// cause jquery might have a wait object
-								}else if(dep.orig && modules[dep.orig.id]) {
-									args.unshift(modules[dep.orig.id]);
 								} else {
 									args.unshift( dep.value );
 								}
 								
 								
-								if( dep.waits && cur.orig === undefined) {
+								if( dep.waits && cur.orig === undefined ) {
 									break;
 								}
 							}
@@ -999,6 +1064,7 @@
 						
 						// if this returns a value, we should register it as a module ...
 						if(ret){
+							console.log("setting value", cur.options.id+"")
 							// register this module ....
 							cur.value = ret;
 						}
@@ -1013,7 +1079,7 @@
 			} else {
 				// save the original options
 				this.options = steal.makeOptions( extend({},
-					isString( options ) ? { id: options } : options ));
+					isString( options ) ? { id: options } : options ), this.curId);
 				
 				this.waits = this.options.waits || false;
 				this.unique = true;
@@ -1194,7 +1260,7 @@
 		}
 
 	});
-
+	
 
 	var events = {};
 
@@ -1217,7 +1283,7 @@
 		// if it's a string, get it's extension and check if
 		// it is a registered type, if it is ... set the type
 		if ( ! raw.type ) {
-			var ext = URI( raw.src ).ext();
+			var ext = URI( raw.id ).ext();
 			if ( ! ext && ! types[ext] ) {
 				ext = "js";
 			}
@@ -1252,6 +1318,9 @@
 	 * @param {Function} error a method called if the conversion fails or the file doesn't exist
 	 */
 	require = function( options, success, error ) {
+		// add the src option
+		options.src = steal.idToUri( options.id );
+		
 		// get the type
 		var type = types[options.type],
 			converters;
@@ -1327,13 +1396,15 @@ each( extend( {
 			//console.log("script for",''+options.src)
 			// listen to loaded
 			script.onload = script.onreadystatechange = callback;
-
+		
+			var src = options.src; //steal.idToUri( options.id );
+			
 			// error handling doesn't work on firefox on the filesystem
-			if (support.error && error && options.src.protocol !== "file") {
+			if (support.error && error && src.protocol !== "file") {
 				script.onerror = error;
 			}
-
-			script.src = options.src = addSuffix(options.src);
+			script.src = ""+src;
+			//script.src = options.src = addSuffix(options.src);
 
 			//script.async = false;
 			script.onSuccess = success;
@@ -1500,8 +1571,8 @@ request = function( options, success, error ) {
 	 * necessary depedencies for the file extensions.
 	 */
 	steal.makeOptions = after(steal.makeOptions,function(raw){
-		raw.ext = raw.src.ext();
-
+		raw.ext = raw.id.ext();
+		// TODO move
 		if(steal.options.needs[raw.ext]){
 			if(!raw.needs){
 				raw.needs = [];
@@ -1535,9 +1606,9 @@ request = function( options, success, error ) {
 	//
 	extend(steal, {
 		// modifies src
-		makeOptions : after(steal.makeOptions,function(raw){
+		/*makeOptions : after(steal.makeOptions,function(raw){
 			raw.src = URI.root().join(raw.rootSrc = URI( raw.rootSrc ).insertMapping());
-		}),
+		}),*/
 
 		//root mappings to other locations
 		mappings : {},
@@ -1557,7 +1628,10 @@ request = function( options, success, error ) {
 				};
 				each(resources, function(id, resource){
 					if(resource.options.type != "fn"){
-						resource.setOptions(resource.orig)
+						// TODO terrible
+						var buildType = resource.options.buildType;
+						resource.setOptions(resource.orig);
+						resource.options.buildType = buildType;
 					}
 				})
 			} else { // its an object
@@ -1732,24 +1806,25 @@ request = function( options, success, error ) {
 	// =========== DEBUG =========
 
 
-
+	/*
 	var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
-			return (""+stel.options.orig).substr(0,50)
+			return (""+stel.orig).substr(0,100)
 		}
-		return stel.options ? stel.options.rootSrc + "": "CONTAINER"
+		return stel.options ? stel.options.id + "": "CONTAINER"
 	}
 
 
-	/*steal.p.load = before(steal.p.load, function(){
+	Resource.prototype.load = before( Resource.prototype.load, function(){
 		console.log("load", name(this), this.loading, this.id)
-	})*/
+	})
 
 	Resource.prototype.executed = before(Resource.prototype.executed, function(){
-		console.log("executed", name(this), this.id)
+		var namer= name(this)
+		console.log("executed", namer, this.id)
 	})
-	/*
-	steal.p.complete = before(steal.p.complete, function(){
+	
+	Resource.prototype.complete = before(Resource.prototype.complete, function(){
 		console.log("complete", name(this), this.id)
 	})*/
 
@@ -2022,7 +2097,7 @@ if (support.interactive) {
 		// we only load things with force = true
 		if ( options.env == "production" && options.loadProduction && options.production ) {
 			steal({
-				src: options.production,
+				id: options.production,
 				force: true
 			});
 		} else {
@@ -2036,7 +2111,7 @@ if (support.interactive) {
 			}
 
 			if (options.startFile) {
-				steals.push(options.startFile)
+				steals.push({id: options.startFile, waits: true})
 			}
 		}
 		if (steals.length) {
@@ -2085,6 +2160,5 @@ if (support.interactive) {
 	//win.steals = steals;
 	win.resources = resources;
 	win.Resource = Resource;
-	
 	
 })( this );

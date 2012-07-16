@@ -59,7 +59,7 @@ steal('steal','steal/parse',function(steal, parse){
 		var compressor = js.minifiers[options.compressor || "localClosure"]()
 		
 		if(source){
-			 return ""+compressor( source, true, options.currentLineMap )
+			 return source; //""+compressor( source, true, options.currentLineMap )
 		} else {
 			return  compressor
 		}

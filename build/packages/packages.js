@@ -79,7 +79,6 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 				
 			// go through every file and mark it packaged
 			for(var name in options.files){
-				print("FILE "+name)
 				options.files[name].packaged = true;
 				masterFiles.push(options.files[name])
 			}

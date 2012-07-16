@@ -129,7 +129,6 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			} else {
 				steal.build.open(html, data, function(opener){
 					steal.print("  adding dependencies");
-					debugger;
 					options.appFiles.push(  apps.addDependencies(opener.rootSteal, options, appName )  );
 					steal.print(" ")
 					callback(options, opener);
@@ -197,7 +196,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			if(file.appNames.indexOf(appName) == -1){
 				file.appNames.push(appName);
 			}
-			steel.dependencies.reverse().forEach(function(dependency){
+			steel.dependencies.forEach(function(dependency){
 				if ( dependency.dependencies && 
 					// don't follow functions
 				     dependency.options.buildType != 'fn' && 
