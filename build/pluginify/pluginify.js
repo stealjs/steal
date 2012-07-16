@@ -49,6 +49,7 @@ steal('steal/parse','steal/build').then(
 		
 		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 		opts.global = opts.global || "jQuery";
+		opts.namespace = opts.namespace || "namespace";
 		
 		if (opts.nojquery) {
 			jq = false;
@@ -105,11 +106,13 @@ steal('steal/parse','steal/build').then(
 		}, true, true);
 		
 		var output = out.join(";\n");
-		if(opts.wrapInner && opts.wrapInner.length === 2){
+		if ( opts.wrapInner && opts.wrapInner.length === 2 ) {
 			output = opts.wrapInner[0] + output + opts.wrapInner[1];
 		}
-		if(opts.onefunc){
-			output = "(function(can, window, undefined){"+ output+ "})("+opts.global+", this );";
+		if ( opts.onefunc ) {
+			output = "(function( " + opts.namespace + ", window, undefined ){"
+				+ output + 
+			"}( " + opts.global + ", this ));";
 		}
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
