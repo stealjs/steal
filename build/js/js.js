@@ -63,17 +63,16 @@ steal('steal','steal/build/css',function( steal ) {
 		}
 		
 		files.forEach(function(file){
-			print("it "+file.rootSrc)
 			if ( file.packaged === false ) {
 
-				steal.print('   not packaging ' + file.rootSrc);
+				steal.print('   not packaging ' + file.id);
 				
 				return;
 			}
 			
 			// ignore
-			if ( file.ignore || (exclude.indexOf(''+file.rootSrc) != -1)) {
-				steal.print('   ignoring ' + file.rootSrc);
+			if ( file.ignore || (exclude.indexOf(''+file.id) != -1)) {
+				steal.print('   ignoring ' + file.id);
 				return;
 			}
 			
@@ -83,13 +82,13 @@ steal('steal','steal/build/css',function( steal ) {
 			} else if(file.buildType == 'css'){
 				csses.push(file)
 			} else {
-				steal.print('no buildType!!')
+				//steal.print('no buildType!!')
 			}
 		})
 		// add to dependencies
 		if(csses.length && dependencies){
 			dependencies[cssPackage] = csses.map(function(css){
-				return css.rootSrc;
+				return css.id;
 			})
 		}
 		
@@ -97,7 +96,6 @@ steal('steal','steal/build/css',function( steal ) {
 		var loadingCalls = jses.map(function(file){
 			return file.id;
 		});
-		print(loadingCalls)
 		//create the dependencies ...
 		var dependencyCalls = [];
 		for (var key in dependencies){

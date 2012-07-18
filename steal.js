@@ -32,7 +32,7 @@
 		}
 		return steal;
 	};
-
+	steal._id = Math.floor(1000*Math.random());
 	var stealConfig = {},
 		matchesId = function(loc, id){
 			if(loc === "*"){
@@ -45,9 +45,15 @@
 		extend(stealConfig, config);
 		each(resources, function(id, resource){
 			if(resource.options.type != "fn"){
-				// TODO terrible
+				// TODO this is terrible
 				var buildType = resource.options.buildType;
 				resource.setOptions(resource.orig);
+				var newId = resource.options.id;
+				// this mapping is to move a config'd key
+				if(id !== newId){
+					resources[newId] = resource;
+					// TODO: remove the old one ....
+				}
 				resource.options.buildType = buildType;
 			}
 		})
@@ -84,21 +90,20 @@
 				})
 			}
 		})
-		// console.log(""+id, currentWorkingId+"", uri+"")
 		return uri;
 	}
 	// for a given ID, where should I find this resource
-	steal.idToUri = function(id, rootUri, type){
+	steal.idToUri = function(id, noJoin){
 		// this is normalize
 		var paths = stealConfig.paths || {};
 		// always run past 
 		each(paths, function(part, replaceWith){
 			if((""+id).indexOf(part) == 0){
-				id = (""+id).replace(part, replaceWith)
+				id = URI( (""+id).replace(part, replaceWith) );
 			}
 		})
 		
-		return URI.root().join(id)
+		return noJoin ? id : URI.root().join(id)
 	}
 
 
@@ -310,7 +315,7 @@
 				} else {
 					// immediately call the function if the deferred has been resolved
 					if (self.status === status)
-						v.apply(this, this.resultArgs || []);
+						v.apply(this, self.resultArgs || []);
 
 					self[type].push(v);
 				}
@@ -947,10 +952,11 @@
 		this.orig = options;
 		// the parent steal's id
 		this.curId = steal.cur && steal.cur.options.id;
-
+		if(this.id === 37){
+			//debugger;
+		}
 
 		this.setOptions(options);
-		//console.log("created", this.orig)
 		// create the deferreds used to manage state
 		this.loaded = Deferred();
 		this.run = Deferred();
@@ -972,11 +978,10 @@
 			// Also check with a .js ending because we defer 'type'
 			// determination until later
 			if ( ! resources[id] && ! resources[id + ".js"] ) {
-				//console.log("caching",id)
 				// If we haven't loaded, cache the resource
 				resources[id] = resource;
 			} else {
-				//console.log("using cached", id)
+				
 				// Otherwise get the cached resource
 				resource = resources[id];
 				// If options were passed, copy new properties over.
@@ -1064,7 +1069,6 @@
 						
 						// if this returns a value, we should register it as a module ...
 						if(ret){
-							console.log("setting value", cur.options.id+"")
 							// register this module ....
 							cur.value = ret;
 						}
@@ -1180,7 +1184,6 @@
 
 				// add it as a dependency, circular are not allowed
 				self.dependencies.push(stel);
-				// console.log('adding deps', self.dependencies.length, self, stel)
 
 				// if there's a wait and it's not the first thing
 				if(stel.waits && set.length){
@@ -1235,7 +1238,7 @@
 			}
 			if ( ! self.executing ) {
 				self.executing = true;
-				//console.log("GETTING", self.options.src+"")
+				
 				steal.require( self.options, function( script ) {
 					self.executed(script);
 				}, function( error, src ) {
@@ -1393,7 +1396,7 @@ each( extend( {
 			script.text = options.text;
 
 		} else {
-			//console.log("script for",''+options.src)
+
 			// listen to loaded
 			script.onload = script.onreadystatechange = callback;
 		
@@ -1648,30 +1651,29 @@ request = function( options, success, error ) {
 			// to start loading its dependencies (the current pending steals)
 			if ( ! rootSteal ) {
 				rootSteal = new Resource();
-
 				// keep a reference in case it disappears
 				var cur = rootSteal,
 					// runs when a steal is starting
 					go = function(){
 
 						// indicates that a collection of steals has started
-						// console.log('start', cur)
+						
 						steal.trigger("start", cur);
 						cur.completed.then(function(){
-							//console.log("COMPLETED")
+							
 							rootSteal = null;
 							steal.trigger("end", cur);
-							// console.log("end", cur)
+							
 
 						});
-						//console.log("EXECUTING ...")
+						
 						cur.executed();
 					};
 				// if we are in rhino, start loading dependencies right away
 				if ( win.setTimeout ) {
 					// otherwise wait a small timeout to make
 					// sure we get all steals in the current file
-					//console.log(pending.slice(0))
+					
 					var first = pending.slice(0);
 					pending = [];
 					setTimeout( function(){
@@ -1806,26 +1808,26 @@ request = function( options, success, error ) {
 	// =========== DEBUG =========
 
 
-	/*
-	var name = function(stel){
+	
+	/*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
-			return (""+stel.orig).substr(0,100)
+			return stel.orig.name? stel.orig.name : "fn";//(""+stel.orig).substr(0,10)
 		}
 		return stel.options ? stel.options.id + "": "CONTAINER"
 	}
 
 
 	Resource.prototype.load = before( Resource.prototype.load, function(){
-		console.log("load", name(this), this.loading, this.id)
+		console.log("      load", name(this), this.loading, steal._id, this.id)
 	})
 
 	Resource.prototype.executed = before(Resource.prototype.executed, function(){
 		var namer= name(this)
-		console.log("executed", namer, this.id)
+		console.log("      executed", namer, steal._id, this.id)
 	})
 	
 	Resource.prototype.complete = before(Resource.prototype.complete, function(){
-		console.log("complete", name(this), this.id)
+		console.log("      complete", name(this), steal._id, this.id)
 	})*/
 
 
@@ -1849,13 +1851,14 @@ request = function( options, success, error ) {
 	addEvent(win, "load", function(){
 		loaded.load.resolve();
 	});
+	
 	steal.one("end", function(collection){
-		//console.log("FIRST?")
-		loaded.end.resolve();
+		loaded.end.resolve(collection);
 		firstEnd = collection;
-		// console.log("firstEnd", firstEnd);
 		steal.trigger("done", firstEnd)
 	})
+	steal.firstComplete = loaded.end;
+	
 	Deferred.when(loaded.load, loaded.end).then(function(){
 		steal.trigger("ready")
 		steal.isReady = true;

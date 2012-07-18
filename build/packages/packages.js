@@ -35,8 +35,9 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 		buildOptions.depth = buildOptions.depth || Infinity;
 		// open the core app
 		apps._open(app, options, function(options, opener){
+			
 			// the folder are build files will go in
-			var to = buildOptions.to || ""+s.URI(opener.firstSteal.options.rootSrc).dir(),
+			var to = buildOptions.to || ""+s.URI(opener.firstSteal.options.id).dir(),
 				appNamesToName = {},
 				usedNames = {},
 				// a helper function that translates between an 
@@ -149,9 +150,9 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					}
 					
 					sharing.files.forEach(function(f){
-						s.print("  + "+f.stealOpts.rootSrc)
+						s.print("  + "+f.stealOpts.id)
 						if(f.stealOpts.buildType == 'js'){
-							has.push(f.stealOpts.rootSrc+'')
+							has.push(f.stealOpts.id+'')
 						}
 					})
 					s.print(" ")

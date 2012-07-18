@@ -88,7 +88,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			//= Configure what we are going to load from APP name
 			
 			// if we have html, get  the app-name
-			var html = 'steal/rhino/blank.html',
+			/*var html = 'steal/rhino/blank.html',
 				data = {env: 'development'};
 			if(appName.indexOf('.html') > 2){
 				html = appName;
@@ -101,8 +101,8 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				data = {
 					startFile: appName + "/" + steal.File(appName).basename() + ".js"
 				}
-			}
-			steal.print("Opening " + ( appName || html) );
+			}*/
+			steal.print("Opening " + ( appName ) );
 			
 			// use last steal to load page
 			if(options.newPage === false && steal.build.apps.lastSteal){
@@ -127,7 +127,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				// steal file
 				window.steal(data.startFile);
 			} else {
-				steal.build.open(html, data, function(opener){
+				steal.build.open(appName, {}, function(opener){
 					steal.print("  adding dependencies");
 					options.appFiles.push(  apps.addDependencies(opener.rootSteal, options, appName )  );
 					steal.print(" ")
@@ -168,15 +168,15 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			// check if a fn ...
 			//steal.print('addD '+steel.options.rootSrc);
 			
-			var rootSrc = steel.options.rootSrc,
+			var id = steel.options.id,
 				buildType = steel.options.buildType,
 				
-				file = maker(options.files, rootSrc, function(){
+				file = maker(options.files, id, function(){
 					//clean and minifify everything right away ...
 					if( steel.options.buildType != 'fn' ) {
 						// some might not have source yet
-						steal.print("  + "+rootSrc)
-						var source = steel.options.text ||  readFile( rootSrc );
+						steal.print("  + "+id );
+						var source = steel.options.text ||  readFile( steal.idToUri( steel.options.id , true ) );
 						steel.options.text = source //
 					}
 					
@@ -202,7 +202,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				     dependency.options.buildType != 'fn' && 
 					 !dependency.options.ignore) {
 					 
-					file.dependencyFileNames.push(dependency.options.rootSrc)
+					file.dependencyFileNames.push(dependency.options.id)
 					 
 					apps.addDependencies(dependency, options, appName);
 				}
