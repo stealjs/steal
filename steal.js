@@ -1096,19 +1096,19 @@
 						var args = [],
 							found = false,
 							reversed = cur.dependencies.slice(0).reverse(),
-							dep;
+							dep,
+							value;
 						for( var i = cur.dependencies.length; i >= 0 ; i-- ) {
 							dep = cur.dependencies[i];
 							
 							if( found ) {
-								if( modules[dep.options.id] ) {
-									args.unshift( modules[dep.options.id] );
-									// cause jquery might have a wait object
-								} else {
-									args.unshift( dep.value );
-								}
-								
-								
+								// We need to access the stored modules in this order
+								// - calculated id
+								// - original name
+								// - dependency return value otherwise
+								value = modules[dep.options.id] || modules[dep.orig] || dep.value;
+								args.unshift(value);
+
 								if( dep.waits && cur.orig === undefined ) {
 									break;
 								}
