@@ -127,7 +127,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				// steal file
 				window.steal(data.startFile);
 			} else {
-				steal.build.open(appName, {}, function(opener){
+				steal.build.open(appName, function(opener){
 					steal.print("  adding dependencies");
 					options.appFiles.push(  apps.addDependencies(opener.rootSteal, options, appName )  );
 					steal.print(" ")

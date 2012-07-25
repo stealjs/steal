@@ -18,7 +18,7 @@ steal('steal',function( steal ) {
 			srcs = [], codez = [];
 		
 		steals.forEach(function(stealOpts){
-			codez.push(convert(stealOpts.text, stealOpts.rootSrc, directory))
+			codez.push(convert(stealOpts.text, stealOpts.id, directory))
 			srcs.push(stealOpts.rootSrc+'')
 		});
 		
@@ -41,7 +41,6 @@ steal('steal',function( steal ) {
 				// prodLocation
 				var rootImagePath = steal.URI(cssLoc).join(part),
 					fin = steal.File(prodLocation).pathTo(rootImagePath);
-					
 				return "url(" + fin + ")";
 			});
 		return newCSS;
