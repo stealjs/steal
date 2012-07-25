@@ -128,7 +128,7 @@ steal('steal',function(s){
 	 * @return {Object} an object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 */
-	steal.build.open = function( js, stealData, cb, depth, includeFns ) {
+	steal.build.open = function( js, cb, depth, includeFns ) {
 		
 		
 		// save and remove the old steal
@@ -237,7 +237,7 @@ steal('steal',function(s){
 					iterate(rootSteal, function(stealer){
 						
 						if( filter(stealer) ) {
-							stealer.options.text = stealer.options.text || loadScriptText(stealer.options);
+							stealer.options.text = stealer.options.text || loadScriptText(stealer);
 							func(stealer.options, stealer );
 							items.push(stealer.options);
 						}
@@ -266,9 +266,10 @@ steal('steal',function(s){
 		}
 	};
 	
-	var loadScriptText = function( options ) {
+	var loadScriptText = function( stl ) {
+		var options = stl.options;
 		if(options.fn){
-			return options.orig.toString();
+			return stl.orig.toString();
 		}
 		if(options._skip){ // if we skip this script, we don't care about its contents
 			return "";
@@ -287,7 +288,7 @@ steal('steal',function(s){
 
 
 		
-		url = Envjs.uri(url, base);
+		// url = Envjs.uri(url, base);
 		
 		if ( url.match(/^file\:/) ) {
 			url = url.replace("file:/", "");

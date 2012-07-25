@@ -19,214 +19,6 @@
 // - Options - 
 (function( win, undefined ) {
 
-	// create the steal function now to use as a namespace.
-
-
-	function steal() {
-		// convert arguments into an array
-		var args = map(arguments);
-		if ( args.length ) {
-			pending.push.apply(pending, args);
-			// steal.after is called everytime steal is called
-			// it kicks off loading these files
-			steal.after(args);
-			// return steal for chaining
-		}
-		return steal;
-	};
-	steal._id = Math.floor(1000 * Math.random());
-	// ## CONFIG ##
-	
-	// stores the current config settings
-	var stealConfig = {
-		types: {},
-		ext: {}
-	},
-	
-		matchesId = function( loc, id ) {
-			if ( loc === "*" ) {
-				return true;
-			} else if ( id.indexOf(loc) === 0 ) {
-				return true;
-			}
-		};
-	/**
-	 * `steal.config(config)` configures steal. Typically it it used
-	 * in __stealconfig.js__.  The available options are:
-	 * 
-	 *  - map - map an id to another id
-	 *  - paths - maps an id to a file
-	 *  - rootUrl - the path to the "root" folder
-	 * 
-	 * 
-	 * ## map
-	 * 
-	 * Maps an id to another id with a certain scope of other ids. This can be
-	 * used to use different modules within the same id or map ids to another id.
-	 * Example:
-	 * 
-	 *     steal.config({
-	 *       map: {
-	 *         "*": {
-	 *           "jquery/jquery.js": "jquery"
-	 *         },
-	 *         "compontent1":{
-	 *           "underscore" : "underscore1.2"
-	 *         },
-	 *         "component2":{
-	 *           "underscore" : "underscore1.1"  
-	 *         }
-	 *       }
-	 *     })
-	 * 
-	 * ## paths
-	 * 
-	 * Maps an id or matching ids to a url. Each maping is specified
-	 * by an id or part of the id to match and what that 
-	 * part should be replaced with.
-	 * 
-	 *     steal.config({
-	 *       paths: {
-	 * 	       // maps everything in a jquery folder like: `jquery/controller`
-	 *         // to http://cdn.com/jquery/controller/controller.com
-	 * 	       "jquery/" : "http://cdn.com/jquery/"
-	 * 
-	 *         // if path does not end with /, it matches only that id
-	 *         "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"
-	 *       }
-	 *     }) 
-	 * 
-	 * 
-	 */
-	steal.config = function( config ) {
-		for(var prop in config){
-			var value = config[prop]
-			// if it's a special function
-			steal.config[prop] ?
-				// run it
-				steal.config[prop](value) :
-				// otherwise set or extend
-				(typeof value == "object" ?
-					// extend
-					extend( stealConfig[prop] || {}, value) :
-					// set
-					stealConfig[prop] = value);
-				
-		}
-		// redo all resources
-		each(resources, function( id, resource ) {
-			if ( resource.options.type != "fn" ) {
-				// TODO this is terrible
-				var buildType = resource.options.buildType;
-				resource.setOptions(resource.orig);
-				var newId = resource.options.id;
-				// this mapping is to move a config'd key
-				if ( id !== newId ) {
-					resources[newId] = resource;
-					// TODO: remove the old one ....
-				}
-				resource.options.buildType = buildType;
-			}
-		})
-		return stealConfig;
-	};
-	/**
-	 * Read or define the path relative URI's should be referenced from.
-	 * 
-	 *     window.location //-> "http://foo.com/site/index.html"
-	 *     steal.URI.root("http://foo.com/app/files/")
-	 *     steal.root.toString() //-> "../../app/files/"
-	 */
-	steal.config.root = function( relativeURI ) {
-		if ( relativeURI !== undefined ) {
-			var root = URI(relativeURI);
-
-			// the current folder-location of the page http://foo.com/bar/card
-			var cleaned = URI.page,
-				// the absolute location or root
-				loc = cleaned.join(relativeURI);
-
-			// cur now points to the 'root' location, but from the page
-			URI.cur = loc.pathTo(cleaned)
-			stealConfig.root = root;
-			return;
-		}
-		stealConfig.root =  root || URI("");
-	}
-	
-	/**
-	 * @function steal.id
-	 * 
-	 * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
-	 * final, unique id. This function can be over
-	 * written to change how unique ids are defined, for example, to be more AMD-like.
-	 * 
-	 * The following are the default rules.
-	 * 
-	 * Given an ID:
-	 * 
-	 *  1. Check the id has an extension like _.js_ or _.customext_. If it doesn't:
-	 *      1. Check if the id is relative, meaning it starts with _../_ or _./_. If it is not, add 
-	 *         "/" plus everything after the last "/". So `foo/bar` becomes `foo/bar/bar`
-	 *      2. Add .js to the id.
-	 *  2. Check if the id is relative, meaning it starts with _../_ or _./_. If it is relative,
-	 *     set the id to the id joined from the currentWorkingId.
-	 *  3. Check the 
-	 * 
-	 * 
-	 * `steal.id()`
-	 */
-	// returns the "rootSrc" id, something that looks like requireJS
-	// for a given id/path, what is the "REAL" id that should be used
-	// this is where substituation can happen
-	steal.id = function( id, currentWorkingId, type ) {
-		// id should be like
-		var uri = URI(id);
-		uri = uri.addJS().normalize(currentWorkingId ? new URI(currentWorkingId) : null)
-		// check foo/bar
-		if (!type ) {
-			type = "js"
-		}
-		if ( type == "js" ) {
-			// if it ends with .js remove it ...
-			// if it ends
-		}
-		// check map config
-		var map = stealConfig.map || {};
-		// always run past 
-		each(map, function( loc, maps ) {
-			// is the current working id matching loc
-			if ( matchesId(loc, currentWorkingId) ) {
-				// run maps
-				each(maps, function( part, replaceWith ) {
-					if (("" + uri).indexOf(part) == 0 ) {
-						uri = URI(("" + uri).replace(part, replaceWith))
-					}
-				})
-			}
-		})
-		return uri;
-	}
-	// for a given ID, where should I find this resource
-	/**
-	 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
-	 * is the location of the file. It uses the paths option of  [steal.config].
-	 * Passing true for `noJoin` does not join from the root URI.
-	 */
-	steal.idToUri = function( id, noJoin ) {
-		// this is normalize
-		var paths = stealConfig.paths || {};
-		// always run past 
-		each(paths, function( part, replaceWith ) {
-			if (("" + id).indexOf(part) == 0 ) {
-				id = URI(("" + id).replace(part, replaceWith));
-			}
-		})
-
-		return noJoin ? id : stealConfig.root.join(id)
-	}
-
-
 	// ## Helpers ##
 	// The following are a list of helper methods used internally to steal
 	var
@@ -331,6 +123,213 @@
 			}
 			return str;
 		};
+		
+	// create the steal function now to use as a namespace.
+
+
+	function steal() {
+		// convert arguments into an array
+		var args = map(arguments);
+		if ( args.length ) {
+			pending.push.apply(pending, args);
+			// steal.after is called everytime steal is called
+			// it kicks off loading these files
+			steal.after(args);
+			// return steal for chaining
+		}
+		return steal;
+	};
+	steal._id = Math.floor(1000 * Math.random());
+	// ## CONFIG ##
+	
+	// stores the current config settings
+	var stealConfig = {
+		types: {},
+		ext: {}
+	},
+	
+		matchesId = function( loc, id ) {
+			if ( loc === "*" ) {
+				return true;
+			} else if ( id.indexOf(loc) === 0 ) {
+				return true;
+			}
+		};
+	/**
+	 * `steal.config(config)` configures steal. Typically it it used
+	 * in __stealconfig.js__.  The available options are:
+	 * 
+	 *  - map - map an id to another id
+	 *  - paths - maps an id to a file
+	 *  - rootUrl - the path to the "root" folder
+	 * 
+	 * 
+	 * ## map
+	 * 
+	 * Maps an id to another id with a certain scope of other ids. This can be
+	 * used to use different modules within the same id or map ids to another id.
+	 * Example:
+	 * 
+	 *     steal.config({
+	 *       map: {
+	 *         "*": {
+	 *           "jquery/jquery.js": "jquery"
+	 *         },
+	 *         "compontent1":{
+	 *           "underscore" : "underscore1.2"
+	 *         },
+	 *         "component2":{
+	 *           "underscore" : "underscore1.1"  
+	 *         }
+	 *       }
+	 *     })
+	 * 
+	 * ## paths
+	 * 
+	 * Maps an id or matching ids to a url. Each mapping is specified
+	 * by an id or part of the id to match and what that 
+	 * part should be replaced with.
+	 * 
+	 *     steal.config({
+	 *       paths: {
+	 * 	       // maps everything in a jquery folder like: `jquery/controller`
+	 *         // to http://cdn.com/jquery/controller/controller.com
+	 * 	       "jquery/" : "http://cdn.com/jquery/"
+	 * 
+	 *         // if path does not end with /, it matches only that id
+	 *         "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"
+	 *       }
+	 *     }) 
+	 * 
+	 * 
+	 */
+	steal.config = function( config ) {
+		for(var prop in config){
+			var value = config[prop]
+			// if it's a special function
+			steal.config[prop] ?
+				// run it
+				steal.config[prop](value) :
+				// otherwise set or extend
+				(typeof value == "object" ?
+					// extend
+					extend( stealConfig[prop] || {}, value) :
+					// set
+					stealConfig[prop] = value);
+				
+		}
+		// redo all resources
+		each(resources, function( id, resource ) {
+			if ( resource.options.type != "fn" ) {
+				// TODO this is terrible
+				var buildType = resource.options.buildType;
+				resource.setOptions(resource.orig);
+				var newId = resource.options.id;
+				// this mapping is to move a config'd key
+				if ( id !== newId ) {
+					resources[newId] = resource;
+					// TODO: remove the old one ....
+				}
+				resource.options.buildType = buildType;
+			}
+		})
+		return stealConfig;
+	};
+	/**
+	 * Read or define the path relative URI's should be referenced from.
+	 * 
+	 *     window.location //-> "http://foo.com/site/index.html"
+	 *     steal.URI.root("http://foo.com/app/files/")
+	 *     steal.root.toString() //-> "../../app/files/"
+	 */
+	steal.config.root = function( relativeURI ) {
+		if ( relativeURI !== undefined ) {
+			var root = URI(relativeURI);
+
+			// the current folder-location of the page http://foo.com/bar/card
+			var cleaned = URI.page,
+				// the absolute location or root
+				loc = cleaned.join(relativeURI);
+
+			// cur now points to the 'root' location, but from the page
+			URI.cur = loc.pathTo(cleaned)
+			stealConfig.root = root;
+			return;
+		}
+		stealConfig.root =  root || URI("");
+	}
+	
+	/**
+	 * @function steal.id
+	 * 
+	 * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
+	 * final, unique id. This function can be overwritten 
+	 * to change how unique ids are defined, for example, to be more AMD-like.
+	 * 
+	 * The following are the default rules.
+	 * 
+	 * Given an ID:
+	 * 
+	 *  1. Check the id has an extension like _.js_ or _.customext_. If it doesn't:
+	 *      1. Check if the id is relative, meaning it starts with _../_ or _./_. If it is not, add 
+	 *         "/" plus everything after the last "/". So `foo/bar` becomes `foo/bar/bar`
+	 *      2. Add .js to the id.
+	 *  2. Check if the id is relative, meaning it starts with _../_ or _./_. If it is relative,
+	 *     set the id to the id joined from the currentWorkingId.
+	 *  3. Check the 
+	 * 
+	 * 
+	 * `steal.id()`
+	 */
+	// returns the "rootSrc" id, something that looks like requireJS
+	// for a given id/path, what is the "REAL" id that should be used
+	// this is where substituation can happen
+	steal.id = function( id, currentWorkingId, type ) {
+		// id should be like
+		var uri = URI(id);
+		uri = uri.addJS().normalize(currentWorkingId ? new URI(currentWorkingId) : null)
+		// check foo/bar
+		if (!type ) {
+			type = "js"
+		}
+		if ( type == "js" ) {
+			// if it ends with .js remove it ...
+			// if it ends
+		}
+		// check map config
+		var map = stealConfig.map || {};
+		// always run past 
+		each(map, function( loc, maps ) {
+			// is the current working id matching loc
+			if ( matchesId(loc, currentWorkingId) ) {
+				// run maps
+				each(maps, function( part, replaceWith ) {
+					if (("" + uri).indexOf(part) == 0 ) {
+						uri = URI(("" + uri).replace(part, replaceWith))
+					}
+				})
+			}
+		})
+		return uri;
+	}
+	// for a given ID, where should I find this resource
+	/**
+	 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
+	 * is the location of the file. It uses the paths option of  [steal.config].
+	 * Passing true for `noJoin` does not join from the root URI.
+	 */
+	steal.idToUri = function( id, noJoin ) {
+		// this is normalize
+		var paths = stealConfig.paths || {};
+		// always run past 
+		each(paths, function( part, replaceWith ) {
+			if (("" + id).indexOf(part) == 0 ) {
+				id = URI(("" + id).replace(part, replaceWith));
+			}
+		})
+
+		return noJoin ? id : stealConfig.root.join(id)
+	}
 
 
 	// ## AOP ##
@@ -1537,6 +1536,11 @@
 			}
 		}
 	});
+	
+	// Overwrite
+	if(opts.types){
+		steal.config(opts);
+	}
 
 	// =============================== HELPERS ===============================
 	var factory = function() {

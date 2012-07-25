@@ -1,12 +1,13 @@
 // this is test helpers for steal
-steal(function(steal){
+steal('steal', function(steal){
 	
 var assertions = [],
 	module = "";
 steal.test =  {
 	//clears every property fromt he window, returns steal (might return old stuff)
 	clear: function() {
-		var win = this.getWindow();
+		var win = this.getWindow(),
+			steal = steal;
 		for(var n in win){
 			if(n != "_S" && n != "STEALPRINT"){
 				//this[n] = null;
@@ -130,5 +131,7 @@ steal.test =  {
 		print("==========  "+name+"  =========")
 	}
 }
+
+return steal.test;
 	
 })
