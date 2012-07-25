@@ -131,7 +131,5 @@ steal.test =  {
 		print("==========  "+name+"  =========")
 	}
 }
-
-return steal.test;
 	
 })

@@ -1,15 +1,15 @@
-// load('steal/build/styles/test/styles_test.js')
+// load('steal/build/styles/test/styles_s.test.js')
 /**
  * Tests compressing a very basic page and one that is using steal
  */
 load('steal/rhino/rhino.js')
-steal('steal/test', function(test) {
+steal('steal', 'steal/test', function(s) {
 	//STEALPRINT = false;
-	test.module("steal/build/js")
+	s.test.module("steal/build/js")
 	
 	//STEALPRINT = false;
 
-	test.test("makePackage", function(){
+	s.test.test("makePackage", function(){
 		load('steal/rhino/rhino.js');
 		steal('steal/build/js',
 			function(){
@@ -36,14 +36,14 @@ steal('steal/test', function(test) {
 				},
 				"package/css.css")
 				
-				test.equals(
+				s.test.equals(
 					res.js,
 					'steal.has("a.js","b.js");steal({id:"package/1.js",waits:!0,has:["jquery/jquery.js"]});steal({id:"package/css.css",waits:!0,has:["c.css"]});a;steal.executed("a.js");b;steal.executed("b.js");\n',
 					"js works");
 					
-				test.equals(res.css.code,"c")
+				s.test.equals(res.css.code,"c")
 				
-				test.clear();
+				s.test.clear();
 			});
 	});
 

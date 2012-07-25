@@ -3,7 +3,7 @@
  * Tests compressing a very basic page and one that is using steal
  */
 load('steal/rhino/rhino.js')
-steal('steal/test', function( s ) {
+steal('steal', 'steal/test', function( s ) {
 	STEALPRINT = false;
 	s.test.module("steal/build/packages")
 
