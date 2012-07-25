@@ -52,6 +52,7 @@
 		},
 		// dummy function
 		noop = function() {},
+		endsInSlashRegex = /\/$/,
 		// creates an element
 		createElement = function( nodeName ) {
 			return doc.createElement(nodeName)
@@ -320,11 +321,16 @@
 	 */
 	steal.idToUri = function( id, noJoin ) {
 		// this is normalize
-		var paths = stealConfig.paths || {};
+		var paths = stealConfig.paths || {},
+			path;
 		// always run past 
 		each(paths, function( part, replaceWith ) {
-			if (("" + id).indexOf(part) == 0 ) {
-				id = URI(("" + id).replace(part, replaceWith));
+			path = ""+id;
+			// if path ends in / only check first part of id
+			if((endsInSlashRegex.test(part) && path.indexOf(part) == 0) ||
+				// or check if its a full match only
+				path === part){
+				id = URI(path.replace(part, replaceWith));
 			}
 		})
 
