@@ -2,7 +2,7 @@ steal('jquery').then(function(){
 
 module("steal")
 
-	var orig = steal.URI( steal.root+'' );
+	var orig = steal.URI( steal.config().root+'' );
 		src = function(src){
 		return orig.join(src)
 	},
@@ -44,7 +44,8 @@ test("steal one js", function(){
 })
 
 test("steal one function", function(){
-	steal.URI.root("../../")
+
+	steal.config({root: "../../"})
 	steal.URI.cur = URI("foo/bar.js");
 	stop();
 	steal(function(){
@@ -58,7 +59,8 @@ test("loading plugin from jmvcroot", function(){
 	PLUGINLOADED = false;
 	DEPENCENCYLOADED = false;
 	stop();
-	steal.URI.root("../../").then('steal/test/files/plugin',function(){
+	steal.config({root: "../../"})
+	steal('steal/test/files/plugin',function(){
 		equals(PLUGINLOADED, true)
 		equals(DEPENCENCYLOADED, true)
 	start();
@@ -69,7 +71,8 @@ test("loading plugin from jmvcroot", function(){
 test("not using extension", function(){
 	REQUIRED = false;
 	stop();
-	steal.URI.root("../../").then('./files/require',function(){
+	steal.config({root: "../../"})
+	steal('./files/require',function(){
 		equals(REQUIRED, true);
 		start();
 	})
@@ -78,7 +81,8 @@ test("not using extension", function(){
 test("loading file from jmvcroot", function(){
 	REQUIRED = false;
 	stop();
-	steal.URI.root("../../").then('steal/test/files/require.js',function(){
+	steal.config({root: "../../"})
+	steal('steal/test/files/require.js',function(){
 		equals(REQUIRED, true)
 		start();
 	})
@@ -87,7 +91,8 @@ test("loading file from jmvcroot", function(){
 test("loading two files", function(){
 	ORDER = [];
 	stop();
-	steal.URI.root("../../").then('./files/file1.js',function(){
+	steal.config({root: "../../"})
+	steal('./files/file1.js',function(){
 		same(ORDER,[1,2,"then2","then1"])
 		start();
 	})
@@ -95,7 +100,8 @@ test("loading two files", function(){
 
 test("steal one file with different URI.root", function(){
 	// doesn't this imply the next ...
-	steal.URI.root("../");
+
+	steal.config({root: "../"})
 	REQUIRED = undefined;
 	stop();
 
@@ -109,7 +115,8 @@ test("steal one file with different URI.root", function(){
 test("loading same file twice", function(){
 	ORDER = [];
 	stop();
-	steal.URI.root("../../").then('./files/duplicate.js', './files/duplicate.js',function(){
+	steal.config({root: "../../"})
+	steal('./files/duplicate.js', './files/duplicate.js',function(){
 		same(ORDER,[1])
 		start();
 	})
@@ -118,7 +125,8 @@ test("loading same file twice", function(){
 test("loading same file twice with absolute paths", function(){
 	ORDER = [];
 	stop();
-	steal.URI.root("../../").then('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
+	steal.config({root: "../../"})
+	steal('./files/loadDuplicate.js').then('//steal/test/files/duplicate.js',function(){
 		same(ORDER,[1])
 		start();
 	})
@@ -127,7 +135,7 @@ test("loading same file twice with absolute paths", function(){
 
 test("steal one file with different cur", function(){
 	// doesn't this imply the next ...
-	steal.URI.root("../../")
+	steal.config({root: "../../"})
 	steal.URI.cur = steal.URI("foo/bar.js");
 	REQUIRED = undefined;
 	stop();
@@ -254,7 +262,7 @@ test("filename", function(){
 
 
 	test("rootSrc", function(){
-		steal.URI.root("../abc/");
+		steal.config({root: "../abc/"})
 		equals( steal.URI.cur+'' , "../../qunit.html", "cur changed right");
 	})
 
@@ -544,7 +552,7 @@ test("ready", function(){
 });
 
 test("loading multiple css file from jmvcroot", function(){
-	URI.root("../../");
+	steal.config({root: "../../"})
 	stop();
 
 	$("#qunit-test-area").append("<div id='blue'>loading multiple css file from jmvcroot - Blue</div>" +
@@ -617,8 +625,8 @@ test("runs error callback", function(){
 
 test("needs", function(){
 	stop();
-
-	steal.URI.root("../../").then({
+	steal.config({root: "../../"})
+	steal({
 		id: "steal/test/files/needs.js",
 		needs: ["steal/test/files/needed.js"]
 	});
@@ -641,7 +649,7 @@ test("needs options", function(){
 
 test("modules", function(){
 	
-	steal.URI.root("../../");
+	steal.config({root: "../../"})
 	stop();
 	steal("steal/test/modules/module1.js", function(module1){
 		ok(module1.foo, true)
