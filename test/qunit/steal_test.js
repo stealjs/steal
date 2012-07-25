@@ -632,6 +632,22 @@ test("needs", function(){
 	});
 });
 
+test("idToUri", function(){
+	steal.config({
+		paths: {
+			"jquery": "can/util/jquery/jquery.1.7.1.js"
+		}
+	})
+	equals(steal.idToUri( "jquery/test/test.js" ), "../../jquery/test/test.js")
+	equals(steal.idToUri( "jquery" ), "../../can/util/jquery/jquery.1.7.1.js")
+	steal.config({
+		paths: {
+			"jquery/" : "http://cdn.com/jquery/"
+		}
+	})
+	equals(steal.idToUri( "jquery/test/test.js" ), "http://cdn.com/jquery/test/test.js")
+	equals(steal.idToUri( "jquery" ), "../../can/util/jquery/jquery.1.7.1.js")
+});
 /** /
 test("needs options", function(){
 	stop();
