@@ -211,9 +211,9 @@
 				// run it
 				steal.config[prop](value) :
 				// otherwise set or extend
-				(typeof value == "object" ?
+				(typeof value == "object" && stealConfig[prop] ?
 					// extend
-					extend( stealConfig[prop] || {}, value) :
+					extend( stealConfig[prop], value) :
 					// set
 					stealConfig[prop] = value);
 				
