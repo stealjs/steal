@@ -309,7 +309,7 @@ test("filename", function(){
 	test("require JS", function(){
 		stop();
 		steal.require({
-			src : src('steal/test/files/require.js'),
+			id: src('steal/test/files/require.js'),
 			type: "js"
 		}, function(){
 			start();
@@ -320,7 +320,7 @@ test("filename", function(){
 	test("require CSS", function(){
 		stop();
 		steal.require({
-			src : src('steal/test/files/require.css'),
+			id: src('steal/test/files/require.css'),
 			type: "css"
 		}, function(){
 			setTimeout(function(){
@@ -342,7 +342,7 @@ test("filename", function(){
 		});
 
 		steal.require({
-			src : src('steal/test/files/require.foo'),
+			id: src('steal/test/files/require.foo'),
 			type: "foo"
 		}, function(){
 			start();
