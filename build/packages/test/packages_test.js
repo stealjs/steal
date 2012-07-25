@@ -11,7 +11,7 @@ steal('steal', 'steal/test', function( s ) {
 		load('steal/rhino/rhino.js');
 		steal('steal/build/packages',
 			function(){
-				steal.build.packages('steal/build/packages/test/app.html')
+				steal.build.packages('steal/build/packages/test/app.js')
 				
 				// TODO change this test to actually open the app in packages mode instead of hardcoding the files
 				var filesToCompare = [

@@ -14,13 +14,9 @@ steal('steal', 'steal/test', function( s ) {
 			s2.build.open('steal/build/open/test/basic.js',function(opener){
 				s.test.ok(opener,"got opener");
 				var items = [];
-				opener.each('js', function( options ){
-					items.push(options.id);
-				});
-				for(var i=0; i<items.length; i++){
-					if(items[i] == 'steal/less/less.js')
-					s.test.ok(true, 'less was loaded')
-				}
+				s.test.open('steal/build/open/test/basic.html')
+				s.test.ok(window.basic)
+				s.test.equals(window.appFiles[0], "one")
 			});
 			
 		});

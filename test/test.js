@@ -107,18 +107,32 @@ steal.test =  {
 			print("I DON'T GET IT")
 		}
 		Envjs(src, {
-			scriptTypes : {
-				"text/javascript" : true,
-				"text/envjs" : true,
+			scriptTypes: {
+				"text/javascript": true,
+				"text/envjs": true,
 				"": true
-			}, 
-			fireLoad: fireLoad !== undefined ? fireLoad : true, 
+			},
+			fireLoad: true,
 			logLevel: 2,
+			afterScriptLoad: {
+				// prevent $(document).ready from being called even though load is fired
+				"jquery.js": function( script ) {
+					window.jQuery && jQuery.readyWait++;
+				},
+				"steal.js": function(script){
+					// a flag to tell steal we're in "build" mode
+					// this is used to completely ignore files with the "ignore" flag set
+					window.steal.isBuilding = true;
+					// if there's timers (like in less) we'll never reach next line 
+					// unless we bind to done here and kill timers
+					window.steal.one('done', function(){
+						Envjs.clear();
+					});
+					newSteal = window.steal;
+				}
+			},
 			dontPrintUserAgent: true
 		});
-		//var newSteal = window.steal;
-		//newSteal.done(function(){});
-		//Envjs.wait();
 		
 	},
 	test : function(name, test){
