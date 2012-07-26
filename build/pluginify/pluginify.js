@@ -5,7 +5,7 @@
 
 // _args = ['jquery/controller']; load('steal/pluginifyjs')
 
-steal('steal/parse','steal/build').then(
+steal('steal', 'steal/parse','steal/build',
  function(s) {
 	var isArray = function(arr){
 		return Object.prototype.toString.call(arr)=== "[object Array]"
