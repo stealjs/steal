@@ -43,10 +43,15 @@ steal('steal',function(s){
 					// load all these steals, and their dependencies
 					loadset(steals, CB, depth, includeFns);
 					
-					// load any dependencies 
-					loadset(curStl.dependencies, CB, depth, includeFns);
-					// probably needs to change if depth
-					touch([curStl], CB)
+					if(depth){
+						// load any dependencies 
+						loadset(curStl.dependencies, CB, depth, includeFns);
+						// probably needs to change if depth
+						touch([curStl], CB)
+					} else {
+						touch([curStl], CB);
+						loadset(curStl.dependencies, CB, depth, includeFns);
+					}
 					i=0;
 				}else{
 					i++;
