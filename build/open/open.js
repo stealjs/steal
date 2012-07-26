@@ -202,6 +202,7 @@ steal('steal',function(s){
 					if(typeof filter == 'string'){
 						var resource = filter;
 						filter = function(stl){
+							print('filter')
 							return stl.options.buildType === resource;
 						}
 					}
@@ -263,7 +264,7 @@ steal('steal',function(s){
 		var stel;
 		for(var i =0; i < rootSteal.dependencies.length; i++){
 			stel = rootSteal.dependencies[i]
-			if(stel.options.buildType != 'fn' && stel.options.rootSrc != 'steal/dev/dev.js'){
+			if(stel.options.buildType != 'fn' && stel.options.id != 'steal/dev/dev.js' && stel.options.id != 'stealconfig.js'){
 				return stel;
 			}	
 		}

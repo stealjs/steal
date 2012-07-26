@@ -129,7 +129,8 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			} else {
 				steal.build.open(html, data, function(opener){
 					steal.print("  adding dependencies");
-					options.appFiles.push(  apps.addDependencies(opener.rootSteal, options, appName )  );
+					var appFile = apps.addDependencies(opener.firstSteal, options, appName );
+					options.appFiles.push(  appFile  );
 					steal.print(" ")
 					callback(options, opener);
 				})
@@ -165,13 +166,10 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 		 * @return {file} the root dependency file for this application
 		 */
 		addDependencies: function( steel, options, appName ) {
-			// check if a fn ...
-			//steal.print('addD '+steel.options.rootSrc);
-			
 			var id = steel.options.id,
-				buildType = steel.options.buildType,
+				buildType = steel.options.buildType;
 				
-				file = maker(options.files, id, function(){
+				var file = maker(options.files, id, function(){
 					//clean and minifify everything right away ...
 					if( steel.options.buildType != 'fn' ) {
 						// some might not have source yet
@@ -444,10 +442,10 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				
 				sharing.files.forEach(function(file){
 					// add the files to the packagesFiles
-					packagesFiles[packageName+".js"].push(file.stealOpts.rootSrc);
+					packagesFiles[packageName+".js"].push(file.stealOpts.id);
 					
 					filesForPackaging.push(file.stealOpts)
-					steal.print("  " + file.order + ":" + file.stealOpts.rootSrc);
+					steal.print("  " + file.order + ":" + file.stealOpts.id);
 				});
 				
 				// create dependencies object
