@@ -6,7 +6,7 @@
 // _args = ['jquery/controller']; load('steal/pluginifyjs')
 
 steal('steal', 'steal/parse','steal/build',
- function(s) {
+ function(s, parse) {
 	var isArray = function(arr){
 		return Object.prototype.toString.call(arr)=== "[object Array]"
 	}
@@ -66,7 +66,7 @@ steal('steal', 'steal/parse','steal/build',
 			str, 
 			i, 
 			inExclude = function(stl){
-				var path = ""+stl.rootSrc;
+				var path = ""+stl.id;
 				for (var i = 0; i < opts.exclude.length; i++) {
 					if (path.indexOf(opts.exclude[i]) > -1 || stl._skip) {
 						return true;
@@ -77,30 +77,31 @@ steal('steal', 'steal/parse','steal/build',
 			pageSteal, 
 			steals = [], 
 			fns = {};
-			
+		
 		steal.build.open("steal/rhino/empty.html", {
 			startFile : plugin, 
 			skipCallbacks: opts.skipCallbacks
 		}, function(opener){
+			
 			opener.each(function(stl, text, i){
-				// print("> ",stl.rootSrc)
+				print("> ",stl.id)
 				if(stl.buildType === "fn") {
-					fns[stl.rootSrc] = true;
+					fns[stl.id] = true;
 				}
-				else if(fns[stl.rootSrc] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
+				else if(fns[stl.id] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
 					return;
 				}
-				if ((opts.standAlone && ( ""+stl.rootSrc ) === plugin )
+				if ( (opts.standAlone && ( ""+stl.id ) === plugin )
 					|| (!opts.standAlone && !inExclude(stl))) {
 				
 					var content = s.build.pluginify.content(stl, opts, text);
 					if (content) {
-						s.print("  > " + stl.rootSrc)
+						//s.print("  > " + stl.id)
 						out.push(s.build.js.clean(content));
 					}
 				}
 				else {
-					s.print("  Ignoring " + stl.rootSrc)
+					s.print("  Ignoring " + stl.id)
 				}
 			}, true)
 		}, true, true);
@@ -131,14 +132,14 @@ steal('steal', 'steal/parse','steal/build',
 		
 		if (steal.buildType == "fn") {
 			// if it's a function, go to the file it's in ... pull out the content
-			var index = funcCount[steal.rootSrc] || 0, 
-				contents = readFile(steal.rootSrc);
-			funcCount[steal.rootSrc]++;
+			var index = funcCount[steal.id] || 0, 
+				contents = readFile(steal.id);
+			funcCount[steal.id]++;
 			var contents = s.build.pluginify.getFunction(contents, index, opts.onefunc);
 			return opts.onefunc ? contents : "(" + contents + ")(" + param + ");";
 		}
 		else {
-			var content = readFile(steal.rootSrc);
+			var content = readFile( s.idToUri( steal.id, true)   );
 			if (/steal[.\(]/.test(content)) {
 				
 				content = s.build.pluginify.getFunction(content, 0, opts.onefunc)
@@ -151,7 +152,7 @@ steal('steal', 'steal/parse','steal/build',
 		}
 	};
 	s.build.pluginify.getFunction = function(content, ith, onewrap){
-		var p = s.parse(content), 
+		var p = parse(content), 
 			token, 
 			funcs = [];
 		while (token = p.moveNext()) {

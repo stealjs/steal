@@ -1045,7 +1045,7 @@
 				var uri = URI.cur,
 					self = this,
 					cur = steal.cur;
-
+				
 				this.options = {
 					fn: function() {
 
@@ -1091,7 +1091,7 @@
 						}
 						return ret;
 					},
-					rootSrc: uri,
+					id: uri,
 					type: "fn"
 				}
 				// this has nothing to do with 'loading' options
@@ -1124,8 +1124,8 @@
 			// will load from it.
 			// rootSrc needs to be the translated path
 			// we need id vs rootSrc ...
-			if ( this.options.rootSrc ) {
-				URI.cur = URI(rootSrc);
+			if ( this.options.id ) {
+				URI.cur = URI(this.options.id);
 			}
 			// set this as the current resource
 			steal.cur = this;

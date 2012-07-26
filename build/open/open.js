@@ -10,13 +10,18 @@ steal('steal',function(s){
 		// depth - true if it should be depth first search, defaults to breadth
 		// includeFns - true if it should include functions in the iterator
 		iterate = function(stl, CB, depth, includeFns){
+	
+			
 			// load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 
 
 			// this goes through the scripts until it finds one that waits for 
 			// everything before it to complete
-			// console.log('OPEN', name(stl), stl.id, "depends on", depends.length)
+			//console.log('OPEN', stl.options.id, "depends on", depends.map(function(stl){
+			//	return stl.options.id+":"+stl.options.type
+			//}).join(","))
+			
 			// if(includeFns){
 				// if(!depends.length){
 					// touch([stl], CB)
@@ -29,7 +34,9 @@ steal('steal',function(s){
 						// var steals = depends.splice(0,i+1),
 							// curStl = steals[steals.length-1];
 					// } else {
+						// removes all steals before the wait
 						var steals = depends.splice(0,i),
+							// cur steal is the waiting dependency
 							curStl = depends.shift();
 					// }
 					
@@ -37,7 +44,9 @@ steal('steal',function(s){
 					loadset(steals, CB, depth, includeFns);
 					
 					// load any dependencies 
-					loadset(curStl.dependencies, CB, null, includeFns);
+					loadset(curStl.dependencies, CB, depth, includeFns);
+					// probably needs to change if depth
+					touch([curStl], CB)
 					i=0;
 				}else{
 					i++;
@@ -67,8 +76,8 @@ steal('steal',function(s){
 		},
 		touch = function(steals, CB){
 			for(var i =0; i < steals.length; i++){
-				var uniqueId = steals[i].id;
-				// print("  Touching "+uniqueId, name(steals[i]))
+				var uniqueId = steals[i].options.id;
+				//print("  Touching "+uniqueId )
 				if(!touched[uniqueId]){
 					CB( steals[i] );
 					touched[uniqueId] = true;
@@ -78,12 +87,12 @@ steal('steal',function(s){
 		},
 		eachSteal = function(steals, CB, depth, includeFns){
 			for(var i =0; i < steals.length; i++){
-				// print("  eachsteal ",name(steals[i]))
+				//print("  eachsteal ",name(steals[i]))
 				iterate(steals[i], CB, depth, includeFns)
 			}
 		},
 		name = function(s){
-			return s.options.src;
+			return s.options.id;
 		},
 		window = (function() {
 			return this;
@@ -207,7 +216,7 @@ steal('steal',function(s){
 					}
 					var items = [];
 					// iterate 
-					
+					print("ITERATING "+depth)
 					iterate(rootSteal, function(stealer){
 						
 						if( filter(stealer) ) {
