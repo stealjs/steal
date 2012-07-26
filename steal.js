@@ -2125,7 +2125,6 @@
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		steal.config(options);
-
 		
 
 		// mark things that have already been loaded
@@ -2163,9 +2162,9 @@
 		}
 
 		// we only load things with force = true
-		if ( options.env == "production" && options.loadProduction && options.production ) {
+		if ( stealConfig.env == "production" && stealConfig.loadProduction && stealConfig.production ) {
 			steal({
-				id: options.production,
+				id: stealConfig.production,
 				force: true
 			});
 		} else {

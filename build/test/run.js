@@ -4,58 +4,59 @@
  */
 
 // load('steal/build/pluginify/test/pluginify_test.js')
-load('steal/build/js/js_test.js')
-load('steal/build/open/test/open_test.js')
-load('steal/build/css/test/css_test.js')
+// load('steal/build/js/js_test.js')
+// load('steal/build/open/test/open_test.js')
+// load('steal/build/css/test/css_test.js')
+// TODO redo this test
 // load('steal/build/packages/test/packages_test.js')
 
-// load('steal/rhino/rhino.js')
-// steal('steal/test/test.js', function( s ) {
+load('steal/rhino/rhino.js')
+steal('steal', 'steal/test/test.js', function( s ) {
 	// STEALPRINT = false;
-	// s.test.module("steal/build")
-// 	
-	// s.test.test("steal.dev removes parens", function(){
-		// load('steal/rhino/rhino.js')
-		// var dev = readFile('steal/build/test/dev.js'),
-			// devCleaned = readFile('steal/build/test/devCleaned.js');
-		// steal("steal/build","steal/build/js").then(function(s2){
-			// var a = steal.build.js.clean("var bla;var foo;steal.dev.log('hi')")
-			// s.test.equals(a, "var bla;var foo;", "clean works")
-			// var b = steal.build.js.clean("var bla;steal.dev.log('hi()');var foo;steal.dev.log('onetwo(bla())')")
-			// s.test.equals(b, "var bla;;var foo;", "clean works with parens")
-			// var c = steal.build.js.clean("var bla;steal.dev.warn('hi()');var foo;steal.dev.warn('onetwo(bla())')")
-			// s.test.equals(b, "var bla;;var foo;", "clean works with warn")
-			// var d = steal.build.js.clean(dev);
-			// s.test.equals(d, devCleaned, "clean really works")
-		// });
-		// s.test.clear();
-	// })
-// 	
-	// s.test.test("less packages correctly", function(){
-		// load('steal/rhino/rhino.js')
-		// steal("steal/build","steal/build/js","steal/build/css", "steal/build/apps").then(function(s2){
-			// s2.build("steal/build/test/styles/styles.html", {
-				// to: 'steal/build/test/styles'
-			// })
-		// });
-		// // will throw an error if its not working
-		// AFTERLESS = false;
-		// s.test.open('steal/build/test/styles/prod.html');
-		// s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
-		// s.test.equals(document.getElementsByTagName("link")[0].href.indexOf("production.css") != -1, true, "its the production.css")
-		// s.test.equals(AFTERLESS, true, "the callback function runs")
-// 		
-		// // this page tests putting link in the head
-		// AFTERLESS = false;
-		// s.test.open('steal/build/test/styles/prod2.html');
-		// s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
-		// s.test.equals(document.getElementsByTagName("link")[0].href.indexOf("production.css") != -1, true, "its the production.css")
-		// s.test.equals(AFTERLESS, true, "the callback function runs")
-		// s.test.clear();
-		// // s.test.remove('steal/build/test/styles/production.js')
-		// // s.test.remove('steal/build/test/styles/production.css')
-// 		
-	// });
+	s.test.module("steal/build")
+	
+	s.test.test("steal.dev removes parens", function(){
+		load('steal/rhino/rhino.js')
+		var dev = readFile('steal/build/test/dev.js'),
+			devCleaned = readFile('steal/build/test/devCleaned.js');
+		steal("steal/build","steal/build/js").then(function(s2){
+			var a = steal.build.js.clean("var bla;var foo;steal.dev.log('hi')")
+			s.test.equals(a, "var bla;var foo;", "clean works")
+			var b = steal.build.js.clean("var bla;steal.dev.log('hi()');var foo;steal.dev.log('onetwo(bla())')")
+			s.test.equals(b, "var bla;;var foo;", "clean works with parens")
+			var c = steal.build.js.clean("var bla;steal.dev.warn('hi()');var foo;steal.dev.warn('onetwo(bla())')")
+			s.test.equals(b, "var bla;;var foo;", "clean works with warn")
+			var d = steal.build.js.clean(dev);
+			s.test.equals(d, devCleaned, "clean really works")
+		});
+		s.test.clear();
+	})
+	
+	s.test.test("less packages correctly", function(){
+		load('steal/rhino/rhino.js')
+		steal('steal', "steal/build","steal/build/js","steal/build/css", "steal/build/apps", function(s2){
+			s2.build("steal/build/test/styles/styles.html", {
+				to: 'steal/build/test/styles'
+			})
+		});
+		// will throw an error if its not working
+		AFTERLESS = false;
+		s.test.open('steal/build/test/styles/prod.html');
+		s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
+		s.test.equals(document.getElementsByTagName("link")[0].href.indexOf("production.css") != -1, true, "its the production.css")
+		s.test.equals(AFTERLESS, true, "the callback function runs")
+		
+		// this page tests putting link in the head
+		AFTERLESS = false;
+		s.test.open('steal/build/test/styles/prod2.html');
+		s.test.equals(document.getElementsByTagName("link").length, 1, "there is one css in the page")
+		s.test.equals(document.getElementsByTagName("link")[0].href.indexOf("production.css") != -1, true, "its the production.css")
+		s.test.equals(AFTERLESS, true, "the callback function runs")
+		s.test.clear();
+		// s.test.remove('steal/build/test/styles/production.js')
+		// s.test.remove('steal/build/test/styles/production.css')
+		
+	});
 // 	
 	// s.test.test("open", function(){
 		// load('steal/rhino/rhino.js')
@@ -369,4 +370,4 @@ load('steal/build/css/test/css_test.js')
 	// });
 // 	
 // 
-// });
+});

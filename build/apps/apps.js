@@ -88,7 +88,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			//= Configure what we are going to load from APP name
 			
 			// if we have html, get  the app-name
-			/*var html = 'steal/rhino/blank.html',
+			var html = 'steal/rhino/blank.html',
 				data = {env: 'development'};
 			if(appName.indexOf('.html') > 2){
 				html = appName;
@@ -101,8 +101,8 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				data = {
 					startFile: appName + "/" + steal.File(appName).basename() + ".js"
 				}
-			}*/
-			steal.print("Opening " + ( appName ) );
+			}
+			steal.print("Opening " + ( appName || html) );
 			
 			// use last steal to load page
 			if(options.newPage === false && steal.build.apps.lastSteal){
@@ -127,7 +127,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				// steal file
 				window.steal(data.startFile);
 			} else {
-				steal.build.open(appName, function(opener){
+				steal.build.open(html, data, function(opener){
 					steal.print("  adding dependencies");
 					options.appFiles.push(  apps.addDependencies(opener.rootSteal, options, appName )  );
 					steal.print(" ")
