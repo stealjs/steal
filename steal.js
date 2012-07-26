@@ -1168,9 +1168,9 @@
 				}
 				// make a steal object
 				var stel = Resource.make(item);
-				if ( packHash[stel.options.rootSrc] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
-					steal.has(stel.options.rootSrc);
-					stel = Resource.make(packHash[stel.options.rootSrc]);
+				if ( packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
+					steal.has(""+stel.options.id);
+					stel = Resource.make(packHash[""+stel.options.id]);
 				}
 				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
@@ -1248,6 +1248,7 @@
 			this.loaded.resolve();
 		},
 		execute: function() {
+			debugger;
 			var self = this;
 			if (!self.loaded.isResolved() ) {
 				self.loaded.resolve();

@@ -11,30 +11,31 @@ steal('steal', 'steal/test', function( s ) {
 		load('steal/rhino/rhino.js');
 		steal('steal/build/packages',
 			function(){
-				steal.build.packages('steal/build/packages/test/app.html')
+				load('steal/build/packages/test/packages_test/scripts/build.js')
+				s.test.open('steal/build/packages/test/packages_test/prod.html')
+				s.test.ok(typeof window.appA === "undefined");
+				s.test.clear();
+				s.test.open('steal/build/packages/test/packages_test/prod.html#a')
+				s.test.equals(window.appA, true);
 				
 				// TODO change this test to actually open the app in packages mode instead of hardcoding the files
-				var filesToCompare = [
-					'production.css',
+				var filesToRemove = [
 					'production.js',
-					'packages/accordion.js',
-					'packages/resize.js',
-					'packages/resize-accordion.js',
-					'packages/resize-accordion-table_scroll.js',
-					'packages/resize-table_scroll.js',
-					'packages/table_scroll.js',
-					'packages/table_scroll.css'
+					'packages/app_a.js',
+					'packages/app_b.js',
+					'packages/app_c.js',
+					'packages/app_d.js',
+					'packages/app_a-app_b.js',
+					'packages/app_a-app_b-app_c-app_d.js'
 				];
 				
-				s.test.clear();
-				s.test.open('steal/build/packages/test/app.html');
-				s.test.ok(window.Route)
-				// TODO verify packages load when you click links
-				
-				// for(var i=0;i<filesToCompare.length; i++){
-					// TODO verify each file exists
-					// s.test.remove('steal/build/packages/test/'+filesToCompare[i])
-				// }
+				var path;
+				for(var i=0;i<filesToRemove.length; i++){
+					path = 'steal/build/packages/test/packages_test/'+filesToRemove[i];
+					// print('checking '+path)
+					s.test.ok(s.File(path).exists())
+					s.test.remove(path)
+				}
 					
 				s.test.clear();
 			});

@@ -221,7 +221,6 @@ steal('steal',function(s){
 					}
 					var items = [];
 					// iterate 
-					print("ITERATING "+depth)
 					iterate(rootSteal, function(stealer){
 						
 						if( filter(stealer) ) {

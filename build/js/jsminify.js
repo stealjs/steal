@@ -54,6 +54,7 @@ steal('steal','steal/parse',function(steal, parse){
 	 *     several files at once.
 	 */
 	js.minify = function(source, options){		
+		// return source;
 		// get the compressor
 		options = options || {};
 		var compressor = js.minifiers[options.compressor || "localClosure"]()
