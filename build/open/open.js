@@ -202,7 +202,6 @@ steal('steal',function(s){
 					if(typeof filter == 'string'){
 						var resource = filter;
 						filter = function(stl){
-							print('filter')
 							return stl.options.buildType === resource;
 						}
 					}
