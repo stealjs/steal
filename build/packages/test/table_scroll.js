@@ -1,1 +1,1 @@
-steal('mxui/layout/table_scroll','./table_scroll.css')
+steal('canui/table_scroll','./table_scroll.css')

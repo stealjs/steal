@@ -26,13 +26,15 @@ steal('steal', 'steal/test', function( s ) {
 					'packages/table_scroll.css'
 				];
 				
-				for(var i=0;i<filesToCompare.length; i++){
-					s.test.compareFiles(
-						'steal/build/packages/test/answerkey/'+filesToCompare[i],
-						'steal/build/packages/test/'+filesToCompare[i],
-						filesToCompare[i]+' packaged');
-					s.test.remove('steal/build/packages/test/'+filesToCompare[i])
-				}
+				s.test.clear();
+				s.test.open('steal/build/packages/test/app.html');
+				s.test.ok(window.Route)
+				// TODO verify packages load when you click links
+				
+				// for(var i=0;i<filesToCompare.length; i++){
+					// TODO verify each file exists
+					// s.test.remove('steal/build/packages/test/'+filesToCompare[i])
+				// }
 					
 				s.test.clear();
 			});

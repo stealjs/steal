@@ -2,7 +2,7 @@
 // go through and mark everything in 'core' as packaged
 
 // indicate which sub-packages each other app needs
-// steal({ src: 'packagea', needs: 'abc.js'})
+// steal({ id: 'packagea', needs: 'abc.js'})
 
 // TODO
 //  - make it able to work with specific files
@@ -105,7 +105,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					// the object that we will pass to steal.p.make
 					// like:
 					//  {
-					//    package1 : {src: package1, needs: [shared1]}
+					//    package1 : {id: package1, needs: [shared1]}
 					//  }
 					// this is used so when the package is stolen,
 					// it will load anything it needs before it
@@ -161,7 +161,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					
 					// make this steal instance
 					makes[packageName+".js"] = {
-						src: packageName+".js",
+						id: packageName+".js",
 						needs :[],
 						has : has
 					}
@@ -172,7 +172,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 						makes[packageName+".js"].needs.push(packageName+".css")
 						// make the css
 						makes[packageName+".css"] = {
-							src: packageName+".css",
+							id: packageName+".css",
 							has: pack.css.srcs
 						};
 						s.URI(packageName+".css").save( filterCode(pack.css.code, 'css') );

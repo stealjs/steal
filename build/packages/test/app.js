@@ -1,6 +1,6 @@
 steal.packages('steal/build/packages/test/table_scroll.js',
-               'mxui/nav/accordion/accordion.js',
-			   'mxui/layout/resize/resize.js')
+               'canui/incubator/accordion/accordion.js',
+			   'canui/resize/resize.js')
 	.then('jquery/controller/route',
 		'jquery/view/ejs','./app.css')
 	.then('./ejs.ejs', function(){
@@ -8,17 +8,17 @@ steal.packages('steal/build/packages/test/table_scroll.js',
 $.Controller('Route', {
 	"table route" : function(){
 		steal('steal/build/packages/test/table_scroll.js', function(){
-			$('#table').mxui_layout_table_scroll()
+			$('#table').tableScroll()
 		})
 	},
 	"accordion route" : function(){
-		steal('mxui/nav/accordion', function(){
-			$('#accordion').mxui_nav_accordion()
+		steal('canui/incubator/accordion', function(){
+			$('#accordion').accordion()
 		})
 	},
 	"resize route" : function(){
-		steal('mxui/layout/resize', function(){
-			$('#resize').mxui_layout_resize()
+		steal('canui/resize', function(){
+			$('#resize').resizable()
 		})
 	}
 });
