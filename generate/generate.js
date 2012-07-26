@@ -229,7 +229,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		insertCode: function( destination, newCode ){
 			// get file, parse it
 			var fileTxt = readFile(destination),
-				parser =  steal.parse(fileTxt),
+				parser =  parse(fileTxt),
 				tokens = [],
 				lastToken,
 				token;
@@ -277,7 +277,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		insertSteal: function( destination, newStealPath, newline ){
 			// get file, parse it
 			var fileTxt = readFile(destination),
-				parser =  steal.parse(fileTxt),
+				parser =  parse(fileTxt),
 				tokens = [],
 				lastToken,
 				token,

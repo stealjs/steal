@@ -1,7 +1,7 @@
 load('steal/rhino/rhino.js')
 load('steal/rhino/test.js');
 
-steal('steal/get',function(rhinoSteal){
+steal('steal','steal/get',function(rhinoSteal){
 	var _S = steal.test;
 	
 	_S

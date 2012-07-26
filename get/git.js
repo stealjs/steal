@@ -1,4 +1,4 @@
-steal(function(s){
+steal('steal',function(s){
 /**
  * Gets the sha of the most recent commit
  *
