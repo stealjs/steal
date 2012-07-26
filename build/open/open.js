@@ -128,66 +128,40 @@ steal('steal',function(s){
 	 * @return {Object} an object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 */
-	steal.build.open = function( js, cb, depth, includeFns ) {
-		
-		
+	steal.build.open = function( url, stealData, cb, depth, includeFns ) {
 		// save and remove the old steal
 		var oldSteal = window.steal || steal,
 			// new steal is the steal opened
 			newSteal;
-		
+			
+		// remove the current steal
 		delete window.steal;
 		
-		window.steal = {
-			types : {
-				"js" : function(options, success){
-					var text = options.text || readFile(options.src);
-					// check for steal
-					if( /steal\(/.test(text) || /steal\.config/.test(text) ){
-						if(options.text){
-							eval(text)
-						}else{
-							load(options.src)
-						}
-					} else{
-						
-					}
-					
-					success()
-				},
-				"css" : function(options, success){
-					success();
-				},
-				"fn": function(options, success){
-					success();
-				}
-			},
-			startFile: js
+		// clean up window in case this is the second time Envjs has opened the page
+		for(var n in window){
+			// TODO make this part of steal namespace
+			if(n !== "STEALPRINT"){
+				delete window[n];
+			}
 		}
-		load("steal/steal.js");
-		//load("steal/rhino/file.js");
-		newSteal = window.steal;
+		// move params
+		if ( typeof stealData == 'object') {
+			window.steal = stealData;
+		}else{
+			cb = stealData;
+		}
+		// get envjs
+		load('steal/rhino/env.js'); //reload every time
 		
-
-		/*window.steal.one("end", function(rootSteal){
-			steal.print("  adding dependencies");
-			
-			options.appFiles.push(  apps.addDependencies(rootSteal.dependencies[0], options.files, appName )  );
-			
-			// set back steal
-			window.steal = curSteal;
-			callback(options, {
-				steal : newSteal,
-				rootSteal: rootSteal,
-				firstSteal: steal.build.open.firstSteal(rootSteal)
-			});
-		})*/
-
+		
 	
 		// what gets called by steal.done
 		// rootSteal the 'master' steal
 		var doneCb = function(rootSteal){
-			window.steal = oldSteal;
+			// get the 'base' steal (what was stolen)
+			
+			// clear timers
+			Envjs.clear();
 			
 			// callback with the following
 			cb({
@@ -245,22 +219,51 @@ steal('steal',function(s){
 				},
 				// the 
 				steal: newSteal,
+				url: url,
 				rootSteal : rootSteal,
 				firstSteal : s.build.open.firstSteal(rootSteal)
 			})
 		};
-		window.steal.firstComplete.then(doneCb);
-
-		//window.steal.one('done', doneCb)
-		// remove the current steal
 		
-		// steal(js)
+		Envjs(url, {
+			scriptTypes: {
+				"text/javascript": true,
+				"text/envjs": true,
+				"": true
+			},
+			fireLoad: true,
+			logLevel: 2,
+			afterScriptLoad: {
+				// prevent $(document).ready from being called even though load is fired
+				"jquery.js": function( script ) {
+					window.jQuery && jQuery.readyWait++;
+				},
+				"steal.js": function(script){
+					// a flag to tell steal we're in "build" mode
+					// this is used to completely ignore files with the "ignore" flag set
+					window.steal.isBuilding = true;
+					// if there's timers (like in less) we'll never reach next line 
+					// unless we bind to done here and kill timers
+					window.steal.one('done', doneCb);
+					newSteal = window.steal;
+				}
+			},
+			dontPrintUserAgent: true
+		});
+		
+		// set back steal
+		
+		window.steal = oldSteal;
+		// TODO: is this needed anymore
+		window.steal._steal = newSteal;
+
+		Envjs.wait();
 	};
-	steal.build.open.firstSteal =function( rootSteal ) {
+	steal.build.open.firstSteal =function(rootSteal){
 		var stel;
 		for(var i =0; i < rootSteal.dependencies.length; i++){
 			stel = rootSteal.dependencies[i]
-			if(stel.options.buildType != 'fn' && stel.options.id != 'steal/dev/dev.js'){
+			if(stel.options.buildType != 'fn' && stel.options.rootSrc != 'steal/dev/dev.js'){
 				return stel;
 			}	
 		}
@@ -288,7 +291,7 @@ steal('steal',function(s){
 
 
 		
-		// url = Envjs.uri(url, base);
+		url = Envjs.uri(url, base);
 		
 		if ( url.match(/^file\:/) ) {
 			url = url.replace("file:/", "");

@@ -4,7 +4,7 @@
  */
 load('steal/rhino/rhino.js')
 steal('steal', 'steal/test', function( s ) {
-	STEALPRINT = false;
+	// STEALPRINT = false;
 	s.test.module("steal/build/packages")
 
 	s.test.test("steal.build.packages", function(){

@@ -10,7 +10,7 @@ steal('steal', 'steal/test', function( s ) {
 	s.test.test("css", function(){
 		load('steal/rhino/rhino.js');
 		steal('steal/build', function(){
-				steal.build('steal/build/css/test/test.js',
+				steal.build('steal/build/css/test/page.html',
 					{to: 'steal/build/css/test'});
 					
 				var prod = readFile('steal/build/css/test/production.css').replace(/\r|\n|\s/g,""),
