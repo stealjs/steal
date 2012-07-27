@@ -170,13 +170,13 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				buildType = steel.options.buildType, 
 				file = maker(options.files, id || appName, function(){
 					//clean and minifify everything right away ...
-					steel.options.text = "";
+					var source = '';
 					if( id && steel.options.buildType != 'fn' ) {
 						// some might not have source yet
 						steal.print("  + "+id );
 						var source = steel.options.text ||  readFile( steal.idToUri( steel.options.id , true ) );
-						steel.options.text = source
 					}
+					steel.options.text = steel.options.text || source
 					
 					// this becomes data
 					return {
