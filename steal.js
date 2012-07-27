@@ -346,7 +346,7 @@
 		}
 	});
 	/**
-	 * @attriute page
+	 * @attribute page
 	 * The location of the page as a URI.
 	 * 
 	 *     steal.URI.page.protocol //-> "http"
@@ -1248,7 +1248,7 @@
 			this.loaded.resolve();
 		},
 		execute: function() {
-			debugger;
+			//debugger;
 			var self = this;
 			if (!self.loaded.isResolved() ) {
 				self.loaded.resolve();
@@ -2201,7 +2201,7 @@
 	// you steal(moduleId1, moduleId2, function(module1, module2){});
 	// 
 	win.define = function( moduleId, dependencies, method ) {
-		if (!dependencies.length ) {
+		if (dependencies && method && !dependencies.length ) {
 			modules[moduleId] = method();
 		}
 	}
