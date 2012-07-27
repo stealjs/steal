@@ -43,7 +43,8 @@ steal('steal', 'steal/parse','steal/build',
 				"onefunc": 0,
 				"wrapInner": 0,
 				"skipCallbacks": 0,
-				"standAlone": 0
+				"standAlone": 0,
+				"exposes": 0
 			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 		
@@ -62,7 +63,7 @@ steal('steal', 'steal/parse','steal/build',
 				s.pluginify = true;
 			}
 		};
-		var out = [], 
+		var out = '', 
 			str, 
 			i, 
 			inExclude = function(stl){
@@ -83,7 +84,7 @@ steal('steal', 'steal/parse','steal/build',
 			skipCallbacks: opts.skipCallbacks
 		}, function(opener){
 			
-			opener.each(function(stl, text, i){
+			opener.each(function(stl, resource, i){
 				print("> ",stl.id)
 				if(stl.buildType === "fn") {
 					fns[stl.id] = true;
@@ -94,10 +95,11 @@ steal('steal', 'steal/parse','steal/build',
 				if ( (opts.standAlone && ( ""+stl.id ) === plugin )
 					|| (!opts.standAlone && !inExclude(stl))) {
 				
-					var content = s.build.pluginify.content(stl, opts, text);
+					var content = s.build.pluginify.content(stl, opts, resource);
 					if (content) {
 						//s.print("  > " + stl.id)
-						out.push(s.build.js.clean(content));
+						out += '\nmodule[\'' + stl.id + '\'] = ';
+						out += s.build.js.clean(content);
 					}
 				}
 				else {
@@ -105,8 +107,12 @@ steal('steal', 'steal/parse','steal/build',
 				}
 			}, true)
 		}, true, true);
-		
-		var output = out.join(";\n");
+
+		var output = 'var module = { _orig: window.module };\n' + out;
+		output += '\nwindow.can = module[\'can/util/can.js\'];';
+		output += '\nwindow.module = module._orig;';
+
+		/* TODO: get working w/ onefunc
 		if ( opts.wrapInner && opts.wrapInner.length === 2 ) {
 			output = opts.wrapInner[0] + output + opts.wrapInner[1];
 		}
@@ -115,6 +121,8 @@ steal('steal', 'steal/parse','steal/build',
 				+ output + 
 			"}( " + opts.global + ", this ));";
 		}
+		//*/
+
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
 			var compressor = steal.build.js.minifiers[compressorName]()
@@ -127,21 +135,27 @@ steal('steal', 'steal/parse','steal/build',
 	}
 	var funcCount = {};
 	//gets content from a steal
-	s.build.pluginify.content = function(steal, opts, text){
-		var param = opts.global;
-		
-		if (steal.buildType == "fn") {
+	s.build.pluginify.content = function(resourceOpts, opts, resource){
+		var param = [];//opts.global; TODO: temporarily commented for 3.3 release
+
+		param = param.join(', ');
+
+		if (resourceOpts.buildType == "fn") {
 			// if it's a function, go to the file it's in ... pull out the content
-			var index = funcCount[steal.id] || 0, 
-				contents = readFile(steal.id);
-			funcCount[steal.id]++;
-			var contents = s.build.pluginify.getFunction(contents, index, opts.onefunc);
+			var index = funcCount[resourceOpts.id] || 0, 
+				contents = readFile(resourceOpts.id);
+			funcCount[resourceOpts.id]++;
+
+			var declaration = '\nvar ' + resourceOpts.id.toString().replace(/\//g, '_') + ' = ';
+			declaration = declaration.replace(/\.js/, '');
+
+			contents = s.build.pluginify.getFunction(contents, index, opts.onefunc);
+
 			return opts.onefunc ? contents : "(" + contents + ")(" + param + ");";
 		}
 		else {
-			var content = readFile( s.idToUri( steal.id, true)   );
+			var content = readFile( s.idToUri( resourceOpts.id, true)   );
 			if (/steal[.\(]/.test(content)) {
-				
 				content = s.build.pluginify.getFunction(content, 0, opts.onefunc)
 				if(content && !opts.onefunc){
 					content =  "(" + content + ")(" + param + ");";
@@ -167,8 +181,8 @@ steal('steal', 'steal/parse','steal/build',
 				}
 			}
 		}
+
 		return funcs[ith || 0];
-		
 	};
 	//gets a function from steal
 	var stealPull = function(p, content, cb, onewrap){
