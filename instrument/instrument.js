@@ -329,7 +329,7 @@ if(typeof steal.instrument.ignores === "string"){
 for(var i=0; i<steal.instrument.ignores.length; i++){
 	if(steal.instrument.ignores[i] === "!jmvc"){
 		// remove it and add jmvc files
-		steal.instrument.ignores.splice(i, 1, "jquery","funcunit","steal","documentjs","*/test","*_test.js", "*funcunit.js", "mxui");
+		steal.instrument.ignores.splice(i, 1, "/can", "/jquery","/funcunit","/steal","/documentjs","*/test","*_test.js", "*funcunit.js");
 		
 	}
 }
