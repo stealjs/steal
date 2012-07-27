@@ -113,7 +113,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				window.steal.one("end", function(rootSteal){
 					steal.print("  adding dependencies");
 					
-					options.appFiles.push(  apps.addDependencies(rootSteal.dependencies[0], options.files, appName )  );
+					options.appFiles.push(  apps.addDependencies(rootSteal, options.files, appName )  );
 					
 					// set back steal
 					window.steal = curSteal;
@@ -129,7 +129,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			} else {
 				steal.build.open(html, data, function(opener){
 					steal.print("  adding dependencies");
-					var appFile = apps.addDependencies(opener.firstSteal, options, appName );
+					var appFile = apps.addDependencies(opener.rootSteal, options, appName );
 					options.appFiles.push(  appFile  );
 					steal.print(" ")
 					callback(options, opener);
@@ -167,15 +167,15 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 		 */
 		addDependencies: function( steel, options, appName ) {
 			var id = steel.options.id,
-				buildType = steel.options.buildType;
-				
-				var file = maker(options.files, id, function(){
+				buildType = steel.options.buildType, 
+				file = maker(options.files, id || appName, function(){
 					//clean and minifify everything right away ...
-					if( steel.options.buildType != 'fn' ) {
+					steel.options.text = "";
+					if( id && steel.options.buildType != 'fn' ) {
 						// some might not have source yet
 						steal.print("  + "+id );
 						var source = steel.options.text ||  readFile( steal.idToUri( steel.options.id , true ) );
-						steel.options.text = source //
+						steel.options.text = source
 					}
 					
 					// this becomes data
@@ -199,7 +199,6 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 					// don't follow functions
 				     dependency.options.buildType != 'fn' && 
 					 !dependency.options.ignore) {
-					 
 					file.dependencyFileNames.push(dependency.options.id)
 					 
 					apps.addDependencies(dependency, options, appName);
@@ -410,7 +409,6 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 
 			//while there are files left to be packaged, get the most shared and largest package
 			while ((sharing = apps.getMostShared(options.files))) {
-				
 				steal.print('\npackaging shared by ' + sharing.appNames.join(", "))
 
 				
