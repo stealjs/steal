@@ -93,7 +93,7 @@ if(!steal.instrument){
 steal("./parser.js").then("./process.js", "./utils.js", function(){
 
 var utils = steal.instrument.utils,
-	origJSConverter = steal.types.js.require,
+	origJSConverter = steal.config().types.js.require,
 	extend = function(orig, newO){
 		for(var k in newO){
 			orig[k] = newO[k];
@@ -269,7 +269,7 @@ extend(steal.instrument, {
 	},
 	jsConvert: function(options, success, error){
 		var files = utils.parentWin().steal.instrument.files,
-			file = options.rootSrc,
+			file = options.src,
 			fileName = file.path,
 			instrumentation = files[fileName],
 			processInstrumentation = function(instrumentation){
