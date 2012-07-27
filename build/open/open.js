@@ -248,8 +248,8 @@ steal('steal',function(s){
 			logLevel: 2,
 			afterScriptLoad: {
 				// prevent $(document).ready from being called even though load is fired
-				"jquery.js": function( script ) {
-					window.jQuery && jQuery.readyWait++;
+				"jquery.1.7.1.js": function( script ) {
+					window.jQuery && jQuery.holdReady(true);
 				},
 				"steal.js": function(script){
 					// a flag to tell steal we're in "build" mode
