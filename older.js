@@ -404,7 +404,7 @@
 		}
 	});
 	/**
-	 * @attriute page
+	 * @attribute page
 	 * The location of the page as a URI.
 	 * 
 	 *     steal.URI.page.protocol //-> "http"

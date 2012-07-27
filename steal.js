@@ -346,7 +346,7 @@
 		}
 	});
 	/**
-	 * @attriute page
+	 * @attribute page
 	 * The location of the page as a URI.
 	 * 
 	 *     steal.URI.page.protocol //-> "http"
@@ -1248,7 +1248,7 @@
 			this.loaded.resolve();
 		},
 		execute: function() {
-//			debugger;
+			//debugger;
 			var self = this;
 			if (!self.loaded.isResolved() ) {
 				self.loaded.resolve();
