@@ -346,7 +346,7 @@
 		}
 	});
 	/**
-	 * @attriute page
+	 * @attribute page
 	 * The location of the page as a URI.
 	 * 
 	 *     steal.URI.page.protocol //-> "http"
@@ -1248,7 +1248,7 @@
 			this.loaded.resolve();
 		},
 		execute: function() {
-			debugger;
+			//debugger;
 			var self = this;
 			if (!self.loaded.isResolved() ) {
 				self.loaded.resolve();
@@ -2150,7 +2150,11 @@
 		// try-catching this so we dont have to build up to the iframe
 		// instrumentation check
 		try {
-			if ( options.instrument || (!options.browser && win.top && win.top.opener && win.top.opener.steal && win.top.opener.steal.instrument) ) {
+			// win.top.steal.instrument is for qunit
+			// win.top.opener.steal.instrument is for funcunit
+			if(!options.browser && ((win.top && win.top.steal.instrument) || 
+									(win.top && win.top.opener && win.top.opener.steal && win.top.opener.steal.instrument))) {
+
 				// force startFiles to load before instrument
 				steals.push(noop, {
 					id: "steal/instrument",
