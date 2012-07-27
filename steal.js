@@ -2201,7 +2201,7 @@
 	// you steal(moduleId1, moduleId2, function(module1, module2){});
 	// 
 	win.define = function( moduleId, dependencies, method ) {
-		if (!dependencies.length ) {
+		if (dependencies && method && !dependencies.length ) {
 			modules[moduleId] = method();
 		}
 	}
