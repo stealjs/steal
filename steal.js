@@ -1248,7 +1248,7 @@
 			this.loaded.resolve();
 		},
 		execute: function() {
-			debugger;
+//			debugger;
 			var self = this;
 			if (!self.loaded.isResolved() ) {
 				self.loaded.resolve();
