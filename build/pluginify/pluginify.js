@@ -95,10 +95,12 @@ steal('steal', 'steal/parse','steal/build',
 				if ( (opts.standAlone && ( ""+stl.id ) === plugin )
 					|| (!opts.standAlone && !inExclude(stl))) {
 				
-					var content = s.build.pluginify.content(stl, opts, resource);
+					var content = s.build.pluginify.content(stl, opts, resource, opener.steal);
 					if (content) {
 						//s.print("  > " + stl.id)
-						out += '\nmodule[\'' + stl.id + '\'] = ';
+						if(stl.buildType === 'fn') {
+							out += '\nmodule[\'' + stl.id + '\'] = ';
+						}
 						out += s.build.js.clean(content);
 					}
 				}
@@ -106,9 +108,12 @@ steal('steal', 'steal/parse','steal/build',
 					s.print("  Ignoring " + stl.id)
 				}
 			}, true)
-		}, true, true);
+		}, true, false);
 
-		var output = 'var module = { _orig: window.module };\n' + out;
+		var output = 'var module = { _orig: window.module };\n';
+		output += 'define = function(id, deps, value) {\n';
+		output += 'module[id] = value();\n';
+		output += '};\n define.amd = { jQuery: true };\n' + out;
 		output += '\nwindow.can = module[\'can/util/can.js\'];';
 		output += '\nwindow.module = module._orig;';
 
@@ -135,10 +140,17 @@ steal('steal', 'steal/parse','steal/build',
 	}
 	var funcCount = {};
 	//gets content from a steal
-	s.build.pluginify.content = function(resourceOpts, opts, resource){
-		var param = [];//opts.global; TODO: temporarily commented for 3.3 release
+	s.build.pluginify.content = function(resourceOpts, opts, resource, stl){
+		var param = [],//opts.global; TODO: temporarily commented for 3.3 release
+		deps = stl.resources[resourceOpts.id].dependencies;
 
-		param = param.join(', ');
+		for(var i = 0; i < deps.length - 1; i++) {
+			param.push(deps[i].options.id);
+		}
+
+		if(param.length) {
+			param = 'module["' + param.join('"], module["') + '"]';
+		}
 
 		if (resourceOpts.buildType == "fn") {
 			// if it's a function, go to the file it's in ... pull out the content

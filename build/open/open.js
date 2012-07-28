@@ -10,8 +10,6 @@ steal('steal',function(s){
 		// depth - true if it should be depth first search, defaults to breadth
 		// includeFns - true if it should include functions in the iterator
 		iterate = function(stl, CB, depth, includeFns){
-	
-			
 			// load each dependency until
 			var i =0,
 				depends = stl.dependencies.slice(0); 

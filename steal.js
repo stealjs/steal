@@ -2235,7 +2235,7 @@
 
 	startup();
 	//win.steals = steals;
-	win.resources = resources;
+	win.steal.resources = resources;
 	win.Resource = Resource;
 
 })(this);
