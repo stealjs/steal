@@ -330,4 +330,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		render: render
 	});
 
+	steal.Inflector = Inflector;
+	steal.EJS = EJS;
+	return steal;
 });
