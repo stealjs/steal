@@ -764,9 +764,7 @@
 	 */
 	// =============================== STATIC API ===============================
 	var page;
-	/**
-	 *  @static
-	 */
+
 	extend(steal, {
 		each: each,
 		extend: extend,
@@ -835,7 +833,46 @@
 			return steal.apply(win, args);
 		},
 		/**
-		 * Listens to events on Steal
+		 * `steal.bind( event, handler(eventData...) )` listens to 
+		 * events on steal. Typically these are used by various build processes
+		 * to know when steal starts and finish loading resources and their
+		 * dependencies. Listen to an event like:
+		 * 
+		 *     steal.bind('end', function(rootResource){
+		 *       rootResource.dependencies // the first stolen resources.
+		 *     })
+		 * 
+		 * Steal supports the following events:
+		 * 
+		 *  - __start__ - steal has started loading a group of resources and their dependencies.
+		 *  - __end__ - steal has finished loading a group of resources and their dependencies.
+		 *  - __done__ - steal has finished loading the first set of resources and their dependencies.
+		 *  - __ready__ - after both steal's "done" event  and the `window`'s onload event have fired.
+		 * 
+		 * For example, the following html:
+		 * 
+		 * @codestart html
+		 * &lt;script src='steal/steal.js'>&lt;/script>
+		 * &lt;script>
+		 * steal('can/control', function(){
+		 *   setTimeout(function(){
+		 *     steal('can/model')    
+		 *   },200)
+		 * })
+		 * &lt;/script>
+		 * @codeend
+		 * 
+		 * Would fire:
+		 * 
+		 *  - __start__ - immediately after `steal('can/control')` is called
+		 *  - __end__ - after 'can/control', all of it's dependencies, and the callback function have executed and completed.
+		 *  - __done__ - fired after the first 'end' event.
+		 *  - __ready__ - fired after window.onload and the 'done' event
+		 *  - __start__ - immediately after `steal('can/model')` is called
+		 *  - __end__ - fired after 'can/model' and all of it's dependencies have fired.
+		 * 
+		 * 
+		 * 
 		 * @param {String} event
 		 * @param {Function} listener
 		 */
@@ -850,6 +887,10 @@
 			listener && events[event].push(listener);
 			return steal;
 		},
+		/**
+		 * `steal.one(eventName, handler(eventArgs...) )` works just like
+		 * [steal.bind] but immediately unbinds after `handler` is called.
+		 */
 		one: function( event, listener ) {
 			return steal.bind(event, function() {
 				listener.apply(this, arguments);
@@ -858,9 +899,9 @@
 		},
 		events: {},
 		/**
-		 * Unbinds an event listener on steal
-		 * @param {Object} event
-		 * @param {Object} listener
+		 * `steal.unbind( eventName, handler )` removes an event listener on steal.
+		 * @param {String} event
+		 * @param {Function} listener
 		 */
 		unbind: function( event, listener ) {
 			var evs = events[event] || [],
@@ -1638,11 +1679,38 @@
 
 	//  ============================== Packages ===============================
 	/**
-	 * Packages handles defining components for deferred downloading.
-	 *
-	 * This is a empty function used to prevent 'undefined' during
-	 * development mode.  At production build time, the build script
-	 * will read this for defining the packages.
+	 * @function steal.packages
+	 * `steal.packages( packageIds... )` defines modules for deferred downloading.
+	 * 
+	 * This is used by the build system to build collections of modules that will be downloaded
+	 * after initial page load.
+	 * 
+	 * For example, an application that wants to progressively load the contents and
+	 * dependencies of _login/login.js_, _filemanager/filemanager.js_, and _contacts/contacts.js_,
+	 * while immediately loading the current users's data might look like:
+	 * 
+	 *     steal.packages('login','filemanager','contacts')
+	 *     steal('models/user', function(User){
+	 * 	   
+	 *       // get the current User
+	 *       User.findOne({id: "current"}, 
+	 * 
+	 *         // success - they logged in
+	 *         function(user){
+	 *           if(window.location.hash == "#filemanager"){
+	 *             steal('filemanager')  
+	 *           }
+	 *         }, 
+	 *         // error - they are logged out
+	 *         function(){
+	 *           steal('login', function(){
+	 *             new Login(document.body);
+	 *             // preload filemanager
+	 * 
+	 *           })  
+	 *         })
+	 *     })
+	 * 
 	 *
 	 * 		steal.packages('tasks','dashboard','fileman');
 	 *
