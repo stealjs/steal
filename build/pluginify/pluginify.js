@@ -29,6 +29,8 @@ steal('steal', 'steal/parse','steal/build',
 	 *   - compress - compress the file
 	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
 	 *   - skipCallbacks - don't run any of the code in steal callbacks (used for canjs build)
+	 *   - exposes - add module to global scope(eg: [{ 'can/util/can.js': 'can' }] )
+	 *   - map - add existing global object to modules collection
 	 */
 	s.build.pluginify = function(plugin, opts){
 		s.print("" + plugin + " >");
@@ -44,14 +46,15 @@ steal('steal', 'steal/parse','steal/build',
 				"wrapInner": 0,
 				"skipCallbacks": 0,
 				"standAlone": 0,
-				"exposes": 0
+				"exposes": {},
+				"map": {}
 			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
-		
+
 		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
 		opts.global = opts.global || "jQuery";
 		opts.namespace = opts.namespace || "namespace";
-		
+
 		if (opts.nojquery) {
 			jq = false;
 			//othervar = opts.nojquery;
@@ -110,33 +113,31 @@ steal('steal', 'steal/parse','steal/build',
 			}, true)
 		}, true, false);
 
-		var output = 'var module = { _orig: window.module };\n';
-		output += 'define = function(id, deps, value) {\n';
-		output += 'module[id] = value();\n';
-		output += '};\n define.amd = { jQuery: true };\n' + out;
-		output += '\nwindow.can = module[\'can/util/can.js\'];';
-		output += '\nwindow.module = module._orig;';
+		var output = 'var module = {};\n';//{ _orig: window.module };\n';
 
-		/* TODO: get working w/ onefunc
-		if ( opts.wrapInner && opts.wrapInner.length === 2 ) {
-			output = opts.wrapInner[0] + output + opts.wrapInner[1];
+		for(var m in opts.map) {
+			output += 'module[\'' + m + '\'] = ' + opts.map[m] + ';\n';
 		}
-		if ( opts.onefunc ) {
-			output = "(function( " + opts.namespace + ", window, undefined ){"
-				+ output + 
-			"}( " + opts.global + ", this ));";
+
+		output += 'define = function(id, deps, value) {\n';
+		output += '\tmodule[id] = value();\n';
+		output += '};\ndefine.amd = { jQuery: true };\n' + out;
+
+		for(var e in opts.exposes) {
+			output += '\nwindow.' + opts.exposes[e] + ' = module[\'' + e + '\'];\n';
 		}
-		//*/
+
+		//output += '\nwindow.module = module._orig;';
+		output = '(function() {\n' + output + '\n})();'
 
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
 			var compressor = steal.build.js.minifiers[compressorName]()
 			output = compressor(output);
 		}
-		
+
 		s.print("--> " + where);
 		new steal.File(where).save(output);
-		
 	}
 	var funcCount = {};
 	//gets content from a steal
