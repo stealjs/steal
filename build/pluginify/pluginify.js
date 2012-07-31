@@ -69,7 +69,7 @@ steal('steal', 'steal/parse','steal/build',
 			inExclude = function(stl){
 				var path = ""+stl.id;
 				for (var i = 0; i < opts.exclude.length; i++) {
-					if ((path.substr(-1) === "/" && path.indexOf(opts.exclude[i]) > -1 || path == opts.exclude[i]) || stl._skip) {
+					if ((path.substr(-1) === "/" && path.indexOf(opts.exclude[i]) === 0 || path == opts.exclude[i]) || stl._skip) {
 						return true;
 					}
 				}
