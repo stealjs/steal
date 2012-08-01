@@ -29,8 +29,7 @@ steal('steal', 'steal/parse','steal/build',
 	 *   - compress - compress the file
 	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
 	 *   - skipCallbacks - don't run any of the code in steal callbacks (used for canjs build)
-	 *   - exposes - add module to global scope(eg: [{ 'can/util/can.js': 'can' }] )
-	 *   - map - add existing global object to modules collection
+	 *   - shim - add existing global object to modules collection
 	 */
 	s.build.pluginify = function(plugin, opts){
 		s.print("" + plugin + " >");
@@ -46,8 +45,7 @@ steal('steal', 'steal/parse','steal/build',
 				"wrapInner": 0,
 				"skipCallbacks": 0,
 				"standAlone": 0,
-				"exposes": {},
-				"map": {}
+				"shim": {}
 			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 
@@ -113,22 +111,20 @@ steal('steal', 'steal/parse','steal/build',
 			}, true)
 		}, true, false);
 
-		var output = 'var module = {};\n';//{ _orig: window.module };\n';
+		var output = 'var module = { _orig: window.module, _define: window.define };\n';
 
-		for(var m in opts.map) {
-			output += 'module[\'' + m + '\'] = ' + opts.map[m] + ';\n';
+		for(var m in opts.shim) {
+			output += 'module[\'' + m + '\'] = ' + opts.shim[m] + ';\n';
 		}
 
-		output += 'define = function(id, deps, value) {\n';
+		output += 'var define = function(id, deps, value) {\n';
 		output += '\tmodule[id] = value();\n';
 		output += '};\ndefine.amd = { jQuery: true };\n' + out;
 
-		for(var e in opts.exposes) {
-			output += '\nwindow.' + opts.exposes[e] + ' = module[\'' + e + '\'];\n';
-		}
+		output += '\nwindow.can = module[\'can/util/can.js\'];\n';
 
-		//output += '\nwindow.module = module._orig;';
-		output = '(function() {\n' + output + '\n})();'
+		output += '\nwindow.define = module._define;\n';
+		output += '\nwindow.module = module._orig;';
 
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
