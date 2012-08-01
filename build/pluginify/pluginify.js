@@ -45,7 +45,8 @@ steal('steal', 'steal/parse','steal/build',
 				"wrapInner": 0,
 				"skipCallbacks": 0,
 				"standAlone": 0,
-				"shim": {}
+				"shim": {},
+				"exports" : {}
 			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 
@@ -113,20 +114,24 @@ steal('steal', 'steal/parse','steal/build',
 			}, true)
 		}, true, false);
 
-		var output = 'var module = { _orig: window.module, _define: window.define };\n';
+		var output = '(function() {\n' +
+			' var module = { _define : window.define };\n';
+		var key;
 
-		for(var m in opts.shim) {
-			output += 'module[\'' + m + '\'] = ' + opts.shim[m] + ';\n';
+		for(key in opts.shim) {
+			output += 'module[\'' + key + '\'] = ' + opts.shim[key] + ';\n';
 		}
 
-		output += 'var define = function(id, deps, value) {\n';
+		output += 'define = function(id, deps, value) {\n';
 		output += '\tmodule[id] = value();\n';
-		output += '};\ndefine.amd = { jQuery: true };\n' + out;
+		output += '};\ndefine.amd = { jQuery: true };\n' + out + '\n';
 
-		output += '\nwindow.can = module[\'can/util/can.js\'];\n';
+		for(key in opts.exports) {
+			output += 'window[\'' + opts.exports[key] + '\'] = module[\'' + key + '\'];\n';
+		}
 
 		output += '\nwindow.define = module._define;\n';
-		output += '\nwindow.module = module._orig;';
+		output += '})();'
 
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
