@@ -602,6 +602,12 @@
 	 * ## startFile
 	 */
 	steal.config = function( config ) {
+		if(!config){ // called as a getter, so just return
+			return stealConfig;
+		}
+		if(arguments.length === 1 && typeof config === "string"){ // called as a getter, so just return
+			return stealConfig[config];
+		}
 		for(var prop in config){
 			var value = config[prop]
 			// if it's a special function
@@ -1074,7 +1080,7 @@
 
 	extend(Resource.prototype, {
 		setOptions: function( options ) {
-
+			var prevOptions = this.options; 
 			// if we have no options, we are the global Resource that
 			// contains all other resources.
 			if (!options ) { //global init cur ...
@@ -1146,6 +1152,12 @@
 
 				this.waits = this.options.waits || false;
 				this.unique = true;
+			}
+			// if there are other options we haven't already set, reuse the old ones
+			for(opt in prevOptions){
+				if(!this.options[opt]){
+					this.options[opt] = prevOptions[opt];
+				}
 			}
 		},
 		// Calling complete indicates that all dependencies have
