@@ -45,7 +45,8 @@ steal('steal', 'steal/parse','steal/build',
 				"wrapInner": 0,
 				"skipCallbacks": 0,
 				"standAlone": 0,
-				"shim": {}
+				"shim": {},
+				"exports": {}
 			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 
@@ -123,7 +124,9 @@ steal('steal', 'steal/parse','steal/build',
 		output += '\tmodule[id] = value();\n';
 		output += '};\ndefine.amd = { jQuery: true };\n' + out + '\n';
 
-		output += '\nwindow.can = module[\'can/util/can.js\'];\n';
+		for(key in opts.exports) {
+			output += 'window[\'' + opts.exports[key] + '\'] = module[\'' + key + '\'];\n';
+		}
 
 		output += '\nwindow.define = module._define;\n';
 		output += '\nwindow.module = module._orig;';
