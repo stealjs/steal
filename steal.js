@@ -1105,8 +1105,8 @@
 						// if they have a value
 						var args = [],
 							found = false,
-							reversed = cur.dependencies.slice(0).reverse(),
 							dep, value;
+						// iterate backwards through dependencies
 						for ( var i = cur.dependencies.length; i >= 0; i-- ) {
 							dep = cur.dependencies[i];
 
@@ -1117,11 +1117,14 @@
 								// - dependency return value otherwise
 								value = modules[dep.options.id] || modules[dep.orig] || dep.value;
 								args.unshift(value);
-
-								if ( dep.waits && cur.orig === undefined ) {
+								
+								// what does this do?
+								if ( dep.waits  ) {
+									//alert("YES")
 									break;
 								}
 							}
+							
 							if ( dep === self ) {
 								found = true;
 							}
@@ -1170,9 +1173,11 @@
 		// - wires up pendings steal's deferreds to eventually complete this
 		// - this is where all of steal's complexity is
 		executed: function( script ) {
-			var myqueue, stel, src = (script && script.src) || this.options.src,
+			var myqueue, 
+				stel, 
+				src = this.options.src,
 				rootSrc = this.options.rootSrc;
-
+			console.log("EXECUTED VALUE",src+'', script)
 			// Set this as the current file so any relative urls
 			// will load from it.
 			// rootSrc needs to be the translated path
@@ -1227,10 +1232,13 @@
 				}
 				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
-				each(stel.options.needs || [], function( i, raw ) {
+				/*each(stel.options.needs || [], function( i, raw ) {
 					//TODO: Justin take a look at this ... this is a bad fix!!
+					// this should not push instance in the array b/c this messes up 
+					// the ordering
+					// instead this should happen below
 					stealInstances.push(Resource.make(function() {}), Resource.make(raw));
-				});
+				});*/
 			});
 
 			// The set of resources before the previous "wait" resource
@@ -1264,13 +1272,23 @@
 					setFirstSet = false;
 				}
 				// when the priorSet is completed, execute this resource
-				whenEach(priorSet, "completed", stel, "execute");
+				// and when it's needs are done
+				var waitsOn = priorSet.slice(0);
+				// if there are needs, this can not be part of the "firstSet"
+				each(stel.options.needs || [], function( i, raw ) {
+					var need= Resource.make(raw);
+					need.execute()
+					waitsOn.push(need);
+				});
+				whenEach(waitsOn, "completed", stel, "execute");
 
+				// what is this used for?
 				stel.waitedOn = stel.waitedOn ? stel.waitedOn.concat(priorSet) : priorSet.slice(0);
 
 				// add this steal to the current set
 				set.push(stel);
-				if ( setFirstSet ) {
+				// if we are still on the first set, and this has no needs
+				if ( setFirstSet && (stel.options.needs || []).length == 0) {
 					// add this to the first set of things
 					firstSet.push(stel)
 				}
@@ -1309,8 +1327,9 @@
 			if (!self.executing ) {
 				self.executing = true;
 
-				steal.require(self.options, function( script ) {
-					self.executed(script);
+				steal.require(self.options, function( value ) {
+					
+					self.executed( value );
 				}, function( error, src ) {
 					var abortFlag = self.options.abort,
 						errorCb = self.options.error;
@@ -1540,7 +1559,7 @@
 					callback = function() {
 						if (!script.readyState || stateCheck.test(script.readyState) ) {
 							cleanUp(script);
-							success(script);
+							success();
 						}
 					};
 	
