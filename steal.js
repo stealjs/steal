@@ -1177,7 +1177,6 @@
 				stel, 
 				src = this.options.src,
 				rootSrc = this.options.rootSrc;
-			console.log("EXECUTED VALUE",src+'', script)
 			// Set this as the current file so any relative urls
 			// will load from it.
 			// rootSrc needs to be the translated path
