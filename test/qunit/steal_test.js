@@ -672,8 +672,57 @@ test("modules", function(){
 		start();
 	})
 	
-})
+});
+
+asyncTest("load 32 stylesheets", 2, function() {
+
+    function normalizeColor( color ) {
+      if ( color.indexOf("rgb") !== -1 ) {
+        color = "#" + $.map( color.split(","), function( part ) {
+          return ("0" + parseInt( part.replace(/[^\d]+/g, ""), 10).toString(16)).slice(-2);
+        }).join("");
+      } else if ( color.indexOf("#") === 0 && color.length == 4 ) {
+        color = "#" + $.map( color.replace("#","").split(""), function( part ) {
+          return part + part;
+        }).join("");
+      }
+      return color;
+    };
+
+	var files = [];
+
+	for ( var i = 0; i <= 32; i++ ) {
+		files.push( "steal/test/files/32/" + i + ".css")
+	}
+
+    steal.apply(steal, files).then(function() {
+      d32 = $("<div>", {
+        "id" : "thirtytwo"
+      }).appendTo( "#qunit-test-area" );
+
+      $("<div>", {
+        "class" : "div32",
+        "text" : "32"
+      }).appendTo( d32 );
+
+      $("<div>", {
+        "class" : "div11",
+        "text" : "11"
+      }).appendTo( d32 );
+
+      setTimeout(function() {
+        var div11 = $(".div11"),
+            div32 = $(".div32"),
+            color1 = normalizeColor( div11.css("color")),
+            color2 = normalizeColor( div32.css("color"));
+
+        QUnit.equals( color1, "#001100" );
+        QUnit.equals( color2, "#003322" );
+        start();
+      }, 500)
+    });
+
+  });
 
 
-
-})
+});
