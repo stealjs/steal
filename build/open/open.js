@@ -236,6 +236,7 @@ steal('steal',function(s){
 			})
 		};
 		
+		var success = true; 
 		Envjs(url, {
 			scriptTypes: {
 				"text/javascript": true,
@@ -259,11 +260,19 @@ steal('steal',function(s){
 					newSteal = window.steal;
 				}
 			},
+			onScriptLoadError:  function(script, e){
+				success = false; 
+			},
 			dontPrintUserAgent: true
 		});
+
+		// If envj has an script error, force build (maven) to fail
+		if (!success) {
+			print("Javascript build fail!");
+			java.lang.System.exit(1);
+		}
 		
 		// set back steal
-		
 		window.steal = oldSteal;
 		// TODO: is this needed anymore
 		window.steal._steal = newSteal;
