@@ -240,8 +240,9 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 				}
 			});
 		});
-	}
-	s.extend(packages,{
+	};
+
+	steal.extend(packages,{
 		/**
 		 * Flattens the list of shares until each script has a minimal depth
 		 * @param {Object} shares
