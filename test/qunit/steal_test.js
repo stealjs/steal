@@ -716,7 +716,7 @@ asyncTest("load 32 stylesheets", 2, function() {
             color1 = normalizeColor( div11.css("color")),
             color2 = normalizeColor( div32.css("color"));
 
-        QUnit.equals( color1, "#001100" );
+        QUnit.equals( color1, "#001111" );
         QUnit.equals( color2, "#003322" );
         start();
       }, 500)
