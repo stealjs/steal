@@ -828,14 +828,7 @@
 		 */
 		then: function() {
 			var args = map(arguments);
-			if ( typeof args[0] === "string" ) {
-				args[0] = {
-					id: args[0]
-				}
-			}
-			if ( typeof args[0] === "object" ) {
-				args[0].waits = true;
-			}
+			args.unshift(null)
 			return steal.apply(win, args);
 		},
 		/**
@@ -1111,6 +1104,10 @@
 							dep = cur.dependencies[i];
 
 							if ( found ) {
+								if ( dep === null  ) {
+								//	//alert("YES")
+									break;
+								}
 								// We need to access the stored modules in this order
 								// - calculated id
 								// - original name
@@ -1119,10 +1116,7 @@
 								args.unshift(value);
 								
 								// what does this do?
-								if ( dep.waits  ) {
-									//alert("YES")
-									break;
-								}
+								
 							}
 							
 							if ( dep === self ) {
@@ -1218,10 +1212,14 @@
 
 			// iterate through the collection and add all the 'needs'
 			// before fetching...
-			each(myqueue.reverse(), function( i, item ) {
+			each(myqueue, function( i, item ) {
 
 				if ( isProduction && item.ignore ) {
 					return;
+				}
+				if( item === null){
+					stealInstances.push(null);
+					return
 				}
 				// make a steal object
 				var stel = Resource.make(item);
@@ -1256,19 +1254,23 @@
 			// a list of the set of resources
 			// that must be complete before the current
 			// resource (`priorSet`).
-			each(stealInstances.reverse(), function( i, stel ) {
+			each( stealInstances, function( i, stel ) {
 
 				// add it as a dependency, circular are not allowed
 				self.dependencies.push(stel);
 
 				// if there's a wait and it's not the first thing
-				if ( stel.waits && set.length ) {
+				if ( (stel === null || stel.waits) && set.length ) {
 					// add the current set to `priorSet`
 					priorSet = priorSet.concat(set);
 					// empty the current set
 					set = [];
 					// we have our firs set of items
 					setFirstSet = false;
+					if(stel === null) {
+						return;
+					}
+					
 				}
 				// when the priorSet is completed, execute this resource
 				// and when it's needs are done
@@ -1855,15 +1857,7 @@
 					pending = [];
 					setTimeout(function() {
 
-						if ( typeof pending[0] === "string" ) {
-							pending[0] = {
-								id: pending[0]
-							}
-						}
-						if ( typeof pending[0] === "object" ) {
-							pending[0].waits = true;
-						}
-						pending.unshift.apply(pending, first);
+						pending.unshift.apply(pending, first.concat([null]));
 						go();
 					}, 0)
 				} else {
@@ -2236,10 +2230,7 @@
 		// add start files first
 		if ( options.startFiles ) {
 			/// this can be a string or an array
-			steals.push.apply(steals, isString(options.startFiles) ? [{
-				id: options.startFiles,
-				waits: true
-			}] : options.startFiles)
+			steals.push.apply(steals, isString(options.startFiles) ? [options.startFiles] : options.startFiles)
 			options.startFiles = steals.slice(0)
 		}
 
@@ -2281,10 +2272,7 @@
 			}
 
 			if ( options.startFile ) {
-				steals.push({
-					id: options.startFile,
-					waits: true
-				})
+				steals.push(null,options.startFile)
 			}
 		}
 		if ( steals.length ) {
