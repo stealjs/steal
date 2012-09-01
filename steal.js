@@ -1246,8 +1246,10 @@
 					if(stel === null) {
 						return;
 					}
-					
+
 				}
+
+				if(stel === null) { return; }
 				// when the priorSet is completed, execute this resource
 				// and when it's needs are done
 				var waitsOn = priorSet.slice(0);
