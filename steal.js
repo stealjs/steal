@@ -278,6 +278,7 @@
 	//
 	//     whenEach(resources,"complete",resource,"execute")
 	var whenEach = function( arr, func, obj, func2 ) {
+		
 		var deferreds = map(arr, func)
 		return Deferred.when.apply(Deferred, deferreds).then(function() {
 			if ( isFn(obj[func2]) ) {
@@ -286,23 +287,8 @@
 				obj[func2].resolve();
 			}
 
-		})
-	},
-		// Used to call methods on multiple objects when
-		// a single deferred is resolved:
-		//
-		//     whenThe(resource,"complete",resources,"load")
-		//
-		// TODO: this might be no longer used
-		whenThe = function( obj, func, items, func2 ) {
-
-			each(items, function( i, item ) {
-				Deferred.when(obj[func]).then(function() {
-					item[func2]();
-				})
-			})
-
-		};
+		});
+	};
 
 	// ## URI ##
 	/**
@@ -775,21 +761,8 @@
 		each: each,
 		extend: extend,
 		Deferred: Deferred,
+		// Currently used a few places
 		isRhino: win.load && win.readUrl && win.readFile,
-		/**
-		 * @attribute options
-		 * Configurable options
-		 */
-		options: {
-			env: "development",
-			// TODO: document this
-			loadProduction: true,
-			needs: {
-				less: "steal/less/less.js",
-				coffee: "steal/coffee/coffee.js"
-			},
-			logLevel: 0
-		},
 		/**
 		 * @hide
 		 * Makes options
@@ -1157,6 +1130,7 @@
 				}
 			}
 		},
+		
 		// Calling complete indicates that all dependencies have
 		// been completed for this resource
 		complete: function() {
@@ -1202,7 +1176,7 @@
 				this.complete();
 				return;
 			}
-
+			//print("-setting up "+this.options.id)
 			// now we have to figure out how to wire up our pending steals
 			var self = this,
 				// the current
@@ -1213,14 +1187,14 @@
 			// iterate through the collection and add all the 'needs'
 			// before fetching...
 			each(myqueue, function( i, item ) {
-
-				if ( isProduction && item.ignore ) {
-					return;
-				}
 				if( item === null){
 					stealInstances.push(null);
 					return
 				}
+				if ( isProduction && item.ignore ) {
+					return;
+				}
+				
 				// make a steal object
 				var stel = Resource.make(item);
 				if ( packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
@@ -1237,14 +1211,16 @@
 					stealInstances.push(Resource.make(function() {}), Resource.make(raw));
 				});*/
 			});
-
+			//print("-instances "+this.options.id)
 			// The set of resources before the previous "wait" resource
 			var priorSet = [],
 				// The current set of resources after and including the
 				// previous "wait" resource
 				set = [],
 				// The first set of resources that we will execute
-				// right away
+				// right away. This should be the first set of dependencies
+				// that we can load in parallel. If something has
+				// a need, the need should be in this set
 				firstSet = [],
 				// Should we be adding resources to the
 				// firstSet
@@ -1278,10 +1254,11 @@
 				// if there are needs, this can not be part of the "firstSet"
 				each(stel.options.needs || [], function( i, raw ) {
 					var need= Resource.make(raw);
-					need.execute()
 					waitsOn.push(need);
+					// add needs to first set to execute
+					firstSet.push(need)
 				});
-				whenEach(waitsOn, "completed", stel, "execute");
+				waitsOn.length && whenEach(waitsOn, "completed", stel, "execute");
 
 				// what is this used for?
 				stel.waitedOn = stel.waitedOn ? stel.waitedOn.concat(priorSet) : priorSet.slice(0);
@@ -1849,18 +1826,20 @@
 
 						cur.executed();
 					};
-				// if we are in rhino, start loading dependencies right away
+				// If we are in the browser, wait a
+				// brief timeout before executing the rootResource.
+				// This allows embeded script tags with steal to be part of 
+				// the initial set
 				if ( win.setTimeout ) {
-					// otherwise wait a small timeout to make
-					// sure we get all steals in the current file
+					// we want to insert a "wait" after the current pending
 					var first = pending.slice(0);
 					pending = [];
 					setTimeout(function() {
-
-						pending.unshift.apply(pending, first.concat([null]));
+						pending = first.concat(null,pending);
 						go();
 					}, 0)
 				} else {
+					// if we are in rhino, start loading dependencies right away
 					go()
 				}
 			}
@@ -1977,17 +1956,17 @@
 	// =========== DEBUG =========
 
 
-/*var name = function(stel){
+    /*var name = function(stel){
 		if(stel.options && stel.options.type == "fn"){
-			return stel.orig.name? stel.orig.name : "fn";//(""+stel.orig).substr(0,10)
+			return stel.orig.name? stel.orig.name : stel.options.id+":fn";//(""+stel.orig).substr(0,10)
 		}
 		return stel.options ? stel.options.id + "": "CONTAINER"
 	}
 
 
-	Resource.prototype.load = before( Resource.prototype.load, function(){
-		console.log("      load", name(this), this.loading, steal._id, this.id)
-	})
+	//Resource.prototype.load = before( Resource.prototype.load, function(){
+	//	console.log("      load", name(this), this.loading, steal._id, this.id)
+	//})
 
 	Resource.prototype.executed = before(Resource.prototype.executed, function(){
 		var namer= name(this)

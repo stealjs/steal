@@ -41,7 +41,13 @@ steal('steal','steal/build/css',function( steal ) {
 		// seperate out css and js
 		exclude = exclude || [];
 		var jses = [],
-			csses = [];
+			csses = [],
+			lineMap = {},
+			lineNum = 0,
+			numLines = function(text){
+				var matches = text.match(/\n/g);
+				return matches? matches.length + 1 : 1
+			};
 				
 		// if even one file has compress: false, we can't compress the whole package at once
 		var canCompressPackage = true;
@@ -55,7 +61,12 @@ steal('steal','steal/build/css',function( steal ) {
 				if(file.buildType == 'js'){
 					var source = steal.build.js.clean(file.text);
 					if(file.minify !== false){
-						source = steal.build.js.minify(source);
+						try{
+							source = steal.build.js.minify(source);
+						} catch(error){
+							print("ERROR minifying "+file.id+"\n"+error.err)
+						}
+						
 					}
 					file.text = source;
 				}
@@ -108,16 +119,22 @@ steal('steal','steal/build/css',function( steal ) {
 		// add dependencies
 		code.push.apply(code, dependencyCalls);
 		
+		
+		lineNum += code.length
 		// add js code
 		jses.forEach(function(file){
+			
 			code.push( file.text, "steal.executed('"+file.id+"')" );
+			lineMap[lineNum] = file.id+"";
+			var linesCount = numLines(file.text)+1;
+			lineNum += linesCount;
 		});
 		
 		var jsCode = code.join(";\n") + "\n";
 		
 		if(canCompressPackage){
 			jsCode = steal.build.js.clean(jsCode);
-			jsCode = steal.build.js.minify(jsCode);
+			jsCode = steal.build.js.minify(jsCode,{currentLineMap: lineMap});
 		}
 		
 		var csspackage = steal.build.css.makePackage(csses, cssPackage);

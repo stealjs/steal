@@ -26,7 +26,7 @@ steal('steal',function(s){
 				// }
 			// }
 			while(i < depends.length){
-				if(depends[i].waits){
+				if(depends[i] === null || depends[i].waits){
 					// once we found something like this ...
 					// if(includeFns){
 						// var steals = depends.splice(0,i+1),
@@ -79,12 +79,15 @@ steal('steal',function(s){
 		},
 		touch = function(steals, CB){
 			for(var i =0; i < steals.length; i++){
-				var uniqueId = steals[i].options.id;
-				//print("  Touching "+uniqueId )
-				if(!touched[uniqueId]){
-					CB( steals[i] );
-					touched[uniqueId] = true;
+				if(steals[i]){
+					var uniqueId = steals[i].options.id;
+					//print("  Touching "+uniqueId )
+					if(!touched[uniqueId]){
+						CB( steals[i] );
+						touched[uniqueId] = true;
+					}
 				}
+				
 				
 			}
 		},
@@ -140,9 +143,9 @@ steal('steal',function(s){
 	 * @return {Object} an object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 */
-	steal.build.open = function( url, stealData, cb, depth, includeFns ) {
+	s.build.open = function( url, stealData, cb, depth, includeFns ) {
 		// save and remove the old steal
-		var oldSteal = window.steal || steal,
+		var oldSteal = s,
 			// new steal is the steal opened
 			newSteal;
 			
@@ -219,12 +222,12 @@ steal('steal',function(s){
 					}
 					var items = [];
 					// iterate 
-					iterate(rootSteal, function(stealer){
+					iterate(rootSteal, function(resource){
 						
-						if( filter(stealer) ) {
-							stealer.options.text = stealer.options.text || loadScriptText(stealer);
-							func(stealer.options, stealer );
-							items.push(stealer.options);
+						if( filter(resource) ) {
+							resource.options.text = resource.options.text || loadScriptText(resource);
+							func(resource.options, resource );
+							items.push(resource.options);
 						}
 					}, depth, includeFns );
 				},
@@ -273,8 +276,9 @@ steal('steal',function(s){
 	steal.build.open.firstSteal =function(rootSteal){
 		var stel;
 		for(var i =0; i < rootSteal.dependencies.length; i++){
-			stel = rootSteal.dependencies[i]
-			if(stel.options.buildType != 'fn' && stel.options.id != 'steal/dev/dev.js' && stel.options.id != 'stealconfig.js'){
+			stel = rootSteal.dependencies[i];
+			
+			if(stel && stel.options.buildType != 'fn' && stel.options.id != 'steal/dev/dev.js' && stel.options.id != 'stealconfig.js'){
 				return stel;
 			}	
 		}

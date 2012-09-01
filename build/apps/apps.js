@@ -195,7 +195,8 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				file.appNames.push(appName);
 			}
 			steel.dependencies.forEach(function(dependency){
-				if ( dependency.dependencies && 
+				// TODO: check status
+				if (dependency && dependency.dependencies && 
 					// don't follow functions
 				     dependency.options.buildType != 'fn' && 
 					 !dependency.options.ignore) {
