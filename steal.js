@@ -1389,8 +1389,6 @@ steal.type("css", function css_type(options, success, error){
 				cssCount = 0;
 			}
 
-			var relative = File(options.src).joinFrom(
-				File(options.src).dir());
 			lastSheet.addImport(options.src);
 			cssCount++;
 		} else {
