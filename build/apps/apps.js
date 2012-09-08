@@ -165,24 +165,24 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 		 * @param {String} appName the appName
 		 * @return {file} the root dependency file for this application
 		 */
-		addDependencies: function( steel, options, appName ) {
-			var id = steel.options.id,
-				buildType = steel.options.buildType, 
+		addDependencies: function( resource, options, appName ) {
+			var id = resource.options.id,
+				buildType = resource.options.buildType, 
 				file = maker(options.files, id || appName, function(){
 					//clean and minifify everything right away ...
 					var source = '';
-					if( id && steel.options.buildType != 'fn' ) {
+					if( id && resource.options.buildType != 'fn' ) {
 						// some might not have source yet
 						steal.print("  + "+id );
-						var source = steel.options.text ||  readFile( steal.idToUri( steel.options.id , true ) );
+						var source = resource.options.text ||  readFile( steal.idToUri( resource.options.id , true ) );
 					}
-					steel.options.text = steel.options.text || source
+					resource.options.text = resource.options.text || source
 					
 					// this becomes data
 					return {
 						// todo, might need to merge options
 						// what if we should not 'steal' it?
-						stealOpts: steel.options,
+						stealOpts: resource.options,
 						appNames: [],
 						dependencyFileNames: [],
 						packaged: false
@@ -194,7 +194,8 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			if(file.appNames.indexOf(appName) == -1){
 				file.appNames.push(appName);
 			}
-			steel.dependencies.forEach(function(dependency){
+					
+			resource.dependencies.forEach(function(dependency){
 				// TODO: check status
 				if (dependency && dependency.dependencies && 
 					// don't follow functions

@@ -42,6 +42,14 @@
 			}
 			return o;
 		},
+		uniquePush = function(arr, item){
+			for(var i=0; i < arr.length; i++){
+				if(arr[i] == item){
+					return;
+				}
+			}
+			arr.push(item)
+		},
 		// if o is a string
 		isString = function( o ) {
 			return typeof o == "string";
@@ -978,6 +986,7 @@
 	var Resource = function( options ) {
 		// an array for dependencies, this is
 		this.dependencies = [];
+
 		// id for debugging
 		this.id = (++id);
 		// the original options
@@ -1230,20 +1239,20 @@
 			// a list of the set of resources
 			// that must be complete before the current
 			// resource (`priorSet`).
-			each( stealInstances, function( i, stel ) {
+			each( stealInstances, function( i, resource ) {
 
 				// add it as a dependency, circular are not allowed
-				self.dependencies.push(stel);
+				self.dependencies.push(resource);
 
 				// if there's a wait and it's not the first thing
-				if ( (stel === null || stel.waits) && set.length ) {
+				if ( (resource === null || resource.waits) && set.length ) {
 					// add the current set to `priorSet`
 					priorSet = priorSet.concat(set);
 					// empty the current set
 					set = [];
 					// we have our firs set of items
 					setFirstSet = false;
-					if(stel === null) {
+					if(resource === null) {
 						return;
 					}
 
@@ -1252,26 +1261,29 @@
 				// and when it's needs are done
 				var waitsOn = priorSet.slice(0);
 				// if there are needs, this can not be part of the "firstSet"
-				each(stel.options.needs || [], function( i, raw ) {
-					var need= Resource.make(raw);
+				each(resource.options.needs || [], function( i, raw ) {
+					
+					var need = Resource.make(raw);
+					// add the need to the resource's dependencies
+					uniquePush(resource.dependencies, need);
 					waitsOn.push(need);
 					// add needs to first set to execute
 					firstSet.push(need)
 				});
-				waitsOn.length && whenEach(waitsOn, "completed", stel, "execute");
+				waitsOn.length && whenEach(waitsOn, "completed", resource, "execute");
 
 				// what is this used for?
-				stel.waitedOn = stel.waitedOn ? stel.waitedOn.concat(priorSet) : priorSet.slice(0);
+				resource.waitedOn = resource.waitedOn ? resource.waitedOn.concat(priorSet) : priorSet.slice(0);
 
 				// add this steal to the current set
-				set.push(stel);
+				set.push(resource);
 				// if we are still on the first set, and this has no needs
-				if ( setFirstSet && (stel.options.needs || []).length == 0) {
+				if ( setFirstSet && (resource.options.needs || []).length == 0) {
 					// add this to the first set of things
-					firstSet.push(stel)
+					firstSet.push(resource)
 				}
 				// start loading the resource if possible
-				stel.load();
+				resource.load();
 			});
 
 			// when every thing is complete, mark us as completed
