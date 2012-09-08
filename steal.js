@@ -993,9 +993,6 @@
 		this.orig = options;
 		// the parent steal's id
 		this.curId = steal.cur && steal.cur.options.id;
-		if ( this.id === 37 ) {
-			//debugger;
-		}
 
 		this.setOptions(options);
 		// create the deferreds used to manage state
@@ -1257,6 +1254,8 @@
 					}
 
 				}
+				if ( stel === null ) return;
+
 				// when the priorSet is completed, execute this resource
 				// and when it's needs are done
 				var waitsOn = priorSet.slice(0);
@@ -1309,7 +1308,6 @@
 			this.loaded.resolve();
 		},
 		execute: function() {
-			//debugger;
 			var self = this;
 			if (!self.loaded.isResolved() ) {
 				self.loaded.resolve();
