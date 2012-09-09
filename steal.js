@@ -904,7 +904,12 @@
 		},
 		/**
 		 * @hide
-		 * Used to tell steal that it is loading a number of plugins
+		 * Creates resources and marks them as loading so steal doesn't try 
+		 * to load them. 
+		 * 
+		 *      steal.has("foo/bar.js","zed/car.js");
+		 * 
+		 * This is used when a file has other resources in it. 
 		 */
 		has: function() {
 			// we don't use IE's interactive script functionality while
@@ -918,15 +923,28 @@
 
 		// a dummy function to add things to after the stel is created, but before executed is called
 		preexecuted: function() {},
-
+		/**
+		 * @hide
+		 * Signals that a resource's JS code has been run.  This is used
+		 * when a file has other resources in it.
+		 * 
+		 *     steal.has("foo/bar.js");
+		 * 
+		 *     //start code for foo/bar.js 
+		 *     steal("zed/car.js", function(){ ... });
+		 *     steal.executed("foo/bar.js");
+		 * 
+		 * When a resource is executed, its dependent resources are loaded and eventually 
+		 * executed.
+		 */
 		// called when a script has loaded via production
 		executed: function( name ) {
 			// create the steal, mark it as loading, then as loaded
-			var stel = Resource.make(name);
-			stel.loading = stel.executing = true;
+			var resource = Resource.make(name);
+			resource.loading = resource.executing = true;
 			//convert(stel, "complete");
-			steal.preexecuted(stel);
-			stel.executed()
+			steal.preexecuted(resource);
+			resource.executed()
 			return steal;
 		},
 		type: function( type, cb ) {
@@ -984,8 +1002,11 @@
 	//   completed
 	// - dependencies - an array of dependencies
 	var Resource = function( options ) {
-		// an array for dependencies, this is
+		// an array for dependencies, this is the steal calls this resource makes
 		this.dependencies = [];
+
+		// an array of implicit dependencies this steal needs
+		this.needsDependencies = [];
 
 		// id for debugging
 		this.id = (++id);
@@ -1021,17 +1042,19 @@
 			} else {
 
 				// Otherwise get the cached resource
-				resource = resources[id];
+				existingResource = resources[id];
 				// If options were passed, copy new properties over.
 				// Don't copy src, etc because those have already
 				// been changed to be the right values;
 				if (!isString(options) ) {
-					each(["id"], function( i, name ) {
-						delete options[name];
-					});
-					extend(resource.options, options);
+					// extend everything other than id
+					for(var prop in options){
+						if(prop !== "id") {
+							existingResource.options[prop] = options[prop];
+						}
+					}
 				}
-
+				return existingResource;
 			}
 		}
 
@@ -1237,7 +1260,6 @@
 			// that must be complete before the current
 			// resource (`priorSet`).
 			each( stealInstances, function( i, resource ) {
-
 				// add it as a dependency, circular are not allowed
 				self.dependencies.push(resource);
 
@@ -1264,7 +1286,7 @@
 					
 					var need = Resource.make(raw);
 					// add the need to the resource's dependencies
-					uniquePush(resource.dependencies, need);
+					uniquePush(resource.needsDependencies, need);
 					waitsOn.push(need);
 					// add needs to first set to execute
 					firstSet.push(need)
@@ -1810,8 +1832,6 @@
 			}
 			return this;
 		},
-
-
 		// called after steals are added to the pending queue
 		after: function() {
 			// if we don't have a current 'top' steal
@@ -1823,7 +1843,6 @@
 				var cur = rootSteal,
 					// runs when a steal is starting
 					go = function() {
-
 						// indicates that a collection of steals has started
 						steal.trigger("start", cur);
 						cur.completed.then(function() {
@@ -1842,10 +1861,9 @@
 				// the initial set
 				if ( win.setTimeout ) {
 					// we want to insert a "wait" after the current pending
-					var first = pending.slice(0);
-					pending = [];
+					steal.pushPending();
 					setTimeout(function() {
-						pending = first.concat(null,pending);
+						steal.popPending();
 						go();
 					}, 0)
 				} else {
@@ -1858,7 +1876,19 @@
 		_after: after
 	});
 
-
+	(function(){
+		var myPending;
+		steal.pushPending = function(){
+			myPending = pending.slice(0);
+			pending = [];
+			each(myPending, function(i, arg){
+				Resource.make(arg);
+			})
+		}
+		steal.popPending = function(){
+			pending = myPending.concat(null,pending);
+		}
+	})();
 
 	// =============================== jQuery ===============================
 	(function() {
@@ -1953,7 +1983,7 @@
 			if ( stel.run.isResolved() ) {
 				stel.loadHas();
 			} else {
-				// have to mark has as loading (so we don't try to get them)
+				// have to mark has as loading and executing (so we don't try to get them)
 				steal.has.apply(steal, stel.options.has)
 			}
 		}

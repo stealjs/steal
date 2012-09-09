@@ -194,7 +194,19 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			if(file.appNames.indexOf(appName) == -1){
 				file.appNames.push(appName);
 			}
-					
+			
+			resource.needsDependencies.forEach(function(dependency){
+				// TODO: check status
+				if (dependency && dependency.dependencies && 
+					// don't follow functions
+				     dependency.options.buildType != 'fn' && 
+					 !dependency.options.ignore) {
+					file.dependencyFileNames.push(dependency.options.id)
+					 
+					apps.addDependencies(dependency, options, appName);
+				}
+			});
+				
 			resource.dependencies.forEach(function(dependency){
 				// TODO: check status
 				if (dependency && dependency.dependencies && 
@@ -367,7 +379,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 		 * 
 		 * this is where 'has' comes into place
 		 * 
-		 * steal({src: 'packageA', has: 'jquery'})
+		 * steal({id: 'packageA', has: 'jquery'})
 		 * 
 		 * This wires up steal to wait until package A is finished for jQuery.
 		 * 
@@ -407,7 +419,12 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			// it needs to load
 			options.appFiles.forEach(function(file){
 				appsPackages[file.appNames[0]] = [];
-			})
+			});
+			
+			// remove stealconfig.js temporarily.  It will be added to every production.js
+			var stealconfig = options.files['stealconfig.js'];
+			
+			delete options.files['stealconfig.js'];
 
 			//while there are files left to be packaged, get the most shared and largest package
 			while ((sharing = apps.getMostShared(options.files))) {
@@ -452,11 +469,17 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				var dependencies = {};
 				// only add dependencies for the 'root' objects
 				if( sharing.appNames.length == 1) {
+					
+					packagesFiles[packageName+".js"].unshift("stealconfig.js")
+					filesForPackaging.unshift(stealconfig.stealOpts);
+					
 					// for the packages for this app
 					appsPackages[appsName].forEach(function(packageName){
 						// add this as a dependency
 						dependencies[packageName] = packagesFiles[packageName].slice(0)
-					})
+					});
+					
+					
 				}
 				
 				//the source of the package

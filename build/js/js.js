@@ -117,8 +117,8 @@ steal('steal','steal/build/css',function( steal ) {
 		// make 'loading'
 		var code = ["steal.has('"+loadingCalls.join("','")+"')"];
 		// add dependencies
-		code.push.apply(code, dependencyCalls);
-		
+		code.push.apply(code,dependencyCalls);
+		code.push("steal.pushPending()")
 		
 		lineNum += code.length
 		// add js code
@@ -130,7 +130,7 @@ steal('steal','steal/build/css',function( steal ) {
 			lineNum += linesCount;
 		});
 		
-		var jsCode = code.join(";\n") + "\n";
+		var jsCode = code.join(";\n") + ";\nsteal.popPending();\n";
 		
 		if(canCompressPackage){
 			jsCode = steal.build.js.clean(jsCode);
