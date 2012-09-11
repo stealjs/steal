@@ -1232,13 +1232,6 @@
 				}
 				// has to happen before 'needs' for when reversed...
 				stealInstances.push(stel);
-				/*each(stel.options.needs || [], function( i, raw ) {
-					//TODO: Justin take a look at this ... this is a bad fix!!
-					// this should not push instance in the array b/c this messes up 
-					// the ordering
-					// instead this should happen below
-					stealInstances.push(Resource.make(function() {}), Resource.make(raw));
-				});*/
 			});
 			//print("-instances "+this.options.id)
 			// The set of resources before the previous "wait" resource
@@ -1276,7 +1269,7 @@
 					}
 
 				}
-				if ( stel === null ) return;
+				if ( resource === null ) return;
 
 				// when the priorSet is completed, execute this resource
 				// and when it's needs are done
