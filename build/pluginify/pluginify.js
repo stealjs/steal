@@ -83,7 +83,7 @@ steal('steal', 'steal/parse','steal/build',
 			steals = [], 
 			fns = {};
 		
-		steal.build.open("steal/rhino/empty.html", {
+		steal.build.open("steal/rhino/blank.html", {
 			startFile : plugin, 
 			skipCallbacks: opts.skipCallbacks
 		}, function(opener){

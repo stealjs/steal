@@ -40,15 +40,17 @@ steal('steal',function(s){
 					
 					// load all these steals, and their dependencies
 					loadset(steals, CB, depth, includeFns);
-					
-					if(depth){
-						// load any dependencies 
-						loadset(curStl.dependencies, CB, depth, includeFns);
-						// probably needs to change if depth
-						touch([curStl], CB)
-					} else {
-						touch([curStl], CB);
-						loadset(curStl.dependencies, CB, depth, includeFns);
+
+					if(curStl) { // curStl can be null
+						if(depth){
+							// load any dependencies
+							loadset(curStl.dependencies, CB, depth, includeFns);
+							// probably needs to change if depth
+							touch([curStl], CB)
+						} else {
+							touch([curStl], CB);
+							loadset(curStl.dependencies, CB, depth, includeFns);
+						}
 					}
 					i=0;
 				}else{
@@ -250,6 +252,9 @@ steal('steal',function(s){
 			afterScriptLoad: {
 				// prevent $(document).ready from being called even though load is fired
 				"jquery.1.7.1.js": function( script ) {
+					window.jQuery && jQuery.holdReady(true);
+				},
+				"jquery.1.8.1.js": function( script ) {
 					window.jQuery && jQuery.holdReady(true);
 				},
 				"steal.js": function(script){
