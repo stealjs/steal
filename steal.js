@@ -1220,7 +1220,8 @@
 					stealInstances.push(null);
 					return
 				}
-				if ( isProduction && item.ignore ) {
+				
+				if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
 					return;
 				}
 				
