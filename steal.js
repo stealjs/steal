@@ -1108,7 +1108,7 @@
 							if ( found ) {
 								if ( dep === null  ) {
 								//	//alert("YES")
-									break;
+									continue;
 								}
 								// We need to access the stored modules in this order
 								// - calculated id
