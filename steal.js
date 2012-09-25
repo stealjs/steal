@@ -716,8 +716,49 @@
 				})
 			}
 		})
+		
 		return uri;
 	}
+
+	steal.config.shim = function(shims){
+
+		for(var id in shims){
+			var resource = Resource.make(id);
+			if(typeof shims[id] === "object"){
+				var needs = shims[id].deps || []
+				if(typeof shims[id].exports === "string"){
+					var exports = (function(_exports){
+						return function(){
+							return win[_exports];
+						}
+					})(shims[id].exports)
+				} else {
+					exports = shims[id].exports;
+				}
+			} else {
+				needs = shims[id];
+			}
+			(function(_resource, _needs){
+				_resource.options.needs = _needs;
+			})(resource, needs)
+
+			if(exports){
+				resource.exports = (function(_resource, _exports, _needs){
+					return function(){
+						var args = _needs.map(function(id){
+							return Resource.make(id).value;
+						})
+						_resource.value = _exports.apply(null, args)
+						return _resource.value
+					}
+				})(resource, exports, needs)
+			}
+		}
+
+	}
+
+
+
 	// for a given ID, where should I find this resource
 	/**
 	 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
@@ -785,7 +826,6 @@
 				}
 			}
 			options.id = steal.id(options.id, curId);
-			
 			// set the ext
 			options.ext = options.id.ext();
 			
@@ -1087,7 +1127,6 @@
 				var uri = URI.cur,
 					self = this,
 					cur = steal.cur;
-				
 				this.options = {
 					fn: function() {
 
@@ -1178,8 +1217,12 @@
 			// will load from it.
 			// rootSrc needs to be the translated path
 			// we need id vs rootSrc ...
+			
 			if ( this.options.id ) {
 				URI.cur = URI(this.options.id);
+			}
+			if( this.exports ){
+				this.exports()
 			}
 			// set this as the current resource
 			steal.cur = this;
