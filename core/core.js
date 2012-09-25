@@ -197,6 +197,7 @@
 			return parts;
 		}
 	});
+
 	/**
 	 * @attribute page
 	 * The location of the page as a URI.
