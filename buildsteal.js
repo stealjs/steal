@@ -17,4 +17,4 @@ core = core.replace(/\/\*#\s+(.*?)\s+#\*\//g, function(match, filename){
 	return readFile(filename);
 })
 
-writeFile('steal/steal.js', core)
+writeFile('steal/steal.js', core);
