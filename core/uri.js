@@ -6,6 +6,9 @@
  *     var uri = URI( "http://stealjs.com/index.html" )
  *     uri.path //-> "/index.html"
  */
+
+var win = win || window;
+
 var URI = function( url ) {
 	if ( this.constructor !== URI ) {
 		return new URI(url);
@@ -69,7 +72,7 @@ h.extend(URI.prototype, {
 	},
 	ext: function() {
 		var filename = this.filename();
-		return~filename.indexOf(".") ? filename.split(".").pop() : "";
+		return (filename.indexOf(".") > -1) ? filename.split(".").pop() : "";
 	},
 	domain: function() {
 		return this.protocol ? this.protocol + "://" + this.host : "";
@@ -179,7 +182,7 @@ h.extend(URI.prototype, {
 	// helper to go from jquery to jquery/jquery.js
 	addJS: function() {
 		var ext = this.ext();
-		if (!ext ) {
+		if ( !ext ) {
 			// if first character of path is a . or /, just load this file
 			if (!this.isRelative() ) {
 				this.path += "/" + this.filename();
@@ -189,6 +192,11 @@ h.extend(URI.prototype, {
 		return this;
 	}
 });
+// This can't be added to the prototype using extend because
+// then for some reason IE < 9 won't recognize it.
+URI.prototype.toString = function() {
+	return this.domain() + this.path + this.search() + this.hash();
+};
 //  =============================== MAPPING ===============================
 URI.prototype.insertMapping = function() {
 	// go through mappings

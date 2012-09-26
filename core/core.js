@@ -148,11 +148,7 @@
 
 
 
-	// This can't be added to the prototype using extend because
-	// then for some reason IE < 9 won't recognize it.
-	URI.prototype.toString = function() {
-		return this.domain() + this.path + this.search() + this.hash();
-	};
+	
 
 	// temp add steal.File for backward compat
 	steal.File = steal.URI = URI;
