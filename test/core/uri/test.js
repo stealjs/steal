@@ -53,6 +53,7 @@ test('URI.prototype.join', function(){
 	equal(newUri.path, '/core/foo/bar', 'Path is correct')
 	equal(newUri.protocol, 'http', 'Protocol is correct')
 	equal(newUri.query, 'foo=bar', 'Query string is correct');
+	
 	var newUri = uri.join('ftp://foo/bar');
 	equal(newUri.host, 'foo', 'Host is set correctly when URL is crossdomain')
 	equal(newUri.protocol, 'ftp', 'Protocol is set correctly when URL is crossdomain')
