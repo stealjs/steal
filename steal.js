@@ -42,6 +42,7 @@
 			}
 			return o;
 		},
+		// adds the item to the array only if it doesn't currently exist
 		uniquePush = function(arr, item){
 			for(var i=0; i < arr.length; i++){
 				if(arr[i] == item){
@@ -60,7 +61,6 @@
 		},
 		// dummy function
 		noop = function() {},
-		endsInSlashRegex = /\/$/,
 		// creates an element
 		createElement = function( nodeName ) {
 			return doc.createElement(nodeName)
@@ -131,7 +131,8 @@
 				str = (str + '').indexOf('?') > -1 ? str + "&" + opts.suffix : str + "?" + opts.suffix;
 			}
 			return str;
-		};
+		},
+		endsInSlashRegex = /\/$/;
 		
 		
 		// ## AOP ##
@@ -718,6 +719,33 @@
 		})
 		return uri;
 	}
+	steal.amdToId = function(id, currentWorkingId, type){
+		var uri = URI(id);
+		uri = uri.normalize(currentWorkingId ? new URI(currentWorkingId) : null)
+		// check foo/bar
+		if (!type ) {
+			type = "js"
+		}
+		if ( type == "js" ) {
+			// if it ends with .js remove it ...
+			// if it ends
+		}
+		// check map config
+		var map = stealConfig.map || {};
+		// always run past 
+		each(map, function( loc, maps ) {
+			// is the current working id matching loc
+			if ( matchesId(loc, currentWorkingId) ) {
+				// run maps
+				each(maps, function( part, replaceWith ) {
+					if (("" + uri).indexOf(part) == 0 ) {
+						uri = URI(("" + uri).replace(part, replaceWith))
+					}
+				})
+			}
+		})
+		return uri;
+	}
 	// for a given ID, where should I find this resource
 	/**
 	 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
@@ -741,7 +769,25 @@
 
 		return noJoin ? id : stealConfig.root.join(id)
 	}
-
+	steal.amdIdToUri = function( id, noJoin ){
+		// this is normalize
+		var paths = stealConfig.paths || {},
+			path;
+		// always run past 
+		each(paths, function( part, replaceWith ) {
+			path = ""+id;
+			// if path ends in / only check first part of id
+			if((endsInSlashRegex.test(part) && path.indexOf(part) == 0) ||
+				// or check if its a full match only
+				path === part){
+				id = URI(path.replace(part, replaceWith));
+			}
+		})
+		if( /(^|\/)[^\/\.]+$/.test(id) ){
+			id= URI(id+".js")
+		}
+		return id //noJoin ? id : stealConfig.root.join(id)
+	}
 
 
 
@@ -784,7 +830,7 @@
 					options: options
 				}
 			}
-			options.id = steal.id(options.id, curId);
+			options.id = options.toId ? options.toId(options.id, curId) : steal.id(options.id, curId);
 			
 			// set the ext
 			options.ext = options.id.ext();
@@ -1503,7 +1549,7 @@
 	 */
 	require = function( options, success, error ) {
 		// add the src option
-		options.src = steal.idToUri(options.id);
+		options.src = options.idToUri ? options.idToUri(options.id) : steal.idToUri(options.id);
 
 		// get the type
 		var type = types[options.type],
@@ -1880,7 +1926,7 @@
 			})
 		}
 		steal.popPending = function(){
-			pending = myPending.concat(null,pending);
+			pending = pending.length ? myPending.concat(null,pending) : myPending;
 		}
 	})();
 
@@ -2304,9 +2350,42 @@
 	// you steal(moduleId1, moduleId2, function(module1, module2){});
 	// 
 	win.define = function( moduleId, dependencies, method ) {
-		if (dependencies && method && !dependencies.length ) {
+		if(typeof moduleId == 'function'){
+			modules[URI.cur+""] = moduleId();
+		} else if(!method && dependencies){
+			if(typeof dependencies == "function"){
+				modules[moduleId] = dependencies();
+			} else {
+				modules[moduleId] = dependencies;
+			}
+			
+		} else if (dependencies && method && !dependencies.length ) {
 			modules[moduleId] = method();
+		} else {
+			steal.apply(null, map(dependencies, function(dependency){
+				dependency = typeof dependency === "string" ? {
+					id: dependency
+				} : dependency;
+				dependency.toId = steal.amdToId;
+				
+				dependency.idToUri = steal.amdIdToUri;
+				return dependency;
+			}).concat(method) )
 		}
+		
+	}
+	win.require = function(dependencies, method){
+		var depends = map(dependencies, function(dependency){
+				dependency = typeof dependency === "string" ? {
+					id: dependency
+				} : dependency;
+				dependency.toId = steal.amdToId;
+				
+				dependency.idToUri = steal.amdIdToUri;
+				return dependency;
+			}).concat([method]);
+		console.log("stealing",depends.slice(0))
+		steal.apply(null, depends )
 	}
 	win.define.amd = {
 		jQuery: true
@@ -2322,6 +2401,10 @@
 	define("steal", [], function() {
 		return steal;
 	});
+
+	define("require",function(){
+		return require;
+	})
 
 	var stealResource = new Resource("steal")
 	stealResource.value = steal;
