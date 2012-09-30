@@ -131,11 +131,11 @@
 		// check map config
 		var map = stealConfig.map || {};
 		// always run past 
-		each(map, function( loc, maps ) {
+		h.each(map, function( loc, maps ) {
 			// is the current working id matching loc
 			if ( matchesId(loc, currentWorkingId) ) {
 				// run maps
-				each(maps, function( part, replaceWith ) {
+				h.each(maps, function( part, replaceWith ) {
 					if (("" + uri).indexOf(part) == 0 ) {
 						uri = URI(("" + uri).replace(part, replaceWith))
 					}
@@ -155,10 +155,10 @@
 		var paths = stealConfig.paths || {},
 			path;
 		// always run past 
-		each(paths, function( part, replaceWith ) {
+		h.each(paths, function( part, replaceWith ) {
 			path = ""+id;
 			// if path ends in / only check first part of id
-			if((endsInSlashRegex.test(part) && path.indexOf(part) == 0) ||
+			if((h.endsInSlashRegex.test(part) && path.indexOf(part) == 0) ||
 				// or check if its a full match only
 				path === part){
 				id = URI(path.replace(part, replaceWith));
@@ -172,10 +172,10 @@
 		var paths = stealConfig.paths || {},
 			path;
 		// always run past 
-		each(paths, function( part, replaceWith ) {
+		h.each(paths, function( part, replaceWith ) {
 			path = ""+id;
 			// if path ends in / only check first part of id
-			if((endsInSlashRegex.test(part) && path.indexOf(part) == 0) ||
+			if((h.endsInSlashRegex.test(part) && path.indexOf(part) == 0) ||
 				// or check if its a full match only
 				path === part){
 				id = URI(path.replace(part, replaceWith));
@@ -1054,7 +1054,7 @@
 		} else if (dependencies && method && !dependencies.length ) {
 			modules[moduleId] = method();
 		} else {
-			steal.apply(null, map(dependencies, function(dependency){
+			steal.apply(null, h.map(dependencies, function(dependency){
 				dependency = typeof dependency === "string" ? {
 					id: dependency
 				} : dependency;
@@ -1067,7 +1067,7 @@
 		
 	}
 	win.require = function(dependencies, method){
-		var depends = map(dependencies, function(dependency){
+		var depends = h.map(dependencies, function(dependency){
 				dependency = typeof dependency === "string" ? {
 					id: dependency
 				} : dependency;
