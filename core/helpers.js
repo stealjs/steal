@@ -1,5 +1,12 @@
 // ## Helpers ##
 // The following are a list of helper methods used internally to steal
+
+var win = win || (function(){ return this }).call(null)
+
+var requestFactory = function() {
+	return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+};
+
 var h = {
 // check that we have a document
 	doc: win.document,
@@ -124,6 +131,48 @@ var h = {
 			var ret = f.apply(this, arguments);
 			after.apply(this, arguments);
 			return ret;
+		}
+	},
+	/**
+	 * Performs an XHR request
+	 * @param {Object} options
+	 * @param {Function} success
+	 * @param {Function} error
+	 */
+	request: function( options, success, error ) {
+		var request = new requestFactory(),
+			contentType = (options.contentType || "application/x-www-form-urlencoded; charset=utf-8"),
+			clean = function() {
+				request = check = clean = null;
+			},
+			check = function() {
+				var status;
+				if ( request && request.readyState === 4 ) {
+					status = request.status;
+					if ( status === 500 || status === 404 || status === 2 || request.status < 0 || (!status && request.responseText === "") ) {
+						error && error(request.status);
+					} else {
+						success(request.responseText);
+					}
+					clean();
+				}
+			};
+		request.open("GET", options.src + '', !(options.async === false));
+		request.setRequestHeader("Content-type", contentType);
+		if ( request.overrideMimeType ) {
+			request.overrideMimeType(contentType);
+		}
+
+		request.onreadystatechange = check;
+		try {
+			request.send(null);
+		}
+		catch (e) {
+			if ( clean ) {
+				console.error(e);
+				error && error();
+				clean();
+			}
 		}
 	}
 }

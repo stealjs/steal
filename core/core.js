@@ -24,6 +24,8 @@
 	/*# deferred.js #*/
 
 	/*# uri.js #*/
+
+	/*# resource.js #*/
 		
 	// create the steal function now to use as a namespace.
 
@@ -283,56 +285,7 @@
 	
 
 
-	// =============================== HELPERS ===============================
-	var factory = function() {
-		return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
-	};
-
-
-	steal.
-	/**
-	 * Performs an XHR request
-	 * @param {Object} options
-	 * @param {Function} success
-	 * @param {Function} error
-	 */
-	request = function( options, success, error ) {
-		var request = new factory(),
-			contentType = (options.contentType || "application/x-www-form-urlencoded; charset=utf-8"),
-			clean = function() {
-				request = check = clean = null;
-			},
-			check = function() {
-				var status;
-				if ( request && request.readyState === 4 ) {
-					status = request.status;
-					if ( status === 500 || status === 404 || status === 2 || request.status < 0 || (!status && request.responseText === "") ) {
-						error && error(request.status);
-					} else {
-						success(request.responseText);
-					}
-					clean();
-				}
-			};
-		request.open("GET", options.src + '', !(options.async === false));
-		request.setRequestHeader("Content-type", contentType);
-		if ( request.overrideMimeType ) {
-			request.overrideMimeType(contentType);
-		}
-
-		request.onreadystatechange = check;
-		try {
-			request.send(null);
-		}
-		catch (e) {
-			if ( clean ) {
-				console.error(e);
-				error && error();
-				clean();
-			}
-		}
-
-	};
+	
 
 
 	//  ============================== Packages ===============================

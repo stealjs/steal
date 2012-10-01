@@ -7,7 +7,7 @@
  *     uri.path //-> "/index.html"
  */
 
-var win = win || window;
+var win = win || (function(){ return this }).call(null)
 
 var URI = function( url ) {
 	if ( this.constructor !== URI ) {

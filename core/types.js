@@ -217,7 +217,7 @@ steal.config({
 			success(ret);
 		},
 		"text": function( options, success, error ) {
-			steal.request(options, function( text ) {
+			h.request(options, function( text ) {
 				options.text = text;
 				success(text);
 			}, error)

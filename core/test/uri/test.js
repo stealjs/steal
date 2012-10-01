@@ -68,10 +68,10 @@ test('URI.prototype.normalize', function(){
 test('URI.prototype.isRelative', function(){
 	ok(uri.isRelative());
 	ok(URI('./foo/bar').isRelative())
-	equals(URI('foo/bar').isRelative(), false)
+	equal(URI('foo/bar').isRelative(), false)
 })
 test('URI.prototype.pathTo', function(){
-	equals(uri.pathTo('http://steal.js/foo/bar/baz') + "", '../../foo/bar/baz')
+	equal(uri.pathTo('http://steal.js/foo/bar/baz') + "", '../../foo/bar/baz')
 })
 test('URI.prototype.addJS', function(){
 	var newUri = URI('jquery');
