@@ -18,7 +18,7 @@ test('loaded, run and completed are deferreds', function(){
 	ok(isDeferred(res.completed))
 })
 
-test('resource optins will be extended if called twice for the same id', function(){
+test('resource options will be extended if called twice for the same id', function(){
 	var res = Resource.make('jquery')
 	var res2 = Resource.make({id: 'jquery', foo: 'bar'})
 	equal(res.options.foo, 'bar')
