@@ -1,7 +1,5 @@
-var uri = URI('http://steal.js/core/uri.js?some=argument#some_fragment');
-
 module('URI');
-
+var uri = URI('http://steal.js/core/uri.js?some=argument#some_fragment');
 test("URI parser", function(){
 	equal(uri.host, 'steal.js', 'Host is correct')
 	equal(uri.path, '/core/uri.js', 'Path is correct')

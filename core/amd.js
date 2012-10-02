@@ -40,7 +40,7 @@ steal.id = function( id, currentWorkingId, type ) {
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
-		if ( matchesId(loc, currentWorkingId) ) {
+		if ( h.matchesId(loc, currentWorkingId) ) {
 			// run maps
 			h.each(maps, function( part, replaceWith ) {
 				if (("" + uri).indexOf(part) == 0 ) {

@@ -195,6 +195,13 @@ var h = {
 				clean();
 			}
 		}
+	},
+	matchesId : function( loc, id ) {
+		if ( loc === "*" ) {
+			return true;
+		} else if ( id.indexOf(loc) === 0 ) {
+			return true;
+		}
 	}
 }
 
@@ -1072,6 +1079,7 @@ Resource.make = h.after(Resource.make, function( stel ) {
 		return steal;
 	};
 	steal._id = Math.floor(1000 * Math.random());
+
 	// ## CONFIG ##
 	
 	// stores the current config settings
@@ -1081,17 +1089,10 @@ Resource.make = h.after(Resource.make, function( stel ) {
 		env: "development",
 		loadProduction: true,
 		logLevel: 0
-	},
-	
-		matchesId = function( loc, id ) {
-			if ( loc === "*" ) {
-				return true;
-			} else if ( id.indexOf(loc) === 0 ) {
-				return true;
-			}
-		};
+	}
 
-	/**
+
+/**
  * `steal.config(config)` configures steal. Typically it it used
  * in __stealconfig.js__.  The available options are:
  * 
@@ -1269,6 +1270,74 @@ steal.config.shim = function(shims){
 	}
 
 }
+// ## Config ##
+var stealCheck = /steal\.(production\.)?js.*/,
+getStealScriptSrc = function() {
+	if (!h.doc ) {
+		return;
+	}
+	var scripts = h.getElementsByTagName("script"),
+		script;
+
+	// find the steal script and setup initial paths.
+	h.each(scripts, function( i, s ) {
+		if ( stealCheck.test(s.src) ) {
+			script = s;
+		}
+	});
+	return script;
+};
+
+steal.getScriptOptions = function( script ) {
+
+	var options = {},
+		parts, src, query, startFile, env;
+
+	script = script || getStealScriptSrc();
+
+	if ( script ) {
+
+		// Split on question mark to get query
+		parts = script.src.split("?");
+		src = parts.shift();
+		query = parts.join("?");
+
+		// Split on comma to get startFile and env
+		parts = query.split(",");
+
+		if ( src.indexOf("steal.production") > -1 ) {
+			options.env = "production";
+		}
+
+		// Grab startFile
+		startFile = parts[0];
+
+		if ( startFile ) {
+			if ( startFile.indexOf(".js") == -1 ) {
+				startFile += "/" + startFile.split("/").pop() + ".js";
+			}
+			options.startFile = startFile;
+		}
+
+		// Grab env
+		env = parts[1];
+
+		if ( env ) {
+			options.env = env;
+		}
+
+		// Split on / to get rootUrl
+		parts = src.split("/")
+		parts.pop();
+		if ( parts[parts.length - 1] == "steal" ) {
+			parts.pop();
+		}
+		options.root = parts.join("/")
+
+	}
+
+	return options;
+};
 	
 	/**
  * @function steal.id
@@ -1312,7 +1381,7 @@ steal.id = function( id, currentWorkingId, type ) {
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
-		if ( matchesId(loc, currentWorkingId) ) {
+		if ( h.matchesId(loc, currentWorkingId) ) {
 			// run maps
 			h.each(maps, function( part, replaceWith ) {
 				if (("" + uri).indexOf(part) == 0 ) {
@@ -1474,7 +1543,8 @@ define("require", function(){
 	 * @add steal
 	 */
 	// =============================== STATIC API ===============================
-	var page;
+	var events = {}, 
+		page;
 
 	h.extend(steal, {
 		each: h.each,
@@ -1670,13 +1740,6 @@ define("require", function(){
 			};
 		}
 	});
-
-
-	
-
-
-	var events = {};
-
 
 	// ### TYPES ##
 var types = stealConfig.types;
@@ -1949,11 +2012,6 @@ steal.config({
 		}
 	}
 });
-	
-
-
-	
-
 
 	//  ============================== Packages ===============================
 	/**
@@ -2381,80 +2439,6 @@ if ( h.support.interactive ) {
 	})
 }
 	
-	// ## Config ##
-	var stealCheck = /steal\.(production\.)?js.*/,
-		getStealScriptSrc = function() {
-			if (!h.doc ) {
-				return;
-			}
-			var scripts = h.getElementsByTagName("script"),
-				script;
-
-			// find the steal script and setup initial paths.
-			h.each(scripts, function( i, s ) {
-				if ( stealCheck.test(s.src) ) {
-					script = s;
-				}
-			});
-			return script;
-		};
-
-	steal.getScriptOptions = function( script ) {
-
-		var options = {},
-			parts, src, query, startFile, env;
-
-		script = script || getStealScriptSrc();
-
-		if ( script ) {
-
-			// Split on question mark to get query
-			parts = script.src.split("?");
-			src = parts.shift();
-			query = parts.join("?");
-
-			// Split on comma to get startFile and env
-			parts = query.split(",");
-
-			if ( src.indexOf("steal.production") > -1 ) {
-				options.env = "production";
-			}
-
-			// Grab startFile
-			startFile = parts[0];
-
-			if ( startFile ) {
-				if ( startFile.indexOf(".js") == -1 ) {
-					startFile += "/" + startFile.split("/").pop() + ".js";
-				}
-				options.startFile = startFile;
-			}
-
-			// Grab env
-			env = parts[1];
-
-			if ( env ) {
-				options.env = env;
-			}
-
-			// Split on / to get rootUrl
-			parts = src.split("/")
-			parts.pop();
-			if ( parts[parts.length - 1] == "steal" ) {
-				parts.pop();
-			}
-			options.root = parts.join("/")
-
-		}
-
-		return options;
-	};
-
-	
-
-
-	
-
 	var stealResource = new Resource("steal")
 	stealResource.value = steal;
 	stealResource.loaded.resolve();

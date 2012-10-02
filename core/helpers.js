@@ -8,7 +8,8 @@ var requestFactory = function() {
 };
 
 var h = {
-// check that we have a document
+// check that we have a document,
+	win : win,
 	doc: win.document,
 	// a jQuery-like $.each
 	each: function( o, cb ) {
@@ -173,6 +174,13 @@ var h = {
 				error && error();
 				clean();
 			}
+		}
+	},
+	matchesId : function( loc, id ) {
+		if ( loc === "*" ) {
+			return true;
+		} else if ( id.indexOf(loc) === 0 ) {
+			return true;
 		}
 	}
 }
