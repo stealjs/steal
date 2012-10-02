@@ -1,6 +1,7 @@
 // ============ RESOURCE ================
 // a map of resources by resourceID
-var resources = {};
+var resources = {},
+	id = 0;
 // this is for methods on a 'steal instance'.  A file can be in one of a few states:
 // created - the steal instance is created, but we haven't started loading it yet
 //           this happens when thens are used
