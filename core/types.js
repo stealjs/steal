@@ -89,7 +89,6 @@ steal.config.types = function(types){
 	h.each(types, steal.type)
 };
 
-/*# resource.js #*/
 
 
 
