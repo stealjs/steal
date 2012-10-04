@@ -152,42 +152,36 @@ steal.config.root = function( relativeURI ) {
 	stealConfig.root =  root || URI("");
 }
 steal.config.root("");
-steal.config.shim = function(shims){
 
+steal.config.shim = function(shims){
 	for(var id in shims){
 		var resource = Resource.make(id);
 		if(typeof shims[id] === "object"){
-			var needs = shims[id].deps || []
-			if(typeof shims[id].exports === "string"){
-				var exports = (function(_exports){
-					return function(){
-						return win[_exports];
-					}
-				})(shims[id].exports)
-			} else {
-				exports = shims[id].exports;
-			}
+			var needs   = shims[id].deps || []
+			var exports = shims[id].exports;
+			var init    = shims[id].init
 		} else {
 			needs = shims[id];
 		}
 		(function(_resource, _needs){
 			_resource.options.needs = _needs;
-		})(resource, needs)
-
-		if(exports){
-			resource.exports = (function(_resource, _exports, _needs){
-				return function(){
-					var args = _needs.map(function(id){
-						return Resource.make(id).value;
-					})
-					_resource.value = _exports.apply(null, args)
-					return _resource.value
+		})(resource, needs);
+		resource.exports = (function(_resource, _needs, _exports, _init){
+			return function(){
+				var args = _needs.map(function(id){
+					return Resource.make(id).value;
+				});
+				if(_init){
+					_resource.value = _init.apply(null, args);
+				} else {
+					_resource.value = win[_exports];
 				}
-			})(resource, exports, needs)
-		}
+			}
+		})(resource, needs, exports, init)
 	}
-
 }
+
+
 // ## Config ##
 var stealCheck = /steal\.(production\.)?js.*/,
 getStealScriptSrc = function() {
