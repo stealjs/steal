@@ -1,20 +1,21 @@
-importPackage(java.io);
+var fs = require('fs');
+var Promise = require('node-promise/promise');
 
-function writeFile( file, stream ) {
-	var buffer = new PrintWriter( new FileWriter( file ) );
-	buffer.print( stream );
-	buffer.close();
-}
+var readFile_promise = Promise.convertNodeAsyncFunction(fs.readFile);
 
-var core = readFile('steal/core/core.js');
-
-core = core.replace(/\/\*#\s+(.*?)\s+#\*\//g, function(match, filename){
-	var filename = 'steal/core/' + filename;
-	var file = new java.io.File(filename);
-	if(!file.exists()){
-		throw "File " + filename + " doesn't exist";
+fs.readFile('core/core.js', 'utf8', function(err, core){
+	var promises = [];
+	if(err){
+		return console.log('An error occured while reading core/core.js file')
 	}
-	return readFile(filename);
-})
-
-writeFile('steal/steal.js', core);
+	var matches = core.match(/\/\*#\s+(.*?)\s+#\*\//g);
+	matches.forEach(function(file){
+		promises.push(readFile_promise("core/" + file.slice(3, -3).trim()));
+	})
+	Promise.all(promises).then(function(results){
+		for(var i = 0; i < results.length; i++){
+			core = core.replace(matches[i], results[i]);
+		}
+		fs.writeFile("steal.js", core, function(){})
+	})
+});

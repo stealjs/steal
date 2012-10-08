@@ -29,7 +29,8 @@ var requestFactory = function() {
 };
 
 var h = {
-// check that we have a document
+// check that we have a document,
+	win : win,
 	doc: win.document,
 	// a jQuery-like $.each
 	each: function( o, cb ) {
@@ -571,7 +572,8 @@ URI.prototype.insertMapping = function() {
 
 	// ============ RESOURCE ================
 // a map of resources by resourceID
-var resources = {};
+var resources = {},
+	id = 0;
 // this is for methods on a 'steal instance'.  A file can be in one of a few states:
 // created - the steal instance is created, but we haven't started loading it yet
 //           this happens when thens are used
@@ -1064,21 +1066,9 @@ Resource.make = h.after(Resource.make, function( stel ) {
 	return stel;
 }, true);
 		
-	// create the steal function now to use as a namespace.
+	
 
-	function steal() {
-		// convert arguments into an array
-		var args = h.map(arguments);
-		if ( args.length ) {
-			pending.push.apply(pending, args);
-			// steal.after is called everytime steal is called
-			// it kicks off loading these files
-			steal.after(args);
-			// return steal for chaining
-		}
-		return steal;
-	};
-	steal._id = Math.floor(1000 * Math.random());
+	
 
 	// ## CONFIG ##
 	
@@ -1234,42 +1224,36 @@ steal.config.root = function( relativeURI ) {
 	stealConfig.root =  root || URI("");
 }
 steal.config.root("");
-steal.config.shim = function(shims){
 
+steal.config.shim = function(shims){
 	for(var id in shims){
 		var resource = Resource.make(id);
 		if(typeof shims[id] === "object"){
-			var needs = shims[id].deps || []
-			if(typeof shims[id].exports === "string"){
-				var exports = (function(_exports){
-					return function(){
-						return win[_exports];
-					}
-				})(shims[id].exports)
-			} else {
-				exports = shims[id].exports;
-			}
+			var needs   = shims[id].deps || []
+			var exports = shims[id].exports;
+			var init    = shims[id].init
 		} else {
 			needs = shims[id];
 		}
 		(function(_resource, _needs){
 			_resource.options.needs = _needs;
-		})(resource, needs)
-
-		if(exports){
-			resource.exports = (function(_resource, _exports, _needs){
-				return function(){
-					var args = _needs.map(function(id){
-						return Resource.make(id).value;
-					})
-					_resource.value = _exports.apply(null, args)
-					return _resource.value
+		})(resource, needs);
+		resource.exports = (function(_resource, _needs, _exports, _init){
+			return function(){
+				var args = _needs.map(function(id){
+					return Resource.make(id).value;
+				});
+				if(_init){
+					_resource.value = _init.apply(null, args);
+				} else {
+					_resource.value = win[_exports];
 				}
-			})(resource, exports, needs)
-		}
+			}
+		})(resource, needs, exports, init)
 	}
-
 }
+
+
 // ## Config ##
 var stealCheck = /steal\.(production\.)?js.*/,
 getStealScriptSrc = function() {
@@ -1410,7 +1394,7 @@ steal.amdToId = function(id, currentWorkingId, type){
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
-		if ( matchesId(loc, currentWorkingId) ) {
+		if ( h.matchesId(loc, currentWorkingId) ) {
 			// run maps
 			h.each(maps, function( part, replaceWith ) {
 				if (("" + uri).indexOf(part) == 0 ) {
@@ -1531,12 +1515,7 @@ define("require", function(){
 	return require;
 })
 
-	// temp add steal.File for backward compat
-	steal.File = steal.URI = URI;
-	// --- END URI
-	var pending = [],
-		s = steal,
-		id = 0;
+	
 
 
 	/**
@@ -1832,7 +1811,6 @@ steal.config.types = function(types){
 	h.each(types, steal.type)
 };
 
-/*# resource.js #*/
 
 
 
