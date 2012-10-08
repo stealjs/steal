@@ -181,31 +181,12 @@ steal.config.shim = function(shims){
 	}
 }
 
-
-// ## Config ##
-var stealCheck = /steal\.(production\.)?js.*/,
-getStealScriptSrc = function() {
-	if (!h.doc ) {
-		return;
-	}
-	var scripts = h.getElementsByTagName("script"),
-		script;
-
-	// find the steal script and setup initial paths.
-	h.each(scripts, function( i, s ) {
-		if ( stealCheck.test(s.src) ) {
-			script = s;
-		}
-	});
-	return script;
-};
-
 steal.getScriptOptions = function( script ) {
 
 	var options = {},
 		parts, src, query, startFile, env;
 
-	script = script || getStealScriptSrc();
+	script = script || h.getStealScriptSrc();
 
 	if ( script ) {
 

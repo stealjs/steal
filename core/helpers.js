@@ -182,6 +182,22 @@ var h = {
 		} else if ( id.indexOf(loc) === 0 ) {
 			return true;
 		}
+	},
+	stealCheck : /steal\.(production\.)?js.*/,
+	getStealScriptSrc : function() {
+		if (!h.doc ) {
+			return;
+		}
+		var scripts = h.getElementsByTagName("script"),
+			script;
+
+		// find the steal script and setup initial paths.
+		h.each(scripts, function( i, s ) {
+			if ( h.stealCheck.test(s.src) ) {
+				script = s;
+			}
+		});
+		return script;
 	}
 }
 
