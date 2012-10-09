@@ -14,8 +14,5 @@ function steal() {
 };
 steal._id = Math.floor(1000 * Math.random());
 
-// temp add steal.File for backward compat
-steal.File = steal.URI = URI;
-// --- END URI
 var pending = [],
 	s = steal;

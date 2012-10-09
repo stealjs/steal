@@ -17,21 +17,16 @@
 // - Window Load - API for knowing when the window has loaded and all scripts have loaded
 // - Interactive - Code for IE
 // - Options - 
-(function( win, undefined ) {
+(function( undefined ) {
 
 	// ## Helpers ##
 // The following are a list of helper methods used internally to steal
 
-var win = win || (function(){ return this }).call(null)
 
-var requestFactory = function() {
-	return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
-};
 
 var h = {
 // check that we have a document,
-	win : win,
-	doc: win.document,
+	win : (function(){ return this }).call(null),
 	// a jQuery-like $.each
 	each: function( o, cb ) {
 		var i, len;
@@ -117,9 +112,6 @@ var h = {
 	// testing support for various browser behaviors
 	// a startup function that will be called when steal is ready
 	startup: function() {},
-	// if oldsteal is an object
-	// we use it as options to configure steal
-	opts: (typeof win.steal == "object" ? win.steal : {}),
 	// adds a suffix to the url for cache busting
 	addSuffix: function( str ) {
 		if ( h.opts.suffix ) {
@@ -203,10 +195,30 @@ var h = {
 		} else if ( id.indexOf(loc) === 0 ) {
 			return true;
 		}
+	},
+	stealCheck : /steal\.(production\.)?js.*/,
+	getStealScriptSrc : function() {
+		if (!h.doc ) {
+			return;
+		}
+		var scripts = h.getElementsByTagName("script"),
+			script;
+
+		// find the steal script and setup initial paths.
+		h.each(scripts, function( i, s ) {
+			if ( h.stealCheck.test(s.src) ) {
+				script = s;
+			}
+		});
+		return script;
 	}
 }
 
+h.doc   = h.win.document
 h.docEl = h.doc && h.doc.documentElement;
+// if oldsteal is an object
+// we use it as options to configure steal
+h.opts  = (typeof h.win.steal == "object" ? h.win.steal : {}),
 
 h.support = {
 	// does onerror work in script tags?
@@ -221,6 +233,29 @@ h.support = {
 	// use attachEvent for event listening (IE)
 	attachEvent: h.doc && h.scriptTag().attachEvent
 }
+
+var requestFactory = function() {
+	return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+};
+
+	// create the steal function now to use as a namespace.
+
+function steal() {
+	// convert arguments into an array
+	var args = h.map(arguments);
+	if ( args.length ) {
+		pending.push.apply(pending, args);
+		// steal.after is called everytime steal is called
+		// it kicks off loading these files
+		steal.after(args);
+		// return steal for chaining
+	}
+	return steal;
+};
+steal._id = Math.floor(1000 * Math.random());
+
+var pending = [],
+	s = steal;
 	
 	// ## Deferred .63
 var Deferred = function( func ) {
@@ -366,8 +401,6 @@ var whenEach = function( arr, func, obj, func2 ) {
  *     uri.path //-> "/index.html"
  */
 
-var win = win || (function(){ return this }).call(null)
-
 var URI = function( url ) {
 	if ( this.constructor !== URI ) {
 		return new URI(url);
@@ -408,7 +441,7 @@ h.extend(URI, {
  * 
  *     steal.URI.page.protocol //-> "http"
  */
-URI.page = URI(win.location && location.href);
+URI.page = URI(h.win.location && location.href);
 /**
  * @attribute cur
  * 
@@ -437,7 +470,7 @@ h.extend(URI.prototype, {
 		return this.protocol ? this.protocol + "://" + this.host : "";
 	},
 	isCrossDomain: function( uri ) {
-		uri = URI(uri || win.location.href);
+		uri = URI(uri || h.win.location.href);
 		var domain = this.domain(),
 			uriDomain = uri.domain()
 			return (domain && uriDomain && domain != uriDomain) || this.protocol === "file" || (domain && !uriDomain);
@@ -569,6 +602,10 @@ URI.prototype.insertMapping = function() {
 	}
 	return URI(orig);
 };
+
+// temp add steal.File for backward compat
+steal.File = steal.URI = URI;
+// --- END URI
 
 	// ============ RESOURCE ================
 // a map of resources by resourceID
@@ -830,7 +867,7 @@ h.extend(Resource.prototype, {
 		h.each(myqueue, function( i, item ) {
 			if( item === null){
 				stealInstances.push(null);
-				return
+				return;
 			}
 			
 			if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
@@ -944,7 +981,6 @@ h.extend(Resource.prototype, {
 			self.executing = true;
 
 			steal.require(self.options, function( value ) {
-				
 				self.executed( value );
 			}, function( error, src ) {
 				var abortFlag = self.options.abort,
@@ -955,7 +991,7 @@ h.extend(Resource.prototype, {
 					errorCb.call(self.options);
 				}
 
-				win.clearTimeout && win.clearTimeout(self.completeTimeout)
+				h.win.clearTimeout && h.win.clearTimeout(self.completeTimeout)
 
 				// if abort: false, register the script as loaded, and don't throw
 				if ( abortFlag === false ) {
@@ -1065,10 +1101,6 @@ Resource.make = h.after(Resource.make, function( stel ) {
 	}
 	return stel;
 }, true);
-		
-	
-
-	
 
 	// ## CONFIG ##
 	
@@ -1246,38 +1278,19 @@ steal.config.shim = function(shims){
 				if(_init){
 					_resource.value = _init.apply(null, args);
 				} else {
-					_resource.value = win[_exports];
+					_resource.value = h.win[_exports];
 				}
 			}
 		})(resource, needs, exports, init)
 	}
 }
 
-
-// ## Config ##
-var stealCheck = /steal\.(production\.)?js.*/,
-getStealScriptSrc = function() {
-	if (!h.doc ) {
-		return;
-	}
-	var scripts = h.getElementsByTagName("script"),
-		script;
-
-	// find the steal script and setup initial paths.
-	h.each(scripts, function( i, s ) {
-		if ( stealCheck.test(s.src) ) {
-			script = s;
-		}
-	});
-	return script;
-};
-
 steal.getScriptOptions = function( script ) {
 
 	var options = {},
 		parts, src, query, startFile, env;
 
-	script = script || getStealScriptSrc();
+	script = script || h.getStealScriptSrc();
 
 	if ( script ) {
 
@@ -1457,7 +1470,7 @@ var modules = {
 // a function is a module definition piece
 // you steal(moduleId1, moduleId2, function(module1, module2){});
 // 
-win.define = function( moduleId, dependencies, method ) {
+h.win.define = function( moduleId, dependencies, method ) {
 	if(typeof moduleId == 'function'){
 		modules[URI.cur+""] = moduleId();
 	} else if(!method && dependencies){
@@ -1482,7 +1495,7 @@ win.define = function( moduleId, dependencies, method ) {
 	}
 	
 }
-win.require = function(dependencies, method){
+h.win.require = function(dependencies, method){
 	var depends = h.map(dependencies, function(dependency){
 			dependency = typeof dependency === "string" ? {
 				id: dependency
@@ -1495,7 +1508,7 @@ win.require = function(dependencies, method){
 	console.log("stealing",depends.slice(0))
 	steal.apply(null, depends )
 }
-win.define.amd = {
+h.win.define.amd = {
 	jQuery: true
 }
 
@@ -1503,7 +1516,7 @@ win.define.amd = {
 
 //steal.when = when;
 // make steal public
-win.steal = steal;
+h.win.steal = steal;
 
 
 // make steal loaded
@@ -1514,9 +1527,6 @@ define("steal", [], function() {
 define("require", function(){
 	return require;
 })
-
-	
-
 
 	/**
 	 * @add steal
@@ -1530,7 +1540,7 @@ define("require", function(){
 		extend: h.extend,
 		Deferred: Deferred,
 		// Currently used a few places
-		isRhino: win.load && win.readUrl && win.readFile,
+		isRhino: h.win.load && h.win.readUrl && h.win.readFile,
 		/**
 		 * @hide
 		 * Makes options
@@ -1569,7 +1579,7 @@ define("require", function(){
 		then: function() {
 			var args = h.map(arguments);
 			args.unshift(null)
-			return steal.apply(win, args);
+			return steal.apply(h.win, args);
 		},
 		/**
 		 * `steal.bind( event, handler(eventData...) )` listens to 
@@ -1717,7 +1727,8 @@ define("require", function(){
 				require: cb,
 				convert: typs
 			};
-		}
+		},
+		request : h.request
 	});
 
 	// ### TYPES ##
@@ -1992,59 +2003,59 @@ steal.config({
 });
 
 	//  ============================== Packages ===============================
-	/**
-	 * @function steal.packages
-	 * `steal.packages( packageIds... )` defines modules for deferred downloading.
-	 * 
-	 * This is used by the build system to build collections of modules that will be downloaded
-	 * after initial page load.
-	 * 
-	 * For example, an application that wants to progressively load the contents and
-	 * dependencies of _login/login.js_, _filemanager/filemanager.js_, and _contacts/contacts.js_,
-	 * while immediately loading the current users's data might look like:
-	 * 
-	 *     steal.packages('login','filemanager','contacts')
-	 *     steal('models/user', function(User){
-	 * 	   
-	 *       // get the current User
-	 *       User.findOne({id: "current"}, 
-	 * 
-	 *         // success - they logged in
-	 *         function(user){
-	 *           if(window.location.hash == "#filemanager"){
-	 *             steal('filemanager')  
-	 *           }
-	 *         }, 
-	 *         // error - they are logged out
-	 *         function(){
-	 *           steal('login', function(){
-	 *             new Login(document.body);
-	 *             // preload filemanager
-	 * 
-	 *           })  
-	 *         })
-	 *     })
-	 * 
-	 *
-	 * 		steal.packages('tasks','dashboard','fileman');
-	 *
-	 */
-	var packs = [],
-		packHash = {};
-	steal.packages = function( map ) {
+/**
+ * @function steal.packages
+ * `steal.packages( packageIds... )` defines modules for deferred downloading.
+ * 
+ * This is used by the build system to build collections of modules that will be downloaded
+ * after initial page load.
+ * 
+ * For example, an application that wants to progressively load the contents and
+ * dependencies of _login/login.js_, _filemanager/filemanager.js_, and _contacts/contacts.js_,
+ * while immediately loading the current users's data might look like:
+ * 
+ *     steal.packages('login','filemanager','contacts')
+ *     steal('models/user', function(User){
+ * 	   
+ *       // get the current User
+ *       User.findOne({id: "current"}, 
+ * 
+ *         // success - they logged in
+ *         function(user){
+ *           if(window.location.hash == "#filemanager"){
+ *             steal('filemanager')  
+ *           }
+ *         }, 
+ *         // error - they are logged out
+ *         function(){
+ *           steal('login', function(){
+ *             new Login(document.body);
+ *             // preload filemanager
+ * 
+ *           })  
+ *         })
+ *     })
+ * 
+ *
+ * 		steal.packages('tasks','dashboard','fileman');
+ *
+ */
+var packs = [],
+	packHash = {};
+steal.packages = function( map ) {
 
-		if (!arguments.length ) {
-			return packs;
+	if (!arguments.length ) {
+		return packs;
+	} else {
+		if ( typeof map == 'string' ) {
+			packs.push.apply(packs, arguments);
 		} else {
-			if ( typeof map == 'string' ) {
-				packs.push.apply(packs, arguments);
-			} else {
-				packHash = map;
-			}
-
-			return this;
+			packHash = map;
 		}
-	};
+
+		return this;
+	}
+};
 
 	// =============================== STARTUP ===============================
 var rootSteal = false;
@@ -2116,7 +2127,7 @@ h.extend(steal, {
 			// brief timeout before executing the rootResource.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
-			if ( win.setTimeout ) {
+			if ( h.win.setTimeout ) {
 				// we want to insert a "wait" after the current pending
 				steal.pushPending();
 				setTimeout(function() {
@@ -2155,7 +2166,7 @@ h.extend(steal, {
 	// check if jQuery loaded after every script load ...
 	Resource.prototype.executed = h.before(Resource.prototype.executed, function() {
 
-		var $ = win.jQuery;
+		var $ = h.win.jQuery;
 		if ( $ && "readyWait" in $ ) {
 
 			//Increment jQuery readyWait if ncecessary.
@@ -2225,7 +2236,7 @@ var addEvent = function( elem, type, fn ) {
 	},
 	firstEnd = false;
 
-addEvent(win, "load", function() {
+addEvent(h.win, "load", function() {
 	loaded.load.resolve();
 });
 
@@ -2265,7 +2276,7 @@ h.startup = h.after(h.startup, function() {
 
 	// 3. if url looks like steal[xyz]=bar, add those to the options
 	// does this ened to be supported anywhere?
-	var search = win.location && decodeURIComponent(win.location.search);
+	var search = h.win.location && decodeURIComponent(h.win.location.search);
 	search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
 		options[prop] = ~val.indexOf(",") ? val.split(",") : val;
 	});
@@ -2296,8 +2307,8 @@ h.startup = h.after(h.startup, function() {
 	try {
 		// win.top.steal.instrument is for qunit
 		// win.top.opener.steal.instrument is for funcunit
-		if(!options.browser && ((win.top && win.top.steal.instrument) || 
-								(win.top && win.top.opener && win.top.opener.steal && win.top.opener.steal.instrument))) {
+		if(!options.browser && ((h.win.top && h.win.top.steal.instrument) || 
+								(h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.steal.instrument))) {
 
 			// force startFiles to load before instrument
 			steals.push(h.noop, {
@@ -2331,7 +2342,7 @@ h.startup = h.after(h.startup, function() {
 		}
 	}
 	if ( steals.length ) {
-		steal.apply(win, steals);
+		steal.apply(h.win, steals);
 	}
 });
 
@@ -2428,7 +2439,7 @@ if ( h.support.interactive ) {
 
 	h.startup();
 	//win.steals = steals;
-	win.steal.resources = resources;
-	win.Resource = Resource;
+	h.win.steal.resources = resources;
+	h.win.Resource = Resource;
 
-})(this);
+})();

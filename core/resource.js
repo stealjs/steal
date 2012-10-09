@@ -206,7 +206,6 @@ h.extend(Resource.prototype, {
 	// - wires up pendings steal's deferreds to eventually complete this
 	// - this is where all of steal's complexity is
 	executed: function( script ) {
-		console.log(arguments)
 		var myqueue, 
 			stel, 
 			src = this.options.src,

@@ -208,3 +208,7 @@ URI.prototype.insertMapping = function() {
 	}
 	return URI(orig);
 };
+
+// temp add steal.File for backward compat
+steal.File = steal.URI = URI;
+// --- END URI

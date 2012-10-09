@@ -197,5 +197,6 @@
 				require: cb,
 				convert: typs
 			};
-		}
+		},
+		request : h.request
 	});
