@@ -10,7 +10,7 @@
 		extend: h.extend,
 		Deferred: Deferred,
 		// Currently used a few places
-		isRhino: win.load && win.readUrl && win.readFile,
+		isRhino: h.win.load && h.win.readUrl && h.win.readFile,
 		/**
 		 * @hide
 		 * Makes options
@@ -49,7 +49,7 @@
 		then: function() {
 			var args = h.map(arguments);
 			args.unshift(null)
-			return steal.apply(win, args);
+			return steal.apply(h.win, args);
 		},
 		/**
 		 * `steal.bind( event, handler(eventData...) )` listens to 

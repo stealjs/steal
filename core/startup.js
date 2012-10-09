@@ -68,7 +68,7 @@ h.extend(steal, {
 			// brief timeout before executing the rootResource.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
-			if ( win.setTimeout ) {
+			if ( h.win.setTimeout ) {
 				// we want to insert a "wait" after the current pending
 				steal.pushPending();
 				setTimeout(function() {
@@ -107,7 +107,7 @@ h.extend(steal, {
 	// check if jQuery loaded after every script load ...
 	Resource.prototype.executed = h.before(Resource.prototype.executed, function() {
 
-		var $ = win.jQuery;
+		var $ = h.win.jQuery;
 		if ( $ && "readyWait" in $ ) {
 
 			//Increment jQuery readyWait if ncecessary.
@@ -177,7 +177,7 @@ var addEvent = function( elem, type, fn ) {
 	},
 	firstEnd = false;
 
-addEvent(win, "load", function() {
+addEvent(h.win, "load", function() {
 	loaded.load.resolve();
 });
 
@@ -217,7 +217,7 @@ h.startup = h.after(h.startup, function() {
 
 	// 3. if url looks like steal[xyz]=bar, add those to the options
 	// does this ened to be supported anywhere?
-	var search = win.location && decodeURIComponent(win.location.search);
+	var search = h.win.location && decodeURIComponent(h.win.location.search);
 	search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
 		options[prop] = ~val.indexOf(",") ? val.split(",") : val;
 	});
@@ -248,8 +248,8 @@ h.startup = h.after(h.startup, function() {
 	try {
 		// win.top.steal.instrument is for qunit
 		// win.top.opener.steal.instrument is for funcunit
-		if(!options.browser && ((win.top && win.top.steal.instrument) || 
-								(win.top && win.top.opener && win.top.opener.steal && win.top.opener.steal.instrument))) {
+		if(!options.browser && ((h.win.top && h.win.top.steal.instrument) || 
+								(h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.steal.instrument))) {
 
 			// force startFiles to load before instrument
 			steals.push(h.noop, {
@@ -283,6 +283,6 @@ h.startup = h.after(h.startup, function() {
 		}
 	}
 	if ( steals.length ) {
-		steal.apply(win, steals);
+		steal.apply(h.win, steals);
 	}
 });

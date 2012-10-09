@@ -1,16 +1,11 @@
 // ## Helpers ##
 // The following are a list of helper methods used internally to steal
 
-var win = win || (function(){ return this }).call(null)
 
-var requestFactory = function() {
-	return win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
-};
 
 var h = {
 // check that we have a document,
-	win : win,
-	doc: win.document,
+	win : (function(){ return this }).call(null),
 	// a jQuery-like $.each
 	each: function( o, cb ) {
 		var i, len;
@@ -96,9 +91,6 @@ var h = {
 	// testing support for various browser behaviors
 	// a startup function that will be called when steal is ready
 	startup: function() {},
-	// if oldsteal is an object
-	// we use it as options to configure steal
-	opts: (typeof win.steal == "object" ? win.steal : {}),
 	// adds a suffix to the url for cache busting
 	addSuffix: function( str ) {
 		if ( h.opts.suffix ) {
@@ -201,7 +193,11 @@ var h = {
 	}
 }
 
+h.doc   = h.win.document
 h.docEl = h.doc && h.doc.documentElement;
+// if oldsteal is an object
+// we use it as options to configure steal
+h.opts  = (typeof h.win.steal == "object" ? h.win.steal : {}),
 
 h.support = {
 	// does onerror work in script tags?
@@ -216,3 +212,7 @@ h.support = {
 	// use attachEvent for event listening (IE)
 	attachEvent: h.doc && h.scriptTag().attachEvent
 }
+
+var requestFactory = function() {
+	return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+};

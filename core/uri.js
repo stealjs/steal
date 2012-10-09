@@ -7,8 +7,6 @@
  *     uri.path //-> "/index.html"
  */
 
-var win = win || (function(){ return this }).call(null)
-
 var URI = function( url ) {
 	if ( this.constructor !== URI ) {
 		return new URI(url);
@@ -49,7 +47,7 @@ h.extend(URI, {
  * 
  *     steal.URI.page.protocol //-> "http"
  */
-URI.page = URI(win.location && location.href);
+URI.page = URI(h.win.location && location.href);
 /**
  * @attribute cur
  * 
@@ -78,7 +76,7 @@ h.extend(URI.prototype, {
 		return this.protocol ? this.protocol + "://" + this.host : "";
 	},
 	isCrossDomain: function( uri ) {
-		uri = URI(uri || win.location.href);
+		uri = URI(uri || h.win.location.href);
 		var domain = this.domain(),
 			uriDomain = uri.domain()
 			return (domain && uriDomain && domain != uriDomain) || this.protocol === "file" || (domain && !uriDomain);

@@ -132,7 +132,7 @@ var modules = {
 // a function is a module definition piece
 // you steal(moduleId1, moduleId2, function(module1, module2){});
 // 
-win.define = function( moduleId, dependencies, method ) {
+h.win.define = function( moduleId, dependencies, method ) {
 	if(typeof moduleId == 'function'){
 		modules[URI.cur+""] = moduleId();
 	} else if(!method && dependencies){
@@ -157,7 +157,7 @@ win.define = function( moduleId, dependencies, method ) {
 	}
 	
 }
-win.require = function(dependencies, method){
+h.win.require = function(dependencies, method){
 	var depends = h.map(dependencies, function(dependency){
 			dependency = typeof dependency === "string" ? {
 				id: dependency
@@ -170,7 +170,7 @@ win.require = function(dependencies, method){
 	console.log("stealing",depends.slice(0))
 	steal.apply(null, depends )
 }
-win.define.amd = {
+h.win.define.amd = {
 	jQuery: true
 }
 
@@ -178,7 +178,7 @@ win.define.amd = {
 
 //steal.when = when;
 // make steal public
-win.steal = steal;
+h.win.steal = steal;
 
 
 // make steal loaded

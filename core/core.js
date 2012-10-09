@@ -17,7 +17,7 @@
 // - Window Load - API for knowing when the window has loaded and all scripts have loaded
 // - Interactive - Code for IE
 // - Options - 
-(function( win, undefined ) {
+(function( undefined ) {
 
 	/*# helpers.js #*/
 	
@@ -26,17 +26,10 @@
 	/*# uri.js #*/
 
 	/*# resource.js #*/
-		
-	
-
-	
 
 	/*# config.js #*/
 	
 	/*# amd.js #*/
-
-	
-
 
 	/*# static.js #*/
 
@@ -113,6 +106,6 @@
 	h.startup();
 	//win.steals = steals;
 	win.steal.resources = resources;
-	win.Resource = Resource;
+	h.win.Resource = Resource;
 
-})(this);
+})();

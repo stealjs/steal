@@ -206,6 +206,7 @@ h.extend(Resource.prototype, {
 	// - wires up pendings steal's deferreds to eventually complete this
 	// - this is where all of steal's complexity is
 	executed: function( script ) {
+		console.log(arguments)
 		var myqueue, 
 			stel, 
 			src = this.options.src,
@@ -258,7 +259,7 @@ h.extend(Resource.prototype, {
 		h.each(myqueue, function( i, item ) {
 			if( item === null){
 				stealInstances.push(null);
-				return
+				return;
 			}
 			
 			if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
@@ -372,7 +373,6 @@ h.extend(Resource.prototype, {
 			self.executing = true;
 
 			steal.require(self.options, function( value ) {
-				
 				self.executed( value );
 			}, function( error, src ) {
 				var abortFlag = self.options.abort,
@@ -383,7 +383,7 @@ h.extend(Resource.prototype, {
 					errorCb.call(self.options);
 				}
 
-				win.clearTimeout && win.clearTimeout(self.completeTimeout)
+				h.win.clearTimeout && h.win.clearTimeout(self.completeTimeout)
 
 				// if abort: false, register the script as loaded, and don't throw
 				if ( abortFlag === false ) {

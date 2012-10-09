@@ -174,7 +174,7 @@ steal.config.shim = function(shims){
 				if(_init){
 					_resource.value = _init.apply(null, args);
 				} else {
-					_resource.value = win[_exports];
+					_resource.value = h.win[_exports];
 				}
 			}
 		})(resource, needs, exports, init)
