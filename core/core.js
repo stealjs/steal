@@ -5,7 +5,7 @@
 // - Deferred - a minimal deferred implementation
 // - Uri - methods for dealing with urls
 // - Api - steal's API
-// - Resource - an object that represents a resource that is loaded and run and has dependencies.
+// - Module - an object that represents a resource that is loaded and run and has dependencies.
 // - Type - a type systems used to load and run different types of resources
 // - Packages -  used to define packages
 // - Extensions - makes steal pre-load a type based on an extension (ex: .coffee)
@@ -47,18 +47,18 @@
 	
 	steal.File = steal.URI = URI;
 
-	var stealResource = new Resource("steal")
-	stealResource.value = steal;
-	stealResource.loaded.resolve();
-	stealResource.run.resolve();
-	stealResource.executing = true;
-	stealResource.completed.resolve();
+	var stealModule = new Module("steal")
+	stealModule.value = steal;
+	stealModule.loaded.resolve();
+	stealModule.run.resolve();
+	stealModule.executing = true;
+	stealModule.completed.resolve();
 
-	resources[stealResource.options.id] = stealResource;
+	resources[stealModule.options.id] = stealModule;
 
 	h.startup();
 	//win.steals = steals;
 	h.win.steal.resources = resources;
-	h.win.Resource = Resource;
+	h.win.Module = Module;
 
 })();

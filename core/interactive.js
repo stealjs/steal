@@ -56,8 +56,8 @@ if ( h.support.interactive ) {
 		}
 		// add to the list of steals for this script tag
 		if ( src ) {
-			interactives[src].push.apply(interactives[src], Resource.pending);
-			Resource.pending = [];
+			interactives[src].push.apply(interactives[src], Module.pending);
+			Module.pending = [];
 		}
 	})
 

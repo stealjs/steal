@@ -57,8 +57,8 @@
 		 * to know when steal starts and finish loading resources and their
 		 * dependencies. Listen to an event like:
 		 * 
-		 *     steal.bind('end', function(rootResource){
-		 *       rootResource.dependencies // the first stolen resources.
+		 *     steal.bind('end', function(rootModule){
+		 *       rootModule.dependencies // the first stolen resources.
 		 *     })
 		 * 
 		 * Steal supports the following events:
@@ -155,7 +155,7 @@
 			// production scripts are loading
 			h.support.interactive = false;
 			h.each(arguments, function( i, arg ) {
-				var stel = Resource.make(arg);
+				var stel = Module.make(arg);
 				stel.loading = stel.executing = true;
 			});
 		},
@@ -179,7 +179,7 @@
 		// called when a script has loaded via production
 		executed: function( name ) {
 			// create the steal, mark it as loading, then as loaded
-			var resource = Resource.make(name);
+			var resource = Module.make(name);
 			resource.loading = resource.executing = true;
 			//convert(stel, "complete");
 			steal.preexecuted(resource);

@@ -47,7 +47,7 @@ h.extend(steal, {
 		// we create one and set it up
 		// to start loading its dependencies (the current pending steals)
 		if (!rootSteal ) {
-			rootSteal = new Resource();
+			rootSteal = new Module();
 			// keep a reference in case it disappears
 			var cur = rootSteal,
 				// runs when a steal is starting
@@ -65,7 +65,7 @@ h.extend(steal, {
 					cur.executed();
 				};
 			// If we are in the browser, wait a
-			// brief timeout before executing the rootResource.
+			// brief timeout before executing the rootModule.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
 			if ( h.win.setTimeout ) {
@@ -88,14 +88,14 @@ h.extend(steal, {
 (function(){
 	var myPending;
 	steal.pushPending = function(){
-		myPending = Resource.pending.slice(0);
-		Resource.pending = [];
+		myPending = Module.pending.slice(0);
+		Module.pending = [];
 		h.each(myPending, function(i, arg){
-			Resource.make(arg);
+			Module.make(arg);
 		})
 	}
 	steal.popPending = function(){
-		Resource.pending = Resource.pending.length ? myPending.concat(null,Resource.pending) : myPending;
+		Module.pending = Module.pending.length ? myPending.concat(null,Module.pending) : myPending;
 	}
 })();
 
@@ -105,7 +105,7 @@ h.extend(steal, {
 		jQ, ready = false;
 
 	// check if jQuery loaded after every script load ...
-	Resource.prototype.executed = h.before(Resource.prototype.executed, function() {
+	Module.prototype.executed = h.before(Module.prototype.executed, function() {
 
 		var $ = h.win.jQuery;
 		if ( $ && "readyWait" in $ ) {
@@ -146,16 +146,16 @@ h.extend(steal, {
 }
 
 
-//Resource.prototype.load = before( Resource.prototype.load, function(){
+//Module.prototype.load = before( Module.prototype.load, function(){
 //	console.log("      load", name(this), this.loading, steal._id, this.id)
 //})
 
-Resource.prototype.executed = before(Resource.prototype.executed, function(){
+Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
 	console.log("      executed", namer, steal._id, this.id)
 })
 
-Resource.prototype.complete = before(Resource.prototype.complete, function(){
+Module.prototype.complete = before(Module.prototype.complete, function(){
 	console.log("      complete", name(this), steal._id, this.id)
 })*/
 

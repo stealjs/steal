@@ -18,7 +18,7 @@ test('steal.config.map', function(){
 			}
 		}
 	})
-	var resource = Resource.make('jquery');
+	var resource = Module.make('jquery');
 	equal(resource.options.id.path, 'foo/bar/jquery/jquery.js');
 })
 
@@ -63,25 +63,25 @@ asyncTest('steal.config.shim', 7, function(){
 			"mocks/arraydeps" : ["mocks/global", "mocks/foobar"]
 		}
 	})
-	var resourceA = Resource.make('mocks/foobar');
+	var resourceA = Module.make('mocks/foobar');
 	resourceA.completed.then(function(){
 		equal(resourceA.value, "foobar")
 		start();
 	})
 	resourceA.execute();
-	var resourceB = Resource.make('mocks/global');
+	var resourceB = Module.make('mocks/global');
 	resourceB.completed.then(function(){
 		equal(resourceB.value, 42)
 		start();
 	})
 	resourceB.execute();
-	var resourceC = Resource.make('mocks/hasdeps');
+	var resourceC = Module.make('mocks/hasdeps');
 	resourceC.completed.then(function(){
 		ok(resourceC.value)
 		start();
 	})
 	resourceC.execute();
-	var resourceD = Resource.make('mocks/hasdeps');
+	var resourceD = Module.make('mocks/hasdeps');
 	resourceD.completed.then(function(){
 		equal(window.gLobal, 42, "Deps were loaded before resource")
 		equal(window.foobar, "baz", "Deps were loaded before resource")

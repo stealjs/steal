@@ -5,7 +5,7 @@
 // - Deferred - a minimal deferred implementation
 // - Uri - methods for dealing with urls
 // - Api - steal's API
-// - Resource - an object that represents a resource that is loaded and run and has dependencies.
+// - Module - an object that represents a resource that is loaded and run and has dependencies.
 // - Type - a type systems used to load and run different types of resources
 // - Packages -  used to define packages
 // - Extensions - makes steal pre-load a type based on an extension (ex: .coffee)
@@ -603,7 +603,7 @@ URI.prototype.insertMapping = function() {
 // a map of resources by resourceID
 var resources = {},
 	id = 0,
-	ignoreableResources = ['stealconfig.js'];
+	ignoreableModules = ['stealconfig.js'];
 // this is for methods on a 'steal instance'.  A file can be in one of a few states:
 // created - the steal instance is created, but we haven't started loading it yet
 //           this happens when thens are used
@@ -611,7 +611,7 @@ var resources = {},
 // loaded - (isLoaded=true) The file has been run, but its dependency files have been completed
 // complete - all of this files dependencies have loaded and completed.
 
-// A Resource is almost anything. It is different from a module
+// A Module is almost anything. It is different from a module
 // as it doesn't represent some unit of functionality, rather
 // it represents a unit that can have other units "within" it
 // as dependencies.  A resource can:
@@ -640,7 +640,7 @@ var resources = {},
 // - completed - a deferred indicating if all of this resources dependencies have
 //   completed
 // - dependencies - an array of dependencies
-var Resource = function( options ) {
+var Module = function( options ) {
 	// an array for dependencies, this is the steal calls this resource makes
 	this.dependencies = [];
 
@@ -661,13 +661,13 @@ var Resource = function( options ) {
 	this.completed = Deferred();
 };
 
-Resource.pending = [];
-// `Resource.make` is used to either create
+Module.pending = [];
+// `Module.make` is used to either create
 // a new resource, or return an existing
 // resource that matches the options.
-Resource.make = function( options ) {
+Module.make = function( options ) {
 	// create the temporary reasource
-	var resource = new Resource(options),
+	var resource = new Module(options),
 		// use `rootSrc` as the definitive ID
 		id = resource.options.id;
 
@@ -683,7 +683,7 @@ Resource.make = function( options ) {
 		} else {
 
 			// Otherwise get the cached resource
-			existingResource = resources[id];
+			existingModule = resources[id];
 			// If options were passed, copy new properties over.
 			// Don't copy src, etc because those have already
 			// been changed to be the right values;
@@ -691,11 +691,11 @@ Resource.make = function( options ) {
 				// extend everything other than id
 				for(var prop in options){
 					if(prop !== "id") {
-						existingResource.options[prop] = options[prop];
+						existingModule.options[prop] = options[prop];
 					}
 				}
 			}
-			return existingResource;
+			return existingModule;
 		}
 	}
 
@@ -706,7 +706,7 @@ Resource.make = function( options ) {
 // use modules b/c they are more fuzzy
 // a module's id stays the same, but a path might change
 // 
-Resource.update = function() {
+Module.update = function() {
 	for ( var rootSrc in resources ) {
 		if (!resources[resources].loaded.isResolved() ) {
 
@@ -714,10 +714,10 @@ Resource.update = function() {
 	}
 };
 
-h.extend(Resource.prototype, {
+h.extend(Module.prototype, {
 	setOptions: function( options ) {
 		var prevOptions = this.options; 
-		// if we have no options, we are the global Resource that
+		// if we have no options, we are the global Module that
 		// contains all other resources.
 		if (!options ) { //global init cur ...
 			this.options = {};
@@ -798,7 +798,7 @@ h.extend(Resource.prototype, {
 				this.options[opt] = prevOptions[opt];
 			}
 		}
-		if(this.options.id && h.inArray(ignoreableResources, this.options.id + "") > - 1){
+		if(this.options.id && h.inArray(ignoreableModules, this.options.id + "") > - 1){
 			this.options.abort = false;
 		}
 	},
@@ -843,8 +843,8 @@ h.extend(Resource.prototype, {
 		// In other browsers, the queue of items to load is
 		// what is in pending
 		if (!myqueue ) {
-			myqueue = Resource.pending.slice(0);
-			Resource.pending = [];
+			myqueue = Module.pending.slice(0);
+			Module.pending = [];
 		}
 
 		// if we have nothing, mark us as complete
@@ -873,10 +873,10 @@ h.extend(Resource.prototype, {
 			}
 			
 			// make a steal object
-			var stel = Resource.make(item);
+			var stel = Module.make(item);
 			if ( packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
 				steal.has(""+stel.options.id);
-				stel = Resource.make(packHash[""+stel.options.id]);
+				stel = Module.make(packHash[""+stel.options.id]);
 			}
 			// has to happen before 'needs' for when reversed...
 			stealInstances.push(stel);
@@ -925,7 +925,7 @@ h.extend(Resource.prototype, {
 			// if there are needs, this can not be part of the "firstSet"
 			h.each(resource.options.needs || [], function( i, raw ) {
 				
-				var need = Resource.make(raw);
+				var need = Module.make(raw);
 				// add the need to the resource's dependencies
 				h.uniquePush(resource.needsDependencies, need);
 				waitsOn.push(need);
@@ -1004,8 +1004,8 @@ h.extend(Resource.prototype, {
 });
 
 // =============================== ERROR HANDLING ===============================
-h.extend(Resource.prototype, {
-	load: h.after(Resource.prototype.load, function( stel ) {
+h.extend(Module.prototype, {
+	load: h.after(Module.prototype.load, function( stel ) {
 		var self = this;
 		if ( h.doc && !self.completed && !self.completeTimeout && !steal.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
 			self.completeTimeout = setTimeout(function() {
@@ -1013,14 +1013,14 @@ h.extend(Resource.prototype, {
 			}, 5000);
 		}
 	}),
-	complete: h.after(Resource.prototype.complete, function() {
+	complete: h.after(Module.prototype.complete, function() {
 		this.completeTimeout && clearTimeout(this.completeTimeout)
 	}),
 
 
 	// if we're about to mark a file as executed, mark its "has" array files as
 	// executed also
-	executed: h.before(Resource.prototype.executed, function() {
+	executed: h.before(Module.prototype.executed, function() {
 		if ( this.options.has ) {
 			this.loadHas();
 		}
@@ -1055,7 +1055,7 @@ h.extend(Resource.prototype, {
 // because one file has JS and another does not?
 // we could check if it matches something with .js because foo.less.js SHOULD
 // be rare
-Resource.prototype.execute = h.before(Resource.prototype.execute, function() {
+Module.prototype.execute = h.before(Module.prototype.execute, function() {
 	var raw = this.options;
 
 	// if it's a string, get it's extension and check if
@@ -1086,7 +1086,7 @@ Resource.prototype.execute = h.before(Resource.prototype.execute, function() {
 //
 // after a steal is created, if its been loaded
 // already and has a "has", mark those files as loaded
-Resource.make = h.after(Resource.make, function( stel ) {
+Module.make = h.after(Module.make, function( stel ) {
 	// if we have things
 	if ( stel.options.has ) {
 		// if we have loaded this already (and we are adding has's)
@@ -1106,7 +1106,7 @@ function steal() {
 	// convert arguments into an array
 	var args = h.map(arguments);
 	if ( args.length ) {
-		Resource.pending.push.apply(Resource.pending, args);
+		Module.pending.push.apply(Module.pending, args);
 		// steal.after is called everytime steal is called
 		// it kicks off loading these files
 		steal.after(args);
@@ -1275,7 +1275,7 @@ steal.config.root("");
 
 steal.config.shim = function(shims){
 	for(var id in shims){
-		var resource = Resource.make(id);
+		var resource = Module.make(id);
 		if(typeof shims[id] === "object"){
 			var needs   = shims[id].deps || []
 			var exports = shims[id].exports;
@@ -1289,7 +1289,7 @@ steal.config.shim = function(shims){
 		resource.exports = (function(_resource, _needs, _exports, _init){
 			return function(){
 				var args = _needs.map(function(id){
-					return Resource.make(id).value;
+					return Module.make(id).value;
 				});
 				if(_init){
 					_resource.value = _init.apply(null, args);
@@ -1603,8 +1603,8 @@ define("require", function(){
 		 * to know when steal starts and finish loading resources and their
 		 * dependencies. Listen to an event like:
 		 * 
-		 *     steal.bind('end', function(rootResource){
-		 *       rootResource.dependencies // the first stolen resources.
+		 *     steal.bind('end', function(rootModule){
+		 *       rootModule.dependencies // the first stolen resources.
 		 *     })
 		 * 
 		 * Steal supports the following events:
@@ -1701,7 +1701,7 @@ define("require", function(){
 			// production scripts are loading
 			h.support.interactive = false;
 			h.each(arguments, function( i, arg ) {
-				var stel = Resource.make(arg);
+				var stel = Module.make(arg);
 				stel.loading = stel.executing = true;
 			});
 		},
@@ -1725,7 +1725,7 @@ define("require", function(){
 		// called when a script has loaded via production
 		executed: function( name ) {
 			// create the steal, mark it as loading, then as loaded
-			var resource = Resource.make(name);
+			var resource = Module.make(name);
 			resource.loading = resource.executing = true;
 			//convert(stel, "complete");
 			steal.preexecuted(resource);
@@ -2122,7 +2122,7 @@ h.extend(steal, {
 		// we create one and set it up
 		// to start loading its dependencies (the current pending steals)
 		if (!rootSteal ) {
-			rootSteal = new Resource();
+			rootSteal = new Module();
 			// keep a reference in case it disappears
 			var cur = rootSteal,
 				// runs when a steal is starting
@@ -2140,7 +2140,7 @@ h.extend(steal, {
 					cur.executed();
 				};
 			// If we are in the browser, wait a
-			// brief timeout before executing the rootResource.
+			// brief timeout before executing the rootModule.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
 			if ( h.win.setTimeout ) {
@@ -2163,14 +2163,14 @@ h.extend(steal, {
 (function(){
 	var myPending;
 	steal.pushPending = function(){
-		myPending = Resource.pending.slice(0);
-		Resource.pending = [];
+		myPending = Module.pending.slice(0);
+		Module.pending = [];
 		h.each(myPending, function(i, arg){
-			Resource.make(arg);
+			Module.make(arg);
 		})
 	}
 	steal.popPending = function(){
-		Resource.pending = Resource.pending.length ? myPending.concat(null,Resource.pending) : myPending;
+		Module.pending = Module.pending.length ? myPending.concat(null,Module.pending) : myPending;
 	}
 })();
 
@@ -2180,7 +2180,7 @@ h.extend(steal, {
 		jQ, ready = false;
 
 	// check if jQuery loaded after every script load ...
-	Resource.prototype.executed = h.before(Resource.prototype.executed, function() {
+	Module.prototype.executed = h.before(Module.prototype.executed, function() {
 
 		var $ = h.win.jQuery;
 		if ( $ && "readyWait" in $ ) {
@@ -2221,16 +2221,16 @@ h.extend(steal, {
 }
 
 
-//Resource.prototype.load = before( Resource.prototype.load, function(){
+//Module.prototype.load = before( Module.prototype.load, function(){
 //	console.log("      load", name(this), this.loading, steal._id, this.id)
 //})
 
-Resource.prototype.executed = before(Resource.prototype.executed, function(){
+Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
 	console.log("      executed", namer, steal._id, this.id)
 })
 
-Resource.prototype.complete = before(Resource.prototype.complete, function(){
+Module.prototype.complete = before(Module.prototype.complete, function(){
 	console.log("      complete", name(this), steal._id, this.id)
 })*/
 
@@ -2420,8 +2420,8 @@ if ( h.support.interactive ) {
 		}
 		// add to the list of steals for this script tag
 		if ( src ) {
-			interactives[src].push.apply(interactives[src], Resource.pending);
-			Resource.pending = [];
+			interactives[src].push.apply(interactives[src], Module.pending);
+			Module.pending = [];
 		}
 	})
 
@@ -2448,18 +2448,18 @@ if ( h.support.interactive ) {
 	
 	steal.File = steal.URI = URI;
 
-	var stealResource = new Resource("steal")
-	stealResource.value = steal;
-	stealResource.loaded.resolve();
-	stealResource.run.resolve();
-	stealResource.executing = true;
-	stealResource.completed.resolve();
+	var stealModule = new Module("steal")
+	stealModule.value = steal;
+	stealModule.loaded.resolve();
+	stealModule.run.resolve();
+	stealModule.executing = true;
+	stealModule.completed.resolve();
 
-	resources[stealResource.options.id] = stealResource;
+	resources[stealModule.options.id] = stealModule;
 
 	h.startup();
 	//win.steals = steals;
 	h.win.steal.resources = resources;
-	h.win.Resource = Resource;
+	h.win.Module = Module;
 
 })();

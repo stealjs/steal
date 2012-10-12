@@ -4,7 +4,7 @@ function steal() {
 	// convert arguments into an array
 	var args = h.map(arguments);
 	if ( args.length ) {
-		Resource.pending.push.apply(Resource.pending, args);
+		Module.pending.push.apply(Module.pending, args);
 		// steal.after is called everytime steal is called
 		// it kicks off loading these files
 		steal.after(args);

@@ -155,7 +155,7 @@ steal.config.root("");
 
 steal.config.shim = function(shims){
 	for(var id in shims){
-		var resource = Resource.make(id);
+		var resource = Module.make(id);
 		if(typeof shims[id] === "object"){
 			var needs   = shims[id].deps || []
 			var exports = shims[id].exports;
@@ -169,7 +169,7 @@ steal.config.shim = function(shims){
 		resource.exports = (function(_resource, _needs, _exports, _init){
 			return function(){
 				var args = _needs.map(function(id){
-					return Resource.make(id).value;
+					return Module.make(id).value;
 				});
 				if(_init){
 					_resource.value = _init.apply(null, args);
