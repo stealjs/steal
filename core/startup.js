@@ -88,14 +88,14 @@ h.extend(steal, {
 (function(){
 	var myPending;
 	steal.pushPending = function(){
-		myPending = pending.slice(0);
-		pending = [];
+		myPending = Resource.pending.slice(0);
+		Resource.pending = [];
 		h.each(myPending, function(i, arg){
 			Resource.make(arg);
 		})
 	}
 	steal.popPending = function(){
-		pending = pending.length ? myPending.concat(null,pending) : myPending;
+		Resource.pending = Resource.pending.length ? myPending.concat(null,Resource.pending) : myPending;
 	}
 })();
 

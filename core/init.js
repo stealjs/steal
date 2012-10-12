@@ -4,7 +4,7 @@ function steal() {
 	// convert arguments into an array
 	var args = h.map(arguments);
 	if ( args.length ) {
-		pending.push.apply(pending, args);
+		Resource.pending.push.apply(Resource.pending, args);
 		// steal.after is called everytime steal is called
 		// it kicks off loading these files
 		steal.after(args);
@@ -14,5 +14,4 @@ function steal() {
 };
 steal._id = Math.floor(1000 * Math.random());
 
-var pending = [],
-	s = steal;
+var s = steal;

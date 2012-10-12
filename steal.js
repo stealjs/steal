@@ -22,8 +22,6 @@
 	// ## Helpers ##
 // The following are a list of helper methods used internally to steal
 
-
-
 var h = {
 // check that we have a document,
 	win : (function(){ return this }).call(null),
@@ -39,7 +37,10 @@ var h = {
 			}
 		} else {
 			for ( i in o ) {
-				cb.call(o[i], i, o[i], o)
+				if(o.hasOwnProperty(i)){
+					cb.call(o[i], i, o[i], o)
+				}
+				
 			}
 		}
 		return o;
@@ -97,7 +98,9 @@ var h = {
 	extend: function( d, s ) {
 		// only extend if we have something to extend
 		s && h.each(s, function( k ) {
-			d[k] = s[k];
+			if(s.hasOwnProperty(k)){
+				d[k] = s[k];
+			}
 		});
 		return d;
 	},
@@ -211,6 +214,14 @@ var h = {
 			}
 		});
 		return script;
+	},
+	inArray : function( arr, val ){
+		for(var i = 0; i < arr.length; i++){
+			if(arr[i] === val){
+				return i;
+			}
+		}
+		return -1;
 	}
 }
 
@@ -237,25 +248,6 @@ h.support = {
 var requestFactory = function() {
 	return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 };
-
-	// create the steal function now to use as a namespace.
-
-function steal() {
-	// convert arguments into an array
-	var args = h.map(arguments);
-	if ( args.length ) {
-		pending.push.apply(pending, args);
-		// steal.after is called everytime steal is called
-		// it kicks off loading these files
-		steal.after(args);
-		// return steal for chaining
-	}
-	return steal;
-};
-steal._id = Math.floor(1000 * Math.random());
-
-var pending = [],
-	s = steal;
 	
 	// ## Deferred .63
 var Deferred = function( func ) {
@@ -604,13 +596,14 @@ URI.prototype.insertMapping = function() {
 };
 
 // temp add steal.File for backward compat
-steal.File = steal.URI = URI;
+
 // --- END URI
 
 	// ============ RESOURCE ================
 // a map of resources by resourceID
 var resources = {},
-	id = 0;
+	id = 0,
+	ignoreableResources = ['stealconfig.js'];
 // this is for methods on a 'steal instance'.  A file can be in one of a few states:
 // created - the steal instance is created, but we haven't started loading it yet
 //           this happens when thens are used
@@ -667,6 +660,8 @@ var Resource = function( options ) {
 	this.run = Deferred();
 	this.completed = Deferred();
 };
+
+Resource.pending = [];
 // `Resource.make` is used to either create
 // a new resource, or return an existing
 // resource that matches the options.
@@ -803,6 +798,9 @@ h.extend(Resource.prototype, {
 				this.options[opt] = prevOptions[opt];
 			}
 		}
+		if(this.options.id && h.inArray(ignoreableResources, this.options.id + "") > - 1){
+			this.options.abort = false;
+		}
 	},
 	
 	// Calling complete indicates that all dependencies have
@@ -845,8 +843,8 @@ h.extend(Resource.prototype, {
 		// In other browsers, the queue of items to load is
 		// what is in pending
 		if (!myqueue ) {
-			myqueue = pending.slice(0);
-			pending = [];
+			myqueue = Resource.pending.slice(0);
+			Resource.pending = [];
 		}
 
 		// if we have nothing, mark us as complete
@@ -1101,6 +1099,24 @@ Resource.make = h.after(Resource.make, function( stel ) {
 	}
 	return stel;
 }, true);
+
+	// create the steal function now to use as a namespace.
+
+function steal() {
+	// convert arguments into an array
+	var args = h.map(arguments);
+	if ( args.length ) {
+		Resource.pending.push.apply(Resource.pending, args);
+		// steal.after is called everytime steal is called
+		// it kicks off loading these files
+		steal.after(args);
+		// return steal for chaining
+	}
+	return steal;
+};
+steal._id = Math.floor(1000 * Math.random());
+
+var s = steal;
 
 	// ## CONFIG ##
 	
@@ -2147,14 +2163,14 @@ h.extend(steal, {
 (function(){
 	var myPending;
 	steal.pushPending = function(){
-		myPending = pending.slice(0);
-		pending = [];
+		myPending = Resource.pending.slice(0);
+		Resource.pending = [];
 		h.each(myPending, function(i, arg){
 			Resource.make(arg);
 		})
 	}
 	steal.popPending = function(){
-		pending = pending.length ? myPending.concat(null,pending) : myPending;
+		Resource.pending = Resource.pending.length ? myPending.concat(null,Resource.pending) : myPending;
 	}
 })();
 
@@ -2404,8 +2420,8 @@ if ( h.support.interactive ) {
 		}
 		// add to the list of steals for this script tag
 		if ( src ) {
-			interactives[src].push.apply(interactives[src], pending);
-			pending = [];
+			interactives[src].push.apply(interactives[src], Resource.pending);
+			Resource.pending = [];
 		}
 	})
 
@@ -2427,7 +2443,11 @@ if ( h.support.interactive ) {
 
 	})
 }
+
+
 	
+	steal.File = steal.URI = URI;
+
 	var stealResource = new Resource("steal")
 	stealResource.value = steal;
 	stealResource.loaded.resolve();

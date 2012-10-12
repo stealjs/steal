@@ -20,14 +20,14 @@
 (function( undefined ) {
 
 	/*# helpers.js #*/
-
-	/*# init.js #*/
 	
 	/*# deferred.js #*/
 
 	/*# uri.js #*/
 
 	/*# resource.js #*/
+
+	/*# init.js #*/
 
 	/*# config.js #*/
 	
@@ -42,7 +42,11 @@
 	/*# startup.js #*/
 
 	/*# interactive.js #*/
+
+
 	
+	steal.File = steal.URI = URI;
+
 	var stealResource = new Resource("steal")
 	stealResource.value = steal;
 	stealResource.loaded.resolve();

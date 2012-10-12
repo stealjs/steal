@@ -1,7 +1,8 @@
 // ============ RESOURCE ================
 // a map of resources by resourceID
 var resources = {},
-	id = 0;
+	id = 0,
+	ignoreableResources = ['stealconfig.js'];
 // this is for methods on a 'steal instance'.  A file can be in one of a few states:
 // created - the steal instance is created, but we haven't started loading it yet
 //           this happens when thens are used
@@ -58,6 +59,8 @@ var Resource = function( options ) {
 	this.run = Deferred();
 	this.completed = Deferred();
 };
+
+Resource.pending = [];
 // `Resource.make` is used to either create
 // a new resource, or return an existing
 // resource that matches the options.
@@ -194,6 +197,9 @@ h.extend(Resource.prototype, {
 				this.options[opt] = prevOptions[opt];
 			}
 		}
+		if(this.options.id && h.inArray(ignoreableResources, this.options.id + "") > - 1){
+			this.options.abort = false;
+		}
 	},
 	
 	// Calling complete indicates that all dependencies have
@@ -236,8 +242,8 @@ h.extend(Resource.prototype, {
 		// In other browsers, the queue of items to load is
 		// what is in pending
 		if (!myqueue ) {
-			myqueue = pending.slice(0);
-			pending = [];
+			myqueue = Resource.pending.slice(0);
+			Resource.pending = [];
 		}
 
 		// if we have nothing, mark us as complete

@@ -1,8 +1,6 @@
 // ## Helpers ##
 // The following are a list of helper methods used internally to steal
 
-
-
 var h = {
 // check that we have a document,
 	win : (function(){ return this }).call(null),
@@ -18,7 +16,10 @@ var h = {
 			}
 		} else {
 			for ( i in o ) {
-				cb.call(o[i], i, o[i], o)
+				if(o.hasOwnProperty(i)){
+					cb.call(o[i], i, o[i], o)
+				}
+				
 			}
 		}
 		return o;
@@ -76,7 +77,9 @@ var h = {
 	extend: function( d, s ) {
 		// only extend if we have something to extend
 		s && h.each(s, function( k ) {
-			d[k] = s[k];
+			if(s.hasOwnProperty(k)){
+				d[k] = s[k];
+			}
 		});
 		return d;
 	},
@@ -190,6 +193,14 @@ var h = {
 			}
 		});
 		return script;
+	},
+	inArray : function( arr, val ){
+		for(var i = 0; i < arr.length; i++){
+			if(arr[i] === val){
+				return i;
+			}
+		}
+		return -1;
 	}
 }
 
