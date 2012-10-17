@@ -184,15 +184,32 @@ steal.config({
 				script.text = options.text;
 
 			} else {
+				var src = options.src; //steal.idToUri( options.id );
+				if(script.readyState){
+					script.event = "onclick";
+					script.id = script.htmlFor = "ie-" + h.uuid();
+					script.onreadystatechange = function(){
+						if (stateCheck.test(script.readyState)  ) {
+							if(script.onclick){
+								var scriptText = script.onclick + "";
+								scriptText = scriptText.slice(scriptText.indexOf('{') + 1, -1);
+								eval(scriptText);
+								success();
+							} else {
+								error();
+							}
+						}
+					}
+				} else {
+					script.onload = callback;
+					// error handling doesn't work on firefox on the filesystem
+					if ( h.support.error && error && src.protocol !== "file" ) {
+						script.onerror = error;
+					}
+				}
 
 				// listen to loaded
-				script.onload = script.onreadystatechange = callback;
-
-				var src = options.src; //steal.idToUri( options.id );
-				// error handling doesn't work on firefox on the filesystem
-				if ( h.support.error && error && src.protocol !== "file" ) {
-					script.onerror = error;
-				}
+				
 				script.src = "" + src;
 				//script.src = options.src = addSuffix(options.src);
 				//script.async = false;
