@@ -168,8 +168,9 @@ steal.config.shim = function(shims){
 		})(resource, needs);
 		resource.exports = (function(_resource, _needs, _exports, _init){
 			return function(){
-				var args = _needs.map(function(id){
-					return Module.make(id).value;
+				var args = [];
+				h.each(_needs, function(i, id){
+					args.push(Module.make(id).value);
 				});
 				if(_init){
 					_resource.value = _init.apply(null, args);

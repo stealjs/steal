@@ -237,7 +237,23 @@ h.extend(Module.prototype, {
 		// It in interactives because you can't use onload to know
 		// which script is executing.
 		if ( h.support.interactive && src ) {
-			myqueue = interactives[src];
+			/*myqueue = interactives[src];*/
+			if(interactives[src]){
+				myqueue = [];
+				if(interactives.length){
+					for(var i = 0; i < interactives.length; i++){
+						if(interactives[i] !== this.orig){
+							myqueue.push(interactives[i])
+						}
+					}
+				} else {
+					if(interactives[src] !== this.orig){
+						myqueue = interactives[src];
+						delete interactives[src];
+					}
+				}
+				
+			}
 		}
 		// In other browsers, the queue of items to load is
 		// what is in pending

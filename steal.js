@@ -838,7 +838,23 @@ h.extend(Module.prototype, {
 		// It in interactives because you can't use onload to know
 		// which script is executing.
 		if ( h.support.interactive && src ) {
-			myqueue = interactives[src];
+			/*myqueue = interactives[src];*/
+			if(interactives[src]){
+				myqueue = [];
+				if(interactives.length){
+					for(var i = 0; i < interactives.length; i++){
+						if(interactives[i] !== this.orig){
+							myqueue.push(interactives[i])
+						}
+					}
+				} else {
+					if(interactives[src] !== this.orig){
+						myqueue = interactives[src];
+						delete interactives[src];
+					}
+				}
+				
+			}
 		}
 		// In other browsers, the queue of items to load is
 		// what is in pending
@@ -1288,8 +1304,9 @@ steal.config.shim = function(shims){
 		})(resource, needs);
 		resource.exports = (function(_resource, _needs, _exports, _init){
 			return function(){
-				var args = _needs.map(function(id){
-					return Module.make(id).value;
+				var args = [];
+				h.each(_needs, function(i, id){
+					args.push(Module.make(id).value);
 				});
 				if(_init){
 					_resource.value = _init.apply(null, args);

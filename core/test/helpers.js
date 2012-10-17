@@ -35,7 +35,7 @@ test('endsInSlashRegex', function(){
 
 test('createElement', function(){
 	var el = h.createElement('div');
-	ok(h.isFn(el.appendChild))
+	ok((typeof el.nodeType !== 'undefined'))
 	equal(el.nodeName, 'DIV');
 })
 
