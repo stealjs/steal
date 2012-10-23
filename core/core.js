@@ -25,7 +25,7 @@
 
 	/*# uri.js #*/
 
-	/*# resource.js #*/
+	/*# module.js #*/
 
 	/*# init.js #*/
 

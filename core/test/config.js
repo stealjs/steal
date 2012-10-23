@@ -18,8 +18,8 @@ test('steal.config.map', function(){
 			}
 		}
 	})
-	var resource = Module.make('jquery');
-	equal(resource.options.id.path, 'foo/bar/jquery/jquery.js');
+	var module = Module.make('jquery');
+	equal(module.options.id.path, 'foo/bar/jquery/jquery.js');
 })
 
 test('steal.getScriptOptions', function(){
@@ -63,29 +63,29 @@ asyncTest('steal.config.shim', 7, function(){
 			"mocks/arraydeps" : ["mocks/global", "mocks/foobar"]
 		}
 	})
-	var resourceA = Module.make('mocks/foobar');
-	resourceA.completed.then(function(){
-		equal(resourceA.value, "foobar")
+	var moduleA = Module.make('mocks/foobar');
+	moduleA.completed.then(function(){
+		equal(moduleA.value, "foobar")
 		start();
 	})
-	resourceA.execute();
-	var resourceB = Module.make('mocks/global');
-	resourceB.completed.then(function(){
-		equal(resourceB.value, 42)
+	moduleA.execute();
+	var moduleB = Module.make('mocks/global');
+	moduleB.completed.then(function(){
+		equal(moduleB.value, 42)
 		start();
 	})
-	resourceB.execute();
-	var resourceC = Module.make('mocks/hasdeps');
-	resourceC.completed.then(function(){
-		ok(resourceC.value)
+	moduleB.execute();
+	var moduleC = Module.make('mocks/hasdeps');
+	moduleC.completed.then(function(){
+		ok(moduleC.value)
 		start();
 	})
-	resourceC.execute();
-	var resourceD = Module.make('mocks/hasdeps');
-	resourceD.completed.then(function(){
-		equal(window.gLobal, 42, "Deps were loaded before resource")
-		equal(window.foobar, "baz", "Deps were loaded before resource")
+	moduleC.execute();
+	var moduleD = Module.make('mocks/hasdeps');
+	moduleD.completed.then(function(){
+		equal(window.gLobal, 42, "Deps were loaded before module")
+		equal(window.foobar, "baz", "Deps were loaded before module")
 		start();
 	})
-	resourceD.execute();
+	moduleD.execute();
 })

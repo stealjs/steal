@@ -2152,12 +2152,12 @@ h.extend(steal, {
 				test: new RegExp("^(\/?" + from + ")([/.]|$)"),
 				path: to
 			};
-			h.each(resources, function( id, resource ) {
-				if ( resource.options.type != "fn" ) {
+			h.each(modules, function( id, module ) {
+				if ( module.options.type != "fn" ) {
 					// TODO terrible
-					var buildType = resource.options.buildType;
-					resource.setOptions(resource.orig);
-					resource.options.buildType = buildType;
+					var buildType = module.options.buildType;
+					module.setOptions(module.orig);
+					module.options.buildType = buildType;
 				}
 			})
 		} else { // its an object

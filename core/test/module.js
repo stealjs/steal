@@ -1,6 +1,6 @@
 module('Module')
 
-test('Module.make always returns same resource for the same id', function(){
+test('Module.make always returns same module for the same id', function(){
 	var res = Module.make('jquery');
 	equal(res, Module.make('jquery'))
 })
@@ -12,7 +12,7 @@ test('loaded, run and completed are deferreds', function(){
 	ok(TH.isDeferred(res.completed))
 })
 
-test('resource options will be extended if called twice for the same id', function(){
+test('module options will be extended if called twice for the same id', function(){
 	var res = Module.make('jquery')
 	var res2 = Module.make({id: 'jquery', foo: 'bar'})
 	equal(res.options.foo, 'bar')
