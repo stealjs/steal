@@ -1,5 +1,5 @@
 // ### TYPES ##
-var types = stealConfig.types;
+var types = stealConfiguration().types;
 /**
  * Registers a type.  You define the type of the file, the basic type it
  * converts to, and a conversion function where you convert the original file
@@ -19,9 +19,9 @@ var types = stealConfig.types;
  *
  *     REQUIRED FOO
  *
- * To define this type, you'd call steal.type like this:
+ * To define this type, you'd call st.type like this:
  *
- *     steal.type("foo js", function(options, original, success, error){
+ *     st.type("foo js", function(options, original, success, error){
  *       var parts = options.text.split(" ")
  *       options.text = parts[0]+"='"+parts[1]+"'";
  *       success();
@@ -35,7 +35,7 @@ var types = stealConfig.types;
  * converting [http://jashkenas.github.com/coffee-script/ coffeescript]
  * to JavaScript:
  *
- *     steal.type("coffee js", function(options, original, success, error){
+ *     st.type("coffee js", function(options, original, success, error){
  *       options.text = CoffeeScript.compile(options.text);
  *       success();
  *     });
@@ -48,7 +48,7 @@ var types = stealConfig.types;
  * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can
  * be converted to CSS:
  *
- *     steal.type("less css", function(options, original, success, error){
+ *     st.type("less css", function(options, original, success, error){
  *       new (less.Parser)({
  *         optimization: less.optimization,
  *         paths: []
@@ -60,7 +60,7 @@ var types = stealConfig.types;
  *
  * This simple type system could be used to convert any file type to be used
  * in your JavaScript app.  For example, [http://fdik.org/yml/ yml] could be
- * used for configuration.  jQueryMX uses steal.type to support JS templates,
+ * used for configuration.  jQueryMX uses st.type to support JS templates,
  * such as EJS, TMPL, and others.
  *
  * @param {String} type A string that defines the new type being defined and
@@ -85,14 +85,14 @@ var types = stealConfig.types;
  * - __error__ - a method called if the conversion fails or the file doesn't
  *   exist
  */
-steal.config.types = function(types){
-	h.each(types, steal.type)
+stealConfiguration.types = function(types){
+	h.each(types, st.type)
 };
 
 
 
 
-steal.
+st.
 /**
  * Called for every file that is loaded.  It sets up a string of methods called
  * for each type in the conversion chain and calls each type one by one.
@@ -112,7 +112,7 @@ steal.
  */
 require = function( options, success, error ) {
 	// add the src option
-	options.src = options.idToUri ? options.idToUri(options.id) : steal.idToUri(options.id);
+	options.src = options.idToUri ? options.idToUri(options.id) : st.idToUri(options.id);
 
 	// get the type
 	var type = types[options.type],
@@ -166,7 +166,7 @@ var cssCount = 0,
 	lastSheet, lastSheetOptions;
 
 // Apply all the basic types
-steal.config({
+stealConfiguration({
 	types:{
 		"js": function( options, success, error ) {
 			// create a script tag
@@ -184,7 +184,7 @@ steal.config({
 				script.text = options.text;
 
 			} else {
-				var src = options.src; //steal.idToUri( options.id );
+				var src = options.src; //st.idToUri( options.id );
 				if(script.readyState){
 					script.event = "onclick";
 					script.id = script.htmlFor = "ie-" + h.uuid();

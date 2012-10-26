@@ -106,7 +106,7 @@ var h = {
 	// Aspect oriented programming helper methods are used to
 	// weave in functionality into steal's API.
 	// calls `before` before `f` is called.
-	//     steal.complete = before(steal.complete, f)
+	//     st.complete = before(st.complete, f)
 	// `changeArgs=true` makes before return the same args
 	before: function(f, before, changeArgs) {
 		return changeArgs ?

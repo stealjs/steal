@@ -5,7 +5,7 @@
 	var events = {}, 
 		page;
 
-	h.extend(steal, {
+	h.extend(st, {
 		each: h.each,
 		extend: h.extend,
 		Deferred: Deferred,
@@ -24,14 +24,14 @@
 					options: options
 				}
 			}
-			options.id = options.toId ? options.toId(options.id, curId) : steal.id(options.id, curId);
+			options.id = options.toId ? options.toId(options.id, curId) : st.id(options.id, curId);
 			// set the ext
 			options.ext = options.id.ext();
 			
 			// Check if it's a configured needs
-			var configedExt = stealConfig.ext[options.ext];
+			var configedExt = stealConfiguration().ext[options.ext];
 			// if we have something, but it's not a type
-			if ( configedExt && ! stealConfig.types[configedExt] ) {
+			if ( configedExt && ! stealConfiguration().types[configedExt] ) {
 				if (!options.needs ) {
 					options.needs = [];
 				}
@@ -49,15 +49,15 @@
 		then: function() {
 			var args = h.map(arguments);
 			args.unshift(null)
-			return steal.apply(h.win, args);
+			return st.apply(h.win, args);
 		},
 		/**
-		 * `steal.bind( event, handler(eventData...) )` listens to 
-		 * events on steal. Typically these are used by various build processes
+		 * `st.bind( event, handler(eventData...) )` listens to 
+		 * events on st. Typically these are used by various build processes
 		 * to know when steal starts and finish loading resources and their
 		 * dependencies. Listen to an event like:
 		 * 
-		 *     steal.bind('end', function(rootModule){
+		 *     st.bind('end', function(rootModule){
 		 *       rootModule.dependencies // the first stolen resources.
 		 *     })
 		 * 
@@ -99,26 +99,26 @@
 			if (!events[event] ) {
 				events[event] = []
 			}
-			var special = steal.events[event]
+			var special = st.events[event]
 			if ( special && special.add ) {
 				listener = special.add(listener);
 			}
 			listener && events[event].push(listener);
-			return steal;
+			return st;
 		},
 		/**
-		 * `steal.one(eventName, handler(eventArgs...) )` works just like
-		 * [steal.bind] but immediately unbinds after `handler` is called.
+		 * `st.one(eventName, handler(eventArgs...) )` works just like
+		 * [st.bind] but immediately unbinds after `handler` is called.
 		 */
 		one: function( event, listener ) {
-			return steal.bind(event, function() {
+			return st.bind(event, function() {
 				listener.apply(this, arguments);
-				steal.unbind(event, arguments.callee);
+				st.unbind(event, arguments.callee);
 			});
 		},
 		events: {},
 		/**
-		 * `steal.unbind( eventName, handler )` removes an event listener on steal.
+		 * `st.unbind( eventName, handler )` removes an event listener on st.
 		 * @param {String} event
 		 * @param {Function} listener
 		 */
@@ -146,7 +146,7 @@
 		 * Creates resources and marks them as loading so steal doesn't try 
 		 * to load them. 
 		 * 
-		 *      steal.has("foo/bar.js","zed/car.js");
+		 *      st.has("foo/bar.js","zed/car.js");
 		 * 
 		 * This is used when a file has other resources in it. 
 		 */
@@ -167,11 +167,11 @@
 		 * Signals that a resource's JS code has been run.  This is used
 		 * when a file has other resources in it.
 		 * 
-		 *     steal.has("foo/bar.js");
+		 *     st.has("foo/bar.js");
 		 * 
 		 *     //start code for foo/bar.js 
 		 *     steal("zed/car.js", function(){ ... });
-		 *     steal.executed("foo/bar.js");
+		 *     st.executed("foo/bar.js");
 		 * 
 		 * When a resource is executed, its dependent resources are loaded and eventually 
 		 * executed.
@@ -182,9 +182,9 @@
 			var resource = Module.make(name);
 			resource.loading = resource.executing = true;
 			//convert(stel, "complete");
-			steal.preexecuted(resource);
+			st.preexecuted(resource);
 			resource.executed()
-			return steal;
+			return st;
 		},
 		type: function( type, cb ) {
 			var typs = type.split(" ");

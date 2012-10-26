@@ -1,44 +1,44 @@
 module("AMD");
 
-test('steal.id', function(){
-	equal(steal.id("foo/bar") + "", "foo/bar/bar.js");
-	equal(steal.id("./baz", "foo/bar") + "", "foo/baz.js");
-	equal(steal.id("../baz", "foo/bar") + "", "baz.js");
-	steal.config({
+test('st.id', function(){
+	equal(st.id("foo/bar") + "", "foo/bar/bar.js");
+	equal(st.id("./baz", "foo/bar") + "", "foo/baz.js");
+	equal(st.id("../baz", "foo/bar") + "", "baz.js");
+	st.config({
 		map: {
 			'*' : {
 				"foo/bar": "http://localhost/foo/foo/bar"
 			}
 		}
 	})
-	equal(steal.id("foo/bar") + "", "http://localhost/foo/foo/bar/bar.js");
+	equal(st.id("foo/bar") + "", "http://localhost/foo/foo/bar/bar.js");
 });
 
-test('steal.amdToId', function(){
-	steal.config({
+test('st.amdToId', function(){
+	st.config({
 		map: {
 			'*' : {
 				"http://localhost/foo/foo/bar": "foo/bar"
 			}
 		}
 	})
-	equal(steal.amdToId("http://localhost/foo/foo/bar") + "", "foo/bar")
+	equal(st.amdToId("http://localhost/foo/foo/bar") + "", "foo/bar")
 });
 
-test('steal.idToUri', function(){
-	steal.config({
+test('st.idToUri', function(){
+	st.config({
 		paths: {
 			"foo/baz" : "http://localhost/foo/baz/baz.js"
 		}
 	})
-	equal(steal.idToUri("foo/baz"), "http://localhost/foo/baz/baz.js")
+	equal(st.idToUri("foo/baz"), "http://localhost/foo/baz/baz.js")
 });
 
-test('steal.amdIdToUri', function(){
-	steal.config({
+test('st.amdIdToUri', function(){
+	st.config({
 		paths: {
 			"baz/foo/" : "http://localhost/foo/baz/baz.js"
 		}
 	})
-	equal(steal.amdIdToUri("baz/foo/"), "http://localhost/foo/baz/baz.js")
+	equal(st.amdIdToUri("baz/foo/"), "http://localhost/foo/baz/baz.js")
 });

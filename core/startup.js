@@ -6,9 +6,9 @@ var rootSteal = false;
 // and, it helps if we use a 'collection' steal because of it's natural
 // use for going through the pending queue
 //
-h.extend(steal, {
+h.extend(st, {
 	// modifies src
-/*makeOptions : after(steal.makeOptions,function(raw){
+/*makeOptions : after(st.makeOptions,function(raw){
 		raw.src = URI.root().join(raw.rootSrc = URI( raw.rootSrc ).insertMapping());
 	}),*/
 
@@ -24,7 +24,7 @@ h.extend(steal, {
 	 */
 	map: function( from, to ) {
 		if ( h.isString(from) ) {
-			steal.mappings[from] = {
+			st.mappings[from] = {
 				test: new RegExp("^(\/?" + from + ")([/.]|$)"),
 				path: to
 			};
@@ -37,7 +37,7 @@ h.extend(steal, {
 				}
 			})
 		} else { // its an object
-			h.each(from, steal.map);
+			h.each(from, st.map);
 		}
 		return this;
 	},
@@ -53,11 +53,11 @@ h.extend(steal, {
 				// runs when a steal is starting
 				go = function() {
 					// indicates that a collection of steals has started
-					steal.trigger("start", cur);
+					st.trigger("start", cur);
 					cur.completed.then(function() {
 
 						rootSteal = null;
-						steal.trigger("end", cur);
+						st.trigger("end", cur);
 
 
 					});
@@ -70,9 +70,9 @@ h.extend(steal, {
 			// the initial set
 			if ( h.win.setTimeout ) {
 				// we want to insert a "wait" after the current pending
-				steal.pushPending();
+				st.pushPending();
 				setTimeout(function() {
-					steal.popPending();
+					st.popPending();
 					go();
 				}, 0)
 			} else {
@@ -87,14 +87,14 @@ h.extend(steal, {
 
 (function(){
 	var myPending;
-	steal.pushPending = function(){
+	st.pushPending = function(){
 		myPending = Module.pending.slice(0);
 		Module.pending = [];
 		h.each(myPending, function(i, arg){
 			Module.make(arg);
 		})
 	}
-	steal.popPending = function(){
+	st.popPending = function(){
 		Module.pending = Module.pending.length ? myPending.concat(null,Module.pending) : myPending;
 	}
 })();
@@ -120,7 +120,7 @@ h.extend(steal, {
 	});
 
 	// once the current batch is done, fire ready if it hasn't already been done
-	steal.bind("end", function() {
+	st.bind("end", function() {
 		if ( jQueryIncremented && !ready ) {
 			jQ.ready(true);
 			ready = true;
@@ -147,16 +147,16 @@ h.extend(steal, {
 
 
 //Module.prototype.load = before( Module.prototype.load, function(){
-//	console.log("      load", name(this), this.loading, steal._id, this.id)
+//	console.log("      load", name(this), this.loading, st._id, this.id)
 //})
 
 Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
-	console.log("      executed", namer, steal._id, this.id)
+	console.log("      executed", namer, st._id, this.id)
 })
 
 Module.prototype.complete = before(Module.prototype.complete, function(){
-	console.log("      complete", name(this), steal._id, this.id)
+	console.log("      complete", name(this), st._id, this.id)
 })*/
 
 
@@ -181,19 +181,19 @@ addEvent(h.win, "load", function() {
 	loaded.load.resolve();
 });
 
-steal.one("end", function( collection ) {
+st.one("end", function( collection ) {
 	loaded.end.resolve(collection);
 	firstEnd = collection;
-	steal.trigger("done", firstEnd)
+	st.trigger("done", firstEnd)
 })
-steal.firstComplete = loaded.end;
+st.firstComplete = loaded.end;
 
 Deferred.when(loaded.load, loaded.end).then(function() {
-	steal.trigger("ready")
-	steal.isReady = true;
+	st.trigger("ready")
+	st.isReady = true;
 });
 
-steal.events.done = {
+st.events.done = {
 	add: function( cb ) {
 		if ( firstEnd ) {
 			cb(firstEnd);
@@ -210,7 +210,7 @@ h.startup = h.after(h.startup, function() {
 
 	// A: GET OPTIONS
 	// 1. get script options
-	h.extend(options, steal.getScriptOptions());
+	h.extend(options, st.getScriptOptions());
 
 	// 2. options from a steal object that existed before this steal
 	h.extend(options, h.opts);
@@ -224,12 +224,12 @@ h.startup = h.after(h.startup, function() {
 
 	// B: DO THINGS WITH OPTIONS
 	// CALCULATE CURRENT LOCATION OF THINGS ...
-	steal.config(options);
+	stealConfiguration(options);
 	
 
 	// mark things that have already been loaded
 	h.each(options.executed || [], function( i, stel ) {
-		steal.executed(stel)
+		st.executed(stel)
 	})
 	// immediate steals we do
 	var steals = [];
@@ -242,14 +242,14 @@ h.startup = h.after(h.startup, function() {
 	}
 
 	// either instrument is in this page (if we're the window opened from
-	// steal.browser), or its opener has it
+	// st.browser), or its opener has it
 	// try-catching this so we dont have to build up to the iframe
 	// instrumentation check
 	try {
-		// win.top.steal.instrument is for qunit
-		// win.top.opener.steal.instrument is for funcunit
-		if(!options.browser && ((h.win.top && h.win.top.steal.instrument) || 
-								(h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.steal.instrument))) {
+		// win.top.st.instrument is for qunit
+		// win.top.opener.st.instrument is for funcunit
+		if(!options.browser && ((h.win.top && h.win.top.st.instrument) || 
+								(h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.st.instrument))) {
 
 			// force startFiles to load before instrument
 			steals.push(h.noop, {
@@ -263,9 +263,9 @@ h.startup = h.after(h.startup, function() {
 	}
 
 	// we only load things with force = true
-	if ( stealConfig.env == "production" && stealConfig.loadProduction && stealConfig.production ) {
-		steal({
-			id: stealConfig.production,
+	if ( stealConfiguration().env == "production" && stealConfiguration().loadProduction && stealConfiguration().production ) {
+		st({
+			id: stealConfiguration().production,
 			force: true
 		});
 	} else {
@@ -283,6 +283,6 @@ h.startup = h.after(h.startup, function() {
 		}
 	}
 	if ( steals.length ) {
-		steal.apply(h.win, steals);
+		st.apply(h.win, steals);
 	}
 });

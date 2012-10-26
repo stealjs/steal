@@ -36,9 +36,9 @@ h.support.interactive = h.doc && !! getInteractiveScript();
 if ( h.support.interactive ) {
 
 	// after steal is called, check which script is "interactive" (for IE)
-	steal.after = h.after(steal.after, function() {
+	st.after = h.after(st.after, function() {
 
-		// check if disabled by steal.loading()
+		// check if disabled by st.loading()
 		if (!h.support.interactive ) {
 			return;
 		}
@@ -63,8 +63,8 @@ if ( h.support.interactive ) {
 
 	// This is used for packaged scripts.  As the packaged script executes, we grab the
 	// dependencies that have come so far and assign them to the loaded script
-	steal.preexecuted = h.before(steal.preexecuted, function( stel ) {
-		// check if disabled by steal.loading()
+	st.preexecuted = h.before(st.preexecuted, function( stel ) {
+		// check if disabled by st.loading()
 		if (!h.support.interactive ) {
 			return;
 		}

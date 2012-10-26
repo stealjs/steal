@@ -1,5 +1,5 @@
 /**
- * @function steal.id
+ * @function st.id
  * 
  * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
  * final, unique id. This function can be overwritten 
@@ -18,12 +18,12 @@
  *  3. Check the 
  * 
  * 
- * `steal.id()`
+ * `st.id()`
  */
 // returns the "rootSrc" id, something that looks like requireJS
 // for a given id/path, what is the "REAL" id that should be used
 // this is where substituation can happen
-steal.id = function( id, currentWorkingId, type ) {
+st.id = function( id, currentWorkingId, type ) {
 	// id should be like
 	var uri = URI(id);
 	uri = uri.addJS().normalize(currentWorkingId ? new URI(currentWorkingId) : null)
@@ -36,7 +36,7 @@ steal.id = function( id, currentWorkingId, type ) {
 		// if it ends
 	}
 	// check map config
-	var map = stealConfig.map || {};
+	var map = stealConfiguration().map || {};
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
@@ -53,7 +53,7 @@ steal.id = function( id, currentWorkingId, type ) {
 	return uri;
 }
 
-steal.amdToId = function(id, currentWorkingId, type){
+st.amdToId = function(id, currentWorkingId, type){
 	var uri = URI(id);
 	uri = uri.normalize(currentWorkingId ? new URI(currentWorkingId) : null)
 	// check foo/bar
@@ -65,7 +65,7 @@ steal.amdToId = function(id, currentWorkingId, type){
 		// if it ends
 	}
 	// check map config
-	var map = stealConfig.map || {};
+	var map = stealConfiguration().map || {};
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
@@ -82,13 +82,13 @@ steal.amdToId = function(id, currentWorkingId, type){
 }
 // for a given ID, where should I find this resource
 /**
- * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
- * is the location of the file. It uses the paths option of  [steal.config].
+ * `st.idToUri( id, noJoin )` takes an id and returns a URI that
+ * is the location of the file. It uses the paths option of  [stealConfiguration].
  * Passing true for `noJoin` does not join from the root URI.
  */
-steal.idToUri = function( id, noJoin ) {
+st.idToUri = function( id, noJoin ) {
 	// this is normalize
-	var paths = stealConfig.paths || {},
+	var paths = stealConfiguration().paths || {},
 		path;
 	// always run past 
 	h.each(paths, function( part, replaceWith ) {
@@ -101,11 +101,11 @@ steal.idToUri = function( id, noJoin ) {
 		}
 	})
 
-	return noJoin ? id : stealConfig.root.join(id)
+	return noJoin ? id : stealConfiguration().root.join(id)
 }
-steal.amdIdToUri = function( id, noJoin ){
+st.amdIdToUri = function( id, noJoin ){
 	// this is normalize
-	var paths = stealConfig.paths || {},
+	var paths = stealConfiguration().paths || {},
 		path;
 	// always run past 
 	h.each(paths, function( part, replaceWith ) {
@@ -120,7 +120,7 @@ steal.amdIdToUri = function( id, noJoin ){
 	if( /(^|\/)[^\/\.]+$/.test(id) ){
 		id= URI(id+".js")
 	}
-	return id //noJoin ? id : stealConfig.root.join(id)
+	return id //noJoin ? id : stealConfiguration().root.join(id)
 }
 
 // ## AMD ##
@@ -145,13 +145,13 @@ h.win.define = function( moduleId, dependencies, method ) {
 	} else if (dependencies && method && !dependencies.length ) {
 		modules[moduleId] = method();
 	} else {
-		steal.apply(null, h.map(dependencies, function(dependency){
+		st.apply(null, h.map(dependencies, function(dependency){
 			dependency = typeof dependency === "string" ? {
 				id: dependency
 			} : dependency;
-			dependency.toId = steal.amdToId;
+			dependency.toId = st.amdToId;
 			
-			dependency.idToUri = steal.amdIdToUri;
+			dependency.idToUri = st.amdIdToUri;
 			return dependency;
 		}).concat(method) )
 	}
@@ -162,13 +162,13 @@ h.win.require = function(dependencies, method){
 			dependency = typeof dependency === "string" ? {
 				id: dependency
 			} : dependency;
-			dependency.toId = steal.amdToId;
+			dependency.toId = st.amdToId;
 			
-			dependency.idToUri = steal.amdIdToUri;
+			dependency.idToUri = st.amdIdToUri;
 			return dependency;
 		}).concat([method]);
 	console.log("stealing",depends.slice(0))
-	steal.apply(null, depends )
+	st.apply(null, depends )
 }
 h.win.define.amd = {
 	jQuery: true
@@ -176,14 +176,13 @@ h.win.define.amd = {
 
 
 
-//steal.when = when;
+//st.when = when;
 // make steal public
-h.win.steal = steal;
 
 
 // make steal loaded
 define("steal", [], function() {
-	return steal;
+	return st;
 });
 
 define("require", function(){
