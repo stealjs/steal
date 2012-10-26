@@ -722,7 +722,7 @@ URI.prototype.insertMapping = function() {
 					stealConfig[prop] = value);
 				
 		}
-		
+
 		for(var i = 0; i < callbacks.length; i++){
 			callbacks[i]()
 		}
@@ -730,8 +730,8 @@ URI.prototype.insertMapping = function() {
 		return stealConfig;
 	};
 
-	configFn.on = function(){
-		callbacks.push.apply(this, arguments);
+	configFn.on = function(cb){
+		callbacks.push(cb)
 	}
 
 	configFn.startFile = function(startFile){
@@ -1344,7 +1344,7 @@ Module.make = h.after(Module.make, function( stel ) {
 		st.config = stealConfiguration
 
 		st.config.on(function(){
-			console.log('zoove')
+			console.log('here')
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible

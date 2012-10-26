@@ -92,8 +92,7 @@ function configManager(configContext){
 		}
 		stealConfig = stealConfig || {};
 		for(var prop in config){
-			var value = config[prop]
-			console.log(config[prop], prop)
+			var value = config[prop];
 			// if it's a special function
 			configFn[prop] ?
 				// run it
@@ -106,7 +105,7 @@ function configManager(configContext){
 					stealConfig[prop] = value);
 				
 		}
-		
+
 		for(var i = 0; i < callbacks.length; i++){
 			callbacks[i]()
 		}
@@ -114,8 +113,8 @@ function configManager(configContext){
 		return stealConfig;
 	};
 
-	configFn.on = function(){
-		callbacks.push.apply(this, arguments);
+	configFn.on = function(cb){
+		callbacks.push(cb)
 	}
 
 	configFn.startFile = function(startFile){

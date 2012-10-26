@@ -53,7 +53,6 @@
 		st.config = stealConfiguration
 
 		st.config.on(function(){
-			console.log('zoove')
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible
