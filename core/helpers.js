@@ -92,15 +92,6 @@ var h = {
 		return arr;
 	},
 	// testing support for various browser behaviors
-	// a startup function that will be called when steal is ready
-	startup: function() {},
-	// adds a suffix to the url for cache busting
-	addSuffix: function( str ) {
-		if ( h.opts.suffix ) {
-			str = (str + '').indexOf('?') > -1 ? str + "&" + h.opts.suffix : str + "?" + h.opts.suffix;
-		}
-		return str;
-	},
 	
 		// ## AOP ##
 	// Aspect oriented programming helper methods are used to
@@ -223,7 +214,6 @@ h.doc   = h.win.document
 h.docEl = h.doc && h.doc.documentElement;
 // if oldsteal is an object
 // we use it as options to configure steal
-h.opts  = (typeof h.win.steal == "object" ? h.win.steal : {}),
 
 h.support = {
 	// does onerror work in script tags?

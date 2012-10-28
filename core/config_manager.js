@@ -1,15 +1,17 @@
+var configs = {
+	"_" : {
+		types: {},
+		ext: {},
+		env: "development",
+		loadProduction: true,
+		logLevel: 0
+	}
+}
+
 function configManager(configContext){
 	configContext = configContext || "_";
-	var configs = {
-		"_" : {
-			types: {},
-			ext: {},
-			env: "development",
-			loadProduction: true,
-			logLevel: 0
-		}
-	},
-	callbacks = [],
+
+	var callbacks = [],
 	/**
 	 * `config(config)` configures st. Typically it it used
 	 * in __stealconfig.js__.  The available options are:
@@ -136,6 +138,7 @@ function configManager(configContext){
 	 */
 	configFn.root = function( relativeURI ) {
 		var stealConfig = configs[configContext];
+		console.log(stealConfig, configContext, configs)
 		if ( relativeURI !== undefined ) {
 			var root = URI(relativeURI);
 
@@ -182,6 +185,11 @@ function configManager(configContext){
 		}
 	}
 
+	configFn.cloneContext = function(){
+		var id = "_" + (new Date()).getTime();
+		configs[id] = h.extend({}, configs[configContext]);
+		return configManager(id);
+	}
 	
 	return configFn;
 }

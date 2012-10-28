@@ -260,11 +260,11 @@ stealConfiguration({
 				if ( createSheet ) {
 					// IE has a 31 sheet and 31 import per sheet limit
 					if (!cssCount++ ) {
-						lastSheet = h.doc.createStyleSheet(h.addSuffix(options.src));
+						lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
 						lastSheetOptions = options;
 					} else {
 						var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-						lastSheet.addImport(h.addSuffix(relative));
+						lastSheet.addImport(addSuffix(relative));
 						if ( cssCount == 30 ) {
 							cssCount = 0;
 						}
@@ -276,7 +276,7 @@ stealConfiguration({
 				options = options || {};
 				var link = h.createElement("link");
 				link.rel = options.rel || "stylesheet";
-				link.href = h.addSuffix(options.src);
+				link.href = addSuffix(options.src);
 				link.type = "text/css";
 				h.head().appendChild(link);
 			}

@@ -113,15 +113,6 @@ var h = {
 		return arr;
 	},
 	// testing support for various browser behaviors
-	// a startup function that will be called when steal is ready
-	startup: function() {},
-	// adds a suffix to the url for cache busting
-	addSuffix: function( str ) {
-		if ( h.opts.suffix ) {
-			str = (str + '').indexOf('?') > -1 ? str + "&" + h.opts.suffix : str + "?" + h.opts.suffix;
-		}
-		return str;
-	},
 	
 		// ## AOP ##
 	// Aspect oriented programming helper methods are used to
@@ -244,7 +235,6 @@ h.doc   = h.win.document
 h.docEl = h.doc && h.doc.documentElement;
 // if oldsteal is an object
 // we use it as options to configure steal
-h.opts  = (typeof h.win.steal == "object" ? h.win.steal : {}),
 
 h.support = {
 	// does onerror work in script tags?
@@ -614,18 +604,20 @@ URI.prototype.insertMapping = function() {
 
 // --- END URI
 
-	function configManager(configContext){
-	configContext = configContext || "_";
 	var configs = {
-		"_" : {
-			types: {},
-			ext: {},
-			env: "development",
-			loadProduction: true,
-			logLevel: 0
-		}
-	},
-	callbacks = [],
+	"_" : {
+		types: {},
+		ext: {},
+		env: "development",
+		loadProduction: true,
+		logLevel: 0
+	}
+}
+
+function configManager(configContext){
+	configContext = configContext || "_";
+
+	var callbacks = [],
 	/**
 	 * `config(config)` configures st. Typically it it used
 	 * in __stealconfig.js__.  The available options are:
@@ -708,8 +700,7 @@ URI.prototype.insertMapping = function() {
 		}
 		stealConfig = stealConfig || {};
 		for(var prop in config){
-			var value = config[prop]
-			console.log(config[prop], prop)
+			var value = config[prop];
 			// if it's a special function
 			configFn[prop] ?
 				// run it
@@ -753,6 +744,7 @@ URI.prototype.insertMapping = function() {
 	 */
 	configFn.root = function( relativeURI ) {
 		var stealConfig = configs[configContext];
+		console.log(stealConfig, configContext, configs)
 		if ( relativeURI !== undefined ) {
 			var root = URI(relativeURI);
 
@@ -799,6 +791,11 @@ URI.prototype.insertMapping = function() {
 		}
 	}
 
+	configFn.cloneContext = function(){
+		var id = "_" + (new Date()).getTime();
+		configs[id] = h.extend({}, configs[configContext]);
+		return configManager(id);
+	}
 	
 	return configFn;
 }
@@ -1322,6 +1319,16 @@ Module.make = h.after(Module.make, function( stel ) {
 	return stel;
 }, true);
 
+		// a startup function that will be called when steal is ready
+		var startup = function(){};
+		var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
+		// adds a suffix to the url for cache busting
+		var addSuffix = function( str ) {
+			if ( opts.suffix ) {
+				str = (str + '').indexOf('?') > -1 ? str + "&" + opts.suffix : str + "?" + opts.suffix;
+			}
+			return str;
+		}
 		var st = function() {
 			
 			// convert arguments into an array
@@ -1338,13 +1345,12 @@ Module.make = h.after(Module.make, function( stel ) {
 		};
 
 		st.clone = function(){
-			return stealManager(false, h.extend({}, stealConfiguration))
+			return stealManager(false, stealConfiguration.cloneContext())
 		}
 
 		st.config = stealConfiguration
 
 		st.config.on(function(){
-			console.log('here')
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible
@@ -2075,11 +2081,11 @@ stealConfiguration({
 				if ( createSheet ) {
 					// IE has a 31 sheet and 31 import per sheet limit
 					if (!cssCount++ ) {
-						lastSheet = h.doc.createStyleSheet(h.addSuffix(options.src));
+						lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
 						lastSheetOptions = options;
 					} else {
 						var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-						lastSheet.addImport(h.addSuffix(relative));
+						lastSheet.addImport(addSuffix(relative));
 						if ( cssCount == 30 ) {
 							cssCount = 0;
 						}
@@ -2091,7 +2097,7 @@ stealConfiguration({
 				options = options || {};
 				var link = h.createElement("link");
 				link.rel = options.rel || "stylesheet";
-				link.href = h.addSuffix(options.src);
+				link.href = addSuffix(options.src);
 				link.type = "text/css";
 				h.head().appendChild(link);
 			}
@@ -2362,7 +2368,7 @@ st.events.done = {
 	}
 };
 
-h.startup = h.after(h.startup, function() {
+startup = h.after(startup, function() {
 	// get options from 
 	var options = {};
 
@@ -2371,7 +2377,7 @@ h.startup = h.after(h.startup, function() {
 	h.extend(options, st.getScriptOptions());
 
 	// 2. options from a steal object that existed before this steal
-	h.extend(options, h.opts);
+	h.extend(options, opts);
 
 	// 3. if url looks like steal[xyz]=bar, add those to the options
 	// does this ened to be supported anywhere?
@@ -2541,7 +2547,7 @@ if ( h.support.interactive ) {
 		}
 		
 
-		h.startup();
+		startup();
 		//win.steals = steals;
 		st.resources = resources;
 		h.win.Module = Module;

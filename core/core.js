@@ -31,6 +31,16 @@
 		
 		/*# module.js #*/
 
+		// a startup function that will be called when steal is ready
+		var startup = function(){};
+		var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
+		// adds a suffix to the url for cache busting
+		var addSuffix = function( str ) {
+			if ( opts.suffix ) {
+				str = (str + '').indexOf('?') > -1 ? str + "&" + opts.suffix : str + "?" + opts.suffix;
+			}
+			return str;
+		}
 		var st = function() {
 			
 			// convert arguments into an array
@@ -47,7 +57,7 @@
 		};
 
 		st.clone = function(){
-			return stealManager(false, h.extend({}, stealConfiguration))
+			return stealManager(false, stealConfiguration.cloneContext())
 		}
 
 		st.config = stealConfiguration
@@ -99,7 +109,7 @@
 		}
 		
 
-		h.startup();
+		startup();
 		//win.steals = steals;
 		st.resources = resources;
 		h.win.Module = Module;

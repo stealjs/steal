@@ -204,7 +204,7 @@ st.events.done = {
 	}
 };
 
-h.startup = h.after(h.startup, function() {
+startup = h.after(startup, function() {
 	// get options from 
 	var options = {};
 
@@ -213,7 +213,7 @@ h.startup = h.after(h.startup, function() {
 	h.extend(options, st.getScriptOptions());
 
 	// 2. options from a steal object that existed before this steal
-	h.extend(options, h.opts);
+	h.extend(options, opts);
 
 	// 3. if url looks like steal[xyz]=bar, add those to the options
 	// does this ened to be supported anywhere?
