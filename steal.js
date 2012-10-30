@@ -399,6 +399,10 @@
 				return uri;
 			}
 			if ( uri.isRelativeToDomain() ) {
+				if( undefined !== uri.host && '' !== uri.host )
+				{
+					return URI(uri.toString())
+				}
 				return URI(this.domain() + uri)
 			}
 			// at this point we either
