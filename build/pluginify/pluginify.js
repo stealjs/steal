@@ -111,7 +111,7 @@ steal('steal', 'steal/parse','steal/build',
 				else {
 					s.print("  Ignoring " + stl.id)
 				}
-			}, true)
+			}, true);
 		}, true, false);
 
 		var output = 'var module = { _orig: window.module, _define: window.define };\n';
@@ -147,7 +147,9 @@ steal('steal', 'steal/parse','steal/build',
 		deps = stl.resources[resourceOpts.id].dependencies;
 
 		for(var i = 0; i < deps.length - 1; i++) {
-			param.push(deps[i].options.id);
+			if(deps[i]) {
+				param.push(deps[i].options.id);
+			}
 		}
 
 		if(param.length) {
