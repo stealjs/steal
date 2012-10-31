@@ -59,7 +59,8 @@ steal('steal', 'steal/parse','steal/build',
 			//othervar = opts.nojquery;
 			opts.exclude.push("jquery.js");
 		}
-		opts.exclude.push("steal/dev/")
+		opts.exclude.push("steal/dev/");
+		opts.exclude.push("stealconfig.js");
 		rhinoLoader = {
 			callback: function(s){
 				s.pluginify = true;
