@@ -1,6 +1,6 @@
 // ## URI ##
 /**
- * @class st.URI
+ * @class steal.URI
  * A URL / URI helper for getting information from a URL.
  * 
  *     var uri = URI( "http://stealjs.com/index.html" )
@@ -200,8 +200,8 @@ URI.prototype.insertMapping = function() {
 	// go through mappings
 	var orig = "" + this,
 		key, value;
-	for ( key in st.mappings ) {
-		value = st.mappings[key]
+	for ( key in steal.mappings ) {
+		value = steal.mappings[key]
 		if ( value.test.test(orig) ) {
 			return orig.replace(key, value.path);
 		}
@@ -209,6 +209,6 @@ URI.prototype.insertMapping = function() {
 	return URI(orig);
 };
 
-// temp add st.File for backward compat
+// temp add steal.File for backward compat
 
 // --- END URI

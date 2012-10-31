@@ -8,7 +8,7 @@ var rootSteal = false;
 //
 h.extend(st, {
 	// modifies src
-/*makeOptions : after(st.makeOptions,function(raw){
+/*makeOptions : after(steal.makeOptions,function(raw){
 		raw.src = URI.root().join(raw.rootSrc = URI( raw.rootSrc ).insertMapping());
 	}),*/
 
@@ -147,16 +147,16 @@ h.extend(st, {
 
 
 //Module.prototype.load = before( Module.prototype.load, function(){
-//	console.log("      load", name(this), this.loading, st._id, this.id)
+//	console.log("      load", name(this), this.loading, steal._id, this.id)
 //})
 
 Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
-	console.log("      executed", namer, st._id, this.id)
+	console.log("      executed", namer, steal._id, this.id)
 })
 
 Module.prototype.complete = before(Module.prototype.complete, function(){
-	console.log("      complete", name(this), st._id, this.id)
+	console.log("      complete", name(this), steal._id, this.id)
 })*/
 
 
@@ -242,12 +242,12 @@ startup = h.after(startup, function() {
 	}
 
 	// either instrument is in this page (if we're the window opened from
-	// st.browser), or its opener has it
+	// steal.browser), or its opener has it
 	// try-catching this so we dont have to build up to the iframe
 	// instrumentation check
 	try {
-		// win.top.st.instrument is for qunit
-		// win.top.opener.st.instrument is for funcunit
+		// win.top.steal.instrument is for qunit
+		// win.top.opener.steal.instrument is for funcunit
 		if(!options.browser && ((h.win.top && h.win.top.st.instrument) || 
 								(h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.st.instrument))) {
 

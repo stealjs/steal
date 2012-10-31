@@ -1,7 +1,7 @@
 //  ============================== Packages ===============================
 /**
- * @function st.packages
- * `st.packages( packageIds... )` defines modules for deferred downloading.
+ * @function steal.packages
+ * `steal.packages( packageIds... )` defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
  * after initial page load.
@@ -10,7 +10,7 @@
  * dependencies of _login/login.js_, _filemanager/filemanager.js_, and _contacts/contacts.js_,
  * while immediately loading the current users's data might look like:
  * 
- *     st.packages('login','filemanager','contacts')
+ *     steal.packages('login','filemanager','contacts')
  *     steal('models/user', function(User){
  * 	   
  *       // get the current User
@@ -33,7 +33,7 @@
  *     })
  * 
  *
- * 		st.packages('tasks','dashboard','fileman');
+ * 		steal.packages('tasks','dashboard','fileman');
  *
  */
 var packs = [],

@@ -52,12 +52,12 @@
 			return st.apply(h.win, args);
 		},
 		/**
-		 * `st.bind( event, handler(eventData...) )` listens to 
-		 * events on st. Typically these are used by various build processes
+		 * `steal.bind( event, handler(eventData...) )` listens to 
+		 * events on steal. Typically these are used by various build processes
 		 * to know when steal starts and finish loading resources and their
 		 * dependencies. Listen to an event like:
 		 * 
-		 *     st.bind('end', function(rootModule){
+		 *     steal.bind('end', function(rootModule){
 		 *       rootModule.dependencies // the first stolen resources.
 		 *     })
 		 * 
@@ -107,8 +107,8 @@
 			return st;
 		},
 		/**
-		 * `st.one(eventName, handler(eventArgs...) )` works just like
-		 * [st.bind] but immediately unbinds after `handler` is called.
+		 * `steal.one(eventName, handler(eventArgs...) )` works just like
+		 * [steal.bind] but immediately unbinds after `handler` is called.
 		 */
 		one: function( event, listener ) {
 			return st.bind(event, function() {
@@ -118,7 +118,7 @@
 		},
 		events: {},
 		/**
-		 * `st.unbind( eventName, handler )` removes an event listener on st.
+		 * `steal.unbind( eventName, handler )` removes an event listener on steal.
 		 * @param {String} event
 		 * @param {Function} listener
 		 */
@@ -146,7 +146,7 @@
 		 * Creates resources and marks them as loading so steal doesn't try 
 		 * to load them. 
 		 * 
-		 *      st.has("foo/bar.js","zed/car.js");
+		 *      steal.has("foo/bar.js","zed/car.js");
 		 * 
 		 * This is used when a file has other resources in it. 
 		 */
@@ -167,11 +167,11 @@
 		 * Signals that a resource's JS code has been run.  This is used
 		 * when a file has other resources in it.
 		 * 
-		 *     st.has("foo/bar.js");
+		 *     steal.has("foo/bar.js");
 		 * 
 		 *     //start code for foo/bar.js 
 		 *     steal("zed/car.js", function(){ ... });
-		 *     st.executed("foo/bar.js");
+		 *     steal.executed("foo/bar.js");
 		 * 
 		 * When a resource is executed, its dependent resources are loaded and eventually 
 		 * executed.

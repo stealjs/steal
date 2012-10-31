@@ -118,7 +118,7 @@ var h = {
 	// Aspect oriented programming helper methods are used to
 	// weave in functionality into steal's API.
 	// calls `before` before `f` is called.
-	//     st.complete = before(st.complete, f)
+	//     steal.complete = before(steal.complete, f)
 	// `changeArgs=true` makes before return the same args
 	before: function(f, before, changeArgs) {
 		return changeArgs ?
@@ -410,7 +410,7 @@ var whenEach = function( arr, func, obj, func2 ) {
 
 	// ## URI ##
 /**
- * @class st.URI
+ * @class steal.URI
  * A URL / URI helper for getting information from a URL.
  * 
  *     var uri = URI( "http://stealjs.com/index.html" )
@@ -610,8 +610,8 @@ URI.prototype.insertMapping = function() {
 	// go through mappings
 	var orig = "" + this,
 		key, value;
-	for ( key in st.mappings ) {
-		value = st.mappings[key]
+	for ( key in steal.mappings ) {
+		value = steal.mappings[key]
 		if ( value.test.test(orig) ) {
 			return orig.replace(key, value.path);
 		}
@@ -619,7 +619,7 @@ URI.prototype.insertMapping = function() {
 	return URI(orig);
 };
 
-// temp add st.File for backward compat
+// temp add steal.File for backward compat
 
 // --- END URI
 
@@ -1698,12 +1698,12 @@ define("require", function(){
 			return st.apply(h.win, args);
 		},
 		/**
-		 * `st.bind( event, handler(eventData...) )` listens to 
-		 * events on st. Typically these are used by various build processes
+		 * `steal.bind( event, handler(eventData...) )` listens to 
+		 * events on steal. Typically these are used by various build processes
 		 * to know when steal starts and finish loading resources and their
 		 * dependencies. Listen to an event like:
 		 * 
-		 *     st.bind('end', function(rootModule){
+		 *     steal.bind('end', function(rootModule){
 		 *       rootModule.dependencies // the first stolen resources.
 		 *     })
 		 * 
@@ -1753,8 +1753,8 @@ define("require", function(){
 			return st;
 		},
 		/**
-		 * `st.one(eventName, handler(eventArgs...) )` works just like
-		 * [st.bind] but immediately unbinds after `handler` is called.
+		 * `steal.one(eventName, handler(eventArgs...) )` works just like
+		 * [steal.bind] but immediately unbinds after `handler` is called.
 		 */
 		one: function( event, listener ) {
 			return st.bind(event, function() {
@@ -1764,7 +1764,7 @@ define("require", function(){
 		},
 		events: {},
 		/**
-		 * `st.unbind( eventName, handler )` removes an event listener on st.
+		 * `steal.unbind( eventName, handler )` removes an event listener on steal.
 		 * @param {String} event
 		 * @param {Function} listener
 		 */
@@ -1792,7 +1792,7 @@ define("require", function(){
 		 * Creates resources and marks them as loading so steal doesn't try 
 		 * to load them. 
 		 * 
-		 *      st.has("foo/bar.js","zed/car.js");
+		 *      steal.has("foo/bar.js","zed/car.js");
 		 * 
 		 * This is used when a file has other resources in it. 
 		 */
@@ -1813,11 +1813,11 @@ define("require", function(){
 		 * Signals that a resource's JS code has been run.  This is used
 		 * when a file has other resources in it.
 		 * 
-		 *     st.has("foo/bar.js");
+		 *     steal.has("foo/bar.js");
 		 * 
 		 *     //start code for foo/bar.js 
 		 *     steal("zed/car.js", function(){ ... });
-		 *     st.executed("foo/bar.js");
+		 *     steal.executed("foo/bar.js");
 		 * 
 		 * When a resource is executed, its dependent resources are loaded and eventually 
 		 * executed.
@@ -1868,9 +1868,9 @@ var types = stealConfiguration().types;
  *
  *     REQUIRED FOO
  *
- * To define this type, you'd call st.type like this:
+ * To define this type, you'd call steal.type like this:
  *
- *     st.type("foo js", function(options, original, success, error){
+ *     steal.type("foo js", function(options, original, success, error){
  *       var parts = options.text.split(" ")
  *       options.text = parts[0]+"='"+parts[1]+"'";
  *       success();
@@ -1884,7 +1884,7 @@ var types = stealConfiguration().types;
  * converting [http://jashkenas.github.com/coffee-script/ coffeescript]
  * to JavaScript:
  *
- *     st.type("coffee js", function(options, original, success, error){
+ *     steal.type("coffee js", function(options, original, success, error){
  *       options.text = CoffeeScript.compile(options.text);
  *       success();
  *     });
@@ -1897,7 +1897,7 @@ var types = stealConfiguration().types;
  * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can
  * be converted to CSS:
  *
- *     st.type("less css", function(options, original, success, error){
+ *     steal.type("less css", function(options, original, success, error){
  *       new (less.Parser)({
  *         optimization: less.optimization,
  *         paths: []
@@ -1909,7 +1909,7 @@ var types = stealConfiguration().types;
  *
  * This simple type system could be used to convert any file type to be used
  * in your JavaScript app.  For example, [http://fdik.org/yml/ yml] could be
- * used for configuration.  jQueryMX uses st.type to support JS templates,
+ * used for configuration.  jQueryMX uses steal.type to support JS templates,
  * such as EJS, TMPL, and others.
  *
  * @param {String} type A string that defines the new type being defined and
@@ -2135,8 +2135,8 @@ stealConfiguration({
 
 		//  ============================== Packages ===============================
 /**
- * @function st.packages
- * `st.packages( packageIds... )` defines modules for deferred downloading.
+ * @function steal.packages
+ * `steal.packages( packageIds... )` defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
  * after initial page load.
@@ -2145,7 +2145,7 @@ stealConfiguration({
  * dependencies of _login/login.js_, _filemanager/filemanager.js_, and _contacts/contacts.js_,
  * while immediately loading the current users's data might look like:
  * 
- *     st.packages('login','filemanager','contacts')
+ *     steal.packages('login','filemanager','contacts')
  *     steal('models/user', function(User){
  * 	   
  *       // get the current User
@@ -2168,7 +2168,7 @@ stealConfiguration({
  *     })
  * 
  *
- * 		st.packages('tasks','dashboard','fileman');
+ * 		steal.packages('tasks','dashboard','fileman');
  *
  */
 var packs = [],
@@ -2198,7 +2198,7 @@ var rootSteal = false;
 //
 h.extend(st, {
 	// modifies src
-/*makeOptions : after(st.makeOptions,function(raw){
+/*makeOptions : after(steal.makeOptions,function(raw){
 		raw.src = URI.root().join(raw.rootSrc = URI( raw.rootSrc ).insertMapping());
 	}),*/
 
@@ -2337,16 +2337,16 @@ h.extend(st, {
 
 
 //Module.prototype.load = before( Module.prototype.load, function(){
-//	console.log("      load", name(this), this.loading, st._id, this.id)
+//	console.log("      load", name(this), this.loading, steal._id, this.id)
 //})
 
 Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
-	console.log("      executed", namer, st._id, this.id)
+	console.log("      executed", namer, steal._id, this.id)
 })
 
 Module.prototype.complete = before(Module.prototype.complete, function(){
-	console.log("      complete", name(this), st._id, this.id)
+	console.log("      complete", name(this), steal._id, this.id)
 })*/
 
 
@@ -2432,12 +2432,12 @@ startup = h.after(startup, function() {
 	}
 
 	// either instrument is in this page (if we're the window opened from
-	// st.browser), or its opener has it
+	// steal.browser), or its opener has it
 	// try-catching this so we dont have to build up to the iframe
 	// instrumentation check
 	try {
-		// win.top.st.instrument is for qunit
-		// win.top.opener.st.instrument is for funcunit
+		// win.top.steal.instrument is for qunit
+		// win.top.opener.steal.instrument is for funcunit
 		if(!options.browser && ((h.win.top && h.win.top.st.instrument) || 
 								(h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.st.instrument))) {
 

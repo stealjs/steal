@@ -19,9 +19,9 @@ var types = stealConfiguration().types;
  *
  *     REQUIRED FOO
  *
- * To define this type, you'd call st.type like this:
+ * To define this type, you'd call steal.type like this:
  *
- *     st.type("foo js", function(options, original, success, error){
+ *     steal.type("foo js", function(options, original, success, error){
  *       var parts = options.text.split(" ")
  *       options.text = parts[0]+"='"+parts[1]+"'";
  *       success();
@@ -35,7 +35,7 @@ var types = stealConfiguration().types;
  * converting [http://jashkenas.github.com/coffee-script/ coffeescript]
  * to JavaScript:
  *
- *     st.type("coffee js", function(options, original, success, error){
+ *     steal.type("coffee js", function(options, original, success, error){
  *       options.text = CoffeeScript.compile(options.text);
  *       success();
  *     });
@@ -48,7 +48,7 @@ var types = stealConfiguration().types;
  * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can
  * be converted to CSS:
  *
- *     st.type("less css", function(options, original, success, error){
+ *     steal.type("less css", function(options, original, success, error){
  *       new (less.Parser)({
  *         optimization: less.optimization,
  *         paths: []
@@ -60,7 +60,7 @@ var types = stealConfiguration().types;
  *
  * This simple type system could be used to convert any file type to be used
  * in your JavaScript app.  For example, [http://fdik.org/yml/ yml] could be
- * used for configuration.  jQueryMX uses st.type to support JS templates,
+ * used for configuration.  jQueryMX uses steal.type to support JS templates,
  * such as EJS, TMPL, and others.
  *
  * @param {String} type A string that defines the new type being defined and
