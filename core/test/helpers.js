@@ -50,15 +50,7 @@ test('head', function(){
 	equal(el, h.head(), 'head helper always returns same element');
 })
 
-test('addSuffix', function(){
-	var opts = h.opts;
-	h.opts = {
-		suffix: "baz"
-	};
-	equal(h.addSuffix('http://foo/bar'), 'http://foo/bar?baz')
-	equal(h.addSuffix('http://foo/bar?foo=bar'), 'http://foo/bar?foo=bar&baz')
-	h.opts = opts;
-})
+
 
 test('before', 3, function(){
 	var fn = function(foo){

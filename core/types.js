@@ -191,9 +191,7 @@ stealConfiguration({
 					script.onreadystatechange = function(){
 						if (stateCheck.test(script.readyState)  ) {
 							if(script.onclick){
-								var scriptText = script.onclick + "";
-								scriptText = scriptText.slice(scriptText.indexOf('{') + 1, -1);
-								eval(scriptText);
+								script.onclick.apply(h.win);
 								success();
 							} else {
 								error();

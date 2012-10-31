@@ -1,7 +1,7 @@
 module('Static')
 
-test('st.makeOptions', function(){
-	var options = st.makeOptions({
+test('steal.makeOptions', function(){
+	var options = steal.makeOptions({
 		id: 'jquery'
 	});
 	equal(options.id + "", 'jquery/jquery.js')

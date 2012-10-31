@@ -267,19 +267,17 @@ h.extend(Module.prototype, {
 			this.complete();
 			return;
 		}
-		//print("-setting up "+this.options.id)
-		// now we have to figure out how to wire up our pending steals
+		this.addDependencies(myqueue)
+		this.loadDependencies();
+
+	},
+	addDependencies  : function(myqueue){
 		var self = this,
-			// the current
-			isProduction = stealConfiguration().env == "production",
-
-			stealInstances = [];
-
-		// iterate through the collection and add all the 'needs'
-		// before fetching...
+			isProduction = stealConfiguration().env == "production";
+		this.queue = [];
 		h.each(myqueue, function( i, item ) {
 			if( item === null){
-				stealInstances.push(null);
+				self.queue.push(null);
 				return;
 			}
 			
@@ -294,11 +292,24 @@ h.extend(Module.prototype, {
 				stel = Module.make(packHash[""+stel.options.id]);
 			}
 			// has to happen before 'needs' for when reversed...
-			stealInstances.push(stel);
+			self.queue.push(stel);
 		});
+	},
+	loadDependencies : function(){
+
+		
+		//print("-setting up "+this.options.id)
+		// now we have to figure out how to wire up our pending steals
+		var self = this,
+			// the current
+			
+
+		// iterate through the collection and add all the 'needs'
+		// before fetching...
+
 		//print("-instances "+this.options.id)
 		// The set of resources before the previous "wait" resource
-		var priorSet = [],
+		priorSet = [],
 			// The current set of resources after and including the
 			// previous "wait" resource
 			set = [],
@@ -315,7 +326,7 @@ h.extend(Module.prototype, {
 		// a list of the set of resources
 		// that must be complete before the current
 		// resource (`priorSet`).
-		h.each( stealInstances, function( i, resource ) {
+		h.each( this.queue, function( i, resource ) {
 			// add it as a dependency, circular are not allowed
 			self.dependencies.push(resource);
 
@@ -371,7 +382,6 @@ h.extend(Module.prototype, {
 		h.each(firstSet, function( i, f ) {
 			f.execute();
 		});
-
 	},
 	/**
 	 * Loads this steal
