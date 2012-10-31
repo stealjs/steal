@@ -138,7 +138,6 @@ function configManager(configContext){
 	 */
 	configFn.root = function( relativeURI ) {
 		var stealConfig = configs[configContext];
-		console.log(stealConfig, configContext, configs)
 		if ( relativeURI !== undefined ) {
 			var root = URI(relativeURI);
 

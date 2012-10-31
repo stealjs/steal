@@ -185,7 +185,7 @@ stealConfiguration({
 
 			} else {
 				var src = options.src; //st.idToUri( options.id );
-				if(script.readyState){
+				if(h.useIEShim){
 					script.event = "onclick";
 					script.id = script.htmlFor = "ie-" + h.uuid();
 					script.onreadystatechange = function(){
