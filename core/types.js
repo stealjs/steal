@@ -191,8 +191,12 @@ stealConfiguration({
 					script.onreadystatechange = function(){
 						if (stateCheck.test(script.readyState)  ) {
 							if(script.onclick){
-								script.onclick.apply(h.win);
-								success();
+								try {
+									script.onclick.apply(h.win);
+									success();
+								} catch(e){
+									alert(e.message + " in file " + src)
+								}
 							} else {
 								error();
 							}
