@@ -216,5 +216,5 @@
 		for(var k in obj){
 			counter++
 		}
-		return h.scriptTag().readyState && counter === 1;
+		return !st.isRhino && h.scriptTag().readyState && counter === 1;
 	})()
