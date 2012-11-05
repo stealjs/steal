@@ -1,3 +1,4 @@
 .tmp*
 dist
 test/myapp/production.js
+node_modules
