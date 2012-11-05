@@ -213,24 +213,6 @@ var h = {
 h.doc   = h.win.document
 h.docEl = h.doc && h.doc.documentElement;
 
-h.useIEShim = (function(){
-	var obj = {foo: "bar", toString: "baz"},
-		counter = 0;
-	// Internet Explorer 8 does not include enumerations of properties 
-	// that have the same name as built-in properties of prototype object. 
-	// All document modes in Internet Explorer 9 include these properties 
-	// in the enumeration. 
-	// Source : http://msdn.microsoft.com/en-us/library/ie/gg622937%28v=vs.85%29.aspx
-	//
-	// This allows us to treat differently script loading in IE8 and below than in IE9.
-	// We need to check this because IE8 and lower don't allow onerror and onload
-	// events on the script element
-	for(var k in obj){
-		counter++
-	}
-	return h.scriptTag().readyState && counter === 1;
-})()
-
 // if oldsteal is an object
 // we use it as options to configure steal
 

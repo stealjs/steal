@@ -121,6 +121,6 @@
 		return st;
 	}
 
-	window.steal = stealManager(true, configManager())
+	h.win.steal = stealManager(true, configManager())
 
 })();
