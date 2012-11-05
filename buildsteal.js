@@ -1,6 +1,7 @@
 var fs = require('fs');
 var Promise = require('node-promise/promise');
 var readFile_promise = Promise.convertNodeAsyncFunction(fs.readFile);
+var beautify         = require('beautifier/lib/beautify')
 
 fs.readFile('core/core.js', 'utf8', function(err, core){
 	var promises = [];
@@ -16,7 +17,10 @@ fs.readFile('core/core.js', 'utf8', function(err, core){
 			core = core.replace(matches[i], results[i]);
 			console.log("-- Adding core/" + matches[i].slice(3, -3).trim() )
 		}
-		fs.writeFile("steal.js", core, function(err){
+		fs.writeFile("steal.js", beautify.js_beautify(core, {
+			'indent_size': 1,
+			'indent_char': '\t'
+			}), function(err){
 			if(err){
 				return console.log('There was an error with writing steal.js file')
 			}

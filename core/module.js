@@ -1,3 +1,5 @@
+var moduleManager = function(steal, types, modules){
+
 // ============ RESOURCE ================
 // a map of resources by resourceID
 var resources = {},
@@ -39,6 +41,9 @@ var resources = {},
 // - completed - a deferred indicating if all of this resources dependencies have
 //   completed
 // - dependencies - an array of dependencies
+
+
+
 var Module = function( options ) {
 	// an array for dependencies, this is the steal calls this resource makes
 	this.dependencies = [];
@@ -51,7 +56,7 @@ var Module = function( options ) {
 	// the original options
 	this.orig = options;
 	// the parent steal's id
-	this.curId = st.cur && st.cur.options.id;
+	this.curId = steal.cur && steal.cur.options.id;
 
 	this.setOptions(options);
 	// create the deferreds used to manage state
@@ -126,7 +131,7 @@ h.extend(Module.prototype, {
 		else if ( h.isFn(options) ) {
 			var uri = URI.cur,
 				self = this,
-				cur = st.cur;
+				cur = steal.cur;
 			this.options = {
 				fn: function() {
 
@@ -184,7 +189,7 @@ h.extend(Module.prototype, {
 			this.unique = false;
 		} else {
 			// save the original options
-			this.options = st.makeOptions(h.extend({}, h.isString(options) ? {
+			this.options = steal.makeOptions(h.extend({}, h.isString(options) ? {
 				id: options
 			} : options), this.curId);
 
@@ -228,7 +233,7 @@ h.extend(Module.prototype, {
 			this.exports()
 		}
 		// set this as the current resource
-		st.cur = this;
+		steal.cur = this;
 
 		// mark yourself as 'loaded'.
 		this.run.resolve();
@@ -273,7 +278,7 @@ h.extend(Module.prototype, {
 	},
 	addDependencies  : function(myqueue){
 		var self = this,
-			isProduction = stealConfiguration().env == "production";
+			isProduction = steal.config().env == "production";
 		this.queue = [];
 		h.each(myqueue, function( i, item ) {
 			if( item === null){
@@ -281,15 +286,15 @@ h.extend(Module.prototype, {
 				return;
 			}
 			
-			if ( (isProduction && item.ignore) || (!isProduction && !st.isRhino && item.prodonly)) {
+			if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
 				return;
 			}
 			
 			// make a steal object
 			var stel = Module.make(item);
-			if ( packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
-				st.has(""+stel.options.id);
-				stel = Module.make(packHash[""+stel.options.id]);
+			if ( steal.packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
+				steal.has(""+stel.options.id);
+				stel = Module.make(steal.packHash[""+stel.options.id]);
 			}
 			// has to happen before 'needs' for when reversed...
 			self.queue.push(stel);
@@ -403,7 +408,7 @@ h.extend(Module.prototype, {
 		if (!self.executing ) {
 			self.executing = true;
 
-			st.require(self.options, function( value ) {
+			steal.require(self.options, function( value ) {
 				self.executed( value );
 			}, function( error, src ) {
 				var abortFlag = self.options.abort,
@@ -432,7 +437,7 @@ h.extend(Module.prototype, {
 h.extend(Module.prototype, {
 	load: h.after(Module.prototype.load, function( stel ) {
 		var self = this;
-		if ( h.doc && !self.completed && !self.completeTimeout && !st.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
+		if ( h.doc && !self.completed && !self.completeTimeout && !steal.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
 			self.completeTimeout = setTimeout(function() {
 				throw "steal.js : " + self.options.src + " not completed"
 			}, 5000);
@@ -468,7 +473,7 @@ h.extend(Module.prototype, {
 		h.each(this.options.has, function( i, has ) {
 			// don't want the current file to change, since we're just marking files as loaded
 			URI.cur = URI(current);
-			st.executed(has);
+			steal.executed(has);
 		});
 
 	}
@@ -492,9 +497,9 @@ Module.prototype.execute = h.before(Module.prototype.execute, function() {
 		}
 		raw.type = ext;
 	}
-	if (!types[raw.type] && stealConfiguration().env == 'development' ) {
+	if (!types[raw.type] && steal.config().env == 'development' ) {
 		throw "steal.js - type " + raw.type + " has not been loaded.";
-	} else if (!types[raw.type] && stealConfiguration().env == 'production' ) {
+	} else if (!types[raw.type] && steal.config().env == 'production' ) {
 		// if we haven't defined EJS yet and we're in production, its ok, just ignore it
 		return;
 	}
@@ -519,8 +524,11 @@ Module.make = h.after(Module.make, function( stel ) {
 			stel.loadHas();
 		} else {
 			// have to mark has as loading and executing (so we don't try to get them)
-			st.has.apply(st, stel.options.has)
+			steal.has.apply(st, stel.options.has)
 		}
 	}
 	return stel;
 }, true);
+	Module.resources = resources;
+	return Module;
+}

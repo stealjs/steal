@@ -185,18 +185,19 @@ stealConfiguration({
 
 			} else {
 				var src = options.src; //st.idToUri( options.id );
-				if(h.useIEShim){
+				if(h.useIEShim && typeof options.debug === "undefined"){
 					script.event = "onclick";
 					script.id = script.htmlFor = "ie-" + h.uuid();
 					script.onreadystatechange = function(){
-						if (stateCheck.test(script.readyState)  ) {
+						if (stateCheck.test(script.readyState)) {
 							if(script.onclick){
 								try {
 									script.onclick.apply(h.win);
 									success();
-								} catch(e){
-									alert(e.message + " in file " + src)
+								} catch(e) {
+									alert(e.message + " in file " + script.src);
 								}
+								
 							} else {
 								error();
 							}

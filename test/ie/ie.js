@@ -1,5 +1,6 @@
 steal(function(){
-	alert('ok!');
-	var obj = {};
-	obj.fooBar()
+	//alert('ok!');
+	console.log("loaded")
+	/*var obj = {};
+	obj.fooBar()*/
 })

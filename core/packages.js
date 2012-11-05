@@ -36,17 +36,17 @@
  * 		steal.packages('tasks','dashboard','fileman');
  *
  */
-var packs = [],
-	packHash = {};
+st.packs = [];
+st.packHash = {};
 st.packages = function( map ) {
 
 	if (!arguments.length ) {
-		return packs;
+		return st.packs;
 	} else {
 		if ( typeof map == 'string' ) {
-			packs.push.apply(packs, arguments);
+			st.packs.push.apply(st.packs, arguments);
 		} else {
-			packHash = map;
+			st.packHash = map;
 		}
 
 		return this;

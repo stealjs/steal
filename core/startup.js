@@ -214,7 +214,7 @@ startup = h.after(startup, function() {
 
 	// 2. options from a steal object that existed before this steal
 	h.extend(options, opts);
-
+	
 	// 3. if url looks like steal[xyz]=bar, add those to the options
 	// does this ened to be supported anywhere?
 	var search = h.win.location && decodeURIComponent(h.win.location.search);

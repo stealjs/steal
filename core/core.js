@@ -27,13 +27,14 @@
 
 	/*# config_manager.js #*/
 
+	/*# module.js #*/
+
 	function stealManager(kickoff, stealConfiguration){
-		
-		/*# module.js #*/
 
 		// a startup function that will be called when steal is ready
 		var startup = function(){};
 		var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
+
 		// adds a suffix to the url for cache busting
 		var addSuffix = function( str ) {
 			if ( opts.suffix ) {
@@ -60,7 +61,26 @@
 			return stealManager(false, stealConfiguration.cloneContext())
 		}
 
-		st.config = stealConfiguration
+		st.config = stealConfiguration;
+
+		st._id = Math.floor(1000 * Math.random());
+
+		/*# config.js #*/
+		
+		/*# amd.js #*/
+
+		/*# static.js #*/
+
+		/*# types.js #*/
+
+		/*# packages.js #*/
+
+		/*# interactive.js #*/
+
+		var Module = moduleManager(st, types, modules);
+		resources  = Module.resources; 
+
+		/*# startup.js #*/
 
 		st.config.on(function(){
 			h.each(resources, function( id, resource ) {
@@ -78,22 +98,6 @@
 				}
 			})
 		})
-
-		st._id = Math.floor(1000 * Math.random());
-
-		/*# config.js #*/
-		
-		/*# amd.js #*/
-
-		/*# static.js #*/
-
-		/*# types.js #*/
-
-		/*# packages.js #*/
-
-		/*# startup.js #*/
-
-		/*# interactive.js #*/
 
 		st.File = st.URI = URI;
 
@@ -117,10 +121,6 @@
 		return st;
 	}
 
-	/*# init.js #*/
-
 	window.steal = stealManager(true, configManager())
-	
-	
 
 })();
