@@ -1,4 +1,4 @@
-var moduleManager = function(steal, types, modules){
+var moduleManager = function(steal, types, modules, interactives){
 
 // ============ RESOURCE ================
 // a map of resources by resourceID

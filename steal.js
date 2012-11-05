@@ -820,7 +820,7 @@
 			return configFn;
 		}
 
-	var moduleManager = function(steal, types, modules) {
+	var moduleManager = function(steal, types, modules, interactives) {
 
 		// ============ RESOURCE ================
 		// a map of resources by resourceID
@@ -2270,7 +2270,7 @@
 				})
 			}
 
-			var Module = moduleManager(st, types, modules);
+			var Module = moduleManager(st, types, modules, interactives);
 			resources = Module.resources;
 
 			// =============================== STARTUP ===============================

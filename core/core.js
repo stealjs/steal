@@ -77,7 +77,7 @@
 
 		/*# interactive.js #*/
 
-		var Module = moduleManager(st, types, modules);
+		var Module = moduleManager(st, types, modules, interactives);
 		resources  = Module.resources; 
 
 		/*# startup.js #*/
