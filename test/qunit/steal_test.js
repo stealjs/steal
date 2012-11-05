@@ -552,7 +552,7 @@ test("ready", function(){
 });
 
 test("loading multiple css file from jmvcroot", function(){
-	steal.config({root: "../../"})
+	steal.config({root: orig})
 	stop();
 
 	$("#qunit-test-area").append("<div id='blue'>loading multiple css file from jmvcroot - Blue</div>" +
@@ -564,6 +564,7 @@ test("loading multiple css file from jmvcroot", function(){
 				var val = parseInt(val, 10);
 				ok(val >= (expected-1) && val <= (expected+1));
 			}
+
 			within($('#blue').css("width"), 777);
 			within($('#red').css("width"), 888);
 
@@ -675,7 +676,7 @@ test("modules", function(){
 });
 
 asyncTest("load 32 stylesheets", 2, function() {
-
+	steal.config({root: orig})
     function normalizeColor( color ) {
       if ( color.indexOf("rgb") !== -1 ) {
         color = "#" + $.map( color.split(","), function( part ) {

@@ -1,0 +1,7 @@
+*.html
+.git*
+src/
+test/
+out/
+node_modules/
+build.sh
