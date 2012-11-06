@@ -25,7 +25,6 @@ steal('steal', 'steal/parse','steal/build',
 	 *   - out - where to put the generated file
 	 *   - exclude - an array of files to exclude
 	 *   - nojquery - exclude jquery
-	 *   - global - what the callback to steal functions should be.  Defaults to jQuery as $.
 	 *   - compress - compress the file
 	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
 	 *   - skipCallbacks - don't run any of the code in steal callbacks (used for canjs build)
@@ -39,7 +38,6 @@ steal('steal', 'steal/parse','steal/build',
 				"out": 1,
 				"exclude": -1,
 				"nojquery": 0,
-				"global": 0,
 				"compress": 0,
 				"onefunc": 0,
 				"wrapInner": 0,
@@ -51,7 +49,6 @@ steal('steal', 'steal/parse','steal/build',
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 
 		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
-		opts.global = opts.global || "jQuery";
 		opts.namespace = opts.namespace || "namespace";
 
 		if (opts.nojquery) {
@@ -123,9 +120,9 @@ steal('steal', 'steal/parse','steal/build',
 		var output = '';
 
 		if(opts.onefunc) {
-			output = '(function(window, undefined) {';
+			output = opts.wrapInner.length ? opts.wrapInner[0] : '(function(window, undefined) {';
 			output += out;
-			output += '\n\n})(window);';
+			output += opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(window);';
 		}
 		else {
 			output = 'var module = { _orig: window.module, _define: window.define };\n';
@@ -158,7 +155,7 @@ steal('steal', 'steal/parse','steal/build',
 	var funcCount = {};
 	//gets content from a steal
 	s.build.pluginify.content = function(resourceOpts, opts, resource, stl){
-		var param = [],//opts.global; TODO: temporarily commented for 3.3 release
+		var param = [],
 		deps = stl.resources[resourceOpts.id].dependencies;
 
 		for(var i = 0; i < deps.length - 1; i++) {
