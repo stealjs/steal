@@ -102,6 +102,7 @@ steal('steal', 'steal/parse','steal/build',
 				
 					var content = s.build.pluginify.content(stl, opts, resource, opener.steal);
 					if (content) {
+						out += '// ## ' + stl.id + '\n';
 						if(stl.buildType === 'fn' && !opts.onefunc) {
 							out += '\nmodule[\'' + stl.id + '\'] = ';
 						}
