@@ -190,10 +190,10 @@
 			var typs = type.split(" ");
 
 			if (!cb ) {
-				return types[typs.shift()].require
+				return config.attr('types')[typs.shift()].require
 			}
 
-			types[typs.shift()] = {
+			config.attr('types')[typs.shift()] = {
 				require: cb,
 				convert: typs
 			};
