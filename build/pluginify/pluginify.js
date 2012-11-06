@@ -102,10 +102,14 @@ steal('steal', 'steal/parse','steal/build',
 				
 					var content = s.build.pluginify.content(stl, opts, resource, opener.steal);
 					if (content) {
-						//s.print("  > " + stl.id)
-						if(stl.buildType === 'fn') {
+						if(stl.buildType === 'fn' && !opts.onefunc) {
 							out += '\nmodule[\'' + stl.id + '\'] = ';
 						}
+
+						if(opts.onefunc) {
+							content = content.substring(0, content.lastIndexOf('return'));
+						}
+
 						out += s.build.js.clean(content);
 					}
 				}
@@ -115,22 +119,31 @@ steal('steal', 'steal/parse','steal/build',
 			}, true);
 		}, true, false);
 
-		var output = 'var module = { _orig: window.module, _define: window.define };\n';
+		var output = '';
 
-		for(key in opts.shim) {
-			output += 'module[\'' + key + '\'] = ' + opts.shim[key] + ';\n';
+		if(opts.onefunc) {
+			output = '(function(window, undefined) {';
+			output += out;
+			output += '\n\n})(window);';
 		}
+		else {
+			output = 'var module = { _orig: window.module, _define: window.define };\n';
 
-		output += 'var define = function(id, deps, value) {\n';
-		output += '\tmodule[id] = value();\n';
-		output += '};\ndefine.amd = { jQuery: true };\n' + out + '\n';
+			for(key in opts.shim) {
+				output += 'module[\'' + key + '\'] = ' + opts.shim[key] + ';\n';
+			}
 
-		for(key in opts.exports) {
-			output += 'window[\'' + opts.exports[key] + '\'] = module[\'' + key + '\'];\n';
+			output += 'var define = function(id, deps, value) {\n';
+			output += '\tmodule[id] = value();\n';
+			output += '};\ndefine.amd = { jQuery: true };\n' + out + '\n';
+
+			for(key in opts.exports) {
+				output += 'window[\'' + opts.exports[key] + '\'] = module[\'' + key + '\'];\n';
+			}
+
+			output += '\nwindow.define = module._define;\n';
+			output += '\nwindow.module = module._orig;';
 		}
-
-		output += '\nwindow.define = module._define;\n';
-		output += '\nwindow.module = module._orig;';
 
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
