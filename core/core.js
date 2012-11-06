@@ -76,7 +76,9 @@
 		st.config = function(){
 			return config.attr.apply(config, arguments)
 		};
-
+		st.require = function(){
+			return config.require.apply(config, arguments);
+		}
 		st._id = Math.floor(1000 * Math.random());
 
 		/*# config.js #*/
