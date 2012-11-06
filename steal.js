@@ -605,21 +605,7 @@ URI.prototype.insertMapping = function() {
 
 // --- END URI
 
-	var configs = {
-	"_" : {
-		types: {},
-		ext: {},
-		env: "development",
-		loadProduction: true,
-		logLevel: 0
-	}
-}
-
-function configManager(configContext){
-	configContext = configContext || "_";
-
-	var callbacks = [],
-	/**
+		/**
 	 * `config(config)` configures st. Typically it it used
 	 * in __stealconfig.js__.  The available options are:
 	 * 
@@ -691,50 +677,54 @@ function configManager(configContext){
 	 * 
 	 * ## startFile
 	 */
-	configFn = function( config ) {
-		var stealConfig = configs[configContext];
+
+var ConfigManager = function(options){
+	this.stealConfig = {};
+	this.callbacks = [];
+	this.attr(ConfigManager.defaults);
+	this.attr(options)
+}
+h.extend(ConfigManager.prototype, {
+	attr: function( config ) {
 		if(!config){ // called as a getter, so just return
-			return stealConfig;
+			return this.stealConfig;
 		}
 		if(arguments.length === 1 && typeof config === "string"){ // called as a getter, so just return
-			return stealConfig && stealConfig[config];
+			return this.stealConfig && this.stealConfig[config];
 		}
-		stealConfig = stealConfig || {};
+		this.stealConfig = this.stealConfig || {};
 		for(var prop in config){
 			var value = config[prop];
 			// if it's a special function
-			configFn[prop] ?
+			this[prop] ?
 				// run it
-				configFn[prop](value) :
+				this[prop](value) :
 				// otherwise set or extend
-				(typeof value == "object" && stealConfig[prop] ?
+				(typeof value == "object" && this.stealConfig[prop] ?
 					// extend
-					h.extend( stealConfig[prop], value) :
+					h.extend( this.stealConfig[prop], value) :
 					// set
-					stealConfig[prop] = value);
+					this.stealConfig[prop] = value);
 				
 		}
 
-		for(var i = 0; i < callbacks.length; i++){
-			callbacks[i]()
+		for(var i = 0; i < this.callbacks.length; i++){
+			this.callbacks[i]()
 		}
 		
-		return stealConfig;
-	};
-
-	configFn.on = function(cb){
-		callbacks.push(cb)
-	}
-
-	configFn.startFile = function(startFile){
-		var stealConfig = configs[configContext];
+		return this;
+	},
+	on: function(cb){
+		this.callbacks.push(cb)
+	},
+	startFile: function(startFile){
 		// make sure startFile and production look right
-		stealConfig.startFile = "" + URI(startFile).addJS()
-		if (!stealConfig.production ) {
-			stealConfig.production = URI(stealConfig.startFile).dir() + "/production.js";
+		this.stealConfig.startFile = "" + URI(startFile).addJS()
+		if (!this.stealConfig.production ) {
+			this.stealConfig.production = URI(this.stealConfig.startFile).dir() + "/production.js";
 		}
 		
-	}
+	},
 
 	/**
 	 * Read or define the path relative URI's should be referenced from.
@@ -743,8 +733,7 @@ function configManager(configContext){
 	 *     st.URI.root("http://foo.com/app/files/")
 	 *     st.root.toString() //-> "../../app/files/"
 	 */
-	configFn.root = function( relativeURI ) {
-		var stealConfig = configs[configContext];
+	root: function( relativeURI ) {
 		if ( relativeURI !== undefined ) {
 			var root = URI(relativeURI);
 
@@ -755,14 +744,12 @@ function configManager(configContext){
 
 			// cur now points to the 'root' location, but from the page
 			URI.cur = loc.pathTo(cleaned)
-			stealConfig.root = root;
-			return;
+			this.stealConfig.root = root;
+			return this;
 		}
-		stealConfig.root =  root || URI("");
-	}
-	configFn.root("");
-
-	configFn.shim = function(shims){
+		this.stealConfig.root =  root || URI("");
+	},
+	shim: function(shims){
 		for(var id in shims){
 			var resource = Module.make(id);
 			if(typeof shims[id] === "object"){
@@ -789,18 +776,305 @@ function configManager(configContext){
 				}
 			})(resource, needs, exports, init)
 		}
+	},
+	//var stealConfig = configs[configContext];
+	cloneContext: function(){
+		return new ConfigManager( h.extend( {}, this.stealConfig ) );
+	}
+})
+ConfigManager.defaults = {
+	types: {},
+	ext: {},
+	env: "development",
+	loadProduction: true,
+	logLevel: 0,
+	root: ""
+};
+
+	// ### TYPES ##
+/**
+ * Registers a type.  You define the type of the file, the basic type it
+ * converts to, and a conversion function where you convert the original file
+ * to JS or CSS.  This is modeled after the
+ * [http://api.jquery.com/extending-ajax/#Converters AJAX converters] in jQuery.
+ *
+ * Types are designed to make it simple to switch between steal's development
+ * and production modes.  In development mode, the types are converted
+ * in the browser to allow devs to see changes as they work.  When the app is
+ * built, these converter functions are run by the build process,
+ * and the processed text is inserted into the production script, optimized for
+ * performance.
+ *
+ * Here's an example converting files of type .foo to JavaScript.  Foo is a
+ * fake language that saves global variables defined like.  A .foo file might
+ * look like this:
+ *
+ *     REQUIRED FOO
+ *
+ * To define this type, you'd call steal.type like this:
+ *
+ *     steal.type("foo js", function(options, original, success, error){
+ *       var parts = options.text.split(" ")
+ *       options.text = parts[0]+"='"+parts[1]+"'";
+ *       success();
+ *     });
+ *
+ * The method we provide is called with the text of .foo files in options.text.
+ * We parse the file, create JavaScript and put it in options.text.  Couldn't
+ * be simpler.
+ *
+ * Here's an example,
+ * converting [http://jashkenas.github.com/coffee-script/ coffeescript]
+ * to JavaScript:
+ *
+ *     steal.type("coffee js", function(options, original, success, error){
+ *       options.text = CoffeeScript.compile(options.text);
+ *       success();
+ *     });
+ *
+ * In this example, any time steal encounters a file with extension .coffee,
+ * it will call the given converter method.  CoffeeScript.compile takes the
+ * text of the file, converts it from coffeescript to javascript, and saves
+ * the JavaScript text in options.text.
+ *
+ * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can
+ * be converted to CSS:
+ *
+ *     steal.type("less css", function(options, original, success, error){
+ *       new (less.Parser)({
+ *         optimization: less.optimization,
+ *         paths: []
+ *       }).parse(options.text, function (e, root) {
+ *         options.text = root.toCSS();
+ *         success();
+ *       });
+ *     });
+ *
+ * This simple type system could be used to convert any file type to be used
+ * in your JavaScript app.  For example, [http://fdik.org/yml/ yml] could be
+ * used for configuration.  jQueryMX uses steal.type to support JS templates,
+ * such as EJS, TMPL, and others.
+ *
+ * @param {String} type A string that defines the new type being defined and
+ * the type being converted to, separated by a space, like "coffee js".
+ *
+ * There can be more than two steps used in conversion, such as "ejs view js".
+ * This will define a method that converts .ejs files to .view files.  There
+ * should be another converter for "view js" that makes this final conversion
+ * to JS.
+ *
+ * @param {Function} cb( options, original, success, error ) a callback
+ * function that converts the new file type to a basic type.  This method
+ * needs to do two things: 1) save the text of the converted file in
+ * options.text and 2) call success() when the conversion is done (it can work
+ * asynchronously).
+ *
+ * - __options__ - the steal options for this file, including path information
+ * - __original__ - the original argument passed to steal, which might be a
+ *   path or a function
+ * - __success__ - a method to call when the file is converted and processed
+ *   successfully
+ * - __error__ - a method called if the conversion fails or the file doesn't
+ *   exist
+ */
+ConfigManager.prototype.types = function(types){
+	var configTypes = this.stealConfig.types || (this.stealConfig.types = {});
+	h.each(types, function( type, cb ) {
+		var typs = type.split(" ");
+		configTypes[typs.shift()] = {
+			require: cb,
+			convert: typs
+		};
+	});
+};
+ConfigManager.prototype.require = function( options, success, error) {
+	// add the src option
+	// but it is not added to functions
+	if(options.idToUri){
+		options.src = options.idToUri(options.id);
 	}
 
-	configFn.cloneContext = function(){
-		var id = "_" + (new Date()).getTime();
-		configs[id] = h.extend({}, configs[configContext]);
-		return configManager(id);
-	}
-	
-	return configFn;
-}
+	// get the type
+	var type = this.attr().types[options.type],
+		converters;
 
-	var moduleManager = function(steal, types, modules, interactives){
+	// if this has converters, make it get the text first, then pass it to the type
+	if ( type.convert.length ) {
+		converters = type.convert.slice(0);
+		converters.unshift("text", options.type)
+	} else {
+		converters = [options.type]
+	}
+	require(options, converters, success, error, this)
+};
+
+function require(options, converters, success, error, config) {
+
+	var type = config.attr('types')[converters.shift()];
+
+	type.require(options, function require_continue_check() {
+		// if we have more types to convert
+		if ( converters.length ) {
+			require(options, converters, success, error)
+		} else { // otherwise this is the final
+			success.apply(this, arguments);
+		}
+	}, error)
+};
+
+
+
+
+// =============================== TYPES ===============================
+// a clean up script that prevents memory leaks and removes the
+// script
+var cleanUp = function( elem ) {
+	elem.onreadystatechange = elem.onload = elem.onerror = null;
+
+	setTimeout(function() {
+		h.head().removeChild(elem);
+	}, 1);
+},
+	// the last inserted script, needed for IE
+	lastInserted,
+	// if the state is done
+	stateCheck = /^loade|c|u/;
+
+
+var cssCount = 0,
+	createSheet = h.doc && h.doc.createStyleSheet,
+	lastSheet, lastSheetOptions;
+
+// Apply all the basic types
+ConfigManager.defaults.types = {
+	"js": function( options, success, error ) {
+		// create a script tag
+		var script = h.scriptTag(),
+			callback = function() {
+				if (!script.readyState || stateCheck.test(script.readyState) ) {
+					cleanUp(script);
+					success();
+				}
+			};
+
+		// if we have text, just set and insert text
+		if ( options.text ) {
+			// insert
+			script.text = options.text;
+
+		} else {
+			var src = options.src; //st.idToUri( options.id );
+			if(h.useIEShim && typeof options.debug === "undefined"){
+				script.event = "onclick";
+				script.id = script.htmlFor = "ie-" + h.uuid();
+				script.onreadystatechange = function(){
+					if (stateCheck.test(script.readyState)) {
+						if(script.onclick){
+							try {
+								script.onclick.apply(h.win);
+								success();
+							} catch(e) {
+								alert(e.message + " in file " + script.src);
+							}
+							
+						} else {
+							error();
+						}
+					}
+				}
+			} else {
+				script.onload = callback;
+				// error handling doesn't work on firefox on the filesystem
+				if ( h.support.error && error && src.protocol !== "file" ) {
+					script.onerror = error;
+				}
+			}
+
+			// listen to loaded
+			
+			script.src = "" + src;
+			//script.src = options.src = addSuffix(options.src);
+			//script.async = false;
+			script.onSuccess = success;
+		}
+
+		// insert the script
+		lastInserted = script;
+		h.head().insertBefore(script, h.head().firstChild);
+
+		// if text, just call success right away, and clean up
+		if ( options.text ) {
+			callback();
+		}
+	},
+	"fn": function( options, success ) {
+		var ret;
+		if (!options.skipCallbacks ) {
+			ret = options.fn();
+		}
+		success(ret);
+	},
+	"text": function( options, success, error ) {
+		h.request(options, function( text ) {
+			options.text = text;
+			success(text);
+		}, error)
+	},
+	"css": function( options, success, error ) {
+		if ( options.text ) { // less
+			var css = h.createElement("style");
+			css.type = "text/css";
+			if ( css.styleSheet ) { // IE
+				css.styleSheet.cssText = options.text;
+			} else {
+				(function( node ) {
+					if ( css.childNodes.length ) {
+						if ( css.firstChild.nodeValue !== node.nodeValue ) {
+							css.replaceChild(node, css.firstChild);
+						}
+					} else {
+						css.appendChild(node);
+					}
+				})(h.doc.createTextNode(options.text));
+			}
+			h.head().appendChild(css);
+		} else {
+			if ( createSheet ) {
+				// IE has a 31 sheet and 31 import per sheet limit
+				if (!cssCount++ ) {
+					lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
+					lastSheetOptions = options;
+				} else {
+					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
+					lastSheet.addImport(addSuffix(relative));
+					if ( cssCount == 30 ) {
+						cssCount = 0;
+					}
+				}
+				success();
+				return;
+			}
+
+			options = options || {};
+			var link = h.createElement("link");
+			link.rel = options.rel || "stylesheet";
+			link.href = addSuffix(options.src);
+			link.type = "text/css";
+			h.head().appendChild(link);
+		}
+
+		success();
+	}
+};
+
+
+	var moduleManager = function(steal, modules, interactives, config){
+
+/*print("types")
+
+for(var typeName in config.attr('types')){
+	print("  "+typeName)
+}*/
 
 // ============ RESOURCE ================
 // a map of resources by resourceID
@@ -991,9 +1265,7 @@ h.extend(Module.prototype, {
 			this.unique = false;
 		} else {
 			// save the original options
-			this.options = steal.makeOptions(h.extend({}, h.isString(options) ? {
-				id: options
-			} : options), this.curId);
+			this.options = steal.makeOptions(h.extend({}, options), this.curId);
 
 			this.waits = this.options.waits || false;
 			this.unique = true;
@@ -1210,7 +1482,7 @@ h.extend(Module.prototype, {
 		if (!self.executing ) {
 			self.executing = true;
 
-			steal.require(self.options, function( value ) {
+			config.require(self.options, function( value ) {
 				self.executed( value );
 			}, function( error, src ) {
 				var abortFlag = self.options.abort,
@@ -1288,7 +1560,8 @@ h.extend(Module.prototype, {
 // we could check if it matches something with .js because foo.less.js SHOULD
 // be rare
 Module.prototype.execute = h.before(Module.prototype.execute, function() {
-	var raw = this.options;
+	var raw = this.options,
+		types = config.attr('types');
 
 	// if it's a string, get it's extension and check if
 	// it is a registered type, if it is ... set the type
@@ -1335,23 +1608,38 @@ Module.make = h.after(Module.make, function( stel ) {
 	return Module;
 }
 
-	function stealManager(kickoff, stealConfiguration){
+	function stealManager(kickoff, config, setStealOnWindow){
 
 		// a startup function that will be called when steal is ready
 		var startup = function(){};
-		var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
+		// Removing because this will be passed in
+		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
 
 		// adds a suffix to the url for cache busting
 		var addSuffix = function( str ) {
-			if ( opts.suffix ) {
-				str = (str + '').indexOf('?') > -1 ? str + "&" + opts.suffix : str + "?" + opts.suffix;
+			var suffix = config.attr('suffix')
+			if ( suffix ) {
+				str = (str + '').indexOf('?') > -1 ? str + "&" + suffix : str + "?" + suffix;
 			}
 			return str;
 		}
 		var st = function() {
 			
 			// convert arguments into an array
-			var args = h.map(arguments);
+			var args = h.map(arguments, function(options){
+				if(options){
+					var opts = h.isString(options) ? {
+						id: options
+					} : options;
+					
+					if( !opts.idToUri ){
+						opts.idToUri =  st.idToUri
+					} 
+					return opts;
+				} else {
+					return options;
+				}
+			});
 			if ( args.length ) {
 				Module.pending.push.apply(Module.pending, args);
 				// steal.after is called everytime steal is called
@@ -1362,12 +1650,16 @@ Module.make = h.after(Module.make, function( stel ) {
 
 			return st;
 		};
-
+		if(setStealOnWindow){
+			h.win.steal = st;
+		}
 		st.clone = function(){
-			return stealManager(false, stealConfiguration.cloneContext())
+			return stealManager(false, config.cloneContext())
 		}
 
-		st.config = stealConfiguration;
+		st.config = function(){
+			return config.attr.apply(config, arguments)
+		};
 
 		st._id = Math.floor(1000 * Math.random());
 
@@ -1465,7 +1757,7 @@ st.id = function( id, currentWorkingId, type ) {
 		// if it ends
 	}
 	// check map config
-	var map = stealConfiguration().map || {};
+	var map = config.attr().map || {};
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
@@ -1494,7 +1786,7 @@ st.amdToId = function(id, currentWorkingId, type){
 		// if it ends
 	}
 	// check map config
-	var map = stealConfiguration().map || {};
+	var map = config.attr().map || {};
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
@@ -1512,12 +1804,12 @@ st.amdToId = function(id, currentWorkingId, type){
 // for a given ID, where should I find this resource
 /**
  * `st.idToUri( id, noJoin )` takes an id and returns a URI that
- * is the location of the file. It uses the paths option of  [stealConfiguration].
+ * is the location of the file. It uses the paths option of  [config].
  * Passing true for `noJoin` does not join from the root URI.
  */
 st.idToUri = function( id, noJoin ) {
 	// this is normalize
-	var paths = stealConfiguration().paths || {},
+	var paths = config.attr().paths || {},
 		path;
 	// always run past 
 	h.each(paths, function( part, replaceWith ) {
@@ -1530,11 +1822,11 @@ st.idToUri = function( id, noJoin ) {
 		}
 	})
 
-	return noJoin ? id : stealConfiguration().root.join(id)
+	return noJoin ? id : config.attr().root.join(id)
 }
 st.amdIdToUri = function( id, noJoin ){
 	// this is normalize
-	var paths = stealConfiguration().paths || {},
+	var paths = config.attr().paths || {},
 		path;
 	// always run past 
 	h.each(paths, function( part, replaceWith ) {
@@ -1549,7 +1841,7 @@ st.amdIdToUri = function( id, noJoin ){
 	if( /(^|\/)[^\/\.]+$/.test(id) ){
 		id= URI(id+".js")
 	}
-	return id //noJoin ? id : stealConfiguration().root.join(id)
+	return id //noJoin ? id : config().root.join(id)
 }
 
 // ## AMD ##
@@ -1596,7 +1888,6 @@ h.win.require = function(dependencies, method){
 			dependency.idToUri = st.amdIdToUri;
 			return dependency;
 		}).concat([method]);
-	console.log("stealing",depends.slice(0))
 	st.apply(null, depends )
 }
 h.win.define.amd = {
@@ -1649,9 +1940,9 @@ define("require", function(){
 			options.ext = options.id.ext();
 			
 			// Check if it's a configured needs
-			var configedExt = stealConfiguration().ext[options.ext];
+			var configedExt = config.attr().ext[options.ext];
 			// if we have something, but it's not a type
-			if ( configedExt && ! stealConfiguration().types[configedExt] ) {
+			if ( configedExt && ! config.attr().types[configedExt] ) {
 				if (!options.needs ) {
 					options.needs = [];
 				}
@@ -1839,296 +2130,7 @@ define("require", function(){
 		return !st.isRhino && h.scriptTag().readyState && counter === 1;
 	})()
 
-		// ### TYPES ##
-var types = stealConfiguration().types;
-/**
- * Registers a type.  You define the type of the file, the basic type it
- * converts to, and a conversion function where you convert the original file
- * to JS or CSS.  This is modeled after the
- * [http://api.jquery.com/extending-ajax/#Converters AJAX converters] in jQuery.
- *
- * Types are designed to make it simple to switch between steal's development
- * and production modes.  In development mode, the types are converted
- * in the browser to allow devs to see changes as they work.  When the app is
- * built, these converter functions are run by the build process,
- * and the processed text is inserted into the production script, optimized for
- * performance.
- *
- * Here's an example converting files of type .foo to JavaScript.  Foo is a
- * fake language that saves global variables defined like.  A .foo file might
- * look like this:
- *
- *     REQUIRED FOO
- *
- * To define this type, you'd call steal.type like this:
- *
- *     steal.type("foo js", function(options, original, success, error){
- *       var parts = options.text.split(" ")
- *       options.text = parts[0]+"='"+parts[1]+"'";
- *       success();
- *     });
- *
- * The method we provide is called with the text of .foo files in options.text.
- * We parse the file, create JavaScript and put it in options.text.  Couldn't
- * be simpler.
- *
- * Here's an example,
- * converting [http://jashkenas.github.com/coffee-script/ coffeescript]
- * to JavaScript:
- *
- *     steal.type("coffee js", function(options, original, success, error){
- *       options.text = CoffeeScript.compile(options.text);
- *       success();
- *     });
- *
- * In this example, any time steal encounters a file with extension .coffee,
- * it will call the given converter method.  CoffeeScript.compile takes the
- * text of the file, converts it from coffeescript to javascript, and saves
- * the JavaScript text in options.text.
- *
- * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can
- * be converted to CSS:
- *
- *     steal.type("less css", function(options, original, success, error){
- *       new (less.Parser)({
- *         optimization: less.optimization,
- *         paths: []
- *       }).parse(options.text, function (e, root) {
- *         options.text = root.toCSS();
- *         success();
- *       });
- *     });
- *
- * This simple type system could be used to convert any file type to be used
- * in your JavaScript app.  For example, [http://fdik.org/yml/ yml] could be
- * used for configuration.  jQueryMX uses steal.type to support JS templates,
- * such as EJS, TMPL, and others.
- *
- * @param {String} type A string that defines the new type being defined and
- * the type being converted to, separated by a space, like "coffee js".
- *
- * There can be more than two steps used in conversion, such as "ejs view js".
- * This will define a method that converts .ejs files to .view files.  There
- * should be another converter for "view js" that makes this final conversion
- * to JS.
- *
- * @param {Function} cb( options, original, success, error ) a callback
- * function that converts the new file type to a basic type.  This method
- * needs to do two things: 1) save the text of the converted file in
- * options.text and 2) call success() when the conversion is done (it can work
- * asynchronously).
- *
- * - __options__ - the steal options for this file, including path information
- * - __original__ - the original argument passed to steal, which might be a
- *   path or a function
- * - __success__ - a method to call when the file is converted and processed
- *   successfully
- * - __error__ - a method called if the conversion fails or the file doesn't
- *   exist
- */
-stealConfiguration.types = function(types){
-	h.each(types, st.type)
-};
-
-
-
-
-st.
-/**
- * Called for every file that is loaded.  It sets up a string of methods called
- * for each type in the conversion chain and calls each type one by one.
- *
- * For example, if the file is a coffeescript file, here's what happens:
- *
- *   - The "text" type converter is called first.  This will perform an AJAX
- *   request for the file and save it in options.text.
- *   - Then the coffee type converter is called (the user provided method).
- *   This converts the text from coffeescript to JavaScript.
- *   - Finally the "js" type converter is called, which inserts the JavaScript
- *   in the page as a script tag that is executed.
- *
- * @param {Object} options the steal options for this file, including path information
- * @param {Function} success a method to call when the file is converted and processed successfully
- * @param {Function} error a method called if the conversion fails or the file doesn't exist
- */
-require = function( options, success, error ) {
-	// add the src option
-	options.src = options.idToUri ? options.idToUri(options.id) : st.idToUri(options.id);
-
-	// get the type
-	var type = types[options.type],
-		converters;
-
-	// if this has converters, make it get the text first, then pass it to the type
-	if ( type.convert.length ) {
-		converters = type.convert.slice(0);
-		converters.unshift("text", options.type)
-	} else {
-		converters = [options.type]
-	}
-	require(options, converters, success, error)
-};
-
-function require(options, converters, success, error) {
-
-	var type = types[converters.shift()];
-
-	type.require(options, function require_continue_check() {
-		// if we have more types to convert
-		if ( converters.length ) {
-			require(options, converters, success, error)
-		} else { // otherwise this is the final
-			success.apply(this, arguments);
-		}
-	}, error)
-};
-
-
-
-
-// =============================== TYPES ===============================
-// a clean up script that prevents memory leaks and removes the
-// script
-var cleanUp = function( elem ) {
-	elem.onreadystatechange = elem.onload = elem.onerror = null;
-
-	setTimeout(function() {
-		h.head().removeChild(elem);
-	}, 1);
-},
-	// the last inserted script, needed for IE
-	lastInserted,
-	// if the state is done
-	stateCheck = /^loade|c|u/;
-
-
-var cssCount = 0,
-	createSheet = h.doc && h.doc.createStyleSheet,
-	lastSheet, lastSheetOptions;
-
-// Apply all the basic types
-stealConfiguration({
-	types:{
-		"js": function( options, success, error ) {
-			// create a script tag
-			var script = h.scriptTag(),
-				callback = function() {
-					if (!script.readyState || stateCheck.test(script.readyState) ) {
-						cleanUp(script);
-						success();
-					}
-				};
-
-			// if we have text, just set and insert text
-			if ( options.text ) {
-				// insert
-				script.text = options.text;
-
-			} else {
-				var src = options.src; //st.idToUri( options.id );
-				if(h.useIEShim && typeof options.debug === "undefined"){
-					script.event = "onclick";
-					script.id = script.htmlFor = "ie-" + h.uuid();
-					script.onreadystatechange = function(){
-						if (stateCheck.test(script.readyState)) {
-							if(script.onclick){
-								try {
-									script.onclick.apply(h.win);
-									success();
-								} catch(e) {
-									alert(e.message + " in file " + script.src);
-								}
-								
-							} else {
-								error();
-							}
-						}
-					}
-				} else {
-					script.onload = callback;
-					// error handling doesn't work on firefox on the filesystem
-					if ( h.support.error && error && src.protocol !== "file" ) {
-						script.onerror = error;
-					}
-				}
-
-				// listen to loaded
-				
-				script.src = "" + src;
-				//script.src = options.src = addSuffix(options.src);
-				//script.async = false;
-				script.onSuccess = success;
-			}
-
-			// insert the script
-			lastInserted = script;
-			h.head().insertBefore(script, h.head().firstChild);
-
-			// if text, just call success right away, and clean up
-			if ( options.text ) {
-				callback();
-			}
-		},
-		"fn": function( options, success ) {
-			var ret;
-			if (!options.skipCallbacks ) {
-				ret = options.fn();
-			}
-			success(ret);
-		},
-		"text": function( options, success, error ) {
-			h.request(options, function( text ) {
-				options.text = text;
-				success(text);
-			}, error)
-		},
-		"css": function( options, success, error ) {
-			if ( options.text ) { // less
-				var css = h.createElement("style");
-				css.type = "text/css";
-				if ( css.styleSheet ) { // IE
-					css.styleSheet.cssText = options.text;
-				} else {
-					(function( node ) {
-						if ( css.childNodes.length ) {
-							if ( css.firstChild.nodeValue !== node.nodeValue ) {
-								css.replaceChild(node, css.firstChild);
-							}
-						} else {
-							css.appendChild(node);
-						}
-					})(h.doc.createTextNode(options.text));
-				}
-				h.head().appendChild(css);
-			} else {
-				if ( createSheet ) {
-					// IE has a 31 sheet and 31 import per sheet limit
-					if (!cssCount++ ) {
-						lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
-						lastSheetOptions = options;
-					} else {
-						var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-						lastSheet.addImport(addSuffix(relative));
-						if ( cssCount == 30 ) {
-							cssCount = 0;
-						}
-					}
-					success();
-					return;
-				}
-
-				options = options || {};
-				var link = h.createElement("link");
-				link.rel = options.rel || "stylesheet";
-				link.href = addSuffix(options.src);
-				link.type = "text/css";
-				h.head().appendChild(link);
-			}
-
-			success();
-		}
-	}
-});
+		
 
 		//  ============================== Packages ===============================
 /**
@@ -2268,7 +2270,7 @@ if ( h.support.interactive ) {
 	})
 }
 
-		var Module = moduleManager(st, types, modules, interactives);
+		var Module = moduleManager(st, modules, interactives, config);
 		resources  = Module.resources; 
 
 		// =============================== STARTUP ===============================
@@ -2479,26 +2481,28 @@ st.events.done = {
 
 startup = h.after(startup, function() {
 	// get options from 
-	var options = {};
+	//var options = {}; TODO: remove
 
 	// A: GET OPTIONS
 	// 1. get script options
-	h.extend(options, st.getScriptOptions());
+	//h.extend(options, ); TODO: remove
 
 	// 2. options from a steal object that existed before this steal
-	h.extend(options, opts);
+	// the steal object is copied right away
+	// h.extend(options, opts);
 	
 	// 3. if url looks like steal[xyz]=bar, add those to the options
-	// does this ened to be supported anywhere?
-	var search = h.win.location && decodeURIComponent(h.win.location.search);
-	search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
-		options[prop] = ~val.indexOf(",") ? val.split(",") : val;
-	});
+	// does this need to be supported anywhere?
+	// NO - Justin
+	//var search = h.win.location && decodeURIComponent(h.win.location.search);
+	//search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+	//	options[prop] = ~val.indexOf(",") ? val.split(",") : val;
+	//});
 
 	// B: DO THINGS WITH OPTIONS
 	// CALCULATE CURRENT LOCATION OF THINGS ...
-	stealConfiguration(options);
-	
+	config.attr(st.getScriptOptions());
+	var options = config.attr();
 
 	// mark things that have already been loaded
 	h.each(options.executed || [], function( i, stel ) {
@@ -2536,9 +2540,9 @@ startup = h.after(startup, function() {
 	}
 
 	// we only load things with force = true
-	if ( stealConfiguration().env == "production" && stealConfiguration().loadProduction && stealConfiguration().production ) {
+	if ( config.attr().env == "production" && config.attr().loadProduction && config.attr().production ) {
 		st({
-			id: stealConfiguration().production,
+			id: config.attr().production,
 			force: true
 		});
 	} else {
@@ -2560,7 +2564,7 @@ startup = h.after(startup, function() {
 	}
 });
 
-		st.config.on(function(){
+		config.on(function(){
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible
@@ -2580,7 +2584,7 @@ startup = h.after(startup, function() {
 		st.File = st.URI = URI;
 
 		if(kickoff){
-			var stealModule = new Module("steal")
+			var stealModule = new Module({id:"steal"})
 			stealModule.value = st;
 			stealModule.loaded.resolve();
 			stealModule.run.resolve();
@@ -2599,6 +2603,6 @@ startup = h.after(startup, function() {
 		return st;
 	}
 
-	h.win.steal = stealManager(true, configManager())
+	stealManager(true, new ConfigManager(typeof h.win.steal == "object" ? h.win.steal : {}), true)
 
 })();

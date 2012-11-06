@@ -29,9 +29,9 @@
 			options.ext = options.id.ext();
 			
 			// Check if it's a configured needs
-			var configedExt = stealConfiguration().ext[options.ext];
+			var configedExt = config.attr().ext[options.ext];
 			// if we have something, but it's not a type
-			if ( configedExt && ! stealConfiguration().types[configedExt] ) {
+			if ( configedExt && ! config.attr().types[configedExt] ) {
 				if (!options.needs ) {
 					options.needs = [];
 				}

@@ -27,25 +27,42 @@
 
 	/*# config_manager.js #*/
 
+	/*# types.js #*/
+
 	/*# module.js #*/
 
-	function stealManager(kickoff, stealConfiguration){
+	function stealManager(kickoff, config, setStealOnWindow){
 
 		// a startup function that will be called when steal is ready
 		var startup = function(){};
-		var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
+		// Removing because this will be passed in
+		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
 
 		// adds a suffix to the url for cache busting
 		var addSuffix = function( str ) {
-			if ( opts.suffix ) {
-				str = (str + '').indexOf('?') > -1 ? str + "&" + opts.suffix : str + "?" + opts.suffix;
+			var suffix = config.attr('suffix')
+			if ( suffix ) {
+				str = (str + '').indexOf('?') > -1 ? str + "&" + suffix : str + "?" + suffix;
 			}
 			return str;
 		}
 		var st = function() {
 			
 			// convert arguments into an array
-			var args = h.map(arguments);
+			var args = h.map(arguments, function(options){
+				if(options){
+					var opts = h.isString(options) ? {
+						id: options
+					} : options;
+					
+					if( !opts.idToUri ){
+						opts.idToUri =  st.idToUri
+					} 
+					return opts;
+				} else {
+					return options;
+				}
+			});
 			if ( args.length ) {
 				Module.pending.push.apply(Module.pending, args);
 				// steal.after is called everytime steal is called
@@ -56,12 +73,16 @@
 
 			return st;
 		};
-
+		if(setStealOnWindow){
+			h.win.steal = st;
+		}
 		st.clone = function(){
-			return stealManager(false, stealConfiguration.cloneContext())
+			return stealManager(false, config.cloneContext())
 		}
 
-		st.config = stealConfiguration;
+		st.config = function(){
+			return config.attr.apply(config, arguments)
+		};
 
 		st._id = Math.floor(1000 * Math.random());
 
@@ -71,18 +92,18 @@
 
 		/*# static.js #*/
 
-		/*# types.js #*/
+		
 
 		/*# packages.js #*/
 
 		/*# interactive.js #*/
 
-		var Module = moduleManager(st, types, modules, interactives);
+		var Module = moduleManager(st, modules, interactives, config);
 		resources  = Module.resources; 
 
 		/*# startup.js #*/
 
-		st.config.on(function(){
+		config.on(function(){
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible
@@ -102,7 +123,7 @@
 		st.File = st.URI = URI;
 
 		if(kickoff){
-			var stealModule = new Module("steal")
+			var stealModule = new Module({id:"steal"})
 			stealModule.value = st;
 			stealModule.loaded.resolve();
 			stealModule.run.resolve();
@@ -121,6 +142,6 @@
 		return st;
 	}
 
-	h.win.steal = stealManager(true, configManager())
+	stealManager(true, new ConfigManager(typeof h.win.steal == "object" ? h.win.steal : {}), true)
 
 })();

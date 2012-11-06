@@ -206,26 +206,28 @@ st.events.done = {
 
 startup = h.after(startup, function() {
 	// get options from 
-	var options = {};
+	//var options = {}; TODO: remove
 
 	// A: GET OPTIONS
 	// 1. get script options
-	h.extend(options, st.getScriptOptions());
+	//h.extend(options, ); TODO: remove
 
 	// 2. options from a steal object that existed before this steal
-	h.extend(options, opts);
+	// the steal object is copied right away
+	// h.extend(options, opts);
 	
 	// 3. if url looks like steal[xyz]=bar, add those to the options
-	// does this ened to be supported anywhere?
-	var search = h.win.location && decodeURIComponent(h.win.location.search);
-	search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
-		options[prop] = ~val.indexOf(",") ? val.split(",") : val;
-	});
+	// does this need to be supported anywhere?
+	// NO - Justin
+	//var search = h.win.location && decodeURIComponent(h.win.location.search);
+	//search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+	//	options[prop] = ~val.indexOf(",") ? val.split(",") : val;
+	//});
 
 	// B: DO THINGS WITH OPTIONS
 	// CALCULATE CURRENT LOCATION OF THINGS ...
-	stealConfiguration(options);
-	
+	config.attr(st.getScriptOptions());
+	var options = config.attr();
 
 	// mark things that have already been loaded
 	h.each(options.executed || [], function( i, stel ) {
@@ -263,9 +265,9 @@ startup = h.after(startup, function() {
 	}
 
 	// we only load things with force = true
-	if ( stealConfiguration().env == "production" && stealConfiguration().loadProduction && stealConfiguration().production ) {
+	if ( config.attr().env == "production" && config.attr().loadProduction && config.attr().production ) {
 		st({
-			id: stealConfiguration().production,
+			id: config.attr().production,
 			force: true
 		});
 	} else {

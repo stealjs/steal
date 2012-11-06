@@ -1,17 +1,3 @@
-var configs = {
-	"_" : {
-		types: {},
-		ext: {},
-		env: "development",
-		loadProduction: true,
-		logLevel: 0
-	}
-}
-
-function configManager(configContext){
-	configContext = configContext || "_";
-
-	var callbacks = [],
 	/**
 	 * `config(config)` configures st. Typically it it used
 	 * in __stealconfig.js__.  The available options are:
@@ -84,50 +70,54 @@ function configManager(configContext){
 	 * 
 	 * ## startFile
 	 */
-	configFn = function( config ) {
-		var stealConfig = configs[configContext];
+
+var ConfigManager = function(options){
+	this.stealConfig = {};
+	this.callbacks = [];
+	this.attr(ConfigManager.defaults);
+	this.attr(options)
+}
+h.extend(ConfigManager.prototype, {
+	attr: function( config ) {
 		if(!config){ // called as a getter, so just return
-			return stealConfig;
+			return this.stealConfig;
 		}
 		if(arguments.length === 1 && typeof config === "string"){ // called as a getter, so just return
-			return stealConfig && stealConfig[config];
+			return this.stealConfig && this.stealConfig[config];
 		}
-		stealConfig = stealConfig || {};
+		this.stealConfig = this.stealConfig || {};
 		for(var prop in config){
 			var value = config[prop];
 			// if it's a special function
-			configFn[prop] ?
+			this[prop] ?
 				// run it
-				configFn[prop](value) :
+				this[prop](value) :
 				// otherwise set or extend
-				(typeof value == "object" && stealConfig[prop] ?
+				(typeof value == "object" && this.stealConfig[prop] ?
 					// extend
-					h.extend( stealConfig[prop], value) :
+					h.extend( this.stealConfig[prop], value) :
 					// set
-					stealConfig[prop] = value);
+					this.stealConfig[prop] = value);
 				
 		}
 
-		for(var i = 0; i < callbacks.length; i++){
-			callbacks[i]()
+		for(var i = 0; i < this.callbacks.length; i++){
+			this.callbacks[i]()
 		}
 		
-		return stealConfig;
-	};
-
-	configFn.on = function(cb){
-		callbacks.push(cb)
-	}
-
-	configFn.startFile = function(startFile){
-		var stealConfig = configs[configContext];
+		return this;
+	},
+	on: function(cb){
+		this.callbacks.push(cb)
+	},
+	startFile: function(startFile){
 		// make sure startFile and production look right
-		stealConfig.startFile = "" + URI(startFile).addJS()
-		if (!stealConfig.production ) {
-			stealConfig.production = URI(stealConfig.startFile).dir() + "/production.js";
+		this.stealConfig.startFile = "" + URI(startFile).addJS()
+		if (!this.stealConfig.production ) {
+			this.stealConfig.production = URI(this.stealConfig.startFile).dir() + "/production.js";
 		}
 		
-	}
+	},
 
 	/**
 	 * Read or define the path relative URI's should be referenced from.
@@ -136,8 +126,7 @@ function configManager(configContext){
 	 *     st.URI.root("http://foo.com/app/files/")
 	 *     st.root.toString() //-> "../../app/files/"
 	 */
-	configFn.root = function( relativeURI ) {
-		var stealConfig = configs[configContext];
+	root: function( relativeURI ) {
 		if ( relativeURI !== undefined ) {
 			var root = URI(relativeURI);
 
@@ -148,14 +137,12 @@ function configManager(configContext){
 
 			// cur now points to the 'root' location, but from the page
 			URI.cur = loc.pathTo(cleaned)
-			stealConfig.root = root;
-			return;
+			this.stealConfig.root = root;
+			return this;
 		}
-		stealConfig.root =  root || URI("");
-	}
-	configFn.root("");
-
-	configFn.shim = function(shims){
+		this.stealConfig.root =  root || URI("");
+	},
+	shim: function(shims){
 		for(var id in shims){
 			var resource = Module.make(id);
 			if(typeof shims[id] === "object"){
@@ -182,13 +169,17 @@ function configManager(configContext){
 				}
 			})(resource, needs, exports, init)
 		}
+	},
+	//var stealConfig = configs[configContext];
+	cloneContext: function(){
+		return new ConfigManager( h.extend( {}, this.stealConfig ) );
 	}
-
-	configFn.cloneContext = function(){
-		var id = "_" + (new Date()).getTime();
-		configs[id] = h.extend({}, configs[configContext]);
-		return configManager(id);
-	}
-	
-	return configFn;
-}
+})
+ConfigManager.defaults = {
+	types: {},
+	ext: {},
+	env: "development",
+	loadProduction: true,
+	logLevel: 0,
+	root: ""
+};

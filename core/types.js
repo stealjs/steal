@@ -1,5 +1,4 @@
 // ### TYPES ##
-var types = stealConfiguration().types;
 /**
  * Registers a type.  You define the type of the file, the basic type it
  * converts to, and a conversion function where you convert the original file
@@ -85,37 +84,25 @@ var types = stealConfiguration().types;
  * - __error__ - a method called if the conversion fails or the file doesn't
  *   exist
  */
-stealConfiguration.types = function(types){
-	h.each(types, st.type)
+ConfigManager.prototype.types = function(types){
+	var configTypes = this.stealConfig.types || (this.stealConfig.types = {});
+	h.each(types, function( type, cb ) {
+		var typs = type.split(" ");
+		configTypes[typs.shift()] = {
+			require: cb,
+			convert: typs
+		};
+	});
 };
-
-
-
-
-st.
-/**
- * Called for every file that is loaded.  It sets up a string of methods called
- * for each type in the conversion chain and calls each type one by one.
- *
- * For example, if the file is a coffeescript file, here's what happens:
- *
- *   - The "text" type converter is called first.  This will perform an AJAX
- *   request for the file and save it in options.text.
- *   - Then the coffee type converter is called (the user provided method).
- *   This converts the text from coffeescript to JavaScript.
- *   - Finally the "js" type converter is called, which inserts the JavaScript
- *   in the page as a script tag that is executed.
- *
- * @param {Object} options the steal options for this file, including path information
- * @param {Function} success a method to call when the file is converted and processed successfully
- * @param {Function} error a method called if the conversion fails or the file doesn't exist
- */
-require = function( options, success, error ) {
+ConfigManager.prototype.require = function( options, success, error) {
 	// add the src option
-	options.src = options.idToUri ? options.idToUri(options.id) : st.idToUri(options.id);
+	// but it is not added to functions
+	if(options.idToUri){
+		options.src = options.idToUri(options.id);
+	}
 
 	// get the type
-	var type = types[options.type],
+	var type = this.attr().types[options.type],
 		converters;
 
 	// if this has converters, make it get the text first, then pass it to the type
@@ -125,12 +112,12 @@ require = function( options, success, error ) {
 	} else {
 		converters = [options.type]
 	}
-	require(options, converters, success, error)
+	require(options, converters, success, error, this)
 };
 
-function require(options, converters, success, error) {
+function require(options, converters, success, error, config) {
 
-	var type = types[converters.shift()];
+	var type = config.attr('types')[converters.shift()];
 
 	type.require(options, function require_continue_check() {
 		// if we have more types to convert
@@ -166,125 +153,123 @@ var cssCount = 0,
 	lastSheet, lastSheetOptions;
 
 // Apply all the basic types
-stealConfiguration({
-	types:{
-		"js": function( options, success, error ) {
-			// create a script tag
-			var script = h.scriptTag(),
-				callback = function() {
-					if (!script.readyState || stateCheck.test(script.readyState) ) {
-						cleanUp(script);
-						success();
-					}
-				};
-
-			// if we have text, just set and insert text
-			if ( options.text ) {
-				// insert
-				script.text = options.text;
-
-			} else {
-				var src = options.src; //st.idToUri( options.id );
-				if(h.useIEShim && typeof options.debug === "undefined"){
-					script.event = "onclick";
-					script.id = script.htmlFor = "ie-" + h.uuid();
-					script.onreadystatechange = function(){
-						if (stateCheck.test(script.readyState)) {
-							if(script.onclick){
-								try {
-									script.onclick.apply(h.win);
-									success();
-								} catch(e) {
-									alert(e.message + " in file " + script.src);
-								}
-								
-							} else {
-								error();
-							}
-						}
-					}
-				} else {
-					script.onload = callback;
-					// error handling doesn't work on firefox on the filesystem
-					if ( h.support.error && error && src.protocol !== "file" ) {
-						script.onerror = error;
-					}
-				}
-
-				// listen to loaded
-				
-				script.src = "" + src;
-				//script.src = options.src = addSuffix(options.src);
-				//script.async = false;
-				script.onSuccess = success;
-			}
-
-			// insert the script
-			lastInserted = script;
-			h.head().insertBefore(script, h.head().firstChild);
-
-			// if text, just call success right away, and clean up
-			if ( options.text ) {
-				callback();
-			}
-		},
-		"fn": function( options, success ) {
-			var ret;
-			if (!options.skipCallbacks ) {
-				ret = options.fn();
-			}
-			success(ret);
-		},
-		"text": function( options, success, error ) {
-			h.request(options, function( text ) {
-				options.text = text;
-				success(text);
-			}, error)
-		},
-		"css": function( options, success, error ) {
-			if ( options.text ) { // less
-				var css = h.createElement("style");
-				css.type = "text/css";
-				if ( css.styleSheet ) { // IE
-					css.styleSheet.cssText = options.text;
-				} else {
-					(function( node ) {
-						if ( css.childNodes.length ) {
-							if ( css.firstChild.nodeValue !== node.nodeValue ) {
-								css.replaceChild(node, css.firstChild);
-							}
-						} else {
-							css.appendChild(node);
-						}
-					})(h.doc.createTextNode(options.text));
-				}
-				h.head().appendChild(css);
-			} else {
-				if ( createSheet ) {
-					// IE has a 31 sheet and 31 import per sheet limit
-					if (!cssCount++ ) {
-						lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
-						lastSheetOptions = options;
-					} else {
-						var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-						lastSheet.addImport(addSuffix(relative));
-						if ( cssCount == 30 ) {
-							cssCount = 0;
-						}
-					}
+ConfigManager.defaults.types = {
+	"js": function( options, success, error ) {
+		// create a script tag
+		var script = h.scriptTag(),
+			callback = function() {
+				if (!script.readyState || stateCheck.test(script.readyState) ) {
+					cleanUp(script);
 					success();
-					return;
 				}
+			};
 
-				options = options || {};
-				var link = h.createElement("link");
-				link.rel = options.rel || "stylesheet";
-				link.href = addSuffix(options.src);
-				link.type = "text/css";
-				h.head().appendChild(link);
+		// if we have text, just set and insert text
+		if ( options.text ) {
+			// insert
+			script.text = options.text;
+
+		} else {
+			var src = options.src; //st.idToUri( options.id );
+			if(h.useIEShim && typeof options.debug === "undefined"){
+				script.event = "onclick";
+				script.id = script.htmlFor = "ie-" + h.uuid();
+				script.onreadystatechange = function(){
+					if (stateCheck.test(script.readyState)) {
+						if(script.onclick){
+							try {
+								script.onclick.apply(h.win);
+								success();
+							} catch(e) {
+								alert(e.message + " in file " + script.src);
+							}
+							
+						} else {
+							error();
+						}
+					}
+				}
+			} else {
+				script.onload = callback;
+				// error handling doesn't work on firefox on the filesystem
+				if ( h.support.error && error && src.protocol !== "file" ) {
+					script.onerror = error;
+				}
 			}
 
-			success();
+			// listen to loaded
+			
+			script.src = "" + src;
+			//script.src = options.src = addSuffix(options.src);
+			//script.async = false;
+			script.onSuccess = success;
 		}
+
+		// insert the script
+		lastInserted = script;
+		h.head().insertBefore(script, h.head().firstChild);
+
+		// if text, just call success right away, and clean up
+		if ( options.text ) {
+			callback();
+		}
+	},
+	"fn": function( options, success ) {
+		var ret;
+		if (!options.skipCallbacks ) {
+			ret = options.fn();
+		}
+		success(ret);
+	},
+	"text": function( options, success, error ) {
+		h.request(options, function( text ) {
+			options.text = text;
+			success(text);
+		}, error)
+	},
+	"css": function( options, success, error ) {
+		if ( options.text ) { // less
+			var css = h.createElement("style");
+			css.type = "text/css";
+			if ( css.styleSheet ) { // IE
+				css.styleSheet.cssText = options.text;
+			} else {
+				(function( node ) {
+					if ( css.childNodes.length ) {
+						if ( css.firstChild.nodeValue !== node.nodeValue ) {
+							css.replaceChild(node, css.firstChild);
+						}
+					} else {
+						css.appendChild(node);
+					}
+				})(h.doc.createTextNode(options.text));
+			}
+			h.head().appendChild(css);
+		} else {
+			if ( createSheet ) {
+				// IE has a 31 sheet and 31 import per sheet limit
+				if (!cssCount++ ) {
+					lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
+					lastSheetOptions = options;
+				} else {
+					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
+					lastSheet.addImport(addSuffix(relative));
+					if ( cssCount == 30 ) {
+						cssCount = 0;
+					}
+				}
+				success();
+				return;
+			}
+
+			options = options || {};
+			var link = h.createElement("link");
+			link.rel = options.rel || "stylesheet";
+			link.href = addSuffix(options.src);
+			link.type = "text/css";
+			h.head().appendChild(link);
+		}
+
+		success();
 	}
-});
+};

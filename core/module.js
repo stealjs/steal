@@ -1,4 +1,10 @@
-var moduleManager = function(steal, types, modules, interactives){
+var moduleManager = function(steal, modules, interactives, config){
+
+/*print("types")
+
+for(var typeName in config.attr('types')){
+	print("  "+typeName)
+}*/
 
 // ============ RESOURCE ================
 // a map of resources by resourceID
@@ -189,9 +195,7 @@ h.extend(Module.prototype, {
 			this.unique = false;
 		} else {
 			// save the original options
-			this.options = steal.makeOptions(h.extend({}, h.isString(options) ? {
-				id: options
-			} : options), this.curId);
+			this.options = steal.makeOptions(h.extend({}, options), this.curId);
 
 			this.waits = this.options.waits || false;
 			this.unique = true;
@@ -408,7 +412,7 @@ h.extend(Module.prototype, {
 		if (!self.executing ) {
 			self.executing = true;
 
-			steal.require(self.options, function( value ) {
+			config.require(self.options, function( value ) {
 				self.executed( value );
 			}, function( error, src ) {
 				var abortFlag = self.options.abort,
@@ -486,7 +490,8 @@ h.extend(Module.prototype, {
 // we could check if it matches something with .js because foo.less.js SHOULD
 // be rare
 Module.prototype.execute = h.before(Module.prototype.execute, function() {
-	var raw = this.options;
+	var raw = this.options,
+		types = config.attr('types');
 
 	// if it's a string, get it's extension and check if
 	// it is a registered type, if it is ... set the type

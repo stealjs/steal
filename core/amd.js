@@ -36,7 +36,7 @@ st.id = function( id, currentWorkingId, type ) {
 		// if it ends
 	}
 	// check map config
-	var map = stealConfiguration().map || {};
+	var map = config.attr().map || {};
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
@@ -65,7 +65,7 @@ st.amdToId = function(id, currentWorkingId, type){
 		// if it ends
 	}
 	// check map config
-	var map = stealConfiguration().map || {};
+	var map = config.attr().map || {};
 	// always run past 
 	h.each(map, function( loc, maps ) {
 		// is the current working id matching loc
@@ -83,12 +83,12 @@ st.amdToId = function(id, currentWorkingId, type){
 // for a given ID, where should I find this resource
 /**
  * `st.idToUri( id, noJoin )` takes an id and returns a URI that
- * is the location of the file. It uses the paths option of  [stealConfiguration].
+ * is the location of the file. It uses the paths option of  [config].
  * Passing true for `noJoin` does not join from the root URI.
  */
 st.idToUri = function( id, noJoin ) {
 	// this is normalize
-	var paths = stealConfiguration().paths || {},
+	var paths = config.attr().paths || {},
 		path;
 	// always run past 
 	h.each(paths, function( part, replaceWith ) {
@@ -101,11 +101,11 @@ st.idToUri = function( id, noJoin ) {
 		}
 	})
 
-	return noJoin ? id : stealConfiguration().root.join(id)
+	return noJoin ? id : config.attr().root.join(id)
 }
 st.amdIdToUri = function( id, noJoin ){
 	// this is normalize
-	var paths = stealConfiguration().paths || {},
+	var paths = config.attr().paths || {},
 		path;
 	// always run past 
 	h.each(paths, function( part, replaceWith ) {
@@ -120,7 +120,7 @@ st.amdIdToUri = function( id, noJoin ){
 	if( /(^|\/)[^\/\.]+$/.test(id) ){
 		id= URI(id+".js")
 	}
-	return id //noJoin ? id : stealConfiguration().root.join(id)
+	return id //noJoin ? id : config().root.join(id)
 }
 
 // ## AMD ##
@@ -167,7 +167,6 @@ h.win.require = function(dependencies, method){
 			dependency.idToUri = st.amdIdToUri;
 			return dependency;
 		}).concat([method]);
-	console.log("stealing",depends.slice(0))
 	st.apply(null, depends )
 }
 h.win.define.amd = {
