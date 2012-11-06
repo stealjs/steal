@@ -3,6 +3,13 @@ var Promise = require('node-promise/promise');
 var readFile_promise = Promise.convertNodeAsyncFunction(fs.readFile);
 
 module.exports = function (grunt) {
+	var codestyle = {
+		options : {
+			indentSize : 1,
+			indentChar : "\t"
+		}
+	};
+
 	grunt.initConfig({
 		pkg : '<json:package.json>',
 		meta : {
@@ -16,7 +23,20 @@ module.exports = function (grunt) {
 			file : 'core/core.js',
 			out : 'steal.js'
 		},
-		beautify : 'steal.js'
+		watch: {
+			scripts: {
+				files: "core/*.js",
+				tasks: "default"
+			}
+		},
+		beautifier : {
+			steal : codestyle,
+			core : codestyle
+		},
+		beautify : {
+			steal : 'steal.js',
+			core : 'core/**/*.js'
+		}
 	});
 
 	grunt.registerTask("build", function() {
@@ -50,6 +70,6 @@ module.exports = function (grunt) {
 	});
 
 	// TODO watch and beautify
-
-	grunt.registerTask('default', 'build');
+	grunt.loadNpmTasks('grunt-beautify');
+	grunt.registerTask('default', 'build beautify:steal');
 };
