@@ -120,9 +120,9 @@ steal('steal', 'steal/parse','steal/build',
 		var output = '';
 
 		if(opts.onefunc) {
-			output = opts.wrapInner.length ? opts.wrapInner[0] : '(function(window, undefined) {';
+			output = opts && opts.wrapInner.length ? opts.wrapInner[0] : '(function(window, undefined) {';
 			output += out;
-			output += opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(window);';
+			output += opts && opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(window);';
 		}
 		else {
 			output = 'var module = { _orig: window.module, _define: window.define };\n';
