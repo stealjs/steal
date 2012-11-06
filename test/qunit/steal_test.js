@@ -314,7 +314,7 @@ test("filename", function(){
 
 
 
-	test("require JS", function(){
+	/*test("require JS", function(){
 		steal.config({root: "../../"})
 		stop();
 		steal({
@@ -324,7 +324,7 @@ test("filename", function(){
 			start();
 			ok(REQUIRED, "loaded the file")
 		})
-	});
+	});*/
 
 	test("require CSS", function(){
 		stop();
