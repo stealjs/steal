@@ -179,11 +179,8 @@ ConfigManager.defaults.types = {
 		} else {
 			var src = options.src; //st.idToUri( options.id );
 			if(h.useIEShim){
-				//src = src + "?" + (new Date).getTime();
 				script.onreadystatechange = function(){
 					if (stateCheck.test(script.readyState)) {
-						//console.log(src + " " + script.readyState)
-						//script.onreadystatechange = null;
 						success();
 					}
 				}
