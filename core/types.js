@@ -98,7 +98,7 @@ ConfigManager.prototype.require = function( options, success, error) {
 	// add the src option
 	// but it is not added to functions
 	if(options.idToUri){
-		options.src = options.idToUri(options.id);
+		options.src = this.addSuffix( options.idToUri(options.id) );
 	}
 
 	// get the type
@@ -113,7 +113,15 @@ ConfigManager.prototype.require = function( options, success, error) {
 		converters = [options.type]
 	}
 	require(options, converters, success, error, this)
-};
+}
+ConfigManager.prototype.addSuffix = function( str ) {
+	var suffix = this.attr('suffix')
+	if ( suffix ) {
+		str = (str + '').indexOf('?') > -1 ? str + "&" + suffix : str + "?" + suffix;
+	}
+	return str;
+}
+
 
 function require(options, converters, success, error, config) {
 
@@ -122,11 +130,11 @@ function require(options, converters, success, error, config) {
 	type.require(options, function require_continue_check() {
 		// if we have more types to convert
 		if ( converters.length ) {
-			require(options, converters, success, error)
+			require(options, converters, success, error, config)
 		} else { // otherwise this is the final
 			success.apply(this, arguments);
 		}
-	}, error)
+	}, error, config)
 };
 
 
@@ -249,11 +257,11 @@ ConfigManager.defaults.types = {
 			if ( createSheet ) {
 				// IE has a 31 sheet and 31 import per sheet limit
 				if (!cssCount++ ) {
-					lastSheet = h.doc.createStyleSheet(addSuffix(options.src));
+					lastSheet = h.doc.createStyleSheet(options.src);
 					lastSheetOptions = options;
 				} else {
 					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-					lastSheet.addImport(addSuffix(relative));
+					lastSheet.addImport(relative);
 					if ( cssCount == 30 ) {
 						cssCount = 0;
 					}
@@ -265,7 +273,7 @@ ConfigManager.defaults.types = {
 			options = options || {};
 			var link = h.createElement("link");
 			link.rel = options.rel || "stylesheet";
-			link.href = addSuffix(options.src);
+			link.href = options.src;
 			link.type = "text/css";
 			h.head().appendChild(link);
 		}

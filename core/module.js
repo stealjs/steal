@@ -360,7 +360,10 @@ h.extend(Module.prototype, {
 			// if there are needs, this can not be part of the "firstSet"
 			h.each(resource.options.needs || [], function( i, raw ) {
 				
-				var need = Module.make(raw);
+				var need = Module.make({
+					id: raw,
+					idToUri: self.options.idToUri
+				});
 				// add the need to the resource's dependencies
 				h.uniquePush(resource.needsDependencies, need);
 				waitsOn.push(need);

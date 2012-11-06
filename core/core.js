@@ -38,14 +38,7 @@
 		// Removing because this will be passed in
 		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
 
-		// adds a suffix to the url for cache busting
-		var addSuffix = function( str ) {
-			var suffix = config.attr('suffix')
-			if ( suffix ) {
-				str = (str + '').indexOf('?') > -1 ? str + "&" + suffix : str + "?" + suffix;
-			}
-			return str;
-		}
+		
 		var st = function() {
 			
 			// convert arguments into an array

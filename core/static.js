@@ -155,7 +155,10 @@
 			// production scripts are loading
 			h.support.interactive = false;
 			h.each(arguments, function( i, arg ) {
-				var stel = Module.make(arg);
+				var stel = Module.make({
+					id: arg,
+					idToUri: st.idToUri
+				});
 				stel.loading = stel.executing = true;
 			});
 		},
@@ -179,7 +182,10 @@
 		// called when a script has loaded via production
 		executed: function( name ) {
 			// create the steal, mark it as loading, then as loaded
-			var resource = Module.make(name);
+			var resource = Module.make({
+				id: name,
+				idToUri: st.idToUri
+			});
 			resource.loading = resource.executing = true;
 			//convert(stel, "complete");
 			st.preexecuted(resource);
