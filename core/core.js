@@ -34,10 +34,11 @@
 	function stealManager(kickoff, config, setStealOnWindow){
 
 		// a startup function that will be called when steal is ready
+		
 		var startup = function(){};
+
 		// Removing because this will be passed in
 		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
-
 		
 		var st = function() {
 			
@@ -85,8 +86,6 @@
 
 		/*# static.js #*/
 
-		
-
 		/*# packages.js #*/
 
 		/*# interactive.js #*/
@@ -125,7 +124,6 @@
 
 			resources[stealModule.options.id] = stealModule;
 		}
-		
 
 		startup();
 		//win.steals = steals;

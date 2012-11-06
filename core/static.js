@@ -27,7 +27,8 @@
 			options.id = options.toId ? options.toId(options.id, curId) : st.id(options.id, curId);
 			// set the ext
 			options.ext = options.id.ext();
-			
+			options.src = options.idToUri ? options.idToUri(options.id) + "" : steal.idToUri(options.id) + "";
+			//console.log(options.src)
 			// Check if it's a configured needs
 			var configedExt = config.attr().ext[options.ext];
 			// if we have something, but it's not a type

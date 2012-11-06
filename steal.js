@@ -959,8 +959,8 @@
 						cleanUp(script);
 						success();
 					}
-				};
-
+				},
+				errorTimeout;
 			// if we have text, just set and insert text
 			if (options.text) {
 				// insert
@@ -968,19 +968,22 @@
 
 			} else {
 				var src = options.src; //st.idToUri( options.id );
-				if (h.useIEShim && typeof options.debug === "undefined") {
+				if (h.useIEShim) {
 					script.event = "onclick";
 					script.id = script.htmlFor = "ie-" + h.uuid();
 					script.onreadystatechange = function () {
+						clearTimeout(errorTimeout);
+						if (script.readyState === "loading") {
+							errorTimeout = setTimeout(error, 5000);
+						}
 						if (stateCheck.test(script.readyState)) {
 							if (script.onclick) {
 								try {
 									script.onclick.apply(h.win);
-									success();
 								} catch (e) {
 									alert(e.message + " in file " + script.src);
 								}
-
+								success();
 							} else {
 								error();
 							}
@@ -1609,9 +1612,9 @@ for(var typeName in config.attr('types')){
 
 		// a startup function that will be called when steal is ready
 		var startup = function () {};
+
 		// Removing because this will be passed in
 		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
-
 		var st = function () {
 
 			// convert arguments into an array
@@ -1925,7 +1928,8 @@ for(var typeName in config.attr('types')){
 				options.id = options.toId ? options.toId(options.id, curId) : st.id(options.id, curId);
 				// set the ext
 				options.ext = options.id.ext();
-
+				options.src = options.idToUri ? options.idToUri(options.id) + "" : steal.idToUri(options.id) + "";
+				//console.log(options.src)
 				// Check if it's a configured needs
 				var configedExt = config.attr().ext[options.ext];
 				// if we have something, but it's not a type
@@ -2125,8 +2129,6 @@ for(var typeName in config.attr('types')){
 			}
 			return !st.isRhino && h.scriptTag().readyState && counter === 1;
 		})()
-
-
 
 		//  ============================== Packages ===============================
 		/**
@@ -2585,7 +2587,6 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 
 			resources[stealModule.options.id] = stealModule;
 		}
-
 
 		startup();
 		//win.steals = steals;
