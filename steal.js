@@ -969,11 +969,8 @@
 			} else {
 				var src = options.src; //st.idToUri( options.id );
 				if (h.useIEShim) {
-					//src = src + "?" + (new Date).getTime();
 					script.onreadystatechange = function () {
 						if (stateCheck.test(script.readyState)) {
-							//console.log(src + " " + script.readyState)
-							//script.onreadystatechange = null;
 							success();
 						}
 					}
@@ -1644,9 +1641,10 @@ for(var typeName in config.attr('types')){
 			st.config.called = true;
 			return config.attr.apply(config, arguments)
 		};
-
+		st.require = function () {
+			return config.require.apply(config, arguments);
+		}
 		st.config.called = false;
-
 		st._id = Math.floor(1000 * Math.random());
 
 		// ## CONFIG ##
