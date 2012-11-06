@@ -271,7 +271,10 @@ startup = h.after(startup, function() {
 			force: true
 		});
 	} else {
-		steals.unshift("stealconfig.js")
+		steals.unshift({
+			id: "stealconfig.js",
+			abort: false
+		});
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({

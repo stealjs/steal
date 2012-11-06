@@ -969,11 +969,8 @@
 			} else {
 				var src = options.src; //st.idToUri( options.id );
 				if (h.useIEShim) {
-					//src = src + "?" + (new Date).getTime();
 					script.onreadystatechange = function () {
 						if (stateCheck.test(script.readyState)) {
-							//console.log(src + " " + script.readyState)
-							//script.onreadystatechange = null;
 							success();
 						}
 					}
@@ -1073,8 +1070,7 @@ for(var typeName in config.attr('types')){
 		// ============ RESOURCE ================
 		// a map of resources by resourceID
 		var resources = {},
-			id = 0,
-			ignoreableModules = ['stealconfig.js'];
+			id = 0;
 		// this is for methods on a 'steal instance'.  A file can be in one of a few states:
 		// created - the steal instance is created, but we haven't started loading it yet
 		//           this happens when thens are used
@@ -1267,7 +1263,7 @@ for(var typeName in config.attr('types')){
 						this.options[opt] = prevOptions[opt];
 					}
 				}
-				if (this.options.id && h.inArray(ignoreableModules, this.options.id + "") > -1) {
+				if (this.options.id) {
 					this.options.abort = false;
 				}
 			},
@@ -1923,7 +1919,6 @@ for(var typeName in config.attr('types')){
 				// set the ext
 				options.ext = options.id.ext();
 				options.src = options.idToUri ? options.idToUri(options.id) + "" : steal.idToUri(options.id) + "";
-				//console.log(options.src)
 				// Check if it's a configured needs
 				var configedExt = config.attr().ext[options.ext];
 				// if we have something, but it's not a type
@@ -2450,7 +2445,10 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 					force: true
 				});
 			} else {
-				steals.unshift("stealconfig.js")
+				steals.unshift({
+					id: "stealconfig.js",
+					abort: false
+				});
 
 				if (options.loadDev !== false) {
 					steals.unshift({
