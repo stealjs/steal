@@ -1,4 +1,3 @@
-console.log('IN CLIENT')
 steal(function(){
 	steal.client = {}
 	steal.client.dataQueue = []
