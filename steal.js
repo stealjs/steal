@@ -959,8 +959,8 @@
 						cleanUp(script);
 						success();
 					}
-				};
-
+				},
+				errorTimeout;
 			// if we have text, just set and insert text
 			if (options.text) {
 				// insert
@@ -968,22 +968,13 @@
 
 			} else {
 				var src = options.src; //st.idToUri( options.id );
-				if (h.useIEShim && typeof options.debug === "undefined") {
-					script.event = "onclick";
-					script.id = script.htmlFor = "ie-" + h.uuid();
+				if (h.useIEShim) {
+					//src = src + "?" + (new Date).getTime();
 					script.onreadystatechange = function () {
 						if (stateCheck.test(script.readyState)) {
-							if (script.onclick) {
-								try {
-									script.onclick.apply(h.win);
-									success();
-								} catch (e) {
-									alert(e.message + " in file " + script.src);
-								}
-
-							} else {
-								error();
-							}
+							//console.log(src + " " + script.readyState)
+							//script.onreadystatechange = null;
+							success();
 						}
 					}
 				} else {
@@ -1608,10 +1599,13 @@ for(var typeName in config.attr('types')){
 	function stealManager(kickoff, config, setStealOnWindow) {
 
 		// a startup function that will be called when steal is ready
+		var interactiveScript,
+		// key is script name, value is array of pending items
+		interactives = {};
 		var startup = function () {};
+
 		// Removing because this will be passed in
 		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
-
 		var st = function () {
 
 			// convert arguments into an array
@@ -1647,8 +1641,11 @@ for(var typeName in config.attr('types')){
 		}
 
 		st.config = function () {
+			st.config.called = true;
 			return config.attr.apply(config, arguments)
 		};
+
+		st.config.called = false;
 
 		st._id = Math.floor(1000 * Math.random());
 
@@ -1925,7 +1922,8 @@ for(var typeName in config.attr('types')){
 				options.id = options.toId ? options.toId(options.id, curId) : st.id(options.id, curId);
 				// set the ext
 				options.ext = options.id.ext();
-
+				options.src = options.idToUri ? options.idToUri(options.id) + "" : steal.idToUri(options.id) + "";
+				//console.log(options.src)
 				// Check if it's a configured needs
 				var configedExt = config.attr().ext[options.ext];
 				// if we have something, but it's not a type
@@ -2126,8 +2124,6 @@ for(var typeName in config.attr('types')){
 			return !st.isRhino && h.scriptTag().readyState && counter === 1;
 		})()
 
-
-
 		//  ============================== Packages ===============================
 		/**
 		 * @function steal.packages
@@ -2183,88 +2179,6 @@ for(var typeName in config.attr('types')){
 			}
 		};
 
-
-		// =========== INTERACTIVE STUFF ===========
-		// Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are
-		// dependencies of another, steal needs to check which is the currently "interactive" script.
-		var interactiveScript,
-		// key is script name, value is array of pending items
-		interactives = {},
-			getInteractiveScript = function () {
-				var scripts = h.getElementsByTagName("script"),
-					i = scripts.length;
-				while (i--) {
-					if (scripts[i].readyState === "interactive") {
-						return scripts[i];
-					}
-				}
-			},
-			getCachedInteractiveScript = function () {
-				if (interactiveScript && interactiveScript.readyState === 'interactive') {
-					return interactiveScript;
-				}
-
-				if (interactiveScript = getInteractiveScript()) {
-					return interactiveScript;
-				}
-
-				// check last inserted
-				if (lastInserted && lastInserted.readyState == 'interactive') {
-					return lastInserted;
-				}
-
-				return null;
-			};
-
-
-		h.support.interactive = h.doc && !! getInteractiveScript();
-
-		if (h.support.interactive) {
-
-			// after steal is called, check which script is "interactive" (for IE)
-			st.after = h.after(st.after, function () {
-
-				// check if disabled by st.loading()
-				if (!h.support.interactive) {
-					return;
-				}
-
-				var interactive = getCachedInteractiveScript();
-				// if no interactive script, this is a steal coming from inside a steal, let complete handle it
-				if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
-					return;
-				}
-				// get the source of the script
-				var src = interactive.src;
-				// create an array to hold all steal calls for this script
-				if (!interactives[src]) {
-					interactives[src] = []
-				}
-				// add to the list of steals for this script tag
-				if (src) {
-					interactives[src].push.apply(interactives[src], Module.pending);
-					Module.pending = [];
-				}
-			})
-
-			// This is used for packaged scripts.  As the packaged script executes, we grab the
-			// dependencies that have come so far and assign them to the loaded script
-			st.preexecuted = h.before(st.preexecuted, function (stel) {
-				// check if disabled by st.loading()
-				if (!h.support.interactive) {
-					return;
-				}
-
-				// get the src name
-				var src = stel.options.src,
-					// and the src of the current interactive script
-					interactiveSrc = getCachedInteractiveScript().src;
-
-				interactives[src] = interactives[interactiveSrc];
-				interactives[interactiveSrc] = null;
-
-			})
-		}
 
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.resources;
@@ -2554,6 +2468,84 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 			}
 		});
 
+		// =========== INTERACTIVE STUFF ===========
+		// Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are
+		// dependencies of another, steal needs to check which is the currently "interactive" script.
+		var getInteractiveScript = function () {
+			var scripts = h.getElementsByTagName("script"),
+				i = scripts.length;
+			while (i--) {
+				if (scripts[i].readyState === "interactive") {
+					return scripts[i];
+				}
+			}
+		},
+			getCachedInteractiveScript = function () {
+				if (interactiveScript && interactiveScript.readyState === 'interactive') {
+					return interactiveScript;
+				}
+
+				if (interactiveScript = getInteractiveScript()) {
+					return interactiveScript;
+				}
+
+				// check last inserted
+				if (lastInserted && lastInserted.readyState == 'interactive') {
+					return lastInserted;
+				}
+
+				return null;
+			};
+
+
+		h.support.interactive = h.doc && !! getInteractiveScript();
+		if (h.support.interactive) {
+
+			// after steal is called, check which script is "interactive" (for IE)
+			st.after = h.after(st.after, function () {
+				// check if disabled by st.loading()
+				if (!h.support.interactive) {
+					return;
+				}
+
+				var interactive = getCachedInteractiveScript();
+				// if no interactive script, this is a steal coming from inside a steal, let complete handle it
+				if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src)) {
+					return;
+				}
+				// get the source of the script
+				var src = interactive.src;
+				// create an array to hold all steal calls for this script
+				if (!interactives[src]) {
+					interactives[src] = []
+				}
+
+				// add to the list of steals for this script tag
+				if (src) {
+					interactives[src].push.apply(interactives[src], Module.pending);
+					Module.pending = [];
+				}
+			})
+
+			// This is used for packaged scripts.  As the packaged script executes, we grab the
+			// dependencies that have come so far and assign them to the loaded script
+			st.preexecuted = h.before(st.preexecuted, function (stel) {
+				// check if disabled by st.loading()
+				if (!h.support.interactive) {
+					return;
+				}
+
+				// get the src name
+				var src = stel.options.src,
+					// and the src of the current interactive script
+					interactiveSrc = getCachedInteractiveScript().src;
+
+				interactives[src] = interactives[interactiveSrc];
+				interactives[interactiveSrc] = null;
+
+			})
+		}
+
 		config.on(function () {
 			h.each(resources, function (id, resource) {
 				if (resource.options.type != "fn") {
@@ -2585,7 +2577,6 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 
 			resources[stealModule.options.id] = stealModule;
 		}
-
 
 		startup();
 		//win.steals = steals;

@@ -170,8 +170,7 @@ ConfigManager.defaults.types = {
 					cleanUp(script);
 					success();
 				}
-			};
-
+			}, errorTimeout;
 		// if we have text, just set and insert text
 		if ( options.text ) {
 			// insert
@@ -179,22 +178,10 @@ ConfigManager.defaults.types = {
 
 		} else {
 			var src = options.src; //st.idToUri( options.id );
-			if(h.useIEShim && typeof options.debug === "undefined"){
-				script.event = "onclick";
-				script.id = script.htmlFor = "ie-" + h.uuid();
+			if(h.useIEShim){
 				script.onreadystatechange = function(){
 					if (stateCheck.test(script.readyState)) {
-						if(script.onclick){
-							try {
-								script.onclick.apply(h.win);
-								success();
-							} catch(e) {
-								alert(e.message + " in file " + script.src);
-							}
-							
-						} else {
-							error();
-						}
+						success();
 					}
 				}
 			} else {
