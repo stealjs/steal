@@ -1,3 +1,4 @@
+console.log('IN CLIENT')
 steal(function(){
 	steal.client = {}
 	steal.client.dataQueue = []
@@ -36,7 +37,7 @@ steal(function(){
           steal.require({
                id : "http://localhost:5555?"+params+"&_="+Math.random(),
                type: "js"
-          },function(){});
+          }, function(){})
          
      }
 	steal.client.evaluate = function(script, arg){
