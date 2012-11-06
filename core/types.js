@@ -179,24 +179,12 @@ ConfigManager.defaults.types = {
 		} else {
 			var src = options.src; //st.idToUri( options.id );
 			if(h.useIEShim){
-				script.event = "onclick";
-				script.id = script.htmlFor = "ie-" + h.uuid();
+				//src = src + "?" + (new Date).getTime();
 				script.onreadystatechange = function(){
-					clearTimeout(errorTimeout);
-					if(script.readyState === "loading"){
-						errorTimeout = setTimeout(error, 5000);
-					}
 					if (stateCheck.test(script.readyState)) {
-						if(script.onclick){
-							try {
-								script.onclick.apply(h.win);
-							} catch(e) {
-								alert(e.message + " in file " + script.src);
-							}
-							success();
-						} else {
-							error();
-						}
+						//console.log(src + " " + script.readyState)
+						//script.onreadystatechange = null;
+						success();
 					}
 				}
 			} else {

@@ -1,10 +1,7 @@
 // =========== INTERACTIVE STUFF ===========
 // Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are
 // dependencies of another, steal needs to check which is the currently "interactive" script.
-var interactiveScript,
-// key is script name, value is array of pending items
-interactives = {},
-	getInteractiveScript = function() {
+var getInteractiveScript = function() {
 		var scripts = h.getElementsByTagName("script"),
 			i = scripts.length;
 		while ( i-- ) {
@@ -32,12 +29,10 @@ interactives = {},
 
 
 h.support.interactive = h.doc && !! getInteractiveScript();
-
 if ( h.support.interactive ) {
 
 	// after steal is called, check which script is "interactive" (for IE)
 	st.after = h.after(st.after, function() {
-
 		// check if disabled by st.loading()
 		if (!h.support.interactive ) {
 			return;
@@ -54,6 +49,7 @@ if ( h.support.interactive ) {
 		if (!interactives[src] ) {
 			interactives[src] = []
 		}
+
 		// add to the list of steals for this script tag
 		if ( src ) {
 			interactives[src].push.apply(interactives[src], Module.pending);

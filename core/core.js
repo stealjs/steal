@@ -34,7 +34,9 @@
 	function stealManager(kickoff, config, setStealOnWindow){
 
 		// a startup function that will be called when steal is ready
-		
+		var interactiveScript,
+			// key is script name, value is array of pending items
+			interactives = {};
 		var startup = function(){};
 
 		// Removing because this will be passed in
@@ -75,8 +77,11 @@
 		}
 
 		st.config = function(){
+			st.config.called = true;
 			return config.attr.apply(config, arguments)
 		};
+
+		st.config.called = false;
 
 		st._id = Math.floor(1000 * Math.random());
 
@@ -88,12 +93,12 @@
 
 		/*# packages.js #*/
 
-		/*# interactive.js #*/
-
 		var Module = moduleManager(st, modules, interactives, config);
 		resources  = Module.resources; 
 
 		/*# startup.js #*/
+
+		/*# interactive.js #*/
 
 		config.on(function(){
 			h.each(resources, function( id, resource ) {
