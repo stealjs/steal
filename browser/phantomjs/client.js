@@ -34,7 +34,7 @@ steal(function(){
           var params = encodeURIComponent(JSON.stringify(q));
          // console.log('senddata', params)
           steal.require({
-               id : "http://localhost:5555?"+params+"&_="+Math.random(),
+               src : "http://localhost:5555?"+params+"&_="+Math.random(),
                type: "js"
           }, function(){})
          
