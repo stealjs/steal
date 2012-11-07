@@ -80,9 +80,10 @@
 			st.config.called = true;
 			return config.attr.apply(config, arguments)
 		};
-
+		st.require = function(){
+			return config.require.apply(config, arguments);
+		}
 		st.config.called = false;
-
 		st._id = Math.floor(1000 * Math.random());
 
 		/*# config.js #*/

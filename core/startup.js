@@ -206,27 +206,23 @@ st.events.done = {
 
 startup = h.after(startup, function() {
 	// get options from 
-	//var options = {}; TODO: remove
-
+	var urlOptions = st.getScriptOptions();
 	// A: GET OPTIONS
 	// 1. get script options
 	//h.extend(options, ); TODO: remove
-
 	// 2. options from a steal object that existed before this steal
 	// the steal object is copied right away
 	// h.extend(options, opts);
-	
 	// 3. if url looks like steal[xyz]=bar, add those to the options
 	// does this need to be supported anywhere?
 	// NO - Justin
-	//var search = h.win.location && decodeURIComponent(h.win.location.search);
-	//search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
-	//	options[prop] = ~val.indexOf(",") ? val.split(",") : val;
-	//});
-
+	var search = h.win.location && decodeURIComponent(h.win.location.search);
+	search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
+		urlOptions[prop] = ~val.indexOf(",") ? val.split(",") : val;
+	});
 	// B: DO THINGS WITH OPTIONS
 	// CALCULATE CURRENT LOCATION OF THINGS ...
-	config.attr(st.getScriptOptions());
+	config.attr(urlOptions);
 	var options = config.attr();
 
 	// mark things that have already been loaded

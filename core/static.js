@@ -162,7 +162,13 @@
 				stel.loading = stel.executing = true;
 			});
 		},
-
+		make: function(id){
+			var opts = (typeof id === "string" ? {id: id} : id);
+			if(!opts.idToUri){
+				opts.idToUri = st.idToUri;
+			}
+			return Module.make(opts);
+		},
 		// a dummy function to add things to after the stel is created, but before executed is called
 		preexecuted: function() {},
 		/**

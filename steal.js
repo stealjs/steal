@@ -1351,7 +1351,7 @@ for(var typeName in config.attr('types')){
 					var stel = Module.make(item);
 					if (steal.packHash[stel.options.id] && stel.options.type !== 'fn') { // if we are production, and this is a package, mark as loading, but steal package?
 						steal.has("" + stel.options.id);
-						stel = Module.make(steal.packHash["" + stel.options.id]);
+						stel = steal.make(steal.packHash["" + stel.options.id]);
 					}
 					// has to happen before 'needs' for when reversed...
 					self.queue.push(stel);
@@ -1583,7 +1583,7 @@ for(var typeName in config.attr('types')){
 					stel.loadHas();
 				} else {
 					// have to mark has as loading and executing (so we don't try to get them)
-					steal.has.apply(st, stel.options.has)
+					steal.has.apply(steal, stel.options.has)
 				}
 			}
 			return stel;
@@ -1640,9 +1640,10 @@ for(var typeName in config.attr('types')){
 			st.config.called = true;
 			return config.attr.apply(config, arguments)
 		};
-
+		st.require = function () {
+			return config.require.apply(config, arguments);
+		}
 		st.config.called = false;
-
 		st._id = Math.floor(1000 * Math.random());
 
 		// ## CONFIG ##
@@ -2053,7 +2054,15 @@ for(var typeName in config.attr('types')){
 					stel.loading = stel.executing = true;
 				});
 			},
-
+			make: function (id) {
+				var opts = (typeof id === "string" ? {
+					id: id
+				} : id);
+				if (!opts.idToUri) {
+					opts.idToUri = st.idToUri;
+				}
+				return Module.make(opts);
+			},
 			// a dummy function to add things to after the stel is created, but before executed is called
 			preexecuted: function () {},
 			/**
@@ -2385,7 +2394,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 
 		startup = h.after(startup, function () {
 			// get options from 
-			//var options = {}; TODO: remove
+			var urlOptions = st.getScriptOptions();
 			// A: GET OPTIONS
 			// 1. get script options
 			//h.extend(options, ); TODO: remove
@@ -2395,13 +2404,13 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 			// 3. if url looks like steal[xyz]=bar, add those to the options
 			// does this need to be supported anywhere?
 			// NO - Justin
-			//var search = h.win.location && decodeURIComponent(h.win.location.search);
-			//search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function( whoe, prop, val ) {
-			//	options[prop] = ~val.indexOf(",") ? val.split(",") : val;
-			//});
+			var search = h.win.location && decodeURIComponent(h.win.location.search);
+			search && search.replace(/steal\[([^\]]+)\]=([^&]+)/g, function (whoe, prop, val) {
+				urlOptions[prop] = ~val.indexOf(",") ? val.split(",") : val;
+			});
 			// B: DO THINGS WITH OPTIONS
 			// CALCULATE CURRENT LOCATION OF THINGS ...
-			config.attr(st.getScriptOptions());
+			config.attr(urlOptions);
 			var options = config.attr();
 
 			// mark things that have already been loaded

@@ -297,7 +297,7 @@ h.extend(Module.prototype, {
 			var stel = Module.make(item);
 			if ( steal.packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
 				steal.has(""+stel.options.id);
-				stel = Module.make(steal.packHash[""+stel.options.id]);
+				stel = steal.make(steal.packHash[""+stel.options.id]);
 			}
 			// has to happen before 'needs' for when reversed...
 			self.queue.push(stel);
@@ -531,7 +531,7 @@ Module.make = h.after(Module.make, function( stel ) {
 			stel.loadHas();
 		} else {
 			// have to mark has as loading and executing (so we don't try to get them)
-			steal.has.apply(st, stel.options.has)
+			steal.has.apply(steal, stel.options.has)
 		}
 	}
 	return stel;
