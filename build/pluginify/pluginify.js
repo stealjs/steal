@@ -105,7 +105,7 @@ steal('steal', 'steal/parse','steal/build',
 						}
 
 						if(opts.onefunc) {
-							content = "\n(function() {\n" + content + "\n})();\n";
+							content = content.substring(0, content.lastIndexOf('return'));
 						}
 
 						out += s.build.js.clean(content);
