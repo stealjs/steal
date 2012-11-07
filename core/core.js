@@ -97,6 +97,8 @@
 		var Module = moduleManager(st, modules, interactives, config);
 		resources  = Module.resources; 
 
+		/*# shim.js #*/
+
 		/*# startup.js #*/
 
 		/*# interactive.js #*/
