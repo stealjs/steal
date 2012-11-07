@@ -532,7 +532,7 @@ Module.make = h.after(Module.make, function( stel ) {
 			stel.loadHas();
 		} else {
 			// have to mark has as loading and executing (so we don't try to get them)
-			steal.has.apply(st, stel.options.has)
+			steal.has.apply(steal, stel.options.has)
 		}
 	}
 	return stel;

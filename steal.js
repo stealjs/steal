@@ -1584,7 +1584,7 @@ for(var typeName in config.attr('types')){
 					stel.loadHas();
 				} else {
 					// have to mark has as loading and executing (so we don't try to get them)
-					steal.has.apply(st, stel.options.has)
+					steal.has.apply(steal, stel.options.has)
 				}
 			}
 			return stel;
