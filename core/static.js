@@ -28,7 +28,6 @@
 			// set the ext
 			options.ext = options.id.ext();
 			options.src = options.idToUri ? options.idToUri(options.id) + "" : steal.idToUri(options.id) + "";
-			//console.log(options.src)
 			// Check if it's a configured needs
 			var configedExt = config.attr().ext[options.ext];
 			// if we have something, but it's not a type
@@ -201,15 +200,18 @@
 		},
 		type: function( type, cb ) {
 			var typs = type.split(" ");
-
 			if (!cb ) {
 				return config.attr('types')[typs.shift()].require
 			}
+			
+			var types = config.attr('types')
 
-			config.attr('types')[typs.shift()] = {
+			types[typs.shift()] = {
 				require: cb,
 				convert: typs
 			};
+
+			config.attr('types', types)
 		},
 		request : h.request
 	});

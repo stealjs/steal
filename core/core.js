@@ -97,6 +97,8 @@
 		var Module = moduleManager(st, modules, interactives, config);
 		resources  = Module.resources; 
 
+		/*# shim.js #*/
+
 		/*# startup.js #*/
 
 		/*# interactive.js #*/
@@ -134,7 +136,7 @@
 		startup();
 		//win.steals = steals;
 		st.resources = resources;
-		h.win.Module = Module;
+		st.Module = Module;
 
 		return st;
 	}

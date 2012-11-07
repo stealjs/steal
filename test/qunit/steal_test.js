@@ -327,6 +327,7 @@ test("filename", function(){
 	});*/
 
 	test("require CSS", function(){
+		steal.config({root: "../../"})
 		stop();
 		steal({
 			id: src('steal/test/files/require.css'),
