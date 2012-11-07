@@ -298,7 +298,7 @@ h.extend(Module.prototype, {
 			var stel = Module.make(item);
 			if ( steal.packHash[stel.options.id] && stel.options.type !== 'fn' ) { // if we are production, and this is a package, mark as loading, but steal package?
 				steal.has(""+stel.options.id);
-				stel = Module.make(steal.packHash[""+stel.options.id]);
+				stel = steal.make(steal.packHash[""+stel.options.id]);
 			}
 			// has to happen before 'needs' for when reversed...
 			self.queue.push(stel);

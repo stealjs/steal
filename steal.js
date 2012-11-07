@@ -1352,7 +1352,7 @@ for(var typeName in config.attr('types')){
 					var stel = Module.make(item);
 					if (steal.packHash[stel.options.id] && stel.options.type !== 'fn') { // if we are production, and this is a package, mark as loading, but steal package?
 						steal.has("" + stel.options.id);
-						stel = Module.make(steal.packHash["" + stel.options.id]);
+						stel = steal.make(steal.packHash["" + stel.options.id]);
 					}
 					// has to happen before 'needs' for when reversed...
 					self.queue.push(stel);
@@ -2056,7 +2056,15 @@ for(var typeName in config.attr('types')){
 					stel.loading = stel.executing = true;
 				});
 			},
-
+			make: function (id) {
+				var opts = (typeof id === "string" ? {
+					id: id
+				} : id);
+				if (!opts.idToUri) {
+					opts.idToUri = st.idToUri;
+				}
+				return Module.make(opts);
+			},
 			// a dummy function to add things to after the stel is created, but before executed is called
 			preexecuted: function () {},
 			/**
