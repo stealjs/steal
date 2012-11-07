@@ -1,10 +1,14 @@
 module("AMD");
 
+config = new ConfigManager();
+
+console.log(config)
+
 test('st.id', function(){
 	equal(st.id("foo/bar") + "", "foo/bar/bar.js");
 	equal(st.id("./baz", "foo/bar") + "", "foo/baz.js");
 	equal(st.id("../baz", "foo/bar") + "", "baz.js");
-	st.config({
+	config.attr({
 		map: {
 			'*' : {
 				"foo/bar": "http://localhost/foo/foo/bar"
@@ -15,7 +19,7 @@ test('st.id', function(){
 });
 
 test('st.amdToId', function(){
-	st.config({
+	config.attr({
 		map: {
 			'*' : {
 				"http://localhost/foo/foo/bar": "foo/bar"
@@ -26,7 +30,7 @@ test('st.amdToId', function(){
 });
 
 test('st.idToUri', function(){
-	st.config({
+	config.attr({
 		paths: {
 			"foo/baz" : "http://localhost/foo/baz/baz.js"
 		}
@@ -35,7 +39,7 @@ test('st.idToUri', function(){
 });
 
 test('st.amdIdToUri', function(){
-	st.config({
+	config.attr({
 		paths: {
 			"baz/foo/" : "http://localhost/foo/baz/baz.js"
 		}

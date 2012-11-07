@@ -748,7 +748,9 @@
 		},
 		shim: function (shims) {
 			for (var id in shims) {
-				var resource = Module.make(id);
+				var resource = steal.Module.make({
+					id: id
+				});
 				if (typeof shims[id] === "object") {
 					var needs = shims[id].deps || []
 					var exports = shims[id].exports;
@@ -762,7 +764,7 @@
 					return function () {
 						var args = [];
 						h.each(_needs, function (i, id) {
-							args.push(Module.make(id).value);
+							args.push(steal.Module.make(id).value);
 						});
 						if (_init) {
 							_resource.value = _init.apply(null, args);
@@ -784,7 +786,8 @@
 		env: "development",
 		loadProduction: true,
 		logLevel: 0,
-		root: ""
+		root: "",
+		amd: false
 	};
 
 	// ### TYPES ##
@@ -887,6 +890,7 @@
 		// add the src option
 		// but it is not added to functions
 		if (options.idToUri) {
+			var old = options.src;
 			options.src = this.addSuffix(options.idToUri(options.id));
 		}
 
@@ -913,7 +917,7 @@
 
 
 	function require(options, converters, success, error, config) {
-
+		var t = converters[0]
 		var type = config.attr('types')[converters.shift()];
 
 		type.require(options, function require_continue_check() {
@@ -1831,24 +1835,39 @@ for(var typeName in config.attr('types')){
 
 		};
 
-		// convert resources to modules ...
-		// a function is a module definition piece
-		// you steal(moduleId1, moduleId2, function(module1, module2){});
-		// 
-		h.win.define = function (moduleId, dependencies, method) {
-			if (typeof moduleId == 'function') {
-				modules[URI.cur + ""] = moduleId();
-			} else if (!method && dependencies) {
-				if (typeof dependencies == "function") {
-					modules[moduleId] = dependencies();
+		if (config.attr('amd') === true) {
+
+			// convert resources to modules ...
+			// a function is a module definition piece
+			// you steal(moduleId1, moduleId2, function(module1, module2){});
+			// 
+			h.win.define = function (moduleId, dependencies, method) {
+				if (typeof moduleId == 'function') {
+					modules[URI.cur + ""] = moduleId();
+				} else if (!method && dependencies) {
+					if (typeof dependencies == "function") {
+						modules[moduleId] = dependencies();
+					} else {
+						modules[moduleId] = dependencies;
+					}
+
+				} else if (dependencies && method && !dependencies.length) {
+					modules[moduleId] = method();
 				} else {
-					modules[moduleId] = dependencies;
+					st.apply(null, h.map(dependencies, function (dependency) {
+						dependency = typeof dependency === "string" ? {
+							id: dependency
+						} : dependency;
+						dependency.toId = st.amdToId;
+
+						dependency.idToUri = st.amdIdToUri;
+						return dependency;
+					}).concat(method))
 				}
 
-			} else if (dependencies && method && !dependencies.length) {
-				modules[moduleId] = method();
-			} else {
-				st.apply(null, h.map(dependencies, function (dependency) {
+			}
+			h.win.require = function (dependencies, method) {
+				var depends = h.map(dependencies, function (dependency) {
 					dependency = typeof dependency === "string" ? {
 						id: dependency
 					} : dependency;
@@ -1856,39 +1875,25 @@ for(var typeName in config.attr('types')){
 
 					dependency.idToUri = st.amdIdToUri;
 					return dependency;
-				}).concat(method))
+				}).concat([method]);
+				st.apply(null, depends)
+			}
+			h.win.define.amd = {
+				jQuery: true
 			}
 
+			//st.when = when;
+			// make steal public
+			// make steal loaded
+			define("steal", [], function () {
+				return st;
+			});
+
+			define("require", function () {
+				return require;
+			})
+
 		}
-		h.win.require = function (dependencies, method) {
-			var depends = h.map(dependencies, function (dependency) {
-				dependency = typeof dependency === "string" ? {
-					id: dependency
-				} : dependency;
-				dependency.toId = st.amdToId;
-
-				dependency.idToUri = st.amdIdToUri;
-				return dependency;
-			}).concat([method]);
-			st.apply(null, depends)
-		}
-		h.win.define.amd = {
-			jQuery: true
-		}
-
-
-
-		//st.when = when;
-		// make steal public
-
-		// make steal loaded
-		define("steal", [], function () {
-			return st;
-		});
-
-		define("require", function () {
-			return require;
-		})
 
 		/**
 		 * @add steal
@@ -2094,15 +2099,18 @@ for(var typeName in config.attr('types')){
 			},
 			type: function (type, cb) {
 				var typs = type.split(" ");
-
 				if (!cb) {
 					return config.attr('types')[typs.shift()].require
 				}
 
-				config.attr('types')[typs.shift()] = {
+				var types = config.attr('types')
+
+				types[typs.shift()] = {
 					require: cb,
 					convert: typs
 				};
+
+				config.attr('types', types)
 			},
 			request: h.request
 		});
@@ -2588,7 +2596,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 		startup();
 		//win.steals = steals;
 		st.resources = resources;
-		h.win.Module = Module;
+		st.Module = Module;
 
 		return st;
 	}

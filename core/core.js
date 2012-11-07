@@ -134,7 +134,7 @@
 		startup();
 		//win.steals = steals;
 		st.resources = resources;
-		h.win.Module = Module;
+		st.Module = Module;
 
 		return st;
 	}

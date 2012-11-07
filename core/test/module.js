@@ -1,25 +1,28 @@
 module('Module')
 
+var Module = moduleManager(st, [], {}, new ConfigManager)
+
+
 test('Module.make always returns same module for the same id', function(){
-	var res = Module.make('jquery');
-	equal(res, Module.make('jquery'))
+	var res = Module.make({id: 'jquery'});
+	equal(res, Module.make({id: 'jquery'}))
 })
 
 test('loaded, run and completed are deferreds', function(){
-	var res = Module.make('jquery')
+	var res = Module.make({id: 'jquery'})
 	ok(TH.isDeferred(res.loaded))
 	ok(TH.isDeferred(res.run))
 	ok(TH.isDeferred(res.completed))
 })
 
 test('module options will be extended if called twice for the same id', function(){
-	var res = Module.make('jquery')
+	var res = Module.make({id: 'jquery'})
 	var res2 = Module.make({id: 'jquery', foo: 'bar'})
 	equal(res.options.foo, 'bar')
 })
 
 test('callback functions for deferreds should be called', 2, function(){
-	var res = Module.make('jquery')
+	var res = Module.make({id: 'jquery'})
 	var callbacks = ['completed', 'loaded'];
 	for(var i = 0; i < callbacks.length; i++){
 		res[callbacks[i]].then(function(){
@@ -31,7 +34,7 @@ test('callback functions for deferreds should be called', 2, function(){
 })
 
 test('calling execute should call deferred functions and st.require.', 3, function(){
-	var res = Module.make('jquery')
+	var res = Module.make({id: 'jquery'})
 	var callbacks = ['completed', 'loaded'];
 	var stealRequire = st.require;
 	st.require = function(){

@@ -144,7 +144,7 @@ h.extend(ConfigManager.prototype, {
 	},
 	shim: function(shims){
 		for(var id in shims){
-			var resource = Module.make(id);
+			var resource = steal.Module.make({id: id});
 			if(typeof shims[id] === "object"){
 				var needs   = shims[id].deps || []
 				var exports = shims[id].exports;
@@ -159,7 +159,7 @@ h.extend(ConfigManager.prototype, {
 				return function(){
 					var args = [];
 					h.each(_needs, function(i, id){
-						args.push(Module.make(id).value);
+						args.push(steal.Module.make(id).value);
 					});
 					if(_init){
 						_resource.value = _init.apply(null, args);
@@ -181,5 +181,6 @@ ConfigManager.defaults = {
 	env: "development",
 	loadProduction: true,
 	logLevel: 0,
-	root: ""
+	root: "",
+	amd: false
 };
