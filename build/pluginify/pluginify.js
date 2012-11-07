@@ -125,13 +125,13 @@ steal('steal', 'steal/parse','steal/build',
 			output += opts.wrapInner && opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(window);';
 		}
 		else {
-			output = 'var module = { _orig: window.module, _define: window.define };\n';
+			output = 'module = { _orig: window.module, _define: window.define };\n';
 
 			for(key in opts.shim) {
 				output += 'module[\'' + key + '\'] = ' + opts.shim[key] + ';\n';
 			}
 
-			output += 'var define = function(id, deps, value) {\n';
+			output += 'define = function(id, deps, value) {\n';
 			output += '\tmodule[id] = value();\n';
 			output += '};\ndefine.amd = { jQuery: true };\n' + out + '\n';
 
