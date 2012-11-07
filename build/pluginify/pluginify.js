@@ -29,6 +29,7 @@ steal('steal', 'steal/parse','steal/build',
 	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
 	 *   - skipAll - don't run any of the code in steal callbacks (used for canjs build)
 	 *   - shim - add existing global object to modules collection
+	 *   - standAlone - Only stip
 	 */
 	s.build.pluginify = function(plugin, opts){
 		s.print("" + plugin + " >");
@@ -80,12 +81,12 @@ steal('steal', 'steal/parse','steal/build',
 			pageSteal, 
 			steals = [], 
 			fns = {};
-		
+
+
 		steal.build.open("steal/rhino/blank.html", {
 			startFile : plugin, 
 			skipAll: opts.skipAll
 		}, function(opener){
-			
 			opener.each(function(stl, resource, i){
 				print("> ",stl.id)
 				if(stl.buildType === "fn") {
@@ -94,9 +95,11 @@ steal('steal', 'steal/parse','steal/build',
 				else if(fns[stl.id] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
 					return;
 				}
-				if ( (opts.standAlone && ( ""+stl.id ) === plugin )
-					|| (!opts.standAlone && !inExclude(stl))) {
-				
+				var id = ( ""+stl.id );
+				var inStandAlone = (opts.standAlone &&  id === plugin) ||
+					(opts.standAlone && opts.standAlone.indexOf && opts.standAlone.indexOf(id) !== -1);
+				if ( inStandAlone || (!opts.standAlone && !inExclude(stl)) ) {
+
 					var content = s.build.pluginify.content(stl, opts, resource, opener.steal);
 					if (content) {
 						out += '// ## ' + stl.id + '\n';
