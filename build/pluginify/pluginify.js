@@ -27,7 +27,7 @@ steal('steal', 'steal/parse','steal/build',
 	 *   - nojquery - exclude jquery
 	 *   - compress - compress the file
 	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
-	 *   - skipCallbacks - don't run any of the code in steal callbacks (used for canjs build)
+	 *   - skipAll - don't run any of the code in steal callbacks (used for canjs build)
 	 *   - shim - add existing global object to modules collection
 	 */
 	s.build.pluginify = function(plugin, opts){
@@ -41,7 +41,7 @@ steal('steal', 'steal/parse','steal/build',
 				"compress": 0,
 				"onefunc": 0,
 				"wrapInner": 0,
-				"skipCallbacks": 0,
+				"skipAll": 0,
 				"standAlone": 0,
 				"shim": {},
 				"exports": {}
@@ -83,7 +83,7 @@ steal('steal', 'steal/parse','steal/build',
 		
 		steal.build.open("steal/rhino/blank.html", {
 			startFile : plugin, 
-			skipCallbacks: opts.skipCallbacks
+			skipAll: opts.skipAll
 		}, function(opener){
 			
 			opener.each(function(stl, resource, i){
