@@ -3,8 +3,7 @@ var moduleManager = function(steal, modules, interactives, config){
 // ============ MODULE ================
 // a map of resources by resourceID
 var resources = {},
-	id = 0,
-	ignoreableModules = ['stealconfig.js'];
+	id = 0;
 // this is for methods on a 'steal instance'.  A file can be in one of a few states:
 // created - the steal instance is created, but we haven't started loading it yet
 //           this happens when thens are used
@@ -200,7 +199,7 @@ h.extend(Module.prototype, {
 				this.options[opt] = prevOptions[opt];
 			}
 		}
-		if(this.options.id && h.inArray(ignoreableModules, this.options.id + "") > - 1){
+		if(this.options.id){
 			this.options.abort = false;
 		}
 	},

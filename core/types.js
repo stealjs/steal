@@ -98,6 +98,7 @@ ConfigManager.prototype.require = function( options, success, error) {
 	// add the src option
 	// but it is not added to functions
 	if(options.idToUri){
+		var old = options.src;
 		options.src = this.addSuffix( options.idToUri(options.id) );
 	}
 
@@ -124,7 +125,7 @@ ConfigManager.prototype.addSuffix = function( str ) {
 
 
 function require(options, converters, success, error, config) {
-
+	var t = converters[0]
 	var type = config.attr('types')[converters.shift()];
 
 	type.require(options, function require_continue_check() {

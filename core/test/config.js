@@ -1,50 +1,40 @@
 module('Config')
 
-steal = stealManager(true, configManager())
+config = new ConfigManager();
+stealConfig = config.stealConfig;
 
 test('steal.config should return default config object', function(){
-	equal(steal.config().env, 'development');
+	equal(stealConfig.env, 'development');
 })
 
 test('steal.config.startFile', function(){
-	steal.config.startFile('foo/bar.html')
-	equal(steal.config().startFile, 'foo/bar.html');
-	equal(steal.config().production, 'foo/production.js');
+	config.attr({'startFile': 'foo/bar.html'})
+	equal(config.attr('startFile'), 'foo/bar.html');
+	equal(config.attr('production'), 'foo/production.js');
 })
 
-test('steal.config.map', function(){
-	steal.config({
-		map: {
-			'*' : {
-				jquery : 'foo/bar/jquery'
-			}
-		}
-	})
-	var module = Module.make('jquery');
-	equal(module.options.id.path, 'foo/bar/jquery/jquery.js');
-})
 
 test('steal.getScriptOptions', function(){
 	var script = h.scriptTag(), scriptOpts;
 	script.src = "http://localhost/app/steal.production.js?foobarapp,development";
-	scriptOpts = steal.getScriptOptions(script);
+	scriptOpts = st.getScriptOptions(script);
 	equal(scriptOpts.env, "development");
 	equal(scriptOpts.root, "http://localhost/app");
 	equal(scriptOpts.startFile, "foobarapp/foobarapp.js");
 	script.src = "http://localhost/app/steal.production.js?foobarapp";
-	scriptOpts = steal.getScriptOptions(script);
+	scriptOpts = st.getScriptOptions(script);
 	equal(scriptOpts.env, "production");
 	equal(scriptOpts.root, "http://localhost/app");
 	equal(scriptOpts.startFile, "foobarapp/foobarapp.js");
 	script.src = "http://localhost/app/steal.production.js?foobarapp.js";
-	scriptOpts = steal.getScriptOptions(script);
+	scriptOpts = st.getScriptOptions(script);
 	equal(scriptOpts.env, "production");
 	equal(scriptOpts.root, "http://localhost/app");
 	equal(scriptOpts.startFile, "foobarapp.js");
 })
 
 asyncTest('steal.config.shim', 7, function(){
-	steal.config({
+	config.attr({
 		shim: {
 			"mocks/foobar" : {
 				init: function(){

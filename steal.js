@@ -743,33 +743,6 @@
 			}
 			this.stealConfig.root = root || URI("");
 		},
-		shim: function (shims) {
-			for (var id in shims) {
-				var resource = Module.make(id);
-				if (typeof shims[id] === "object") {
-					var needs = shims[id].deps || []
-					var exports = shims[id].exports;
-					var init = shims[id].init
-				} else {
-					needs = shims[id];
-				}(function (_resource, _needs) {
-					_resource.options.needs = _needs;
-				})(resource, needs);
-				resource.exports = (function (_resource, _needs, _exports, _init) {
-					return function () {
-						var args = [];
-						h.each(_needs, function (i, id) {
-							args.push(Module.make(id).value);
-						});
-						if (_init) {
-							_resource.value = _init.apply(null, args);
-						} else {
-							_resource.value = h.win[_exports];
-						}
-					}
-				})(resource, needs, exports, init)
-			}
-		},
 		//var stealConfig = configs[configContext];
 		cloneContext: function () {
 			return new ConfigManager(h.extend({}, this.stealConfig));
@@ -781,7 +754,8 @@
 		env: "development",
 		loadProduction: true,
 		logLevel: 0,
-		root: ""
+		root: "",
+		amd: false
 	};
 
 	// ### TYPES ##
@@ -884,6 +858,7 @@
 		// add the src option
 		// but it is not added to functions
 		if (options.idToUri) {
+			var old = options.src;
 			options.src = this.addSuffix(options.idToUri(options.id));
 		}
 
@@ -910,7 +885,7 @@
 
 
 	function require(options, converters, success, error, config) {
-
+		var t = converters[0]
 		var type = config.attr('types')[converters.shift()];
 
 		type.require(options, function require_continue_check() {
@@ -1061,8 +1036,7 @@
 		// ============ MODULE ================
 		// a map of resources by resourceID
 		var resources = {},
-			id = 0,
-			ignoreableModules = ['stealconfig.js'];
+			id = 0;
 		// this is for methods on a 'steal instance'.  A file can be in one of a few states:
 		// created - the steal instance is created, but we haven't started loading it yet
 		//           this happens when thens are used
@@ -1255,7 +1229,7 @@
 						this.options[opt] = prevOptions[opt];
 					}
 				}
-				if (this.options.id && h.inArray(ignoreableModules, this.options.id + "") > -1) {
+				if (this.options.id) {
 					this.options.abort = false;
 				}
 			},
@@ -1828,24 +1802,39 @@
 
 		};
 
-		// convert resources to modules ...
-		// a function is a module definition piece
-		// you steal(moduleId1, moduleId2, function(module1, module2){});
-		// 
-		h.win.define = function (moduleId, dependencies, method) {
-			if (typeof moduleId == 'function') {
-				modules[URI.cur + ""] = moduleId();
-			} else if (!method && dependencies) {
-				if (typeof dependencies == "function") {
-					modules[moduleId] = dependencies();
+		if (config.attr('amd') === true) {
+
+			// convert resources to modules ...
+			// a function is a module definition piece
+			// you steal(moduleId1, moduleId2, function(module1, module2){});
+			// 
+			h.win.define = function (moduleId, dependencies, method) {
+				if (typeof moduleId == 'function') {
+					modules[URI.cur + ""] = moduleId();
+				} else if (!method && dependencies) {
+					if (typeof dependencies == "function") {
+						modules[moduleId] = dependencies();
+					} else {
+						modules[moduleId] = dependencies;
+					}
+
+				} else if (dependencies && method && !dependencies.length) {
+					modules[moduleId] = method();
 				} else {
-					modules[moduleId] = dependencies;
+					st.apply(null, h.map(dependencies, function (dependency) {
+						dependency = typeof dependency === "string" ? {
+							id: dependency
+						} : dependency;
+						dependency.toId = st.amdToId;
+
+						dependency.idToUri = st.amdIdToUri;
+						return dependency;
+					}).concat(method))
 				}
 
-			} else if (dependencies && method && !dependencies.length) {
-				modules[moduleId] = method();
-			} else {
-				st.apply(null, h.map(dependencies, function (dependency) {
+			}
+			h.win.require = function (dependencies, method) {
+				var depends = h.map(dependencies, function (dependency) {
 					dependency = typeof dependency === "string" ? {
 						id: dependency
 					} : dependency;
@@ -1853,39 +1842,25 @@
 
 					dependency.idToUri = st.amdIdToUri;
 					return dependency;
-				}).concat(method))
+				}).concat([method]);
+				st.apply(null, depends)
+			}
+			h.win.define.amd = {
+				jQuery: true
 			}
 
+			//st.when = when;
+			// make steal public
+			// make steal loaded
+			define("steal", [], function () {
+				return st;
+			});
+
+			define("require", function () {
+				return require;
+			})
+
 		}
-		h.win.require = function (dependencies, method) {
-			var depends = h.map(dependencies, function (dependency) {
-				dependency = typeof dependency === "string" ? {
-					id: dependency
-				} : dependency;
-				dependency.toId = st.amdToId;
-
-				dependency.idToUri = st.amdIdToUri;
-				return dependency;
-			}).concat([method]);
-			st.apply(null, depends)
-		}
-		h.win.define.amd = {
-			jQuery: true
-		}
-
-
-
-		//st.when = when;
-		// make steal public
-
-		// make steal loaded
-		define("steal", [], function () {
-			return st;
-		});
-
-		define("require", function () {
-			return require;
-		})
 
 		/**
 		 * @add steal
@@ -1917,7 +1892,6 @@
 				// set the ext
 				options.ext = options.id.ext();
 				options.src = options.idToUri ? options.idToUri(options.id) + "" : steal.idToUri(options.id) + "";
-				//console.log(options.src)
 				// Check if it's a configured needs
 				var configedExt = config.attr().ext[options.ext];
 				// if we have something, but it's not a type
@@ -2092,15 +2066,18 @@
 			},
 			type: function (type, cb) {
 				var typs = type.split(" ");
-
 				if (!cb) {
 					return config.attr('types')[typs.shift()].require
 				}
 
-				config.attr('types')[typs.shift()] = {
+				var types = config.attr('types')
+
+				types[typs.shift()] = {
 					require: cb,
 					convert: typs
 				};
+
+				config.attr('types', types)
 			},
 			request: h.request
 		});
@@ -2184,6 +2161,36 @@
 
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.resources;
+
+		config.shim = function (shims) {
+			for (var id in shims) {
+				var resource = Module.make({
+					id: id
+				});
+				if (typeof shims[id] === "object") {
+					var needs = shims[id].deps || []
+					var exports = shims[id].exports;
+					var init = shims[id].init
+				} else {
+					needs = shims[id];
+				}(function (_resource, _needs) {
+					_resource.options.needs = _needs;
+				})(resource, needs);
+				resource.exports = (function (_resource, _needs, _exports, _init) {
+					return function () {
+						var args = [];
+						h.each(_needs, function (i, id) {
+							args.push(Module.make(id).value);
+						});
+						if (_init) {
+							_resource.value = _init.apply(null, args);
+						} else {
+							_resource.value = h.win[_exports];
+						}
+					}
+				})(resource, needs, exports, init)
+			}
+		}
 
 		// =============================== STARTUP ===============================
 		var rootSteal = false;
@@ -2452,7 +2459,10 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 					force: true
 				});
 			} else {
-				steals.unshift("stealconfig.js")
+				steals.unshift({
+					id: "stealconfig.js",
+					abort: false
+				});
 
 				if (options.loadDev !== false) {
 					steals.unshift({
@@ -2598,7 +2608,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 		startup();
 		//win.steals = steals;
 		st.resources = resources;
-		h.win.Module = Module;
+		st.Module = Module;
 
 		return st;
 	}

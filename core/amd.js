@@ -128,62 +128,63 @@ var modules = {
 
 };
 
-// convert resources to modules ...
-// a function is a module definition piece
-// you steal(moduleId1, moduleId2, function(module1, module2){});
-// 
-h.win.define = function( moduleId, dependencies, method ) {
-	if(typeof moduleId == 'function'){
-		modules[URI.cur+""] = moduleId();
-	} else if(!method && dependencies){
-		if(typeof dependencies == "function"){
-			modules[moduleId] = dependencies();
+if(config.attr('amd') === true){
+
+	// convert resources to modules ...
+	// a function is a module definition piece
+	// you steal(moduleId1, moduleId2, function(module1, module2){});
+	// 
+	h.win.define = function( moduleId, dependencies, method ) {
+		if(typeof moduleId == 'function'){
+			modules[URI.cur+""] = moduleId();
+		} else if(!method && dependencies){
+			if(typeof dependencies == "function"){
+				modules[moduleId] = dependencies();
+			} else {
+				modules[moduleId] = dependencies;
+			}
+			
+		} else if (dependencies && method && !dependencies.length ) {
+			modules[moduleId] = method();
 		} else {
-			modules[moduleId] = dependencies;
+			st.apply(null, h.map(dependencies, function(dependency){
+				dependency = typeof dependency === "string" ? {
+					id: dependency
+				} : dependency;
+				dependency.toId = st.amdToId;
+				
+				dependency.idToUri = st.amdIdToUri;
+				return dependency;
+			}).concat(method) )
 		}
 		
-	} else if (dependencies && method && !dependencies.length ) {
-		modules[moduleId] = method();
-	} else {
-		st.apply(null, h.map(dependencies, function(dependency){
-			dependency = typeof dependency === "string" ? {
-				id: dependency
-			} : dependency;
-			dependency.toId = st.amdToId;
-			
-			dependency.idToUri = st.amdIdToUri;
-			return dependency;
-		}).concat(method) )
 	}
-	
+	h.win.require = function(dependencies, method){
+		var depends = h.map(dependencies, function(dependency){
+				dependency = typeof dependency === "string" ? {
+					id: dependency
+				} : dependency;
+				dependency.toId = st.amdToId;
+				
+				dependency.idToUri = st.amdIdToUri;
+				return dependency;
+			}).concat([method]);
+		st.apply(null, depends )
+	}
+	h.win.define.amd = {
+		jQuery: true
+	}
+
+	//st.when = when;
+	// make steal public
+
+	// make steal loaded
+	define("steal", [], function() {
+		return st;
+	});
+
+	define("require", function(){
+		return require;
+	})
+
 }
-h.win.require = function(dependencies, method){
-	var depends = h.map(dependencies, function(dependency){
-			dependency = typeof dependency === "string" ? {
-				id: dependency
-			} : dependency;
-			dependency.toId = st.amdToId;
-			
-			dependency.idToUri = st.amdIdToUri;
-			return dependency;
-		}).concat([method]);
-	st.apply(null, depends )
-}
-h.win.define.amd = {
-	jQuery: true
-}
-
-
-
-//st.when = when;
-// make steal public
-
-
-// make steal loaded
-define("steal", [], function() {
-	return st;
-});
-
-define("require", function(){
-	return require;
-})
