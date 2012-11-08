@@ -2151,12 +2151,39 @@
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.resources;
 
+		/**
+		 * Shim support for steal
+		 *
+		 * This function sets up shims for steal. It follows RequireJS' syntax:
+		 *
+		 *     steal.config({
+		 *        shim : {
+		 *          jquery: {
+		 *            exports: "jQuery"
+		 *          }
+		 *        }
+		 *      })
+		 *
+		 * This enables steal to pass you a value from library that is not wrapped
+		 * with steal() call.
+		 *
+		 *     steal('jquery', function(j){
+		 *       // j is set to jQuery
+		 *     })
+		 */
+
 		st.setupShims = function (shims) {
+			// Go through all shims
 			for (var id in shims) {
+				// Make resource from shim's id. Since steal takes care
+				// of always returning same resource for same id 
+				// when someone steals resource created in this function
+				// they will get same object back
 				var resource = Module.make({
 					id: id
 				});
 				if (typeof shims[id] === "object") {
+					// set up dependencies of the module
 					var needs = shims[id].deps || []
 					var exports = shims[id].exports;
 					var init = shims[id].init
@@ -2165,6 +2192,9 @@
 				}(function (_resource, _needs) {
 					_resource.options.needs = _needs;
 				})(resource, needs);
+				// create resource's exports function. We check for existance
+				// of this function in `Module.prototype.executed` and if it exitst
+				// it is called, which sets `value` of the module 
 				resource.exports = (function (_resource, _needs, _exports, _init) {
 					return function () {
 						var args = [];
@@ -2172,8 +2202,11 @@
 							args.push(Module.make(id).value);
 						});
 						if (_init) {
+							// if module has exports function, call it
 							_resource.value = _init.apply(null, args);
 						} else {
+							// otherwise it's a string so we just return
+							// object from the window e.g window['jQuery']
 							_resource.value = h.win[_exports];
 						}
 					}
@@ -2547,9 +2580,14 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 			})
 		}
 
+
+		// Use config.on to listen on changes in config. We primarily use this
+		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function (configData) {
 			h.each(resources, function (id, resource) {
+				// if resource is not a function it means it's `src` is changeable
 				if (resource.options.type != "fn") {
+					// finds resource's needs 
 					// TODO this is terrible
 					var needs = (resource.options.needs || []).slice(0),
 						buildType = resource.options.buildType;
@@ -2565,7 +2603,15 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 					// if a resource is set to load
 					// check if there are new needs
 					if (resource.isSetupToExecute) {
-
+						// find all `needs` and set up "late dependencies"
+						// this allows us to steal files that need to load
+						// special converters without loading these converters
+						// explicitely:
+						// 
+						//    steal('view.ejs', function(ejsFn){...})
+						//
+						// This will load files needed to convert .ejs files
+						// without explicite steal
 						h.each(resource.options.needs || [], function (i, need) {
 							if (h.inArray(needs, need) == -1) {
 								var n = steal.make(need);
@@ -2577,6 +2623,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 					}
 				}
 			});
+			// set up shims after paths are updated
 			if (configData.shim) {
 				st.setupShims(configData.shim)
 			}
