@@ -102,7 +102,7 @@ h.extend(ConfigManager.prototype, {
 		}
 
 		for(var i = 0; i < this.callbacks.length; i++){
-			this.callbacks[i]()
+			this.callbacks[i](this.stealConfig)
 		}
 		
 		return this;

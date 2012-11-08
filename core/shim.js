@@ -1,4 +1,4 @@
-config.shim = function(shims){
+st.setupShims = function(shims){
 	for(var id in shims){
 		var resource = Module.make({id: id});
 		if(typeof shims[id] === "object"){

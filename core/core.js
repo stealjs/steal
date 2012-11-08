@@ -103,7 +103,7 @@
 
 		/*# interactive.js #*/
 
-		config.on(function(){
+		config.on(function(configData){
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible
@@ -132,7 +132,10 @@
 						})
 					}
 				}				
-			})
+			});
+			if(configData.shim){
+				st.setupShims(configData.shim)
+			}
 		})
 
 		st.File = st.URI = URI;

@@ -703,7 +703,7 @@
 			}
 
 			for (var i = 0; i < this.callbacks.length; i++) {
-				this.callbacks[i]()
+				this.callbacks[i](this.stealConfig)
 			}
 
 			return this;
@@ -2083,24 +2083,13 @@
 		});
 
 		h.useIEShim = (function () {
-			var obj = {
-				foo: "bar",
-				toString: "baz"
-			},
-				counter = 0;
-			// Internet Explorer 8 does not include enumerations of properties 
-			// that have the same name as built-in properties of prototype object. 
-			// All document modes in Internet Explorer 9 include these properties 
-			// in the enumeration. 
-			// Source : http://msdn.microsoft.com/en-us/library/ie/gg622937%28v=vs.85%29.aspx
-			//
-			// This allows us to treat differently script loading in IE8 and below than in IE9.
-			// We need to check this because IE8 and lower don't allow onerror and onload
-			// events on the script element
-			for (var k in obj) {
-				counter++
+			if (st.isRhino) {
+				return false;
 			}
-			return !st.isRhino && h.scriptTag().readyState && counter === 1;
+
+			var d = document.createElement('div');
+			d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";
+			return !!(h.scriptTag().readyState && d.innerText === "ie");
 		})()
 
 		//  ============================== Packages ===============================
@@ -2162,7 +2151,7 @@
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.resources;
 
-		config.shim = function (shims) {
+		st.setupShims = function (shims) {
 			for (var id in shims) {
 				var resource = Module.make({
 					id: id
@@ -2558,7 +2547,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 			})
 		}
 
-		config.on(function () {
+		config.on(function (configData) {
 			h.each(resources, function (id, resource) {
 				if (resource.options.type != "fn") {
 					// TODO this is terrible
@@ -2587,7 +2576,10 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 						})
 					}
 				}
-			})
+			});
+			if (configData.shim) {
+				st.setupShims(configData.shim)
+			}
 		})
 
 		st.File = st.URI = URI;
