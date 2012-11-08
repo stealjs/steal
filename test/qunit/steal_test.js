@@ -678,6 +678,10 @@ test("modules", function(){
 	
 });
 
+test("inline steals work with needs and shims", 2, function(){
+	stop();
+	$('body').append('<iframe src="inline_steals/inline_steals.html"></iframe>')
+})
 asyncTest("load 32 stylesheets", 2, function() {
 	steal.config({root: orig})
 	function normalizeColor( color ) {
