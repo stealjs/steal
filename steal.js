@@ -187,7 +187,9 @@
 				return true;
 			}
 		},
+		// are we in production
 		stealCheck: /steal\.(production\.)?js.*/,
+		// get script that loaded steal 
 		getStealScriptSrc: function () {
 			if (!h.doc) {
 				return;
@@ -251,12 +253,17 @@
 		return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 	};
 
-	// ## Deferred .63
+	// steal's deferred library. It is used through steal
+	// to support jQuery like API for file loading.
+	//
+	// This is a low level library and it's never exposed to
+	// the end user
 	var Deferred = function (func) {
 		if (!(this instanceof Deferred)) return new Deferred();
-
+		// arrays for `done` and `fail` callbacks
 		this.doneFuncs = [];
 		this.failFuncs = [];
+
 		this.resultArgs = null;
 		this.status = "";
 
@@ -298,13 +305,14 @@
 
 		}
 	}
-
+	// call resolve functions
 	var resolveFunc = function (type, status) {
 		return function (context) {
 			var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
 			return this.exec(context, this[type], args, status);
 		}
 	},
+
 		doneFunc = function (type, status) {
 			return function () {
 				var self = this;
@@ -1617,9 +1625,15 @@
 		st.config.called = false;
 		st._id = Math.floor(1000 * Math.random());
 
-		// ## CONFIG ##
-
-
+/*
+ * `steal.getScriptOptions` is used to determine various
+ * options passed to the steal.js file:
+ *
+ * - should we load the production version of the 
+ *   (if you use steal.production.js instead of steal.js)
+ * - parts of the query string to determine `startFile`
+ * - location of the `root url`
+ */
 
 		st.getScriptOptions = function (script) {
 
@@ -1754,9 +1768,10 @@
 			})
 			return uri;
 		}
+
 		// for a given ID, where should I find this resource
 		/**
-		 * `st.idToUri( id, noJoin )` takes an id and returns a URI that
+		 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
 		 * is the location of the file. It uses the paths option of  [config].
 		 * Passing true for `noJoin` does not join from the root URI.
 		 */
@@ -1777,6 +1792,13 @@
 
 			return noJoin ? id : config.attr().root.join(id)
 		}
+
+		// for a given AMD id this will return an URI object
+		/**
+		 * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
+		 * is the location of the file. It uses the paths options of [config].
+		 * Passing true for `noJoin` does not join from that URI.
+		 */
 		st.amdIdToUri = function (id, noJoin) {
 			// this is normalize
 			var paths = config.attr().paths || {},
@@ -1802,12 +1824,21 @@
 
 		};
 
+
+		// AMD is not available for now. If you want to use AMD features with
+		// steal you can by setting the `amd` param to true:
+		//
+		//     steal({
+		//       amd: true
+		//     })
+		//
+		// This will expose `define` and `require` functions which can be used
+		// to load AMD modules
 		if (config.attr('amd') === true) {
 
 			// convert resources to modules ...
 			// a function is a module definition piece
 			// you steal(moduleId1, moduleId2, function(module1, module2){});
-			// 
 			h.win.define = function (moduleId, dependencies, method) {
 				if (typeof moduleId == 'function') {
 					modules[URI.cur + ""] = moduleId();
@@ -1849,9 +1880,7 @@
 				jQuery: true
 			}
 
-			//st.when = when;
-			// make steal public
-			// make steal loaded
+			// expose steal as AMD module
 			define("steal", [], function () {
 				return st;
 			});

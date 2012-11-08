@@ -1,7 +1,12 @@
-// ## CONFIG ##
-	
-	
-
+/*
+ * `steal.getScriptOptions` is used to determine various
+ * options passed to the steal.js file:
+ *
+ * - should we load the production version of the 
+ *   (if you use steal.production.js instead of steal.js)
+ * - parts of the query string to determine `startFile`
+ * - location of the `root url`
+ */
 
 st.getScriptOptions = function( script ) {
 
