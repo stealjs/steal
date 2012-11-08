@@ -703,7 +703,7 @@
 			}
 
 			for (var i = 0; i < this.callbacks.length; i++) {
-				this.callbacks[i]()
+				this.callbacks[i](this.stealConfig)
 			}
 
 			return this;
@@ -2083,7 +2083,9 @@
 		});
 
 		h.useIEShim = (function () {
-			if(st.isRhino) { return false; }
+			if (st.isRhino) {
+				return false;
+			}
 
 			var d = document.createElement('div');
 			d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";
@@ -2149,7 +2151,7 @@
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.resources;
 
-		config.shim = function (shims) {
+		st.setupShims = function (shims) {
 			for (var id in shims) {
 				var resource = Module.make({
 					id: id
@@ -2545,7 +2547,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 			})
 		}
 
-		config.on(function () {
+		config.on(function (configData) {
 			h.each(resources, function (id, resource) {
 				if (resource.options.type != "fn") {
 					// TODO this is terrible
@@ -2574,7 +2576,10 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 						})
 					}
 				}
-			})
+			});
+			if (configData.shim) {
+				st.setupShims(configData.shim)
+			}
 		})
 
 		st.File = st.URI = URI;
