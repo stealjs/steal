@@ -8,9 +8,13 @@
 <script type='text/javascript' src='../../../steal/steal.js'></script>
 <script type='text/javascript'>
 steal(
-	'steal/test/inline_steals_using_ext/ejs.ejs',
-	 function(ejs) {
+	'steal/test/inline_steals/ejs.ejs',
+  'jquery',
+	 function(ejs, jquery) {
 	      ejs({message: "Hello World"});
+        if(typeof jquery === "undefined"){
+          throw "No jQuery"
+        }
 	 }
 );
 </script>
