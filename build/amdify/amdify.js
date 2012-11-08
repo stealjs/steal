@@ -2,37 +2,13 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 	var contents = {},
 	modules = {},
 	inexcludes = function(excludes, src) {
-		for(var i = 0; i < excludes.length; i++) {
-			if(src.indexOf(excludes[i]) !== -1) {
+		for (var i = 0; i < excludes.length; i++) {
+			if ((excludes[i].substr(-1) === "/" && src.indexOf(excludes[i]) === 0)
+				|| src == excludes[i]) {
 				return true;
 			}
 		}
 		return false;
-	},
-	/**
-	 * Creates a variable name from a filename or AMD module name.
-	 *
-	 * @param {String} name The name of the AMD module or file
-	 * @return {String} The variable name
-	 */
-	variableName = function(name) {
-		var start = name.lastIndexOf('/') + 1,
-			end = name.lastIndexOf('.') !== -1 ? name.lastIndexOf('.') : name.length;
-		return '__' + name.substring(start, end).replace(/\./g, '_');
-	},
-	/**
-	 * Returns a steal.File instance from a filename or AMD module name.
-	 *
-	 * @param name
-	 * @param suffix
-	 * @return {*}
-	 */
-	getFile = function(name, suffix) {
-		var suffix = suffix || '.js', file = name;
-		if(name.indexOf(suffix, name.length - suffix.length) === -1) {
-			file = file + suffix;
-		}
-		return steal.File(file);
 	},
 	/**
 	 * Returns a list of steal dependencies for a given file and caches
@@ -45,18 +21,16 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 	 * of steals
 	 */
 	getDependencies = function(file, excludes, options, callback) {
-		s.build.open("steal/rhino/empty.html", {
+		s.build.open("steal/rhino/blank.html", {
 			startFile : file,
 			skipAll: true
 		}, function(opener){
 			var ret = [];
-			opener.each(function(stl, text){
+			opener.each(function(stl) {
 				if(!inexcludes(excludes || [], stl.id.toString())) {
-					// Add the parsed content to cache
-					if(!contents[stl.id.toString().toString()]) {
-						contents[stl.id.toString()] = s.build.pluginify.content(stl, options, text, opener.steal);
-					}
 					ret.push(stl);
+				} else {
+					print('Ignoring ' + stl.id);
 				}
 			});
 			callback(ret);
@@ -71,38 +45,48 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 	 */
 	createModule = function(name, excludes, options) {
 		getDependencies(name, excludes, options, function(steals) {
-			var content,
-				dependencies = [],
-				names = [],
-				nameMap = options.names || {},
-				map = options.map || {},
-				where = getFile(options.out + (map[name] || name));
-
-			print('  > ' + name + ' -> ' + (map[name] || name));
-
 			steals.forEach(function(stl) {
-				var current = (map[stl.id.toString()] || stl.id.toString());
-				if(stl.id.toString() !== name) { // Don't include the current file
-					if(!modules[stl.id.toString()] && !inexcludes(excludes, stl.id.toString())) {
-						createModule(stl.id.toString(), excludes, options);
-					}
-					dependencies.push("'" + current + "'");
-					names.push(nameMap[current] || variableName(current));
-				}
+				var content = readFile(stl.id);
+				var wrapper = "define([";
+				// content.replace(/steal\(['"].*function\(/,)
+				content = content.replace('steal', 'define');
+				var outFile = new s.File(options.out + stl.id.toString().substring(stl.id.toString().lastIndexOf('/'), stl.id.toString().length));
+				console.log('Saving to ' + outFile);
+				outFile.save(content);
 			});
-
-			content = "define([" +
-				dependencies.join(',') +
-				'], function(' +
-				names.join(', ') +
-				') { \n' +
-				(contents[name] || (' return ' + (options.global || '{}'))) +
-				';\n})';
-
-			modules[name] = content;
-
-			steal.File(where.dir()).mkdirs();
-			where.save(content);
+//			var content,
+//				dependencies = [],
+//				names = [],
+//				nameMap = options.names || {},
+//				map = options.map || {},
+//				where = getFile(options.out + (map[name] || name));
+//
+//			print('  > ' + name + ' -> ' + (map[name] || name));
+//
+//			steals.forEach(function(stl) {
+//				console.log(stl.id);
+//				var current = (map[stl.id.toString()] || stl.id.toString());
+//				if(stl.id.toString() !== name) { // Don't include the current file
+//					if(!modules[stl.id.toString()] && !inexcludes(excludes, stl.id.toString())) {
+//						createModule(stl.id.toString(), excludes, options);
+//					}
+//					dependencies.push("'" + current + "'");
+//					names.push(nameMap[current] || variableName(current));
+//				}
+//			});
+//
+//			content = "define([" +
+//				dependencies.join(',') +
+//				'], function(' +
+//				names.join(', ') +
+//				') { \n' +
+//				(contents[name] || (' return ' + (options.global || '{}'))) +
+//				';\n})';
+//
+//			modules[name] = content;
+//
+//			new steal.File(where.dir()).mkdirs();
+//			where.save(content);
 		});
 	};
 
@@ -131,8 +115,18 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 	 * to parameter variable names.
 	 * - `global` - The global option passed to pluginify
 	 */
-	steal.build.amdify = function(source, options) {
+	s.build.amdify = function(source, options) {
 		var out = options.out;
+
+		rhinoLoader = {
+			callback: function(s){
+				s.pluginify = true;
+			}
+		};
+
+		options.exclude = options.exclude || [];
+		options.exclude.push('stealconfig.js', 'steal/dev/');
+
 		print('Creating AMD modules for ' + source + " in " + options.out);
 		steal.File(out).mkdirs();
 		createModule(source, options.exclude || {}, options);
