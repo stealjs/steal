@@ -82,7 +82,6 @@ steal('steal', 'steal/parse','steal/build',
 			steals = [], 
 			fns = {};
 
-
 		steal.build.open("steal/rhino/blank.html", {
 			startFile : plugin, 
 			skipAll: opts.skipAll
