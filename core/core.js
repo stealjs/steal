@@ -105,16 +105,31 @@
 			h.each(resources, function( id, resource ) {
 				if ( resource.options.type != "fn" ) {
 					// TODO this is terrible
-					var buildType = resource.options.buildType;
+					var needs = (resource.options.needs || []).slice(0),
+						buildType = resource.options.buildType;
 					resource.setOptions(resource.orig);
 					var newId = resource.options.id;
 					// this mapping is to move a config'd key
-					if ( id !== newId ) {
+					if (id !== newId) {
 						resources[newId] = resource;
 						// TODO: remove the old one ....
 					}
 					resource.options.buildType = buildType;
-				}
+					
+					// if a resource is set to load
+					// check if there are new needs
+					if( resource.isSetupToExecute ) {
+						
+						h.each(resource.options.needs||[],function(i,need){
+							if(h.inArray(needs, need) == -1){
+								var n = steal.make(need);
+								n.execute()
+								resource.needsDependencies.push(n);
+								resource.lateNeedDependency = n;
+							}
+						})
+					}
+				}				
 			})
 		})
 

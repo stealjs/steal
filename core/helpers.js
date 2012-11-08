@@ -26,12 +26,9 @@ var h = {
 	},
 	// adds the item to the array only if it doesn't currently exist
 	uniquePush: function(arr, item){
-		for(var i=0; i < arr.length; i++){
-			if(arr[i] == item){
-				return;
-			}
+		if( h.inArray(arr, item) === -1 ){
+			return arr.push(item)
 		}
-		arr.push(item)
 	},
 	// if o is a string
 	isString: function( o ) {

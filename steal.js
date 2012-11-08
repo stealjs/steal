@@ -48,12 +48,9 @@
 		},
 		// adds the item to the array only if it doesn't currently exist
 		uniquePush: function (arr, item) {
-			for (var i = 0; i < arr.length; i++) {
-				if (arr[i] == item) {
-					return;
-				}
+			if (h.inArray(arr, item) === -1) {
+				return arr.push(item)
 			}
-			arr.push(item)
 		},
 		// if o is a string
 		isString: function (o) {
@@ -1061,13 +1058,7 @@
 
 	var moduleManager = function (steal, modules, interactives, config) {
 
-/*print("types")
-
-for(var typeName in config.attr('types')){
-	print("  "+typeName)
-}*/
-
-		// ============ RESOURCE ================
+		// ============ MODULE ================
 		// a map of resources by resourceID
 		var resources = {},
 			id = 0,
@@ -1406,6 +1397,8 @@ for(var typeName in config.attr('types')){
 					}
 					if (resource === null) return;
 
+					// lets us know this resource is currently wired to load
+					resource.isSetupToExecute = true;
 					// when the priorSet is completed, execute this resource
 					// and when it's needs are done
 					var waitsOn = priorSet.slice(0);
@@ -1425,8 +1418,7 @@ for(var typeName in config.attr('types')){
 					waitsOn.length && whenEach(waitsOn, "completed", resource, "execute");
 
 					// what is this used for?
-					resource.waitedOn = resource.waitedOn ? resource.waitedOn.concat(priorSet) : priorSet.slice(0);
-
+					// resource.waitedOn = resource.waitedOn ? resource.waitedOn.concat(priorSet) : priorSet.slice(0);
 					// add this steal to the current set
 					set.push(resource);
 					// if we are still on the first set, and this has no needs
@@ -1461,6 +1453,38 @@ for(var typeName in config.attr('types')){
 			},
 			execute: function () {
 				var self = this;
+				// if a late need dependency was addded
+				if (this.lateNeedDependency && !this.lateNeedDependency.completed.isResolved()) {
+					// call execute again when it's finished
+					this.lateNeedDependency.completed.then(function () {
+						self.execute()
+					})
+					return;
+				}
+
+				// check types
+				var raw = this.options,
+					types = config.attr('types');
+
+				// if it's a string, get it's extension and check if
+				// it is a registered type, if it is ... set the type
+				if (!raw.type) {
+					var ext = URI(raw.id).ext();
+					if (!ext && !types[ext]) {
+						ext = "js";
+					}
+					raw.type = ext;
+				}
+				if (!types[raw.type] && steal.config().env == 'development') {
+					throw "steal.js - type " + raw.type + " has not been loaded.";
+				} else if (!types[raw.type] && steal.config().env == 'production') {
+					// if we haven't defined EJS yet and we're in production, its ok, just ignore it
+					return;
+				}
+				var converters = types[raw.type].convert;
+				raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
+
+
 				if (!self.loaded.isResolved()) {
 					self.loaded.resolve();
 				}
@@ -1538,34 +1562,6 @@ for(var typeName in config.attr('types')){
 			}
 		});
 
-		// adds a type (js by default) and buildType (css, js)
-		// this should happen right before loading
-		// however, what if urls are different
-		// because one file has JS and another does not?
-		// we could check if it matches something with .js because foo.less.js SHOULD
-		// be rare
-		Module.prototype.execute = h.before(Module.prototype.execute, function () {
-			var raw = this.options,
-				types = config.attr('types');
-
-			// if it's a string, get it's extension and check if
-			// it is a registered type, if it is ... set the type
-			if (!raw.type) {
-				var ext = URI(raw.id).ext();
-				if (!ext && !types[ext]) {
-					ext = "js";
-				}
-				raw.type = ext;
-			}
-			if (!types[raw.type] && steal.config().env == 'development') {
-				throw "steal.js - type " + raw.type + " has not been loaded.";
-			} else if (!types[raw.type] && steal.config().env == 'production') {
-				// if we haven't defined EJS yet and we're in production, its ok, just ignore it
-				return;
-			}
-			var converters = types[raw.type].convert;
-			raw.buildType = converters.length ? converters[converters.length - 1] : raw.type;
-		});
 
 		// =========== HAS ARRAY STUFF ============
 		// Logic that deals with files that have collections of other files within
@@ -2556,7 +2552,8 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 			h.each(resources, function (id, resource) {
 				if (resource.options.type != "fn") {
 					// TODO this is terrible
-					var buildType = resource.options.buildType;
+					var needs = (resource.options.needs || []).slice(0),
+						buildType = resource.options.buildType;
 					resource.setOptions(resource.orig);
 					var newId = resource.options.id;
 					// this mapping is to move a config'd key
@@ -2565,6 +2562,20 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 						// TODO: remove the old one ....
 					}
 					resource.options.buildType = buildType;
+
+					// if a resource is set to load
+					// check if there are new needs
+					if (resource.isSetupToExecute) {
+
+						h.each(resource.options.needs || [], function (i, need) {
+							if (h.inArray(needs, need) == -1) {
+								var n = steal.make(need);
+								n.execute()
+								resource.needsDependencies.push(n);
+								resource.lateNeedDependency = n;
+							}
+						})
+					}
 				}
 			})
 		})
