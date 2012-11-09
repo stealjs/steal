@@ -1,76 +1,13 @@
-	/**
-	 * `config(config)` configures st. Typically it it used
-	 * in __stealconfig.js__.  The available options are:
-	 * 
-	 *  - map - map an id to another id
-	 *  - paths - maps an id to a file
-	 *  - root - the path to the "root" folder
-	 *  - env - `"development"` or `"production"`
-	 *  - types - processor rules for various types
-	 *  - ext - behavior rules for extensions
-	 *  - urlArgs - extra queryString arguments
-	 *  - startFile - the file to load
-	 * 
-	 * ## map
-	 * 
-	 * Maps an id to another id with a certain scope of other ids. This can be
-	 * used to use different modules within the same id or map ids to another id.
-	 * Example:
-	 * 
-	 *     st.config({
-	 *       map: {
-	 *         "*": {
-	 *           "jquery/jquery.js": "jquery"
-	 *         },
-	 *         "compontent1":{
-	 *           "underscore" : "underscore1.2"
-	 *         },
-	 *         "component2":{
-	 *           "underscore" : "underscore1.1"  
-	 *         }
-	 *       }
-	 *     })
-	 * 
-	 * ## paths
-	 * 
-	 * Maps an id or matching ids to a url. Each mapping is specified
-	 * by an id or part of the id to match and what that 
-	 * part should be replaced with.
-	 * 
-	 *     st.config({
-	 *       paths: {
-	 * 	       // maps everything in a jquery folder like: `jquery/controller`
-	 *         // to http://cdn.com/jquery/controller/controller.com
-	 * 	       "jquery/" : "http://cdn.com/jquery/"
-	 * 
-	 *         // if path does not end with /, it matches only that id
-	 *         "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"
-	 *       }
-	 *     }) 
-	 * 
-	 * ## root
-	 * ## env
-	 * 
-	 * If production, does not load "ignored" scripts and loads production script.  If development gives more warnings / errors.
-	 * 
-	 * ## types
-	 * 
-	 * The types option can specify how a type is loaded. 
-	 * 
-	 * ## ext
-	 * 
-	 * The ext option specifies the default behavior if file is loaded with the 
-	 * specified extension. For a given extension, a file that configures the type can be given or
-	 * an existing type. For example, for ejs:
-	 * 
-	 *     st.config({ext: {"ejs": "can/view/ejs/ejs.js"}})
-	 * 
-	 * This tells steal to make sure `can/view/ejs/ejs.js` is executed before any file with
-	 * ".ejs" is executed.
-	 * 
-	 * ## startFile
-	 */
+/**
+ * `new ConfigManager(config)` creates configuration profile for the steal context.
+ * It keeps all config parameters in the instance which allows steal to clone it's 
+ * context.
+ */
 
+
+/**
+ *
+ **/
 var ConfigManager = function(options){
 	this.stealConfig = {};
 	this.callbacks = [];

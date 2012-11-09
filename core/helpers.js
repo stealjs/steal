@@ -205,8 +205,16 @@ var h = {
 
 		var uuid = s.join("");
 		return uuid;
+	},
+	addEvent : function( elem, type, fn ) {
+		if ( elem.addEventListener ) {
+			elem.addEventListener(type, fn, false);
+		} else if ( elem.attachEvent ) {
+			elem.attachEvent("on" + type, fn);
+		} else {
+			fn();
+		}
 	}
-
 }
 
 h.doc   = h.win.document

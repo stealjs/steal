@@ -226,8 +226,16 @@
 
 			var uuid = s.join("");
 			return uuid;
+		},
+		addEvent: function (elem, type, fn) {
+			if (elem.addEventListener) {
+				elem.addEventListener(type, fn, false);
+			} else if (elem.attachEvent) {
+				elem.attachEvent("on" + type, fn);
+			} else {
+				fn();
+			}
 		}
-
 	}
 
 	h.doc = h.win.document
@@ -608,78 +616,15 @@
 	// temp add steal.File for backward compat
 	// --- END URI
 	/**
-	 * `config(config)` configures st. Typically it it used
-	 * in __stealconfig.js__.  The available options are:
-	 * 
-	 *  - map - map an id to another id
-	 *  - paths - maps an id to a file
-	 *  - root - the path to the "root" folder
-	 *  - env - `"development"` or `"production"`
-	 *  - types - processor rules for various types
-	 *  - ext - behavior rules for extensions
-	 *  - urlArgs - extra queryString arguments
-	 *  - startFile - the file to load
-	 * 
-	 * ## map
-	 * 
-	 * Maps an id to another id with a certain scope of other ids. This can be
-	 * used to use different modules within the same id or map ids to another id.
-	 * Example:
-	 * 
-	 *     st.config({
-	 *       map: {
-	 *         "*": {
-	 *           "jquery/jquery.js": "jquery"
-	 *         },
-	 *         "compontent1":{
-	 *           "underscore" : "underscore1.2"
-	 *         },
-	 *         "component2":{
-	 *           "underscore" : "underscore1.1"  
-	 *         }
-	 *       }
-	 *     })
-	 * 
-	 * ## paths
-	 * 
-	 * Maps an id or matching ids to a url. Each mapping is specified
-	 * by an id or part of the id to match and what that 
-	 * part should be replaced with.
-	 * 
-	 *     st.config({
-	 *       paths: {
-	 * 	       // maps everything in a jquery folder like: `jquery/controller`
-	 *         // to http://cdn.com/jquery/controller/controller.com
-	 * 	       "jquery/" : "http://cdn.com/jquery/"
-	 * 
-	 *         // if path does not end with /, it matches only that id
-	 *         "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"
-	 *       }
-	 *     }) 
-	 * 
-	 * ## root
-	 * ## env
-	 * 
-	 * If production, does not load "ignored" scripts and loads production script.  If development gives more warnings / errors.
-	 * 
-	 * ## types
-	 * 
-	 * The types option can specify how a type is loaded. 
-	 * 
-	 * ## ext
-	 * 
-	 * The ext option specifies the default behavior if file is loaded with the 
-	 * specified extension. For a given extension, a file that configures the type can be given or
-	 * an existing type. For example, for ejs:
-	 * 
-	 *     st.config({ext: {"ejs": "can/view/ejs/ejs.js"}})
-	 * 
-	 * This tells steal to make sure `can/view/ejs/ejs.js` is executed before any file with
-	 * ".ejs" is executed.
-	 * 
-	 * ## startFile
+	 * `new ConfigManager(config)` creates configuration profile for the steal context.
+	 * It keeps all config parameters in the instance which allows steal to clone it's 
+	 * context.
 	 */
 
+
+	/**
+	 *
+	 **/
 	var ConfigManager = function (options) {
 		this.stealConfig = {};
 		this.callbacks = [];
@@ -2378,16 +2323,9 @@
 				}
 			})
 
-
 		})();
 
-
-
-
-
-
 		// =========== DEBUG =========
-
 /*var name = function(stel){
 	if(stel.options && stel.options.type == "fn"){
 		return stel.orig.name? stel.orig.name : stel.options.id+":fn";//(""+stel.orig).substr(0,10)
@@ -2395,10 +2333,9 @@
 	return stel.options ? stel.options.id + "": "CONTAINER"
 }
 
-
-//Module.prototype.load = before( Module.prototype.load, function(){
-//	console.log("      load", name(this), this.loading, steal._id, this.id)
-//})
+Module.prototype.load = before( Module.prototype.load, function(){
+	console.log("      load", name(this), this.loading, steal._id, this.id)
+})
 
 Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
@@ -2409,25 +2346,14 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 	console.log("      complete", name(this), steal._id, this.id)
 })*/
 
-
-
 		// ============= WINDOW LOAD ========
-		var addEvent = function (elem, type, fn) {
-			if (elem.addEventListener) {
-				elem.addEventListener(type, fn, false);
-			} else if (elem.attachEvent) {
-				elem.attachEvent("on" + type, fn);
-			} else {
-				fn();
-			}
+		var loaded = {
+			load: Deferred(),
+			end: Deferred()
 		},
-			loaded = {
-				load: Deferred(),
-				end: Deferred()
-			},
 			firstEnd = false;
 
-		addEvent(h.win, "load", function () {
+		h.addEvent(h.win, "load", function () {
 			loaded.load.resolve();
 		});
 

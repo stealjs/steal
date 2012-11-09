@@ -8,7 +8,7 @@ var rootSteal = false;
 //
 h.extend(st, {
 	// modifies src
-/*makeOptions : after(steal.makeOptions,function(raw){
+	/*makeOptions : after(steal.makeOptions,function(raw){
 		raw.src = URI.root().join(raw.rootSrc = URI( raw.rootSrc ).insertMapping());
 	}),*/
 
@@ -127,16 +127,9 @@ h.extend(st, {
 		}
 	})
 
-
 })();
 
-
-
-
-
-
 // =========== DEBUG =========
-
 
 /*var name = function(stel){
 	if(stel.options && stel.options.type == "fn"){
@@ -145,10 +138,9 @@ h.extend(st, {
 	return stel.options ? stel.options.id + "": "CONTAINER"
 }
 
-
-//Module.prototype.load = before( Module.prototype.load, function(){
-//	console.log("      load", name(this), this.loading, steal._id, this.id)
-//})
+Module.prototype.load = before( Module.prototype.load, function(){
+	console.log("      load", name(this), this.loading, steal._id, this.id)
+})
 
 Module.prototype.executed = before(Module.prototype.executed, function(){
 	var namer= name(this)
@@ -159,25 +151,14 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 	console.log("      complete", name(this), steal._id, this.id)
 })*/
 
-
-
 // ============= WINDOW LOAD ========
-var addEvent = function( elem, type, fn ) {
-	if ( elem.addEventListener ) {
-		elem.addEventListener(type, fn, false);
-	} else if ( elem.attachEvent ) {
-		elem.attachEvent("on" + type, fn);
-	} else {
-		fn();
-	}
-},
-	loaded = {
+var loaded = {
 		load: Deferred(),
 		end: Deferred()
 	},
 	firstEnd = false;
 
-addEvent(h.win, "load", function() {
+h.addEvent(h.win, "load", function() {
 	loaded.load.resolve();
 });
 
