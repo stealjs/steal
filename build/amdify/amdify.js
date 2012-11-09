@@ -1,4 +1,4 @@
-steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
+steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s, parse) {
 	var modules = {},
 	inexcludes = function(excludes, src) {
 		for (var i = 0; i < excludes.length; i++) {
@@ -35,6 +35,81 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 			callback(ret);
 		}, null);
 	},
+
+	convertContents = function(content) {
+		var p = parse(content),
+		out = 'define',
+		deps = [],
+		token = null,
+		depsLooking = true;
+
+		if (/steal[.\(]/.test(content)) {
+			p.until('steal');
+			p.moveNext();
+		}
+		else {
+			return 'define(function() {\n' + content + '\n})';
+		}
+
+		out += p.cur().value;
+
+		while(token = p.moveNext()) {
+			if(token.type === 'string') {
+				deps.push(token.value);
+			}
+
+			if(token.type === 'name' &&
+				token.value === 'function') {
+
+				if(deps.length) {
+					deps = deps.map(function(d) {
+						return d.replace('.js', '');
+					});
+
+					out += '[\'';
+					out += deps.join('\',\'');
+					out += '\'], ';
+				}
+
+				break;
+			}
+		}
+
+		//just moving the cursor to the end of the cb
+		p.partner('{', function(token) {});
+
+		content = s.build.pluginify.getFunction(content, 0, false) + '\n';
+		out += content.substring(0, content.lastIndexOf('return'));
+
+		while(token = p.moveNext()) {
+			if(token.type === 'string') {
+				var fileContent = s.build.pluginify.getFunction(readFile(token.value),
+					0, false);
+
+				out += fileContent.substring(0, fileContent.lastIndexOf('return'));
+			}
+		}
+
+		out += 'return can;\n})';
+
+		return s.build.js.clean(out);
+	},
+
+	writeContents = function(content, dir, stl) {
+		var src = stl.id.toString(),
+		parts = src.replace('.' + stl.ext, '').split('/');
+
+		if(parts[parts.length - 1] == parts[parts.length - 2]) {
+			parts.pop();
+			src = parts.join('/') + '.' + stl.ext
+		}
+
+		new s.File(dir + '/' + src).dir().mkdirs();
+		var outFile = new s.File(dir + '/' + src);
+		console.log('Saving to ' + outFile);
+		outFile.save(content);
+	},
+
 	/**
 	 * Creates the actual module recursively
 	 *
@@ -45,45 +120,10 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 	createModule = function(name, excludes, options) {
 		getDependencies(name, excludes, options, function(steals) {
 			steals.forEach(function(stl) {
-				var content = readFile(stl.id),
-					header = /steal\(['"]?.*,?[\s]?function[\s]?\(/m,
-					oldHeader = header.exec(content),
-					src = stl.id.toString(),
-					dependencies = oldHeader ? oldHeader[0].replace(/steal\(/, '')
-						.replace(/[\'"]/g, '')
-						.replace(/,?[\s]?function[\s]?\(/, '')
-						.split(',') : [];
 
-				if(content == '') {
-					console.log('ERROR: ' + stl.id + ' is empty');
-				}
+				var content = convertContents(readFile(stl.id));
+				writeContents(content, options.out, stl);
 
-				dependencies.forEach(function(d) {
-					d = d.replace('.js', '');
-				});
-
-				dependencies = dependencies.filter(function(d) {
-					return d.length;
-				});
-
-				var newHeader = 'define(';
-
-				newHeader += dependencies.length ? '[\'' : '';
-				newHeader += dependencies.join('\',\'');
-				newHeader += dependencies.length ? '\'],' : '';
-				newHeader += 'function(';
-
-				content = content.replace(header, newHeader);
-
-				var parts = src.replace('.' + stl.ext, '').split('/');
-				if(parts[parts.length - 1] == parts[parts.length - 2]) {
-					parts.pop();
-					src = parts.join('/') + '.' + stl.ext
-				}
-				new s.File(options.out + '/' + src).dir().mkdirs();
-				var outFile = new s.File(options.out + '/' + src);
-				console.log('Saving to ' + outFile);
-				outFile.save(content);
 			});
 		});
 	};
