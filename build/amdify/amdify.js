@@ -92,7 +92,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 
 		out += 'return can;\n})';
 
-		return s.build.js.clean(out);
+		return out;
 	},
 
 	writeContents = function(content, dir, stl) {
@@ -107,7 +107,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		new s.File(dir + '/' + src).dir().mkdirs();
 		var outFile = new s.File(dir + '/' + src);
 		console.log('Saving to ' + outFile);
-		outFile.save(content);
+		outFile.save(s.build.js.clean(content));
 	},
 
 	/**
