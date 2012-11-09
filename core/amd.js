@@ -80,9 +80,10 @@ st.amdToId = function(id, currentWorkingId, type){
 	})
 	return uri;
 }
+
 // for a given ID, where should I find this resource
 /**
- * `st.idToUri( id, noJoin )` takes an id and returns a URI that
+ * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
  * is the location of the file. It uses the paths option of  [config].
  * Passing true for `noJoin` does not join from the root URI.
  */
@@ -103,6 +104,13 @@ st.idToUri = function( id, noJoin ) {
 
 	return noJoin ? id : config.attr().root.join(id)
 }
+
+// for a given AMD id this will return an URI object
+/**
+ * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
+ * is the location of the file. It uses the paths options of [config].
+ * Passing true for `noJoin` does not join from that URI.
+ */
 st.amdIdToUri = function( id, noJoin ){
 	// this is normalize
 	var paths = config.attr().paths || {},
@@ -128,12 +136,22 @@ var modules = {
 
 };
 
+
+// AMD is not available for now. If you want to use AMD features with
+// steal you can by setting the `amd` param to true:
+//
+//     steal({
+//       amd: true
+//     })
+//
+// This will expose `define` and `require` functions which can be used
+// to load AMD modules
+
 if(config.attr('amd') === true){
 
 	// convert resources to modules ...
 	// a function is a module definition piece
 	// you steal(moduleId1, moduleId2, function(module1, module2){});
-	// 
 	h.win.define = function( moduleId, dependencies, method ) {
 		if(typeof moduleId == 'function'){
 			modules[URI.cur+""] = moduleId();
@@ -174,11 +192,8 @@ if(config.attr('amd') === true){
 	h.win.define.amd = {
 		jQuery: true
 	}
-
-	//st.when = when;
-	// make steal public
-
-	// make steal loaded
+	
+	// expose steal as AMD module
 	define("steal", [], function() {
 		return st;
 	});

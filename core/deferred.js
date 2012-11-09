@@ -1,9 +1,15 @@
-// ## Deferred .63
+// steal's deferred library. It is used through steal
+// to support jQuery like API for file loading.
+//
+// This is a low level library and it's never exposed to
+// the end user
+
 var Deferred = function( func ) {
 	if (!(this instanceof Deferred)) return new Deferred();
-
+	// arrays for `done` and `fail` callbacks
 	this.doneFuncs = [];
 	this.failFuncs = [];
+
 	this.resultArgs = null;
 	this.status = "";
 
@@ -45,13 +51,14 @@ Deferred.when = function() {
 
 	}
 }
-
+// call resolve functions
 var resolveFunc = function( type, status ) {
 	return function( context ) {
 		var args = this.resultArgs = (arguments.length > 1) ? arguments[1] : [];
 		return this.exec(context, this[type], args, status);
 	}
 },
+
 	doneFunc = function( type, status ) {
 		return function() {
 			var self = this;

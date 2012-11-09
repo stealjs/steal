@@ -166,7 +166,9 @@ var h = {
 			return true;
 		}
 	},
+	// are we in production
 	stealCheck : /steal\.(production\.)?js.*/,
+	// get script that loaded steal 
 	getStealScriptSrc : function() {
 		if (!h.doc ) {
 			return;

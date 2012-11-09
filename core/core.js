@@ -103,15 +103,21 @@
 
 		/*# interactive.js #*/
 
+
+		// Use config.on to listen on changes in config. We primarily use this
+		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function(configData){
 			h.each(resources, function( id, resource ) {
+				// if resource is not a function it means it's `src` is changeable
 				if ( resource.options.type != "fn" ) {
+					// finds resource's needs 
 					// TODO this is terrible
 					var needs = (resource.options.needs || []).slice(0),
 						buildType = resource.options.buildType;
 					resource.setOptions(resource.orig);
 					var newId = resource.options.id;
 					// this mapping is to move a config'd key
+
 					if (id !== newId) {
 						resources[newId] = resource;
 						// TODO: remove the old one ....
@@ -121,7 +127,15 @@
 					// if a resource is set to load
 					// check if there are new needs
 					if( resource.isSetupToExecute ) {
-						
+						// find all `needs` and set up "late dependencies"
+						// this allows us to steal files that need to load
+						// special converters without loading these converters
+						// explicitely:
+						// 
+						//    steal('view.ejs', function(ejsFn){...})
+						//
+						// This will load files needed to convert .ejs files
+						// without explicite steal
 						h.each(resource.options.needs||[],function(i,need){
 							if(h.inArray(needs, need) == -1){
 								var n = steal.make(need);
@@ -133,6 +147,7 @@
 					}
 				}				
 			});
+			// set up shims after paths are updated
 			if(configData.shim){
 				st.setupShims(configData.shim)
 			}
