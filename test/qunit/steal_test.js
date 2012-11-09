@@ -28,6 +28,11 @@ if(window !== window.parent && window.parent.QUnit && !$.browser.msie){
 
 // testing new steal API
 
+// test("steal.config().root", function(){
+// 	// this test is for IE7, where steal.config().root was a relative path (different from all other browsers) before the fix
+// 	// the test verifies that :// is in the root...if its not, its probably broken
+// 	ok(/\:\/\//.test(steal.config().root), "steal.config().root has :// in it")
+// })
 
 test("packages", function(){
 	same(packagesStolen,["0","1","2", "uses"],"defined works right")
@@ -610,6 +615,7 @@ test("don't abort on error", function(){
 	});
 });
 
+// TODO not expected to work in IE8 or below, should conditionally remove this test in those browsers
 test("runs error callback", function(){
 	stop();
 	expect(2);
