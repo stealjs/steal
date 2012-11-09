@@ -1620,7 +1620,6 @@
 		// ## CONFIG ##
 
 
-
 		st.getScriptOptions = function (script) {
 
 			var options = {},
@@ -1633,12 +1632,11 @@
 				// Split on question mark to get query
 				parts = script.src.split("?");
 				src = parts.shift();
-				// for IE7, where the script.src is always relative
-				if(!/\/\//.test(src)){
-					var dir = URI.page.dir();
-					src = URI(dir.join(src))+"";
-				}
-				
+				// // for IE7, where the script.src is always relative
+				// if(!/\/\//.test(src)){
+				// 	var dir = URI.page.dir();
+				// 	src = URI(dir.join(src))+"";
+				// }
 				query = parts.join("?");
 
 				// Split on comma to get startFile and env
