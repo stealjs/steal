@@ -615,21 +615,31 @@ test("don't abort on error", function(){
 	});
 });
 
-// TODO not expected to work in IE8 or below, should conditionally remove this test in those browsers
-test("runs error callback", function(){
-	stop();
-	expect(2);
+// Following test always fails in IE8 and lower so we don't run it for these browsers
+var shouldRun = (function(){
+	if(steal.isRhino) { return false; }
 
-	steal({id: "./does_not_exist2.js",
-		abort: false,
-		error: function(){
-			ok(true, "executed error callback");
-		}
-	}, function(){
-		ok(true, "executed steal fn");
-		start();
+	var d = document.createElement('div');
+	d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";
+	return !(d.innerText === "ie");
+})()
+if(shouldRun){
+	test("runs error callback", function(){
+		stop();
+		expect(2);
+
+		steal({id: "./does_not_exist2.js",
+			abort: false,
+			error: function(){
+				ok(true, "executed error callback");
+			}
+		}, function(){
+			ok(true, "executed steal fn");
+			start();
+		});
 	});
-});
+}
+
 
 test("needs", function(){
 	stop();

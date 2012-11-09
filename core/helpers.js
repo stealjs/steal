@@ -1,3 +1,7 @@
+var requestFactory = function() {
+	return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+};
+
 // ## Helpers ##
 // The following are a list of helper methods used internally to steal
 
@@ -192,20 +196,6 @@ var h = {
 		}
 		return -1;
 	},
-	uuid : function(){
-		// http://www.ietf.org/rfc/rfc4122.txt
-		var s = [];
-		var hexDigits = "0123456789abcdef";
-		for (var i = 0; i < 36; i++) {
-			s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
-		}
-		s[14] = "4";  // bits 12-15 of the time_hi_and_version field to 0010
-		s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
-		s[8] = s[13] = s[18] = s[23] = "-";
-
-		var uuid = s.join("");
-		return uuid;
-	},
 	addEvent : function( elem, type, fn ) {
 		if ( elem.addEventListener ) {
 			elem.addEventListener(type, fn, false);
@@ -214,21 +204,19 @@ var h = {
 		} else {
 			fn();
 		}
-	}
+	},
+	useIEShim : false
 }
 
-h.doc   = h.win.document
+h.doc   = h.win.document;
 h.docEl = h.doc && h.doc.documentElement;
-
-// if oldsteal is an object
-// we use it as options to configure steal
 
 h.support = {
 	// does onerror work in script tags?
 	error: h.doc && (function() {
 		var script = h.scriptTag();
 		script.onerror = h.noop;
-		return h.isFn(script.onerror) || "onerror" in script
+		return h.isFn(script.onerror) || "onerror" in script;
 	})(),
 	// If scripts support interactive ready state.
 	// This is tested later.
@@ -236,7 +224,3 @@ h.support = {
 	// use attachEvent for event listening (IE)
 	attachEvent: h.doc && h.scriptTag().attachEvent
 }
-
-var requestFactory = function() {
-	return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
-};

@@ -36,11 +36,9 @@
 		// a startup function that will be called when steal is ready
 		var interactiveScript,
 			// key is script name, value is array of pending items
-			interactives = {};
-		var startup = function(){};
-
-		// Removing because this will be passed in
-		// var opts    = (typeof h.win.steal == "object" ? h.win.steal : {});
+			interactives = {},
+			// empty startup function
+			startup = function(){};
 		
 		var st = function() {
 			
@@ -72,6 +70,7 @@
 		if(setStealOnWindow){
 			h.win.steal = st;
 		}
+		// clone steal context
 		st.clone = function(){
 			return stealManager(false, config.cloneContext())
 		}
@@ -103,51 +102,13 @@
 
 		/*# interactive.js #*/
 
-
 		// Use config.on to listen on changes in config. We primarily use this
 		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function(configData){
 			h.each(resources, function( id, resource ) {
-				// if resource is not a function it means it's `src` is changeable
-				if ( resource.options.type != "fn" ) {
-					// finds resource's needs 
-					// TODO this is terrible
-					var needs = (resource.options.needs || []).slice(0),
-						buildType = resource.options.buildType;
-					resource.setOptions(resource.orig);
-					var newId = resource.options.id;
-					// this mapping is to move a config'd key
-
-					if (id !== newId) {
-						resources[newId] = resource;
-						// TODO: remove the old one ....
-					}
-					resource.options.buildType = buildType;
-					
-					// if a resource is set to load
-					// check if there are new needs
-					if( resource.isSetupToExecute ) {
-						// find all `needs` and set up "late dependencies"
-						// this allows us to steal files that need to load
-						// special converters without loading these converters
-						// explicitely:
-						// 
-						//    steal('view.ejs', function(ejsFn){...})
-						//
-						// This will load files needed to convert .ejs files
-						// without explicite steal
-						h.each(resource.options.needs||[],function(i,need){
-							if(h.inArray(needs, need) == -1){
-								var n = steal.make(need);
-								n.execute()
-								resource.needsDependencies.push(n);
-								resource.lateNeedDependency = n;
-							}
-						})
-					}
-				}				
+				resource.rewriteId(id);
 			});
-			// set up shims after paths are updated
+			// set up shims after ids are updated
 			if(configData.shim){
 				st.setupShims(configData.shim)
 			}
@@ -155,6 +116,9 @@
 
 		st.File = st.URI = URI;
 
+		// if this is a first steal context in the page
+		// we need to set up the `steal` module so we would 
+		// know steal was loaded.
 		if(kickoff){
 			var stealModule = new Module({id:"steal"})
 			stealModule.value = st;
@@ -162,18 +126,16 @@
 			stealModule.run.resolve();
 			stealModule.executing = true;
 			stealModule.completed.resolve();
-
 			resources[stealModule.options.id] = stealModule;
 		}
 
 		startup();
-		//win.steals = steals;
 		st.resources = resources;
 		st.Module = Module;
 
 		return st;
 	}
-
+	// create initial steal instance
 	stealManager(true, new ConfigManager(typeof h.win.steal == "object" ? h.win.steal : {}), true)
 
 })();

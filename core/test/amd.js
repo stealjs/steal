@@ -1,8 +1,6 @@
 module("AMD");
 
-config = new ConfigManager();
-
-console.log(config)
+config = new ConfigManager({});
 
 test('st.id', function(){
 	equal(st.id("foo/bar") + "", "foo/bar/bar.js");

@@ -5,6 +5,7 @@ var getInteractiveScript = function() {
 		var scripts = h.getElementsByTagName("script"),
 			i = scripts.length;
 		while ( i-- ) {
+			// if script's readyState is interactive it is the one we want
 			if ( scripts[i].readyState === "interactive" ) {
 				return scripts[i];
 			}
