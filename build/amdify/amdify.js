@@ -1,6 +1,5 @@
 steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
-	var contents = {},
-	modules = {},
+	var modules = {},
 	inexcludes = function(excludes, src) {
 		for (var i = 0; i < excludes.length; i++) {
 			if ((excludes[i].substr(-1) === "/" && src.indexOf(excludes[i]) === 0)
@@ -47,13 +46,17 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 		getDependencies(name, excludes, options, function(steals) {
 			steals.forEach(function(stl) {
 				var content = readFile(stl.id),
-				header = /steal\(['"]?.*,?[\s]?function[\s]?\(/m,
+					header = /steal\(['"]?.*,?[\s]?function[\s]?\(/m,
+					oldHeader = header.exec(content),
+					src = stl.id.toString(),
+					dependencies = oldHeader ? oldHeader[0].replace(/steal\(/, '')
+						.replace(/[\'"]/g, '')
+						.replace(/,?[\s]?function[\s]?\(/, '')
+						.split(',') : [];
 
-				oldHeader = header.exec(content),
-				dependencies = oldHeader ? oldHeader[0].replace(/steal\(/, '')
-					.replace(/[\'"]/g, '')
-					.replace(/,?[\s]?function[\s]?\(/, '')
-					.split(',') : [];
+				if(content == '') {
+					console.log('ERROR: ' + stl.id + ' is empty');
+				}
 
 				dependencies.forEach(function(d) {
 					d = d.replace('.js', '');
@@ -72,43 +75,16 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 
 				content = content.replace(header, newHeader);
 
-				var outFile = new s.File(options.out + stl.id.toString().substring(stl.id.toString().lastIndexOf('/'), stl.id.toString().length));
+				var parts = src.replace('.' + stl.ext, '').split('/');
+				if(parts[parts.length - 1] == parts[parts.length - 2]) {
+					parts.pop();
+					src = parts.join('/') + '.' + stl.ext
+				}
+				new s.File(options.out + '/' + src).dir().mkdirs();
+				var outFile = new s.File(options.out + '/' + src);
 				console.log('Saving to ' + outFile);
 				outFile.save(content);
 			});
-//			var content,
-//				dependencies = [],
-//				names = [],
-//				nameMap = options.names || {},
-//				map = options.map || {},
-//				where = getFile(options.out + (map[name] || name));
-//
-//			print('  > ' + name + ' -> ' + (map[name] || name));
-//
-//			steals.forEach(function(stl) {
-//				console.log(stl.id);
-//				var current = (map[stl.id.toString()] || stl.id.toString());
-//				if(stl.id.toString() !== name) { // Don't include the current file
-//					if(!modules[stl.id.toString()] && !inexcludes(excludes, stl.id.toString())) {
-//						createModule(stl.id.toString(), excludes, options);
-//					}
-//					dependencies.push("'" + current + "'");
-//					names.push(nameMap[current] || variableName(current));
-//				}
-//			});
-//
-//			content = "define([" +
-//				dependencies.join(',') +
-//				'], function(' +
-//				names.join(', ') +
-//				') { \n' +
-//				(contents[name] || (' return ' + (options.global || '{}'))) +
-//				';\n})';
-//
-//			modules[name] = content;
-//
-//			new steal.File(where.dir()).mkdirs();
-//			where.save(content);
 		});
 	};
 
