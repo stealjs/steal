@@ -46,10 +46,32 @@ steal('steal', 'steal/build', 'steal/build/pluginify', function(s) {
 	createModule = function(name, excludes, options) {
 		getDependencies(name, excludes, options, function(steals) {
 			steals.forEach(function(stl) {
-				var content = readFile(stl.id);
-				var wrapper = "define([";
-				// content.replace(/steal\(['"].*function\(/,)
-				content = content.replace('steal', 'define');
+				var content = readFile(stl.id),
+				header = /steal\(['"]?.*,?[\s]?function[\s]?\(/m,
+
+				oldHeader = header.exec(content),
+				dependencies = oldHeader ? oldHeader[0].replace(/steal\(/, '')
+					.replace(/[\'"]/g, '')
+					.replace(/,?[\s]?function[\s]?\(/, '')
+					.split(',') : [];
+
+				dependencies.forEach(function(d) {
+					d = d.replace('.js', '');
+				});
+
+				dependencies = dependencies.filter(function(d) {
+					return d.length;
+				});
+
+				var newHeader = 'define(';
+
+				newHeader += dependencies.length ? '[\'' : '';
+				newHeader += dependencies.join('\',\'');
+				newHeader += dependencies.length ? '\'],' : '';
+				newHeader += 'function(';
+
+				content = content.replace(header, newHeader);
+
 				var outFile = new s.File(options.out + stl.id.toString().substring(stl.id.toString().lastIndexOf('/'), stl.id.toString().length));
 				console.log('Saving to ' + outFile);
 				outFile.save(content);
