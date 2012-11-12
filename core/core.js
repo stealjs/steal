@@ -106,7 +106,7 @@
 		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function(configData){
 			h.each(resources, function( id, resource ) {
-				resource.rewriteId(id);
+				resource.rewriteOptions(id);
 			});
 			// set up shims after ids are updated
 			if(configData.shim){

@@ -32,7 +32,7 @@ h.extend(st, {
 				if ( module.options.type != "fn" ) {
 					// TODO terrible
 					var buildType = module.options.buildType;
-					module.setOptions(module.orig);
+					module.updateOptions();
 					module.options.buildType = buildType;
 				}
 			})

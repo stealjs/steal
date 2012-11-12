@@ -461,14 +461,25 @@ var moduleManager = function(steal, modules, interactives, config){
 				});
 			}
 		},
-		rewriteId : function(id){
+		updateOptions: function(){
+			var buildType = this.options.buildType;
+			var orginalOptions = this.options;
+			this.setOptions(this.orig);
+			var newOptions = this.options;
+			this.options = orginalOptions;
+			for (opt in newOptions) {
+				this.options[opt] = newOptions[opt];
+			}
+			this.options.buildType = buildType;
+		},
+		rewriteOptions : function(id){
 			// if resource is not a function it means it's `src` is changeable
 			if ( this.options.type != "fn" ) {
 				// finds resource's needs 
 				// TODO this is terrible
 				var needs = (this.options.needs || []).slice(0),
 					buildType = this.options.buildType;
-				this.setOptions(this.orig);
+				this.updateOptions();
 				var newId = this.options.id;
 				// this mapping is to move a config'd key
 

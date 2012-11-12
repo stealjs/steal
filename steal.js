@@ -1491,14 +1491,25 @@
 					});
 				}
 			},
-			rewriteId: function (id) {
+			updateOptions: function () {
+				var buildType = this.options.buildType;
+				var orginalOptions = this.options;
+				this.setOptions(this.orig);
+				var newOptions = this.options;
+				this.options = orginalOptions;
+				for (opt in newOptions) {
+					this.options[opt] = newOptions[opt];
+				}
+				this.options.buildType = buildType;
+			},
+			rewriteOptions: function (id) {
 				// if resource is not a function it means it's `src` is changeable
 				if (this.options.type != "fn") {
 					// finds resource's needs 
 					// TODO this is terrible
 					var needs = (this.options.needs || []).slice(0),
 						buildType = this.options.buildType;
-					this.setOptions(this.orig);
+					this.updateOptions();
 					var newId = this.options.id;
 					// this mapping is to move a config'd key
 					if (id !== newId) {
@@ -2320,7 +2331,7 @@
 						if (module.options.type != "fn") {
 							// TODO terrible
 							var buildType = module.options.buildType;
-							module.setOptions(module.orig);
+							module.updateOptions();
 							module.options.buildType = buildType;
 						}
 					})
@@ -2638,7 +2649,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function (configData) {
 			h.each(resources, function (id, resource) {
-				resource.rewriteId(id);
+				resource.rewriteOptions(id);
 			});
 			// set up shims after ids are updated
 			if (configData.shim) {
