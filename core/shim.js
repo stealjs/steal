@@ -1,5 +1,5 @@
 /**
- * Shim support for steal
+ * Implements shim support for steal
  *
  * This function sets up shims for steal. It follows RequireJS' syntax:
  *
@@ -7,6 +7,18 @@
  *        shim : {
  *          jquery: {
  *            exports: "jQuery"
+ *          }
+ *        }
+ *      })
+ * 
+ * You can also set function to explicitely return value from the module:
+ *
+ *     steal.config({
+ *        shim : {
+ *          jquery: {
+ *            exports: function(){
+ *              return window.jQuery;
+ *            }
  *          }
  *        }
  *      })
@@ -18,7 +30,6 @@
  *       // j is set to jQuery
  *     })
  */
-
 st.setupShims = function(shims){
 	// Go through all shims
 	for(var id in shims){

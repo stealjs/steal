@@ -44,7 +44,12 @@ h.extend(st, {
 	/**
 	 * Calls steal, but waits until all previous steals
 	 * have completed loading until loading the
-	 * files passed to the arguments.
+	 * files passed to the arguments:
+	 * 
+	 *     steal('jquery', 'can/util').then('file/that/depends/on_jquery.js')
+	 *
+	 * In this case first `jquery` and `can/util` will be loaded in parallel, 
+	 * and after both are loaded `file/that/depends/on_jquery.js` will be loaded
 	 */
 	then: function() {
 		var args = h.map(arguments);

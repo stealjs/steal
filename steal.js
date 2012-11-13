@@ -114,7 +114,6 @@
 			});
 			return arr;
 		},
-		// testing support for various browser behaviors
 		// ## AOP ##
 		// Aspect oriented programming helper methods are used to
 		// weave in functionality into steal's API.
@@ -595,7 +594,6 @@
 		return URI(orig);
 	};
 
-	// temp add steal.File for backward compat
 	// --- END URI
 	/**
 	 * `new ConfigManager(config)` creates configuration profile for the steal context.
@@ -893,6 +891,12 @@
 		return str;
 	}
 
+	// Require function. It will be called recursevly until all 
+	// converters are ran. After that `success` callback is ran.
+	// For instance if we're loading the .less file it will first
+	// run the `text` converter, then `less` converter and finally
+	// the `fn` converter.
+
 
 	function require(options, converters, success, error, config) {
 		var t = converters[0]
@@ -950,6 +954,12 @@
 
 			} else {
 				var src = options.src; //st.idToUri( options.id );
+				// If we're in IE older than IE9 we need to use
+				// onreadystatechange to determine when javascript file
+				// is loaded. Unfortunately this makes it impossible to
+				// call teh error callback, because it will return 
+				// loaded or completed for the script even if it 
+				// encountered the 404 error
 				if (h.useIEShim) {
 					script.onreadystatechange = function () {
 						if (stateCheck.test(script.readyState)) {
@@ -987,12 +997,14 @@
 			}
 			success(ret);
 		},
+		// request text
 		"text": function (options, success, error) {
 			h.request(options, function (text) {
 				options.text = text;
 				success(text);
 			}, error)
 		},
+		// loads css files and works around IE's 31 sheet limit
 		"css": function (options, success, error) {
 			if (options.text) { // less
 				var css = h.createElement("style");
@@ -1148,14 +1160,6 @@
 		// use stealModules b/c they are more fuzzy
 		// a module's id stays the same, but a path might change
 		// 
-/*Module.update = function() {
-		for ( var rootSrc in modules ) {
-			if (!modules[modules].loaded.isResolved() ) {
-
-			}
-		}
-	};*/
-
 		h.extend(Module.prototype, {
 			setOptions: function (options) {
 				var prevOptions = this.options;
@@ -1307,7 +1311,7 @@
 				this.loadDependencies();
 
 			},
-			// add depenedencies to the module:
+			// add depenedencies to the module
 			addDependencies: function (myqueue) {
 				var self = this,
 					isProduction = steal.config().env == "production";
@@ -1332,6 +1336,7 @@
 					self.queue.push(stel);
 				});
 			},
+			// loads module's dependencies
 			loadDependencies: function () {
 
 				//print("-setting up "+this.options.id)
@@ -2028,7 +2033,12 @@
 			/**
 			 * Calls steal, but waits until all previous steals
 			 * have completed loading until loading the
-			 * files passed to the arguments.
+			 * files passed to the arguments:
+			 * 
+			 *     steal('jquery', 'can/util').then('file/that/depends/on_jquery.js')
+			 *
+			 * In this case first `jquery` and `can/util` will be loaded in parallel, 
+			 * and after both are loaded `file/that/depends/on_jquery.js` will be loaded
 			 */
 			then: function () {
 				var args = h.map(arguments);
@@ -2201,7 +2211,8 @@
 			},
 			request: h.request
 		});
-
+		// Determine if we're running in IE older than IE9. This 
+		// will affect loading strategy for JavaScripts.
 		h.useIEShim = (function () {
 			if (st.isRhino) {
 				return false;
@@ -2214,7 +2225,7 @@
 
 		//  ============================== Packages ===============================
 		/**
-		 * @function steal.packages
+		 * @function packages
 		 * `steal.packages( packageIds... )` defines modules for deferred downloading.
 		 * 
 		 * This is used by the build system to build collections of modules that will be downloaded
@@ -2272,7 +2283,7 @@
 		resources = Module.modules;
 
 		/**
-		 * Shim support for steal
+		 * Implements shim support for steal
 		 *
 		 * This function sets up shims for steal. It follows RequireJS' syntax:
 		 *
@@ -2280,6 +2291,18 @@
 		 *        shim : {
 		 *          jquery: {
 		 *            exports: "jQuery"
+		 *          }
+		 *        }
+		 *      })
+		 * 
+		 * You can also set function to explicitely return value from the module:
+		 *
+		 *     steal.config({
+		 *        shim : {
+		 *          jquery: {
+		 *            exports: function(){
+		 *              return window.jQuery;
+		 *            }
 		 *          }
 		 *        }
 		 *      })
@@ -2291,7 +2314,6 @@
 		 *       // j is set to jQuery
 		 *     })
 		 */
-
 		st.setupShims = function (shims) {
 			// Go through all shims
 			for (var id in shims) {
@@ -2352,7 +2374,11 @@
 			mappings: {},
 
 			/**
-			 * Maps a 'rooted' folder to another location.
+			 * Maps a 'rooted' folder to another location. For instance you could use it 
+			 * to map from the `foo/bar` location to the `http://foo.cdn/bar`:
+			 *
+			 *     steal.map('foo/bar', 'http://foo.cdn/bar');
+			 *
 			 * @param {String|Object} from the location you want to map from.  For example:
 			 *   'foo/bar'
 			 * @param {String} [to] where you want to map this folder too.  Ex: 'http://foo.cdn/bar'
@@ -2466,26 +2492,25 @@
 		})();
 
 		// =========== DEBUG =========
-/*var name = function(stel){
-	if(stel.options && stel.options.type == "fn"){
-		return stel.orig.name? stel.orig.name : stel.options.id+":fn";//(""+stel.orig).substr(0,10)
-	}
-	return stel.options ? stel.options.id + "": "CONTAINER"
-}
-
-Module.prototype.load = before( Module.prototype.load, function(){
-	console.log("      load", name(this), this.loading, steal._id, this.id)
-})
-
-Module.prototype.executed = before(Module.prototype.executed, function(){
-	var namer= name(this)
-	console.log("      executed", namer, steal._id, this.id)
-})
-
-Module.prototype.complete = before(Module.prototype.complete, function(){
-	console.log("      complete", name(this), steal._id, this.id)
-})*/
-
+		// var name = function(stel){
+		// 	if(stel.options && stel.options.type == "fn"){
+		// 		return stel.orig.name? stel.orig.name : stel.options.id+":fn";//(""+stel.orig).substr(0,10)
+		// 	}
+		// 	return stel.options ? stel.options.id + "": "CONTAINER"
+		// }
+		// 
+		// Module.prototype.load = before( Module.prototype.load, function(){
+		// 	console.log("      load", name(this), this.loading, steal._id, this.id)
+		// })
+		// 
+		// Module.prototype.executed = before(Module.prototype.executed, function(){
+		// 	var namer= name(this)
+		// 	console.log("      executed", namer, steal._id, this.id)
+		// })
+		// 
+		// Module.prototype.complete = before(Module.prototype.complete, function(){
+		// 	console.log("      complete", name(this), steal._id, this.id)
+		// })
 		// ============= WINDOW LOAD ========
 		var loaded = {
 			load: Deferred(),
@@ -2636,7 +2661,6 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 
 		h.support.interactive = h.doc && !! getInteractiveScript();
 		if (h.support.interactive) {
-
 			// after steal is called, check which script is "interactive" (for IE)
 			st.after = h.after(st.after, function () {
 				// check if disabled by st.loading()

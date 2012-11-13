@@ -16,7 +16,11 @@ h.extend(st, {
 	mappings: {},
 
 	/**
-	 * Maps a 'rooted' folder to another location.
+	 * Maps a 'rooted' folder to another location. For instance you could use it 
+	 * to map from the `foo/bar` location to the `http://foo.cdn/bar`:
+	 *
+	 *     steal.map('foo/bar', 'http://foo.cdn/bar');
+	 *
 	 * @param {String|Object} from the location you want to map from.  For example:
 	 *   'foo/bar'
 	 * @param {String} [to] where you want to map this folder too.  Ex: 'http://foo.cdn/bar'
@@ -131,25 +135,25 @@ h.extend(st, {
 
 // =========== DEBUG =========
 
-/*var name = function(stel){
-	if(stel.options && stel.options.type == "fn"){
-		return stel.orig.name? stel.orig.name : stel.options.id+":fn";//(""+stel.orig).substr(0,10)
-	}
-	return stel.options ? stel.options.id + "": "CONTAINER"
-}
-
-Module.prototype.load = before( Module.prototype.load, function(){
-	console.log("      load", name(this), this.loading, steal._id, this.id)
-})
-
-Module.prototype.executed = before(Module.prototype.executed, function(){
-	var namer= name(this)
-	console.log("      executed", namer, steal._id, this.id)
-})
-
-Module.prototype.complete = before(Module.prototype.complete, function(){
-	console.log("      complete", name(this), steal._id, this.id)
-})*/
+// var name = function(stel){
+// 	if(stel.options && stel.options.type == "fn"){
+// 		return stel.orig.name? stel.orig.name : stel.options.id+":fn";//(""+stel.orig).substr(0,10)
+// 	}
+// 	return stel.options ? stel.options.id + "": "CONTAINER"
+// }
+// 
+// Module.prototype.load = before( Module.prototype.load, function(){
+// 	console.log("      load", name(this), this.loading, steal._id, this.id)
+// })
+// 
+// Module.prototype.executed = before(Module.prototype.executed, function(){
+// 	var namer= name(this)
+// 	console.log("      executed", namer, steal._id, this.id)
+// })
+// 
+// Module.prototype.complete = before(Module.prototype.complete, function(){
+// 	console.log("      complete", name(this), steal._id, this.id)
+// })
 
 // ============= WINDOW LOAD ========
 var loaded = {
