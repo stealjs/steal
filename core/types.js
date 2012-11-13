@@ -123,7 +123,11 @@ ConfigManager.prototype.addSuffix = function( str ) {
 	return str;
 }
 
-
+// Require function. It will be called recursevly until all 
+// converters are ran. After that `success` callback is ran.
+// For instance if we're loading the .less file it will first
+// run the `text` converter, then `less` converter and finally
+// the `fn` converter.
 function require(options, converters, success, error, config) {
 	var t = converters[0]
 	var type = config.attr('types')[converters.shift()];
@@ -179,6 +183,12 @@ ConfigManager.defaults.types = {
 
 		} else {
 			var src = options.src; //st.idToUri( options.id );
+			// If we're in IE older than IE9 we need to use
+			// onreadystatechange to determine when javascript file
+			// is loaded. Unfortunately this makes it impossible to
+			// call teh error callback, because it will return 
+			// loaded or completed for the script even if it 
+			// encountered the 404 error
 			if(h.useIEShim){
 				script.onreadystatechange = function(){
 					if (stateCheck.test(script.readyState)) {
@@ -217,12 +227,14 @@ ConfigManager.defaults.types = {
 		}
 		success(ret);
 	},
+	// request text
 	"text": function( options, success, error ) {
 		h.request(options, function( text ) {
 			options.text = text;
 			success(text);
 		}, error)
 	},
+	// loads css files and works around IE's 31 sheet limit
 	"css": function( options, success, error ) {
 		if ( options.text ) { // less
 			var css = h.createElement("style");

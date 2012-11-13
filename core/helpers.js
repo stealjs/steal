@@ -92,9 +92,7 @@ var h = {
 		});
 		return arr;
 	},
-	// testing support for various browser behaviors
-	
-		// ## AOP ##
+	// ## AOP ##
 	// Aspect oriented programming helper methods are used to
 	// weave in functionality into steal's API.
 	// calls `before` before `f` is called.

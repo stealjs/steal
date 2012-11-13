@@ -31,7 +31,6 @@ var getInteractiveScript = function() {
 
 h.support.interactive = h.doc && !! getInteractiveScript();
 if ( h.support.interactive ) {
-
 	// after steal is called, check which script is "interactive" (for IE)
 	st.after = h.after(st.after, function() {
 		// check if disabled by st.loading()

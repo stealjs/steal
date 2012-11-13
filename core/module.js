@@ -107,13 +107,6 @@ var moduleManager = function(steal, stealModules, interactives, config){
 	// use stealModules b/c they are more fuzzy
 	// a module's id stays the same, but a path might change
 	// 
-	/*Module.update = function() {
-		for ( var rootSrc in modules ) {
-			if (!modules[modules].loaded.isResolved() ) {
-
-			}
-		}
-	};*/
 
 	h.extend(Module.prototype, {
 		setOptions: function( options ) {
@@ -271,7 +264,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 			this.loadDependencies();
 
 		},
-		// add depenedencies to the module:
+		// add depenedencies to the module
 		addDependencies  : function(myqueue){
 			var self = this,
 				isProduction = steal.config().env == "production";
@@ -296,6 +289,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 				self.queue.push(stel);
 			});
 		},
+		// loads module's dependencies
 		loadDependencies : function(){
 			
 			//print("-setting up "+this.options.id)
