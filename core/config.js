@@ -1,4 +1,6 @@
-/*
+/**
+ * @function st.getScriptOptions
+ *
  * `steal.getScriptOptions` is used to determine various
  * options passed to the steal.js file:
  *

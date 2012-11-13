@@ -74,12 +74,15 @@
  * 
  **/
 
+
+
 var ConfigManager = function(options){
 	this.stealConfig = {};
 	this.callbacks = [];
 	this.attr(ConfigManager.defaults);
 	this.attr(options)
 }
+
 h.extend(ConfigManager.prototype, {
 	// get or set config.stealConfig attributes
 	attr: function( config ) {
@@ -111,10 +114,12 @@ h.extend(ConfigManager.prototype, {
 		
 		return this;
 	},
+	
 	// add callbacks which are called after config is changed
 	on: function(cb){
 		this.callbacks.push(cb)
 	},
+
 	// get the current start file
 	startFile: function(startFile){
 		// make sure startFile and production look right
@@ -125,6 +130,7 @@ h.extend(ConfigManager.prototype, {
 	},
 
 	/**
+	 *
 	 * Read or define the path relative URI's should be referenced from.
 	 * 
 	 *     window.location //-> "http://foo.com/site/index.html"

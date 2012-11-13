@@ -1,8 +1,5 @@
 // steal's deferred library. It is used through steal
 // to support jQuery like API for file loading.
-//
-// This is a low level library and it's never exposed to
-// the end user
 
 var Deferred = function( func ) {
 	if (!(this instanceof Deferred)) return new Deferred();

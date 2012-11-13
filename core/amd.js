@@ -83,6 +83,8 @@ st.amdToId = function(id, currentWorkingId, type){
 
 // for a given ID, where should I find this resource
 /**
+ * @function st.idToUri
+ *
  * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
  * is the location of the file. It uses the paths option of  [config].
  * Passing true for `noJoin` does not join from the root URI.
@@ -107,6 +109,8 @@ st.idToUri = function( id, noJoin ) {
 
 // for a given AMD id this will return an URI object
 /**
+ * @function st.amdIdToUri
+ *
  * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
  * is the location of the file. It uses the paths options of [config].
  * Passing true for `noJoin` does not join from that URI.
@@ -152,6 +156,20 @@ if(config.attr('amd') === true){
 	// convert resources to modules ...
 	// a function is a module definition piece
 	// you steal(moduleId1, moduleId2, function(module1, module2){});
+	/**
+ 	 * @function window.define
+ 	 *
+ 	 * AMD compatible `define` function. It is available only if steal's
+ 	 * `amd` param is set to true:
+ 	 *
+ 	 *     <script type="text/javascript">
+ 	 *       steal = {
+	 *         amd : true
+ 	 *       }
+ 	 *     <script />
+ 	 *     <script type="text/javascript" src="steal/steal.js"></script>
+ 	 *
+ 	 */
 	h.win.define = function( moduleId, dependencies, method ) {
 		if(typeof moduleId == 'function'){
 			modules[URI.cur+""] = moduleId();
@@ -177,6 +195,20 @@ if(config.attr('amd') === true){
 		}
 		
 	}
+	/**
+ 	 * @function window.require
+ 	 *
+ 	 * AMD compatible require function. It is available only if steal's
+ 	 * `amd` param is set to true:
+ 	 *
+ 	 *     <script type="text/javascript">
+ 	 *       steal = {
+	 *         amd : true
+ 	 *       }
+ 	 *     <script />
+ 	 *     <script type="text/javascript" src="steal/steal.js"></script>
+ 	 *
+ 	 */
 	h.win.require = function(dependencies, method){
 		var depends = h.map(dependencies, function(dependency){
 				dependency = typeof dependency === "string" ? {

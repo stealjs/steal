@@ -248,9 +248,6 @@
 
 	// steal's deferred library. It is used through steal
 	// to support jQuery like API for file loading.
-	//
-	// This is a low level library and it's never exposed to
-	// the end user
 	var Deferred = function (func) {
 		if (!(this instanceof Deferred)) return new Deferred();
 		// arrays for `done` and `fail` callbacks
@@ -676,12 +673,15 @@
 	 * 
 	 **/
 
+
+
 	var ConfigManager = function (options) {
 		this.stealConfig = {};
 		this.callbacks = [];
 		this.attr(ConfigManager.defaults);
 		this.attr(options)
 	}
+
 	h.extend(ConfigManager.prototype, {
 		// get or set config.stealConfig attributes
 		attr: function (config) {
@@ -713,10 +713,12 @@
 
 			return this;
 		},
+
 		// add callbacks which are called after config is changed
 		on: function (cb) {
 			this.callbacks.push(cb)
 		},
+
 		// get the current start file
 		startFile: function (startFile) {
 			// make sure startFile and production look right
@@ -727,6 +729,7 @@
 		},
 
 		/**
+		 *
 		 * Read or define the path relative URI's should be referenced from.
 		 * 
 		 *     window.location //-> "http://foo.com/site/index.html"
@@ -1038,11 +1041,11 @@
 	};
 
 
-	var moduleManager = function (steal, modules, interactives, config) {
+	var moduleManager = function (steal, stealModules, interactives, config) {
 
 		// ============ MODULE ================
-		// a map of resources by resourceID
-		var resources = {},
+		// a map of modules by moduleID
+		var modules = {},
 			id = 0;
 		// this is for methods on a 'steal instance'.  A file can be in one of a few states:
 		// created - the steal instance is created, but we haven't started loading it yet
@@ -1053,13 +1056,13 @@
 		// A Module is almost anything. It is different from a module
 		// as it doesn't represent some unit of functionality, rather
 		// it represents a unit that can have other units "within" it
-		// as dependencies.  A resource can:
+		// as dependencies.  A module can:
 		//
-		// - load - load the resource to the client so it is available, but don't run it yet
-		// - run - run the code for the resource
-		// - executed - the code has been run for the resource, but all
-		//   dependencies for that resource might not have finished
-		// - completed - all resources within the resource have completed
+		// - load - load the module to the client so it is available, but don't run it yet
+		// - run - run the code for the module
+		// - executed - the code has been run for the module, but all
+		//   dependencies for that module might not have finished
+		// - completed - all modules within the module have completed
 		//
 		// __options__
 		// `options` can be a string, function, or object.
@@ -1067,20 +1070,20 @@
 		// __properties__
 		//
 		// - options - has a number of properties
-		//    - src - a URI to this resource that can be loaded from the current page
-		//    - rootSrc - a URI to this resource relative to the current root URI.
-		//    - type - the type of resource: "fn", "js", "css", etc
-		//    - needs - other resources that must be loaded prior to this resource
+		//    - src - a URI to this module that can be loaded from the current page
+		//    - rootSrc - a URI to this module relative to the current root URI.
+		//    - type - the type of module: "fn", "js", "css", etc
+		//    - needs - other modules that must be loaded prior to this module
 		//    - fn - a callback function to run when executed
-		// - unique - false if this resource should be loaded each time
-		// - waits - this resource should wait until all prior scripts have completed before running
-		// - loaded - a deferred indicating if this resource has been loaded to the client
-		// - run - a deferred indicating if the the code for this resource run
-		// - completed - a deferred indicating if all of this resources dependencies have
+		// - unique - false if this module should be loaded each time
+		// - waits - this module should wait until all prior scripts have completed before running
+		// - loaded - a deferred indicating if this module has been loaded to the client
+		// - run - a deferred indicating if the the code for this module run
+		// - completed - a deferred indicating if all of this modules dependencies have
 		//   completed
 		// - dependencies - an array of dependencies
 		var Module = function (options) {
-			// an array for dependencies, this is the steal calls this resource makes
+			// an array for dependencies, this is the steal calls this module makes
 			this.dependencies = [];
 
 			// an array of implicit dependencies this steal needs
@@ -1102,27 +1105,27 @@
 
 		Module.pending = [];
 		// `Module.make` is used to either create
-		// a new resource, or return an existing
-		// resource that matches the options.
+		// a new module, or return an existing
+		// module that matches the options.
 		Module.make = function (options) {
 			// create the temporary reasource
-			var resource = new Module(options),
+			var module = new Module(options),
 				// use `rootSrc` as the definitive ID
-				id = resource.options.id;
+				id = module.options.id;
 
-			// assuming this resource should not be created again.
-			if (resource.unique && id) {
+			// assuming this module should not be created again.
+			if (module.unique && id) {
 
-				// Check if we already have a resource for this rootSrc
+				// Check if we already have a module for this rootSrc
 				// Also check with a .js ending because we defer 'type'
 				// determination until later
-				if (!resources[id] && !resources[id + ".js"]) {
-					// If we haven't loaded, cache the resource
-					resources[id] = resource;
+				if (!modules[id] && !modules[id + ".js"]) {
+					// If we haven't loaded, cache the module
+					modules[id] = module;
 				} else {
 
-					// Otherwise get the cached resource
-					existingModule = resources[id];
+					// Otherwise get the cached module
+					existingModule = modules[id];
 					// If options were passed, copy new properties over.
 					// Don't copy src, etc because those have already
 					// been changed to be the right values;
@@ -1138,26 +1141,26 @@
 				}
 			}
 
-			return resource;
+			return module;
 		};
 
 		// updates the paths of things ...
-		// use modules b/c they are more fuzzy
+		// use stealModules b/c they are more fuzzy
 		// a module's id stays the same, but a path might change
 		// 
-		Module.update = function () {
-			for (var rootSrc in resources) {
-				if (!resources[resources].loaded.isResolved()) {
+/*Module.update = function() {
+		for ( var rootSrc in modules ) {
+			if (!modules[modules].loaded.isResolved() ) {
 
-				}
 			}
-		};
+		}
+	};*/
 
 		h.extend(Module.prototype, {
 			setOptions: function (options) {
 				var prevOptions = this.options;
 				// if we have no options, we are the global Module that
-				// contains all other resources.
+				// contains all other modules.
 				if (!options) { //global init cur ...
 					this.options = {};
 					this.waits = false;
@@ -1189,11 +1192,11 @@
 										//	//alert("YES")
 										break;
 									}
-									// We need to access the stored modules in this order
+									// We need to access the stored stealModules in this order
 									// - calculated id
 									// - original name
 									// - dependency return value otherwise
-									value = modules[dep.options.id] || modules[dep.orig] || dep.value;
+									value = stealModules[dep.options.id] || stealModules[dep.orig] || dep.value;
 									args.unshift(value);
 
 									// what does this do?
@@ -1240,7 +1243,7 @@
 			},
 
 			// Calling complete indicates that all dependencies have
-			// been completed for this resource
+			// been completed for this module
 			complete: function () {
 				this.completed.resolve();
 			},
@@ -1261,7 +1264,7 @@
 				if (this.exports) {
 					this.exports()
 				}
-				// set this as the current resource
+				// set this as the current module
 				steal.cur = this;
 
 				// mark yourself as 'loaded'.
@@ -1339,74 +1342,74 @@
 					// iterate through the collection and add all the 'needs'
 					// before fetching...
 					//print("-instances "+this.options.id)
-					// The set of resources before the previous "wait" resource
+					// The set of modules before the previous "wait" module
 					priorSet = [],
-					// The current set of resources after and including the
-					// previous "wait" resource
+					// The current set of modules after and including the
+					// previous "wait" module
 					set = [],
-					// The first set of resources that we will execute
+					// The first set of modules that we will execute
 					// right away. This should be the first set of dependencies
 					// that we can load in parallel. If something has
 					// a need, the need should be in this set
 					firstSet = [],
-					// Should we be adding resources to the
+					// Should we be adding modules to the
 					// firstSet
 					setFirstSet = true;
 
-				// Goes through each resource and maintains
-				// a list of the set of resources
+				// Goes through each module and maintains
+				// a list of the set of modules
 				// that must be complete before the current
-				// resource (`priorSet`).
-				h.each(this.queue, function (i, resource) {
+				// module (`priorSet`).
+				h.each(this.queue, function (i, module) {
 					// add it as a dependency, circular are not allowed
-					self.dependencies.push(resource);
+					self.dependencies.push(module);
 
 					// if there's a wait and it's not the first thing
-					if ((resource === null || resource.waits) && set.length) {
+					if ((module === null || module.waits) && set.length) {
 						// add the current set to `priorSet`
 						priorSet = priorSet.concat(set);
 						// empty the current set
 						set = [];
 						// we have our firs set of items
 						setFirstSet = false;
-						if (resource === null) {
+						if (module === null) {
 							return;
 						}
 
 					}
-					if (resource === null) return;
+					if (module === null) return;
 
-					// lets us know this resource is currently wired to load
-					resource.isSetupToExecute = true;
-					// when the priorSet is completed, execute this resource
+					// lets us know this module is currently wired to load
+					module.isSetupToExecute = true;
+					// when the priorSet is completed, execute this module
 					// and when it's needs are done
 					var waitsOn = priorSet.slice(0);
 					// if there are needs, this can not be part of the "firstSet"
-					h.each(resource.options.needs || [], function (i, raw) {
+					h.each(module.options.needs || [], function (i, raw) {
 
 						var need = Module.make({
 							id: raw,
 							idToUri: self.options.idToUri
 						});
-						// add the need to the resource's dependencies
-						h.uniquePush(resource.needsDependencies, need);
+						// add the need to the module's dependencies
+						h.uniquePush(module.needsDependencies, need);
 						waitsOn.push(need);
 						// add needs to first set to execute
 						firstSet.push(need)
 					});
-					waitsOn.length && whenEach(waitsOn, "completed", resource, "execute");
+					waitsOn.length && whenEach(waitsOn, "completed", module, "execute");
 
 					// what is this used for?
-					// resource.waitedOn = resource.waitedOn ? resource.waitedOn.concat(priorSet) : priorSet.slice(0);
+					// module.waitedOn = module.waitedOn ? module.waitedOn.concat(priorSet) : priorSet.slice(0);
 					// add this steal to the current set
-					set.push(resource);
+					set.push(module);
 					// if we are still on the first set, and this has no needs
-					if (setFirstSet && (resource.options.needs || []).length == 0) {
+					if (setFirstSet && (module.options.needs || []).length == 0) {
 						// add this to the first set of things
-						firstSet.push(resource)
+						firstSet.push(module)
 					}
-					// start loading the resource if possible
-					resource.load();
+					// start loading the module if possible
+					module.load();
 				});
 
 				// when every thing is complete, mark us as completed
@@ -1502,10 +1505,10 @@
 				}
 				this.options.buildType = buildType;
 			},
-			rewriteOptions: function (id) {
-				// if resource is not a function it means it's `src` is changeable
+			rewriteIdAndUpdateOptions: function (id) {
+				// if module is not a function it means it's `src` is changeable
 				if (this.options.type != "fn") {
-					// finds resource's needs 
+					// finds module's needs 
 					// TODO this is terrible
 					var needs = (this.options.needs || []).slice(0),
 						buildType = this.options.buildType;
@@ -1513,19 +1516,19 @@
 					var newId = this.options.id;
 					// this mapping is to move a config'd key
 					if (id !== newId) {
-						resources[newId] = this;
+						modules[newId] = this;
 						// TODO: remove the old one ....
 					}
 					this.options.buildType = buildType;
 
-					// if a resource is set to load
+					// if a module is set to load
 					// check if there are new needs
 					if (this.isSetupToExecute) {
-						this.addLateNeeds(needs);
+						this.addLateDependencies(needs);
 					}
 				}
 			},
-			addLateNeeds: function (needs) {
+			addLateDependencies: function (needs) {
 				var self = this;
 				// find all `needs` and set up "late dependencies"
 				// this allows us to steal files that need to load
@@ -1615,7 +1618,7 @@
 			}
 			return stel;
 		}, true);
-		Module.resources = resources;
+		Module.modules = modules;
 		return Module;
 	}
 
@@ -1673,15 +1676,17 @@
 		st.config.called = false;
 		st._id = Math.floor(1000 * Math.random());
 
-/*
- * `steal.getScriptOptions` is used to determine various
- * options passed to the steal.js file:
- *
- * - should we load the production version of the 
- *   (if you use steal.production.js instead of steal.js)
- * - parts of the query string to determine `startFile`
- * - location of the `root url`
- */
+		/**
+		 * @function st.getScriptOptions
+		 *
+		 * `steal.getScriptOptions` is used to determine various
+		 * options passed to the steal.js file:
+		 *
+		 * - should we load the production version of the 
+		 *   (if you use steal.production.js instead of steal.js)
+		 * - parts of the query string to determine `startFile`
+		 * - location of the `root url`
+		 */
 
 		st.getScriptOptions = function (script) {
 
@@ -1825,6 +1830,8 @@
 
 		// for a given ID, where should I find this resource
 		/**
+		 * @function st.idToUri
+		 *
 		 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
 		 * is the location of the file. It uses the paths option of  [config].
 		 * Passing true for `noJoin` does not join from the root URI.
@@ -1849,6 +1856,8 @@
 
 		// for a given AMD id this will return an URI object
 		/**
+		 * @function st.amdIdToUri
+		 *
 		 * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
 		 * is the location of the file. It uses the paths options of [config].
 		 * Passing true for `noJoin` does not join from that URI.
@@ -1893,6 +1902,20 @@
 			// convert resources to modules ...
 			// a function is a module definition piece
 			// you steal(moduleId1, moduleId2, function(module1, module2){});
+			/**
+			 * @function window.define
+			 *
+			 * AMD compatible `define` function. It is available only if steal's
+			 * `amd` param is set to true:
+			 *
+			 *     <script type="text/javascript">
+			 *       steal = {
+			 *         amd : true
+			 *       }
+			 *     <script />
+			 *     <script type="text/javascript" src="steal/steal.js"></script>
+			 *
+			 */
 			h.win.define = function (moduleId, dependencies, method) {
 				if (typeof moduleId == 'function') {
 					modules[URI.cur + ""] = moduleId();
@@ -1918,6 +1941,20 @@
 				}
 
 			}
+			/**
+			 * @function window.require
+			 *
+			 * AMD compatible require function. It is available only if steal's
+			 * `amd` param is set to true:
+			 *
+			 *     <script type="text/javascript">
+			 *       steal = {
+			 *         amd : true
+			 *       }
+			 *     <script />
+			 *     <script type="text/javascript" src="steal/steal.js"></script>
+			 *
+			 */
 			h.win.require = function (dependencies, method) {
 				var depends = h.map(dependencies, function (dependency) {
 					dependency = typeof dependency === "string" ? {
@@ -2232,7 +2269,7 @@
 
 
 		var Module = moduleManager(st, modules, interactives, config);
-		resources = Module.resources;
+		resources = Module.modules;
 
 		/**
 		 * Shim support for steal
@@ -2649,7 +2686,7 @@ Module.prototype.complete = before(Module.prototype.complete, function(){
 		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function (configData) {
 			h.each(resources, function (id, resource) {
-				resource.rewriteOptions(id);
+				resource.rewriteIdAndUpdateOptions(id);
 			});
 			// set up shims after ids are updated
 			if (configData.shim) {
