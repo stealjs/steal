@@ -94,7 +94,7 @@
 		/*# packages.js #*/
 
 		var Module = moduleManager(st, modules, interactives, config);
-		resources  = Module.resources; 
+		resources  = Module.modules; 
 
 		/*# shim.js #*/
 
@@ -106,7 +106,7 @@
 		// to update resources' paths when stealconfig.js is loaded.
 		config.on(function(configData){
 			h.each(resources, function( id, resource ) {
-				resource.rewriteOptions(id);
+				resource.rewriteIdAndUpdateOptions(id);
 			});
 			// set up shims after ids are updated
 			if(configData.shim){
