@@ -79,16 +79,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		p.partner('{', function(token) {});
 
 		content = s.build.pluginify.getFunction(content, 0, false) + '\n';
-		out += content.substring(0, content.lastIndexOf('return'));
-
-		while(token = p.moveNext()) {
-			if(token.type === 'string') {
-				var fileContent = s.build.pluginify.getFunction(readFile(token.value),
-					0, false);
-
-				out += fileContent;
-			}
-		}
+		out += content + ');';
 
 		return out;
 	},
