@@ -36,12 +36,28 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		}, null);
 	},
 
-	convertContents = function(content) {
+	mapDependency = function(value, mappings) {
+		var mapping;
+		for(var key in mappings) {
+			if(mappings.hasOwnProperty(key)) {
+				mapping = mappings[key];
+				// Match for mappings that end with `/`
+				if(key.charAt(key.length - 1) === '/' && value.indexOf(key) === 0) {
+					return value.replace(key, mapping)
+				}
+				// Direct match
+				if(value === key) {
+					return mapping;
+				}
+			}
+		}
+		return value;
+	},
+
+	convertContents = function(content, options) {
 		var p = parse(content),
-		out = 'define',
-		deps = [],
-		token = null,
-		depsLooking = true;
+			out = 'define',
+			deps = [];
 
 		if (/steal[.\(]/.test(content)) {
 			p.until('steal');
@@ -55,17 +71,13 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 
 		while(token = p.moveNext()) {
 			if(token.type === 'string') {
-				deps.push(token.value);
+				deps.push(mapDependency(token.value, options.map || {}));
 			}
 
 			if(token.type === 'name' &&
 				token.value === 'function') {
 
 				if(deps.length) {
-					deps = deps.map(function(d) {
-						return d.replace('.js', '');
-					});
-
 					out += '[\'';
 					out += deps.join('\',\'');
 					out += '\'], ';
@@ -84,7 +96,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		return out;
 	},
 
-	writeContents = function(content, dir, stl) {
+	writeContents = function(content, options, stl) {
 		var src = stl.id.toString(),
 		parts = src.replace('.' + stl.ext, '').split('/');
 
@@ -93,8 +105,9 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 			src = parts.join('/') + '.' + stl.ext
 		}
 
-		new s.File(dir + '/' + src).dir().mkdirs();
-		var outFile = new s.File(dir + '/' + src);
+		// We need to take mappings into consideration for the filename as well
+		var outFile = new s.File(options.out + '/' + mapDependency(src, options.map || {}));
+		outFile.dir().mkdirs();
 		console.log('Saving to ' + outFile);
 		outFile.save(s.build.js.clean(content));
 	},
@@ -110,8 +123,8 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		getDependencies(name, excludes, options, function(steals) {
 			steals.forEach(function(stl) {
 
-				var content = convertContents(readFile(stl.id));
-				writeContents(content, options.out, stl);
+				var content = convertContents(readFile(stl.id), options);
+				writeContents(content, options, stl);
 
 			});
 		});
