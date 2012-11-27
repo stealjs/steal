@@ -51,7 +51,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 				}
 			}
 		}
-		return value;
+		return value.replace('.js', '');
 	},
 
 	convertContents = function(content, options) {
@@ -106,7 +106,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		}
 
 		// We need to take mappings into consideration for the filename as well
-		var outFile = new s.File(options.out + '/' + mapDependency(src, options.map || {}));
+		var outFile = new s.File(options.out + '/' + mapDependency(src, options.map || {}) + '.js');
 		outFile.dir().mkdirs();
 		console.log('Saving to ' + outFile);
 		outFile.save(s.build.js.clean(content));
