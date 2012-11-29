@@ -1,6 +1,3 @@
-
-var exports = {};
-
 /***********************************************************************
 
   A JavaScript tokenizer / parser / beautifier / compressor.
@@ -61,7 +58,7 @@ var exports = {};
  ***********************************************************************/
 
 /* -----[ Tokenizer (constants) ]----- */
-(function(){
+steal(function(){
 var KEYWORDS = array_to_hash([
         "break",
         "case",
@@ -1325,6 +1322,7 @@ function HOP(obj, prop) {
 var warn = function() {};
 
 /* -----[ Exports ]----- */
+var exports = {};
 exports.tokenizer = tokenizer;
 exports.parse = parse;
 exports.slice = slice;
@@ -1342,4 +1340,6 @@ exports.set_logger = function(logger) {
         warn = logger;
 };
 
-})();
+return exports;
+
+})
