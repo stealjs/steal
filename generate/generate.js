@@ -203,15 +203,15 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * }
 		 */
 		convert: function( name ) {
-			var className = name.match(/[^\.]*$/)[0], //Customer
-				appName = name.split(".")[0]; //Customer
+			var className = name.match(/[^\/]*$/)[0], //Customer
+				appName = name.split("/")[0]; //Customer
 			return {
 				underscore: generate.underscore(className),
 				plugin : generate.underscore(name.replace(/\./g, "_")),
 				path: generate.underscore(name).replace(/\./g, "/").replace(/\/[^\/]*$/, ""),
 				name: name,
-				fullName: name,
-				className: className,
+				fullName: className,
+				className: generate.toClass(className),
 				plural: Inflector.pluralize(generate.underscore(className)),
 				appName: generate.underscore(appName)
 			};
@@ -234,15 +234,15 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 				lastToken,
 				token;
 
-			// parse until function(){
-			while (tokens = parser.until(["function", "(", ")"])) {
+			// parse until function(
+			while (tokens = parser.until(["function", "("])) {
 				if (tokens) {
 					parser.partner("{", function(token){
 						if (token.value == "}") {
 							lastToken = token;
 						}
-						// print("TOKEN = " + token.value, token.type, token.from, token.to)
-					})
+						print("TOKEN = " + token.value, token.type, token.from, token.to)
+					});
 				}
 			}
 			
