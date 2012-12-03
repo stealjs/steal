@@ -274,53 +274,59 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @param {String} destination a path to the script we're inserting a steal into
 		 * @param {String} newStealPath the new steal path to be inserted
 		 */
-		insertSteal: function( destination, newStealPath, newline ){
+		insertSteal: function( destination, newStealPath, options ){
 			// get file, parse it
 			var fileTxt = readFile(destination),
 				parser =  parse(fileTxt),
-				tokens = [],
-				lastToken,
+				firstToken,
+				firstVariable,
 				token,
-				duplicate = false,
+				newline = options && options.newline,
 				cur;
 
-			// parse until steal(
-			while (token = parser.until(["steal", "("], [".","then","("])) {
-				//print("M = " + token.value, token.type, token.from, token.to)
-				if (token) {
-					while( (cur = parser.moveNext() ) && ( cur.value === "," || cur.type === "string" ) ) {
-			      		//print("TOKEN = " + cur.value, cur.type, cur.from, cur.to);
-						//if (cur.type == "name" || cur.type == "string") {
-						//	lastToken = cur;
-						//}
-						if (cur.type === "string" && cur.value === newStealPath) { // duplicate
-							duplicate = true;
-						}
+			var getVariableName = function() {
+					if(options && options.name) {
+						return options.name;
 					}
-					lastToken = cur;
-					break;
-				}
-				if (duplicate) {
-					throw "DUPLICATE "+newStealPath
-				}
+
+					var split = newStealPath.split('/'),
+						name = split[split.length - 1].replace(/\.js$/, '');
+					return name.charAt(0).toUpperCase() + name.slice(1);
+				},
+				variableName = (options && options.name) || getVariableName();
+
+			// parse until steal(
+			if (token = parser.until(["steal", "("])) {
+				firstToken = cur = parser.moveNext();
+				do {
+					if (cur.type === "string" && cur.value === newStealPath) { // duplicate
+						throw "DUPLICATE " + newStealPath;
+					}
+				} while( ( cur = parser.moveNext() ) && ( cur.value === "," || cur.type === "string" ) );
 			}
-			
-			
+
+			if(cur && cur.value === 'function') {
+				// We need to add after opening `(`
+				firstVariable = parser.moveNext(); // skip `(`
+			}
+
 			// insert steal
-			if(lastToken){
-				//print("TOKEN = " + lastToken.value, lastToken.type, lastToken.from, lastToken.to);
-				if(lastToken.value == ")") {
-					
-					fileTxt = fileTxt.slice(0, lastToken.from) 
-						+ ", "+(newline ? "\n\t" : "")+"'" + newStealPath + "'" + fileTxt.slice(lastToken.from)
-					
-				} else {
-					fileTxt = fileTxt.slice(0, lastToken.from) 
-					+ "'" + newStealPath + "'," +(newline ? "\n\t" : " ") + fileTxt.slice(lastToken.from)
-				}
-				
+			if(firstToken && firstVariable) {
+				var parts = [];
+				// From the beginning to the last Steal module id
+				parts.push(fileTxt.slice(0, firstToken.from));
+				// Add the new Steal module id
+				parts.push((newline ? "\n\t" : "") + "'" + newStealPath + "', ");
+				// The end of the last Steal module id to the last existing callback parameter
+				parts.push(fileTxt.slice(firstToken.from, firstVariable.to));
+				// Add the variable name for the new module id
+				parts.push(variableName + (parser.next().value !== ')' ? ', ' : ''));
+				// The rest starting at the end of the last module variable name
+				parts.push(fileTxt.slice(firstVariable.to));
+
+				fileTxt = parts.join('');
 			} else { // no steal found
-				fileTxt += "steal('" + newStealPath +"')"
+				fileTxt += "steal('" + newStealPath +"', function(" + variableName + ") {\n});"
 			}
 			
 			steal.print('      ' + destination + ' (steal added)');
