@@ -2580,26 +2580,6 @@
 				options.startFiles = steals.slice(0)
 			}
 
-			// either instrument is in this page (if we're the window opened from
-			// steal.browser), or its opener has it
-			// try-catching this so we dont have to build up to the iframe
-			// instrumentation check
-			try {
-				// win.top.steal.instrument is for qunit
-				// win.top.opener.steal.instrument is for funcunit
-				if (!options.browser && ((h.win.top && h.win.top.st.instrument) || (h.win.top && h.win.top.opener && h.win.top.opener.steal && h.win.top.opener.st.instrument))) {
-
-					// force startFiles to load before instrument
-					steals.push(h.noop, {
-						id: "steal/instrument",
-						waits: true
-					});
-				}
-			} catch (e) {
-				// This would throw permission denied if
-				// the child window was from a different domain
-			}
-
 			// we only load things with force = true
 			if (config.attr().env == "production" && config.attr().loadProduction && config.attr().production) {
 				st({

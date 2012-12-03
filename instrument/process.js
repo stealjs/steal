@@ -58,7 +58,7 @@
     SUCH DAMAGE.
 
  ***********************************************************************/
-(function(){
+steal('./parser.js', function(exports){
 var jsp = exports,
     slice = jsp.slice,
     member = jsp.member,
@@ -1989,4 +1989,4 @@ exports.MAP = MAP;
 
 // keep this last!
 // exports.ast_squeeze_more = require("./squeeze-more").ast_squeeze_more;
-})();
+})

@@ -88,6 +88,9 @@ steal.instrument.utils = {
 		}
 	},
 	parentWin: function(){
+		if(steal.isRhino){
+			return;
+		}
 		var win = window;
 		if(top !== window){
 			win = top;
