@@ -262,7 +262,7 @@ extend(steal.instrument, {
 	},
 	jsConvert: function(options, success, error){
 		var files = utils.parentWin().steal.instrument.files,
-			file = options.src,
+			file = (typeof options.src === "string"? steal.URI(options.src): options.src),
 			fileName = file.path,
 			instrumentation = files[fileName],
 			processInstrumentation = function(instrumentation){
