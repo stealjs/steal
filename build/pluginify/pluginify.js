@@ -124,7 +124,7 @@ steal('steal', 'steal/parse','steal/build',
 		if(opts.onefunc) {
 			output = opts.wrapInner && opts.wrapInner.length ? opts.wrapInner[0] : '(function(window, undefined) {';
 			output += out;
-			output += opts.wrapInner && opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(window);';
+			output += opts.wrapInner && opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(this);';
 		}
 		else {
 			output = 'module = { _orig: window.module, _define: window.define };\n';
@@ -155,6 +155,13 @@ steal('steal', 'steal/parse','steal/build',
 		new steal.File(where).save(output);
 	}
 	var funcCount = {};
+	var strip = function(output) {
+		if(!output) {
+			return '';
+		}
+		// Remove all //!steal-pluginify-remove-* section
+		return output.replace(/(\/\/\!steal-pluginify-remove-start)(.|\s)*?(\/\/\!steal-pluginify-remove-end).*/mg, '');
+	}
 	//gets content from a steal
 	s.build.pluginify.content = function(resourceOpts, opts, resource, stl){
 		var param = [],
@@ -212,7 +219,7 @@ steal('steal', 'steal/parse','steal/build',
 			}
 		}
 
-		return funcs[ith || 0];
+		return strip(funcs[ith || 0]);
 	};
 	//gets a function from steal
 	var stealPull = function(p, content, cb, onewrap){
