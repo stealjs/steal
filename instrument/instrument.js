@@ -274,7 +274,7 @@ extend(steal.instrument, {
 				success();
 			}
 		
-		if(utils.shouldIgnore(fileName) || file.ext() != "js"){
+		if(utils.shouldIgnore(options) || file.ext() != "js"){
 			return origJSConverter.apply(this, arguments);
 		}
 		

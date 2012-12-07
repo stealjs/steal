@@ -34,10 +34,11 @@ steal.instrument.utils = {
 				} )( data );
 	},
 	// true if the path starts the same as something in the ignores array
-	shouldIgnore: function(file){
+	shouldIgnore: function(options){
 		var ignoreRegex,
-			ignore;
-			
+			ignore,
+			file = (typeof options.src === "string"? steal.URI(options.src): options.src),
+			fileName = file.path;
 		if(steal.instrument.ignores){
 			for(var i=0; i<steal.instrument.ignores.length; i++){
 				ignore = steal.instrument.ignores[i];
@@ -47,7 +48,7 @@ steal.instrument.utils = {
 				}
 				ignore = ignore.replace("*", ".*");
 				ignoreRegex = new RegExp("^"+ignore);
-				if(ignoreRegex.test(file)){
+				if(ignoreRegex.test(options.id+"")){
 					return true;
 				}
 			}
