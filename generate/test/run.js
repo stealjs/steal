@@ -3,27 +3,72 @@ load('steal/rhino/rhino.js')
 steal('steal/test', "steal/generate",'steal/generate/system.js',function(s){
 	_S = steal.test;
 	
+	_S.module("steal/generate")
 	//turn off printing
-	STEALPRINT = false;
+	_S.test("convert", function(){
+		
+		var res = s.generate.convert("cookbook/models/recipe_thang")
+		
+		_S.equals(res.appName, "cookbook", "appName is right");
+		_S.equals(res.appPath, "cookbook", "appPath is right");
+		_S.equals(res.Alias, "RecipeThang", "Alias is right");
+		_S.equals(res.alias, "recipeThang", "alias is right");
+		_S.equals(res._alias, "recipe_thang", "_alias is right");
+		_S.equals(res.pluralAlias, "recipeThangs", "pluralAlias is right");
+		_S.equals(res.path, "cookbook/models/recipe_thang/recipe_thang.js");
+		_S.equals(res.module, "cookbook/models/recipe_thang");
+		_S.equals(res.parentModule, "cookbook/models");
+		
+		var res = s.generate.convert("company/cookbook/models/recipe_thang")
+		_S.equals(res.appName, "cookbook", "appName is right");
+		_S.equals(res.appPath, "company/cookbook", "appPath is right");
+	})
 	
-	print("==========================  steal/generate =============================")
-	
-	print("-- generate basic foo app --");
-	
-	var	data = steal.extend({
-		path: "foo", 
-		application_name: "foo",
-		current_path: steal.File.cwdURL(),
-		path_to_steal: new steal.File("foo").pathToRoot()
-	}, steal.system);
-	steal.generate("steal/generate/templates/app","foo",data)
-	
-	steal.File("foo").removeDir();
-	
-	print("== complete ==\n")
-	
-	
+	_S.test("generate basic foo app", function(){
+		
+		var	data = steal.extend({
+			path: "foo", 
+			application_name: "foo",
+			current_path: steal.File.cwdURL(),
+			path_to_steal: new steal.File("foo").pathToRoot()
+		}, steal.system);
+		steal.generate("steal/generate/templates/app","foo",data)
+		
+		steal.File("foo").removeDir();
+		
+	});
+	var clean = function(str){
+		return str.replace(/\r|\n|\s/g,"");
+	}
+	_S.test("_insertSteal",function(){
+		var insert = s.generate._insertSteal;
+		var tests = {
+			"blank file": 			["","foo",{name: "foo"},"steal('foo',function(foo){});"],
+			"blank file, no name":  	["","foo",{},"steal('foo');"],
+			"empty steal": 			["steal()","foo",{name: "foo"},"steal('foo',function(foo){})"],
+			"empty steal, no name": 	["steal()","foo",{},"steal('foo')"],
+			"single steal, no function": 
+									["steal('bar')",'foo',{name: "foo"},"steal('foo','bar',function(foo){})"],
+			"mixed steals with function":
+									["steal('bar','car',function(bar){})",'foo',{name:'foo'},
+									 "steal('bar','foo','car',function(bar,foo){})"],
+			"starts with a function": ["steal(function(){})",'foo',{name:'foo'},
+									  "steal('foo',function(foo){})"],
+			"starts with a function, no name": ["steal(function(){})",'foo',{},
+									  "steal('foo',function(){})"],
+			"module, function, no name": ["steal('foo',function(){})",'bar',{},
+									  "steal('foo','bar',function(){})"]
+		};
+		for(var assertName in tests){
+			var test = tests[assertName],
+				args = test.slice(0),
+				expected = test.pop(),
+				res = clean(insert.apply(s.generate, args));
+			_S.equals(res, expected, assertName);
+		}
+	})
 
+	
 	/**
 	 * Tests 4 cases:
 	 * 1. steal(function(){})
@@ -55,31 +100,5 @@ steal('steal/test', "steal/generate",'steal/generate/system.js',function(s){
 		s.test.remove(testFile)
 		
 	});
-	s.test.test("insertSteal blank", function(){
-		var testFile = "steal/generate/test/insertSteal.js",
-			expectedFile = "steal/generate/test/insertStealExpected.js"
-		
-		steal.File(testFile).save("");
-		steal.generate.insertSteal(testFile,"bar");
-		
-		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
-			expected = "steal('bar')"
-			
-		s.test.equals(res, expected, "insertSteal is working");
-		s.test.remove(testFile)
-		
-	});
-	s.test.test("insertSteal ordering", function(){
-		var testFile = "steal/generate/test/insertSteal.js",
-			expectedFile = "steal/generate/test/insertStealExpected.js"
-		
-		steal.File(testFile).save("steal('foo').then('zoo');");
-		steal.generate.insertSteal(testFile,"bar");
-		
-		var res = readFile(testFile).replace(/\r|\n|\s/g,""),
-			expected = "steal('foo','bar').then('zoo');"
-			
-		s.test.equals(res, expected, "insertSteal is working");
-		s.test.remove(testFile)
-	});
+	
 })

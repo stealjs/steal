@@ -1,5 +1,5 @@
-steal("steal/generate/ejs.js", 'steal/generate/inflector.js', 
-	'steal/parse', 'steal/rhino/prompt.js', function( EJS, Inflector, parse ) {
+steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js', 
+	'steal/parse', 'steal/rhino/prompt.js', function(s, EJS, Inflector, parse ) {
 
 	var render = function( from, to, data ) {
 		var text = readFile(from);
@@ -18,7 +18,28 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		}
 
 	},
+		inserter = function(str){
 
+			var insertions = [];
+
+			return {
+				insert: function(index, content){
+					insertions.push({index: index, content:content});
+					return this;
+				},
+				toString: function(){
+					var insert = insertions.slice(0).sort( function(first, second){
+						return second.index - first.index;
+					});
+					var start = str;
+					insert.forEach(function(insert){
+						//console.log(insert.content, insert.index);
+						start = start.substr(0,insert.index)+insert.content+start.substr(insert.index);
+					});
+					return start;
+				}
+			};
+		},
 		/**
 		 * @plugin steal/generate
 		 * @parent stealjs
@@ -191,8 +212,9 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		//converts a name to a bunch of useful things
 		
 		/**
-		 * @hide
-		 * FooBar.ZedTed ->
+		 * Takes a module name and returns a bunch of useful properties of 
+		 * that module.
+		 * "my_app/foo/zed_ted" ->
 		 * {
 		 *   appName : "foobar",
 		 *   className : "ZedTed",
@@ -202,29 +224,51 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 *   underscore : "zed_ted"
 		 * }
 		 */
-		convert: function( name ) {
-			var className = name.match(/[^\/]*$/)[0], //Customer
-				appName = name.split("/")[0]; //Customer
+		convert: function( moduleId ) {
+			var path = s.id(moduleId)+"";
+			var parts = moduleId.split("/"),
+				last = parts[parts.length-1],
+				appPath = parts.slice(0,parts.length -1).join("/"),
+				appName = parts[parts.length - 2];
+			
+			// try to find likely app ...
+			if( /models|controls/.test(parts[parts.length-2]||"") ){
+				appPath = parts.slice(0,parts.length -2).join("/"),
+				appName = parts[parts.length - 3];
+			}
+			
 			return {
-				underscore: generate.underscore(className),
-				plugin : generate.underscore(name.replace(/\./g, "_")),
-				path: generate.underscore(name).replace(/\./g, "/").replace(/\/[^\/]*$/, ""),
-				name: name,
-				fullName: className,
-				className: generate.toClass(className),
-				plural: Inflector.pluralize(generate.underscore(className)),
-				appName: generate.underscore(appName)
+				module: moduleId,
+				parentModule: moduleId.replace(/\/\w+$/, ""),
+				_alias: last,
+				underscore: last,
+				alias: this.camelize(last),
+				pluralAlias: Inflector.pluralize(this.camelize(last)),
+				Alias: this.classize(last),
+				path: path,
+				appName: appName,
+				appPath: appPath
 			};
 		},
-		// creates a class-like name
-		toClass : function(name, joiner){
-			var upper = function(parts){
-				for(var i =0; i < parts.length; i++){
-					parts[i] = parts[i].charAt(0).toUpperCase()+parts[i].substr(1)
-				}
-				return parts
-			}
-			return upper(name.split('/') ).join(joiner || '.')
+		/**
+		 *     generate.camelize("foo_bar") //-> "fooBar"
+		 */
+		camelize: function(str){ 
+			return str.replace(/[-_]+(.)?/g, function(match, chr){ 
+				return chr ? chr.toUpperCase() : '' 
+			}) 
+		},
+		/**
+		 *    generate.camelize("foo_bar") //-> "FooBar"
+		 */
+		classize: function(str){
+			return this.capitalize( this.camelize(str) );
+		},
+		/**
+		 *    generate.capitalize("foo_bar") //-> "Foo_bar"
+		 */
+		capitalize: function(str){
+			return str.charAt(0).toUpperCase()+str.substr(1)
 		},
 		insertCode: function( destination, newCode ){
 			// get file, parse it
@@ -241,7 +285,7 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 						if (token.value == "}") {
 							lastToken = token;
 						}
-						print("TOKEN = " + token.value, token.type, token.from, token.to)
+						// print("TOKEN = " + token.value, token.type, token.from, token.to)
 					});
 				}
 			}
@@ -262,6 +306,108 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 			
 		},
 		/**
+		 *     insertSteal(""
+		 */
+		_insertSteal: function(source, moduleId, options){
+			var parser =  parse(source),
+				firstToken,
+				firstVariable,
+				token,
+				newline = options && options.newline,
+				cur;
+
+			var variableName = (options && options.name),
+				moduleIdTokens = [],
+				endArgToken,
+				argumentNameTokens = [];
+
+			// parse until steal(
+			if (token = parser.until(["steal", "("])) {
+				// start finding moduleIdTokens
+				firstToken = cur = parser.moveNext();
+				do {
+					if (cur.type === "string") {
+						// save moduleIdToken
+						moduleIdTokens.push(cur);
+						if ( cur.value === moduleId ) { // duplicate
+							throw "DUPLICATE " + moduleId;
+						}
+					}
+					
+				} while( ( cur = parser.moveNext() ) && ( cur.value === "," || cur.type === "string" ) );
+			}
+			endArgToken = cur;
+			if(cur && cur.value === 'function') {
+				endArgToken = parser.moveNext();
+				// We need to add after opening `(`
+				while( ( cur = parser.moveNext() ) && (cur.value !== ")" )){
+					if(cur.type == "name"){
+						argumentNameTokens.push(cur)
+					}
+				}
+				
+			}
+			var sourceModifier = inserter(source),
+				functionExists = endArgToken && endArgToken.value === '(';
+			// try to find place where we add everything
+			
+			if(!firstToken){
+				if(variableName){
+					return "steal('" + moduleId +"', function(" + variableName + "){});"
+				} else {
+					return "steal('" + moduleId +"');"
+				}
+			} else {
+				// steal is present
+				if ( !variableName ){ 
+					// always add to the end
+					if( moduleIdTokens.length ) {
+						sourceModifier.insert(moduleIdTokens[moduleIdTokens.length -1].to,", '"+moduleId+"'");
+					} else {
+						if(functionExists) {
+							sourceModifier.insert( firstToken.from, "'"+moduleId+"', ");
+						} else {
+							sourceModifier.insert( firstToken.from, "'"+moduleId+"'");
+						}
+						
+						
+					}
+				} else {
+					// adding a module and a variable
+					if( argumentNameTokens.length ) {
+						// try to add after latest argument
+						var place = argumentNameTokens.length - 1;
+						sourceModifier.insert(argumentNameTokens[place].to,", "+variableName);
+						sourceModifier.insert(moduleIdTokens[place].to,", '"+moduleId+"'");
+						
+					} else {
+						// no existing arguments
+						var hasModules = moduleIdTokens.length;
+						// add to start
+						if(functionExists){
+							//print("  "+functionExists+" "+)
+							// there is a function, it's just empty
+							sourceModifier.insert(endArgToken.to,variableName);
+							sourceModifier.insert( firstToken.from, "'"+moduleId+"', ")
+							
+						} else {
+							// there is no function
+							if( hasModules ){
+								// but there are modules
+								sourceModifier.insert(endArgToken.from,", function(" + variableName + "){}");
+								sourceModifier.insert( firstToken.from, "'"+moduleId+"', ");
+							} else {
+								// empty steal
+								sourceModifier.insert( firstToken.from, "'"+moduleId+"', function(" + variableName + "){}")
+							}
+						}
+					}
+				}
+				
+				return sourceModifier.toString();
+			}
+		},
+		/**
 		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
 		 * 
 		 *   1. Page already looks like steal("a", function(){})
@@ -275,60 +421,11 @@ steal("steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @param {String} newStealPath the new steal path to be inserted
 		 */
 		insertSteal: function( destination, newStealPath, options ){
-			// get file, parse it
-			var fileTxt = readFile(destination),
-				parser =  parse(fileTxt),
-				firstToken,
-				firstVariable,
-				token,
-				newline = options && options.newline,
-				cur;
-
-			var getVariableName = function() {
-					if(options && options.name) {
-						return options.name;
-					}
-
-					var split = newStealPath.split('/'),
-						name = split[split.length - 1].replace(/\.js$/, '');
-					return name.charAt(0).toUpperCase() + name.slice(1);
-				},
-				variableName = (options && options.name) || getVariableName();
-
-			// parse until steal(
-			if (token = parser.until(["steal", "("])) {
-				firstToken = cur = parser.moveNext();
-				do {
-					if (cur.type === "string" && cur.value === newStealPath) { // duplicate
-						throw "DUPLICATE " + newStealPath;
-					}
-				} while( ( cur = parser.moveNext() ) && ( cur.value === "," || cur.type === "string" ) );
-			}
-
-			if(cur && cur.value === 'function') {
-				// We need to add after opening `(`
-				firstVariable = parser.moveNext(); // skip `(`
-			}
-
-			// insert steal
-			if(firstToken && firstVariable) {
-				var parts = [];
-				// From the beginning to the last Steal module id
-				parts.push(fileTxt.slice(0, firstToken.from));
-				// Add the new Steal module id
-				parts.push((newline ? "\n\t" : "") + "'" + newStealPath + "', ");
-				// The end of the last Steal module id to the last existing callback parameter
-				parts.push(fileTxt.slice(firstToken.from, firstVariable.to));
-				// Add the variable name for the new module id
-				parts.push(variableName + (parser.next().value !== ')' ? ', ' : ''));
-				// The rest starting at the end of the last module variable name
-				parts.push(fileTxt.slice(firstVariable.to));
-
-				fileTxt = parts.join('');
-			} else { // no steal found
-				fileTxt += "steal('" + newStealPath +"', function(" + variableName + ") {\n});"
-			}
 			
+			// get file, parse it
+			var fileTxt = readFile(destination);
+			fileTxt = this._insertSteal( fileTxt, newStealPath, options );
+
 			steal.print('      ' + destination + ' (steal added)');
 			// save back to original file destination
 			steal.File(destination).save(fileTxt);
