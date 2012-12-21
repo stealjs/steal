@@ -244,6 +244,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 				underscore: last,
 				alias: this.camelize(last),
 				pluralAlias: Inflector.pluralize(this.camelize(last)),
+				plural: Inflector.pluralize(this.camelize(last)),
 				Alias: this.classize(last),
 				path: path,
 				appName: appName,
@@ -269,6 +270,9 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 */
 		capitalize: function(str){
 			return str.charAt(0).toUpperCase()+str.substr(1)
+		},
+		downcase: function(str){
+			return str.charAt(0).toLowerCase()+str.substr(1)
 		},
 		insertCode: function( destination, newCode ){
 			// get file, parse it
@@ -362,10 +366,10 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 				if ( !variableName ){ 
 					// always add to the end
 					if( moduleIdTokens.length ) {
-						sourceModifier.insert(moduleIdTokens[moduleIdTokens.length -1].to,", '"+moduleId+"'");
+						sourceModifier.insert(moduleIdTokens[moduleIdTokens.length -1].to,",\n\t'"+moduleId+"'");
 					} else {
 						if(functionExists) {
-							sourceModifier.insert( firstToken.from, "'"+moduleId+"', ");
+							sourceModifier.insert( firstToken.from, "'"+moduleId+"',\n\t");
 						} else {
 							sourceModifier.insert( firstToken.from, "'"+moduleId+"'");
 						}
@@ -378,7 +382,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 						// try to add after latest argument
 						var place = argumentNameTokens.length - 1;
 						sourceModifier.insert(argumentNameTokens[place].to,", "+variableName);
-						sourceModifier.insert(moduleIdTokens[place].to,", '"+moduleId+"'");
+						sourceModifier.insert(moduleIdTokens[place].to,",\n\t'"+moduleId+"'");
 						
 					} else {
 						// no existing arguments
@@ -388,17 +392,17 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 							//print("  "+functionExists+" "+)
 							// there is a function, it's just empty
 							sourceModifier.insert(endArgToken.to,variableName);
-							sourceModifier.insert( firstToken.from, "'"+moduleId+"', ")
+							sourceModifier.insert( firstToken.from, "'"+moduleId+"',\n\t")
 							
 						} else {
 							// there is no function
 							if( hasModules ){
 								// but there are modules
-								sourceModifier.insert(endArgToken.from,", function(" + variableName + "){}");
-								sourceModifier.insert( firstToken.from, "'"+moduleId+"', ");
+								sourceModifier.insert(endArgToken.from,",\n\tfunction(" + variableName + "){}");
+								sourceModifier.insert( firstToken.from, "'"+moduleId+"',\n\t");
 							} else {
 								// empty steal
-								sourceModifier.insert( firstToken.from, "'"+moduleId+"', function(" + variableName + "){}")
+								sourceModifier.insert( firstToken.from, "'"+moduleId+"',\n\tfunction(" + variableName + "){}")
 							}
 						}
 					}
