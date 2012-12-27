@@ -35,11 +35,11 @@ steal('steal','steal/build/css',function( steal ) {
 	 *     }
 	 * 
 	 */
-	js.makePackage = function(files, dependencies, cssPackage, exclude){
+	js.makePackage = function(files, dependencies, cssPackage, buildOptions){
 		// put it somewhere ...
 		// add to dependencies ...
 		// seperate out css and js
-		exclude = exclude || [];
+		exclude = buildOptions.exclude || [];
 		var jses = [],
 			csses = [],
 			lineMap = {},
@@ -134,7 +134,7 @@ steal('steal','steal/build/css',function( steal ) {
 		
 		if(canCompressPackage){
 			jsCode = steal.build.js.clean(jsCode);
-			jsCode = steal.build.js.minify(jsCode,{currentLineMap: lineMap});
+			jsCode = steal.build.js.minify(jsCode,{currentLineMap: lineMap, compressor: buildOptions.compressor});
 		}
 		
 		var csspackage = steal.build.css.makePackage(csses, cssPackage);
