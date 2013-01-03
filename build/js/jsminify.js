@@ -55,7 +55,7 @@ steal('steal','steal/parse',function(steal, parse){
 	 * 
 	 *         {0: "foo.js", 100: "bar.js"}
 	 */
-	js.minify = function(source, options){		
+	js.minify = function(source, options){
 		// return source;
 		// get the compressor
 		options = options || {};

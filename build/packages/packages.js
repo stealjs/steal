@@ -137,7 +137,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					// create package
 					var pack = build.js.makePackage(sharing.files.map(function(f){
 						return f.stealOpts;
-					}), {}, packageName+".css", buildOptions.exclude),
+					}), {}, packageName+".css", buildOptions),
 						hasCSS = pack.css,
 						has = [];
 					
@@ -222,7 +222,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 				
 				var pack = build.js.makePackage(
 					masterFiles.map(function(f){return f.stealOpts}),
-					{}, destCSS, buildOptions.exclude);
+					{}, destCSS, buildOptions);
 				// prepend maps and makes ...
 				// make makes
 				var makeCode = [],
