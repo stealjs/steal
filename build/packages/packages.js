@@ -121,14 +121,18 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 				
 				
 				
-				s.print("Getting Packages");
+				s.print("Getting packages");
 				while(sharing = apps.getMostShared(options.files)){
 					shares.push(sharing);
 				};
 				packages.flatten(shares, buildOptions.depth);
 				
+				if( shares.length ) {
+					s.print("\nBuilding packages");
+				} else {
+					s.print("  no packages\n")
+				}
 				
-				s.print("\nMaking Packages");
 				shares.forEach(function(sharing){
 					// is it a 'end' package
 					var isPackage = sharing.appNames.length == 1,
@@ -218,7 +222,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 				buildOptions.to = buildOptions.to || ""+s.URI(app).dir();
 				var destJS = ''+steal.URI(buildOptions.to).join('production.js'),
 					destCSS = ''+steal.URI(buildOptions.to).join('production.css');
-				s.print("Making "+destJS);
+				s.print("Building "+destJS);
 				
 				var pack = build.js.makePackage(
 					masterFiles.map(function(f){return f.stealOpts}),
@@ -235,7 +239,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 				mapCode = "steal.packages("+s.toJSON(maps)+");"
 				s.URI(destJS).save( filterCode(mapCode+makeCode.join('\n')+"\n"+pack.js, 'js') );
 				if(pack.css){
-					s.print("       "+destCSS);
+					s.print("         "+destCSS);
 					s.URI(destCSS).save( filterCode(pack.css.code, 'css') );
 				}
 			});

@@ -102,7 +102,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 					startFile: appName + "/" + steal.File(appName).basename() + ".js"
 				}
 			}
-			steal.print("Opening " + ( appName || html) );
+			steal.print("  opening " + ( appName || html) );
 			
 			// use last steal to load page
 			if(options.newPage === false && steal.build.apps.lastSteal){
