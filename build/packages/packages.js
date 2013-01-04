@@ -187,7 +187,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					// add to maps
 					if(isPackage){
 						// this should be the real file
-						maps[sharing.appNames[0]+".js"] = packageName+".js";
+						maps[""+s.id(sharing.appNames[0])] = packageName+".js";
 					}
 				})
 				// handle depth
