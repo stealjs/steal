@@ -1,6 +1,6 @@
 if(!steal.isRhino){
 
-steal('./report.css', 'funcunit/qunit', function(){
+steal('./report.css', function(){
 	var pct = function(num){
 			return Math.round(num*1000)/10;
 		},
@@ -156,22 +156,32 @@ steal('./report.css', 'funcunit/qunit', function(){
 		el.id = 'files-wrapper';
 		document.body.appendChild(el);
 	
-		QUnit.addEvent($('test-tab'), "click", function(){
+		addEvent($('test-tab'), "click", function(){
 			clickTab('test-tab');
 		})
-		QUnit.addEvent($('report-tab'), "click", function(){
+		addEvent($('report-tab'), "click", function(){
 			clickTab('report-tab');
 		})
-		QUnit.addEvent($('file-tab'), "click", function(){
+		addEvent($('file-tab'), "click", function(){
 			clickTab('file-tab');
 		})
-		QUnit.addEvent($("report"), "click", function(ev){
+		addEvent($("report"), "click", function(ev){
 			ev.preventDefault();
 			if(ev.target.className == "file"){
 				var fileName = ev.target.innerHTML;
 				showFile(fileName)
 			}
 		})
+	}
+
+	function addEvent( elem, type, fn ) {
+		if ( elem.addEventListener ) {
+			elem.addEventListener( type, fn, false );
+		} else if ( elem.attachEvent ) {
+			elem.attachEvent( "on" + type, fn );
+		} else {
+			fn();
+		}
 	}
 	
 	var showFile = function(fileName){
