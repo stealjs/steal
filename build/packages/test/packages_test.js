@@ -4,16 +4,17 @@
  */
 load('steal/rhino/rhino.js')
 steal('steal', 'steal/test', function( s ) {
-	// STEALPRINT = false;
+	STEALPRINT = false;
 	s.test.module("steal/build/packages")
 
 	s.test.test("steal.build.packages", function(){
 		load('steal/rhino/rhino.js');
 		steal('steal/build/packages',
 			function(){
-				load('steal/build/packages/test/packages_test/scripts/build.js')
+				load('steal/build/packages/test/packages_test/scripts/build.js');
+				s.test.clear();
 				s.test.open('steal/build/packages/test/packages_test/prod.html')
-				s.test.ok(typeof window.appA === "undefined");
+				s.test.ok(typeof window.appA === "undefined","appA is undefined");
 				s.test.clear();
 				s.test.open('steal/build/packages/test/packages_test/prod.html#a')
 				s.test.equals(window.appA, true);

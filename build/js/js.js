@@ -39,7 +39,8 @@ steal('steal','steal/build/css',function( steal ) {
 		// put it somewhere ...
 		// add to dependencies ...
 		// seperate out css and js
-		exclude = buildOptions.exclude || [];
+		buildOptions = buildOptions || {};
+		var exclude = buildOptions.exclude || [];
 		var jses = [],
 			csses = [],
 			lineMap = {},
@@ -115,9 +116,22 @@ steal('steal','steal/build/css',function( steal ) {
 			)
 		}
 		// make 'loading'
-		var code = ["steal.has('"+loadingCalls.join("','")+"')"];
+		var code = ["steal.has('"+loadingCalls.join("','")+"');"];
+		
+		
+		
 		// add dependencies
 		code.push.apply(code,dependencyCalls);
+		
+		if(buildOptions.stealContents){
+			// this makes production.js wait for these files to complete
+			// this was removing the rootSteal and causing problems
+			
+			// but having it might cause a circular dependency in
+			// the apps scenario
+			code.push("steal('"+loadingCalls.join("','")+"')")
+		}
+		
 		code.push("steal.pushPending()")
 		
 		lineNum += code.length

@@ -33,6 +33,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 		};
 		buildOptions = buildOptions || {};
 		buildOptions.depth = buildOptions.depth || Infinity;
+		buildOptions.stealContents = true
 		// open the core app
 		apps._open(app, options, function(options, opener){
 			
@@ -46,7 +47,7 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					
 					//remove js if it's there
 					appNames = appNames.map(function(appName){
-						return appName.replace(".js","")
+						return (appName+"").replace(".js","")
 					});
 					var expanded = appNames.join('-');
 					// check map
@@ -56,10 +57,11 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					// try with just the last part
 					var shortened = appNames.map(function(l){
 						return s.URI(l).filename()
-					}).join('-')
+					}).join('-');
+					
 					if(!usedNames[shortened]){
 						usedNames[shortened] = true;
-					return appNamesToName[expanded] = to + "/packages/"+shortened;
+						return appNamesToName[expanded] = to + "/packages/"+shortened;
 					} else {
 						return appNamesToName[expanded] = to + "/packages/"+expanded.replace(/\//g,'_') ;
 					}
@@ -119,12 +121,10 @@ steal('steal','steal/build/open','steal/build/apps','steal/get/json.js',function
 					shares = [];
 				
 				
-				
-				
-				s.print("Getting packages");
 				while(sharing = apps.getMostShared(options.files)){
 					shares.push(sharing);
 				};
+				
 				packages.flatten(shares, buildOptions.depth);
 				
 				if( shares.length ) {

@@ -100,16 +100,16 @@ steal('steal', 'steal/test', function( s ) {
     s.test.test("multibuild creates JS/CSS packages with the right contents", function(){
         setupMultiBuild(function(){
             var contents;
-            contents = readFile("packages/steal_build_apps_test_multibuild_app_x-steal_build_apps_test_multibuild_app_y-steal_build_apps_test_multibuild_app_z.js");
+            contents = readFile("packages/app_x-app_y-app_z.js");
 
             s.test.equals(/init_nested_plugin_xyz/.test(contents), true,
                     "content of nested_plugin_xyz.js should be packaged");
 
-            contents = readFile("packages/steal_build_apps_test_multibuild_app_x-steal_build_apps_test_multibuild_app_y.js");
+            contents = readFile("packages/app_x-app_y.js");
             s.test.equals(/init_plugin_xy/.test(contents), true,
                     "content of plugin_xy.js should be packaged");
 
-            contents = readFile("packages/steal_build_apps_test_multibuild_app_y-steal_build_apps_test_multibuild_app_z.js");
+            contents = readFile("packages/app_y-app_z.js");
             s.test.equals(/init_plugin_yz/.test(contents), true,
                     "content of plugin_yz.js should be packaged");
 
@@ -128,15 +128,15 @@ steal('steal', 'steal/test', function( s ) {
                     "content of plugin_z.js should be packaged");
                     
                     
-            contents = readFile("packages/steal_build_apps_test_multibuild_app_x-steal_build_apps_test_multibuild_app_y-steal_build_apps_test_multibuild_app_z.css");
+            contents = readFile("packages/app_x-app_y-app_z.css");
             s.test.equals(/#nested_plugin_xyz_styles/.test(contents), true,
                     "content of nested_plugin_xyz.css should be packaged");
 
-            contents = readFile("packages/steal_build_apps_test_multibuild_app_x-steal_build_apps_test_multibuild_app_y.css");
+            contents = readFile("packages/app_x-app_y.css");
             s.test.equals(/#plugin_xy_styles/.test(contents), true,
                     "content of plugin_xy.css should be packaged");
 
-            contents = readFile("packages/steal_build_apps_test_multibuild_app_y-steal_build_apps_test_multibuild_app_z.css");
+            contents = readFile("packages/app_y-app_z.css");
             s.test.equals(/#plugin_yz_styles/.test(contents), true,
                     "content of plugin_yz.css should be packaged");
 
@@ -158,9 +158,9 @@ steal('steal', 'steal/test', function( s ) {
 
             s.test.open("steal/build/apps/test/multibuild/app_x/app_x.prod.html");
             linkTags = document.getElementsByTagName("link");
-            s.test.equals(/packages\/steal_build_apps_test_multibuild_app_x-steal_build_apps_test_multibuild_app_y-steal_build_apps_test_multibuild_app_z\.css/.test(linkTags[0].href), true,
+            s.test.equals(/packages\/app_x-app_y-app_z\.css/.test(linkTags[0].href), true,
                     "loaded direct dependencies stylesheet");
-            s.test.equals(/packages\/steal_build_apps_test_multibuild_app_x-steal_build_apps_test_multibuild_app_y\.css/.test(linkTags[1].href), true,
+            s.test.equals(/packages\/app_x-app_y\.css/.test(linkTags[1].href), true,
                     "loaded indirect dependencies stylesheet");
             s.test.equals(/multibuild\/app_x\/production\.css/.test(linkTags[2].href), true,
                     "loaded app dependencies stylesheet");
