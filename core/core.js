@@ -70,11 +70,64 @@
 		if(setStealOnWindow){
 			h.win.steal = st;
 		}
+		/**
+		 * @add steal
+		 */
 		// clone steal context
 		st.clone = function(){
 			return stealManager(false, config.cloneContext())
 		}
-
+		/**
+		 * @function config
+		 * 
+		 * `steal.config( configOptions )` configures the behavior
+		 * of steal. For example:
+		 * 
+		 *     steal.config({
+		 *       map: {
+		 *         "*": {
+		 *           "jquery/jquery.js" : "jquery",
+		 *           "can/util/util.js": "can/util/jquery/jquery.js"
+		 *         }
+		 *       },
+		 *       paths: {
+		 *         "jquery": "can/lib/jquery.1.8.3.js",
+		 *       },
+		 *       shim : {
+		 *         jquery: {
+		 *           exports: "jQuery"
+		 *         }
+		 *       },
+		 *       ext: {
+		 *         js: "js",
+		 *         css: "css",
+		 *         less: "steal/less/less.js",
+		 *         coffee: "steal/coffee/coffee.js",
+		 *       }
+		 *     })
+		 * 
+		 * `steal.config(optionName)` returns a configuration option value. Example:
+		 * 
+		 *     steal.config("env") //-> "development"
+		 * 
+		 * Steal supports the following configuration options:
+		 * 
+		 * - [steal.config.map map] - maps ids passed to steal to another id.
+		 * - [steal.config.paths paths] - maps ids to a specific path.
+		 * - [steal.config.shim shim] - used to support libraries that don't use steal.
+		 * - [steal.config.ext ext] - specifies a dependency to load for specific extensions
+		 * - [steal.config.startFile startFile] - the first module to load
+		 * - [steal.config.root root] - the root folder where everything is loaded from
+		 * - [steal.config.types types] - types used to load modules 
+		 * - [steal.config.env env] - the enviornement: "development" or "production"
+		 * - [steal.config.loadProduction loadProduction] - load the production script in production environment
+		 * - [steal.config.amd amd] - turn on AMD support.
+		 * - [steal.config.executed executed] - tells steal that a dependency has already been loaded.
+		 * 
+		 * Typically this is called in `stealconfig.js` which is 
+		 * loaded automatically.
+		 * 
+		 */
 		st.config = function(){
 			st.config.called = true;
 			return config.attr.apply(config, arguments)

@@ -1,4 +1,5 @@
-/**
+/*
+ * @hide
  * `new ConfigManager(config)` creates configuration profile for the steal context.
  * It keeps all config parameters in the instance which allows steal to clone it's 
  * context.
@@ -72,7 +73,7 @@
  * ".ejs" is executed.
  * 
  * 
- **/
+ */
 
 
 
@@ -82,7 +83,9 @@ var ConfigManager = function(options){
 	this.attr(ConfigManager.defaults);
 	this.attr(options)
 }
-
+/**
+ * @add steal.config
+ */
 h.extend(ConfigManager.prototype, {
 	// get or set config.stealConfig attributes
 	attr: function( config ) {
@@ -121,6 +124,10 @@ h.extend(ConfigManager.prototype, {
 	},
 
 	// get the current start file
+	/**
+	 * @attribute startFile
+	 * 
+	 */
 	startFile: function(startFile){
 		// make sure startFile and production look right
 		this.stealConfig.startFile = "" + URI(startFile).addJS()
@@ -130,7 +137,7 @@ h.extend(ConfigManager.prototype, {
 	},
 
 	/**
-	 *
+	 * @attribute root
 	 * Read or define the path relative URI's should be referenced from.
 	 * 
 	 *     window.location //-> "http://foo.com/site/index.html"
@@ -161,10 +168,27 @@ h.extend(ConfigManager.prototype, {
 // ConfigManager's defaults
 ConfigManager.defaults = {
 	types: {},
+	/**
+	 * @attribute ext
+	 */
 	ext: {},
+	/**
+	 * @attribute env
+	 */
 	env: "development",
+	/**
+	 * @attribute loadProduction
+	 */
 	loadProduction: true,
 	logLevel: 0,
 	root: "",
 	amd: false
+	/**
+	 * @attribute map
+	 */
+	//
+	/**
+	 * @attribute paths
+	 */
+	//
 };

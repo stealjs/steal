@@ -42,14 +42,14 @@ h.extend(st, {
 		return options;
 	},
 	/**
-	 * Calls steal, but waits until all previous steals
-	 * have completed loading until loading the
-	 * files passed to the arguments:
+	 * @function then
 	 * 
-	 *     steal('jquery', 'can/util').then('file/that/depends/on_jquery.js')
-	 *
-	 * In this case first `jquery` and `can/util` will be loaded in parallel, 
-	 * and after both are loaded `file/that/depends/on_jquery.js` will be loaded
+	 * `steal(previousId,...).then(moduleId...)` waits until
+	 * all previousId's have loaded before loading moduleIds.
+	 * 
+	 * Note: This is depricated in 3.3.  You should use the
+	 * needs config option instead.
+	 * 
 	 */
 	then: function() {
 		var args = h.map(arguments);
@@ -57,6 +57,7 @@ h.extend(st, {
 		return st.apply(h.win, args);
 	},
 	/**
+	 * @function bind
 	 * `steal.bind( event, handler(eventData...) )` listens to 
 	 * events on steal. Typically these are used by various build processes
 	 * to know when steal starts and finish loading resources and their
@@ -96,9 +97,8 @@ h.extend(st, {
 	 *  - __end__ - fired after 'can/model' and all of it's dependencies have fired.
 	 * 
 	 * 
-	 * 
-	 * @param {String} event
-	 * @param {Function} listener
+	 * @param {String} event the event to listen to
+	 * @param {Function} listener a function callback.
 	 */
 	bind: function( event, listener ) {
 		if (!events[event] ) {
@@ -112,6 +112,7 @@ h.extend(st, {
 		return st;
 	},
 	/**
+	 * @function one
 	 * `steal.one(eventName, handler(eventArgs...) )` works just like
 	 * [steal.bind] but immediately unbinds after `handler` is called.
 	 */
@@ -123,6 +124,8 @@ h.extend(st, {
 	},
 	events: {},
 	/**
+	 * @function unbind
+	 * 
 	 * `steal.unbind( eventName, handler )` removes an event listener on steal.
 	 * @param {String} event
 	 * @param {Function} listener

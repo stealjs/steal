@@ -382,9 +382,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 				f.execute();
 			});
 		},
-		/**
-		 * Loads this steal
-		 */
+		// Loads this steal
 		load: function( returnScript ) {
 			// if we are already loading / loaded
 			if ( this.loading || this.loaded.isResolved() ) {

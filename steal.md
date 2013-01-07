@@ -1,261 +1,251 @@
 @class steal
 @parent stealjs
 
-__steal__ is a function that loads scripts, css, and
-other resources into your application.
+`steal(moduleIds..., definition(modules...))` loads scripts, css, and other
+modules into your application.  For example:
 
-    steal(FILE_or_FUNCTION, ...)
-
-## Quick Walkthrough
-
-Add a script tag that loads <code>steal/steal.js</code> and add
-the path to the first file to load in the query string like:
-
-&lt;script type='text/javascript'
-    src='../steal/steal.js?myapp/myapp.js'>
-&lt;/script>
-
-Then, start loading things and using them like:
-
-    steal('myapp/tabs.js',
-          'myapp/slider.js',
-          'myapp/style.css',function(){
-
-       // tabs and slider have loaded
-       $('#tabs').tabs();
-       $('#slider').slider()
+    steal('jquery','can',function($, can){
+      
     })
 
-Make sure your widgets load their dependencies too:
+To use steal effectively, there's four things
+you need to know how to do:
 
-    // myapp/tabs.js
-    steal('jquery', function(){
-      $.fn.tabs = function(){
-       ...
+ - add steal.js to your page
+ - configure steal's behavior
+ - load modules
+ - return module values
+ 
+We will go into each of these in detail, but first lets
+do the "hello world" of steal:
+ 
+## Quick Overview
+
+To get started, here's how to create
+a JS and LESS module for use in `myapp`.  Assume a folder structure like:
+
+    ROOT/
+      steal/
+        steal.js
+        ...
+      myapp/
+        myapp.js
+        myapp.less
+        mymodule.js
+        index.html
+      stealconfig.js
+    
+__0.__ Create `myapp`, its contents, and `stealconfig.js`.
+
+__1.__ Add a script tag to __index.html__  that 
+loads <code>steal/steal.js</code> and add
+the path to the first file to load in the query string like:
+
+    <script src='../steal/steal.js?myapp/myapp.js'>
+    </script>
+
+__2.__ In __stealconfig.js__, configure steal to load
+the less engine for any modules ending in `.less` like:
+
+    steal.config({
+      ext: {
+        less: "steal/less/less.js"
       }
     })
 
-## Examples:
+__3.__ Add the following to __mymodule.js__:
 
-    // Loads ROOT/jquery/controller/controller.js
-    steal('jquery/controller')
-    steal('jquery/controller/controller.js')
-
-    // Loads coffee script type and a coffee file relative to
-    // the current file
-    steal('steal/coffee').then('./mycoffee.coffee')
-
-    // Load 2 files and dependencies in parallel and
-    // callback when both have completed
-    steal('jquery/controller','jquery/model', function(){
-      // $.Controller and $.Model are available
+    steal(function(){
+      return function(element){
+        element.innerHTML = "Hello World"
+        element.className = "welcome"
+      }
     })
 
-    // Loads a coffee script with a non-standard extension (cf)
-    // relative to the current page and instructs the build
-    // system to not package it (but it will still be loaded).
-    steal({
-       src: "./foo.cf",
-       packaged: false,
-       type: "coffee"
-     })
+`myapp/mymodule.js`'s module value is a function that
+sets an element's contents and changes its class attribute to "welcome".
 
-The following is a longer walkthrough of how to install
-and use steal:
+Add the following to __myapp.less__:
 
-## Adding steal to a page
+    @dark #222222;
+    .welcome {
+      color: @dark;
+    }
 
-After installing StealJS (or JavaScriptMVC),
-find the <code>steal</code> folder with
-<code>steal/steal.js</code>.
+`myapp/myapp.less` adds a `.welcome` style to the app.
 
-To use steal, add a script tag
-to <code>steal/steal.js</code> to your
-html pages.
+__4.__ Add the following to __myapp/myapp.js__:
 
-This walkthrough assumes you have the steal script
-in <code>public/steal/steal.js</code> and a directory
-structure like:
+    steal("./mymodule.js","./myapp.less",function(mymodule){
+      mymodule(document.body)
+    })
 
-@codestart text
-/public
-    /steal
-    /pages
-        myapp.html
-    /myapp
-        myapp.js
-        jquery.js
-        jquery.ui.tabs.js
-@codeend
+## Add steal.js to your page
 
-To use steal in <code>public/pages/myapp.html</code>,
-add a script tag in <code>myapp.html</code>:
+The first step to using steal is to 
+add `steal/steal.js` to your page. 
 
-@codestart html
-&lt;script type='text/javascript'
-    src='../steal/steal.js'>
-&lt;/script>
-@codeend
+    <script src='../public/steal/steal.js'>
+    </script>
 
 <div class='whisper'>PRO TIP: Bottom load your scripts. It
 will increase your application's percieved response time.</div>
 
-## Loading the First Script
+With that, you can start stealing modules. For example,
+you could load jQuery from a CDN in a following
+script tag like:
 
-Once steal has been added to your page, it's time
-to load scripts. We want to load <code>myapp.js</code>
-and have it load <code>jquery.js</code> and
-<code>jquery.ui.tabs.js</code>.
-
-By default, steal likes your scripts
-to be within in the [steal.static.root steal.root] folder.  The [steal.root] the
-folder contains the <code>steal</code> folder.  In this example,
-it is the <code>public</code> folder.
-
-To load <code>myapp/myapp.js</code>, we have two options:
-
-#### Add a script tag
-
-Add a script tag after the steal
-script that 'steals' <code>myapp.js</code> like:
-
-@codestart html
-&lt;script type='text/javascript'>
-  steal('myapp/myapp.js')
-&lt;/script>
-@codeend
-
-#### Add the script parameter
-
-The most common (and shortest) way to load <code>myapp.js</code>
-is to add the script path to the steal script's src after in the
-query params.  So, instead of adding a script, we change
-the steal script from:
-
-@codestart html
-&lt;script type='text/javascript'
-    src='../steal/steal.js'>
-&lt;/script>
-@codeend
-
-To
-
-@codestart html
-&lt;script type='text/javascript'
-    src='../steal/steal.js?<b>myapp/myapp.js</b>'>
-&lt;/script>
-@codeend
-
-<div class='whisper'>PRO TIP: You can also just add
-<code>?myapp</code> to the query string.</div>
-
-## Loading Scripts
-
-We want to load <code>jquery.js</code> and
-<code>jquery.ui.tabs.js</code> into the page and then
-add then create a tabs widget.  First we need to load
-<code>jquery.js</code>.
-
-By default, steal loads script relative to [steal.root]. To
-load <code>myapp/jquery.js</code> we can the following to
-<code>myapp.js</code>:
-
-    steal('myapp/jquery.js');
-
-But, we can also load relative to <code>myapp.js</code> like:
-
-    steal('./jquery.js');
-
-Next, we need to load <code>jquery.ui.tabs.js</code>.  You
-might expect something like:
-
-    steal('./jquery.js','./jquery.ui.tabs.js')
-
-to work.  But there are two problems / complications:
-
-  - steal loads scripts in parallel and runs out of order
-  - <code>jquery.ui.tabs.js</code> depends on jQuery being loaded
-
-This means that steal might load <code>jquery.ui.tabs.js</code>
-before <code>jquery.js</code>.  But this is easily fixed.
-
-[steal.static.then] waits until all previous scripts have loaded and
-run before loading scripts after it.  We can load <code>jquery.ui.tabs.js</code>
-after <code>jquery.js</code> like:
-
-    steal('./jquery.js').then('./jquery.ui.tabs.js')
-
-Finally, we need to add tabs to the page after
-the tabs's widget has loaded.  We can add a callback function to
-steal that will get called when all previous scripts have finished
-loading:
-
-    steal('./jquery.js').then('./jquery.ui.tabs.js', function($){
-      $('#tabs').tabs();
+    <script>
+    steal('http://cdn.com/jquery-1.8.3.js',function(){
+    
     })
+    </script>
 
-## Other Info
+The folder that contains the `steal` folder is
+the [rootfolder root folder]. By default, all modules are loaded 
+from the root folder unless they start with:
 
-### Exclude Code Blocks From Production
+ - "http://" or "https://" like "http://foo.com/bar.js"
+ - "/" like `"/bar.js"`
 
-To exclude code blocks from being included in
-production builds, add the following around
-the code blocks.
+So the following would load `public/component.js`:
 
-    //!steal-remove-start
-        code to be removed at build
-    //!steal-remove-end
+    <script>
+    steal('http://cdn.com/jquery-1.8.3.js',
+      'component.js',
+      function(){
+    
+    })
+    </script>
 
-### Lookup Paths
+Although, your HTML pages that load steal can
+exist anywhere can be served up dynamically, it's 
+best to have all your JavaScript, CSS, and other static
+resources in the [rootfolder root folder]. 
 
-By default steal loads resources relative
-to [steal.static.root steal.root].  For example, the following
-loads foo.js in <code>steal.root</code>:
+But steal allows you to configure pretty much everything as we will see ...
 
-    steal('foo.js'); // loads //foo.js
+## Configure steal's behavior
 
-This is the same as writing:
+[steal.config]\(configOptions\) allows you to 
+change the behavior of how steal loads modules. `steal.config`
+allows you to set rules that:
 
-    steal('//foo.js');
+ - Apply for all modules. (_ex: changing the location of the root folder_)
+ - Apply for a single moduleId. (_ex: 'steal/dev/dev.js' should not be added to production_)
+ - Apply to startup. (_ex: load `myapp/myapp.js` as the first JS module)
 
-Steal uses <code>'//'</code> to designate the [steal.static.root steal.root]
-folder.
+You can find a full list of options in [steal.config steal.config's docs],
+but the most common configuration options are:
 
-To load relative to the current file, add <code>"./"</code> or
- <code>"../"</code>:
+ - __startFile__ - the first moduleId to load. Example: `"myapp/myapp.js"`.
+ - __env__ - the environment the page is 
+   running in: `"development"` or `"production"`. By default, env is development.
 
-    steal("./bar.js","../folder/zed.js");
+For any application that you intend to [steal.build build], 
+`startFile` and __env__ need to be set.
 
-Often, scripts can be found in a folder within the same
-name. For example, [jQuery.Controller $.Controller] is
-in <code>//jquery/controller/controller.js</code>. For convience,
-if steal is provided a path without an extension like:
+You can set configOptions in a variety ways:
 
-    steal('FOLDER/PLUGIN');
+__Set startFile and env in the script tag__
 
-It is the same as writing:
+You can set startFile and env the queryparams of steal like:
 
-    steal('FOLDER/PLUGIN/PLUGIN.js')
+    <script src='../steal/steal.js?STARTFILE,ENV'>
+    </script>
 
-This means that <code>//jquery/controller/controller.js</code>
-can be loaded like:
+For example:
 
-     steal('jquery/controller')
+    <script src='../steal/steal.js?cookbook,production'>
+    </script>
 
-### Types
+If you load `steal/steal.production.js` the environment defaults
+to production:
 
-steal can load resources other than JavaScript.
+    <script src='../steal/steal.production.js?cookbook'>
+    </script>
 
+__Call `steal.config(stealConfig)`__
 
-@constructor
+After `steal.js` is loaded and run, you can call steal.config
+anywhere in the application.  However, after `steal.js` loads,
+it automatically loads `stealconfig.js` before it loads 
+anything else. `stealconfig.js` is the best place to 
+configure settings that should be applied to all 
+projects.
 
-Loads resources specified by each argument.  By default, resources
-are loaded in parallel and run in any order.
+__A `steal` object that exists before `steal.js` is loaded__
 
+If a `steal` object exists before `steal.js` is loaded,
+steal will internally call `steal.config` with that 
+object.  For example:
 
-@param {String|Function|Object} resource...
+    <script>
+    steal = {
+      executed: "myapp/production.css"
+    }
+    </script>
+    <script src='../steal/steal.production.js,myapp'>
+    </script>
+    
+## Load modules
 
-Each argument specifies a resource.  Resources can
+Use `steal(ids...)` to load dependent 
+modules. Ids might look like:
+
+    // in myapp/myapp.js
+    steal('components/item',
+          'person.js',
+          './view.ejs')
+
+Steal uses [steal.id] to convert the id passed to steal
+into a moduleId. It then uses [steal.idToUri] to
+convert that moduleId into a URI to load the resource.
+
+The behavior of [steal.id] and [steal.idToUri] can
+be configured by steal.config's [steal.config.map map] and 
+[steal.config.paths paths] options. But the default behavior is 
+as follows:
+
+ - "components/item" is found in `ROOT/components/item/item.js`
+ - "person.js" is found in `ROOT/person.js`
+ - "./view.ejs" is found in `ROOT/myapp/view.ejs`
+
+It is possible to use:
+
+ - a url like: `"http://cdn.com/foo.js"`
+ - a path relative to the domain like: `"/foo.js"`
+ 
+But, we STRONGLY encourage you to use moduleId's and [steal.config]
+to adjust the lookup path for resources outside stealroot.
+
+## Return module values
+
+After the optional list of moduleIds, you can pass steal
+a "definition" function. For example:
+
+    // in myapp/myapp.js
+    steal('components/item',
+          'person.js',
+          './view.ejs', 
+          
+          function(item, Person, viewEJS){
+          
+              return MODULEVALUE;
+          
+          })
+
+The "definition" function gets called with
+each dependent module's value 
+and can optionally return a module value of its
+own. Your code goes in the definition function.
+
+If a module doesn't return a value, undefined
+is passed to the definition function.
+
+@param {String|Object} [moduleIds...]
+
+Each argument specifies a module. Modules can
 be given as a:
 
 ### Object
@@ -264,7 +254,7 @@ An object that specifies the loading and build
 behavior of a resource.
 
      steal({
-       src: "myfile.cf",
+       id: "myfile.cf",
        type: "coffee",
        packaged: true,
        unique: true,
@@ -274,7 +264,7 @@ behavior of a resource.
 
 The available options are:
 
- - __src__ {*String*} - the path to the resource.
+ - __id__ {*String*} - the path to the resource.
 
  - __waits__ {*Boolean default=false*} - true the resource should wait
    for prior steals to load and run. False if the resource should load and run in
@@ -301,20 +291,20 @@ The available options are:
 
 ### __String__
 
-Specifies src of the resource.  For example:
+Specifies id of a module.  For example:
 
       steal('./file.js')
 
 Is the same as calling:
 
-      steal({src: './file.js'})
+      steal({id: './file.js'})
 
-### __Function__
+@param {Function} [definition(moduleValues...)]
 
-A callback function that runs when all previous steals
+A "definition" function that runs when all previous steals
 have completed.
 
-    steal('jquery', 'foo',function(){
+    steal('jquery', 'foo',function($, foo){
       // jquery and foo have finished loading
       // and running
     })

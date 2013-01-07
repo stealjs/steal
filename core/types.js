@@ -1,5 +1,10 @@
+/**
+ * @add steal.config
+ */
 // ### TYPES ##
 /**
+ * @function types
+ * 
  * Registers a type.  You define the type of the file, the basic type it
  * converts to, and a conversion function where you convert the original file
  * to JS or CSS.  This is modeled after the
@@ -20,11 +25,11 @@
  *
  * To define this type, you'd call steal.type like this:
  *
- *     steal.type("foo js", function(options, original, success, error){
+ *     steal.config("types",{"foo js": function(options, success, error){
  *       var parts = options.text.split(" ")
  *       options.text = parts[0]+"='"+parts[1]+"'";
  *       success();
- *     });
+ *     }});
  *
  * The method we provide is called with the text of .foo files in options.text.
  * We parse the file, create JavaScript and put it in options.text.  Couldn't

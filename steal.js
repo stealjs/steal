@@ -386,6 +386,8 @@
 	// ## URI ##
 	/**
 	 * @class steal.URI
+	 * @parent steal
+	 * 
 	 * A URL / URI helper for getting information from a URL.
 	 * 
 	 *     var uri = URI( "http://stealjs.com/index.html" )
@@ -581,6 +583,7 @@
 		return this.domain() + this.path + this.search() + this.hash();
 	};
 	//  =============================== MAPPING ===============================
+	// TODO: this can likely be removed
 	URI.prototype.insertMapping = function () {
 		// go through mappings
 		var orig = "" + this,
@@ -595,81 +598,82 @@
 	};
 
 	// --- END URI
-	/**
-	 * `new ConfigManager(config)` creates configuration profile for the steal context.
-	 * It keeps all config parameters in the instance which allows steal to clone it's 
-	 * context.
-	 *
-	 * config.stealConfig is tipically set up in __stealconfig.js__.  The available options are:
-	 * 
-	 *  - map - map an id to another id
-	 *  - paths - maps an id to a file
-	 *  - root - the path to the "root" folder
-	 *  - env - `"development"` or `"production"`
-	 *  - types - processor rules for various types
-	 *  - ext - behavior rules for extensions
-	 *  - urlArgs - extra queryString arguments
-	 *  - startFile - the file to load
-	 * 
-	 * ## map
-	 * 
-	 * Maps an id to another id with a certain scope of other ids. This can be
-	 * used to use different modules within the same id or map ids to another id.
-	 * Example:
-	 * 
-	 *     st.config({
-	 *       map: {
-	 *         "*": {
-	 *           "jquery/jquery.js": "jquery"
-	 *         },
-	 *         "compontent1":{
-	 *           "underscore" : "underscore1.2"
-	 *         },
-	 *         "component2":{
-	 *           "underscore" : "underscore1.1"  
-	 *         }
-	 *       }
-	 *     })
-	 * 
-	 * ## paths
-	 * 
-	 * Maps an id or matching ids to a url. Each mapping is specified
-	 * by an id or part of the id to match and what that 
-	 * part should be replaced with.
-	 * 
-	 *     st.config({
-	 *       paths: {
-	 * 	       // maps everything in a jquery folder like: `jquery/controller`
-	 *         // to http://cdn.com/jquery/controller/controller.com
-	 * 	       "jquery/" : "http://cdn.com/jquery/"
-	 * 
-	 *         // if path does not end with /, it matches only that id
-	 *         "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"
-	 *       }
-	 *     }) 
-	 * 
-	 * ## root
-	 * ## env
-	 * 
-	 * If production, does not load "ignored" scripts and loads production script.  If development gives more warnings / errors.
-	 * 
-	 * ## types
-	 * 
-	 * The types option can specify how a type is loaded. 
-	 * 
-	 * ## ext
-	 * 
-	 * The ext option specifies the default behavior if file is loaded with the 
-	 * specified extension. For a given extension, a file that configures the type can be given or
-	 * an existing type. For example, for ejs:
-	 * 
-	 *     st.config({ext: {"ejs": "can/view/ejs/ejs.js"}})
-	 * 
-	 * This tells steal to make sure `can/view/ejs/ejs.js` is executed before any file with
-	 * ".ejs" is executed.
-	 * 
-	 * 
-	 **/
+/*
+ * @hide
+ * `new ConfigManager(config)` creates configuration profile for the steal context.
+ * It keeps all config parameters in the instance which allows steal to clone it's 
+ * context.
+ *
+ * config.stealConfig is tipically set up in __stealconfig.js__.  The available options are:
+ * 
+ *  - map - map an id to another id
+ *  - paths - maps an id to a file
+ *  - root - the path to the "root" folder
+ *  - env - `"development"` or `"production"`
+ *  - types - processor rules for various types
+ *  - ext - behavior rules for extensions
+ *  - urlArgs - extra queryString arguments
+ *  - startFile - the file to load
+ * 
+ * ## map
+ * 
+ * Maps an id to another id with a certain scope of other ids. This can be
+ * used to use different modules within the same id or map ids to another id.
+ * Example:
+ * 
+ *     st.config({
+ *       map: {
+ *         "*": {
+ *           "jquery/jquery.js": "jquery"
+ *         },
+ *         "compontent1":{
+ *           "underscore" : "underscore1.2"
+ *         },
+ *         "component2":{
+ *           "underscore" : "underscore1.1"  
+ *         }
+ *       }
+ *     })
+ * 
+ * ## paths
+ * 
+ * Maps an id or matching ids to a url. Each mapping is specified
+ * by an id or part of the id to match and what that 
+ * part should be replaced with.
+ * 
+ *     st.config({
+ *       paths: {
+ * 	       // maps everything in a jquery folder like: `jquery/controller`
+ *         // to http://cdn.com/jquery/controller/controller.com
+ * 	       "jquery/" : "http://cdn.com/jquery/"
+ * 
+ *         // if path does not end with /, it matches only that id
+ *         "jquery" : "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"
+ *       }
+ *     }) 
+ * 
+ * ## root
+ * ## env
+ * 
+ * If production, does not load "ignored" scripts and loads production script.  If development gives more warnings / errors.
+ * 
+ * ## types
+ * 
+ * The types option can specify how a type is loaded. 
+ * 
+ * ## ext
+ * 
+ * The ext option specifies the default behavior if file is loaded with the 
+ * specified extension. For a given extension, a file that configures the type can be given or
+ * an existing type. For example, for ejs:
+ * 
+ *     st.config({ext: {"ejs": "can/view/ejs/ejs.js"}})
+ * 
+ * This tells steal to make sure `can/view/ejs/ejs.js` is executed before any file with
+ * ".ejs" is executed.
+ * 
+ * 
+ */
 
 
 
@@ -679,7 +683,9 @@
 		this.attr(ConfigManager.defaults);
 		this.attr(options)
 	}
-
+	/**
+	 * @add steal.config
+	 */
 	h.extend(ConfigManager.prototype, {
 		// get or set config.stealConfig attributes
 		attr: function (config) {
@@ -718,6 +724,10 @@
 		},
 
 		// get the current start file
+		/**
+		 * @attribute startFile
+		 * 
+		 */
 		startFile: function (startFile) {
 			// make sure startFile and production look right
 			this.stealConfig.startFile = "" + URI(startFile).addJS()
@@ -727,7 +737,7 @@
 		},
 
 		/**
-		 *
+		 * @attribute root
 		 * Read or define the path relative URI's should be referenced from.
 		 * 
 		 *     window.location //-> "http://foo.com/site/index.html"
@@ -758,16 +768,38 @@
 	// ConfigManager's defaults
 	ConfigManager.defaults = {
 		types: {},
+		/**
+		 * @attribute ext
+		 */
 		ext: {},
+		/**
+		 * @attribute env
+		 */
 		env: "development",
+		/**
+		 * @attribute loadProduction
+		 */
 		loadProduction: true,
 		logLevel: 0,
 		root: "",
 		amd: false
+		/**
+		 * @attribute map
+		 */
+		//
+		/**
+		 * @attribute paths
+		 */
+		//
 	};
 
+	/**
+	 * @add steal.config
+	 */
 	// ### TYPES ##
 	/**
+	 * @function types
+	 * 
 	 * Registers a type.  You define the type of the file, the basic type it
 	 * converts to, and a conversion function where you convert the original file
 	 * to JS or CSS.  This is modeled after the
@@ -788,11 +820,11 @@
 	 *
 	 * To define this type, you'd call steal.type like this:
 	 *
-	 *     steal.type("foo js", function(options, original, success, error){
+	 *     steal.config("types",{"foo js": function(options, success, error){
 	 *       var parts = options.text.split(" ")
 	 *       options.text = parts[0]+"='"+parts[1]+"'";
 	 *       success();
-	 *     });
+	 *     }});
 	 *
 	 * The method we provide is called with the text of .foo files in options.text.
 	 * We parse the file, create JavaScript and put it in options.text.  Couldn't
@@ -1426,9 +1458,7 @@
 					f.execute();
 				});
 			},
-			/**
-			 * Loads this steal
-			 */
+			// Loads this steal
 			load: function (returnScript) {
 				// if we are already loading / loaded
 				if (this.loading || this.loaded.isResolved()) {
@@ -1666,11 +1696,64 @@
 		if (setStealOnWindow) {
 			h.win.steal = st;
 		}
+		/**
+		 * @add steal
+		 */
 		// clone steal context
 		st.clone = function () {
 			return stealManager(false, config.cloneContext())
 		}
-
+		/**
+		 * @function config
+		 * 
+		 * `steal.config( configOptions )` configures the behavior
+		 * of steal. For example:
+		 * 
+		 *     steal.config({
+		 *       map: {
+		 *         "*": {
+		 *           "jquery/jquery.js" : "jquery",
+		 *           "can/util/util.js": "can/util/jquery/jquery.js"
+		 *         }
+		 *       },
+		 *       paths: {
+		 *         "jquery": "can/lib/jquery.1.8.3.js",
+		 *       },
+		 *       shim : {
+		 *         jquery: {
+		 *           exports: "jQuery"
+		 *         }
+		 *       },
+		 *       ext: {
+		 *         js: "js",
+		 *         css: "css",
+		 *         less: "steal/less/less.js",
+		 *         coffee: "steal/coffee/coffee.js",
+		 *       }
+		 *     })
+		 * 
+		 * `steal.config(optionName)` returns a configuration option value. Example:
+		 * 
+		 *     steal.config("env") //-> "development"
+		 * 
+		 * Steal supports the following configuration options:
+		 * 
+		 * - [steal.config.map map] - maps ids passed to steal to another id.
+		 * - [steal.config.paths paths] - maps ids to a specific path.
+		 * - [steal.config.shim shim] - used to support libraries that don't use steal.
+		 * - [steal.config.ext ext] - specifies a dependency to load for specific extensions
+		 * - [steal.config.startFile startFile] - the first module to load
+		 * - [steal.config.root root] - the root folder where everything is loaded from
+		 * - [steal.config.types types] - types used to load modules 
+		 * - [steal.config.env env] - the enviornement: "development" or "production"
+		 * - [steal.config.loadProduction loadProduction] - load the production script in production environment
+		 * - [steal.config.amd amd] - turn on AMD support.
+		 * - [steal.config.executed executed] - tells steal that a dependency has already been loaded.
+		 * 
+		 * Typically this is called in `stealconfig.js` which is 
+		 * loaded automatically.
+		 * 
+		 */
 		st.config = function () {
 			st.config.called = true;
 			return config.attr.apply(config, arguments)
@@ -1682,8 +1765,8 @@
 		st._id = Math.floor(1000 * Math.random());
 
 		/**
-		 * @function st.getScriptOptions
-		 *
+		 * @function getScriptOptions
+		 * @hide
 		 * `steal.getScriptOptions` is used to determine various
 		 * options passed to the steal.js file:
 		 *
@@ -1751,7 +1834,7 @@
 		};
 
 		/**
-		 * @function st.id
+		 * @function id
 		 * 
 		 * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
 		 * final, unique id. This function can be overwritten 
@@ -1770,7 +1853,11 @@
 		 *  3. Check the 
 		 * 
 		 * 
-		 * `st.id()`
+		 * `steal.id()`
+		 * 
+		 * @param {String} id
+		 * @param {String} currentWorkingId
+		 * @param {String} [type=js]
 		 */
 		// returns the "rootSrc" id, something that looks like requireJS
 		// for a given id/path, what is the "REAL" id that should be used
@@ -1835,7 +1922,7 @@
 
 		// for a given ID, where should I find this resource
 		/**
-		 * @function st.idToUri
+		 * @function idToUri
 		 *
 		 * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
 		 * is the location of the file. It uses the paths option of  [config].
@@ -1862,7 +1949,7 @@
 		// for a given AMD id this will return an URI object
 		/**
 		 * @function st.amdIdToUri
-		 *
+		 * @hide
 		 * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
 		 * is the location of the file. It uses the paths options of [config].
 		 * Passing true for `noJoin` does not join from that URI.
@@ -1909,7 +1996,7 @@
 			// you steal(moduleId1, moduleId2, function(module1, module2){});
 			/**
 			 * @function window.define
-			 *
+			 * @hide
 			 * AMD compatible `define` function. It is available only if steal's
 			 * `amd` param is set to true:
 			 *
@@ -1948,7 +2035,7 @@
 			}
 			/**
 			 * @function window.require
-			 *
+			 * @hide
 			 * AMD compatible require function. It is available only if steal's
 			 * `amd` param is set to true:
 			 *
@@ -2031,14 +2118,14 @@
 				return options;
 			},
 			/**
-			 * Calls steal, but waits until all previous steals
-			 * have completed loading until loading the
-			 * files passed to the arguments:
+			 * @function then
 			 * 
-			 *     steal('jquery', 'can/util').then('file/that/depends/on_jquery.js')
-			 *
-			 * In this case first `jquery` and `can/util` will be loaded in parallel, 
-			 * and after both are loaded `file/that/depends/on_jquery.js` will be loaded
+			 * `steal(previousId,...).then(moduleId...)` waits until
+			 * all previousId's have loaded before loading moduleIds.
+			 * 
+			 * Note: This is depricated in 3.3.  You should use the
+			 * needs config option instead.
+			 * 
 			 */
 			then: function () {
 				var args = h.map(arguments);
@@ -2046,6 +2133,7 @@
 				return st.apply(h.win, args);
 			},
 			/**
+			 * @function bind
 			 * `steal.bind( event, handler(eventData...) )` listens to 
 			 * events on steal. Typically these are used by various build processes
 			 * to know when steal starts and finish loading resources and their
@@ -2085,9 +2173,8 @@
 			 *  - __end__ - fired after 'can/model' and all of it's dependencies have fired.
 			 * 
 			 * 
-			 * 
-			 * @param {String} event
-			 * @param {Function} listener
+			 * @param {String} event the event to listen to
+			 * @param {Function} listener a function callback.
 			 */
 			bind: function (event, listener) {
 				if (!events[event]) {
@@ -2101,6 +2188,7 @@
 				return st;
 			},
 			/**
+			 * @function one
 			 * `steal.one(eventName, handler(eventArgs...) )` works just like
 			 * [steal.bind] but immediately unbinds after `handler` is called.
 			 */
@@ -2112,6 +2200,8 @@
 			},
 			events: {},
 			/**
+			 * @function unbind
+			 * 
 			 * `steal.unbind( eventName, handler )` removes an event listener on steal.
 			 * @param {String} event
 			 * @param {Function} listener
@@ -2278,11 +2368,17 @@
 			}
 		};
 
-
+		/**
+		 * @add steal.config
+		 */
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.modules;
 
+
+		// 
 		/**
+		 * @attribute shim
+		 * 
 		 * Implements shim support for steal
 		 *
 		 * This function sets up shims for steal. It follows RequireJS' syntax:
@@ -2374,6 +2470,8 @@
 			mappings: {},
 
 			/**
+			 * @hide
+			 * todo: remove
 			 * Maps a 'rooted' folder to another location. For instance you could use it 
 			 * to map from the `foo/bar` location to the `http://foo.cdn/bar`:
 			 *
@@ -2449,6 +2547,7 @@
 
 		(function () {
 			var myPending;
+			// temporarily clears the pending queue
 			st.pushPending = function () {
 				myPending = Module.pending.slice(0);
 				Module.pending = [];
@@ -2456,6 +2555,7 @@
 					Module.make(arg);
 				})
 			}
+			// restores the pending queue
 			st.popPending = function () {
 				Module.pending = Module.pending.length ? myPending.concat(null, Module.pending) : myPending;
 			}

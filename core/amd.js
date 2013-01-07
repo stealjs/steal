@@ -1,5 +1,5 @@
 /**
- * @function st.id
+ * @function id
  * 
  * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
  * final, unique id. This function can be overwritten 
@@ -18,7 +18,11 @@
  *  3. Check the 
  * 
  * 
- * `st.id()`
+ * `steal.id()`
+ * 
+ * @param {String} id
+ * @param {String} currentWorkingId
+ * @param {String} [type=js]
  */
 // returns the "rootSrc" id, something that looks like requireJS
 // for a given id/path, what is the "REAL" id that should be used
@@ -83,7 +87,7 @@ st.amdToId = function(id, currentWorkingId, type){
 
 // for a given ID, where should I find this resource
 /**
- * @function st.idToUri
+ * @function idToUri
  *
  * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
  * is the location of the file. It uses the paths option of  [config].
@@ -110,7 +114,7 @@ st.idToUri = function( id, noJoin ) {
 // for a given AMD id this will return an URI object
 /**
  * @function st.amdIdToUri
- *
+ * @hide
  * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
  * is the location of the file. It uses the paths options of [config].
  * Passing true for `noJoin` does not join from that URI.
@@ -158,7 +162,7 @@ if(config.attr('amd') === true){
 	// you steal(moduleId1, moduleId2, function(module1, module2){});
 	/**
  	 * @function window.define
- 	 *
+ 	 * @hide
  	 * AMD compatible `define` function. It is available only if steal's
  	 * `amd` param is set to true:
  	 *
@@ -197,7 +201,7 @@ if(config.attr('amd') === true){
 	}
 	/**
  	 * @function window.require
- 	 *
+ 	 * @hide
  	 * AMD compatible require function. It is available only if steal's
  	 * `amd` param is set to true:
  	 *

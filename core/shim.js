@@ -1,4 +1,10 @@
 /**
+ * @add steal.config
+ */
+// 
+/**
+ * @attribute shim
+ * 
  * Implements shim support for steal
  *
  * This function sets up shims for steal. It follows RequireJS' syntax:

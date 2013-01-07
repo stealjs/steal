@@ -1,6 +1,8 @@
 // ## URI ##
 /**
  * @class steal.URI
+ * @parent steal
+ * 
  * A URL / URI helper for getting information from a URL.
  * 
  *     var uri = URI( "http://stealjs.com/index.html" )
@@ -196,6 +198,7 @@ URI.prototype.toString = function() {
 	return this.domain() + this.path + this.search() + this.hash();
 };
 //  =============================== MAPPING ===============================
+// TODO: this can likely be removed
 URI.prototype.insertMapping = function() {
 	// go through mappings
 	var orig = "" + this,

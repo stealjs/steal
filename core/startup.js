@@ -16,6 +16,8 @@ h.extend(st, {
 	mappings: {},
 
 	/**
+	 * @hide
+	 * todo: remove
 	 * Maps a 'rooted' folder to another location. For instance you could use it 
 	 * to map from the `foo/bar` location to the `http://foo.cdn/bar`:
 	 *
@@ -91,6 +93,7 @@ h.extend(st, {
 
 (function(){
 	var myPending;
+	// temporarily clears the pending queue
 	st.pushPending = function(){
 		myPending = Module.pending.slice(0);
 		Module.pending = [];
@@ -98,6 +101,7 @@ h.extend(st, {
 			Module.make(arg);
 		})
 	}
+	// restores the pending queue
 	st.popPending = function(){
 		Module.pending = Module.pending.length ? myPending.concat(null,Module.pending) : myPending;
 	}
