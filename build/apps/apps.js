@@ -2,16 +2,21 @@
 if(!steal.build){
 	steal.build = {};	
 }
-steal('steal','steal/build/js','steal/build/css',function( steal ) {
+steal('steal',
+	'steal/build/share',
+	'steal/build/js',
+	'steal/build/css',
+	'steal/build/open',
+	function( steal, shareUtil ) {
 	
 		
 		/**
 		 * 
 		 * 
 		 */
-		var apps = steal.build.apps = function( list, options ) {
+		var apps = steal.build.apps = function( list, buildOptions ) {
 			
-			options = steal.opts(options || {}, {
+			buildOptions = steal.opts(buildOptions || {}, {
 				//folder to build to, defaults to the folder the page is in
 				to: 1
 			});
@@ -19,13 +24,14 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			// set the compressor globally
 			//steal.build.compressor = steal.build.builders.scripts.compressors[options.compressor || "localClosure"]();
 			//set defaults
-			options.to = options.to || "packages/"
+			buildOptions.to = buildOptions.to || "packages/"
 			// check if path exists
-			var dest = steal.File(options.to);
+			var dest = steal.File(buildOptions.to);
 			if(!dest.exists()){
 				var dir = dest.dir();
 				dest.mkdir();
 			}
+			buildOptions.depth = buildOptions.depth || Infinity;
 			var options = {
 				appFiles : [],
 				files : {},
@@ -34,7 +40,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			}
 			// opens each app and add its dependencies to options
 			steal.build.apps.open(list, options, function(options){
-				apps.makePackages(options);
+				apps.makePackages(options, buildOptions);
 			})
 			
 		};
@@ -387,7 +393,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 		 * @param {appFiles} appFiles
 		 * @param {files} files
 		 */
-		makePackages: function(options) {
+		makePackages: function(options, buildOptions) {
 			
 			steal.print("Making packages")
 			
@@ -423,17 +429,25 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 			var stealconfig = {
 				stealOpts: {
 					text: readFile('stealconfig.js'),
-					id: steal.URI("stealconfig.js")
+					id: steal.URI("stealconfig.js"),
+					buildType: "js"
 				},
 				appNames: [],
 				dependencyFileNames: [],
 				packaged: false
-			};
+			},
+				shares = [];
 			
 			delete options.files['stealconfig.js'];
 
+			while(sharing = apps.getMostShared(options.files)){
+				shares.push(sharing);
+			};
+				
+			shareUtil.flatten(shares, buildOptions.depth);
+
 			//while there are files left to be packaged, get the most shared and largest package
-			while ((sharing = apps.getMostShared(options.files))) {
+			shares.forEach(function(sharing){
 				steal.print('\npackaging shared by ' + sharing.appNames.join(", "))
 
 				
@@ -473,7 +487,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 				// only add dependencies for the 'root' objects
 				if( sharing.appNames.length == 1) {
 					
-					packagesFiles[packageName+".js"].unshift("stealconfig.js")
+					packagesFiles[packageName+".js"].unshift("stealconfig.js");
 					filesForPackaging.unshift(stealconfig.stealOpts);
 					
 					// for the packages for this app
@@ -501,7 +515,7 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 					// me
 				}
 				//packageCount++;
-			}
+			})
 
 		}
 	})
@@ -524,7 +538,15 @@ steal('steal','steal/build/js','steal/build/css',function( steal ) {
 	var makePackageName = function(appModuleIds){
 		if( appModuleIds.length == 1 ){
 			// this needs to go in that app's production
-			return (appModuleIds[0]+"").replace(/\/[^\/]*$/,"")+"/production"
+			var filename = steal.URI(appModuleIds).filename(),
+				folder = steal.URI(appModuleIds).dir().filename();
+			if( filename == folder ){
+				return (appModuleIds[0]+"").replace(/\/[^\/]*$/,"")+"/production"
+			} else {
+				return (appModuleIds[0]+"").replace(/\.[^\.]*$/,"")+".production"
+			}
+			
+			
 		} else {
 			return appNamesToMake(appModuleIds)
 		}							
