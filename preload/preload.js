@@ -36,12 +36,12 @@
 		},
 		resolveUris = function( srcs ) {
 			return map( srcs, function( src ) {
-				return URI.root().join(  URI( URI( src ).addJS().normalize()).insertMapping() );
+				return steal.config().root.join(  steal.URI( steal.URI( src ).addJS().normalize()).insertMapping() );
 			});
 		},
 		preloading = {},
 		Deferred = steal.Deferred,
-		origLoad = Resource.prototype.load;
+		origLoad = steal.Module.prototype.load;
 
 	extend( steal, {
 		preload: function() {
@@ -56,7 +56,7 @@
 	});
 
 	
-	extend(Resource.prototype, {
+	extend(steal.Module.prototype, {
 		/**
 		 * This clobbers the original steal.load function to make sure we don't
 		 * load something twice.
