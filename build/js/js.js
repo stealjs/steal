@@ -2,40 +2,111 @@ if(!steal.build){
 	steal.build = {};	
 }
 steal('steal','steal/build/css',function( steal ) {
-	
+	/**
+	 * @class steal.build.js
+	 * @parent steal.build
+	 * 
+	 * An object that contains functions for creating a package of scripts, minifying it,
+	 * and cleaning it.
+	 */
 	var js = steal.build.js = {};
 	/**
-	 * Create package's content.
+	 * @function makePackage
 	 * 
-	 * @param {Array} files like:
+	 * `steal.build.js.makePackage(moduleOptions, dependencies, cssPackage, buildOptions)`
+	 * creates JavaScript and CSS packages. For example:
 	 * 
-	 *     [{rootSrc: "jquery/jquery.js", text: "var a;", baseType: "js"}]
+	 *     steal.build.js.makePackage( [
+	 *        { buildType : "js", id : "a.js", text: "a" },
+	 *        { buildType : "js", id : "b.js", text: "b" },
+	 *        { buildType : "css", id : "c.css", text: "c" }
+	 *       ],
+	 *       { "package/1.js" : ["jquery/jquery.js"] },
+	 *       "package/css.css",
+	 *       {stealOwnModules: true}
+	 *     )
 	 * 
-	 * @param {Object} dependencies like:
+	 * ... produces an object with minified js that looks like the following
+	 * unminified source:
+	 * 
+	 *     // indicates these modules are loading
+	 *     steal.has("a.js","b.js");
+	 *     
+	 *     // steal any packages this package depends on
+	 *     // waits makes them wait until the prior steal has finished
+	 *     steal({id:"package/1.js",waits:true,has:["jquery/jquery.js"]});
+	 *     steal({id:"package/css.css",waits:true,has:["c.css"]});
+	 * 
+	 *     // steal the modules required by production.js
+	 *     // so that it can be marked completed
+	 *     // at the right time
+	 *     steal("a.js","b.js");
+	 * 
+	 *     // temporarily saves and empties the pending
+	 *     // queue because the content's of other files
+	 *     // will add to it and steal.excuted will clear it.
+	 *     steal.pushPending();
+	 *     // the files and executed contexts
+	 *     a;
+	 *     steal.executed("a.js");
+	 *     b;
+	 *     steal.executed("b.js");
+	 *   
+	 *     // pop production.js's pending state back into
+	 *     // the pending queue.  
+	 *     // When production.js is done loading, steal
+	 *     // will use pending as production.js's dependencies.
+	 *     steal.popPending();
+	 * 
+	 * 
+	 * 
+	 * @param {Array} moduleOptions like:
+	 * 
+	 *     [{id: "jquery/jquery.js", text: "var a;", baseType: "js"}]
+	 * 
+	 * Each moduleOption should have:
+	 * 
+	 * - id - the moduleId
+	 * - text - the JS or CSS text of the module
+	 * - baseType - either "css" or "js" 
+	 * 
+	 * @param {Object} dependencies An object of dependency moduleIds mapped
+	 * to the moduleIds of the modules they contain:
 	 * 
 	 *      {"package/package.js": ['jquery/jquery.js']}
 	 *      
-	 * essentially, things that depend on the things in the package will
-	 * wait until the package has been loaded
+	 * The package being created will wait until all dependencies in this
+	 * object have been [steal.Module.states].
 	 * 
 	 * @param {String} cssPackage the css package name, added as dependency if
 	 * there is css in files.
 	 * 
-	 * @param {Array} exclude an array of files to exclude from the package
+	 * @param {Array} buildOptions An object that indicates certain behavior
+	 * patterns.  For example:
+	 * 
+	 *     {
+	 *       exclude: ["jquery/jquery.js"],
+	 *       stealOwnModules: true
+	 *     }
+	 * 
+	 * Supported options are:
+	 * 
+	 *  - exclude - exclude these modules from any build
+	 *  - stealOwnModules - if the package should steal the modules it contains.
 	 * 
 	 * @return {Object} an object with the css and js 
 	 * code that make up this package unminified
 	 * 
 	 *     {
-	 *       js: "steal.loading('plugin1','plugin2', ... )"+
+	 *       js: "steal.has('plugin1','plugin2', ... )"+
 	 *           "steal({src: 'package/package.js', has: ['jquery/jquery.js']})"+
 	 *           "plugin1 content"+
-	 *           "steal.loaded('plugin1')",
+	 *           "steal.executed('plugin1')",
 	 *       css : "concated css content"
 	 *     }
 	 * 
 	 */
-	js.makePackage = function(files, dependencies, cssPackage, buildOptions){
+	js.makePackage = function(moduleOptions, dependencies, cssPackage, buildOptions){
 		// put it somewhere ...
 		// add to dependencies ...
 		// seperate out css and js
@@ -52,13 +123,13 @@ steal('steal','steal/build/css',function( steal ) {
 				
 		// if even one file has compress: false, we can't compress the whole package at once
 		var canCompressPackage = true;
-		files.forEach(function(file){
+		moduleOptions.forEach(function(file){
 			if(file.minify === false){
 				canCompressPackage = false;
 			}
 		});
 		if(!canCompressPackage){
-			files.forEach(function(file){
+			moduleOptions.forEach(function(file){
 				if(file.buildType == 'js'){
 					var source = steal.build.js.clean(file.text);
 					if(file.minify !== false){
@@ -74,7 +145,7 @@ steal('steal','steal/build/css',function( steal ) {
 			});
 		}
 		
-		files.forEach(function(file){
+		moduleOptions.forEach(function(file){
 			if ( file.packaged === false ) {
 
 				steal.print('   not packaging ' + file.id);
@@ -83,11 +154,14 @@ steal('steal','steal/build/css',function( steal ) {
 			}
 			
 			// ignore
-			if ( file.ignore || (exclude.indexOf(''+file.id) != -1)) {
+			if ( file.ignore ) {
 				steal.print('   ignoring ' + file.id);
 				return;
 			}
-			
+			if ( file.exclude || (exclude.indexOf(''+file.id) != -1) ){
+				steal.print('   excluding '+file.id)
+				return;
+			}
 			
 			if(file.buildType == 'js'){
 				jses.push(file)
@@ -123,8 +197,8 @@ steal('steal','steal/build/css',function( steal ) {
 		// add dependencies
 		code.push.apply(code,dependencyCalls);
 		
-		if(buildOptions.stealContents){
-			// this makes production.js wait for these files to complete
+		if(buildOptions.stealOwnModules){
+			// this makes production.js wait for these moduleOptions to complete
 			// this was removing the rootSteal and causing problems
 			
 			// but having it might cause a circular dependency in

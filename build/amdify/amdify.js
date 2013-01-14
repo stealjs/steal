@@ -21,7 +21,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 	 */
 	getDependencies = function(file, excludes, options, callback) {
 		s.build.open("steal/rhino/blank.html", {
-			startFile : file,
+			startId : file,
 			skipAll: true
 		}, function(opener){
 			var ret = [];
@@ -131,6 +131,9 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 	};
 
 	/**
+	 * @function steal.build.amdify
+	 * @parent steal.build
+	 * 
 	 * Creates a set of AMD modules recursively. The `map` options contain a mapping from Steal
 	 * rootSrc filenames to AMD module names. For examples:
 	 *

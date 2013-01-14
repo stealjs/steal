@@ -34,7 +34,7 @@ steal('steal', 'steal/test', function(s) {
 				{
 					"package/1.js" : ["jquery/jquery.js"]
 				},
-				"package/css.css")
+				"package/css.css",{stealOwnModules: true})
 				
 				s.test.equals(
 					res.js,
@@ -43,6 +43,8 @@ steal('steal', 'steal/test', function(s) {
 					// steal any packages this package depends on
 					'steal({id:"package/1.js",waits:!0,has:["jquery/jquery.js"]});'+
 					'steal({id:"package/css.css",waits:!0,has:["c.css"]});'+
+					// steal the resources production.js needs so it can be marked complete
+					'steal("a.js","b.js");'+
 					// clear pending for future steals
 					'steal.pushPending();'+
 					// the files and executed contexts

@@ -1,5 +1,8 @@
 var moduleManager = function(steal, stealModules, interactives, config){
-
+	/**
+	 * @class steal.Module
+	 * @hide
+	 */
 	// ============ MODULE ================
 	// a map of modules by moduleID
 	var modules = {},
@@ -40,6 +43,8 @@ var moduleManager = function(steal, stealModules, interactives, config){
 	// - completed - a deferred indicating if all of this modules dependencies have
 	//   completed
 	// - dependencies - an array of dependencies
+	// 
+	// exporter
 
 	var Module = function( options ) {
 		// an array for dependencies, this is the steal calls this module makes
@@ -57,8 +62,27 @@ var moduleManager = function(steal, stealModules, interactives, config){
 
 		this.setOptions(options);
 		// create the deferreds used to manage state
+		/**
+		 * @attribute states
+		 * 
+		 * There are 4 states a Module can be 
+		 * within:
+		 * 
+		 *  - created - the Module instance is created, but no further action has been
+		 *    taken on it.
+		 *  - __loaded__ - the module's source has been loaded, but not run.
+		 *  - __run__ - the module's source has been run, but it's dependencies
+		 *    have not been loaded, and its value has not been determined.
+		 *  - __completed__ - the module's dependencies have been loaded and value determined.
+		 * 
+		 * Each module has the following deferreds to retain the state:
+		 * 
+		 *  - module.loaded
+		 *  - module.run 
+		 *  - module.completed
+		 */
 		this.loaded = Deferred();
-		this.run = Deferred();
+		this.run = Deferred(); // TODO - this should be ran or executed
 		this.completed = Deferred();
 	};
 

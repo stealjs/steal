@@ -7,10 +7,10 @@ test('steal.config should return default config object', function(){
 	equal(stealConfig.env, 'development');
 })
 
-test('steal.config.startFile', function(){
-	config.attr({'startFile': 'foo/bar.html'})
-	equal(config.attr('startFile'), 'foo/bar.html');
-	equal(config.attr('production'), 'foo/production.js');
+test('steal.config.startId', function(){
+	config.attr({'startId': 'foo/bar.html'})
+	equal(config.attr('startId'), 'foo/bar.html');
+	equal(config.attr('productionId'), 'foo/production.js');
 })
 
 
@@ -20,17 +20,17 @@ test('steal.getScriptOptions', function(){
 	scriptOpts = st.getScriptOptions(script);
 	equal(scriptOpts.env, "development");
 	equal(scriptOpts.root, "http://localhost/app");
-	equal(scriptOpts.startFile, "foobarapp/foobarapp.js");
+	equal(scriptOpts.startId, "foobarapp/foobarapp.js");
 	script.src = "http://localhost/app/steal.production.js?foobarapp";
 	scriptOpts = st.getScriptOptions(script);
 	equal(scriptOpts.env, "production");
 	equal(scriptOpts.root, "http://localhost/app");
-	equal(scriptOpts.startFile, "foobarapp/foobarapp.js");
+	equal(scriptOpts.startId, "foobarapp/foobarapp.js");
 	script.src = "http://localhost/app/steal.production.js?foobarapp.js";
 	scriptOpts = st.getScriptOptions(script);
 	equal(scriptOpts.env, "production");
 	equal(scriptOpts.root, "http://localhost/app");
-	equal(scriptOpts.startFile, "foobarapp.js");
+	equal(scriptOpts.startId, "foobarapp.js");
 })
 
 /*asyncTest('steal.config.shim', 7, function(){

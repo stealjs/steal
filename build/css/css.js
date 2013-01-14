@@ -2,10 +2,13 @@ if(!steal.build){
 	steal.build = {};	
 }
 steal('steal',function( steal ) {
-	
+	/**
+	 * @class steal.build.css
+	 * @parent steal.build
+	 */
 	var css = steal.build.css = {};
 	/**
-	 * 
+	 * @function makePackage
 	 * @param {Object} steals
 	 * @param {Object} where
 	 */

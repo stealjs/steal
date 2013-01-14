@@ -106,10 +106,17 @@ steal('steal',function(s){
 			return this;
 		}).call(null, 0);
 	/**
-	 * @function open
+	 * @function steal.build.open
+	 * @parent steal.build
 	 * 
-	 * Opens a page and returns helpers that can be used to extract steals and their 
-	 * content
+	 * `steal.build.open(url, [stealData], cb(opener) )`  
+	 * opens a page that typically uses steal.js. Once all
+	 * scripts have been loaded, `cb` is called back with `opener`.
+	 * `opener` is an object that helps walk through the modules 
+	 * loaded by steal.
+	 * 
+	 * 
+	 * 
 	 * 
 	 * Opens a page by:
 	 * 
@@ -142,10 +149,12 @@ steal('steal',function(s){
 	 *   - url - the html page opened
 	 *   - rootSteal - the 'root' steal instance
 	 *   - firstSteal - the first steal file
+	 * @param {Boolean} [includeFns=true]  indicates that iteration should
+	 * happen
 	 * @return {Object} an object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 */
-	s.build.open = function( url, stealData, cb, depth, includeFns ) {
+	s.build.open = function( url, stealData, cb, includeFns ) {
 		// save and remove the old steal
 		var oldSteal = s,
 			// new steal is the steal opened

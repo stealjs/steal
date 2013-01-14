@@ -83,7 +83,7 @@ steal('steal', 'steal/parse','steal/build',
 			fns = {};
 
 		steal.build.open("steal/rhino/blank.html", {
-			startFile : plugin, 
+			startId : plugin, 
 			skipAll: opts.skipAll
 		}, function(opener){
 			opener.each(function(stl, resource, i){
@@ -117,7 +117,7 @@ steal('steal', 'steal/parse','steal/build',
 					s.print("  Ignoring " + stl.id)
 				}
 			}, true);
-		}, true, false);
+		}, false);
 
 		var output = '';
 

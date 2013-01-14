@@ -1,10 +1,22 @@
 steal('steal','steal/parse',function(steal, parse){
-	
+	/**
+	 * @add steal.build.js
+	 */
 	var js = steal.build.js;
 	
 	var stealDevTest = /steal\.dev/;
 	// removes  dev comments from text
-	js.clean = function( text, file ) {
+	/**
+	 * @function clean
+	 * `steal.build.js.clean(text)` removes
+	 * `steal.dev.log` and `//!steal-remove-start` / `//!steal-remove-end`
+	 * blocks from production code.
+	 *     
+	 * 
+	 * @param {String} text JavaScript source to clean.
+	 * @return {String} the source code minus code indended to be removed.
+	 */
+	js.clean = function( text ) {
 		var parsedTxt = String(java.lang.String(text)
 			.replaceAll("(?s)\/\/!steal-remove-start(.*?)\/\/!steal-remove-end", ""));
 		
@@ -45,15 +57,29 @@ steal('steal','steal/parse',function(steal, parse){
 	};
 
 	/**
-	 * Minifies JavaScript
-	 * @param {Source} source - the JS source code
-	 * @param {Object} [options] - options to configure the minification:
-	 *   - quiet - should the compression happen w/o errors
-	 *   - compressor - which minification engine, defaults to localClosure
-	 *   - currentLineMap - a map of lines to JS files, used for error reporting when minifying
+	 * @function minify
+	 * 
+	 * `steal.build.js.minify(source, options)` minifies the source
+	 * of a JavaScript file.  If `source` is not provided,
+	 * a minifier function is returned.
+	 * 
+	 * @param {Source} [source] the JS source code.
+	 * 
+	 * @param {Object} [options] options to configure the minification:
+	 * 
+	 *  - compressor "{String}" - which minification engine, defaults to `"localClosure"`.
+	 *  - currentLineMap - a map of lines to JS files, used for error reporting when minifying
 	 *     several files at once. EX:
 	 * 
 	 *         {0: "foo.js", 100: "bar.js"}
+	 * 
+	 * @return {String|Function} if `source` is provided, the minified
+	 * source is returned.  Otherwise a `minifier(source, quiet, currentLineMap)` function is returned
+	 * where:
+	 * 
+	 *   - source - the source code to be minified
+	 *   - quiet - if minification should be done without reporting errors
+	 *   - currentLineMap - a line map to resolve paths in grouped source 
 	 */
 	js.minify = function(source, options){
 		// return source;

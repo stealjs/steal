@@ -35,7 +35,7 @@ steal('steal',
 		};
 		buildOptions = buildOptions || {};
 		buildOptions.depth = buildOptions.depth || Infinity;
-		buildOptions.stealContents = true
+		buildOptions.stealOwnModules = true
 		// open the core app
 		apps._open(app, options, function(options, opener){
 			

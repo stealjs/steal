@@ -116,7 +116,7 @@
 		 * - [steal.config.paths paths] - maps ids to a specific path.
 		 * - [steal.config.shim shim] - used to support libraries that don't use steal.
 		 * - [steal.config.ext ext] - specifies a dependency to load for specific extensions
-		 * - [steal.config.startFile startFile] - the first module to load
+		 * - [steal.config.startId startId] - the first module to load
 		 * - [steal.config.root root] - the root folder where everything is loaded from
 		 * - [steal.config.types types] - types used to load modules 
 		 * - [steal.config.env env] - the enviornement: "development" or "production"

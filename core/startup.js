@@ -222,16 +222,16 @@ startup = h.after(startup, function() {
 	var steals = [];
 
 	// add start files first
-	if ( options.startFiles ) {
+	if ( options.startIds ) {
 		/// this can be a string or an array
-		steals.push.apply(steals, h.isString(options.startFiles) ? [options.startFiles] : options.startFiles)
-		options.startFiles = steals.slice(0)
+		steals.push.apply(steals, h.isString(options.startIds) ? [options.startIds] : options.startIds)
+		options.startIds = steals.slice(0)
 	}
 
 	// we only load things with force = true
-	if ( config.attr().env == "production" && config.attr().loadProduction && config.attr().production ) {
+	if ( config.attr().env == "production" && config.attr().loadProduction && config.attr().productionId ) {
 		st({
-			id: config.attr().production,
+			id: config.attr().productionId,
 			force: true
 		});
 	} else {
@@ -247,8 +247,8 @@ startup = h.after(startup, function() {
 			});
 		}
 
-		if ( options.startFile ) {
-			steals.push(null,options.startFile)
+		if ( options.startId ) {
+			steals.push(null,options.startId)
 		}
 	}
 	if ( steals.length ) {

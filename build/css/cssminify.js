@@ -229,6 +229,8 @@ steal('steal',function( steal ) {
         return css;
     };
 	/**
+	 * @function steal.build.css.minify
+	 * @parent steal.build.css
 	 * Minifies CSS
 	 * @param {String} source
 	 * @param {Object} options - not used
@@ -237,6 +239,10 @@ steal('steal',function( steal ) {
         //remove comments & minify
         return YAHOO.compressor.cssmin(source);
     }
+    /**
+     * @function steal.build.css.clean
+     * @parent steal.build.css
+     */
 	steal.build.css.clean = function(source){
 		return source;
 	}

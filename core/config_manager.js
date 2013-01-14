@@ -13,7 +13,7 @@
  *  - types - processor rules for various types
  *  - ext - behavior rules for extensions
  *  - urlArgs - extra queryString arguments
- *  - startFile - the file to load
+ *  - startId - the file to load
  * 
  * ## map
  * 
@@ -125,14 +125,19 @@ h.extend(ConfigManager.prototype, {
 
 	// get the current start file
 	/**
-	 * @attribute startFile
+	 * @attribute startId
+	 * 
+	 * `steal.config("startId", startModuleId )` configures the
+	 * first file that steal loads. This is important for 
+	 * builds.
+	 * 
 	 * 
 	 */
-	startFile: function(startFile){
+	startId: function(startFile){
 		// make sure startFile and production look right
-		this.stealConfig.startFile = "" + URI(startFile).addJS()
-		if (!this.stealConfig.production ) {
-			this.stealConfig.production = URI(this.stealConfig.startFile).dir() + "/production.js";
+		this.stealConfig.startId = "" + URI(startFile).addJS()
+		if (!this.stealConfig.productionId ) {
+			this.stealConfig.productionId = URI(this.stealConfig.startId).dir() + "/production.js";
 		}
 	},
 
@@ -170,14 +175,66 @@ ConfigManager.defaults = {
 	types: {},
 	/**
 	 * @attribute ext
+	 * 
+	 * `steal.config("ext", extensionConfig)` configures
+	 * processing behavior of moduleId extensions. For example:
+	 * 
+	 *     steal.config("ext",{
+	 *       js: "js",
+	 *       css: "css",
+	 *       less: "steal/less/less.js",
+	 *       mustache: "can/view/mustache/mustache.js"
+	 *     })
+	 * 
+	 * `extensionConfig` maps a filename extension to
+	 * be processed by a [steal.config.types type] 
+	 * (like `js: "js"`) or to a dependency moduleId that
+	 * defines that type (like `less: "steal/less/less.js"`).
+	 * 
 	 */
 	ext: {},
 	/**
 	 * @attribute env
+	 * 
+	 * `steal.config("env", environment )` configures steal's 
+	 * environment to either:
+	 * 
+	 *  - `'development'` - loads all modules seperately
+	 *  - `'production'` - load modules in minified production scripts and styles.
+	 * 
+	 * 
+	 * ## Setting Env
+	 * 
+	 * Typically, changing the environment is done by changing
+	 * `steal/steal.js` to `steal/steal.production.js` like:
+	 * 
+	 *     <script src="../steal/steal.production.js?myapp">
+	 *     </script>
+	 * 
+	 * It can also be set in the queryparams like:
+	 * 
+	 *     <script src="../steal/steal.js?myapp,production">
+	 *     </script>
+	 * 
+	 * Or set before steal is loaded like:
+	 * 
+	 *     <script>
+	 *     steal = {env: "production"}
+	 *     </script>
+	 *     <script src="../steal/steal.js?myapp">
+	 *     </script>
+	 * 
+	 * Of course, it can also be set in `stealconfig.js`, but you
+	 * probably shouldn't.
+	 * 
+	 * 
 	 */
 	env: "development",
 	/**
 	 * @attribute loadProduction
+	 * 
+	 * `steal.config("loadProduction",loadProduction)` indicates
+	 * 
 	 */
 	loadProduction: true,
 	logLevel: 0,
@@ -185,10 +242,98 @@ ConfigManager.defaults = {
 	amd: false
 	/**
 	 * @attribute map
+	 * 
+	 * `steal.config( "map", mapConfig )` maps
+	 * moduleIds to other moduleIds when stolen
+	 * in a particular location. 
+	 * 
+	 * The following maps "jquery/jquery.js" to
+	 * `"jquery-1.8.3.js" in "filemanager" and 
+	 * "jquery/jquery.js" to `"jquery-1.4.2.js"` in
+	 * "taskmanager":
+	 * 
+	 *     steal.config({
+	 *       maps: {
+	 *         filemanager: {
+	 * 	         "jquery/jquery.js": "jquery-1.8.3.js"
+	 *         },
+	 *         taskmanager: {
+	 *           "jquery/jquery.js": "jquery-1.4.2.js"
+	 *         }
+	 *       }
+	 *     });
+	 * 
+	 * In _filemanager/filemanager.js_:
+	 * 
+	 *     steal('jquery')
+	 * 
+	 * ... will load `jquery-1.8.3.js`. To configure the location of 
+	 * `jquery-1.8.3.js`, use [steal.config.paths].
+	 * 
+	 * To map ids within any location, use "*":
+	 * 
+	 *     steal.config({
+	 *       maps: {
+	 *         "*": {
+	 * 	         "jquery/jquery.js": "jquery-1.8.3.js"
+	 *         }
+	 *       }
+	 *     });
+	 * 
+	 * ## mapConfig
+	 * 
+	 * `mapConfig` is a map of a "require-er" moduleId 
+	 * to a mapping of ids like:
+	 * 
+	 *     {
+	 * 	      "require-er" : {requiredId: moduleId}
+	 *     }
+	 * 
+	 * where:
+	 * 
+	 *   - __require-er__ is a moduleId or folderId where the `requiredId`
+	 *     is stolen.
+	 *   - __requiredId__ is the id returned by [steal.id].
+	 *   - __moduleId__ is the moduleId that will be retrieved.
 	 */
 	//
 	/**
 	 * @attribute paths
+	 * 
+	 * `steal.config( "paths", pathConfig )` maps moduleIds
+	 * to paths.  This is used to 
+	 * override [steal.idToUri]. Often, this can be used to
+	 * specify loading from a CDN like:
+	 * 
+	 *     steal.config({
+	 *       paths: {
+	 *         "jquery" : "http://cdn.google.com/jquery"
+	 *       }
+	 *     });
+	 * 
+	 * To keep loading jQuery in production from the CDN, use
+	 * [steal.config.shim] and set the "exclude" option.
+	 */
+	//
+	/**
+	 * @attribute productionId 
+	 * `steal.config("productionId", productionid )` configures
+	 * the id to load the production package. It defaults
+	 * to replacing [steal.config.startId] 
+	 * with "`production.js`". For example,
+	 * `myapp/myapp.js` becomes `myapp/production.js`.
+	 * 
+	 * The best way to configure `productionId` is 
+	 * with a `steal` object before steal.js is loaded:
+	 * 
+	 *     <script>
+	 *     steal = {productionId: "myapp/myapp.production.js"}
+	 *     </script>
+	 *     <script src="../steal/steal.js?myapp">
+	 *     </script>
+	 * 
+	 * If you change `productionId`, make sure you change
+	 * your build script.
 	 */
 	//
 };

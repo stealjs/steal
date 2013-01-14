@@ -11,8 +11,8 @@ steal('steal',
 	
 		
 		/**
-		 * 
-		 * 
+		 * @function steal.build.apps
+		 * @parent steal.build
 		 */
 		var apps = steal.build.apps = function( list, buildOptions ) {
 			
@@ -94,14 +94,14 @@ steal('steal',
 			} else {
 				appName = steal.id(appName);
 				data = {
-					startFile: appName
+					startId: appName
 				}
 			}
 			
 			
 			// use last steal to load page
 			if(options.newPage === false && options.steal){
-				steal.print("  stealing " + ( data.startFile ) );
+				steal.print("  stealing " + ( data.startId ) );
 				// move steal back
 				var curSteal = window.steal,
 					newSteal = window.steal= options.steal;
@@ -121,7 +121,7 @@ steal('steal',
 				})
 				
 				// steal file
-				window.steal({id: data.startFile});
+				window.steal({id: data.startId});
 			} else {
 				steal.print("  opening " + ( appName || html) );
 				steal.build.open(html, data, function(opener){

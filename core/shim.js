@@ -3,7 +3,58 @@
  */
 // 
 /**
- * @attribute shim
+ * @attribute steal.config.shim
+ * 
+ * `steal.config("shim",options)` allows configuring a
+ * specific module's behavior. It accepts an object map of 
+ * `moduleId` property names to options. For example, the
+ * following ensures that the "jquery" module is loaded before
+ * "jquery.ui.tabs.js":
+ * 
+ *     steal.config("shim",{
+ *       "jquery.ui.tabs.js" : {
+ *         deps: ["jquery"]
+ *       }
+ *     });
+ * 
+ * The following options are supported:
+ * 
+ * - __exports__ - define the export value of the module
+ * - __deps__ - the dependencies that must load before this module
+ * - __type__ - the type this module represents
+ * - __minify__ - minify this script in production
+ * - __ignore__ - ignore this module completely in production builds
+ * - __exclude__ - don't package this file, but load it in production
+ * 
+ * ### deps
+ * 
+ * `deps` is an array of module ids that must load 
+ * and run before this module. For example, if `moocalendar` 
+ * depends on `mootools` and 'can/view/ejs`, but does not use
+ * steal, write:
+ * 
+ *     steal.config({
+ *       shim: {
+ *         moocalendar: {
+ *           deps: ["mootools","can/view/ejs"]  
+ *         }
+ *       }       
+ *     });
+ * 
+ * If a shim moduleId's value is an array, or string, it is assumed
+ * to be a dependency. This means the following will work the 
+ * same as above:
+ * 
+ *     steal.config({
+ *       shim: {
+ *         moocalendar: ["mootools","can/view/ejs"]  
+ *       }       
+ *     });
+ * 
+ * ### exports
+ * 
+ * 
+ * 
  * 
  * Implements shim support for steal
  *

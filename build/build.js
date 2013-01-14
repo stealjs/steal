@@ -7,20 +7,33 @@ steal('steal',function( steal ) {
 	}).call(null, 0);
 
 	/**
-	 *
 	 * @parent stealjs
 	 *
-	 * <p>Builds an html page's JavaScript and CSS files by compressing and concatenating them into
-	 * a single or several files.
-	 * </p>
-	 * <p>Steal can also build multiple applications at the same time and separate
-	 * 	shared dependencies into standalone cache-able scripts.</p>
-	 * <h2>How it works</h2>
-	 * <p><code>Steal.build</code> opens a page in Envjs to extract all scripts and styles
-	 * from the page.  It compresses the resources into production.js and production.css
-	 * files.</p>
-	 * <p>Steal.build works with or without using steal.js, so it could work with other script loaders.</p>
-	 *
+	 * `steal.build(moduleId, options)` builds a JavaScript module along 
+	 * with all of its dependencies. It also builds any packages specified
+	 * by [steal.packages]. 
+	 * 
+	 * Calling steal's build in rhino might look like:
+	 * 
+	 *     steal.build('myproject/myproject.js',{
+	 *       to: "myproject",
+	 *       depth: 4
+	 *     });
+	 * 
+	 * This could be run on the command-line like:
+	 * 
+	 *     ./js steal/buildjs myproject -to "myproject" -depth 4
+	 * 
+	 * If you used the app [steal.generate generator] to create
+	 * an application, build your project like:
+	 * 
+	 *     ./js myproject/script/build.js
+	 * 
+	 * Use [steal.build.apps] to build multiple applications at once
+	 * and group shared dependencies into cache-able scripts.
+	 * 
+	 * 
+	 * 
 	 *
 	 * <h2>Building with steal.js.</h2>
 	 * <p>Building with steal is easy, just point the <code>steal/buildjs</code> script at your page and
@@ -49,51 +62,47 @@ steal('steal',function( steal ) {
 	 * @codeend
 	 * This will compress file1.js and file2.js into a file package named production.js an put it in OUTPUT_FOLDER.
 	 *
-	 * <h2>Common Problems</h2>
-	 * <p>If you are getting errors building a production build, it's almost certainly because Envjs is
-	 * close, but not quite a fully featured browser.  So, you have to avoid doing things in your page that
-	 * Envjs doesn't like before onload.  The most common problems are:</p>
-	 * <h5>Malformed HTML or unescaped characters</h5>
-	 * <p>Steal does not have as tolerant of an HTML parser as Firefox.  Make sure your page's tags look good.
-	 * Also, make sure you escape characters like &amp; to &amp;amp;
-	 * </p>
-	 * <h5>DOM manipulations before onload</h5>
-	 * <p>EnvJS supports most DOM manipulations.  But, it's not a graphical browser so it completely punts
-	 * on styles and dimensional DOM features.  It's easy to protect against this, just wait until
-	 * document ready or onload to do these things.
-	 * </p>
-	 * <h5>Unending timeouts or intervals before onload</h5>
-	 * <p>Envjs won't quit running until all timeouts or intervals have completed.  If you have a reoccuring
-	 * 'process', consider starting it on document ready or onload.</p>
-	 * <h2>Building With Shared Dependencies</h2>
-	 * <p>
-	 * If you are using steal in a setting with multiple pages loading similar
-	 * functionality, it's typically a good idea to build the shared functionality in
-	 * its own script.  This way when a user switches pages, they don't have to load
-	 * that functionality again.
-	 * </p>
-	 * <p>
-	 * To do this, use the buildjs script with the names of your apps:
-	 * </p>
-	 * @codestart
-	 * ./js steal/buildjs myco/search myco/searchresults music
-	 * @codeend
-	 * <h2>steal.build function</h2>
-	 * Takes a url, extracts
-	 * @param {String} url an html page to compress
+	 * 
+	 * ## Trouble-shooting
+	 * 
+	 * `steal.build` uses EnvJS to simulate a html page and DOM for your 
+	 * scripts to run inside. EnvJS is not a full featured browser and
+	 * the page might not be similar to the pages your app's code
+	 * runs inside. Fortunately, the fixes are easy:
+	 * 
+	 * __Prevent DOM manipulations, Ajax calls, or setTimeout's before onload
+	 * 
+	 * The easist way to do this is to surround this code with an `if(steal.isRhino)`
+	 * like:
+	 * 
+	 *     if( steal.isRhino ) {
+	 *       $.get("/user/current", function(){  ... })
+	 *     }
+	 * 
+	 * __Feature detect calling Canvas and other HTML5 APIs__
+	 * 
+	 * Instead of doing:
+	 * 
+	 *     canvas.getContext('2d');
+	 * 
+	 * Write
+	 * 
+	 *     if( canvas.getContext ) {
+	 * 	     canvas.getContext('2d')
+	 *     }
+	 * 
+	 * _The next version of StealJS will not have this problem._
+	 * 
+	 * 
+	 * @param {String} url a JS moduleId or html page that loads steal to build.
+	 * 
 	 * @param {Object} options An object literal with the following optional values:
-	 * <table class='options'>
-	 *       <tr>
-	 *           <th>Name</th><th>Description</th>
-	 *       </tr>
-	 *       <tr><td>to</td>
-	 *           <td>The folder to put the production.js and production.css files.</td></tr>
-	 *       <tr><td>minify</td>
-	 *           <td>Defaults to true.</td></tr>
-	 *       <tr><td>all</td>
-	 *       <td>Concat and compress all scripts and styles.  By default, this is set to false, meaning
-	 *           scripts and styles have to opt into being compress with the <code>compress='true'</code> attribute.</td></tr>
-	 *     </table>
+	 * 
+	 *  - to - The folder to put the production.js and production.css files. Ex: `"myproject"`.
+	 *  - minify - `true` to minify scripts, `false` if otherwise. Defaults to `true`.
+	 *  - depth - The total number of packages to load in production if [steal.packages]
+	 *            is used. Defaults to `Infinity`
+	 *  - packageSteal - `true` to package stealjs with `production.js`. Defaults to `false`.
 	 */
 	steal.build = function( url, options ) {
 

@@ -6,7 +6,7 @@
  *
  * - should we load the production version of the 
  *   (if you use steal.production.js instead of steal.js)
- * - parts of the query string to determine `startFile`
+ * - parts of the query string to determine `startId`
  * - location of the `root url`
  */
 
@@ -44,7 +44,7 @@ st.getScriptOptions = function (script) {
 			if (startFile.indexOf(".js") == -1) {
 				startFile += "/" + startFile.split("/").pop() + ".js";
 			}
-			options.startFile = startFile;
+			options.startId = startFile;
 		}
 
 		// Grab env

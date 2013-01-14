@@ -613,7 +613,7 @@
  *  - types - processor rules for various types
  *  - ext - behavior rules for extensions
  *  - urlArgs - extra queryString arguments
- *  - startFile - the file to load
+ *  - startId - the file to load
  * 
  * ## map
  * 
@@ -725,14 +725,14 @@
 
 		// get the current start file
 		/**
-		 * @attribute startFile
+		 * @attribute startId
 		 * 
 		 */
-		startFile: function (startFile) {
+		startId: function (startFile) {
 			// make sure startFile and production look right
-			this.stealConfig.startFile = "" + URI(startFile).addJS()
-			if (!this.stealConfig.production) {
-				this.stealConfig.production = URI(this.stealConfig.startFile).dir() + "/production.js";
+			this.stealConfig.startId = "" + URI(startFile).addJS()
+			if (!this.stealConfig.productionId) {
+				this.stealConfig.productionId = URI(this.stealConfig.startId).dir() + "/production.js";
 			}
 		},
 
@@ -770,14 +770,66 @@
 		types: {},
 		/**
 		 * @attribute ext
+		 * 
+		 * `steal.config("ext", extensionConfig)` configures
+		 * processing behavior of moduleId extensions. For example:
+		 * 
+		 *     steal.config("ext",{
+		 *       js: "js",
+		 *       css: "css",
+		 *       less: "steal/less/less.js",
+		 *       mustache: "can/view/mustache/mustache.js"
+		 *     })
+		 * 
+		 * `extensionConfig` maps a filename extension to
+		 * be processed by a [steal.config.types type] 
+		 * (like `js: "js"`) or to a dependency moduleId that
+		 * defines that type (like `less: "steal/less/less.js"`).
+		 * 
 		 */
 		ext: {},
 		/**
 		 * @attribute env
+		 * 
+		 * `steal.config("env", environment )` configures steal's 
+		 * environment to either:
+		 * 
+		 *  - `'development'` - loads all modules seperately
+		 *  - `'production'` - load modules in minified production scripts and styles.
+		 * 
+		 * 
+		 * ## Setting Env
+		 * 
+		 * Typically, changing the environment is done by changing
+		 * `steal/steal.js` to `steal/steal.production.js` like:
+		 * 
+		 *     <script src="../steal/steal.production.js?myapp">
+		 *     </script>
+		 * 
+		 * It can also be set in the queryparams like:
+		 * 
+		 *     <script src="../steal/steal.js?myapp,production">
+		 *     </script>
+		 * 
+		 * Or set before steal is loaded like:
+		 * 
+		 *     <script>
+		 *     steal = {env: "production"}
+		 *     </script>
+		 *     <script src="../steal/steal.js?myapp">
+		 *     </script>
+		 * 
+		 * Of course, it can also be set in `stealconfig.js`, but you
+		 * probably shouldn't.
+		 * 
+		 * 
 		 */
 		env: "development",
 		/**
 		 * @attribute loadProduction
+		 * 
+		 * `steal.config("loadProduction",loadProduction)` indicates
+		 * 
 		 */
 		loadProduction: true,
 		logLevel: 0,
@@ -789,6 +841,10 @@
 		//
 		/**
 		 * @attribute paths
+		 */
+		//
+		/**
+		 * @attribute productionId 
 		 */
 		//
 	};
@@ -1086,7 +1142,10 @@
 
 
 	var moduleManager = function (steal, stealModules, interactives, config) {
-
+		/**
+		 * @class steal.Module
+		 * @hide
+		 */
 		// ============ MODULE ================
 		// a map of modules by moduleID
 		var modules = {},
@@ -1126,6 +1185,8 @@
 		// - completed - a deferred indicating if all of this modules dependencies have
 		//   completed
 		// - dependencies - an array of dependencies
+		// 
+		// exporter
 		var Module = function (options) {
 			// an array for dependencies, this is the steal calls this module makes
 			this.dependencies = [];
@@ -1142,8 +1203,27 @@
 
 			this.setOptions(options);
 			// create the deferreds used to manage state
+			/**
+			 * @attribute states
+			 * 
+			 * There are 4 states a Module can be 
+			 * within:
+			 * 
+			 *  - created - the Module instance is created, but no further action has been
+			 *    taken on it.
+			 *  - __loaded__ - the module's source has been loaded, but not run.
+			 *  - __run__ - the module's source has been run, but it's dependencies
+			 *    have not been loaded, and its value has not been determined.
+			 *  - __completed__ - the module's dependencies have been loaded and value determined.
+			 * 
+			 * Each module has the following deferreds to retain the state:
+			 * 
+			 *  - module.loaded
+			 *  - module.run 
+			 *  - module.completed
+			 */
 			this.loaded = Deferred();
-			this.run = Deferred();
+			this.run = Deferred(); // TODO - this should be ran or executed
 			this.completed = Deferred();
 		};
 
@@ -1742,7 +1822,7 @@
 		 * - [steal.config.paths paths] - maps ids to a specific path.
 		 * - [steal.config.shim shim] - used to support libraries that don't use steal.
 		 * - [steal.config.ext ext] - specifies a dependency to load for specific extensions
-		 * - [steal.config.startFile startFile] - the first module to load
+		 * - [steal.config.startId startId] - the first module to load
 		 * - [steal.config.root root] - the root folder where everything is loaded from
 		 * - [steal.config.types types] - types used to load modules 
 		 * - [steal.config.env env] - the enviornement: "development" or "production"
@@ -1772,7 +1852,7 @@
 		 *
 		 * - should we load the production version of the 
 		 *   (if you use steal.production.js instead of steal.js)
-		 * - parts of the query string to determine `startFile`
+		 * - parts of the query string to determine `startId`
 		 * - location of the `root url`
 		 */
 
@@ -1809,7 +1889,7 @@
 					if (startFile.indexOf(".js") == -1) {
 						startFile += "/" + startFile.split("/").pop() + ".js";
 					}
-					options.startFile = startFile;
+					options.startId = startFile;
 				}
 
 				// Grab env
@@ -2368,16 +2448,64 @@
 			}
 		};
 
-		/**
-		 * @add steal.config
-		 */
+
 		var Module = moduleManager(st, modules, interactives, config);
 		resources = Module.modules;
 
-
+		/**
+		 * @add steal.config
+		 */
 		// 
 		/**
-		 * @attribute shim
+		 * @attribute steal.config.shim
+		 * 
+		 * `steal.config("shim",options)` allows configuring a
+		 * specific module's behavior. It accepts an object map of 
+		 * `moduleId` property names to options. For example, the
+		 * following ensures that the "jquery" module is loaded before
+		 * "jquery.ui.tabs.js":
+		 * 
+		 *     steal.config("shim",{
+		 *       "jquery.ui.tabs.js" : {
+		 *         deps: ["jquery"]
+		 *       }
+		 *     });
+		 * 
+		 * The following options are supported:
+		 * 
+		 * - __exports__ - define the export value of the module
+		 * - __deps__ - the dependencies that must load before this module
+		 * - __type__ - the type this module represents
+		 * 
+		 * ### deps
+		 * 
+		 * `deps` is an array of module ids that must load 
+		 * and run before this module. For example, if `moocalendar` 
+		 * depends on `mootools` and 'can/view/ejs`, but does not use
+		 * steal, write:
+		 * 
+		 *     steal.config({
+		 *       shim: {
+		 *         moocalendar: {
+		 *           deps: ["mootools","can/view/ejs"]  
+		 *         }
+		 *       }       
+		 *     });
+		 * 
+		 * If a shim moduleId's value is an array, or string, it is assumed
+		 * to be a dependency. This means the following will work the 
+		 * same as above:
+		 * 
+		 *     steal.config({
+		 *       shim: {
+		 *         moocalendar: ["mootools","can/view/ejs"]  
+		 *       }       
+		 *     });
+		 * 
+		 * ### exports
+		 * 
+		 * 
+		 * 
 		 * 
 		 * Implements shim support for steal
 		 *
@@ -2674,16 +2802,16 @@
 			var steals = [];
 
 			// add start files first
-			if (options.startFiles) {
+			if (options.startIds) {
 				/// this can be a string or an array
-				steals.push.apply(steals, h.isString(options.startFiles) ? [options.startFiles] : options.startFiles)
-				options.startFiles = steals.slice(0)
+				steals.push.apply(steals, h.isString(options.startIds) ? [options.startIds] : options.startIds)
+				options.startIds = steals.slice(0)
 			}
 
 			// we only load things with force = true
-			if (config.attr().env == "production" && config.attr().loadProduction && config.attr().production) {
+			if (config.attr().env == "production" && config.attr().loadProduction && config.attr().productionId) {
 				st({
-					id: config.attr().production,
+					id: config.attr().productionId,
 					force: true
 				});
 			} else {
@@ -2699,8 +2827,8 @@
 					});
 				}
 
-				if (options.startFile) {
-					steals.push(null, options.startFile)
+				if (options.startId) {
+					steals.push(null, options.startId)
 				}
 			}
 			if (steals.length) {
