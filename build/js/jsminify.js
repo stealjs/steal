@@ -192,7 +192,6 @@ steal('steal','steal/parse',function(steal, parse){
 						throw options
 					}
 					else {
-						print("HOLLER")
 						var errMatch;
 						while (errMatch = /\:(\d+)\:\s(.*)/g.exec(options.err)) {
 							
