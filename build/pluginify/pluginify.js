@@ -29,13 +29,19 @@ steal('steal', 'steal/parse','steal/build',
 	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
 	 *   - skipAll - don't run any of the code in steal callbacks (used for canjs build)
 	 *   - shim - add existing global object to modules collection
-	 *   - standAlone - Only stip
+	 *   - standAlone - Only build what's in standAlone
+	 * 
+	 *         {standAlone: true}
+	 *         {standAlone: "can/control"}
+	 * 
+	 *   - nocanjs - exclude canjs
 	 */
 	s.build.pluginify = function(plugin, opts){
 		s.print("" + plugin + " >");
-		var jq = true, 
-			othervar, 
-			opts = steal.opts(opts, {
+		
+		// figure out options
+		var othervar, 
+			opts = s.opts(opts, {
 				"out": 1,
 				"exclude": -1,
 				"nojquery": 0,
@@ -44,30 +50,43 @@ steal('steal', 'steal/parse','steal/build',
 				"wrapInner": 0,
 				"skipAll": 0,
 				"standAlone": 0,
+				"nocanjs": 0,
 				"shim": {},
 				"exports": {}
 			}),
 			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
 
+		opts.shim = opts.shim || {};
+		
 		opts.exclude = !opts.exclude ? [] : (isArray(opts.exclude) ? opts.exclude : [opts.exclude]);
-		opts.namespace = opts.namespace || "namespace";
 
 		if (opts.nojquery) {
-			jq = false;
-			//othervar = opts.nojquery;
-			opts.exclude.push("jquery.js");
+			opts.exclude.push("jquery");
+			if(!opts.shim.jquery){
+				opts.shim.jquery = "jQuery"
+			}
 		}
+		if(opts.nocanjs){
+			// TODO: change it so modules that
+			// are ignored, but expected to have a value
+			// will be shown
+			"Construct Control Model Observe route".split(" ").forEach(function(name){
+				var lower = name.toLowerCase();
+				opts.shim["can/"+lower+"/"+lower+".js"] = "can."+name
+			})
+			"view/ejs view/mustache".split(" ").forEach(function(name){
+				var last = name.split("/").pop();
+				opts.shim["can/"+name+"/"+last+".js"] = "can";
+			});
+			opts.shim["can/can.js"] = "can";
+			opts.exclude.push("can/");
+		}
+		
 		opts.exclude.push("steal/dev/");
 		opts.exclude.push("stealconfig.js");
-		rhinoLoader = {
-			callback: function(s){
-				s.pluginify = true;
-			}
-		};
-		var out = '', 
-			str, 
-			i, 
-			inExclude = function(stl){
+		
+		// helper function used to tell if a steal should be excluded
+		var inExclude = function(stl){
 				var path = ""+stl.id;
 				for (var i = 0; i < opts.exclude.length; i++) {
 					if ((opts.exclude[i].substr(-1) === "/" && path.indexOf(opts.exclude[i]) === 0
@@ -78,43 +97,81 @@ steal('steal', 'steal/parse','steal/build',
 				}
 				return false;
 			}, 
-			pageSteal, 
-			steals = [], 
+			// the js output of the plugin
+			jsOut = '', 
+			cssOut = '',
+			// a mapping of ids we've already seen
 			fns = {};
+			
+			
 
-		steal.build.open("steal/rhino/blank.html", {
+		// Open a page and load the plugin and dependencies
+		s.build.open("steal/rhino/blank.html", {
 			startId : plugin, 
 			skipAll: opts.skipAll
 		}, function(opener){
-			opener.each(function(stl, resource, i){
-				print("> ",stl.id)
-				if(stl.buildType === "fn") {
-					fns[stl.id] = true;
+			
+			// go through each module and get it's content
+			opener.each(function(moduleOptions, module, i){
+				
+				
+				// mark this file as processed, continue no matter
+				// what if it's a function because some files have two function callbacks
+				if(moduleOptions.buildType === "fn") {
+					fns[moduleOptions.id] = ( fns[moduleOptions.id] !== undefined ? fns[moduleOptions.id] + 1 : 0 );
 				}
-				else if(fns[stl.id] && stl.buildType === "js"){ // if its a js type and we already had a function, ignore it
+				// if this module has already been processed as a function
+				else if(fns[moduleOptions.id] !== undefined && moduleOptions.buildType === "js"){ 
 					return;
 				}
-				var id = ( ""+stl.id );
+				
+				
+				var id = ( ""+moduleOptions.id );
+				
+				
 				var inStandAlone = (opts.standAlone &&  id === plugin) ||
 					(opts.standAlone && opts.standAlone.indexOf && opts.standAlone.indexOf(id) !== -1);
-				if ( inStandAlone || (!opts.standAlone && !inExclude(stl)) ) {
-
-					var content = s.build.pluginify.content(stl, opts, resource, opener.steal);
-					if (content) {
-						out += '// ## ' + stl.id + '\n';
-						if(stl.buildType === 'fn' && !opts.onefunc) {
-							out += '\nmodule[\'' + stl.id + '\'] = ';
+					
+				if ( inStandAlone || (!opts.standAlone && !inExclude(moduleOptions)) ) {
+					s.print("  + "+id)
+					// get the content for the module
+					if( moduleOptions.buildType === "css" ) {
+						cssOut += moduleOptions.text || readFile( opener.steal.idToUri( moduleOptions.id, true) )
+					} else {
+						
+						// get the "js" file this "fn" module represents
+						var rootJsModule = opener.steal.resources[moduleOptions.id],
+						
+							content = s.build.pluginify.content(rootJsModule, opts, fns[moduleOptions.id]);
+						
+						if (content) {
+							// add a comment
+							jsOut += '// ## ' + moduleOptions.id + '\n';
+							
+							// if it's a function, create a module that will get the result of 
+							// calling the function
+							if(moduleOptions.buildType === 'fn' && !opts.onefunc) {
+								jsOut += '\nmodule[\'' + moduleOptions.id + '\'] = ';
+							}
+	
+							// if there should only be one func, remove the last return
+							if(opts.onefunc) {
+								content = content.substring(0, content.lastIndexOf('return'));
+							}
+	
+							// clean the content and add that to jsOut
+							jsOut += s.build.js.clean(content);
 						}
-
-						if(opts.onefunc) {
-							content = content.substring(0, content.lastIndexOf('return'));
-						}
-
-						out += s.build.js.clean(content);
+						
 					}
+					
+					
+					
+					
+					
 				}
 				else {
-					s.print("  Ignoring " + stl.id)
+					s.print("  x " +id )
 				}
 			}, true);
 		}, false);
@@ -123,7 +180,7 @@ steal('steal', 'steal/parse','steal/build',
 
 		if(opts.onefunc) {
 			output = opts.wrapInner && opts.wrapInner.length ? opts.wrapInner[0] : '(function(window, undefined) {';
-			output += out;
+			output += jsOut;
 			output += opts.wrapInner && opts.wrapInner.length ? opts.wrapInner[1] : '\n\n})(this);';
 		}
 		else {
@@ -135,7 +192,7 @@ steal('steal', 'steal/parse','steal/build',
 
 			output += 'define = function(id, deps, value) {\n';
 			output += '\tmodule[id] = value();\n';
-			output += '};\ndefine.amd = { jQuery: true };\n' + out + '\n';
+			output += '};\ndefine.amd = { jQuery: true };\n' + jsOut + '\n';
 
 			for(key in opts.exports) {
 				output += 'window[\'' + opts.exports[key] + '\'] = module[\'' + key + '\'];\n';
@@ -147,12 +204,17 @@ steal('steal', 'steal/parse','steal/build',
 
 		if (opts.compress) {
 			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
-			var compressor = steal.build.js.minifiers[compressorName]()
+			var compressor = s.build.js.minifiers[compressorName]()
 			output = compressor(output);
 		}
 
-		s.print("--> " + where);
-		new steal.File(where).save(output);
+		s.print("> " + where);
+		new s.URI(where).save(output);
+		if(cssOut){
+			var cssLocation = where.replace(/\.js$/,".css")
+			s.print("> " + cssLocation);
+			new s.URI(cssLocation).save(cssOut);
+		}
 	}
 	var funcCount = {};
 	var strip = function(output) {
@@ -162,10 +224,12 @@ steal('steal', 'steal/parse','steal/build',
 		// Remove all //!steal-pluginify-remove-* section
 		return output.replace(/(\/\/\!steal-pluginify-remove-start)(.|\s)*?(\/\/\!steal-pluginify-remove-end).*/mg, '');
 	}
+	
+	
 	//gets content from a steal
-	s.build.pluginify.content = function(resourceOpts, opts, resource, stl){
+	s.build.pluginify.content = function(module, opts, funcCount){
 		var param = [],
-		deps = stl.resources[resourceOpts.id].dependencies;
+			deps = module.dependencies;
 
 		for(var i = 0; i < deps.length - 1; i++) {
 			if(deps[i]) {
@@ -176,15 +240,25 @@ steal('steal', 'steal/parse','steal/build',
 		if(param.length) {
 			param = 'module["' + param.join('"], module["') + '"]';
 		}
-
+		var content = module.options.text || readFile( s.idToUri( module.options.id, true)   )
+		
+		if (/steal[.\(]/.test(content)) {
+			content = s.build.pluginify.getFunction(content, funcCount, opts.onefunc);
+			if(content && !opts.onefunc){
+				content =  "(" + content + ")(" + param + ");";
+			}
+		}
+		return content;
+		/*
+		if ( resourceOpts.buildType !== resourceOpts.type) {
+			console.log("   -"+resourceOpts.type)
+		}
 		if (resourceOpts.buildType == "fn") {
 			// if it's a function, go to the file it's in ... pull out the content
 			var index = funcCount[resourceOpts.id] || 0, 
 				contents = readFile(resourceOpts.id);
 			funcCount[resourceOpts.id]++;
 
-			var declaration = '\nvar ' + resourceOpts.id.toString().replace(/\//g, '_') + ' = ';
-			declaration = declaration.replace(/\.js/, '');
 
 			contents = s.build.pluginify.getFunction(contents, index, opts.onefunc);
 
@@ -200,7 +274,7 @@ steal('steal', 'steal/parse','steal/build',
 			}
 			//make sure steal isn't in here
 			return content;
-		}
+		}*/
 	};
 	s.build.pluginify.getFunction = function(content, ith, onewrap){
 		var p = parse(content), 
