@@ -53,7 +53,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 			}
 
 			// We need to take mappings into consideration for the filename as well
-			var outFile = new s.File(options.out + '/' + src + '.js');
+			var outFile = new s.File(options.out + '/' + src);
 			outFile.dir().mkdirs();
 			console.log('Saving to ' + outFile);
 			outFile.save(s.build.js.clean(content));
