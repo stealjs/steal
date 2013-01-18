@@ -61,8 +61,11 @@ steal('steal', 'steal/test', function( s ) {
          */
 
         load('steal/rhino/rhino.js');
-        steal('steal', "steal/build","steal/build/scripts","steal/build/styles", "steal/build/apps", function(s2){
+        steal('steal', "steal/build","steal/build/apps", function(s2){
 
+			// the following isn't all that's required
+			//s2.config('root','');
+			
             var buildOptions = {
                 // compressor: "uglify" // uglify is much faster
             };

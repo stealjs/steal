@@ -115,7 +115,7 @@ h.extend(URI.prototype, {
 		if ( this.path.match(/\/$/) ) {
 			left.pop();
 		}
-		while ( part == ".." && left.length ) {
+		while ( part == ".." && left.length && left[left.length-1] !== "..") {
 			// if we've emptied out, folders, just break
 			// leaving any additional ../s
 			if (!left.pop() ) {

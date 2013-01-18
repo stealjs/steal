@@ -500,7 +500,7 @@
 			if (this.path.match(/\/$/)) {
 				left.pop();
 			}
-			while (part == ".." && left.length) {
+			while (part == ".." && left.length && left[left.length - 1] !== "..") {
 				// if we've emptied out, folders, just break
 				// leaving any additional ../s
 				if (!left.pop()) {
@@ -688,12 +688,18 @@
 	 */
 	h.extend(ConfigManager.prototype, {
 		// get or set config.stealConfig attributes
-		attr: function (config) {
+		attr: function (config, value) {
 			if (!config) { // called as a getter, so just return
 				return this.stealConfig;
 			}
-			if (arguments.length === 1 && typeof config === "string") { // called as a getter, so just return
-				return this.stealConfig && this.stealConfig[config];
+			if (typeof config === "string") { // getter / setter
+				if (arguments.length === 1) {
+					return this.stealConfig && this.stealConfig[config];
+				} else {
+					var temp = {};
+					temp[config] = value;
+					config = temp;
+				}
 			}
 			this.stealConfig = this.stealConfig || {};
 			for (var prop in config) {
@@ -726,6 +732,11 @@
 		// get the current start file
 		/**
 		 * @attribute startId
+		 * 
+		 * `steal.config("startId", startModuleId )` configures the
+		 * first file that steal loads. This is important for 
+		 * builds.
+		 * 
 		 * 
 		 */
 		startId: function (startFile) {
@@ -837,14 +848,98 @@
 		amd: false
 		/**
 		 * @attribute map
+		 * 
+		 * `steal.config( "map", mapConfig )` maps
+		 * moduleIds to other moduleIds when stolen
+		 * in a particular location. 
+		 * 
+		 * The following maps "jquery/jquery.js" to
+		 * `"jquery-1.8.3.js" in "filemanager" and 
+		 * "jquery/jquery.js" to `"jquery-1.4.2.js"` in
+		 * "taskmanager":
+		 * 
+		 *     steal.config({
+		 *       maps: {
+		 *         filemanager: {
+		 * 	         "jquery/jquery.js": "jquery-1.8.3.js"
+		 *         },
+		 *         taskmanager: {
+		 *           "jquery/jquery.js": "jquery-1.4.2.js"
+		 *         }
+		 *       }
+		 *     });
+		 * 
+		 * In _filemanager/filemanager.js_:
+		 * 
+		 *     steal('jquery')
+		 * 
+		 * ... will load `jquery-1.8.3.js`. To configure the location of 
+		 * `jquery-1.8.3.js`, use [steal.config.paths].
+		 * 
+		 * To map ids within any location, use "*":
+		 * 
+		 *     steal.config({
+		 *       maps: {
+		 *         "*": {
+		 * 	         "jquery/jquery.js": "jquery-1.8.3.js"
+		 *         }
+		 *       }
+		 *     });
+		 * 
+		 * ## mapConfig
+		 * 
+		 * `mapConfig` is a map of a "require-er" moduleId 
+		 * to a mapping of ids like:
+		 * 
+		 *     {
+		 * 	      "require-er" : {requiredId: moduleId}
+		 *     }
+		 * 
+		 * where:
+		 * 
+		 *   - __require-er__ is a moduleId or folderId where the `requiredId`
+		 *     is stolen.
+		 *   - __requiredId__ is the id returned by [steal.id].
+		 *   - __moduleId__ is the moduleId that will be retrieved.
 		 */
 		//
 		/**
 		 * @attribute paths
+		 * 
+		 * `steal.config( "paths", pathConfig )` maps moduleIds
+		 * to paths.  This is used to 
+		 * override [steal.idToUri]. Often, this can be used to
+		 * specify loading from a CDN like:
+		 * 
+		 *     steal.config({
+		 *       paths: {
+		 *         "jquery" : "http://cdn.google.com/jquery"
+		 *       }
+		 *     });
+		 * 
+		 * To keep loading jQuery in production from the CDN, use
+		 * [steal.config.shim] and set the "exclude" option.
 		 */
 		//
 		/**
 		 * @attribute productionId 
+		 * `steal.config("productionId", productionid )` configures
+		 * the id to load the production package. It defaults
+		 * to replacing [steal.config.startId] 
+		 * with "`production.js`". For example,
+		 * `myapp/myapp.js` becomes `myapp/production.js`.
+		 * 
+		 * The best way to configure `productionId` is 
+		 * with a `steal` object before steal.js is loaded:
+		 * 
+		 *     <script>
+		 *     steal = {productionId: "myapp/myapp.production.js"}
+		 *     </script>
+		 *     <script src="../steal/steal.js?myapp">
+		 *     </script>
+		 * 
+		 * If you change `productionId`, make sure you change
+		 * your build script.
 		 */
 		//
 	};
@@ -2476,6 +2571,9 @@
 		 * - __exports__ - define the export value of the module
 		 * - __deps__ - the dependencies that must load before this module
 		 * - __type__ - the type this module represents
+		 * - __minify__ - minify this script in production
+		 * - __ignore__ - ignore this module completely in production builds
+		 * - __exclude__ - don't package this file, but load it in production
 		 * 
 		 * ### deps
 		 * 

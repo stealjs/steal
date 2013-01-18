@@ -55,7 +55,41 @@ test('URI.prototype.join', function(){
 	var newUri = uri.join('ftp://foo/bar');
 	equal(newUri.host, 'foo', 'Host is set correctly when URL is crossdomain')
 	equal(newUri.protocol, 'ftp', 'Protocol is set correctly when URL is crossdomain')
+	
+	
+	
+	
+	equal(URI("http://abc.com").join("/a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+
+	equal(URI("http://abc.com/").join("/a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+
+	equal(URI("http://abc.com/").join("a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+
+	equal(URI("http://abc.com").join("a/b/c"), "http://abc.com/a/b/c", "http://abc.com/a/b/c was joined successfuly.");
+
+	equal(URI("a/b/c").join("d/e"), "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+
+	equal(URI("a/b/c/").join("d/e"), "a/b/c/d/e", "a/b/c/d/e was joined successfuly.");
+
+	equal(URI("a/b/c/").join("/d/e"), "/d/e", "/d/e was joined successfuly.");
+
+	equal(URI("a/b/c").join("/d/e"), "/d/e", "/d/e was joined successfuly.");
+	
+	equal(URI('../d/e').join('a/b.c'), "../d/e/a/b.c", "../d/e/a/b.c is correctly joined.");
+
+	equal(URI('').join('a/b.c'), "a/b.c", "a/b.c is correctly joined.");
+
+	equal(URI('').join('/a/b.c'), "/a/b.c", "/a/b.c is correctly joined.");
+
+
+	equal(URI('cookbook/').join('../../up.js'), "../up.js", "up.js is correctly joined.")
+	
+	
+	equal( URI("").join(".."), ".." , "up from empty");
+	equal( URI("..").join(".."), "../..", "up from up");
+	equal( URI("../foo/bar").join("../zed")+"", "../foo/zed" , "up from a location" );
 })
+
 
 test('URI.prototype.normalize', function(){
 	var newUri = URI('./foo/bar').normalize(uri);
