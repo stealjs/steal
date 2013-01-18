@@ -32,6 +32,11 @@ steal('steal',
 				dest.mkdir();
 			}
 			buildOptions.depth = buildOptions.depth || Infinity;
+			if(buildOptions.depth < 2){
+				steal.print("Depth must be 2 or greater. depth=2 means every app loads its production "+
+				"file and a single common package shared by all.");
+				quit()
+			}
 			var options = {
 				appFiles : [],
 				files : {},
