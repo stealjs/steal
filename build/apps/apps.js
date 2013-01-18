@@ -26,7 +26,8 @@ steal('steal',
 			//set defaults
 			buildOptions.to = buildOptions.to || "packages/"
 			// check if path exists
-			var dest = steal.File(buildOptions.to);
+			var dest = steal.config('root').join(buildOptions.to);
+
 			if(!dest.exists()){
 				var dir = dest.dir();
 				dest.mkdir();
@@ -112,8 +113,7 @@ steal('steal',
 					newSteal = window.steal= options.steal;
 				// listen to when this is done
 				window.steal.one("end", function(rootSteal){
-					steal.print("  adding dependencies");
-					
+
 					options.appFiles.push(  apps.addDependencies(rootSteal.dependencies[0], options, appName )  );
 					
 					// set back steal
@@ -183,7 +183,9 @@ steal('steal',
 					if( id && resource.options.buildType != 'fn' ) {
 						// some might not have source yet
 						steal.print("  + "+id );
-						var source = resource.options.text ||  readFile( steal.idToUri( resource.options.id , true ) );
+						
+						// convert using steal's root because that might have been configured
+						var source = resource.options.text ||  readFile( steal.idToUri( resource.options.id ) );
 					}
 					resource.options.text = resource.options.text || source
 					
@@ -505,21 +507,17 @@ steal('steal',
 				}
 				
 				//the source of the package
-				//
 				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css", options.exclude)
 
 				//save the file
-				steal.print("saving " + packageName+".js");
-				steal.File(packageName+".js").save( pack.js );
+				steal.print("saving " + steal.config('root').join(packageName+".js"));
+				steal.config('root').join(packageName+".js").save( pack.js );
 
 				if(pack.css){
-					steal.print("saving " + packageName+".css");
-					steal.File(packageName+".css").save( pack.css.code );
-					// I need to tell things that 
-					// have this dependency, that this dependency needs
-					// me
+					steal.print("saving " + steal.config('root').join(packageName+".css"));
+					steal.config('root').join(packageName+".css").save( pack.css.code );
 				}
-				//packageCount++;
+				
 			})
 
 		}
@@ -543,8 +541,9 @@ steal('steal',
 	var makePackageName = function(appModuleIds){
 		if( appModuleIds.length == 1 ){
 			// this needs to go in that app's production
-			var filename = steal.URI(appModuleIds).filename(),
+			var filename = steal.URI(appModuleIds).filename().replace(/\.js$/,""),
 				folder = steal.URI(appModuleIds).dir().filename();
+
 			if( filename == folder ){
 				return (appModuleIds[0]+"").replace(/\/[^\/]*$/,"")+"/production"
 			} else {

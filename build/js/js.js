@@ -147,9 +147,7 @@ steal('steal','steal/build/css',function( steal ) {
 		
 		moduleOptions.forEach(function(file){
 			if ( file.packaged === false ) {
-
 				steal.print('   not packaging ' + file.id);
-				
 				return;
 			}
 			
@@ -158,17 +156,32 @@ steal('steal','steal/build/css',function( steal ) {
 				steal.print('   ignoring ' + file.id);
 				return;
 			}
-			if ( file.exclude || (exclude.indexOf(''+file.id) != -1) ){
+
+			/**
+			 * Match the strings in the array and return result.
+			 */
+			var matchStr = function(str){
+				var has = false;
+				if(exclude.length){
+					for(var i=0;i<exclude.length;i++){
+						if(str.indexOf(exclude[i]) === 0){
+							has = true;
+							break;
+						}
+					}
+				}
+				return has;
+			};
+
+			if ( file.exclude || matchStr(''+file.id)){
 				steal.print('   excluding '+file.id)
 				return;
 			}
-			
+
 			if(file.buildType == 'js'){
 				jses.push(file)
 			} else if(file.buildType == 'css'){
 				csses.push(file)
-			} else {
-				//steal.print('no buildType!!')
 			}
 		})
 		// add to dependencies

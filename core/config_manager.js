@@ -88,12 +88,18 @@ var ConfigManager = function(options){
  */
 h.extend(ConfigManager.prototype, {
 	// get or set config.stealConfig attributes
-	attr: function( config ) {
+	attr: function( config, value ) {
 		if(!config){ // called as a getter, so just return
 			return this.stealConfig;
 		}
-		if(arguments.length === 1 && typeof config === "string"){ // called as a getter, so just return
-			return this.stealConfig && this.stealConfig[config];
+		if(typeof config === "string"){ // getter / setter
+			if(arguments.length === 1){
+				return this.stealConfig && this.stealConfig[config];
+			} else {
+				var temp = {};
+				temp[config] = value;
+				config = temp;
+			}
 		}
 		this.stealConfig = this.stealConfig || {};
 		for(var prop in config){
