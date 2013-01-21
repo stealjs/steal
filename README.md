@@ -6,26 +6,32 @@ that make building, packaging, and sharing
 JavaScript applications easy.  Lets see what it can do:
 
 
-### Dependency Management ([steal])
+### Dependency management ([steal])
 
-[steal] loads JS and other file into your app.  Features:
+[steal] loads modules into your app. Features:
 
- - Loads JavaScript, CSS, Less, CoffeeScript, and a variety of client-side templates.
- - Can be use with scripts that don't use steal.
+ - Loads JS, CSS, Less, CoffeeScript, and client-side templates.
+ - Parallel loading.
+ - Works with scripts that don't use steal.
 
-    steal('widgets/tabs.js',
-          './style.css', function(){
-      $('#tabs ).tabs();
-    });
+@codestart
+steal('widgets/tabs.js',
+      './style.css', 
+      function(Tabs){
+      
+  new Tabs("#item");
+});
+@codeend
+  
+### JS/CSS concatenation and minification ([steal.build])
 
-### JS/CSS Concatenation and Compression ([steal.build])
+[steal.build] combines and minfies an application (or application's) resources
+into a small number of minified packages for faster downloading. Features:
 
-The [steal.build] plugin combines an application's files into a single minified
-JavaScript and CSS file extremely easy.  Features:
-
-  - Configurable compressors (defaults to Google Closure).
-  - Compresses Less and CoffeeScript.
-  - Pre-processes and compresses client-side templates (templates don't have to be parsed).
+ - Minifies JS, Less, CoffeeScript, and client-side templates.
+ - Build shared dependencies across [steal.build.apps multiple apps].
+ - Package modules for [steal.build.packages progressive loading].
+ - Create modules that work [steal.build.pluginify without steal].
 
 @codestart text
 js steal/buildjs mypage.html
@@ -37,7 +43,7 @@ js steal/buildjs mypage.html
 
     steal.dev.log('something is happening');
 
-### Code Generators ([steal.generate])
+### Code generators ([steal.generate])
 
 [steal.generate]  makes building code generators extremely easy.  Features:
 
@@ -48,7 +54,7 @@ js steal/buildjs mypage.html
 js jquery/generate/app cookbook
 @codeend
 
-### Package Management ([steal.get])
+### Package management ([steal.get])
 
 [steal.get] is a simple JavaScript version of [http://rubygems.org/ ruby gems] featuring:
 
@@ -59,7 +65,7 @@ js jquery/generate/app cookbook
 js steal/getjs http://github.com/jupiterjs/mxui/
 @codeend
 
-### Code Cleaner ([steal.clean])
+### Code cleaner ([steal.clean])
 
 [steal.clean] cleans your code and checks it against JSLint.
 
@@ -67,7 +73,7 @@ js steal/getjs http://github.com/jupiterjs/mxui/
 js steal/clean path/to/page.html
 @codeend
 
-### Searchable Ajax Apps ([steal.html])
+### Searchable ajax apps ([steal.html])
 
 [steal.html] makes Google-crawlable html from your ajax app.
 

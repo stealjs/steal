@@ -239,12 +239,33 @@ ConfigManager.defaults = {
 	/**
 	 * @attribute loadProduction
 	 * 
-	 * `steal.config("loadProduction",loadProduction)` indicates
+	 * `steal.config("loadProduction",loadProduction)` tells steal
+	 * to load [steal.config.productionId productionId] when 
+	 * [steal.config.env env] is `"production"`. It's true
+	 * by default.
+	 * 
+	 * `steal.config("loadProduction",false)` is used when steal is 
+	 * bundled with the production script.
 	 * 
 	 */
 	loadProduction: true,
 	logLevel: 0,
 	root: "",
+	/**
+	 * @attribute amd
+	 * 
+	 * `steal.config("amd",true)` turns on steal's AMD support. This needs
+	 * to be configured before steal loads like:
+	 * 
+	 *     <script>
+	 *     steal = {amd: true}	
+	 *     </script>
+	 *     <script src='../../public/steal/steal.js?app'>
+	 *     </script>
+	 * 
+	 * This lets you use `define([id], [deps...], definition)` and
+	 * `require([deps], definition)`.
+	 */
 	amd: false
 	/**
 	 * @attribute map

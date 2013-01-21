@@ -11,10 +11,10 @@ modules into your application.  For example:
 To use steal effectively, there's four things
 you need to know how to do:
 
- - add steal.js to your page
- - configure steal's behavior
- - load modules
- - return module values
+ - Add steal.js to your page
+ - Configure steal's behavior
+ - Load modules
+ - Return module values
  
 We will go into each of these in detail, but first lets
 do the "hello world" of steal:
@@ -67,7 +67,7 @@ sets an element's contents and changes its class attribute to "welcome".
 
 Add the following to __myapp.less__:
 
-    @dark #222222;
+    @dark #228022;
     .welcome {
       color: @dark;
     }
@@ -80,6 +80,10 @@ __4.__ Add the following to __myapp/myapp.js__:
       mymodule(document.body)
     })
 
+Open __index.html__, you should 
+find <span style="color: #228022">Hello World</span>. Read
+on to understand setting up steal in detail.
+
 ## Add steal.js to your page
 
 The first step to using steal is to 
@@ -91,13 +95,15 @@ add `steal/steal.js` to your page.
 <div class='whisper'>PRO TIP: Bottom load your scripts. It
 will increase your application's percieved response time.</div>
 
-With that, you can start stealing modules. For example,
+With this, you can start stealing modules. For example,
 you could load jQuery from a CDN in a following
 script tag like:
 
+    <script src='../public/steal/steal.js'>
+    </script>
     <script>
     steal('http://cdn.com/jquery-1.8.3.js',function(){
-    
+       $
     })
     </script>
 

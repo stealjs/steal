@@ -234,7 +234,7 @@ startup = h.after(startup, function() {
 			id: config.attr().productionId,
 			force: true
 		});
-	} else {
+	} else if(config.attr().env == "dev"){
 		steals.unshift({
 			id: "stealconfig.js",
 			abort: false

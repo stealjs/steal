@@ -212,14 +212,13 @@ h.extend(st, {
 			return config.attr('types')[typs.shift()].require
 		}
 		
-		var types = config.attr('types')
-
-		types[typs.shift()] = {
-			require: cb,
-			convert: typs
-		};
-
-		config.attr('types', types)
+		var typs = type.split(" ");
+		if (!cb) {
+			return config.attr('types')[typs.shift()].require;
+		}
+		var obj = {};
+		obj[type] = cb;
+		config.attr('types', obj);
 	},
 	request : h.request
 });

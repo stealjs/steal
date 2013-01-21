@@ -110,6 +110,11 @@
 		 * 
 		 *     steal.config("env") //-> "development"
 		 * 
+		 * `steal.config(optionName, optionVal)` configures a 
+		 * specific option value. Example:
+		 * 
+		 *     steal.config("env","production")
+		 * 
 		 * Steal supports the following configuration options:
 		 * 
 		 * - [steal.config.map map] - maps ids passed to steal to another id.
@@ -122,7 +127,8 @@
 		 * - [steal.config.env env] - the enviornement: "development" or "production"
 		 * - [steal.config.loadProduction loadProduction] - load the production script in production environment
 		 * - [steal.config.amd amd] - turn on AMD support.
-		 * - [steal.config.executed executed] - tells steal that a dependency has already been loaded.
+		 * - [steal.config.completed completed] - tells steal that a dependency 
+		 *   has already been loaded.
 		 * 
 		 * Typically this is called in `stealconfig.js` which is 
 		 * loaded automatically.
@@ -164,6 +170,12 @@
 			// set up shims after ids are updated
 			if(configData.shim){
 				st.setupShims(configData.shim)
+			}
+			if(configData.completed){
+				h.each( h.isString(configData.completed) ? 
+						[configData.completed] : configData.completed, function(i, id){
+						Module.make({id: id}).executed()
+				});
 			}
 		})
 
