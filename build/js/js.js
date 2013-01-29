@@ -164,7 +164,7 @@ steal('steal','steal/build/css',function( steal ) {
 				var has = false;
 				if(exclude.length){
 					for(var i=0;i<exclude.length;i++){
-						if(str.indexOf(exclude[i]) === 0){
+						if(str === exclude[i]){
 							has = true;
 							break;
 						}
