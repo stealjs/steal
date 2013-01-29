@@ -51,7 +51,7 @@ done
 ARGS=$ARGS]
 java -Xmx512m -Xss1024k -cp $CP org.mozilla.javascript.tools.shell.Main -e _args=$ARGS -opt -1 -e 'load('"'"$1"'"')'
 
-if [ $ERRORLEV = "1" -a $? = "1" ]
+if [ $? == 1 -o $ERRORLEV == "1" ]
 then
-	exit $?
+  exit 1
 fi
