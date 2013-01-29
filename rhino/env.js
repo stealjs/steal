@@ -2279,6 +2279,10 @@ Envjs.connection = function(xhr, responseHandler, data){
         }
 
     }
+    else {
+        java.lang.System.exit(1);
+    }
+
     if(responseHandler){
         //Envjs.debug('calling ajax response handler');
         responseHandler();
