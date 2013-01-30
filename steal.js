@@ -2453,10 +2453,19 @@
 					id: name,
 					idToUri: st.idToUri
 				});
+
 				resource.loading = resource.executing = true;
 				//convert(stel, "complete");
 				st.preexecuted(resource);
-				resource.executed()
+				resource.executed();
+
+				// Fix for nested steals loading in package mode not 
+				// executing callbacks in production mode 
+				// but DOES work in development.
+				if(steal.packHash[name]){
+					steal.executed(steal.packHash[name]);
+				}
+
 				return st;
 			},
 			type: function (type, cb) {
