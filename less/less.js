@@ -53,7 +53,7 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 		new (less.Parser)({
             optimization: less.optimization,
             paths: [pathParts.join('/')],
-            rootpath: pathParts.join('/')
+            rootpath: steal.isRhino ? '' : pathParts.join('/')
         }).parse(options.text, function (e, root) {
 			options.text = root.toCSS();
 			success();
