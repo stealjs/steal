@@ -21,8 +21,9 @@ do the "hello world" of steal:
  
 ## Quick Overview
 
-To get started, here's how to create
-a JS and LESS module for use in `myapp`.  Assume a folder structure like:
+To create
+a JavaScript and [LESS](http://lesscss.org/) module for use in `myapp`
+assuming a folder structure like:
 
     ROOT/
       steal/
@@ -34,7 +35,9 @@ a JS and LESS module for use in `myapp`.  Assume a folder structure like:
         mymodule.js
         index.html
       stealconfig.js
-    
+
+Follow these steps:
+  
 __0.__ Create `myapp`, its contents, and `stealconfig.js`.
 
 __1.__ Add a script tag to __index.html__  that 

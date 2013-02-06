@@ -18,20 +18,22 @@
  * performance.
  *
  * Here's an example converting files of type .foo to JavaScript.  Foo is a
- * fake language that saves global variables defined like.  A .foo file might
+ * fake language that saves global variables.  A .foo file might
  * look like this:
  *
  *     REQUIRED FOO
  *
- * To define this type, you'd call steal.type like this:
+ * To define this type, you'd call `steal.config` like:
  *
- *     steal.config("types",{"foo js": function(options, success, error){
- *       var parts = options.text.split(" ")
- *       options.text = parts[0]+"='"+parts[1]+"'";
- *       success();
- *     }});
+ *     steal.config("types",{
+ * 	     "foo js": function(options, success, error){
+ *         var parts = options.text.split(" ")
+ *         options.text = parts[0]+"='"+parts[1]+"'";
+ *         success();
+ *        }
+ *     });
  *
- * The method we provide is called with the text of .foo files in options.text.
+ * The `"foo js"` method we provide is called with the text of .foo files in options.text.
  * We parse the file, create JavaScript and put it in options.text.  Couldn't
  * be simpler.
  *

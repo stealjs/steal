@@ -363,4 +363,24 @@ ConfigManager.defaults = {
 	 * your build script.
 	 */
 	//
+	/**
+	 * @attribute completed
+	 * 
+	 * `steal.config("completed", completedIds)` marks
+	 * the modules represented by `completedIds` as
+	 * completed (already loaded and run). 
+	 * 
+	 * The following can be used to indicate that
+	 * `production.css` has already been loaded and run:
+	 * 
+	 *     <link rel="stylesheet" type="text/css" 
+	 *           href="../myapp/production.css">
+	 *     <script>
+	 *     steal = {completed: ["myapp/production.css"]}
+	 *     </script>
+	 *     <script src="../steal/steal.production.js?myapp">
+	 *     </script>
+	 * 
+	 */
+	// code in core.js w/i config.on callback
 };

@@ -104,7 +104,10 @@
 		 *         less: "steal/less/less.js",
 		 *         coffee: "steal/coffee/coffee.js",
 		 *       }
-		 *     })
+		 *     });
+		 * 
+		 * This sets the [steal.config.map map], [steal.config.paths paths],
+		 * [steal.config.shim shim], and [steal.config.ext ext].
 		 * 
 		 * `steal.config(optionName)` returns a configuration option value. Example:
 		 * 
@@ -130,8 +133,49 @@
 		 * - [steal.config.completed completed] - tells steal that a dependency 
 		 *   has already been loaded.
 		 * 
-		 * Typically this is called in `stealconfig.js` which is 
-		 * loaded automatically.
+		 * 
+		 * 
+		 * ## Alternative methods of setting config options
+		 * 
+		 * After `steal.js` is loaded and run, you can call `steal.config`
+		 * anywhere.  However, after `steal.js` loads,
+		 * it automatically loads `stealconfig.js` before it loads 
+		 * anything else. `stealconfig.js` is the best place to 
+		 * configure settings that should be applied to all 
+		 * projects. But, there are other ways of
+		 * calling `steal.config`.
+		 * 
+		 * ### Set startFile and env in the script tag
+		 * 
+		 * You can set startFile and env the queryparams of steal like:
+		 * 
+		 *     <script src='../steal/steal.js?STARTFILE,ENV'>
+		 *     </script>
+		 * 
+		 * For example:
+		 * 
+		 *     <script src='../steal/steal.js?cookbook,production'>
+		 *     </script>
+		 * 
+		 * If you load `steal/steal.production.js` the environment defaults
+		 * to production:
+		 * 
+		 *     <script src='../steal/steal.production.js?cookbook'>
+		 *     </script>
+		 * 
+		 * ### A `steal` object that exists before `steal.js` is loaded
+		 * 
+		 * If a `steal` object exists before `steal.js` is loaded,
+		 * steal will internally call `steal.config` with that 
+		 * object.  For example:
+		 * 
+		 *     <script>
+		 *     steal = {
+		 *       completed: "myapp/production.css"
+		 *     }
+		 *     </script>
+		 *     <script src='../steal/steal.production.js,myapp'>
+		 *     </script>
 		 * 
 		 */
 		st.config = function(){

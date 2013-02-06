@@ -202,8 +202,14 @@ h.extend(st, {
 		});
 		resource.loading = resource.executing = true;
 		//convert(stel, "complete");
-		st.preexecuted(resource);
-		resource.executed()
+		st.preexecuted(resource);	
+        resource.executed();
+
+		// need to execute the package name
+        if(steal.packHash[name]){
+          steal.executed(steal.packHash[name]);
+        }
+
 		return st;
 	},
 	type: function( type, cb ) {

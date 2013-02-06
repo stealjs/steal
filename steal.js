@@ -839,12 +839,33 @@
 		/**
 		 * @attribute loadProduction
 		 * 
-		 * `steal.config("loadProduction",loadProduction)` indicates
+		 * `steal.config("loadProduction",loadProduction)` tells steal
+		 * to load [steal.config.productionId productionId] when 
+		 * [steal.config.env env] is `"production"`. It's true
+		 * by default.
+		 * 
+		 * `steal.config("loadProduction",false)` is used when steal is 
+		 * bundled with the production script.
 		 * 
 		 */
 		loadProduction: true,
 		logLevel: 0,
 		root: "",
+		/**
+		 * @attribute amd
+		 * 
+		 * `steal.config("amd",true)` turns on steal's AMD support. This needs
+		 * to be configured before steal loads like:
+		 * 
+		 *     <script>
+		 *     steal = {amd: true}	
+		 *     </script>
+		 *     <script src='../../public/steal/steal.js?app'>
+		 *     </script>
+		 * 
+		 * This lets you use `define([id], [deps...], definition)` and
+		 * `require([deps], definition)`.
+		 */
 		amd: false
 		/**
 		 * @attribute map
@@ -942,6 +963,26 @@
 		 * your build script.
 		 */
 		//
+		/**
+		 * @attribute completed
+		 * 
+		 * `steal.config("completed", completedIds)` marks
+		 * the modules represented by `completedIds` as
+		 * completed (already loaded and run). 
+		 * 
+		 * The following can be used to indicate that
+		 * `production.css` has already been loaded and run:
+		 * 
+		 *     <link rel="stylesheet" type="text/css" 
+		 *           href="../myapp/production.css">
+		 *     <script>
+		 *     steal = {completed: ["myapp/production.css"]}
+		 *     </script>
+		 *     <script src="../steal/steal.production.js?myapp">
+		 *     </script>
+		 * 
+		 */
+		// code in core.js w/i config.on callback
 	};
 
 	/**
@@ -1905,11 +1946,19 @@
 		 *         less: "steal/less/less.js",
 		 *         coffee: "steal/coffee/coffee.js",
 		 *       }
-		 *     })
+		 *     });
+		 * 
+		 * This sets the [steal.config.map map], [steal.config.paths paths],
+		 * [steal.config.shim shim], and [steal.config.ext ext].
 		 * 
 		 * `steal.config(optionName)` returns a configuration option value. Example:
 		 * 
 		 *     steal.config("env") //-> "development"
+		 * 
+		 * `steal.config(optionName, optionVal)` configures a 
+		 * specific option value. Example:
+		 * 
+		 *     steal.config("env","production")
 		 * 
 		 * Steal supports the following configuration options:
 		 * 
@@ -1923,10 +1972,52 @@
 		 * - [steal.config.env env] - the enviornement: "development" or "production"
 		 * - [steal.config.loadProduction loadProduction] - load the production script in production environment
 		 * - [steal.config.amd amd] - turn on AMD support.
-		 * - [steal.config.executed executed] - tells steal that a dependency has already been loaded.
+		 * - [steal.config.completed completed] - tells steal that a dependency 
+		 *   has already been loaded.
 		 * 
-		 * Typically this is called in `stealconfig.js` which is 
-		 * loaded automatically.
+		 * 
+		 * 
+		 * ## Alternative methods of setting config options
+		 * 
+		 * After `steal.js` is loaded and run, you can call `steal.config`
+		 * anywhere.  However, after `steal.js` loads,
+		 * it automatically loads `stealconfig.js` before it loads 
+		 * anything else. `stealconfig.js` is the best place to 
+		 * configure settings that should be applied to all 
+		 * projects. But, there are other ways of
+		 * calling `steal.config`.
+		 * 
+		 * ### Set startFile and env in the script tag
+		 * 
+		 * You can set startFile and env the queryparams of steal like:
+		 * 
+		 *     <script src='../steal/steal.js?STARTFILE,ENV'>
+		 *     </script>
+		 * 
+		 * For example:
+		 * 
+		 *     <script src='../steal/steal.js?cookbook,production'>
+		 *     </script>
+		 * 
+		 * If you load `steal/steal.production.js` the environment defaults
+		 * to production:
+		 * 
+		 *     <script src='../steal/steal.production.js?cookbook'>
+		 *     </script>
+		 * 
+		 * ### A `steal` object that exists before `steal.js` is loaded
+		 * 
+		 * If a `steal` object exists before `steal.js` is loaded,
+		 * steal will internally call `steal.config` with that 
+		 * object.  For example:
+		 * 
+		 *     <script>
+		 *     steal = {
+		 *       completed: "myapp/production.css"
+		 *     }
+		 *     </script>
+		 *     <script src='../steal/steal.production.js,myapp'>
+		 *     </script>
 		 * 
 		 */
 		st.config = function () {
@@ -2453,16 +2544,13 @@
 					id: name,
 					idToUri: st.idToUri
 				});
-
 				resource.loading = resource.executing = true;
 				//convert(stel, "complete");
 				st.preexecuted(resource);
 				resource.executed();
 
-				// Fix for nested steals loading in package mode not 
-				// executing callbacks in production mode 
-				// but DOES work in development.
-				if(steal.packHash[name]){
+				// need to execute the package name
+				if (steal.packHash[name]) {
 					steal.executed(steal.packHash[name]);
 				}
 
@@ -2920,7 +3008,7 @@
 					id: config.attr().productionId,
 					force: true
 				});
-			} else {
+			} else if (config.attr().env == "development") {
 				steals.unshift({
 					id: "stealconfig.js",
 					abort: false
@@ -3029,6 +3117,13 @@
 			// set up shims after ids are updated
 			if (configData.shim) {
 				st.setupShims(configData.shim)
+			}
+			if (configData.completed) {
+				h.each(h.isString(configData.completed) ? [configData.completed] : configData.completed, function (i, id) {
+					Module.make({
+						id: id
+					}).executed()
+				});
 			}
 		})
 
