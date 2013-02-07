@@ -133,6 +133,9 @@ var moduleManager = function(steal, stealModules, interactives, config){
 	// 
 
 	h.extend(Module.prototype, {
+		/**
+		 * @attribute options
+		 */
 		setOptions: function( options ) {
 			var prevOptions = this.options; 
 			// if we have no options, we are the global Module that

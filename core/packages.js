@@ -1,7 +1,7 @@
 //  ============================== Packages ===============================
 /**
  * @function packages
- * `steal.packages( packageIds... )` defines modules for deferred downloading.
+ * `steal.packages( moduleIds... )` defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
  * after initial page load.
@@ -33,8 +33,12 @@
  *     })
  * 
  *
- * 		steal.packages('tasks','dashboard','fileman');
+ *     steal.packages('tasks','dashboard','filemanager');
  *
+ * 
+ * @param {Array} moduleIds... Each argument is a moduleId that
+ * tells the build system to package that module for progressive loading.
+ * 
  */
 st.packs = [];
 st.packHash = {};

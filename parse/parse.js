@@ -44,7 +44,6 @@ like = function(a, b){
  *     //parse until it finds the matching ) to (
  *     p.partner("(");
  *
- * ## API
  * @constructor
  * @param {String} str
  * @return {steal.parse} an object that can be used to pull tokens.

@@ -44,112 +44,92 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @plugin steal/generate
 		 * @parent stealjs
 		 * 
-		 * The Generate plugin makes building code generators crazy easy.
-		 * StealJS comes with its own app generator.  JavaScriptMVC has more complex generators.
+		 * `steal.generate(path, where, data)` renders all the `.ejs` templates recursively in directory `path`
+		 * with `data` and copies them to directory `where`. For example:
 		 * 
-		 * ## Steal Generators
+		 *     steal.generate(
+		 *       "generators/app",
+		 *       "newproject", 
+		 *       {
+		 *         name: "newproject"
+		 *       })
 		 * 
-		 * ### app
-		 * 
-		 * Creates an application structure, build and clean scripts.
-		 * 
-		 * @codestart text
-		 * js steal/generate/app <i>path/to/app</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - path/to/app - The lowercase path you want your application in. 
 		 * 
 		 * ## JavaScriptMVC Generators
+		 * 
+		 * JavaScriptMVC comes with the following generators.
 		 * 
 		 * ### app
 		 * 
 		 * Creates a JavaScriptMVC application structure.
 		 * 
 		 * @codestart text
-		 * js jquery/generate/app <i>path/to/app</i> [OPTIONS]
+		 * js jmvc/generate/app <i>path/to/app</i> [OPTIONS]
 		 * @codeend
 		 * 
-		 *   - path/to/app - The lowercase path you want your application 
-		 *     in. Keep application names short because they 
+		 *   - `path/to/app` - The lowercase directory your application
+		 *     will be placed within. Keep application names short because they 
 		 *     are used as namespaces.  The last part of the path 
 		 *     will be taken to be your application's name.
 		 * 
-		 * ### controller
+		 * ### control
 		 * 
-		 * Creates a [jQuery.Controller $.Controller] and test files.
+		 * Creates a [can.Control] and test files.
 		 * 
 		 * @codestart text
-		 * js jquery/generate/controller <i>App.Videos</i> [OPTIONS]
+		 * js jmvc/generate/control <i>app/controls/video</i> [OPTIONS]
 		 * @codeend
 		 * 
-		 *   - App.Videos - The namespaced name of your controller.  For 
-		 *     example, if your controller is 
-		 *     named <code>Cookbook.Recipes</code>, the generator will 
-		 *     create  <code>cookbook/recipes.js</code>. 
+		 *   - `app/videos` - The moduleId name of your control. 
 		 * 
 		 * ### model
 		 * 
-		 * Creates a [jQuery.Model] and test files.
+		 * Creates a [can.Model] and test files.
 		 * 
 		 * @codestart text
-		 * js jquery/generate/model <i>App.Models.Name</i> [TYPE] [OPTIONS]
+		 * js jmvc/generate/model <i>app/models/name</i> [OPTIONS]
 		 * @codeend
 		 * 
-		 *   - App.Models.Name - The namespaced name of your 
-		 *     model. For example, if your model is 
-		 *     named <code>Cookbook.Models.Recipe</code>, the 
-		 *     generator will 
-		 *     create <code>cookbook/models/recipe.js</code>. 
+		 *   - `app/models/name` - The name of the module
 		 * 
 		 * ### page
 		 * 
 		 * Creates a page that loads steal.js and an application.
 		 * 
 		 * @codestart text
-		 * js jquery/generate/model <i>path/to/app</i> <i>path/to/page.html</i>
+		 * js jmvc/generate/page <i>path/to/app</i> <i>path/to/page.html</i>
 		 * @codeend
 		 * 
-		 *   - path/to/app - The path to your apps folder. 
-		 *   - path/to/page.html - The path to the page you want to create. 
+		 *   - `path/to/app` - The path to your apps folder. 
+		 *   - `path/to/page.html` - The path to the page you want to create. 
 		 * 
 		 * ### plugin
 		 * 
-		 * Use plugin to create a file and 
-		 * folder structure for basic jQuery plugins.
+		 * Create a file and folder structure for a basic jQuery plugin.
 		 * 
 		 * @codestart text
-		 * js jquery/generate/plugin <i>path/to/plugin</i> [OPTIONS]
+		 * js jmvc/generate/plugin <i>path/to/plugin</i> [OPTIONS]
 		 * @codeend
 		 * 
-		 *   - path/to/plugin - The path to where you want 
+		 *   - `path/to/plugin` - The path to where you want 
 		 *   your plugin. 
 		 *   
 		 * 
 		 * ### scaffold
 		 * 
-		 * Creates the controllers, models, and fixtures used
-		 * to provide basic CRUD functionality..
+		 * Creates the controls, models, and fixtures used
+		 * to provide basic CRUD functionality.
 		 * 
 		 * @codestart text
-		 * js jquery/generate/scaffold <i>App.Models.ModelName</i> [OPTIONS]
+		 * js jmvc/generate/scaffold <i>app/models/modelname</i> [OPTIONS]
 		 * @codeend
 		 * 
-		 *   - App.Models.ModelName - The model resource you want to add CRUD functionality to.
+		 *   - `app/models/modelname` - The moduleId of you want to create CRUD functionality 
+		 *     for.
 		 * 
-		 * 
-		 * <h2>The Generator Function</h2>
-		 * <p>Renders a folders contents with EJS and data and then copies it to another folder.</p>
-		 * @codestart
-		 * steal.generate(
-		 *   "path/to/my_template_folder",
-		 *   "render/templates/here", 
-		 *   {
-		 *     data: "to be used"
-		 *   })
-		 * @codeend
-		 * @param {String} path the folder to get templates from
-		 * @param {String} where where to put the results of the rendered templates
-		 * @param {Object} data data to render the templates with.  If force is true, it will overwrite everything
+		 * @param {String} path The folder to get templates from.
+		 * @param {String} where Where to put the results of the rendered templates.
+		 * @param {Object} data Data to render the templates with.  If force is true, it will overwrite everything
 		 */
 		generate = (steal.generate = function( path, where, data ) {
 			//get all files in a folder

@@ -5,6 +5,7 @@ steal('steal','steal/build/css',function( steal ) {
 	/**
 	 * @class steal.build.js
 	 * @parent steal.build
+	 * @hide
 	 * 
 	 * An object that contains functions for creating a package of scripts, minifying it,
 	 * and cleaning it.

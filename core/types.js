@@ -5,18 +5,53 @@
 /**
  * @function types
  * 
- * Registers a type.  You define the type of the file, the basic type it
- * converts to, and a conversion function where you convert the original file
- * to JS or CSS.  This is modeled after the
- * [http://api.jquery.com/extending-ajax/#Converters AJAX converters] in jQuery.
- *
- * Types are designed to make it simple to switch between steal's development
- * and production modes.  In development mode, the types are converted
- * in the browser to allow devs to see changes as they work.  When the app is
- * built, these converter functions are run by the build process,
- * and the processed text is inserted into the production script, optimized for
- * performance.
- *
+ * `steal.config("types",types)` registers alternative types. The
+ * `types` object is a mapping of a `type path` to 
+ * a `type converter`. For example, the following creates a "coffee" type
+ * that converts a [http://jashkenas.github.com/coffee-script/ CoffeeScript] 
+ * file to JavaScript:
+ * 
+ *     steal.config("types",{
+ *       "coffee js": function(options, success, error){
+ *         options.text = CoffeeScript.compile(options.text);
+ *         success();
+ *       }
+ *     });
+ * 
+ * The __type path__ is a list of the type to a `buildType` (either "js" or "css"). For example,
+ * `"coffee js"` means the converter converts from CoffeeScript text to 
+ * JavaScript text.
+ * 
+ * The __type converter__, `converter(options, success, error)`, takes a [steal.Module.options Module options] updates it's text property
+ * to contain the text of the `buildType` and calls success. For example:
+ * 
+ *     steal.config("types", {
+ *       "less css": function(options, success, error){
+ *         new (less.Parser)({
+ *           optimization: less.optimization,
+ *           paths: []
+ *         }).parse(options.text, function (e, root) {
+ *           options.text = root.toCSS();
+ *           success();
+ *         });
+ *       }
+ *     });
+ * 
+ * A __type path__ can specify intermediate types. For example, 
+ * 
+ *     steal.config("types", {
+ * 	     "view js": function(options, sucesss, error){
+ * 	        return "steal('can/view/" +options.type)+"',"+
+ *                 "function(){ return "+options.text+
+ *                 "})" 
+ *       },
+ *       "ejs view js": function(options, success, error){
+ *         return new EJS(options.text).fn
+ *       }
+ *     });  
+ * 
+ * ## Create your own type
+ * 
  * Here's an example converting files of type .foo to JavaScript.  Foo is a
  * fake language that saves global variables.  A .foo file might
  * look like this:
@@ -26,70 +61,17 @@
  * To define this type, you'd call `steal.config` like:
  *
  *     steal.config("types",{
- * 	     "foo js": function(options, success, error){
+ *       "foo js": function(options, success, error){
  *         var parts = options.text.split(" ")
  *         options.text = parts[0]+"='"+parts[1]+"'";
  *         success();
- *        }
+ *       }
  *     });
  *
- * The `"foo js"` method we provide is called with the text of .foo files in options.text.
- * We parse the file, create JavaScript and put it in options.text.  Couldn't
- * be simpler.
- *
- * Here's an example,
- * converting [http://jashkenas.github.com/coffee-script/ coffeescript]
- * to JavaScript:
- *
- *     steal.type("coffee js", function(options, original, success, error){
- *       options.text = CoffeeScript.compile(options.text);
- *       success();
- *     });
- *
- * In this example, any time steal encounters a file with extension .coffee,
- * it will call the given converter method.  CoffeeScript.compile takes the
- * text of the file, converts it from coffeescript to javascript, and saves
- * the JavaScript text in options.text.
- *
- * Similarly, languages on top of CSS, like [http://lesscss.org/ LESS], can
- * be converted to CSS:
- *
- *     steal.type("less css", function(options, original, success, error){
- *       new (less.Parser)({
- *         optimization: less.optimization,
- *         paths: []
- *       }).parse(options.text, function (e, root) {
- *         options.text = root.toCSS();
- *         success();
- *       });
- *     });
- *
- * This simple type system could be used to convert any file type to be used
- * in your JavaScript app.  For example, [http://fdik.org/yml/ yml] could be
- * used for configuration.  jQueryMX uses steal.type to support JS templates,
- * such as EJS, TMPL, and others.
- *
- * @param {String} type A string that defines the new type being defined and
- * the type being converted to, separated by a space, like "coffee js".
- *
- * There can be more than two steps used in conversion, such as "ejs view js".
- * This will define a method that converts .ejs files to .view files.  There
- * should be another converter for "view js" that makes this final conversion
- * to JS.
- *
- * @param {Function} cb( options, original, success, error ) a callback
- * function that converts the new file type to a basic type.  This method
- * needs to do two things: 1) save the text of the converted file in
- * options.text and 2) call success() when the conversion is done (it can work
- * asynchronously).
- *
- * - __options__ - the steal options for this file, including path information
- * - __original__ - the original argument passed to steal, which might be a
- *   path or a function
- * - __success__ - a method to call when the file is converted and processed
- *   successfully
- * - __error__ - a method called if the conversion fails or the file doesn't
- *   exist
+ * The `"foo js"` method is called with the text of .foo files as `options.text`.
+ * The method parses the text, and sets the resulting JavaScript 
+ * as options.text.
+ * 
  */
 ConfigManager.prototype.types = function(types){
 	var configTypes = this.stealConfig.types || (this.stealConfig.types = {});

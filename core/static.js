@@ -47,8 +47,8 @@ h.extend(st, {
 	 * `steal(previousId,...).then(moduleId...)` waits until
 	 * all previousId's have loaded before loading moduleIds.
 	 * 
-	 * Note: This is depricated in 3.3.  You should use the
-	 * needs config option instead.
+	 * Note: This is depricated in 3.3.  You should use
+	 * [steal.config.shim]'s `deps` property instead.
 	 * 
 	 */
 	then: function() {

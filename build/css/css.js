@@ -5,6 +5,7 @@ steal('steal',function( steal ) {
 	/**
 	 * @class steal.build.css
 	 * @parent steal.build
+	 * @hide
 	 */
 	var css = steal.build.css = {};
 	/**

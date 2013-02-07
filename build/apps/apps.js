@@ -13,8 +13,49 @@ steal('steal',
 		/**
 		 * @function steal.build.apps
 		 * @parent steal.build
+		 * 
+		 * `steal.build.apps(moduleIds, buildOptions)` builds 
+		 * multiple apps at once and packages shared dependencies to 
+		 * improve loading performance.
+		 * 
+		 * You can call it from a js script like:
+		 * 
+		 *     load('steal/rhino/rhino.js')
+		 *     steal('steal/build/apps',function(apps){
+		 * 	     steal.build.apps(['app1','app2','app3'],{
+		 *         to: "packages/",
+		 *         depth: 4,
+		 *         packageSteal: true
+		 *       })
+		 *     })
+		 * 
+		 * Or from the command line like:
+		 * 
+		 *     ./js steal/buildjs app1 app2 app3 -to packages/ -depth 3 -pacakgeSteal 
+		 * 
+		 * This will build app1, app2, and app3's `production.js` and `production.css` file
+		 * and possibly the following packages:
+		 * 
+		 *  - app1_app2_app3 - resources shared by all applications
+		 *  - app1_app2 - resources shared by app 1 and 2 
+		 *  - app1_app3 - resources shared by app 1 and 3
+		 *  - app2_app3 - resources shared by app 2 and 3
+		 * 
+		 * Changing the depth to 2 will only create `app1_app2_app3`.
+		 * 
+		 * @param {Array} moduleIds An array of application
+		 * @param {Object} [buildOptions] A object map of the following
+		 * configuration properties: 
+		 * 
+		 * __to__ - the location to deploy packages. Defaults to
+		 * `"packages/"`.
+		 * 
+		 * __depth__ -  how many scripts to load, including the 
+		 * app's production scripts. This means that depth should 
+		 * always be 2 or more.  Depth defaults to `infinity`.
+		 * 
 		 */
-		var apps = steal.build.apps = function( list, buildOptions ) {
+		var apps = steal.build.apps = function( moduleIds, buildOptions ) {
 			
 			buildOptions = steal.opts(buildOptions || {}, {
 				//folder to build to, defaults to the folder the page is in
@@ -45,7 +86,7 @@ steal('steal',
 				multipleOpens: true
 			}
 			// opens each app and add its dependencies to options
-			steal.build.apps.open(list, options, function(options){
+			steal.build.apps.open(moduleIds, options, function(options){
 				apps.makePackages(options, buildOptions);
 			})
 			
@@ -580,4 +621,5 @@ steal('steal',
 			return appNamesToName[expanded] = "packages/"+expanded.replace(/\//g,'_') ;
 		}
 	};
+	return steal.build.apps;
 })

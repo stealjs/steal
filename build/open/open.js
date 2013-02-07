@@ -115,21 +115,22 @@ steal('steal',function(s){
 	 * `opener` is an object that helps walk through the modules 
 	 * loaded by steal.
 	 * 
+	 *     steal.build.open(
+	 *       "page.html",
+	 *       {
+	 * 	       startId: "myapp"
+	 *       }, 
+	 *       function(opener){})
 	 * 
-	 * 
-	 * 
-	 * Opens a page by:
+	 * `open` opens a page by:
 	 * 
 	 *   - temporarily deleting the rhino steal
 	 *   - opening the page with Envjs
 	 *   - setting back rhino steal, saving envjs's steal as steal._steal;
 	 * 
-	 * 
-	 * 
-	 * 
-	 * @param {String} url the html page to open
-	 * @param {Object} [stealData] - data to configure steal with
-	 * @param {Function} cb(opener) - an object with properties that makes extracting 
+	 * @param {String} url The html page to open.
+	 * @param {Object} [stealData] Data to [steal.config configure steal] with.
+	 * @param {Function} cb(opener) An object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 * 
 	 *   - each(filter, depth, callback(options, stel)) - goes through steals loaded by this

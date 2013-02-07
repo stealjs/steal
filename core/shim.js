@@ -19,12 +19,12 @@
  * 
  * The following options are supported:
  * 
- * - __exports__ - define the export value of the module
  * - __deps__ - the dependencies that must load before this module
- * - __type__ - the type this module represents
- * - __minify__ - minify this script in production
+ * - __exports__ - define the export value of the module
  * - __ignore__ - ignore this module completely in production builds
- * - __exclude__ - don't package this file, but load it in production
+ * - __minify__ - minify this script in production
+ * - __packaged__ - if set to false, don't package this file, but load it in production
+ * - __type__ - the type this module represents
  * 
  * ### deps
  * 
@@ -51,15 +51,22 @@
  *       }       
  *     });
  * 
+ * This type of thing works too:
+ * 
+ *     steal.config("shim",{
+ *       "jquery.ui.tabs.js": "jquery"
+ *       }
+ *     });
+ * 
  * ### exports
  * 
+ * The `exports` option allows a module that is not using steal to export a value
+ * that can be an argument in a steal callback function. `exports` can
+ * be specified as a String or a function.  If `exports` is a string,
+ * that string is the name of a global variable to use after the 
+ * module's code has been run. For example, the following might allow you 
+ * to reference jQuery as __jQ__ in `steal('jquery',function(jQ){})`:
  * 
- * 
- * 
- * Implements shim support for steal
- *
- * This function sets up shims for steal. It follows RequireJS' syntax:
- *
  *     steal.config({
  *        shim : {
  *          jquery: {
@@ -68,24 +75,78 @@
  *        }
  *      })
  * 
- * You can also set function to explicitely return value from the module:
- *
+ * `"jQuery"` is the name of the global variable to export.
+ * 
+ * If `exports` is a function, it is run after the module's code has run
+ * and passed the modules `deps` as arguments.  The function's return
+ * value is used as the module's value. For example:
+ * 
  *     steal.config({
  *        shim : {
  *          jquery: {
- *            exports: function(){
- *              return window.jQuery;
- *            }
+ *            exports: "jQuery"
+ *          },
+ *          "slider/slider.js": {
+ *            deps: ["jquery","jqueryconstruct.js"]
+ *            exports: function($, jQueryConstruct){
+ *              return jQueryConstruct($.fn.slider)
+ *            }  
  *          }
  *        }
  *      })
- *
- * This enables steal to pass you a value from library that is not wrapped
- * with steal() call.
- *
- *     steal('jquery', function(j){
- *       // j is set to jQuery
- *     })
+ * 
+ * ### ignore
+ * 
+ * Setting `ignore: true` ignores this module completely in production 
+ * builds. It does not package it and will not load it.
+ * 
+ *     steal.config({
+ *        shim : {
+ *          "mydebugtools/mydebugtools.js": {
+ *            ignore: true
+ *          }
+ *        }
+ *      })
+ * 
+ * ### minify 
+ * 
+ * Setting `minify: false` prevents this module from being minified. Some modules
+ * have already been minified or possibly break with minification.
+ * 
+ *     steal.config({
+ *        shim : {
+ *          "datejs": {
+ *            minify: false
+ *          }
+ *        }
+ *      })
+ * 
+ * ### packaged 
+ * 
+ * Setting `packaged: false` prevents the module from being added in
+ * a production build, but it will still load.
+ * 
+ *     steal.config({
+ *        shim : {
+ *          "jquery": {
+ *            packaged: false
+ *          }
+ *        }
+ *      })
+ * 
+ * ### type 
+ * 
+ * Specifying the type can override the module's type infered from
+ * it's extension.
+ * 
+ *     steal.config({
+ *        shim : {
+ *          "foo/bar.js": {
+ *           type: "css"
+ *          }
+ *        }
+ *      })
+ * 
  */
 st.setupShims = function(shims){
 	// Go through all shims
@@ -94,36 +155,46 @@ st.setupShims = function(shims){
 		// of always returning same resource for same id 
 		// when someone steals resource created in this function
 		// they will get same object back
-		var resource = Module.make({id: id});
-		if(typeof shims[id] === "object"){
-			// set up dependencies of the module
-			var needs   = shims[id].deps || []
-			var exports = shims[id].exports;
-			var init    = shims[id].init
-		} else {
-			needs = shims[id];
-		}
-		(function(_resource, _needs){
-			_resource.options.needs = _needs;
-		})(resource, needs);
-		// create resource's exports function. We check for existance
-		// of this function in `Module.prototype.executed` and if it exitst
-		// it is called, which sets `value` of the module 
-		resource.exports = (function(_resource, _needs, _exports, _init){
-			return function(){
-				var args = [];
-				h.each(_needs, function(i, id){
-					args.push(Module.make(id).value);
-				});
-				if(_init){
-					// if module has exports function, call it
-					_resource.value = _init.apply(null, args);
-				} else {
-					// otherwise it's a string so we just return
-					// object from the window e.g window['jQuery']
-					_resource.value = h.win[_exports];
+		var val = shims[id];
+		
+		(function(module, options){
+			// we treat init and exports the same right
+			// now to be more amdish
+			var exports = options.init || options.exports;
+			// rename deps to needs
+			if(options.deps){
+				options.needs = options.deps;
+			}
+			// copy everything but what we delete to options
+			delete options.init;
+			delete options.exports;
+			delete options.deps;
+			h.extend(module.options, options)
+			// setup exports
+			if(exports){
+				module.exports = function(){
+					// setup the arguments
+					// not sure if these should be from needs
+					var args = [];
+					h.each(options.needs || [], function(i, id){
+						args.push(Module.make(id).value);
+					});
+					
+					if(typeof exports === "function"){
+						// if module has exports function, call it
+						module.value = exports.apply(null, args);
+					} else {
+						// otherwise it's a string so we just return
+						// object from the window e.g window['jQuery']
+						module.value = h.win[exports];
+					}
 				}
 			}
-		})(resource, needs, exports, init)
+			
+		})( Module.make({id: id}),
+			typeof val === "string" ?
+				{deps: [val]} :
+				( val.length ?
+					{deps: val} : val ) );
 	}
 }

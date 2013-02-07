@@ -32,36 +32,46 @@ steal('steal',function( steal ) {
 	 * Use [steal.build.apps] to build multiple applications at once
 	 * and group shared dependencies into cache-able scripts.
 	 * 
+	 * ## Excluding code from a build.
 	 * 
+	 * Often, you don't want some code to be run in production. There
+	 * are serveral ways to make that happen:
 	 * 
-	 *
-	 * <h2>Building with steal.js.</h2>
-	 * <p>Building with steal is easy, just point the <code>steal/buildjs</code> script at your page and
-	 * give it the name of your application folder:</p>
-	 * @codestart no-highlight
-	 * js steal/buildjs path/to/page.html -to myapp
-	 * @codeend
-	 * <p>If you generated a steal app or plugin, there's a handy script already ready for you:</p>
-	 * @codestart no-highlight
-	 * js myapp/scripts/build.js
-	 * @codeend
-	 * <h2>Building without steal.js</h2>
-	 * You can compress and package any page's JavaScript by adding <code>compress="true"</code>
-	 * attributes to your script tag like the following:
-	 * @codestart html
-	 * &lt;script src="file1.js" type="text/javascript" compress="true">&lt;/script>
-	 * &lt;script src="file2.js" type="text/javascript" compress="true">&lt;/script>
-	 * @codeend
-	 * and then running either:
-	 * @codestart no-highlight
-	 * js steal/buildjs path/to/page.html -to [OUTPUT_FOLDER]
-	 * @codeend
-	 * or:
-	 * @codestart no-highlight
-	 * js steal/buildjs http://hostname/path/page.html -to [OUTPUT_FOLDER]
-	 * @codeend
-	 * This will compress file1.js and file2.js into a file package named production.js an put it in OUTPUT_FOLDER.
-	 *
+	 * ### steal.dev.log
+	 * 
+	 * [steal.dev.log] can be used as a replacement to console.log. Steal
+	 * will remove all lines that look like the following:
+	 * 
+	 *    steal.dev.log("A message")
+	 * 
+	 * ### ignore
+	 * 
+	 * Use [steal.config.shim] to specify that a module should be ignored like:
+	 * 
+	 *     steal.config({
+	 *       shim: {
+	 *         "mydebugtool/mydebugtool.js" : {ignore: true}
+	 *       }
+	 *     })
+	 * 
+	 * `mydebugtool/mydebugtool.js` will not be loaded in production
+	 * 
+	 * ### packaged
+	 * 
+	 * Sometimes you don't want to include some module in production, but you
+	 * still want it to load. A common case is loading jQuery from a 
+	 * cdn. This can be done by setting `packaged` to false in
+	 * shim like:
+	 * 
+	 *     steal.config({
+	 *       shim: {
+	 *         "jquery" : {packaged: false}
+	 *       },
+	 *       {
+	 *         paths: {jquery: "http://cdn.com/jquery"}
+	 *       }
+	 *     })
+	 * 
 	 * 
 	 * ## Trouble-shooting
 	 * 
@@ -94,17 +104,33 @@ steal('steal',function( steal ) {
 	 * _The next version of StealJS will not have this problem._
 	 * 
 	 * 
-	 * @param {String} url a JS moduleId or html page that loads steal to build.
+	 * @param {String} moduleId a JS moduleId or html page that loads steal to build. For example:
+	 * 
+	 *     steal.build('myapp');
+	 * 
+	 *     ./js steal/buildjs myapp
 	 * 
 	 * @param {Object} options An object literal with the following optional values:
 	 * 
-	 *  - to - The folder to put the production.js and production.css files. Ex: `"myproject"`.
-	 *  - minify - `true` to minify scripts, `false` if otherwise. Defaults to `true`.
-	 *  - depth - The total number of packages to load in production if [steal.packages]
-	 *            is used. Defaults to `Infinity`
-	 *  - packageSteal - `true` to package stealjs with `production.js`. Defaults to `false`.
+	 *  __to__ - The folder to put the production.js and production.css files. Ex: `"myproject"`.
+	 * 
+	 *  __minify__ - `true` to minify scripts, `false` if otherwise. Defaults to `true`.
+	 * 
+	 *  __depth__ - The total number of packages to load in production if [steal.packages]
+	 *  is used. Defaults to `Infinity`.
+	 * 
+	 *  __packageSteal__ - `true` to package stealjs with `production.js`. Defaults to `false`.
+	 * 
+	 * Example:
+	 * 
+	 *     steal.build("app",{
+	 *       minify: false,
+	 *       depth: 3.
+	 *       packageSteal: true,
+	 *       to: "staticproduction/app"
+	 *     })
 	 */
-	steal.build = function( url, options ) {
+	steal.build = function( moduleId, options ) {
 
 		var dependencies = {}, dep;
 
@@ -117,7 +143,7 @@ steal('steal',function( steal ) {
 		});
 
 		// to is the folder packages will be put in
-		options.to = options.to || (url.match(/https?:\/\//) ? "" : url.substr(0, url.lastIndexOf('/')));
+		options.to = options.to || (moduleId.match(/https?:\/\//) ? "" : moduleId.substr(0, moduleId.lastIndexOf('/')));
 
 		// make sure to ends with /
 		if ( options.to.match(/\\$/) === null && options.to !== '' ) {
@@ -129,7 +155,7 @@ steal('steal',function( steal ) {
 		}
 
 		steal.print("Building to " + options.to);
-		steal.build.packages(url, options);
+		steal.build.packages(moduleId, options);
 
 	};
 

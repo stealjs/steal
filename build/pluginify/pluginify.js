@@ -14,30 +14,75 @@ steal('steal', 'steal/parse','steal/build',
 	 * @function steal.build.pluginify
 	 * @parent steal.build
 	 * 
-	 * Builds a 'steal-less' version of your application.  To use this, files that use steal must
-	 * have their code within a callback function.
+	 * `steal.build.pluginify(moduleId, options)` builds a 'steal-less' version 
+	 * of a module. It can called programatically in JavaScript like:
 	 * 
-	 *     js steal\pluginify jquery\controller -nojquery
+	 *     steal.build.pluginify('widgets/chart',{
+	 *       nojquery: true,
+	 *       nocanjs: true,
+	 *       exclude: ["underscore"],
+	 *       shim: { "underscore" : "_" }
+	 *     })
+	 *     
+	 * Basic examples can be called from the command line like:
+	 * 
+	 *     ./js steal/pluginifyjs widgets/chart -nojquery -nocanjs
 	 *   
-	 * @param {Object} plugin
-	 * @param {Object} opts options include:
+	 * @param {Object} moduleId The moduleId of the plugin to be built.
+	 * @param {Object} opts An object map of the following optional configuration
+	 * properties:
 	 * 
-	 *   - out - where to put the generated file
-	 *   - exclude - an array of files to exclude
-	 *   - nojquery - exclude jquery
-	 *   - compress - compress the file
-	 *   - wrapInner - an array containing code you want to wrap the output in [before, after]
-	 *   - skipAll - don't run any of the code in steal callbacks (used for canjs build)
-	 *   - shim - add existing global object to modules collection
-	 *   - standAlone - Only build what's in standAlone
+	 * __out__ -  Specifies the location of the generated file. The default filename is the 
+	 * moduleId with `.` replacing all `/` in the moduleId's folder. For example,
+	 * pluginifying `"foo/bar"` will create `"foo/bar/foo.bar.js"
 	 * 
-	 *         {standAlone: true}
-	 *         {standAlone: "can/control"}
+	 *     steal.build.pluginify("foo/bar",{
+	 *       out: "bar.js"
+	 *     })
 	 * 
-	 *   - nocanjs - exclude canjs
+	 * __exclude__ - An array of moduleIds to exclude. If the moduleId ends with a 
+	 * slash (ex: `"can/"`) all modules within that folder will be ignored.
+	 * 
+	 * __standAlone__ - Set to `true` to only build the moduleId resource, everything
+	 * else will be excluded. `standAlone` can also be set to a specific module or 
+	 * folder.
+	 * 
+	 * __nojquery__ - Excludes jQuery and adds `jquery: "jQuery"` to the shim. Example:
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       nojquery: true
+	 *     })
+	 * 
+	 * __nocanjs__ - Exclude all CanJS files and adds corresponding shims.
+	 * 
+	 * __minify__ - Set to `true` to minify the build.  
+	 * 
+	 * __wrapInner__ - An array containing code you want to wrap the output in 
+	 * like `[before, after]`. Example:
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       wrapInner: ["(function($,can){","})(jQuery, can)"]
+	 *     })
+	 * 
+	 * __shim__ - Specifies a mappings between an excluded moduleId and
+	 * it's global value.  For example:
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       exclude: ["jquery","can/"],
+	 *       shim: {
+	 *         jquery: "jQuery",
+	 *         "can/util": "can",
+	 *         "can/control": "can.Control"
+	 *       }
+	 *     })
+	 * 
+	 * 
+	 * __skipAll__ - Don't run any of the code in steal callbacks (used for canjs build)
+	 * 
+	 * 
 	 */
-	s.build.pluginify = function(plugin, opts){
-		s.print("" + plugin + " >");
+	s.build.pluginify = function(moduleId, opts){
+		s.print("" + moduleId + " >");
 		
 		// figure out options
 		var othervar, 
@@ -45,7 +90,7 @@ steal('steal', 'steal/parse','steal/build',
 				"out": 1,
 				"exclude": -1,
 				"nojquery": 0,
-				"compress": 0,
+				"minify": 0,
 				"onefunc": 0,
 				"wrapInner": 0,
 				"skipAll": 0,
@@ -54,7 +99,7 @@ steal('steal', 'steal/parse','steal/build',
 				"shim": {},
 				"exports": {}
 			}),
-			where = opts.out || plugin + "/" + plugin.replace(/\//g, ".") + ".js";
+			where = opts.out || moduleId + "/" + moduleId.replace(/\//g, ".") + ".js";
 
 		opts.shim = opts.shim || {};
 		
@@ -107,7 +152,7 @@ steal('steal', 'steal/parse','steal/build',
 
 		// Open a page and load the plugin and dependencies
 		s.build.open("steal/rhino/blank.html", {
-			startId : plugin, 
+			startId : moduleId, 
 			skipAll: opts.skipAll
 		}, function(opener){
 			
@@ -129,7 +174,7 @@ steal('steal', 'steal/parse','steal/build',
 				var id = ( ""+moduleOptions.id );
 				
 				
-				var inStandAlone = (opts.standAlone &&  id === plugin) ||
+				var inStandAlone = (opts.standAlone &&  id === moduleId) ||
 					(opts.standAlone && opts.standAlone.indexOf && opts.standAlone.indexOf(id) !== -1);
 					
 				if ( inStandAlone || (!opts.standAlone && !inExclude(moduleOptions)) ) {
@@ -202,8 +247,8 @@ steal('steal', 'steal/parse','steal/build',
 			output += '\nwindow.module = module._orig;';
 		}
 
-		if (opts.compress) {
-			var compressorName = (typeof(opts.compress) == "string") ? opts.compress : "localClosure";
+		if (opts.minify) {
+			var compressorName = (typeof(opts.minify) == "string") ? opts.minify : "localClosure";
 			var compressor = s.build.js.minifiers[compressorName]()
 			output = compressor(output);
 		}
@@ -326,4 +371,5 @@ steal('steal', 'steal/parse','steal/build',
 		stealPull(p, content, cb, onewrap);
 		
 	};
+	return steal.build.pluginify
 });
