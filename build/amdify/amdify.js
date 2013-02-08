@@ -38,6 +38,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 
 	mapDependency = function(value, mappings) {
 		var mapping;
+		value = value.replace('.js', '');
 		for(var key in mappings) {
 			if(mappings.hasOwnProperty(key)) {
 				mapping = mappings[key];
@@ -51,7 +52,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 				}
 			}
 		}
-		return value.replace('.js', '');
+		return value;
 	},
 
 	convertContents = function(content, options) {
