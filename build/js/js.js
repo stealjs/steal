@@ -112,7 +112,7 @@ steal('steal','steal/build/css',function( steal ) {
 		// add to dependencies ...
 		// seperate out css and js
 		buildOptions = buildOptions || {};
-		var exclude = buildOptions.exclude || [];
+		var excludes = buildOptions.exclude || [];
 		var jses = [],
 			csses = [],
 			lineMap = {},
@@ -163,9 +163,15 @@ steal('steal','steal/build/css',function( steal ) {
 			 */
 			var matchStr = function(str){
 				var has = false;
-				if(exclude.length){
-					for(var i=0;i<exclude.length;i++){
-						if(str === exclude[i]){
+				if(excludes.length){
+					for(var i=0;i<excludes.length;i++){
+						//- Match wildcard strings if they end in '/'
+						//- otherwise match the string exactly
+						//- Example `exclude: [ 'jquery/' ]` would exclude all of jquery++
+						//- however `exclude: [ 'jquery' ]` would only exclude the file
+						var exclude = excludes[i];
+						if((exclude[exclude.length - 1] === "/" && 
+							str.indexOf(exclude) === 0) || str === exclude){
 							has = true;
 							break;
 						}
