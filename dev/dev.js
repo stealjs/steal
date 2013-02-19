@@ -90,20 +90,3 @@ steal.dev = {
 		}
 	} 
 };
-
-//stuff for jmvc
-/**
- * @class jQuery
- * @constructor blah
- */
-
-//
-/**
- * @class jQuery.fn
- * @constructor blah
- */
-//
-/**
- * @class jQuery.event.special
- */
-// as fasf sa
