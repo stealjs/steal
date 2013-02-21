@@ -70,7 +70,7 @@ sets an element's contents and changes its class attribute to "welcome".
 
 Add the following to __myapp.less__:
 
-    @dark #228022;
+    @@dark #228022;
     .welcome {
       color: @dark;
     }
