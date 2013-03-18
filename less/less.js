@@ -1,4 +1,22 @@
 steal({id: "./less_engine.js",ignore: true}, function(){
+	// only if rhino and we have less
+	if(steal.isRhino && window.less) {
+		// Some monkey patching of the LESS AST
+		// For production builds we NEVER want the parser to add paths to a url(),
+		// the CSS postprocessor is doing that already.
+		(function(tree) {
+			var oldProto = tree.URL.prototype;
+			tree.URL = function (val, paths) {
+				if (val.data) {
+					this.attrs = val;
+				} else {
+					this.value = val;
+					this.paths = paths;
+				}
+			};
+			tree.URL.prototype = oldProto;
+		})(less.tree);
+	}
 
 	/**
 	 * @page steal.less Less
@@ -43,17 +61,14 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
 		var paths = [];
-
 		if (!steal.isRhino) {
 			var pathParts = (options.src+'').split('/');
 			pathParts[pathParts.length - 1] = ''; // Remove filename
 			paths = [pathParts.join('/')];
 		}
-
 		new (less.Parser)({
             optimization: less.optimization,
-            paths: [pathParts.join('/')],
-            rootpath: steal.isRhino ? '' : pathParts.join('/')
+            paths: [pathParts.join('/')]
         }).parse(options.text, function (e, root) {
 			options.text = root.toCSS();
 			success();
