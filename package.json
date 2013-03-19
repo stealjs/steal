@@ -13,10 +13,11 @@
     "grunt-beautify" : "*",
     "node-promise" : ">= 0.5.4"
   },
+  "main": "node/steal",
   "homepage" : "http://javascriptmvc.com/docs.html#!stealjs",
   "repository" : {
     "type" : "git",
-    "url" : "git://github.com/jupiterjs/steal.git"
+    "url" : "git://github.com/bitovi/steal.git"
   },
   "licenses" : [
     {

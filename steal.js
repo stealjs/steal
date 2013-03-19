@@ -2562,7 +2562,7 @@
 		// Determine if we're running in IE older than IE9. This 
 		// will affect loading strategy for JavaScripts.
 		h.useIEShim = (function () {
-			if (st.isRhino) {
+			if (st.isRhino || typeof document === 'undefined') {
 				return false;
 			}
 
