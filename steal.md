@@ -23,7 +23,7 @@ do the "hello world" of steal:
 
 To create
 a JavaScript and [LESS](http://lesscss.org/) module for use in `myapp`
-assuming a folder structure like:
+using a folder structure like:
 
     ROOT/
       steal/

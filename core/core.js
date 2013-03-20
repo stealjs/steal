@@ -177,6 +177,52 @@
 		 *     <script src='../steal/steal.production.js,myapp'>
 		 *     </script>
 		 * 
+		 * ## Locating StealJS and other libraries outside the root folder.
+		 * 
+		 * Its common desire to want steal and other projects in
+		 * some shared folder and the application code somewhere 
+		 * else.  For example:
+		 * 
+		 *     shared/
+		 *         steal/
+		 *         can/
+		 *         stealconfig.js
+		 *     apps/
+		 *         myapp/
+		 *           myapp.js
+		 * 
+		 * This is possible by changing [steal.config.root] to
+		 * point `apps` and  
+		 * [steal.config.paths] to point to the shared 
+		 * location.  For example, the following in stealconfig.js
+		 * will work for the case above:
+		 * 
+		 *     paths: {
+		 *       "can/": "../shared/can/",
+		 *       "steal/" : "../shared/steal/",
+		 *     },
+		 *     root: steal.config('root').join('../apps')
+		 * 
+		 * ## Signatures
+		 * 
+		 * ### `steal.config()`
+		 * 
+		 * Returns all configured properties. For example:
+		 * 
+		 *     steal.config().root //-> URI
+		 * 
+		 * ### `steal.config(propertyName)`
+		 * 
+		 * Returns a single configured property value. For example:
+		 * 
+		 *     steal.config("root") //-> URI
+		 * 
+		 * ### `steal.config(properties)`
+		 * 
+		 * Configures multiple properties at once. For example:
+		 * 
+		 *     steal.config({root: "path/to/root"})
+		 * 
 		 */
 		st.config = function(){
 			st.config.called = true;
