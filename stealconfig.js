@@ -2,8 +2,7 @@ steal.config({
 	map: {
 		"*": {
 			"jquery/jquery.js" : "jquery",
-			"can/util/util.js": "can/util/jquery/jquery.js",
-			"jquery/": "jquerypp/"
+			"can/util/util.js": "can/util/jquery/jquery.js"
 		}
 	},
 	paths: {
