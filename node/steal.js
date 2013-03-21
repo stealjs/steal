@@ -3,7 +3,6 @@ var path = require('path');
 // We can hardcode this for now
 var root = fs.realpathSync(__dirname + '/../../');
 
-// A Rhino-version of steal
 (function (win) {
 	// we are going to need to swap this out while loading the scripts
 	// it's possible a new version of steal will need to be loaded / replace the old one
