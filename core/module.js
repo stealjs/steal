@@ -108,7 +108,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 			} else {
 
 				// Otherwise get the cached module
-				existingModule = modules[id];
+				var existingModule = modules[id];
 				// If options were passed, copy new properties over.
 				// Don't copy src, etc because those have already
 				// been changed to be the right values;
