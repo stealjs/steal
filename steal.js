@@ -1188,10 +1188,10 @@
 		var configTypes = this.stealConfig.types || (this.stealConfig.types = {});
 		h.each(types, function (type, cb) {
 			var typs = type.split(" ");
-			configTypes[typs.shift()] = {
+			configTypes[typs.shift()] = typeof cb == 'function' ? {
 				require: cb,
 				convert: typs
-			};
+			} : cb;
 		});
 	};
 	ConfigManager.prototype.require = function (options, success, error) {
