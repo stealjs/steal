@@ -12,6 +12,7 @@ steal(function(){
 		// console.log('TYPE: '+type+", data: "+JSON.stringify(steal.client.dataQueue))
 		if(type == "done"){
 			steal.client.phantomexit = true;
+			window.cb();
 		}
 	}
 	window.cb = function(resp){
