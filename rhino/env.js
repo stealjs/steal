@@ -1623,8 +1623,8 @@ Envjs.getcwd = function() {
 /**
  * resolves location relative to doc location
  *
- * @param {Object} path  Relative or absolute URL
- * @param {Object} base  (semi-optional)  The base url used in resolving "path" above
+ * @param {Object} path Relative or absolute URL
+ * @param base {Object} (optional) The base url used in resolving "path" above
  
  */
 Envjs.uri = function(path, base, allow) {
