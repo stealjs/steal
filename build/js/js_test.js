@@ -85,7 +85,7 @@ steal('steal', 'steal/test', function(s) {
 				{
 					"package/1.js" : ["jquery/jquery.js"]
 				},
-				"package/css.css", { exclude: ['b/b'] })
+				"package/css.css", { exclude: ['b/b.js'] })
 				
 				s.test.equals(
 					res.js,
