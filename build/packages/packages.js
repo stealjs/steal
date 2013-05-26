@@ -12,7 +12,7 @@ if(!steal.build){
 }
 steal('steal',
 	'steal/build/share',
-	'steal/build/open','steal/build/apps','steal/get/json.js',function(s, share){
+	'steal/build/open','steal/build/apps','steal/rhino/json.js',function(s, share){
 
 	var apps = steal.build.apps,
 		build = steal.build, 
