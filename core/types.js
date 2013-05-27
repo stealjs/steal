@@ -193,8 +193,10 @@ ConfigManager.defaults.types = {
 			}
 
 			// listen to loaded
-			
-			script.src = "" + src;
+			// IE will change the src property to a full domain.
+			// For example, if you set it to 'foo.js', when grabbing src it will be "http://localhost/foo.js".
+			// We set the id property so later references to this script will have the same path.
+			script.src = script.id = "" + src;
 			//script.src = options.src = addSuffix(options.src);
 			//script.async = false;
 			script.onSuccess = success;
