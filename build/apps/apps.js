@@ -13,6 +13,19 @@ steal('steal',
 		/**
 		 * @function steal.build.apps
 		 * @parent steal.build
+		 *
+		 * @signature
+		 * @param {Array} moduleIds An array of application
+		 * @param {{}} [buildOptions] A object map of the following configuration properties: 
+		 * 
+		 * @option {String} to the location to deploy packages. Defaults to `"packages/"`.
+		 * 
+		 * @option {Number} depth how many scripts to load, including the 
+		 * app's production scripts. This means that depth should 
+		 * always be 2 or more.  Depth defaults to `infinity`.
+		 * 
+		 * 
+		 * @body
 		 * 
 		 * `steal.build.apps(moduleIds, buildOptions)` builds 
 		 * multiple apps at once and packages shared dependencies to 
@@ -42,17 +55,6 @@ steal('steal',
 		 *  - app2_app3 - resources shared by app 2 and 3
 		 * 
 		 * Changing the depth to 2 will only create `app1_app2_app3`.
-		 * 
-		 * @param {Array} moduleIds An array of application
-		 * @param {Object} [buildOptions] A object map of the following
-		 * configuration properties: 
-		 * 
-		 * __to__ - the location to deploy packages. Defaults to
-		 * `"packages/"`.
-		 * 
-		 * __depth__ -  how many scripts to load, including the 
-		 * app's production scripts. This means that depth should 
-		 * always be 2 or more.  Depth defaults to `infinity`.
 		 * 
 		 */
 		var apps = steal.build.apps = function( moduleIds, buildOptions ) {
@@ -96,18 +98,21 @@ steal('steal',
 		// only add files to files, but recurse through fns
 	steal.extend(steal.build.apps, {
 		/**
-		 * Opens se
+		 * @function steal.build.apps.open
+		 * @parent steal.build.apps
+		 * 
+		 * @signature
+		 * 
 		 * @param {Array} appNames
-		 * @param {Object} options An object that
+		 * @param {{}} options An object that
 		 * has an appFiles array, and a files object.
+		 *
+		 * @option {Array} templates 
+		 * @option {{}} files
+		 * @option {Boolean} [newPage] open in a new page or do not
+		 *
+		 * @param {function({}):undefined} callback A callback to call on successful retr
 		 * 
-		 *     {appFiles : [], files: {}}
-		 *     
-		 * It can also have other properties like:
-		 * 
-		 *   - newPage - open in a new page or do not
-		 * 
-		 * @param {Function} callback(options)
 		 */
 		open : function(appNames,options, callback){
 			options = options || {};
@@ -186,6 +191,18 @@ steal('steal',
 			}
 		},
 		/**
+		 * @function steal.build.apps.addDependencies
+		 * @parent steal.build.apps
+		 * 
+		 * @signature
+		 * 
+		 * @param {steal} steel a steal instance
+		 * @param {Object} files the files mapping that gets filled out
+		 * @param {String} appName the appName
+		 * @return {file} the root dependency file for this application
+		 * 
+		 * @body
+		 * 
 		 * Gets a steal instance and recursively sets up a __files__ object with 
 		 * __file__ objects for each steal that represents a resource (not a function).
 		 * 
@@ -209,10 +226,6 @@ steal('steal',
 		 *       "jquery/class/class.js" : file2
 		 *     }
 		 * 
-		 * @param {steal} steel a steal instance
-		 * @param {Object} files the files mapping that gets filled out
-		 * @param {String} appName the appName
-		 * @return {file} the root dependency file for this application
 		 */
 		addDependencies: function( resource, options, appName ) {
 			//print("  "+resource.options.id+":"+appName)
@@ -292,6 +305,19 @@ steal('steal',
 		},
 		/**
 		 * @hide
+		 *
+		 * @signature
+		 *
+		 * @param {{}} files the files object.  
+		 * @return {sharing} The sharing object:
+		 * 
+		 *     {
+		 *       // apps that need this
+		 *       appNames : ['cookbook','mxui/grid','mxui/data/list'],
+		 *       files : [{file1}, {file2}]
+		 *     }
+		 *
+		 * @body
 		 * 
 		 * Goes through the files, makes a __shared__ array of 
 		 * __sharedSets__. Each
@@ -324,14 +350,6 @@ steal('steal',
 		 * marked packaged.  Thus, it changes the files by marking files 
 		 * as packaged.
 		 * 
-		 * @param {Object} files - the files object.  
-		 * @return {sharing} The sharing object:
-		 * 
-		 *     {
-		 *       // apps that need this
-		 *       appNames : ['cookbook','mxui/grid','mxui/data/list'],
-		 *       files : [{file1}, {file2}]
-		 *     }
 		 */
 		getMostShared: function( files ) {
 			
@@ -407,6 +425,15 @@ steal('steal',
 			return most;
 		},
 		/**
+		 * @function steal.build.apps.makePackages
+		 * @parent steal.build.apps
+		 * 
+		 * @signature
+		 * 
+		 * @param {appFiles} appFiles
+		 * @param {files} files
+		 *
+		 * @body
 		 * Creates packages that can be downloaded.
 		 * 
 		 * Recursively uses getMostShared to pull out
@@ -438,8 +465,6 @@ steal('steal',
 		 * 
 		 * So, we need to know all the packages and app needs, and all the things in that package.
 		 * 
-		 * @param {appFiles} appFiles
-		 * @param {files} files
 		 */
 		makePackages: function(options, buildOptions) {
 			

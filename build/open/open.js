@@ -102,12 +102,51 @@ steal('steal',function(s){
 		name = function(s){
 			return s.options.id;
 		},
+	/**
+	 * @typedef {{}} steal.build.openOptions OpenerObject
+	 * 
+	 * @option {function():boolean,Boolean,function():undefined} each(filter,depth,callback)
+	 *
+	 * - each(filter, depth, callback(options, stel)) - goes through steals loaded by this
+	 *   application.  You can provide it a:
+	 * 
+	 * - filter - a function to filter out some types of steal methods, 
+	 *   it supports js and css.
+	 * - depth - if true, goes through with breadth first search, false is 
+	 *   breadth. Defaults to breadth (how steal loads scripts)
+	 * - callback - a method that is called with each steal option
+	 * 
+	 *   opener.each(function(option){
+	 *     console.log(option.text)
+	 *   })
+	 *
+	 * @option {steal} steal the steal loaded by the app
+	 * @option {String} url the html page opened
+	 * @option {steal} rootSteal the 'root' steal instance
+	 * @option {steal} rootSteal the first steal file
+	 *  
+	 *
+	 */
 		window = (function() {
 			return this;
 		}).call(null, 0);
 	/**
 	 * @function steal.build.open
 	 * @parent steal.build
+	 *
+	 * @signature
+	 *
+	 * @param {String} url The html page to open.
+	 * @param {{}} [stealData] Data to [steal.config configure steal] with.
+	 * @param {function(steal.build.openOptions):undefined} cb(openerObject) An object with properties that makes extracting 
+	 * the content for a certain tag slightly easier.
+	 *
+	 * @param {Boolean} [includeFns=true]  indicates that iteration should
+	 * happen
+	 * @return {Object} an object with properties that makes extracting 
+	 * the content for a certain tag slightly easier.
+	 *
+	 * @body
 	 * 
 	 * `steal.build.open(url, [stealData], cb(opener) )`  
 	 * opens a page that typically uses steal.js. Once all
@@ -128,33 +167,8 @@ steal('steal',function(s){
 	 *   - opening the page with Envjs
 	 *   - setting back rhino steal, saving envjs's steal as steal._steal;
 	 * 
-	 * @param {String} url The html page to open.
-	 * @param {Object} [stealData] Data to [steal.config configure steal] with.
-	 * @param {Function} cb(opener) An object with properties that makes extracting 
-	 * the content for a certain tag slightly easier.
-	 * 
-	 *   - each(filter, depth, callback(options, stel)) - goes through steals loaded by this
-	 *     application.  You can provide it a:
-	 *     
-	 *       - filter - a function to filter out some types of steal methods, 
-	 *         it supports js and css.
-	 *       - depth - if true, goes through with breadth first search, false is 
-	 *         breadth. Defaults to breadth (how steal loads scripts)
-	 *       - callback - a method that is called with each steal option
-	 *       
-	 *         opener.each(function(option){
-	 *           console.log(option.text)
-	 *         })
-	 *         
-	 *   - steal - the steal loaded by the app
-	 *   - url - the html page opened
-	 *   - rootSteal - the 'root' steal instance
-	 *   - firstSteal - the first steal file
-	 * @param {Boolean} [includeFns=true]  indicates that iteration should
-	 * happen
-	 * @return {Object} an object with properties that makes extracting 
-	 * the content for a certain tag slightly easier.
 	 */
+	//
 	s.build.open = function( url, stealData, cb, includeFns ) {
 		// save and remove the old steal
 		var oldSteal = s,

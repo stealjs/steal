@@ -5,7 +5,13 @@ steal(function(){
 	/**
 	 * @function steal.html
 	 * @parent stealjs
-	 * 
+	 *
+	 * @signature
+	 * @param {String} urlo The url of the page to open. The url should be 
+	 * relative to [rootfolder] or a website.
+	 * @param {Object|Function} opts
+	 *
+	 * @body
 	 * `steal.html(url)` loads a page in Envjs and gets it's HTML 
 	 * when it's ready. Use this to make your site
 	 * crawlable [http://code.google.com/web/ajaxcrawling/docs/getting-started.html AJAX crawling for Google].
@@ -19,10 +25,6 @@ steal(function(){
 	 *     })
 	 * 
 	 * 
-	 * @param {String} urlo The url of the page to open. The url should be 
-	 * relative to [rootfolder] or a website.
-	 * 
-	 * @param {Object|Function} opts
 	 */
 	steal.html = function(urlo, opts){
 		
