@@ -43,6 +43,16 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		/**
 		 * @plugin steal/generate
 		 * @parent stealjs
+		 *
+		 * @signature
+		 *
+		 * @param {String} path The folder to get templates from.
+		 * @param {String} where Where to put the results of the rendered templates.
+		 * @param {{}} data Data to render the templates with. 
+		 *
+		 * @option {Boolean} force If force is true, it will overwrite everything
+		 * 
+		 * @body
 		 * 
 		 * `steal.generate(path, where, data)` renders all the `.ejs` templates recursively in directory `path`
 		 * with `data` and copies them to directory `where`. For example:
@@ -127,9 +137,6 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 *   - `app/models/modelname` - The moduleId of you want to create CRUD functionality 
 		 *     for.
 		 * 
-		 * @param {String} path The folder to get templates from.
-		 * @param {String} where Where to put the results of the rendered templates.
-		 * @param {Object} data Data to render the templates with.  If force is true, it will overwrite everything
 		 */
 		generate = (steal.generate = function( path, where, data ) {
 			//get all files in a folder

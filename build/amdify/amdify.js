@@ -134,6 +134,20 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 	/**
 	 * @function steal.build.amdify
 	 * @parent steal.build
+	 *
+	 * @signature
+	 * @param {String} source The root JavaScript source file name to generate the modules from.
+	 * @param {{}} options The options for generating AMD modules. The following options will be used:
+	 * 
+	 * @option {String} out The output folder
+	 * @option {Array} excludes An array of files to exclude (must be the full Steal rootSrc)
+	 * @option {{}} [map] A mapping from full Steal rootSrc filenames to the AMD module name.
+	 * Any missing folders will be created automatically.
+	 * @option {{}} [names] A mapping from AMD module names (as set in `map` or the default)
+	 * to parameter variable names.
+	 * @option {{}} global The global option passed to pluginify
+	 *
+	 * @body
 	 * 
 	 * Creates a set of AMD modules recursively. The `map` options contain a mapping from Steal
 	 * rootSrc filenames to AMD module names. For examples:
@@ -147,17 +161,6 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 	 * pluginified function. By default this will be the filename without extension, `__` prefixed and
 	 * `.` converted to `_` (looking like `define(['jquery/compare`], function(__compare) { ... })`).
 	 *
-	 * @param {String} source The root JavaScript source file name to generate the modules from.
-	 * @param {Object} options The options for generating AMD modules.
-	 * The following options will be used:
-	 *
-	 * - `out` - The output folder
-	 * - `excludes` - An array of files to exclude (must be the full Steal rootSrc)
-	 * - `map` - A mapping from full Steal rootSrc filenames to the AMD module name.
-	 * Any missing folders will be created automatically.
-	 * - `names` - A mapping from AMD module names (as set in `map` or the default)
-	 * to parameter variable names.
-	 * - `global` - The global option passed to pluginify
 	 */
 	s.build.amdify = function(source, options) {
 		var out = options.out;

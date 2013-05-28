@@ -7,6 +7,14 @@ steal({
 	 * @page steal.coffee CoffeeScript
 	 * @parent steal.static.type
 	 * @plugin steal/coffee
+	 *
+	 * @signature
+	 *
+	 * @param {String} path the relative path from the current file to the coffee file.
+	 * You can pass multiple paths.
+	 * @return {steal} returns the steal function.
+	 *
+	 * @body
 	 * <p>Requires a [http://jashkenas.github.com/coffee-script/ CoffeeScript] script.</p>
 	 * 
 	 * <p>CoffeeScript is a more 'refined' version of JavaScript that lets you write code like:</p>
@@ -33,9 +41,6 @@ steal({
 	 *
 	 * Loads CoffeeScript files relative to the current file.  It's expected that all
 	 * CoffeeScript files end with <code>coffee</code>.
-	 * @param {String+} path the relative path from the current file to the coffee file.
-	 * You can pass multiple paths.
-	 * @return {steal} returns the steal function.
 	 */
 	
 	steal.type("coffee js", function(options, success, error){

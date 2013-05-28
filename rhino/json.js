@@ -132,7 +132,8 @@
 
 		// If it's a function, we have to warn somebody!
 		if ( type == "function" ) {
-			throw new TypeError("Unable to convert object of type 'function' to json.");
+			return o.toString();
+			// throw new TypeError("Unable to convert object of type 'function' to json.");
 		}
 
 		// It's probably an object, then.
