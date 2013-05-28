@@ -78,7 +78,8 @@
 			return stealManager(false, config.cloneContext())
 		}
 		/**
-		 * @function config
+		 * @function steal.config
+		 * @parent stealjs
 		 * 
 		 * `steal.config( configOptions )` configures the behavior
 		 * of steal. For example:

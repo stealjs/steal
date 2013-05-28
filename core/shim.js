@@ -1,9 +1,6 @@
 /**
- * @add steal.config
- */
-// 
-/**
  * @property {{}} steal.config.shim
+ * @parent steal.config
  * 
  * `steal.config("shim",options)` allows configuring a
  * specific module's behavior. It accepts an object map of 

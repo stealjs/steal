@@ -1,7 +1,7 @@
 /*global  window: false, console: true, opera: true */
 //
 /**
- * @class steal.dev
+ * @property steal.dev
  * @parent stealjs
  * Provides helper functions for development that get removed when put in production mode.
  * This means you can leave <code>steal.dev.log("hello world")</code> in your code and it

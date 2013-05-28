@@ -1,9 +1,7 @@
-/**
- * @add steal.config
- */
 // ### TYPES ##
 /**
- * @function types
+ * @function steal.config.types
+ * @parent steal.config
  * 
  * `steal.config("types",types)` registers alternative types. The
  * `types` object is a mapping of a `type path` to 

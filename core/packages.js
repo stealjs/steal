@@ -1,6 +1,8 @@
 //  ============================== Packages ===============================
 /**
- * @function packages
+ * @function steal.packages
+ * @parent stealjs
+ *
  * `steal.packages( moduleIds... )` defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
