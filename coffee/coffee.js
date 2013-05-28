@@ -4,7 +4,7 @@ steal({
 }, function(CoffeeScript) {
 
 	/**
-	 * @page steal.coffee CoffeeScript
+	 * @page steal.coffee steal.coffee
 	 * @parent stealjs
 	 * @plugin steal/coffee
 	 *

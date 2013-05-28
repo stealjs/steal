@@ -13,6 +13,7 @@ steal('steal',
 		/**
 		 * @function steal.build.apps
 		 * @parent steal.build
+		 * @hide
 		 *
 		 * @signature `apps(moduleIds[, options])`
 		 * 

@@ -45,11 +45,17 @@ steal.dev = {
 
 	logLevel : 0,
 	/**
-	 * Adds a warning message to the console.
-	 * @codestart
-	 * steal.dev.warn("something evil");
-	 * @codeend
+	 * @function steal.dev.warn
+	 * @parent steal.dev
+	 * 
+	 * @signature `steal.dev.warn(out)`
 	 * @param {String} out the message
+	 *
+	 * @body
+	 * Adds a warning message to the console.
+	 * 
+	 *     steal.dev.warn("something evil");
+	 * 
 	 */
 	warn: function( out ) {
 		var ll = steal.config().logLevel;
@@ -66,11 +72,17 @@ steal.dev = {
 		
 	},
 	/**
-	 * Adds a message to the console.
-	 * @codestart
-	 * steal.dev.log("hi");
-	 * @codeend
+	 * @function steal.dev.log
+	 * @parent steal.dev
+	 * 
+	 * @signature `steal.dev.log(out)`
 	 * @param {String} out the message
+	 *
+	 * @body
+	 * Adds a message to the console.
+	 * 
+	 *     steal.dev.log("hi");
+	 * 
 	 */
 	log: function( out ) {
 		var ll = steal.config().logLevel;

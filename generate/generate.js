@@ -41,7 +41,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			};
 		},
 		/**
-		 * @page steal.generate Generate
+		 * @page steal.generate steal.generate
 		 * @plugin steal/generate
 		 * @parent stealjs
 		 *
@@ -65,78 +65,6 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 *         name: "newproject"
 		 *       })
 		 * 
-		 * 
-		 * ## JavaScriptMVC Generators
-		 * 
-		 * JavaScriptMVC comes with the following generators.
-		 * 
-		 * ### app
-		 * 
-		 * Creates a JavaScriptMVC application structure.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/app <i>path/to/app</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `path/to/app` - The lowercase directory your application
-		 *     will be placed within. Keep application names short because they 
-		 *     are used as namespaces.  The last part of the path 
-		 *     will be taken to be your application's name.
-		 * 
-		 * ### control
-		 * 
-		 * Creates a [can.Control] and test files.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/control <i>app/controls/video</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `app/videos` - The moduleId name of your control. 
-		 * 
-		 * ### model
-		 * 
-		 * Creates a [can.Model] and test files.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/model <i>app/models/name</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `app/models/name` - The name of the module
-		 * 
-		 * ### page
-		 * 
-		 * Creates a page that loads steal.js and an application.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/page <i>path/to/app</i> <i>path/to/page.html</i>
-		 * @codeend
-		 * 
-		 *   - `path/to/app` - The path to your apps folder. 
-		 *   - `path/to/page.html` - The path to the page you want to create. 
-		 * 
-		 * ### plugin
-		 * 
-		 * Create a file and folder structure for a basic jQuery plugin.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/plugin <i>path/to/plugin</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `path/to/plugin` - The path to where you want 
-		 *   your plugin. 
-		 *   
-		 * 
-		 * ### scaffold
-		 * 
-		 * Creates the controls, models, and fixtures used
-		 * to provide basic CRUD functionality.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/scaffold <i>app/models/modelname</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `app/models/modelname` - The moduleId of you want to create CRUD functionality 
-		 *     for.
 		 * 
 		 */
 		generate = (steal.generate = function( path, where, data ) {

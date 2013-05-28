@@ -19,7 +19,7 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 	}
 
 	/**
-	 * @page steal.less Less
+	 * @page steal.less steal.less
 	 * @parent stealjs
 	 * @plugin steal/less
 	 *
