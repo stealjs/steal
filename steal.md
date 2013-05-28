@@ -1,5 +1,5 @@
 @class steal
-@parent stealjs
+@parent stealjs 0
 
 `steal(moduleIds..., definition(modules...))` loads scripts, css, and other
 modules into your application.  For example:

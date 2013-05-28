@@ -30,7 +30,7 @@ h.extend(URI, {
 			protoParts = uri.split("://"),
 			parts = {
 				/**
-				 * @attribute query
+				 * @property query
 				 * 
 				 * The query part of the url. Everything after the `?`, but before
 				 * the `#`.
@@ -41,7 +41,7 @@ h.extend(URI, {
 				 */
 				query: queryParts.shift(),
 				/**
-				 * @attribute fragment
+				 * @property fragment
 				 * 
 				 *     var uri = URI("/foo?bar#zed")
 				 *     uri.query //-> zed
@@ -53,16 +53,16 @@ h.extend(URI, {
 
 		if ( protoParts[1] ) {
 			/**
-			 * @attribute protocol
+			 * @property protocol
 			 */
 			parts.protocol = protoParts.shift();
 			pathParts = protoParts[0].split("/");
 			/**
-			 * @attribute host
+			 * @property host
 			 */
 			parts.host = pathParts.shift();
 			/**
-			 * @attribute path
+			 * @property path
 			 */
 			parts.path = "/" + pathParts.join("/");
 		} else {
@@ -76,14 +76,14 @@ h.extend(URI, {
  */
 //
 /**
- * @attribute page
+ * @property page
  * The location of the page as a URI.
  * 
  *     st.URI.page.protocol //-> "http"
  */
 URI.page = URI(h.win.location && location.href);
 /**
- * @attribute cur
+ * @property cur
  * 
  * The current working directory / path.  Anything
  * loaded relative will be loaded relative to this.
