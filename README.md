@@ -56,7 +56,7 @@ js jquery/generate/app cookbook
 
 ### Package management ([steal.get])
 
-[steal.get] is a simple JavaScript version of [http://rubygems.org/ ruby gems] featuring:
+[steal.get] is a simple JavaScript version of [ruby gems](http://rubygems.org/) featuring:
 
  - Download and install plugins from remote SVN or GIT repositories.
  - Installs dependencies.

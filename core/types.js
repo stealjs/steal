@@ -6,7 +6,7 @@
  * `steal.config("types",types)` registers alternative types. The
  * `types` object is a mapping of a `type path` to 
  * a `type converter`. For example, the following creates a "coffee" type
- * that converts a [http://jashkenas.github.com/coffee-script/ CoffeeScript] 
+ * that converts a [CoffeeScript](http://jashkenas.github.com/coffee-script/) 
  * file to JavaScript:
  * 
  *     steal.config("types",{

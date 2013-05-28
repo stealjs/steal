@@ -22,7 +22,7 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 	 * @page steal.less Less
 	 * @parent steal.static.type
 	 * @plugin steal/less
-	 * <p>Lets you build and compile [http://lesscss.org/ Less ] css styles.</p>
+	 * <p>Lets you build and compile [Less](http://lesscss.org/) css styles.</p>
 	 * <p>Less is an extension of CSS that adds variables, mixins, and quite a bit more.
 	 * You can write css like:
 	 * </p>

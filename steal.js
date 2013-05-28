@@ -1144,7 +1144,7 @@ ConfigManager.defaults = {
  * `steal.config("types",types)` registers alternative types. The
  * `types` object is a mapping of a `type path` to 
  * a `type converter`. For example, the following creates a "coffee" type
- * that converts a [http://jashkenas.github.com/coffee-script/ CoffeeScript] 
+ * that converts a [CoffeeScript](http://jashkenas.github.com/coffee-script/) 
  * file to JavaScript:
  * 
  *     steal.config("types",{
@@ -2391,7 +2391,7 @@ st.amdToId = function(id, currentWorkingId, type){
  * @function steal.idToUri
  *
  * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
- * is the location of the file. It uses the paths option of  [config].
+ * is the location of the file. It uses the paths option of  [steal.config].
  * Passing true for `noJoin` does not join from the root URI.
  */
 st.idToUri = function( id, noJoin ) {
@@ -2417,7 +2417,7 @@ st.idToUri = function( id, noJoin ) {
  * @function steal.amdIdToUri
  * @hide
  * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
- * is the location of the file. It uses the paths options of [config].
+ * is the location of the file. It uses the paths options of [steal.config].
  * Passing true for `noJoin` does not join from that URI.
  */
 st.amdIdToUri = function( id, noJoin ){
@@ -2587,8 +2587,8 @@ h.extend(st, {
 	/**
 	 * @function steal.then
 	 * 
-	 * `steal(previousId,...).then(moduleId...)` waits until
-	 * all previousId's have loaded before loading moduleIds.
+	 * @signature `steal(previousId,...).then(moduleId...)`
+	 * Waits until all previousId's have loaded before loading moduleIds.
 	 * 
 	 * Note: This is depricated in 3.3.  You should use
 	 * [steal.config.shim]'s `deps` property instead.
@@ -2601,8 +2601,9 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.bind
-	 * `steal.bind( event, handler(eventData...) )` listens to 
-	 * events on steal. Typically these are used by various build processes
+	 * @signature `steal.bind( event, handler(eventData...) )`
+	 * Listens to events on steal. 
+	 * Typically these are used by various build processes
 	 * to know when steal starts and finish loading resources and their
 	 * dependencies. Listen to an event like:
 	 * 
@@ -2656,8 +2657,8 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.one
-	 * `steal.one(eventName, handler(eventArgs...) )` works just like
-	 * [steal.bind] but immediately unbinds after `handler` is called.
+	 * @signature `steal.one(eventName, handler(eventArgs...) )`
+	 * Works just like [steal.bind] but immediately unbinds after `handler` is called.
 	 */
 	one: function( event, listener ) {
 		return st.bind(event, function() {
@@ -2669,7 +2670,8 @@ h.extend(st, {
 	/**
 	 * @function steal.unbind
 	 * 
-	 * `steal.unbind( eventName, handler )` removes an event listener on steal.
+	 * @signature `steal.unbind( eventName, handler )`
+	 * Removes an event listener on steal.
 	 * @param {String} event
 	 * @param {Function} listener
 	 */
@@ -2684,6 +2686,9 @@ h.extend(st, {
 			}
 		}
 	},
+	/**
+	 * @hide
+	 */
 	trigger: function( event, arg ) {
 		var arr = events[event] || [];
 		// array items might be removed during each iteration (with unbind),
@@ -2713,6 +2718,9 @@ h.extend(st, {
 			stel.loading = stel.executing = true;
 		});
 	},
+	/**
+	 * @hide
+	 */
 	make: function(id){
 		var opts = (typeof id === "string" ? {id: id} : id);
 		if(!opts.idToUri){
@@ -2786,7 +2794,8 @@ h.useIEShim = (function(){
  * @function steal.packages
  * @parent stealjs
  *
- * `steal.packages( moduleIds... )` defines modules for deferred downloading.
+ * @signature `steal.packages( moduleIds... )`
+ * Defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
  * after initial page load.

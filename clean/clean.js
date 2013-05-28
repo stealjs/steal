@@ -51,9 +51,9 @@ steal('steal','steal/build','steal/clean/beautify.js','steal/clean/jslint.js','s
 	
 	/**
 	 * @parent stealjs
-	 * <p>Beautifies source code with [http://jsbeautifier.org/ JS Beautify]
+	 * <p>Beautifies source code with [JS Beautify](http://jsbeautifier.org/)
 	 * and checks it for trouble spots with 
-	 * [http://www.jslint.com/ JSLint].
+	 * [JSLint](http://www.jslint.com/).
 	 * </p>
 	 * <p>The following cleans all scripts found in myapp/myapp.html.</p>
 	 * @codestart text

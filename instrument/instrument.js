@@ -41,7 +41,7 @@
  steal.instrument works by adding a custom JS converter.  When an instrumented file is stolen, it:
  
  1. Is loaded via AJAX (hence cross domain files are ignored, since the AJAX request would fail)
- 2. The text from the file is parsed, using the JS parser written by Mihai Bazon for the [https://github.com/mishoo/UglifyJS UglifyJS project]
+ 2. The text from the file is parsed, using the JS parser written by Mihai Bazon for the [UglifyJS project](https://github.com/mishoo/UglifyJS)
  3. The text from the file is rebuilt from the parse tree.  At the start of any block of code, a line like 
  __s("foo.js", 3) is added.  When this block runs, this function call will increment the counter for block 3 
  in foo.js.

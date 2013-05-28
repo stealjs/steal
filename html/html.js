@@ -15,7 +15,7 @@ steal(function(){
 	 * @body
 	 * `steal.html(url)` loads a page in Envjs and gets it's HTML 
 	 * when it's ready. Use this to make your site
-	 * crawlable [http://code.google.com/web/ajaxcrawling/docs/getting-started.html AJAX crawling for Google].
+	 * crawlable [AJAX crawling for Google](http://code.google.com/web/ajaxcrawling/docs/getting-started.html).
 	 * 
 	 *  
 	 * 
