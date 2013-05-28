@@ -2803,11 +2803,6 @@ h.useIEShim = (function(){
  * @parent stealjs
  *
  * @signature `steal.packages( moduleIds... )`
- *
- * @param {Array} moduleIds... Each argument is a moduleId that
- * tells the build system to package that module for progressive loading.
- *
- * @body
  * Defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
@@ -2842,6 +2837,10 @@ h.useIEShim = (function(){
  *
  *     steal.packages('tasks','dashboard','filemanager');
  *
+ * 
+ * @param {Array} moduleIds... Each argument is a moduleId that
+ * tells the build system to package that module for progressive loading.
+ * 
  */
 st.packs = [];
 st.packHash = {};
