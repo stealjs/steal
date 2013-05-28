@@ -83,9 +83,6 @@ var ConfigManager = function(options){
 	this.attr(ConfigManager.defaults);
 	this.attr(options)
 }
-/**
- * @add steal.config
- */
 h.extend(ConfigManager.prototype, {
 	// get or set config.stealConfig attributes
 	attr: function( config, value ) {
@@ -131,7 +128,8 @@ h.extend(ConfigManager.prototype, {
 
 	// get the current start file
 	/**
-	 * @attribute startId
+	 * @property steal.config.startId
+	 * @parent steal.config
 	 * 
 	 * `steal.config("startId", startModuleId )` configures the
 	 * first file that steal loads. This is important for 
@@ -148,7 +146,7 @@ h.extend(ConfigManager.prototype, {
 	},
 
 	/**
-	 * @attribute root
+	 * @property steal.config.root
 	 * Read or define the path relative URI's should be referenced from.
 	 * 
 	 *     window.location //-> "http://foo.com/site/index.html"
@@ -180,7 +178,8 @@ h.extend(ConfigManager.prototype, {
 ConfigManager.defaults = {
 	types: {},
 	/**
-	 * @attribute ext
+	 * @property steal.config.ext
+	 * @parent steal.config
 	 * 
 	 * `steal.config("ext", extensionConfig)` configures
 	 * processing behavior of moduleId extensions. For example:
