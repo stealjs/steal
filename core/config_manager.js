@@ -284,10 +284,10 @@ ConfigManager.defaults = {
 	 * Maps moduleIds to other moduleIds when stolen
 	 * in a particular location. 
 	 * 
-	 * The following maps "jquery/jquery.js" to
-	 * `"jquery-1.8.3.js" in "filemanager" and 
-	 * "jquery/jquery.js" to `"jquery-1.4.2.js"` in
-	 * "taskmanager":
+	 * The following maps `jquery/jquery.js` to
+	 * `jquery-1.8.3.js` in `filemanager` and 
+	 * `jquery/jquery.js` to `jquery-1.4.2.js` in
+	 * `taskmanager`:
 	 * 
 	 *     steal.config({
 	 *       maps: {

@@ -42,7 +42,7 @@ h.extend(st, {
 		return options;
 	},
 	/**
-	 * @function then
+	 * @function steal.then
 	 * 
 	 * `steal(previousId,...).then(moduleId...)` waits until
 	 * all previousId's have loaded before loading moduleIds.
@@ -57,7 +57,7 @@ h.extend(st, {
 		return st.apply(h.win, args);
 	},
 	/**
-	 * @function bind
+	 * @function steal.bind
 	 * `steal.bind( event, handler(eventData...) )` listens to 
 	 * events on steal. Typically these are used by various build processes
 	 * to know when steal starts and finish loading resources and their
@@ -112,7 +112,7 @@ h.extend(st, {
 		return st;
 	},
 	/**
-	 * @function one
+	 * @function steal.one
 	 * `steal.one(eventName, handler(eventArgs...) )` works just like
 	 * [steal.bind] but immediately unbinds after `handler` is called.
 	 */
@@ -124,7 +124,7 @@ h.extend(st, {
 	},
 	events: {},
 	/**
-	 * @function unbind
+	 * @function steal.unbind
 	 * 
 	 * `steal.unbind( eventName, handler )` removes an event listener on steal.
 	 * @param {String} event
