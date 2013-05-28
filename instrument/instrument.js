@@ -1,4 +1,5 @@
 /**
+<<<<<<< HEAD
  * @constructor steal.instrument
  * @parent stealjs
  * @plugin steal/instrument

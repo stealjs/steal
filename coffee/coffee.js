@@ -15,7 +15,7 @@ steal({
 	 * @return {steal} returns the steal function.
 	 *
 	 * @body
-	 * Requires a [http://jashkenas.github.com/coffee-script/ CoffeeScript] script.
+	 * Requires a [CoffeeScript](http://jashkenas.github.com/coffee-script/) script.
 	 * 
 	 * CoffeeScript is a more 'refined' version of JavaScript that lets you write code like:
 	 *

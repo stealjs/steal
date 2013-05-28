@@ -90,7 +90,7 @@ st.amdToId = function(id, currentWorkingId, type){
  * @function steal.idToUri
  *
  * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
- * is the location of the file. It uses the paths option of  [config].
+ * is the location of the file. It uses the paths option of  [steal.config].
  * Passing true for `noJoin` does not join from the root URI.
  */
 st.idToUri = function( id, noJoin ) {
@@ -116,7 +116,7 @@ st.idToUri = function( id, noJoin ) {
  * @function steal.amdIdToUri
  * @hide
  * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
- * is the location of the file. It uses the paths options of [config].
+ * is the location of the file. It uses the paths options of [steal.config].
  * Passing true for `noJoin` does not join from that URI.
  */
 st.amdIdToUri = function( id, noJoin ){
