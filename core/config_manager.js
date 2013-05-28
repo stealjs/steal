@@ -128,12 +128,13 @@ h.extend(ConfigManager.prototype, {
 
 	// get the current start file
 	/**
-	 * @property steal.config.startId
+	 * @function steal.config.startId
 	 * @parent steal.config
 	 * 
-	 * `steal.config("startId", startModuleId )` configures the
-	 * first file that steal loads. This is important for 
-	 * builds.
+	 * @signature `steal.config("startId", startModuleId )`
+	 * 
+	 * Configures the first file that steal loads. This is important 
+	 * for builds.
 	 * 
 	 * 
 	 */
@@ -146,7 +147,11 @@ h.extend(ConfigManager.prototype, {
 	},
 
 	/**
-	 * @property steal.config.root
+	 * @function steal.config.root
+	 * @parent steal.config
+	 *
+	 * @signature `steal.config.root("root", "http://foo.com/app/files/")`
+	 *
 	 * Read or define the path relative URI's should be referenced from.
 	 * 
 	 *     window.location //-> "http://foo.com/site/index.html"
@@ -181,8 +186,8 @@ ConfigManager.defaults = {
 	 * @property steal.config.ext
 	 * @parent steal.config
 	 * 
-	 * `steal.config("ext", extensionConfig)` configures
-	 * processing behavior of moduleId extensions. For example:
+	 * @signature `steal.config("ext", extensionConfig)`
+	 * Configures processing behavior of moduleId extensions. For example:
 	 * 
 	 *     steal.config("ext",{
 	 *       js: "js",
@@ -191,6 +196,7 @@ ConfigManager.defaults = {
 	 *       mustache: "can/view/mustache/mustache.js"
 	 *     })
 	 * 
+	 * @body
 	 * `extensionConfig` maps a filename extension to
 	 * be processed by a [steal.config.types type] 
 	 * (like `js: "js"`) or to a dependency moduleId that
@@ -199,15 +205,16 @@ ConfigManager.defaults = {
 	 */
 	ext: {},
 	/**
-	 * @attribute env
+	 * @property steal.config.env
+	 * @parent steal.config
 	 * 
-	 * `steal.config("env", environment )` configures steal's 
-	 * environment to either:
+	 * @signature `steal.config("env", environment )`
+	 * Configures steal's environment to either:
 	 * 
 	 *  - `'development'` - loads all modules seperately
 	 *  - `'production'` - load modules in minified production scripts and styles.
 	 * 
-	 * 
+	 * @body
 	 * ## Setting Env
 	 * 
 	 * Typically, changing the environment is done by changing
@@ -236,10 +243,11 @@ ConfigManager.defaults = {
 	 */
 	env: "development",
 	/**
-	 * @attribute loadProduction
+	 * @property steal.config.loadProduction
+	 * @parent steal.config
 	 * 
-	 * `steal.config("loadProduction",loadProduction)` tells steal
-	 * to load [steal.config.productionId productionId] when 
+	 * @signature `steal.config("loadProduction",loadProduction)`
+	 * Tells steal to load [steal.config.productionId productionId] when 
 	 * [steal.config.env env] is `"production"`. It's true
 	 * by default.
 	 * 
@@ -251,9 +259,11 @@ ConfigManager.defaults = {
 	logLevel: 0,
 	root: "",
 	/**
-	 * @attribute amd
+	 * @property steal.config.amd
+	 * @parent steal.config
 	 * 
-	 * `steal.config("amd",true)` turns on steal's AMD support. This needs
+	 * @signature `steal.config("amd",true)`
+	 * Turns on steal's AMD support. This needs
 	 * to be configured before steal loads like:
 	 * 
 	 *     <script>
@@ -267,16 +277,17 @@ ConfigManager.defaults = {
 	 */
 	amd: false
 	/**
-	 * @attribute map
+	 * @property steal.config.map
+	 * @parent steal.config
 	 * 
-	 * `steal.config( "map", mapConfig )` maps
-	 * moduleIds to other moduleIds when stolen
+	 * @signature `steal.config( "map", mapConfig )` 
+	 * Maps moduleIds to other moduleIds when stolen
 	 * in a particular location. 
 	 * 
-	 * The following maps "jquery/jquery.js" to
-	 * `"jquery-1.8.3.js" in "filemanager" and 
-	 * "jquery/jquery.js" to `"jquery-1.4.2.js"` in
-	 * "taskmanager":
+	 * The following maps `jquery/jquery.js` to
+	 * `jquery-1.8.3.js` in `filemanager` and 
+	 * `jquery/jquery.js` to `jquery-1.4.2.js` in
+	 * `taskmanager`:
 	 * 
 	 *     steal.config({
 	 *       maps: {
@@ -324,10 +335,11 @@ ConfigManager.defaults = {
 	 */
 	//
 	/**
-	 * @attribute paths
+	 * @property steal.config.paths
+	 * @parent steal.config
 	 * 
-	 * `steal.config( "paths", pathConfig )` maps moduleIds
-	 * to paths.  This is used to 
+	 * @signature `steal.config( "paths", pathConfig )`
+	 * Maps moduleIds to paths.  This is used to 
 	 * override [steal.idToUri]. Often, this can be used to
 	 * specify loading from a CDN like:
 	 * 
@@ -342,9 +354,11 @@ ConfigManager.defaults = {
 	 */
 	//
 	/**
-	 * @attribute productionId 
-	 * `steal.config("productionId", productionid )` configures
-	 * the id to load the production package. It defaults
+	 * @property steal.config.productionId 
+	 * @parent steal.config
+	 *
+	 * @signature `steal.config("productionId", productionid )`
+	 * Configures the id to load the production package. It defaults
 	 * to replacing [steal.config.startId] 
 	 * with "`production.js`". For example,
 	 * `myapp/myapp.js` becomes `myapp/production.js`.
@@ -363,10 +377,11 @@ ConfigManager.defaults = {
 	 */
 	//
 	/**
-	 * @attribute completed
+	 * @property steal.config.completed
+	 * @parent steal.config
 	 * 
-	 * `steal.config("completed", completedIds)` marks
-	 * the modules represented by `completedIds` as
+	 * @signature `steal.config("completed", completedIds)`
+	 * Marks the modules represented by `completedIds` as
 	 * completed (already loaded and run). 
 	 * 
 	 * The following can be used to indicate that

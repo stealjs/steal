@@ -1,7 +1,7 @@
 /*global  window: false, console: true, opera: true */
 //
 /**
- * @page steal.dev
+ * @property steal.dev
  * @parent stealjs
  * 
  * Provides helper functions for development that get removed when put in production mode.

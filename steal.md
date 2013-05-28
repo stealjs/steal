@@ -1,5 +1,5 @@
 @class steal
-@parent stealjs
+@parent stealjs 0
 
 `steal(moduleIds..., definition(modules...))` loads scripts, css, and other
 modules into your application.  For example:
@@ -111,7 +111,7 @@ script tag like:
     </script>
 
 The folder that contains the `steal` folder is
-the [rootfolder root folder]. By default, all modules are loaded 
+the [steal.config.root rootfolder]. By default, all modules are loaded 
 from the root folder unless they start with:
 
  - "http://" or "https://" like "http://foo.com/bar.js"

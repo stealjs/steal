@@ -1,5 +1,5 @@
 /**
- * @function id
+ * @function steal.id
  * 
  * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
  * final, unique id. This function can be overwritten 
@@ -87,7 +87,7 @@ st.amdToId = function(id, currentWorkingId, type){
 
 // for a given ID, where should I find this resource
 /**
- * @function idToUri
+ * @function steal.idToUri
  *
  * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
  * is the location of the file. It uses the paths option of  [config].
@@ -113,7 +113,7 @@ st.idToUri = function( id, noJoin ) {
 
 // for a given AMD id this will return an URI object
 /**
- * @function st.amdIdToUri
+ * @function steal.amdIdToUri
  * @hide
  * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
  * is the location of the file. It uses the paths options of [config].

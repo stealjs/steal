@@ -9,7 +9,7 @@ steal(function(){
 	 * @signature `html(urlo, opts)`
 	 * 
 	 * @param {String} urlo The url of the page to open. The url should be 
-	 * relative to [rootfolder] or a website.
+	 * relative to [steal.config.root rootfolder] or a website.
 	 * @param {Object|Function} opts
 	 *
 	 * @body

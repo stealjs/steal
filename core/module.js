@@ -63,7 +63,9 @@ var moduleManager = function(steal, stealModules, interactives, config){
 		this.setOptions(options);
 		// create the deferreds used to manage state
 		/**
-		 * @attribute states
+		 * @property steal.Module.states
+		 * @parent steal.Module
+		 * @hide
 		 * 
 		 * There are 4 states a Module can be 
 		 * within:
@@ -134,7 +136,9 @@ var moduleManager = function(steal, stealModules, interactives, config){
 
 	h.extend(Module.prototype, {
 		/**
-		 * @attribute options
+		 * @property steal.Module.options
+		 * @parent steal.Module
+		 * @hide
 		 */
 		setOptions: function( options ) {
 			var prevOptions = this.options; 
