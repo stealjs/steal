@@ -481,8 +481,8 @@ URI.cur = URI();
 h.extend(URI.prototype, {
 	/**
 	 * @function
-	 * `uri.dir()` returns everything before the last `/`
-	 * as a URI.
+	 * @signature `dir()`
+	 * Returns everything before the last `/` as a URI.
 	 * 
 	 * @return {steal.URI}
 	 */
@@ -493,8 +493,8 @@ h.extend(URI.prototype, {
 	},
 	/**
 	 * @function
-	 * `uri.filename()` returns everything after the last `/`
-	 * as a String.
+	 * @signature `filename()`
+	 * Returns everything after the last `/` as a String.
 	 * 
 	 * @return {String}
 	 */
@@ -504,7 +504,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.ext()` returns everything after the last `.`.
+	 * @signature `ext()`
+	 * returns everything after the last `.`.
 	 * 
 	 * @return {String}
 	 */
@@ -515,7 +516,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.domain()` returns the protocol and host of the domain.
+	 * @signature `domain()`
+	 * Returns the protocol and host of the domain.
 	 * 
 	 * return {String}
 	 */
@@ -525,8 +527,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.isCrossDomain([referenceUri])` returns 
-	 * if a URI is cross domain.  
+	 * @signature `isCrossDomain([referenceUri])`
+	 * Returns if a URI is cross domain.  
 	 * 
 	 *     var abc = URI("http://abc.com")
 	 *     abc.isCrossDomain() // -> true
@@ -544,7 +546,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.isRelativeToDomain()` returns if the uri begins with `/`.
+	 * @signature `isRelativeToDomain()`
+	 * Returns if the uri begins with `/`.
 	 * 
 	 * @return {Boolean}
 	 */
@@ -554,7 +557,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.hash()` returns the URI's [steal.URI::fragment fragment] with 
+	 * @signature `hash()`
+	 * Returns the URI's [steal.URI::fragment fragment] with 
 	 * `"#"` preceeding it.
 	 * 
 	 * return {String}
@@ -565,7 +569,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.search()` returns the URI's [steal.URI::query query] with
+	 * @signature `search()`
+	 * Returns the URI's [steal.URI::query query] with
 	 * `"?"` preceeding it.
 	 * 
 	 * @return {String}
@@ -578,7 +583,9 @@ h.extend(URI.prototype, {
 		return this.join(uri) + '';
 	},
 	/**
-	 * `leftUri.join(rightUri)` joins two uris together and return
+	 * @function
+	 * @signature `join(rightUri)`
+	 * Joins two uris together and return
 	 * the result as a new URI.
 	 * 
 	 *     var left = URI("/a/starting/place")
@@ -620,6 +627,7 @@ h.extend(URI.prototype, {
 		});
 	},
 	/**
+	 * @function
 	 * For a given path, a given working directory, and file location, update the
 	 * path so it points to a location relative to steal's root.
 	 *
@@ -649,7 +657,9 @@ h.extend(URI.prototype, {
 		return res;
 	},
 	/**
-	 * `uri.isRelative()` returns if the path starts with `.` or `/`.
+	 * @function
+	 * @signature `isRelative()`
+	 * Returns if the path starts with `.` or `/`.
 	 * 
 	 * @return {Boolean}
 	 */
@@ -658,7 +668,9 @@ h.extend(URI.prototype, {
 	},
 	// a min path from 2 urls that share the same domain
 	/**
-	 * `uri.pathTo(relativeURI)` returns a relative
+	 * @function
+	 * @signature `pathTo(relativeURI)`
+	 * Returns a relative
 	 * path from `uri` to `relativeURI`
 	 * 
 	 *     steal.URI("app/controls/recipe.js")
@@ -1009,10 +1021,10 @@ ConfigManager.defaults = {
 	 * Maps moduleIds to other moduleIds when stolen
 	 * in a particular location. 
 	 * 
-	 * The following maps "jquery/jquery.js" to
-	 * `"jquery-1.8.3.js" in "filemanager" and 
-	 * "jquery/jquery.js" to `"jquery-1.4.2.js"` in
-	 * "taskmanager":
+	 * The following maps `jquery/jquery.js` to
+	 * `jquery-1.8.3.js` in `filemanager` and 
+	 * `jquery/jquery.js` to `jquery-1.4.2.js` in
+	 * `taskmanager`:
 	 * 
 	 *     steal.config({
 	 *       maps: {
@@ -2289,7 +2301,6 @@ st.getScriptOptions = function (script) {
 		
 		/**
  * @function steal.id
- * @parent stealjs
  * 
  * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
  * final, unique id. This function can be overwritten 
@@ -2378,7 +2389,6 @@ st.amdToId = function(id, currentWorkingId, type){
 // for a given ID, where should I find this resource
 /**
  * @function steal.idToUri
- * @parent stealjs
  *
  * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
  * is the location of the file. It uses the paths option of  [config].
@@ -2575,7 +2585,7 @@ h.extend(st, {
 		return options;
 	},
 	/**
-	 * @function then
+	 * @function steal.then
 	 * 
 	 * `steal(previousId,...).then(moduleId...)` waits until
 	 * all previousId's have loaded before loading moduleIds.
@@ -2590,7 +2600,7 @@ h.extend(st, {
 		return st.apply(h.win, args);
 	},
 	/**
-	 * @function bind
+	 * @function steal.bind
 	 * `steal.bind( event, handler(eventData...) )` listens to 
 	 * events on steal. Typically these are used by various build processes
 	 * to know when steal starts and finish loading resources and their
@@ -2645,7 +2655,7 @@ h.extend(st, {
 		return st;
 	},
 	/**
-	 * @function one
+	 * @function steal.one
 	 * `steal.one(eventName, handler(eventArgs...) )` works just like
 	 * [steal.bind] but immediately unbinds after `handler` is called.
 	 */
@@ -2657,7 +2667,7 @@ h.extend(st, {
 	},
 	events: {},
 	/**
-	 * @function unbind
+	 * @function steal.unbind
 	 * 
 	 * `steal.unbind( eventName, handler )` removes an event listener on steal.
 	 * @param {String} event
@@ -2840,7 +2850,9 @@ st.packages = function( map ) {
  * @property {{}} steal.config.shim
  * @parent steal.config
  * 
- * `steal.config("shim",options)` allows configuring a
+ * @signature `steal.config("shim",options)`
+ *
+ * Allows configuring a
  * specific module's behavior. It accepts an object map of 
  * `moduleId` property names to options. For example, the
  * following ensures that the "jquery" module is loaded before
@@ -2854,12 +2866,15 @@ st.packages = function( map ) {
  * 
  * The following options are supported:
  * 
- * - __deps__ - the dependencies that must load before this module
- * - __exports__ - define the export value of the module
- * - __ignore__ - ignore this module completely in production builds
- * - __minify__ - minify this script in production
- * - __packaged__ - if set to false, don't package this file, but load it in production
- * - __type__ - the type this module represents
+ * @param {{}} options
+ * @option {{Array}} deps the dependencies that must load before this module
+ * @option {String} exports define the export value of the module
+ * @option {Boolean} ignore ignore this module completely in production builds
+ * @option {Boolean} minify minify this script in production
+ * @option {Boolean} packaged if set to false, don't package this file, but load it in production
+ * @option {String} type the type this module represents
+ *
+ * @body
  * 
  * ### deps
  * 
