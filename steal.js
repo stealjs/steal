@@ -2073,10 +2073,9 @@ ConfigManager.defaults.types = {
 		}
 		/**
 		 * @function steal.config
-		 * @parent stealjs
 		 * 
-		 * `steal.config( configOptions )` configures the behavior
-		 * of steal. For example:
+		 * @signature `steal.config( configOptions )`
+		 * Configures the behavior of steal. For example:
 		 * 
 		 *     steal.config({
 		 *       map: {
@@ -2104,12 +2103,13 @@ ConfigManager.defaults.types = {
 		 * This sets the [steal.config.map map], [steal.config.paths paths],
 		 * [steal.config.shim shim], and [steal.config.ext ext].
 		 * 
-		 * `steal.config(optionName)` returns a configuration option value. Example:
+		 * @signature `steal.config(optionName)`
+		 * Returns a configuration option value. Example:
 		 * 
 		 *     steal.config("env") //-> "development"
 		 * 
-		 * `steal.config(optionName, optionVal)` configures a 
-		 * specific option value. Example:
+		 * @signature `steal.config(optionName, optionVal)`
+		 * Configures a specific option value. Example:
 		 * 
 		 *     steal.config("env","production")
 		 * 
@@ -2547,10 +2547,8 @@ if(config.attr('amd') === true){
 
 }
 
-		/**
- * @add steal
- */
-// =============================== STATIC API ===============================
+		// =============================== STATIC API ===============================
+
 var events = {}, 
 	page;
 
@@ -2592,6 +2590,7 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.then
+	 * @parent steal
 	 * 
 	 * @signature `steal(previousId,...).then(moduleId...)`
 	 * Waits until all previousId's have loaded before loading moduleIds.
@@ -2607,6 +2606,7 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.bind
+	 * @parent steal
 	 * @signature `steal.bind( event, handler(eventData...) )`
 	 * Listens to events on steal. 
 	 * Typically these are used by various build processes
@@ -2663,6 +2663,7 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.one
+	 * @parent steal
 	 * @signature `steal.one(eventName, handler(eventArgs...) )`
 	 * Works just like [steal.bind] but immediately unbinds after `handler` is called.
 	 */
@@ -2675,6 +2676,7 @@ h.extend(st, {
 	events: {},
 	/**
 	 * @function steal.unbind
+	 * @parent steal
 	 * 
 	 * @signature `steal.unbind( eventName, handler )`
 	 * Removes an event listener on steal.

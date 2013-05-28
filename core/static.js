@@ -1,7 +1,5 @@
-/**
- * @add steal
- */
 // =============================== STATIC API ===============================
+
 var events = {}, 
 	page;
 
@@ -43,6 +41,7 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.then
+	 * @parent steal
 	 * 
 	 * @signature `steal(previousId,...).then(moduleId...)`
 	 * Waits until all previousId's have loaded before loading moduleIds.
@@ -58,6 +57,7 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.bind
+	 * @parent steal
 	 * @signature `steal.bind( event, handler(eventData...) )`
 	 * Listens to events on steal. 
 	 * Typically these are used by various build processes
@@ -114,6 +114,7 @@ h.extend(st, {
 	},
 	/**
 	 * @function steal.one
+	 * @parent steal
 	 * @signature `steal.one(eventName, handler(eventArgs...) )`
 	 * Works just like [steal.bind] but immediately unbinds after `handler` is called.
 	 */
@@ -126,6 +127,7 @@ h.extend(st, {
 	events: {},
 	/**
 	 * @function steal.unbind
+	 * @parent steal
 	 * 
 	 * @signature `steal.unbind( eventName, handler )`
 	 * Removes an event listener on steal.
