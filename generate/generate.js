@@ -44,7 +44,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @plugin steal/generate
 		 * @parent stealjs
 		 *
-		 * @signature
+		 * @signature `generate( path, where, data )`
 		 *
 		 * @param {String} path The folder to get templates from.
 		 * @param {String} where Where to put the results of the rendered templates.
@@ -400,6 +400,13 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			}
 		},
 		/**
+		 * @signature `insertSteal(destination, newStealPath, options)`
+		 * 
+		 * @param {String} destination a path to the script we're inserting a steal into
+		 * @param {String} newStealPath the new steal path to be inserted
+		 * @param {{}} [options] Options passed to steal
+		 *
+		 * @body
 		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
 		 * 
 		 *   1. Page already looks like steal("a", function(){})
@@ -409,8 +416,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 *   
 		 *   It will try to put the new steal before the last function first
 		 *   
-		 * @param {String} destination a path to the script we're inserting a steal into
-		 * @param {String} newStealPath the new steal path to be inserted
+
 		 */
 		insertSteal: function( destination, newStealPath, options ){
 			

@@ -6,7 +6,8 @@ steal(function(){
 	 * @function steal.html
 	 * @parent stealjs
 	 *
-	 * @signature
+	 * @signature `html(urlo, opts)`
+	 * 
 	 * @param {String} urlo The url of the page to open. The url should be 
 	 * relative to [rootfolder] or a website.
 	 * @param {Object|Function} opts

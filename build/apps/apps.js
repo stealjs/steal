@@ -14,7 +14,8 @@ steal('steal',
 		 * @function steal.build.apps
 		 * @parent steal.build
 		 *
-		 * @signature
+		 * @signature `apps(moduleIds[, options])`
+		 * 
 		 * @param {Array} moduleIds An array of application
 		 * @param {{}} [buildOptions] A object map of the following configuration properties: 
 		 * 
@@ -23,7 +24,6 @@ steal('steal',
 		 * @option {Number} depth how many scripts to load, including the 
 		 * app's production scripts. This means that depth should 
 		 * always be 2 or more.  Depth defaults to `infinity`.
-		 * 
 		 * 
 		 * @body
 		 * 
@@ -197,7 +197,7 @@ steal('steal',
 		 * @signature
 		 * 
 		 * @param {steal} steel a steal instance
-		 * @param {Object} files the files mapping that gets filled out
+		 * @param {{}} files the files mapping that gets filled out
 		 * @param {String} appName the appName
 		 * @return {file} the root dependency file for this application
 		 * 
@@ -428,7 +428,7 @@ steal('steal',
 		 * @function steal.build.apps.makePackages
 		 * @parent steal.build.apps
 		 * 
-		 * @signature
+		 * @signature `apps(appFiles, files)`
 		 * 
 		 * @param {appFiles} appFiles
 		 * @param {files} files

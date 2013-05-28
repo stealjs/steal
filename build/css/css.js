@@ -12,7 +12,7 @@ steal('steal',function( steal ) {
 	 * @function steal.build.css.makePackage
 	 * @parent steal.build.css
 	 * 
-	 * @signature
+	 * @signature `css(steals, where)`
 	 *
 	 * @param {{}} steals
 	 * @param {{Object}} where
