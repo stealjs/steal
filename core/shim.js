@@ -3,7 +3,7 @@
  */
 // 
 /**
- * @attribute steal.config.shim
+ * @property {{}} steal.config.shim
  * 
  * `steal.config("shim",options)` allows configuring a
  * specific module's behavior. It accepts an object map of 
