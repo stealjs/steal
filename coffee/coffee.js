@@ -5,7 +5,7 @@ steal({
 
 	/**
 	 * @page steal.coffee CoffeeScript
-	 * @parent steal
+	 * @parent stealjs
 	 * @plugin steal/coffee
 	 *
 	 * @signature `steal('path/to/filename.coffee')`

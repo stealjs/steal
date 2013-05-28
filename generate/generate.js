@@ -412,12 +412,12 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 * @body
 		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
 		 * 
-		 *   1. Page already looks like steal("a", function(){})
-		 *   1. Page already looks like steal(function(){})
-		 *   1. Page has no steals
-		 *   1. Page already looks like steal("a")
+		 * 1. Page already looks like steal("a", function(){})
+		 * 1. Page already looks like steal(function(){})
+		 * 1. Page has no steals
+		 * 1. Page already looks like steal("a")
 		 *   
-		 *   It will try to put the new steal before the last function first
+		 * It will try to put the new steal before the last function first
 		 *   
 
 		 */

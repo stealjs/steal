@@ -20,7 +20,7 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 
 	/**
 	 * @page steal.less Less
-	 * @parent steal
+	 * @parent stealjs
 	 * @plugin steal/less
 	 *
 	 * @signature `steal('path/to/filename.less')`

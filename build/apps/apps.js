@@ -104,8 +104,7 @@ steal('steal',
 		 * @signature `open(appNames, options, callback)`
 		 * 
 		 * @param {Array} appNames
-		 * @param {{}} options An object that
-		 * has an appFiles array, and a files object.
+		 * @param {{}} options An object that has an appFiles array, and a files object.
 		 *
 		 * @option {Array} templates 
 		 * @option {{}} files
@@ -428,10 +427,10 @@ steal('steal',
 		 * @function steal.build.apps.makePackages
 		 * @parent steal.build.apps
 		 * 
-		 * @signature `apps(appFiles, files)`
+		 * @signature `makePackages(options, buildOptions)`
 		 * 
-		 * @param {appFiles} appFiles
-		 * @param {files} files
+		 * @param {Object} options
+		 * @param {Object} buildOptions
 		 *
 		 * @body
 		 * Creates packages that can be downloaded.
@@ -441,28 +440,19 @@ steal('steal',
 		 * makes a package of the sharing and marks
 		 * the apps that need that sharing.
 		 * 
-		 * The apps that need the sharing
-		 * 
-		 * packages are mostly dummy things.  
-		 * 
-		 * a production file might steal multiple packages.
+		 * The apps that need the sharing packages are mostly dummy things. A production file 
+		 * might steal multiple packages.
 		 * 
 		 * say package A and package B
 		 * 
 		 * say package A has jQuery
 		 * 
-		 * so, the production file has code like:
+		 * so, the production file has code like: `steal('jquery')`
+		 * It needs to know to not load jQuery this is where `has` comes into place
 		 * 
-		 * steal('jquery')
-		 * 
-		 * It needs to know to not load jQuery
-		 * 
-		 * this is where 'has' comes into place
-		 * 
-		 * steal({id: 'packageA', has: 'jquery'})
+		 *     steal({id: 'packageA', has: 'jquery'})
 		 * 
 		 * This wires up steal to wait until package A is finished for jQuery.
-		 * 
 		 * So, we need to know all the packages and app needs, and all the things in that package.
 		 * 
 		 */

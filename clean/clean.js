@@ -52,7 +52,6 @@ steal('steal','steal/build','steal/clean/beautify.js','steal/clean/jslint.js','s
 	/**
 	 * @function steal.clean
 	 * @parent stealjs
-<<<<<<< HEAD
 	 *
 	 * @signature `clean(url[, opts])`
 	 * 
