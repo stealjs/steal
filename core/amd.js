@@ -18,16 +18,17 @@
  *  3. Check the 
  * 
  * 
- * `steal.id()`
+ * @signature `steal.id(id, currentWorkingId, [type=js])`
  * 
  * @param {String} id
  * @param {String} currentWorkingId
  * @param {String} [type=js]
  */
-// returns the "rootSrc" id, something that looks like requireJS
-// for a given id/path, what is the "REAL" id that should be used
-// this is where substituation can happen
 st.id = function( id, currentWorkingId, type ) {
+	// returns the "rootSrc" id, something that looks like requireJS
+	// for a given id/path, what is the "REAL" id that should be used
+	// this is where substituation can happen
+
 	// id should be like
 	var uri = URI(id);
 	uri = uri.addJS().normalize(currentWorkingId ? new URI(currentWorkingId) : null)
@@ -89,9 +90,14 @@ st.amdToId = function(id, currentWorkingId, type){
 /**
  * @function steal.idToUri
  *
- * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
+ * @signature `steal.idToUri( id, noJoin )`
+ *
+ * Takes an id and returns a URI that
  * is the location of the file. It uses the paths option of  [steal.config].
  * Passing true for `noJoin` does not join from the root URI.
+ * 
+ * @param {String} id
+ * @param {Boolean} [noJoin=false]
  */
 st.idToUri = function( id, noJoin ) {
 	// this is normalize
