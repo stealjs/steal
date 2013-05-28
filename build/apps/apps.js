@@ -101,7 +101,7 @@ steal('steal',
 		 * @function steal.build.apps.open
 		 * @parent steal.build.apps
 		 * 
-		 * @signature
+		 * @signature `open(appNames, options, callback)`
 		 * 
 		 * @param {Array} appNames
 		 * @param {{}} options An object that
@@ -194,7 +194,7 @@ steal('steal',
 		 * @function steal.build.apps.addDependencies
 		 * @parent steal.build.apps
 		 * 
-		 * @signature
+		 * @signature `addDependencies(resource, options, appName)`
 		 * 
 		 * @param {steal} steel a steal instance
 		 * @param {{}} files the files mapping that gets filled out
@@ -306,7 +306,7 @@ steal('steal',
 		/**
 		 * @hide
 		 *
-		 * @signature
+		 * @signature `getMostShared(files)`
 		 *
 		 * @param {{}} files the files object.  
 		 * @return {sharing} The sharing object:

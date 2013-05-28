@@ -41,6 +41,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			};
 		},
 		/**
+		 * @page steal.generate Generate
 		 * @plugin steal/generate
 		 * @parent stealjs
 		 *
@@ -199,17 +200,24 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		//converts a name to a bunch of useful things
 		
 		/**
+		 * @signature `convert(moduleId)`
+		 *
+		 * @param {String} [moduleId] module id 
+		 * 
+		 * @body
+		 * 
 		 * Takes a module name and returns a bunch of useful properties of 
 		 * that module.
-		 * "my_app/foo/zed_ted" ->
-		 * {
-		 *   appName : "foobar",
-		 *   className : "ZedTed",
-		 *   fullName : "FooBar.ZedTed",
-		 *   name : "FooBar.ZedTed",
-		 *   path : foo_bar,
-		 *   underscore : "zed_ted"
-		 * }
+		 * 
+		 *     "my_app/foo/zed_ted" ->
+		 *     {
+		 *       appName : "foobar",
+		 *       className : "ZedTed",
+		 *       fullName : "FooBar.ZedTed",
+		 *       name : "FooBar.ZedTed",
+		 *       path : foo_bar,
+		 *       underscore : "zed_ted"
+		 *     }
 		 */
 		convert: function( moduleId ) {
 			var path = s.id(moduleId)+"";
@@ -239,23 +247,20 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 				appPath: appPath
 			};
 		},
-		/**
-		 *     generate.camelize("foo_bar") //-> "fooBar"
-		 */
+		
+		// generate.camelize("foo_bar") //-> "fooBar"
 		camelize: function(str){ 
 			return str.replace(/[-_]+(.)?/g, function(match, chr){ 
 				return chr ? chr.toUpperCase() : '' 
 			}) 
 		},
-		/**
-		 *    generate.camelize("foo_bar") //-> "FooBar"
-		 */
+		
+		// generate.camelize("foo_bar") //-> "FooBar"
 		classize: function(str){
 			return this.capitalize( this.camelize(str) );
 		},
-		/**
-		 *    generate.capitalize("foo_bar") //-> "Foo_bar"
-		 */
+		
+		// generate.capitalize("foo_bar") //-> "Foo_bar"
 		capitalize: function(str){
 			return str.charAt(0).toUpperCase()+str.substr(1)
 		},
@@ -297,9 +302,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			// save back to original file destination
 			
 		},
-		/**
-		 *     insertSteal(""
-		 */
+		
 		_insertSteal: function(source, moduleId, options){
 			var parser =  parse(source),
 				firstToken,

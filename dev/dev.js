@@ -1,16 +1,18 @@
 /*global  window: false, console: true, opera: true */
 //
 /**
- * @class steal.dev
+ * @page steal.dev
  * @parent stealjs
+ * 
  * Provides helper functions for development that get removed when put in production mode.
  * This means you can leave <code>steal.dev.log("hello world")</code> in your code and it
  * will get removed in prodution.
- * <h3>Examples</h3>
- * @codestart
- * steal.dev.log("Something is happening");
- * steal.dev.warn("Something bad is happening");
- * @codeend
+ *
+ * ## Examples
+ * 
+ *     steal.dev.log("Something is happening");
+ *     steal.dev.warn("Something bad is happening");
+ * 
  */
 steal.dev = {
 	regexps: {

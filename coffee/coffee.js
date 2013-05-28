@@ -35,14 +35,14 @@ steal({
 	 * Next, you have to add the coffee script entry to the `stealconfig.js` file so it
 	 * looks like this:
 	 *
-	 *    steal.config({
-	 *        ext: {
-	 *            coffee: "steal/coffee/coffee.js"
-	 *        }
-	 *    });
+	 *     steal.config({
+	 *         ext: {
+	 *             coffee: "steal/coffee/coffee.js"
+	 *         }
+	 *     });
 	 *
 	 * This will automatically load the CoffeeScript parser when the CoffeeScript file is
-	 * stealed. It's expected that all CoffeeScript files end with `coffee`.
+	 * loaded. It's expected that all CoffeeScript files end with `coffee`.
 	 *
 	 * You can steal the CoffeeScript file like any JavaScript file:
 	 *

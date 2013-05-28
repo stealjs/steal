@@ -13,6 +13,7 @@ steal(function(){
 	 * @param {Object|Function} opts
 	 *
 	 * @body
+	 * 
 	 * `steal.html(url)` loads a page in Envjs and gets it's HTML 
 	 * when it's ready. Use this to make your site
 	 * crawlable [http://code.google.com/web/ajaxcrawling/docs/getting-started.html AJAX crawling for Google].
@@ -61,6 +62,11 @@ steal(function(){
 	/**
 	 * @function steal.html.wait
 	 * @parent steal.html
+	 *
+	 * @signature `wait()`
+	 *
+	 * @body
+	 * 
 	 * Waits for the html to finish
 	 */
 	steal.html.wait = function(){
@@ -69,6 +75,11 @@ steal(function(){
 	/**
 	 * @function steal.html.ready
 	 * @parent steal.html
+	 *
+	 * @signature `ready()`
+	 *
+	 * @body
+	 * 
 	 * Lets the page know it's ready to render the html
 	 */
 	steal.html.ready = function(){
