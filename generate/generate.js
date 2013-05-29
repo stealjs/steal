@@ -128,6 +128,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		//converts a name to a bunch of useful things
 		
 		/**
+		 * @hide
 		 * @signature `convert(moduleId)`
 		 *
 		 * @param {String} [moduleId] module id 
@@ -331,6 +332,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			}
 		},
 		/**
+		 * @hide
 		 * @signature `insertSteal(destination, newStealPath, options)`
 		 * 
 		 * @param {String} destination a path to the script we're inserting a steal into

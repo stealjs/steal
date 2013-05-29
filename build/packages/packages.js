@@ -22,7 +22,7 @@ steal('steal',
 	 * @function steal.build.packages
 	 * @parent steal.build
 	 *
-	 * @signature `packages(app[, buildOptions])`
+	 * @signature `steal.build.packages(app[, buildOptions])`
 	 * @param {Object} app
 	 *
 	 * @body

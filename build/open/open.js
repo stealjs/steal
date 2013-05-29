@@ -134,7 +134,7 @@ steal('steal',function(s){
 	 * @function steal.build.open
 	 * @parent steal.build
 	 *
-	 * @signature `open(url, [stealData, cb])`
+	 * @signature `steal.build.open(url, [stealData, cb])`
 	 *
 	 * @param {String} url The html page to open.
 	 * @param {{}} [stealData] Data to [steal.config configure steal] with.
