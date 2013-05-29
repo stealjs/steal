@@ -50,51 +50,65 @@ steal('steal','steal/build','steal/clean/beautify.js','steal/clean/jslint.js','s
 	
 	
 	/**
+	 * @function steal.clean
 	 * @parent stealjs
-	 * <p>Beautifies source code with [http://jsbeautifier.org/ JS Beautify]
-	 * and checks it for trouble spots with 
-	 * [http://www.jslint.com/ JSLint].
-	 * </p>
-	 * <p>The following cleans all scripts found in myapp/myapp.html.</p>
-	 * @codestart text
-	 * ./js steal/cleanjs myapp/myapp.html
-	 * @codeend
-	 * <h2>Use</h2>
-	 * <p>Typically, steal.clean is used from the command line
-	 * <code>steal/cleanjs</code> script.  It takes
-	 * a path to an html or js file on the filesystem and
-	 * a list of options.  It then
-	 * updates the file or files in place.</p>
-	 * <p><b>Using on a single file</b></p>
-	 * @codestart text
-	 * ./js steal/cleanjs myapp/myapp.js
-	 * @codeend
-	 * <p><b>Using on many files</b></p>
-	 * @codestart text
-	 * ./js steal/cleanjs myapp/myapp.html
-	 * @codeend
-	 * <h2>Turning on JSLint and other options</h2>
-	 * Turn on JSLint like:
-	 * @codestart text
-	 * ./js steal/cleanjs myapp/myapp.js -jslint true
-	 * @codeend
-	 * <p>You can pass other options in a similar way.</p>
-	 * <h2>The clean script</h2>
-	 * When you generate a JavaScriptMVC application, it comes with
-	 * a steal script.  You can modify the options in this file.</p>
-	 * <h2>Ignoring Files</h2>
-	 * To ignore a file from your application, mark it as clean with a comment like:
-	 * @codestart
-	 * //!steal-clean
-	 * @codeend
-	 * <h2>The steal.clean function</h2>
-	 * <p>Takes a relative path to a file on the filesystem;
-	 * checks if it is a html page or a single js file; runs 
-	 * beautify on it then optionally runs JSLint.</p>
+	 *
+	 * @signature `clean(url[, opts])`
+	 * 
 	 * @param {String} url the path to a page or a JS file
 	 * @param {Object} [options] an optional set of params.  If you
 	 * want to turn on steal, this should be true.
 	 * 
+	 * @body
+	 * 
+	 * Beautifies source code with [http://jsbeautifier.org/ JS Beautify]
+	 * and checks it for trouble spots with [http://www.jslint.com/ JSLint].
+	 * 
+	 * The following cleans all scripts found in myapp/myapp.html.
+	 * 
+	 *     ./js steal/cleanjs myapp/myapp.html
+	 *
+	 * ## Use
+	 * 
+	 * Typically, steal.clean is used from the command line
+	 * `steal/cleanjs` script.  It takes  a path to an html or js file 
+	 * on the filesystem and a list of options.  It then
+	 * updates the file or files in place.
+	 * 
+	 * **Using on a single file**
+	 * 
+	 *     ./js steal/cleanjs myapp/myapp.js
+	 *
+	 * **Using on many files**
+	 * 
+	 * 
+	 *     ./js steal/cleanjs myapp/myapp.html
+	 * 
+	 * ## Turning on JSLint and other options
+	 * 
+	 * Turn on JSLint like:
+	 *
+	 *     ./js steal/cleanjs myapp/myapp.js -jslint true
+	 *
+	 * You can pass other options in a similar way.
+	 * 
+	 * ## The clean script
+	 * 
+	 * When you generate a JavaScriptMVC application, it comes with
+	 * a steal script.  You can modify the options in this file.</p>
+	 * 
+	 * ## Ignoring Files
+	 * 
+	 * To ignore a file from your application, mark it as clean with a comment like:
+	 * 
+	 *     //!steal-clean
+	 * 
+	 * ## The steal.clean function
+	 * 
+	 * Takes a relative path to a file on the filesystem;
+	 * checks if it is a html page or a single js file; runs 
+	 * beautify on it then optionally runs JSLint.
+	 *
 	 */
 	steal.clean = function(url, options){
 		options = extend(

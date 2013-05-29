@@ -134,7 +134,7 @@ steal('steal',function(s){
 	 * @function steal.build.open
 	 * @parent steal.build
 	 *
-	 * @signature
+	 * @signature `open(url, [stealData, cb])`
 	 *
 	 * @param {String} url The html page to open.
 	 * @param {{}} [stealData] Data to [steal.config configure steal] with.
@@ -143,7 +143,7 @@ steal('steal',function(s){
 	 *
 	 * @param {Boolean} [includeFns=true]  indicates that iteration should
 	 * happen
-	 * @return {Object} an object with properties that makes extracting 
+	 * @return {{}} an object with properties that makes extracting 
 	 * the content for a certain tag slightly easier.
 	 *
 	 * @body

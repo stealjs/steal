@@ -18,6 +18,14 @@ var queue = [],
 /**
  * @function steal.html.crawl
  * @parent steal.html
+ *
+ * @signature `crawl(url, opts)`
+ *
+ * @param {Object} url the starting page to crawl
+ * @param {String|Object} opts the location to put the crawled content.
+ *
+ * @body
+ * 
  * Loads an ajax driven page and generates the html for google to crawl. Check out the [ajaxy tutorial] 
  * for a more complete walkthrough.
  * 
@@ -43,19 +51,14 @@ var queue = [],
  * the second parameter passed to <code>crawl</code>.
  * 
  * By default uses EnvJS, but you can use PhantomJS for more advanced pages:
-
-@codestart
-steal('steal/html', function(){
-	steal.html.crawl("ajaxy/ajaxy.html", 
-	{
-		out: 'ajaxy/out',
-		browser: 'phantomjs'
-	})
-})
-@codeend
  * 
- * @param {Object} url the starting page to crawl
- * @param {String|Object} opts the location to put the crawled content.
+ *     steal('steal/html', function(){
+ *         steal.html.crawl("ajaxy/ajaxy.html", {
+ *             out: 'ajaxy/out',
+ *             browser: 'phantomjs'
+ *         })
+ *     })
+ * 
  */
 steal.html.crawl = function(url, opts){
 	if(typeof opts == 'string'){

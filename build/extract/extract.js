@@ -14,7 +14,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		 *
 		 * @param {String} file The JavaScript file to load
 		 * @param {Array} excludes A list of dependencies to exclude
-		 * @param {Object} options Options
+		 * @param {{}} options Options
 		 * @param {Function} callback A callback getting passed an array
 		 * of steals
 		 */
@@ -64,7 +64,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 		 *
 		 * @param {String} name The name of the main module file
 		 * @param {Array} excludes A list of files to exclude
-		 * @param {Object} options The options to use
+		 * @param {{}} options The options to use
 		 */
 		createModule = function(name, excludes, options) {
 			getDependencies(name, excludes, options, function(steals) {
@@ -79,7 +79,7 @@ steal('steal', 'steal/parse', 'steal/build', 'steal/build/pluginify', function(s
 	 * @function steal.build.extract
 	 * @parent steal.build
 	 *
-	 * @signature
+	 * @signature `extract(source, options)`
 	 * 
 	 * @param {String} source The root JavaScript source file name to generate the modules from.
 	 * @param {{}} options The options for generating AMD modules. The following options will be used:

@@ -34,7 +34,7 @@ like = function(a, b){
  * @class steal.parse
  * @parent stealjs
  *
- * @signature
+ * @signature `parse(str)`
  * 
  * @constructor
  * @param {String} str

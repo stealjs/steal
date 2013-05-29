@@ -72,7 +72,7 @@ steal('steal',function(s){
 		 * Goes through every combination of shares and returns the one with the smallest difference.
 		 * Shares can have a waste property that has how much waste the share currently has 
 		 * accumulated.
-		 * @param {Object} shares
+		 * @param {{}} shares
 		 * @return {min}
 		 *     {
 		 *       waste : 123213, // the amount of waste in the composite share

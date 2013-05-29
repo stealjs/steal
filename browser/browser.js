@@ -2,6 +2,12 @@
 	/**
 	 * @class steal.browser
 	 * @parent StealJS
+	 *
+	 * @signature `browser(options)`
+	 *
+	 * @param {{}} options
+	 *
+	 * @body
 	 * 
 	 * `steal.browser` is an interface for browser drivers.  There is currently support for 
 	 * envjs, phantomjs, and selenium.  Each driver implements an API that allows steal to:
@@ -29,7 +35,6 @@
 	 * that any app using steal.browser can't trigger browser events until after document.ready.  This is 
 	 * required because the server needs to have a chance to load its own code and prevent race conditions.
 	 * 
-	 * @param {Object} options
 	 */
 	steal.browser = function(options, type){
 		this.type = type;

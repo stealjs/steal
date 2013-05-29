@@ -69,7 +69,7 @@ of the string, then they will be persisted.
 @parent can.util
 
 `can.each(object, function)` iterates through an array or object like
-like [http://api.jquery.com/jQuery.each/ jQuery.each].
+like [jQuery.each](http://api.jquery.com/jQuery.each/).
 
     can.each([{prop: "val1"}, {prop: "val2"}], 
 		function( value, index ) {
@@ -87,7 +87,7 @@ like [http://api.jquery.com/jQuery.each/ jQuery.each].
 @parent can.util
 
 `can.extend(target, objectN)` merges the contents of two or more objects together into the first object
-similarly to [http://api.jquery.com/jQuery.extend/ jQuery.extend].
+similarly to [jQuery.extend](http://api.jquery.com/jQuery.extend/).
 
     var first = {},
         second = {a: "b"},
@@ -109,7 +109,7 @@ similarly to [http://api.jquery.com/jQuery.extend/ jQuery.extend].
 @function can.param
 @parent can.util
 Parameterizes an object into a query string
-like [http://api.jquery.com/jQuery.param/ jQuery.param].
+like [jQuery.param](http://api.jquery.com/jQuery.param/).
 
     can.param({a: "b", c: "d"}) //-> "a=b&c=d"
 
@@ -121,7 +121,7 @@ like [http://api.jquery.com/jQuery.param/ jQuery.param].
 @function can.isEmptyObject
 @parent can.util
 `can.isEmptyObject(object)` returns if an object has no properties similar to
-[http://api.jquery.com/jQuery.isEmptyObject/ jQuery.isEmptyObject].
+[jQuery.isEmptyObject](http://api.jquery.com/jQuery.isEmptyObject/).
 
     can.isEmptyObject({})      //-> true
     can.isEmptyObject({a:"b"}) //-> false
@@ -135,7 +135,7 @@ like [http://api.jquery.com/jQuery.param/ jQuery.param].
 @parent can.util
 `can.proxy(function)` accepts a function and returns a 
 new one that will always the context from which it was 
-called.  This works similar to [http://api.jquery.com/jQuery.proxy/ jQuery.proxy].
+called.  This works similar to [jQuery.proxy](http://api.jquery.com/jQuery.proxy/).
 
      var func = can.proxy(function(one){
        return this.a + one
@@ -151,7 +151,7 @@ called.  This works similar to [http://api.jquery.com/jQuery.proxy/ jQuery.proxy
 @function can.isFunction
 @parent can.util
 `can.isFunction(object)` returns if an object is a function similar to
-[http://api.jquery.com/jQuery.isFunction/ jQuery.isFunction].
+[jQuery.isFunction](http://api.jquery.com/jQuery.isFunction/).
 
      can.isFunction({})           //-> false
      can.isFunction(function(){}) //-> true
@@ -316,7 +316,7 @@ Trigger an event on an element or object.
 @parent can.util
 
 `can.ajax( settings )` is used to make an asynchronous HTTP (Ajax) request 
-similar to [http://api.jquery.com/jQuery.ajax/ jQuery.ajax].
+similar to [jQuery.ajax](http://api.jquery.com/jQuery.ajax/).
 
 	can.ajax({
 		url: 'ajax/farm/animals',
@@ -447,7 +447,7 @@ set also.
 	// After
 	<div id="foo" class="monkey bar man" />
 	
-This works similarly to [http://api.jquery.com/addClass/ jQuery.fn.addClass].
+This works similarly to [jQuery.fn.addClass](http://api.jquery.com/addClass/).
 
 @param {String} class name to add to the wrapped node list
 */

@@ -14,7 +14,7 @@ steal('steal', 'steal/parse','steal/build',
 	 * @function steal.build.pluginify
 	 * @parent steal.build
 	 *
-	 * @signature
+	 * @signature `pluginify(moduleId, opts)`
 	 * 
 	 * @param {{}} moduleId The moduleId of the plugin to be built.
 	 * @param {{}} opts An object map of the following optional configuration

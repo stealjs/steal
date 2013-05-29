@@ -1,16 +1,18 @@
 /*global  window: false, console: true, opera: true */
 //
 /**
- * @class steal.dev
+ * @property steal.dev
  * @parent stealjs
+ * 
  * Provides helper functions for development that get removed when put in production mode.
  * This means you can leave <code>steal.dev.log("hello world")</code> in your code and it
  * will get removed in prodution.
- * <h3>Examples</h3>
- * @codestart
- * steal.dev.log("Something is happening");
- * steal.dev.warn("Something bad is happening");
- * @codeend
+ *
+ * ## Examples
+ * 
+ *     steal.dev.log("Something is happening");
+ *     steal.dev.warn("Something bad is happening");
+ * 
  */
 steal.dev = {
 	regexps: {
@@ -43,11 +45,17 @@ steal.dev = {
 
 	logLevel : 0,
 	/**
-	 * Adds a warning message to the console.
-	 * @codestart
-	 * steal.dev.warn("something evil");
-	 * @codeend
+	 * @function steal.dev.warn
+	 * @parent steal.dev
+	 * 
+	 * @signature `steal.dev.warn(out)`
 	 * @param {String} out the message
+	 *
+	 * @body
+	 * Adds a warning message to the console.
+	 * 
+	 *     steal.dev.warn("something evil");
+	 * 
 	 */
 	warn: function( out ) {
 		var ll = steal.config().logLevel;
@@ -64,11 +72,17 @@ steal.dev = {
 		
 	},
 	/**
-	 * Adds a message to the console.
-	 * @codestart
-	 * steal.dev.log("hi");
-	 * @codeend
+	 * @function steal.dev.log
+	 * @parent steal.dev
+	 * 
+	 * @signature `steal.dev.log(out)`
 	 * @param {String} out the message
+	 *
+	 * @body
+	 * Adds a message to the console.
+	 * 
+	 *     steal.dev.log("hi");
+	 * 
 	 */
 	log: function( out ) {
 		var ll = steal.config().logLevel;

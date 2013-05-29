@@ -1,5 +1,5 @@
 @page stealjs StealJS
-@parent index 2
+@parent javascriptmvc 2
 
 StealJS is a collection of command line and JavaScript client utilities
 that make building, packaging, and sharing 
@@ -52,17 +52,6 @@ js steal/buildjs mypage.html
 
 @codestart text
 js jquery/generate/app cookbook
-@codeend
-
-### Package management ([steal.get])
-
-[steal.get] is a simple JavaScript version of [http://rubygems.org/ ruby gems] featuring:
-
- - Download and install plugins from remote SVN or GIT repositories.
- - Installs dependencies.
-
-@codestart text
-js steal/getjs http://github.com/jupiterjs/mxui/
 @codeend
 
 ### Code cleaner ([steal.clean])

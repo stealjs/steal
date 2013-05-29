@@ -19,8 +19,16 @@ steal('steal',
 		packages =
 	
 	/**
-	 * builds an app, and pulls out packages
+	 * @function steal.build.packages
+	 * @parent steal.build
+	 *
+	 * @signature `packages(app[, buildOptions])`
 	 * @param {Object} app
+	 *
+	 * @body
+	 * 
+	 * Builds an app, and pulls out packages
+	 * 
 	 */
 	steal.build.packages = function(app, buildOptions){
 		
