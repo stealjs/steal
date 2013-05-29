@@ -1,11 +1,10 @@
 /**
- * @add steal.config
- */
-// 
-/**
- * @attribute steal.config.shim
+ * @property {{}} steal.config.shim
+ * @parent steal.config
  * 
- * `steal.config("shim",options)` allows configuring a
+ * @signature `steal.config("shim",options)`
+ *
+ * Allows configuring a
  * specific module's behavior. It accepts an object map of 
  * `moduleId` property names to options. For example, the
  * following ensures that the "jquery" module is loaded before
@@ -19,12 +18,15 @@
  * 
  * The following options are supported:
  * 
- * - __deps__ - the dependencies that must load before this module
- * - __exports__ - define the export value of the module
- * - __ignore__ - ignore this module completely in production builds
- * - __minify__ - minify this script in production
- * - __packaged__ - if set to false, don't package this file, but load it in production
- * - __type__ - the type this module represents
+ * @param {{}} options
+ * @option {{Array}} deps the dependencies that must load before this module
+ * @option {String} exports define the export value of the module
+ * @option {Boolean} ignore ignore this module completely in production builds
+ * @option {Boolean} minify minify this script in production
+ * @option {Boolean} packaged if set to false, don't package this file, but load it in production
+ * @option {String} type the type this module represents
+ *
+ * @body
  * 
  * ### deps
  * 

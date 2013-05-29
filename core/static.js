@@ -1,7 +1,5 @@
-/**
- * @add steal
- */
 // =============================== STATIC API ===============================
+
 var events = {}, 
 	page;
 
@@ -42,10 +40,11 @@ h.extend(st, {
 		return options;
 	},
 	/**
-	 * @function then
+	 * @function steal.then
+	 * @parent steal
 	 * 
-	 * `steal(previousId,...).then(moduleId...)` waits until
-	 * all previousId's have loaded before loading moduleIds.
+	 * @signature `steal(previousId,...).then(moduleId...)`
+	 * Waits until all previousId's have loaded before loading moduleIds.
 	 * 
 	 * Note: This is depricated in 3.3.  You should use
 	 * [steal.config.shim]'s `deps` property instead.
@@ -57,9 +56,11 @@ h.extend(st, {
 		return st.apply(h.win, args);
 	},
 	/**
-	 * @function bind
-	 * `steal.bind( event, handler(eventData...) )` listens to 
-	 * events on steal. Typically these are used by various build processes
+	 * @function steal.bind
+	 * @parent steal
+	 * @signature `steal.bind( event, handler(eventData...) )`
+	 * Listens to events on steal. 
+	 * Typically these are used by various build processes
 	 * to know when steal starts and finish loading resources and their
 	 * dependencies. Listen to an event like:
 	 * 
@@ -112,9 +113,10 @@ h.extend(st, {
 		return st;
 	},
 	/**
-	 * @function one
-	 * `steal.one(eventName, handler(eventArgs...) )` works just like
-	 * [steal.bind] but immediately unbinds after `handler` is called.
+	 * @function steal.one
+	 * @parent steal
+	 * @signature `steal.one(eventName, handler(eventArgs...) )`
+	 * Works just like [steal.bind] but immediately unbinds after `handler` is called.
 	 */
 	one: function( event, listener ) {
 		return st.bind(event, function() {
@@ -124,9 +126,11 @@ h.extend(st, {
 	},
 	events: {},
 	/**
-	 * @function unbind
+	 * @function steal.unbind
+	 * @parent steal
 	 * 
-	 * `steal.unbind( eventName, handler )` removes an event listener on steal.
+	 * @signature `steal.unbind( eventName, handler )`
+	 * Removes an event listener on steal.
 	 * @param {String} event
 	 * @param {Function} listener
 	 */
@@ -141,6 +145,9 @@ h.extend(st, {
 			}
 		}
 	},
+	/**
+	 * @hide
+	 */
 	trigger: function( event, arg ) {
 		var arr = events[event] || [];
 		// array items might be removed during each iteration (with unbind),
@@ -170,6 +177,9 @@ h.extend(st, {
 			stel.loading = stel.executing = true;
 		});
 	},
+	/**
+	 * @hide
+	 */
 	make: function(id){
 		var opts = (typeof id === "string" ? {id: id} : id);
 		if(!opts.idToUri){

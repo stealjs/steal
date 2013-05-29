@@ -13,8 +13,10 @@ steal('steal',
 		/**
 		 * @function steal.build.apps
 		 * @parent steal.build
+		 * @hide
 		 *
-		 * @signature
+		 * @signature `apps(moduleIds[, options])`
+		 * 
 		 * @param {Array} moduleIds An array of application
 		 * @param {{}} [buildOptions] A object map of the following configuration properties: 
 		 * 
@@ -23,7 +25,6 @@ steal('steal',
 		 * @option {Number} depth how many scripts to load, including the 
 		 * app's production scripts. This means that depth should 
 		 * always be 2 or more.  Depth defaults to `infinity`.
-		 * 
 		 * 
 		 * @body
 		 * 
@@ -101,11 +102,10 @@ steal('steal',
 		 * @function steal.build.apps.open
 		 * @parent steal.build.apps
 		 * 
-		 * @signature
+		 * @signature `open(appNames, options, callback)`
 		 * 
 		 * @param {Array} appNames
-		 * @param {{}} options An object that
-		 * has an appFiles array, and a files object.
+		 * @param {{}} options An object that has an appFiles array, and a files object.
 		 *
 		 * @option {Array} templates 
 		 * @option {{}} files
@@ -194,10 +194,10 @@ steal('steal',
 		 * @function steal.build.apps.addDependencies
 		 * @parent steal.build.apps
 		 * 
-		 * @signature
+		 * @signature `addDependencies(resource, options, appName)`
 		 * 
 		 * @param {steal} steel a steal instance
-		 * @param {Object} files the files mapping that gets filled out
+		 * @param {{}} files the files mapping that gets filled out
 		 * @param {String} appName the appName
 		 * @return {file} the root dependency file for this application
 		 * 
@@ -306,7 +306,7 @@ steal('steal',
 		/**
 		 * @hide
 		 *
-		 * @signature
+		 * @signature `getMostShared(files)`
 		 *
 		 * @param {{}} files the files object.  
 		 * @return {sharing} The sharing object:
@@ -428,10 +428,10 @@ steal('steal',
 		 * @function steal.build.apps.makePackages
 		 * @parent steal.build.apps
 		 * 
-		 * @signature
+		 * @signature `makePackages(options, buildOptions)`
 		 * 
-		 * @param {appFiles} appFiles
-		 * @param {files} files
+		 * @param {Object} options
+		 * @param {Object} buildOptions
 		 *
 		 * @body
 		 * Creates packages that can be downloaded.
@@ -441,28 +441,19 @@ steal('steal',
 		 * makes a package of the sharing and marks
 		 * the apps that need that sharing.
 		 * 
-		 * The apps that need the sharing
-		 * 
-		 * packages are mostly dummy things.  
-		 * 
-		 * a production file might steal multiple packages.
+		 * The apps that need the sharing packages are mostly dummy things. A production file 
+		 * might steal multiple packages.
 		 * 
 		 * say package A and package B
 		 * 
 		 * say package A has jQuery
 		 * 
-		 * so, the production file has code like:
+		 * so, the production file has code like: `steal('jquery')`
+		 * It needs to know to not load jQuery this is where `has` comes into place
 		 * 
-		 * steal('jquery')
-		 * 
-		 * It needs to know to not load jQuery
-		 * 
-		 * this is where 'has' comes into place
-		 * 
-		 * steal({id: 'packageA', has: 'jquery'})
+		 *     steal({id: 'packageA', has: 'jquery'})
 		 * 
 		 * This wires up steal to wait until package A is finished for jQuery.
-		 * 
 		 * So, we need to know all the packages and app needs, and all the things in that package.
 		 * 
 		 */

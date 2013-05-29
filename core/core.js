@@ -78,10 +78,10 @@
 			return stealManager(false, config.cloneContext())
 		}
 		/**
-		 * @function config
+		 * @function steal.config
 		 * 
-		 * `steal.config( configOptions )` configures the behavior
-		 * of steal. For example:
+		 * @signature `steal.config( configOptions )`
+		 * Configures the behavior of steal. For example:
 		 * 
 		 *     steal.config({
 		 *       map: {
@@ -109,12 +109,13 @@
 		 * This sets the [steal.config.map map], [steal.config.paths paths],
 		 * [steal.config.shim shim], and [steal.config.ext ext].
 		 * 
-		 * `steal.config(optionName)` returns a configuration option value. Example:
+		 * @signature `steal.config(optionName)`
+		 * Returns a configuration option value. Example:
 		 * 
 		 *     steal.config("env") //-> "development"
 		 * 
-		 * `steal.config(optionName, optionVal)` configures a 
-		 * specific option value. Example:
+		 * @signature `steal.config(optionName, optionVal)`
+		 * Configures a specific option value. Example:
 		 * 
 		 *     steal.config("env","production")
 		 * 
