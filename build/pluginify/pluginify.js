@@ -240,7 +240,7 @@ steal('steal', 'steal/parse','steal/build',
 			}
 
 			output += 'define = function(id, deps, value) {\n';
-			output += '\tmodule[id] = value();\n';
+			output += '\tif(value) module[id] = value();\n';
 			output += '};\ndefine.amd = { jQuery: true };\n' + jsOut + '\n';
 
 			for(key in opts.exports) {
