@@ -175,10 +175,11 @@ return  function(str){
 								cb && cb(token);
 								return token;
 							}
-						}else if(token.value === "/"){
+						}
+						else if(token.value === "/"){
 						// }else if(token.value === "/" && guessNextIsRegexp(token.value))
-							print("YOU SHOULD NOT BE HERE")
-							this.comment();
+							// print("YOU SHOULD NOT BE HERE")
+							// this.comment();
 						}
 					}
 					cb && cb(token)
