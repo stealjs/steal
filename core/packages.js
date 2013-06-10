@@ -1,7 +1,10 @@
 //  ============================== Packages ===============================
 /**
- * @function packages
- * `steal.packages( moduleIds... )` defines modules for deferred downloading.
+ * @function steal.packages
+ * @parent stealjs
+ *
+ * @signature `steal.packages( moduleIds... )`
+ * Defines modules for deferred downloading.
  * 
  * This is used by the build system to build collections of modules that will be downloaded
  * after initial page load.

@@ -9,9 +9,13 @@ steal('steal',function( steal ) {
 	 */
 	var css = steal.build.css = {};
 	/**
-	 * @function makePackage
-	 * @param {Object} steals
-	 * @param {Object} where
+	 * @function steal.build.css.makePackage
+	 * @parent steal.build.css
+	 * 
+	 * @signature `css(steals, where)`
+	 *
+	 * @param {{}} steals
+	 * @param {{Object}} where
 	 */
 	css.makePackage = function(steals, where){
 		if(!steals || !steals.length){

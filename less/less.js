@@ -19,41 +19,58 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 	}
 
 	/**
-	 * @page steal.less Less
-	 * @parent steal.static.type
+	 * @page steal.less steal.less
+	 * @parent stealjs
 	 * @plugin steal/less
-	 * <p>Lets you build and compile [http://lesscss.org/ Less ] css styles.</p>
-	 * <p>Less is an extension of CSS that adds variables, mixins, and quite a bit more.
+	 *
+	 * @signature `steal('path/to/filename.less')`
+	 *
+	 * @param {String} path the relative path from the current file to the coffee file.
+	 * You can pass multiple paths.
+	 * @return {steal} returns the steal function.
+	 * 
+	 *
+	 * @body
+	 * 
+	 * Lets you build and compile [http://lesscss.org/ Less ] css styles.
+	 * Less is an extension of CSS that adds variables, mixins, and quite a bit more.
+	 * 
 	 * You can write css like:
-	 * </p>
-	 * @codestart css
-	 * @@brand_color: #4D926F;
-	 * #header {
-	 *   color: @@brand_color;
-	 * }
-	 * h2 {
-	 *   color: @@brand_color;
-	 * }
-	 * @codeend
-	 * <h2>Use</h2>
-	 * <p>First, create a less file like:</p>
-	 * @codestart css
-	 * @@my_color red
+	 * 
+	 *     @@brand_color: #4D926F;
+	 *     #header {
+	 *       color: @@brand_color;
+	 *     }
+	 *     h2 {
+	 *       color: @@brand_color;
+	 *     }
+	 * 
+	 * ## Use
+	 * 
+	 * First, create a less file like:
+	 * 
+	 *     @@my_color red
+	 *    
+	 *     body { color:  @@my_color; }
 	 *
-	 * body { color:  @@my_color; }
-	 * @codeend
 	 *
-	 * Save this in a file named <code>red.less</code>.
+	 * Save this in a file named `red.less`.
 	 *
-	 * Next, steal the <code>steal/less</code> plugin, wait for it to finish loading
-	 * (by using [steal.static.then then]) and then load the less file:
+	 * Next, you have to add the less entry to the `stealconfig.js` file so it
+	 * looks like this:
 	 *
-	 * @codestart
-	 * steal('steal/less').then('./red.less');
-	 * @codeend
+	 *     steal.config({
+	 *         ext: {
+	 *             less: "steal/less/less.js"
+	 *         }
+	 *     });
 	 *
-	 * Loads Less files relative to the current file.  It's expected that all
-	 * Less files end with <code>less</code>.
+	 * This will automatically load the Less parser when the Less file is
+	 * loaded. It's expected that all Less files end with `less`.
+	 * 
+	 * You can steal the Less file like any other file:
+	 *
+	 *     steal('filename.less')
 	 *
 	 */
 	steal.type("less css", function(options, success, error){

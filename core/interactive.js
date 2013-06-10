@@ -43,8 +43,8 @@ if ( h.support.interactive ) {
 		if (!interactive || !interactive.src || /steal\.(production|production\.[a-zA-Z0-9\-\.\_]*)*js/.test(interactive.src) ) {
 			return;
 		}
-		// get the source of the script
-		var src = interactive.src;
+		// get the source of the script from id because this hasn't been changed to an absolute path
+		var src = interactive.id;
 		// create an array to hold all steal calls for this script
 		if (!interactives[src] ) {
 			interactives[src] = []

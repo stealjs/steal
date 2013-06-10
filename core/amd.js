@@ -1,5 +1,5 @@
 /**
- * @function id
+ * @function steal.id
  * 
  * Given a resource id passed to `steal( resourceID, currentWorkingId )`, this function converts it to the 
  * final, unique id. This function can be overwritten 
@@ -18,16 +18,17 @@
  *  3. Check the 
  * 
  * 
- * `steal.id()`
+ * @signature `steal.id(id, currentWorkingId, [type=js])`
  * 
  * @param {String} id
  * @param {String} currentWorkingId
  * @param {String} [type=js]
  */
-// returns the "rootSrc" id, something that looks like requireJS
-// for a given id/path, what is the "REAL" id that should be used
-// this is where substituation can happen
 st.id = function( id, currentWorkingId, type ) {
+	// returns the "rootSrc" id, something that looks like requireJS
+	// for a given id/path, what is the "REAL" id that should be used
+	// this is where substituation can happen
+
 	// id should be like
 	var uri = URI(id);
 	uri = uri.addJS().normalize(currentWorkingId ? new URI(currentWorkingId) : null)
@@ -87,11 +88,16 @@ st.amdToId = function(id, currentWorkingId, type){
 
 // for a given ID, where should I find this resource
 /**
- * @function idToUri
+ * @function steal.idToUri
  *
- * `steal.idToUri( id, noJoin )` takes an id and returns a URI that
- * is the location of the file. It uses the paths option of  [config].
+ * @signature `steal.idToUri( id, noJoin )`
+ *
+ * Takes an id and returns a URI that
+ * is the location of the file. It uses the paths option of  [steal.config].
  * Passing true for `noJoin` does not join from the root URI.
+ * 
+ * @param {String} id
+ * @param {Boolean} [noJoin=false]
  */
 st.idToUri = function( id, noJoin ) {
 	// this is normalize
@@ -113,10 +119,10 @@ st.idToUri = function( id, noJoin ) {
 
 // for a given AMD id this will return an URI object
 /**
- * @function st.amdIdToUri
+ * @function steal.amdIdToUri
  * @hide
  * `steal.amdIdToUri( id, noJoin )` takes and AMD id and returns a URI that
- * is the location of the file. It uses the paths options of [config].
+ * is the location of the file. It uses the paths options of [steal.config].
  * Passing true for `noJoin` does not join from that URI.
  */
 st.amdIdToUri = function( id, noJoin ){

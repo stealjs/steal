@@ -54,17 +54,6 @@ js steal/buildjs mypage.html
 js jquery/generate/app cookbook
 @codeend
 
-### Package management ([steal.get])
-
-[steal.get] is a simple JavaScript version of [http://rubygems.org/ ruby gems] featuring:
-
- - Download and install plugins from remote SVN or GIT repositories.
- - Installs dependencies.
-
-@codestart text
-js steal/getjs http://github.com/jupiterjs/mxui/
-@codeend
-
 ### Code cleaner ([steal.clean])
 
 [steal.clean] cleans your code and checks it against JSLint.

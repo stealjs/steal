@@ -4,38 +4,49 @@ steal({
 }, function(CoffeeScript) {
 
 	/**
-	 * @page steal.coffee CoffeeScript
-	 * @parent steal.static.type
+	 * @page steal.coffee steal.coffee
+	 * @parent stealjs
 	 * @plugin steal/coffee
-	 * <p>Requires a [http://jashkenas.github.com/coffee-script/ CoffeeScript] script.</p>
+	 *
+	 * @signature `steal('path/to/filename.coffee')`
+	 *
+	 * @param {String} path the relative path from the current file to the coffee file.
+	 * You can pass multiple paths.
+	 * @return {steal} returns the steal function.
+	 *
+	 * @body
+	 * Requires a [CoffeeScript](http://jashkenas.github.com/coffee-script/) script.
 	 * 
-	 * <p>CoffeeScript is a more 'refined' version of JavaScript that lets you write code like:</p>
-	 * @codestart
-	 * number = -42 if opposite
-	 * @codeend
+	 * CoffeeScript is a more 'refined' version of JavaScript that lets you write code like:
+	 *
+	 *     number = -42 if opposite
+	 *
 	 * CoffeeScript is normally used on the server, but steal lets you load CoffeeScripts
 	 * in the browser, and compress their JavaScript output into your production builds.
 	 * 
-	 * <h2>Use</h2>
-	 * <p>First, create a coffee script like:</p>
-	 * @codestart
-	 * console.log "There are no () around this string!"
-	 * @codeend
-	 * <p>Save this in a file named <code>log.coffee</code>.</p>
-	 * <p>Next, you have to require the <code>steal/coffee</code> plugin and then use
-	 * steal.coffee to load your coffee script:
-	 * </p>
-	 * @codestart
-	 * steal('steal/coffee').then(function(){
-	 *   steal.coffee('log');
-	 * });
-	 * @codeend
+	 * ## Use
+	 * 
+	 * First, create a coffee script like:
 	 *
-	 * Loads CoffeeScript files relative to the current file.  It's expected that all
-	 * CoffeeScript files end with <code>coffee</code>.
-	 * @param {String+} path the relative path from the current file to the coffee file.
-	 * You can pass multiple paths.
-	 * @return {steal} returns the steal function.
+	 *     console.log "There are no () around this string!"
+	 * 
+	 * Save this in a file named `log.coffee`.
+	 * 
+	 * Next, you have to add the coffee script entry to the `stealconfig.js` file so it
+	 * looks like this:
+	 *
+	 *     steal.config({
+	 *         ext: {
+	 *             coffee: "steal/coffee/coffee.js"
+	 *         }
+	 *     });
+	 *
+	 * This will automatically load the CoffeeScript parser when the CoffeeScript file is
+	 * loaded. It's expected that all CoffeeScript files end with `coffee`.
+	 *
+	 * You can steal the CoffeeScript file like any JavaScript file:
+	 *
+	 *     steal('filename.coffee')
 	 */
 	
 	steal.type("coffee js", function(options, success, error){

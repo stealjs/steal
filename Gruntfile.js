@@ -52,30 +52,17 @@ module.exports = function (grunt) {
 		out : 'steal.js',
 		build : {
 			file : 'core/core.js',
-			out : '<config:out>'
+			out : '<%= out %>'
 		},
-		watch: {
-			scripts: {
-				files: "core/*.js",
-				tasks: "default"
+		uglify: {
+			steal: {
+				files: {
+					'steal.production.js': ['steal.js']
+				}
 			}
-		},
-		beautifier : {
-			steal : codestyle,
-			core : codestyle
-		},
-		min : {
-			dist: {
-				src: [ '<banner:meta.banner>', '<config:out>'],
-				dest: 'steal.production.js'
-			}
-		},
-		beautify : {
-			steal : '<config:out>',
-			core : 'core/**/*.js'
 		}
 	});
 
-	grunt.loadNpmTasks('grunt-beautify');
-	grunt.registerTask('default', 'build beautify:steal min:dist');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.registerTask('default', ['build', 'uglify']);
 };

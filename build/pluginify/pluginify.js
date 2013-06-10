@@ -13,7 +13,62 @@ steal('steal', 'steal/parse','steal/build',
 	/**
 	 * @function steal.build.pluginify
 	 * @parent steal.build
+	 *
+	 * @signature `steal.build.pluginify(moduleId, opts)`
 	 * 
+	 * @param {{}} moduleId The moduleId of the plugin to be built.
+	 * @param {{}} opts An object map of the following optional configuration
+	 * properties:
+	 * 
+	 * @option {String }[out] Specifies the location of the generated file. The default filename is the 
+	 * moduleId with `.` replacing all `/` in the moduleId's folder. For example,
+	 * pluginifying `"foo/bar"` will create `"foo/bar/foo.bar.js"
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       out: "bar.js"
+	 *     })
+	 * 
+	 * @option  {Array} exclude An array of moduleIds to exclude. If the moduleId ends with a 
+	 * slash (ex: `"can/"`) all modules within that folder will be ignored.
+	 * 
+	 * @option {Boolean|String} standAlone Set to `true` to only build the moduleId resource, everything
+	 * else will be excluded. `standAlone` can also be set to a specific module or 
+	 * folder.
+	 * 
+	 * @option {Boolean} nojquery Excludes jQuery and adds `jquery: "jQuery"` to the shim. Example:
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       nojquery: true
+	 *     })
+	 * 
+	 * @option {Boolean} nocanjs Exclude all CanJS files and adds corresponding shims.
+	 * 
+	 * @option {Boolean} minify Set to `true` to minify the build.  
+	 * 
+	 * @option {Array} wrapInner An array containing code you want to wrap the output in 
+	 * like `[before, after]`. Example:
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       wrapInner: ["(function($,can){","})(jQuery, can)"]
+	 *     })
+	 * 
+	 * @option {{}} shim Specifies a mappings between an excluded moduleId and
+	 * it's global value.  For example:
+	 * 
+	 *     steal.build.pluginify("foo/bar",{
+	 *       exclude: ["jquery","can/"],
+	 *       shim: {
+	 *         jquery: "jQuery",
+	 *         "can/util": "can",
+	 *         "can/control": "can.Control"
+	 *       }
+	 *     })
+	 * 
+	 * 
+	 * @option {Boolean} skipAll - Don't run any of the code in steal callbacks (used for canjs build)
+	 *
+	 * @body
+	 *
 	 * `steal.build.pluginify(moduleId, options)` builds a 'steal-less' version 
 	 * of a module. It can called programatically in JavaScript like:
 	 * 
@@ -28,57 +83,6 @@ steal('steal', 'steal/parse','steal/build',
 	 * 
 	 *     ./js steal/pluginifyjs widgets/chart -nojquery -nocanjs
 	 *   
-	 * @param {Object} moduleId The moduleId of the plugin to be built.
-	 * @param {Object} opts An object map of the following optional configuration
-	 * properties:
-	 * 
-	 * __out__ -  Specifies the location of the generated file. The default filename is the 
-	 * moduleId with `.` replacing all `/` in the moduleId's folder. For example,
-	 * pluginifying `"foo/bar"` will create `"foo/bar/foo.bar.js"
-	 * 
-	 *     steal.build.pluginify("foo/bar",{
-	 *       out: "bar.js"
-	 *     })
-	 * 
-	 * __exclude__ - An array of moduleIds to exclude. If the moduleId ends with a 
-	 * slash (ex: `"can/"`) all modules within that folder will be ignored.
-	 * 
-	 * __standAlone__ - Set to `true` to only build the moduleId resource, everything
-	 * else will be excluded. `standAlone` can also be set to a specific module or 
-	 * folder.
-	 * 
-	 * __nojquery__ - Excludes jQuery and adds `jquery: "jQuery"` to the shim. Example:
-	 * 
-	 *     steal.build.pluginify("foo/bar",{
-	 *       nojquery: true
-	 *     })
-	 * 
-	 * __nocanjs__ - Exclude all CanJS files and adds corresponding shims.
-	 * 
-	 * __minify__ - Set to `true` to minify the build.  
-	 * 
-	 * __wrapInner__ - An array containing code you want to wrap the output in 
-	 * like `[before, after]`. Example:
-	 * 
-	 *     steal.build.pluginify("foo/bar",{
-	 *       wrapInner: ["(function($,can){","})(jQuery, can)"]
-	 *     })
-	 * 
-	 * __shim__ - Specifies a mappings between an excluded moduleId and
-	 * it's global value.  For example:
-	 * 
-	 *     steal.build.pluginify("foo/bar",{
-	 *       exclude: ["jquery","can/"],
-	 *       shim: {
-	 *         jquery: "jQuery",
-	 *         "can/util": "can",
-	 *         "can/control": "can.Control"
-	 *       }
-	 *     })
-	 * 
-	 * 
-	 * __skipAll__ - Don't run any of the code in steal callbacks (used for canjs build)
-	 * 
 	 * 
 	 */
 	s.build.pluginify = function(moduleId, opts){

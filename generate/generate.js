@@ -41,8 +41,19 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			};
 		},
 		/**
+		 * @page steal.generate steal.generate
 		 * @plugin steal/generate
 		 * @parent stealjs
+		 *
+		 * @signature `generate( path, where, data )`
+		 *
+		 * @param {String} path The folder to get templates from.
+		 * @param {String} where Where to put the results of the rendered templates.
+		 * @param {{}} data Data to render the templates with. 
+		 *
+		 * @option {Boolean} force If force is true, it will overwrite everything
+		 * 
+		 * @body
 		 * 
 		 * `steal.generate(path, where, data)` renders all the `.ejs` templates recursively in directory `path`
 		 * with `data` and copies them to directory `where`. For example:
@@ -55,81 +66,6 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		 *       })
 		 * 
 		 * 
-		 * ## JavaScriptMVC Generators
-		 * 
-		 * JavaScriptMVC comes with the following generators.
-		 * 
-		 * ### app
-		 * 
-		 * Creates a JavaScriptMVC application structure.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/app <i>path/to/app</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `path/to/app` - The lowercase directory your application
-		 *     will be placed within. Keep application names short because they 
-		 *     are used as namespaces.  The last part of the path 
-		 *     will be taken to be your application's name.
-		 * 
-		 * ### control
-		 * 
-		 * Creates a [can.Control] and test files.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/control <i>app/controls/video</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `app/videos` - The moduleId name of your control. 
-		 * 
-		 * ### model
-		 * 
-		 * Creates a [can.Model] and test files.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/model <i>app/models/name</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `app/models/name` - The name of the module
-		 * 
-		 * ### page
-		 * 
-		 * Creates a page that loads steal.js and an application.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/page <i>path/to/app</i> <i>path/to/page.html</i>
-		 * @codeend
-		 * 
-		 *   - `path/to/app` - The path to your apps folder. 
-		 *   - `path/to/page.html` - The path to the page you want to create. 
-		 * 
-		 * ### plugin
-		 * 
-		 * Create a file and folder structure for a basic jQuery plugin.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/plugin <i>path/to/plugin</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `path/to/plugin` - The path to where you want 
-		 *   your plugin. 
-		 *   
-		 * 
-		 * ### scaffold
-		 * 
-		 * Creates the controls, models, and fixtures used
-		 * to provide basic CRUD functionality.
-		 * 
-		 * @codestart text
-		 * js jmvc/generate/scaffold <i>app/models/modelname</i> [OPTIONS]
-		 * @codeend
-		 * 
-		 *   - `app/models/modelname` - The moduleId of you want to create CRUD functionality 
-		 *     for.
-		 * 
-		 * @param {String} path The folder to get templates from.
-		 * @param {String} where Where to put the results of the rendered templates.
-		 * @param {Object} data Data to render the templates with.  If force is true, it will overwrite everything
 		 */
 		generate = (steal.generate = function( path, where, data ) {
 			//get all files in a folder
@@ -192,17 +128,25 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 		//converts a name to a bunch of useful things
 		
 		/**
+		 * @hide
+		 * @signature `convert(moduleId)`
+		 *
+		 * @param {String} [moduleId] module id 
+		 * 
+		 * @body
+		 * 
 		 * Takes a module name and returns a bunch of useful properties of 
 		 * that module.
-		 * "my_app/foo/zed_ted" ->
-		 * {
-		 *   appName : "foobar",
-		 *   className : "ZedTed",
-		 *   fullName : "FooBar.ZedTed",
-		 *   name : "FooBar.ZedTed",
-		 *   path : foo_bar,
-		 *   underscore : "zed_ted"
-		 * }
+		 * 
+		 *     "my_app/foo/zed_ted" ->
+		 *     {
+		 *       appName : "foobar",
+		 *       className : "ZedTed",
+		 *       fullName : "FooBar.ZedTed",
+		 *       name : "FooBar.ZedTed",
+		 *       path : foo_bar,
+		 *       underscore : "zed_ted"
+		 *     }
 		 */
 		convert: function( moduleId ) {
 			var path = s.id(moduleId)+"";
@@ -232,23 +176,20 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 				appPath: appPath
 			};
 		},
-		/**
-		 *     generate.camelize("foo_bar") //-> "fooBar"
-		 */
+		
+		// generate.camelize("foo_bar") //-> "fooBar"
 		camelize: function(str){ 
 			return str.replace(/[-_]+(.)?/g, function(match, chr){ 
 				return chr ? chr.toUpperCase() : '' 
 			}) 
 		},
-		/**
-		 *    generate.camelize("foo_bar") //-> "FooBar"
-		 */
+		
+		// generate.camelize("foo_bar") //-> "FooBar"
 		classize: function(str){
 			return this.capitalize( this.camelize(str) );
 		},
-		/**
-		 *    generate.capitalize("foo_bar") //-> "Foo_bar"
-		 */
+		
+		// generate.capitalize("foo_bar") //-> "Foo_bar"
 		capitalize: function(str){
 			return str.charAt(0).toUpperCase()+str.substr(1)
 		},
@@ -290,9 +231,7 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			// save back to original file destination
 			
 		},
-		/**
-		 *     insertSteal(""
-		 */
+		
 		_insertSteal: function(source, moduleId, options){
 			var parser =  parse(source),
 				firstToken,
@@ -393,17 +332,24 @@ steal("steal","steal/generate/ejs.js", 'steal/generate/inflector.js',
 			}
 		},
 		/**
-		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
+		 * @hide
+		 * @signature `insertSteal(destination, newStealPath, options)`
 		 * 
-		 *   1. Page already looks like steal("a", function(){})
-		 *   1. Page already looks like steal(function(){})
-		 *   1. Page has no steals
-		 *   1. Page already looks like steal("a")
-		 *   
-		 *   It will try to put the new steal before the last function first
-		 *   
 		 * @param {String} destination a path to the script we're inserting a steal into
 		 * @param {String} newStealPath the new steal path to be inserted
+		 * @param {{}} [options] Options passed to steal
+		 *
+		 * @body
+		 * Inserts a new steal, like "foo/bar" into a file.  It can handle 4 cases:
+		 * 
+		 * 1. Page already looks like steal("a", function(){})
+		 * 1. Page already looks like steal(function(){})
+		 * 1. Page has no steals
+		 * 1. Page already looks like steal("a")
+		 *   
+		 * It will try to put the new steal before the last function first
+		 *   
+
 		 */
 		insertSteal: function( destination, newStealPath, options ){
 			

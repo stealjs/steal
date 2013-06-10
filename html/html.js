@@ -5,10 +5,18 @@ steal(function(){
 	/**
 	 * @function steal.html
 	 * @parent stealjs
+	 *
+	 * @signature `html(urlo, opts)`
+	 * 
+	 * @param {String} urlo The url of the page to open. The url should be 
+	 * relative to [steal.config.root rootfolder] or a website.
+	 * @param {Object|Function} opts
+	 *
+	 * @body
 	 * 
 	 * `steal.html(url)` loads a page in Envjs and gets it's HTML 
 	 * when it's ready. Use this to make your site
-	 * crawlable [http://code.google.com/web/ajaxcrawling/docs/getting-started.html AJAX crawling for Google].
+	 * crawlable [AJAX crawling for Google](http://code.google.com/web/ajaxcrawling/docs/getting-started.html).
 	 * 
 	 *  
 	 * 
@@ -19,10 +27,6 @@ steal(function(){
 	 *     })
 	 * 
 	 * 
-	 * @param {String} urlo The url of the page to open. The url should be 
-	 * relative to [rootfolder] or a website.
-	 * 
-	 * @param {Object|Function} opts
 	 */
 	steal.html = function(urlo, opts){
 		
@@ -58,6 +62,11 @@ steal(function(){
 	/**
 	 * @function steal.html.wait
 	 * @parent steal.html
+	 *
+	 * @signature `wait()`
+	 *
+	 * @body
+	 * 
 	 * Waits for the html to finish
 	 */
 	steal.html.wait = function(){
@@ -66,6 +75,11 @@ steal(function(){
 	/**
 	 * @function steal.html.ready
 	 * @parent steal.html
+	 *
+	 * @signature `ready()`
+	 *
+	 * @body
+	 * 
 	 * Lets the page know it's ready to render the html
 	 */
 	steal.html.ready = function(){

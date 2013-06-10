@@ -406,49 +406,20 @@
 	h.extend(URI, {
 		// parses a URI into it's basic parts
 		parse: function (string) {
-			/**
-			 * @prototype
-			 */
 			var uriParts = string.split("?"),
 				uri = uriParts.shift(),
 				queryParts = uriParts.join("").split("#"),
 				protoParts = uri.split("://"),
 				parts = {
-					/**
-					 * @attribute query
-					 * 
-					 * The query part of the url. Everything after the `?`, but before
-					 * the `#`.
-					 * 
-					 *     var uri = URI("/foo?bar#zed")
-					 *     uri.query //-> bar
-					 * 
-					 */
 					query: queryParts.shift(),
-					/**
-					 * @attribute fragment
-					 * 
-					 *     var uri = URI("/foo?bar#zed")
-					 *     uri.query //-> zed
-					 * 
-					 */
 					fragment: queryParts.join("#")
 				},
 				pathParts;
 
 			if (protoParts[1]) {
-				/**
-				 * @attribute protocol
-				 */
 				parts.protocol = protoParts.shift();
 				pathParts = protoParts[0].split("/");
-				/**
-				 * @attribute host
-				 */
 				parts.host = pathParts.shift();
-				/**
-				 * @attribute path
-				 */
 				parts.path = "/" + pathParts.join("/");
 			} else {
 				parts.path = protoParts[0];
@@ -456,10 +427,7 @@
 			return parts;
 		}
 	});
-	/**
-	 * @static
-	 */
-	//
+
 	/**
 	 * @attribute page
 	 * The location of the page as a URI.
@@ -479,97 +447,33 @@
 	 * @prototype
 	 */
 	h.extend(URI.prototype, {
-		/**
-		 * @function
-		 * `uri.dir()` returns everything before the last `/`
-		 * as a URI.
-		 * 
-		 * @return {steal.URI}
-		 */
 		dir: function () {
 			var parts = this.path.split("/");
 			parts.pop();
 			return URI(this.domain() + parts.join("/"))
 		},
-		/**
-		 * @function
-		 * `uri.filename()` returns everything after the last `/`
-		 * as a String.
-		 * 
-		 * @return {String}
-		 */
 		filename: function () {
 			return this.path.split("/").pop();
 		},
-		/**
-		 * @function
-		 * 
-		 * `uri.ext()` returns everything after the last `.`.
-		 * 
-		 * @return {String}
-		 */
 		ext: function () {
 			var filename = this.filename();
 			return (filename.indexOf(".") > -1) ? filename.split(".").pop() : "";
 		},
-		/**
-		 * @function
-		 * 
-		 * `uri.domain()` returns the protocol and host of the domain.
-		 * 
-		 * return {String}
-		 */
 		domain: function () {
 			return this.protocol ? this.protocol + "://" + this.host : "";
 		},
-		/**
-		 * @function
-		 * 
-		 * `uri.isCrossDomain([referenceUri])` returns 
-		 * if a URI is cross domain.  
-		 * 
-		 *     var abc = URI("http://abc.com")
-		 *     abc.isCrossDomain() // -> true
-		 *     abc.isCrossDomain( "http://abc.com/foo" ) //-> false
-		 * 
-		 * @param {steal.URI} [referenceUri] An optional uri to use
-		 * as the reference to return if the uri is cross domain from.
-		 */
-		isCrossDomain: function (referenceUri) {
-			referenceUri = URI(referenceUri || h.win.location.href);
+		isCrossDomain: function (uri) {
+			uri = URI(uri || h.win.location.href);
 			var domain = this.domain(),
-				uriDomain = referenceUri.domain()
+				uriDomain = uri.domain()
 				return (domain && uriDomain && domain != uriDomain) || this.protocol === "file" || (domain && !uriDomain);
 		},
-		/**
-		 * @function
-		 * 
-		 * `uri.isRelativeToDomain()` returns if the uri begins with `/`.
-		 * 
-		 * @return {Boolean}
-		 */
 		isRelativeToDomain: function () {
 			return !this.path.indexOf("/");
 		},
-		/**
-		 * @function
-		 * 
-		 * `uri.hash()` returns the URI's [steal.URI::fragment fragment] with 
-		 * `"#"` preceeding it.
-		 * 
-		 * return {String}
-		 */
 		hash: function () {
 			return this.fragment ? "#" + this.fragment : ""
 		},
-		/**
-		 * @function
-		 * 
-		 * `uri.search()` returns the URI's [steal.URI::query query] with
-		 * `"?"` preceeding it.
-		 * 
-		 * @return {String}
-		 */
 		search: function () {
 			return this.query ? "?" + this.query : ""
 		},
@@ -577,15 +481,6 @@
 		add: function (uri) {
 			return this.join(uri) + '';
 		},
-		/**
-		 * `leftUri.join(rightUri)` joins two uris together and return
-		 * the result as a new URI.
-		 * 
-		 *     var left = URI("/a/starting/place")
-		 *     var res = left.join("../../better/location")
-		 *     res //-> URI("a/better/location")
-		 * 
-		 */
 		join: function (uri, min) {
 			uri = URI(uri);
 			if (uri.isCrossDomain(this)) {
@@ -626,10 +521,10 @@
 		 * We want everything relative to steal's root so the same app can work in
 		 * multiple pages.
 		 *
-		 *     ./files/a.js = steals a.js
-		 *     ./files/a = a/a.js
-		 *     files/a = //files/a/a.js
-		 *     files/a.js = loads //files/a.js
+		 * ./files/a.js = steals a.js
+		 * ./files/a = a/a.js
+		 * files/a = //files/a/a.js
+		 * files/a.js = loads //files/a.js
 		 */
 		normalize: function (cur) {
 			cur = cur ? cur.dir() : URI.cur.dir();
@@ -648,29 +543,10 @@
 			res.query = this.query;
 			return res;
 		},
-		/**
-		 * `uri.isRelative()` returns if the path starts with `.` or `/`.
-		 * 
-		 * @return {Boolean}
-		 */
 		isRelative: function () {
 			return /^[\.|\/]/.test(this.path)
 		},
 		// a min path from 2 urls that share the same domain
-		/**
-		 * `uri.pathTo(relativeURI)` returns a relative
-		 * path from `uri` to `relativeURI`
-		 * 
-		 *     steal.URI("app/controls/recipe.js")
-		 *        .pathTo("app/models/recipe.js")
-		 *     // -> ../../models/recipe.js
-		 *     
-		 *     steal.URI("foo/bar")
-		 *        .pathTo("foo/bar/zed")
-		 *     //-> zed
-		 *     
-		 * @return {steal.URI}
-		 */
 		pathTo: function (uri) {
 			uri = URI(uri);
 			var uriParts = uri.path.split("/"),
@@ -1493,7 +1369,7 @@
 				} else {
 
 					// Otherwise get the cached module
-					var existingModule = modules[id];
+					existingModule = modules[id];
 					// If options were passed, copy new properties over.
 					// Don't copy src, etc because those have already
 					// been changed to be the right values;
@@ -2130,52 +2006,6 @@
 		 *     <script src='../steal/steal.production.js,myapp'>
 		 *     </script>
 		 * 
-		 * ## Locating StealJS and other libraries outside the root folder.
-		 * 
-		 * Its common desire to want steal and other projects in
-		 * some shared folder and the application code somewhere 
-		 * else.  For example:
-		 * 
-		 *     shared/
-		 *         steal/
-		 *         can/
-		 *         stealconfig.js
-		 *     apps/
-		 *         myapp/
-		 *           myapp.js
-		 * 
-		 * This is possible by changing [steal.config.root] to
-		 * point `apps` and  
-		 * [steal.config.paths] to point to the shared 
-		 * location.  For example, the following in stealconfig.js
-		 * will work for the case above:
-		 * 
-		 *     paths: {
-		 *       "can/": "../shared/can/",
-		 *       "steal/" : "../shared/steal/",
-		 *     },
-		 *     root: steal.config('root').join('../apps')
-		 * 
-		 * ## Signatures
-		 * 
-		 * ### `steal.config()`
-		 * 
-		 * Returns all configured properties. For example:
-		 * 
-		 *     steal.config().root //-> URI
-		 * 
-		 * ### `steal.config(propertyName)`
-		 * 
-		 * Returns a single configured property value. For example:
-		 * 
-		 *     steal.config("root") //-> URI
-		 * 
-		 * ### `steal.config(properties)`
-		 * 
-		 * Configures multiple properties at once. For example:
-		 * 
-		 *     steal.config({root: "path/to/root"})
-		 * 
 		 */
 		st.config = function () {
 			st.config.called = true;
@@ -2732,7 +2562,7 @@
 		// Determine if we're running in IE older than IE9. This 
 		// will affect loading strategy for JavaScripts.
 		h.useIEShim = (function () {
-			if (st.isRhino || typeof document === 'undefined') {
+			if (st.isRhino) {
 				return false;
 			}
 

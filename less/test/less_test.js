@@ -21,7 +21,7 @@ steal('steal/test', function( s ) {
 		
 		var prod = readFile('steal/less/test/production.css').replace(/\r|\n|\s/g,""),
 			expected = readFile('steal/less/test/productionCompare.css').replace(/\r|\n|\s/g,"");
-		
+
 		s.test.equals(
 			prod,
 			expected,

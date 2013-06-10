@@ -30,7 +30,7 @@ h.extend(URI, {
 			protoParts = uri.split("://"),
 			parts = {
 				/**
-				 * @attribute query
+				 * @property query
 				 * 
 				 * The query part of the url. Everything after the `?`, but before
 				 * the `#`.
@@ -41,7 +41,7 @@ h.extend(URI, {
 				 */
 				query: queryParts.shift(),
 				/**
-				 * @attribute fragment
+				 * @property fragment
 				 * 
 				 *     var uri = URI("/foo?bar#zed")
 				 *     uri.query //-> zed
@@ -53,16 +53,16 @@ h.extend(URI, {
 
 		if ( protoParts[1] ) {
 			/**
-			 * @attribute protocol
+			 * @property protocol
 			 */
 			parts.protocol = protoParts.shift();
 			pathParts = protoParts[0].split("/");
 			/**
-			 * @attribute host
+			 * @property host
 			 */
 			parts.host = pathParts.shift();
 			/**
-			 * @attribute path
+			 * @property path
 			 */
 			parts.path = "/" + pathParts.join("/");
 		} else {
@@ -76,14 +76,14 @@ h.extend(URI, {
  */
 //
 /**
- * @attribute page
+ * @property page
  * The location of the page as a URI.
  * 
  *     st.URI.page.protocol //-> "http"
  */
 URI.page = URI(h.win.location && location.href);
 /**
- * @attribute cur
+ * @property cur
  * 
  * The current working directory / path.  Anything
  * loaded relative will be loaded relative to this.
@@ -96,8 +96,8 @@ URI.cur = URI();
 h.extend(URI.prototype, {
 	/**
 	 * @function
-	 * `uri.dir()` returns everything before the last `/`
-	 * as a URI.
+	 * @signature `dir()`
+	 * Returns everything before the last `/` as a URI.
 	 * 
 	 * @return {steal.URI}
 	 */
@@ -108,8 +108,8 @@ h.extend(URI.prototype, {
 	},
 	/**
 	 * @function
-	 * `uri.filename()` returns everything after the last `/`
-	 * as a String.
+	 * @signature `filename()`
+	 * Returns everything after the last `/` as a String.
 	 * 
 	 * @return {String}
 	 */
@@ -119,7 +119,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.ext()` returns everything after the last `.`.
+	 * @signature `ext()`
+	 * returns everything after the last `.`.
 	 * 
 	 * @return {String}
 	 */
@@ -130,7 +131,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.domain()` returns the protocol and host of the domain.
+	 * @signature `domain()`
+	 * Returns the protocol and host of the domain.
 	 * 
 	 * return {String}
 	 */
@@ -140,8 +142,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.isCrossDomain([referenceUri])` returns 
-	 * if a URI is cross domain.  
+	 * @signature `isCrossDomain([referenceUri])`
+	 * Returns if a URI is cross domain.  
 	 * 
 	 *     var abc = URI("http://abc.com")
 	 *     abc.isCrossDomain() // -> true
@@ -159,7 +161,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.isRelativeToDomain()` returns if the uri begins with `/`.
+	 * @signature `isRelativeToDomain()`
+	 * Returns if the uri begins with `/`.
 	 * 
 	 * @return {Boolean}
 	 */
@@ -169,7 +172,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.hash()` returns the URI's [steal.URI::fragment fragment] with 
+	 * @signature `hash()`
+	 * Returns the URI's [steal.URI::fragment fragment] with 
 	 * `"#"` preceeding it.
 	 * 
 	 * return {String}
@@ -180,7 +184,8 @@ h.extend(URI.prototype, {
 	/**
 	 * @function
 	 * 
-	 * `uri.search()` returns the URI's [steal.URI::query query] with
+	 * @signature `search()`
+	 * Returns the URI's [steal.URI::query query] with
 	 * `"?"` preceeding it.
 	 * 
 	 * @return {String}
@@ -193,7 +198,9 @@ h.extend(URI.prototype, {
 		return this.join(uri) + '';
 	},
 	/**
-	 * `leftUri.join(rightUri)` joins two uris together and return
+	 * @function
+	 * @signature `join(rightUri)`
+	 * Joins two uris together and return
 	 * the result as a new URI.
 	 * 
 	 *     var left = URI("/a/starting/place")
@@ -235,6 +242,7 @@ h.extend(URI.prototype, {
 		});
 	},
 	/**
+	 * @function
 	 * For a given path, a given working directory, and file location, update the
 	 * path so it points to a location relative to steal's root.
 	 *
@@ -264,7 +272,9 @@ h.extend(URI.prototype, {
 		return res;
 	},
 	/**
-	 * `uri.isRelative()` returns if the path starts with `.` or `/`.
+	 * @function
+	 * @signature `isRelative()`
+	 * Returns if the path starts with `.` or `/`.
 	 * 
 	 * @return {Boolean}
 	 */
@@ -273,7 +283,9 @@ h.extend(URI.prototype, {
 	},
 	// a min path from 2 urls that share the same domain
 	/**
-	 * `uri.pathTo(relativeURI)` returns a relative
+	 * @function
+	 * @signature `pathTo(relativeURI)`
+	 * Returns a relative
 	 * path from `uri` to `relativeURI`
 	 * 
 	 *     steal.URI("app/controls/recipe.js")

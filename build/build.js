@@ -8,7 +8,37 @@ steal('steal',function( steal ) {
 
 	/**
 	 * @parent stealjs
+	 * @function steal.build
+	 * 
+	 * @signature `steal.build( moduleId, options )`
 	 *
+	 * @param {String} moduleId a JS moduleId or html page that loads steal to build. For example:
+	 * 
+	 *     steal.build('myapp');
+	 * 
+	 *     ./js steal/buildjs myapp
+	 * 
+	 * @param {{}} [options] An object literal with the following optional values:
+	 *
+	 * @option {String} [to] The folder to put the production.js and production.css files. Ex: `"myproject"`.
+	 * 
+	 * @option {Boolean} [minify] `true` to minify scripts, `false` if otherwise. Defaults to `true`.
+	 * 
+	 * @option {Number} [depth] - The total number of packages to load in production if [steal.packages]
+	 *  is used. Defaults to `Infinity`.
+	 * 
+	 * @option {Boolean} [packageSteal] `true` to package stealjs with `production.js`. Defaults to `false`.
+	 * 
+	 * Example:
+	 * 
+	 *     steal.build("app",{
+	 *       minify: false,
+	 *       depth: 3.
+	 *       packageSteal: true,
+	 *       to: "staticproduction/app"
+	 *     })
+	 *
+	 * @body
 	 * `steal.build(moduleId, options)` builds a JavaScript module along 
 	 * with all of its dependencies. It also builds any packages specified
 	 * by [steal.packages]. 
@@ -104,31 +134,7 @@ steal('steal',function( steal ) {
 	 * _The next version of StealJS will not have this problem._
 	 * 
 	 * 
-	 * @param {String} moduleId a JS moduleId or html page that loads steal to build. For example:
 	 * 
-	 *     steal.build('myapp');
-	 * 
-	 *     ./js steal/buildjs myapp
-	 * 
-	 * @param {Object} options An object literal with the following optional values:
-	 * 
-	 *  __to__ - The folder to put the production.js and production.css files. Ex: `"myproject"`.
-	 * 
-	 *  __minify__ - `true` to minify scripts, `false` if otherwise. Defaults to `true`.
-	 * 
-	 *  __depth__ - The total number of packages to load in production if [steal.packages]
-	 *  is used. Defaults to `Infinity`.
-	 * 
-	 *  __packageSteal__ - `true` to package stealjs with `production.js`. Defaults to `false`.
-	 * 
-	 * Example:
-	 * 
-	 *     steal.build("app",{
-	 *       minify: false,
-	 *       depth: 3.
-	 *       packageSteal: true,
-	 *       to: "staticproduction/app"
-	 *     })
 	 */
 	steal.build = function( moduleId, options ) {
 

@@ -33,6 +33,14 @@ like = function(a, b){
 /**
  * @class steal.parse
  * @parent stealjs
+ *
+ * @signature `parse(str)`
+ * 
+ * @constructor
+ * @param {String} str
+ * @return {steal.parse} an object that can be used to pull tokens.
+ *
+ * @body
  * Returns an pull parser useful for walking through
  * token streams.
  *
@@ -44,9 +52,6 @@ like = function(a, b){
  *     //parse until it finds the matching ) to (
  *     p.partner("(");
  *
- * @constructor
- * @param {String} str
- * @return {steal.parse} an object that can be used to pull tokens.
  */
 return  function(str){
 		//print("Breaking up strs")

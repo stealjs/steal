@@ -1,79 +1,83 @@
-
 /**
- @class steal.instrument
- @parent stealjs
- @plugin steal/instrument
- @test steal/instrument/qunit.html
- 
- Instruments JavaScript code blocks.  As the code runs, a block counter object keeps track 
- of which blocks of code were run per file.  This information can be used to determine code 
- coverage statistics.
- 
- ## Usage
- 
- To turn on instrumentation, steal this plugin and set the files you want to ignore, then resume 
- stealing files, which will be instrumented:
- 
-     steal('steal/instrument', function(instrument){
-       instrument({
-         ignores: ["/jquery","/can","/funcunit","/steal","*\/test","*_test.js","*funcunit.js"]
-       })
-      })
-     .then("./some_file.js")
- 
- ## Ignoring files
- 
- If you want to tell steal.instrument to ignore certain directories, files, or file patterns, set 
- an array of strings which are used to ignore files.  For 
- example:
- 
-     steal('steal/instrument', function(instrument){
-       instrument({
-         ignores: ["jquery","*_test.js."]
-       })
-      })
- 
- The is a wildcard character.  The above example would ignore any files in the jquery directory, along with 
- any file ending in _test.js.  Ignored files are stolen normally, without any instrumentation.
- 
- ## How it works
- 
- steal.instrument works by adding a custom JS converter.  When an instrumented file is stolen, it:
- 
- 1. Is loaded via AJAX (hence cross domain files are ignored, since the AJAX request would fail)
- 2. The text from the file is parsed, using the JS parser written by Mihai Bazon for the [https://github.com/mishoo/UglifyJS UglifyJS project]
- 3. The text from the file is rebuilt from the parse tree.  At the start of any block of code, a line like 
- __s("foo.js", 3) is added.  When this block runs, this function call will increment the counter for block 3 
- in foo.js.
- 4. This text is then eval-ed in global scope.
- 
- To make this as fast as possible, localStorage is used where possible.  Instrumented files are cached in 
- localStorage with a hash representing their contents.  Next run, this cache is checked first.  If the file has changed, 
- the hash will change and invalidate the cache.  Otherwise, the cached file is eval-ed.
- 
- If the app opens a popup window or iframe, these children frames will all be loaded with instrumentation turned on also.  
- Each instrumented file is stored in a global object on the opener window, so if children steal the same file, those files will 
- use the stored version.  This is useful for FuncUnit runs, where child apps are loaded multiple times.
- 
- ## Reporting coverage results
- 
- When you're ready to calculate results and show them, call steal.instrument.compileStats.  This function inspects all the block 
- counters, calculates statistics for each file and total statistics for the collection of all files.  Each file has its:
- 
- 1. src - not matching the real source because its rebuild from the parse tree
- 2. linesUsed - an object representing which lines were run in the src.  Each key in the key-value map is a line number.  
- Each value is the counter for how many times that line was run.  Non-statements are skipped.
- 3. lineCoverage - percent of lines run
- 4. blockCoverage - percent of blocks run
- 5. lines - number of total lines
- 6. blocks - number of total blocks
- 
- Call steal.instrument.report with the result of compileStats to display a reporting view, showing 
- percentages and which lines were run for each file.
- 
- Remote files (not on the same domain) are skipped because they can't be loaded via AJAX.
- 
-**/
+ * @constructor steal.instrument
+ * @parent stealjs
+ * @plugin steal/instrument
+ * @test steal/instrument/qunit.html
+ * 
+ * Instruments JavaScript code blocks.  As the code runs, a block counter object keeps track 
+ * of which blocks of code were run per file.  This information can be used to determine code 
+ * coverage statistics.
+ * 
+ * ## Usage
+ * 
+ * To turn on instrumentation, steal this plugin and set the files you want to ignore, then resume 
+ * stealing files, which will be instrumented:
+ * 
+ *     steal('steal/instrument', function(instrument){
+ *       instrument({
+ *         ignores: ["/jquery","/can","/funcunit","/steal","*\/test","*_test.js","*funcunit.js"]
+ *       })
+ *      })
+ *     .then("./some_file.js")
+ * 
+ * ## Ignoring files
+ * 
+ * If you want to tell steal.instrument to ignore certain directories, files, or file patterns, set 
+ * an array of strings which are used to ignore files.  For 
+ * example:
+ * 
+ *     steal('steal/instrument', function(instrument){
+ *       instrument({
+ *         ignores: ["jquery","*_test.js."]
+ *       })
+ *      })
+ * 
+ * The is a wildcard character.  The above example would ignore any files in the jquery directory, along with 
+ * any file ending in _test.js.  Ignored files are stolen normally, without any instrumentation.
+ * 
+ * ## How it works
+ * 
+ * steal.instrument works by adding a custom JS converter.  When an instrumented file is stolen, it:
+ * 
+ * 1. Is loaded via AJAX (hence cross domain files are ignored, since the AJAX request would fail)
+ * 2. The text from the file is parsed, using the JS parser written by 
+ * Mihai Bazon for the [https://github * com/mishoo/UglifyJS UglifyJS project]
+ * 3. The text from the file is rebuilt from the parse tree.  At the start of any block of code, a line like 
+ * __s("foo.js", 3) is added.  When this block runs, this function call will increment the counter for block 3 
+ * in foo.js.
+ * 4. This text is then eval-ed in global scope.
+ * 
+ * To make this as fast as possible, localStorage is used where possible.  Instrumented files are cached in 
+ * localStorage with a hash representing their contents.  Next run, this cache is checked first. 
+ * If the file has changed, the hash will change and invalidate the cache.  Otherwise, the cached file is eval-ed.
+ * 
+ * If the app opens a popup window or iframe, these children frames will all be loaded with 
+ * instrumentation turned on also.  
+ * Each instrumented file is stored in a global object on the opener window, 
+ * so if children steal the same file, * those files will 
+ * use the stored version.  This is useful for FuncUnit runs, where child apps are loaded multiple times.
+ * 
+ * ## Reporting coverage results
+ * 
+ * When you're ready to calculate results and show them, call steal.instrument.compileStats.  
+ * This function inspects all the block 
+ * counters, calculates statistics for each file and total statistics for the collection of all files. 
+ * Each file has its:
+ * 
+ * 1. src - not matching the real source because its rebuild from the parse tree
+ * 2. linesUsed - an object representing which lines were run in the src.  Each key in the key-value map is a line * number.  
+ * Each value is the counter for how many times that line was run.  Non-statements are skipped.
+ * 3. lineCoverage - percent of lines run
+ * 4. blockCoverage - percent of blocks run
+ * 5. lines - number of total lines
+ * 6. blocks - number of total blocks
+ * 
+ * Call steal.instrument.report with the result of compileStats to display a reporting view, showing 
+ * percentages and which lines were run for each file.
+ * 
+ * Remote files (not on the same domain) are skipped because they can't be loaded via AJAX.
+ * 
+ */
 
 if(steal.isRhino){
 	steal(function(){
