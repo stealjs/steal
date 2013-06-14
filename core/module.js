@@ -306,7 +306,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 					return;
 				}
 				
-				if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
+				if ( (isProduction && item.ignore) || (!isProduction && !steal.isNode && item.prodonly)) {
 					return;
 				}
 				
@@ -545,7 +545,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 	h.extend(Module.prototype, {
 		load: h.after(Module.prototype.load, function( stel ) {
 			var self = this;
-			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
+			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isNode && (self.options.src.protocol == "file" || !h.support.error) ) {
 				self.completeTimeout = setTimeout(function() {
 					throw "steal.js : " + self.options.src + " not completed"
 				}, 5000);

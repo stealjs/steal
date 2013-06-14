@@ -1718,7 +1718,7 @@ ConfigManager.defaults.types = {
 					return;
 				}
 				
-				if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
+				if ( (isProduction && item.ignore) || (!isProduction && !steal.isNode && item.prodonly)) {
 					return;
 				}
 				
@@ -1957,7 +1957,7 @@ ConfigManager.defaults.types = {
 	h.extend(Module.prototype, {
 		load: h.after(Module.prototype.load, function( stel ) {
 			var self = this;
-			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
+			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isNode && (self.options.src.protocol == "file" || !h.support.error) ) {
 				self.completeTimeout = setTimeout(function() {
 					throw "steal.js : " + self.options.src + " not completed"
 				}, 5000);
@@ -2024,6 +2024,7 @@ ConfigManager.defaults.types = {
 	Module.modules = modules;
 	return Module;
 }
+
 
 	function stealManager(kickoff, config, setStealOnWindow){
 
@@ -2557,7 +2558,7 @@ h.extend(st, {
 	extend: h.extend,
 	Deferred: Deferred,
 	// Currently used a few places
-	isRhino: h.win.load && h.win.readUrl && h.win.readFile,
+	isNode: typeof process !== "undefined" && process.versions && !!process.versions.node,
 	/**
 	 * @hide
 	 * Makes options
@@ -2790,12 +2791,13 @@ h.extend(st, {
 // Determine if we're running in IE older than IE9. This 
 // will affect loading strategy for JavaScripts.
 h.useIEShim = (function(){
-	if(st.isRhino || typeof document === 'undefined') { return false; }
+	if(st.isNode || typeof document === 'undefined') { return false; }
 
 	var d = document.createElement('div');
 	d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";
 	return !!(h.scriptTag().readyState && d.innerText === "ie");
 })()
+
 
 		//  ============================== Packages ===============================
 /**
