@@ -15,11 +15,11 @@
     "node-promise" : ">= 0.5.4",
     "grunt-contrib-connect": "0.1.2"
   },
-  "main": "node/steal",
+  "main": "lib/index",
   "homepage" : "http://javascriptmvc.com/docs.html#!stealjs",
   "repository" : {
     "type" : "git",
-    "url" : "git://github.com/bitovi/steal.git"
+    "url" : "git://github.com/bitovi/steal.js.git"
   },
   "licenses" : [
     {
