@@ -293,6 +293,8 @@ steal('steal',
 
 			function visit( f ) {
 				if ( f.order === undefined ) {
+					//prevent infinate loops
+					f.order = null;
 					f.dependencyFileNames.forEach(function(fileName){
 						visit( options.files[fileName] )
 					})
