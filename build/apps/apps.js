@@ -182,7 +182,7 @@ steal('steal',
 					} else {
 						var firstDependency = opener.rootSteal;
 					}
-					var appFile = apps.addDependencies(firstDependency, options, appName );
+					var appFile = apps.addDependencies(firstDependency, options, options.multipleOpens ? appName: "APP" );
 					options.appFiles.push(  appFile  );
 					options.steal = opener.steal;
 					steal.print(" ")
