@@ -2289,7 +2289,7 @@ st.getScriptOptions = function (script) {
 		// Split on / to get rootUrl
 		parts = src.split("/")
 		parts.pop();
-		if (parts[parts.length - 1] == "steal") {
+		if (parts[parts.length - 1] == "stealjs") {
 			parts.pop();
 		}
 		var root = parts.join("/");
@@ -2299,6 +2299,7 @@ st.getScriptOptions = function (script) {
 
 	return options;
 };
+
 		
 		/**
  * @function steal.id
