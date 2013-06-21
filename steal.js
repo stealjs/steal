@@ -1464,6 +1464,11 @@
 					this.waits = true;
 					this.unique = false;
 				} else {
+					if(h.isString(options)) {
+						options = {
+							id: options
+						}
+					}
 					// save the original options
 					this.options = steal.makeOptions(h.extend({}, options), this.curId);
 
