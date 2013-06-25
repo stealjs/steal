@@ -242,7 +242,7 @@ startup = h.after(startup, function() {
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({
-				id: "steal/dev/dev.js",
+				id: "stealjs/dev/dev.js",
 				ignore: true
 			});
 		}

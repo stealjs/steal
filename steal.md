@@ -141,7 +141,7 @@ change the behavior of how steal loads modules. `steal.config`
 allows you to set rules that:
 
  - Apply for all modules. (_ex: changing the location of the root folder_)
- - Apply for a single moduleId. (_ex: 'steal/dev/dev.js' should not be added to production_)
+ - Apply for a single moduleId. (_ex: 'stealjs/dev/dev.js' should not be added to production_)
  - Apply to startup. (_ex: load `myapp/myapp.js` as the first JS module)
 
 You can find a full list of options in [steal.config steal.config's docs],

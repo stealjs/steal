@@ -3313,7 +3313,7 @@ startup = h.after(startup, function() {
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({
-				id: "steal/dev/dev.js",
+				id: "stealjs/dev/dev.js",
 				ignore: true
 			});
 		}
@@ -3326,6 +3326,7 @@ startup = h.after(startup, function() {
 		st.apply(h.win, steals);
 	}
 });
+
 
 		// =========== INTERACTIVE STUFF ===========
 // Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are
