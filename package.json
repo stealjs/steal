@@ -1,7 +1,7 @@
 {
   "name" : "stealjs",
   "description" : "Gets JavaScript.",
-  "version" : "3.3.5pre",
+  "version" : "3.3.7pre",
   "author" : {
     "name" : "Bitovi",
     "email" : "contact@bitovi.com",

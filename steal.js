@@ -3313,7 +3313,7 @@ startup = h.after(startup, function() {
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({
-				id: "steal/dev/dev.js",
+				id: st.isNode ? "dev/dev.js" : "steal/dev/dev.js",
 				ignore: true
 			});
 		}
