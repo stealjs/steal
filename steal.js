@@ -2289,7 +2289,7 @@ st.getScriptOptions = function (script) {
 		// Split on / to get rootUrl
 		parts = src.split("/")
 		parts.pop();
-		if (parts[parts.length - 1] == "stealjs") {
+		if (parts[parts.length - 1] == "steal") {
 			parts.pop();
 		}
 		var root = parts.join("/");
@@ -3313,7 +3313,7 @@ startup = h.after(startup, function() {
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({
-				id: "stealjs/dev/dev.js",
+				id: "steal/dev/dev.js",
 				ignore: true
 			});
 		}

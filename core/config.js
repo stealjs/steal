@@ -57,7 +57,7 @@ st.getScriptOptions = function (script) {
 		// Split on / to get rootUrl
 		parts = src.split("/")
 		parts.pop();
-		if (parts[parts.length - 1] == "stealjs") {
+		if (parts[parts.length - 1] == "steal") {
 			parts.pop();
 		}
 		var root = parts.join("/");
