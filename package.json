@@ -1,7 +1,7 @@
 {
   "name" : "stealjs",
   "description" : "Gets JavaScript.",
-  "version" : "3.3.7pre",
+  "version" : "3.3.9-pre",
   "author" : {
     "name" : "Bitovi",
     "email" : "contact@bitovi.com",
@@ -14,9 +14,6 @@
     "node-promise" : ">= 0.5.4",
     "grunt-contrib-connect": "0.1.2"
   },
-	"dependencies": {
-		"execsync-ng": ">= 0.0.6"
-	},
   "main": "lib/index",
   "homepage" : "http://javascriptmvc.com/docs.html#!stealjs",
   "repository" : {
