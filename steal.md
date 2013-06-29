@@ -1,5 +1,41 @@
-@class steal
+@function steal
 @parent stealjs 0
+@group steal.types Types
+
+Loads a Module.
+
+@signature `steal(moduleIdRef..., definition(module...) )`
+
+Loads scripts, css, and other modules into your application.
+
+    steal('jquery','can','./app.less',function($, can){
+      
+    })
+
+@param {steal.moduleIdReference...} moduleIdRef Specifies the module dependencies
+of the current module. A 
+[steal.moduleIdReference moduleIdReference] uses:
+
+ - The [steal.moduleId moduleId] of the module depending on the moduleIdReference
+ - [steal.config]'s [steal.config.map map] and [steal.config.root root] configuration options
+ 
+too look up a [steal.moduleId moduleId]. 
+
+The moduleId uses [steal.config]'s [steal.config.paths paths]
+option to determine the file location or url of the module and 
+the file extension and other [steal.config] values to determine
+how to process the module to retrieve a value.
+
+@param {steal.definition} [definition] A callback function
+that gets passed the module values of the modules referenced by
+the moduleIdReferences and whose return value defines the value of
+the current module.
+
+@return {steal} returns steal for chaining.
+
+@body
+
+## Use
 
 `steal(moduleIds..., definition(modules...))` loads scripts, css, and other
 modules into your application.  For example:
@@ -252,70 +288,3 @@ own. Your code goes in the definition function.
 If a module doesn't return a value, undefined
 is passed to the definition function.
 
-@param {String|Object} [moduleIds...]
-
-Each argument specifies a module. Modules can
-be given as a:
-
-### Object
-
-An object that specifies the loading and build
-behavior of a resource.
-
-     steal({
-       id: "myfile.cf",
-       type: "coffee",
-       packaged: true,
-       unique: true,
-       ignore: false,
-       waits: false
-     })
-
-The available options are:
-
- - __id__ {*String*} - the path to the resource.
-
- - __waits__ {*Boolean default=false*} - true the resource should wait
-   for prior steals to load and run. False if the resource should load and run in
-   parallel.  This defaults to true for functions.
-
- - __unique__ {*Boolean default=true*} - true if this is a unique resource
-   that 'owns' this url.  This is true for files, false for functions.
-
- - __ignore__ {*Boolean default=false*} - true if this resource should
-   not be built into a production file and not loaded in
-   production.  This is great for script that should only be available
-   in development mode.  This script is loaded during compression, but not
-   added to the bundled script.
-
- - __packaged__ {*Boolean default=true*} - true if the script should be built
-   into the production file. false if the script should not be built
-   into the production file, but still loaded.  This is useful for
-   loading 'packages'.  This script is loaded during compression, but not
-   added to the bundled script.  The difference with ignore is packaged still
-   steals this file while production mode, from an external script.
-
- - __type__ {*String default="js"*} - the type of the resource.  This
-   is typically inferred from the src.
-
-### __String__
-
-Specifies id of a module.  For example:
-
-      steal('./file.js')
-
-Is the same as calling:
-
-      steal({id: './file.js'})
-
-@param {Function} [definition(moduleValues...)]
-
-A "definition" function that runs when all previous steals
-have completed.
-
-    steal('jquery', 'foo',function($, foo){
-      // jquery and foo have finished loading
-      // and running
-    })
-
-@return {steal} the steal object for chaining
