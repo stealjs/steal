@@ -3145,7 +3145,7 @@ h.extend(st, {
 			// brief timeout before executing the rootModule.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
-			if ( h.win.setTimeout ) {
+			if ( !st.isNode ) {
 				// we want to insert a "wait" after the current pending
 				st.pushPending();
 				setTimeout(function() {
