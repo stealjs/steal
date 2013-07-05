@@ -1,5 +1,6 @@
 @page stealjs StealJS
 @parent javascriptmvc 2
+@group stealjs.pages Pages
 
 StealJS is a collection of command line and JavaScript client utilities
 that make building, packaging, and sharing 
