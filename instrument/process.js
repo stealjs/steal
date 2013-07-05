@@ -1380,7 +1380,7 @@ function gen_code(ast, options) {
         function encode_string(str) {
                 var ret = make_string(str, options.ascii_only);
                 if (options.inline_script)
-                        ret = ret.replace(/<\x2fscript([>/\t\n\f\r ])/gi, "<\\/script$1");
+                        ret = ret.replace(/<\x2fscript([>\/\t\n\f\r ])/gi, "<\\/script$1");
                 return ret;
         };
 
@@ -1858,7 +1858,7 @@ function gen_code(ast, options) {
                         name = add_spaces([ make_name(name), "=", parenthesize(val, "seq") ]);
                 return name;
         };
-        
+
 
 };
 
