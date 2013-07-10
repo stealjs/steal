@@ -1647,7 +1647,7 @@ ConfigManager.defaults.types = {
 		// - checks what has been stolen (in pending)
 		// - wires up pendings steal's deferreds to eventually complete this
 		// - this is where all of steal's complexity is
-		executed: function( script ) {
+		executed: function( script, moduleValue ) {
 			var myqueue, 
 				stel, 
 				src = this.options.src,
@@ -1696,6 +1696,11 @@ ConfigManager.defaults.types = {
 			if (!myqueue ) {
 				myqueue = Module.pending.slice(0);
 				Module.pending = [];
+			}
+
+			// Set the value, if we have it.
+			if(moduleValue) {
+				this.value = moduleValue;
 			}
 
 			// if we have nothing, mark us as complete
@@ -1874,8 +1879,8 @@ ConfigManager.defaults.types = {
 			if (!self.executing ) {
 				self.executing = true;
 
-				config.require(self.options, function( value ) {
-					self.executed( value );
+				config.require(self.options, function() {
+					self.executed.apply(self, arguments);
 				}, function( error, src ) {
 					var abortFlag = self.options.abort,
 						errorCb = self.options.error;
