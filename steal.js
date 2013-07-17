@@ -911,9 +911,14 @@ h.extend(ConfigManager.prototype, {
 		}
 		this.stealConfig.root =  root || URI("");
 	},
-	//var stealConfig = configs[configContext];
 	cloneContext: function(){
-		return new ConfigManager( h.extend( {}, this.stealConfig ) );
+		var configManager = new ConfigManager(h.extend({}, this.stealConfig));
+		var stealConfig = configManager.stealConfig;
+
+		// Types are likely messed up at this point.
+		stealConfig.types = h.extend({}, this.stealConfig.types);
+
+		return configManager;
 	}
 })
 // ConfigManager's defaults
@@ -1135,6 +1140,7 @@ ConfigManager.defaults = {
 	 */
 	// code in core.js w/i config.on callback
 };
+
 
 	// ### TYPES ##
 /**
