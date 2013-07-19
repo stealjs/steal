@@ -40,6 +40,41 @@ module.exports = function (grunt) {
 		});
 	});
 
+	grunt.registerTask("nodetest", function(){
+		var done = this.async(),
+			flags = Object.keys(this.flags);
+
+		var testFiles = {
+			basic: ["test/node/basic.js"],
+			multiple: ["test/node/multiple.js"]
+		};
+
+		var allFiles = (function(){
+			var items = flags.length ? flags : Object.keys(testFiles);
+			var files = [];
+
+			items.forEach(function(i){
+				files = files.concat(testFiles[i]);
+			});
+
+			return files;
+		})();
+
+
+		var Mocha = require('mocha');
+		//Add the interface
+		Mocha.interfaces["qunit-mocha-ui"] = require("qunit-mocha-ui");
+		//Tell mocha to use the interface.
+		var mocha = new Mocha({ui:"qunit-mocha-ui", reporter:"spec"});
+		//Add your test files
+		allFiles.forEach(mocha.addFile.bind(mocha));
+		//Run your tests
+		mocha.run(function(failures){
+			process.exit(failures);
+		});
+	});
+
+
 	grunt.initConfig({
 		pkg : '<json:package.json>',
 		meta : {
@@ -64,5 +99,6 @@ module.exports = function (grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.registerTask('test', ['nodetest']);
 	grunt.registerTask('default', ['build', 'uglify']);
 };
