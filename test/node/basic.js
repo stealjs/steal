@@ -24,3 +24,15 @@ test("Able to steal code", function(done){
 	});
 
 });
+
+/*
+test("Able to steal code using relative paths", function(done){
+	expect(1);
+
+	steal("./files/file1.js", function(f){
+		notEqual(typeof f, "undefined", "f was retrieved.");
+		done();
+	});
+
+});
+*/
