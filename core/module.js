@@ -430,6 +430,21 @@ var moduleManager = function(steal, stealModules, interactives, config){
 		},
 		execute: function() {
 			var self = this;
+
+			// prevent shim dependencies with nested shim dependencies from executing early
+			if (this.needsDependencies.length) {
+				var fail = h.inArray(h.map(this.needsDependencies, function(module) {
+					return module.completed.isResolved();
+				}), false);
+
+				if (fail > -1) {
+					this.needsDependencies[fail].completed.then(function() {
+						self.execute()
+					});
+					return;
+				}
+			}
+
 			// if a late need dependency was addded
 			if(this.lateNeedDependency && !this.lateNeedDependency.completed.isResolved()){
 				// call execute again when it's finished
