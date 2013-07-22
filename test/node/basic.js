@@ -9,6 +9,12 @@ suite("Basic");
 
 var steal = require("../../lib");
 
+// The name of this module.
+// either stealjs or steal depending
+// on where this is being run from.
+var moduleName = path.resolve(__dirname, "../..")
+	.split("/").pop();
+
 test("Steal is required", function(){
 	equal(typeof steal, "function", "Steal is a function");
 });
@@ -16,7 +22,7 @@ test("Steal is required", function(){
 test("Able to steal code", function(done){
 	expect(1);
 
-	steal("stealjs/test/node/files/file1.js",
+	steal(moduleName + "/test/node/files/file1.js",
 		function(f){
 
 		deepEqual(f, { foo: "bar" }, "Objects are equal");

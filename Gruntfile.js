@@ -89,6 +89,12 @@ module.exports = function (grunt) {
 			file : 'core/core.js',
 			out : '<%= out %>'
 		},
+		testee: {
+			/*options: {
+				root : "..",
+ 			},*/
+			files: "core/test/qunit.html",
+		},
 		uglify: {
 			steal: {
 				files: {
@@ -99,6 +105,8 @@ module.exports = function (grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.registerTask('test', ['nodetest']);
+	grunt.loadNpmTasks('testee');
+
+	grunt.registerTask('test', ['testee', 'nodetest']);
 	grunt.registerTask('default', ['build', 'uglify']);
 };

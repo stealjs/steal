@@ -15,7 +15,8 @@
     "grunt-contrib-connect": "0.1.2",
 		"mocha": "~1.9.0",
 		"grunt-mocha-test": "0.4.0",
-		"qunit-mocha-ui": "0.0.1"
+		"qunit-mocha-ui": "0.0.1",
+		"testee": "0.0.4"
   },
   "main": "lib/index",
   "homepage" : "http://javascriptmvc.com/docs.html#!stealjs",
