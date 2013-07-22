@@ -3,7 +3,8 @@
 This is a pre-release version of `steal.js` and is not ready for public consumption. Use [steal](https://github.com/bitovi/steal) instead.
 
 @page stealjs StealJS
-@parent index 2
+@parent javascriptmvc 2
+@group stealjs.pages Pages
 
 StealJS is a collection of command line and JavaScript client utilities
 that make building, packaging, and sharing 
