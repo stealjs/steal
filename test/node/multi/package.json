@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-		"stealjs": "~0.0.0",
+		"steal": "~0.0.0",
     "other": "~0.0.0"
   },
   "devDependencies": {},

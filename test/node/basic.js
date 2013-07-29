@@ -9,8 +9,8 @@ suite("Basic");
 
 var steal = require("../../lib");
 
-// The name of this module.
-// either stealjs or steal depending
+// The name of this module could be
+// either steal or steal-tools depending
 // on where this is being run from.
 var moduleName = path.resolve(__dirname, "../..")
 	.split("/").pop();

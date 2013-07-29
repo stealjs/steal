@@ -5,7 +5,7 @@ global.steal = {
 	nodeRequire: require
 };
 
-var steal = require("stealjs");
+var steal = require("steal");
 
 steal("other", function(o){
 	console.log("Worked?", o && o.value === "other");
