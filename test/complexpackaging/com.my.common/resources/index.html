@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Complex steal packaging test</title>
+	</head>
+
+	<body>
+	</body>
+	<script>
+		steal = {
+			// When the below "paths" configurations are uncommented and the same lines are
+			// commented in stealconfig.js build throws an error. When the same "paths"
+			// configurations are commented here and uncommented in stealconfig.js build is
+			// working
+
+			paths : {
+			 	"common/" : "steal/test/complexpackaging/com.my.common/resources/",
+			 	"theme/" : "steal/test/complexpackaging/com.my.app1/resources/"
+			},
+
+			env : "development",
+			startId : "common/my/init.js"
+		}
+	</script>
+
+	<script type="text/javascript"
+	src="../../../../../steal/steal.js"></script>
+</html>
+
