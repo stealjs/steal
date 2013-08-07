@@ -239,9 +239,9 @@ steal('steal',
 						steal.print("  + "+id );
 						
 						// convert using steal's root because that might have been configured
-						var source = resource.options.text ||  readFile( steal.idToUri( resource.options.id ) );
+						source = resource.options.text ||  readFile( steal.idToUri( resource.options.id ) );
 					}
-					resource.options.text = resource.options.text || source
+					resource.options.text = source;
 					
 					// this becomes data
 					return {

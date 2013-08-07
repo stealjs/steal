@@ -236,6 +236,10 @@ test("pathTo", function() {
 	equals(''+URI("a/b/c/d/e").pathTo("a/b/c/x/y"), "../../x/y", "../../x/y is the correct reference from same domain result.");
 
 	equals(''+URI("a/b/c/d/e").pathTo("a/b/c/d/e"), "", "'' is the correct reference from same domain result.");
+
+	equals(''+URI("a/b").pathTo("a/c"), "c", "'' is the correct reference from same domain result.");
+	
+	equals(''+URI("a").pathTo("http://abc.com/d/e/x/y"), "http://abc.com/d/e/x/y", "'' is the correct reference from same domain result.");
 })
 
 test("normalize", function(){

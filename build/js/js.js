@@ -189,6 +189,8 @@ steal('steal','steal/build/css',function( steal ) {
 				jses.push(file)
 			} else if(file.buildType == 'css'){
 				csses.push(file)
+			} else if(file.buildType == 'less'){
+				csses.push(file)
 			}
 		})
 		// add to dependencies
@@ -211,8 +213,6 @@ steal('steal','steal/build/css',function( steal ) {
 		}
 		// make 'loading'
 		var code = ["steal.has('"+loadingCalls.join("','")+"');"];
-		
-		
 		
 		// add dependencies
 		code.push.apply(code,dependencyCalls);
@@ -244,9 +244,9 @@ steal('steal','steal/build/css',function( steal ) {
 			jsCode = steal.build.js.clean(jsCode);
 			jsCode = steal.build.js.minify(jsCode,{currentLineMap: lineMap, compressor: buildOptions.compressor});
 		}
-		
+
 		var csspackage = steal.build.css.makePackage(csses, cssPackage);
-		
+
 		return {
 			js: jsCode,
 			css: csspackage
