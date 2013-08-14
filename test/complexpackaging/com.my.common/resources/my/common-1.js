@@ -1,0 +1,3 @@
+function common_1(){
+
+}
