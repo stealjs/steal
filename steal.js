@@ -1114,12 +1114,12 @@ ConfigManager.defaults = {
 	 */
 	//
 	/**
-	 * @property steal.config.completed
+	 * @property steal.config.executed
 	 * @parent steal.config
 	 * 
-	 * @signature `steal.config("completed", completedIds)`
-	 * Marks the modules represented by `completedIds` as
-	 * completed (already loaded and run). 
+	 * @signature `steal.config("executed", executedIds)`
+	 * Marks the modules represented by `executedIds` as
+	 * executed (already loaded and run). 
 	 * 
 	 * The following can be used to indicate that
 	 * `production.css` has already been loaded and run:
@@ -1127,7 +1127,7 @@ ConfigManager.defaults = {
 	 *     <link rel="stylesheet" type="text/css" 
 	 *           href="../myapp/production.css">
 	 *     <script>
-	 *     steal = {completed: ["myapp/production.css"]}
+	 *     steal = {executed: ["myapp/production.css"]}
 	 *     </script>
 	 *     <script src="../steal/steal.production.js?myapp">
 	 *     </script>
