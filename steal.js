@@ -887,7 +887,7 @@ h.extend(ConfigManager.prototype, {
 	 * @function steal.config.root
 	 * @parent steal.config
 	 *
-	 * @signature `steal.config.root("root", "http://foo.com/app/files/")`
+	 * @signature `steal.config("root", "http://foo.com/app/files/")`
 	 *
 	 * Read or define the path relative URI's should be referenced from.
 	 * 
@@ -2132,6 +2132,10 @@ ConfigManager.defaults.types = {
 		 * Configures a specific option value. Example:
 		 * 
 		 *     steal.config("env","production")
+		 * 
+		 * @body
+		 * 
+		 * ## Configurable options
 		 * 
 		 * Steal supports the following configuration options:
 		 * 

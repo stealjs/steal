@@ -150,13 +150,70 @@ h.extend(ConfigManager.prototype, {
 	 * @function steal.config.root
 	 * @parent steal.config
 	 *
-	 * @signature `steal.config.root("root", "http://foo.com/app/files/")`
+	 * @signature `steal.config("root", [newRoot])`
 	 *
-	 * Read or define the path relative URI's should be referenced from.
+	 * Read or define the path relative URI's should be 
+	 * referenced from.  The `root` value is the default location
+	 * used to find [steal.moduleId moduleIds].
 	 * 
-	 *     window.location //-> "http://foo.com/site/index.html"
-	 *     st.URI.root("http://foo.com/app/files/")
-	 *     st.root.toString() //-> "../../app/files/"
+	 * By default `root` is the parent folder of the `steal` folder.
+	 * 
+	 * @param {String} [newRoot] If provided, updates `root` to point to this
+	 * location.
+	 * 
+	 * @return {steal.URI|undefined} If a `newRoot` value is provided
+	 * undefined is returned. If `newRoot` is not provided a URI of the path to the root folder from the 
+	 * current page is returned.
+	 * 
+	 * ## Use
+	 * 
+	 * `steal.root("root",newRoot)` configures the default location where 
+	 * steal should find module ids.  By default `root` is the parent folder of 
+	 * the `steal` folder.
+	 * 
+	 * For example, if _app.js_ looks like:
+	 * 
+	 *     steal("mymodules/plugin", function(){
+	 *     
+	 *     })
+	 * 
+	 * And your app's folders and files look like:
+	 * 
+	 *     myproject/
+	 *       stealconfig.js
+	 *       steal/
+	 *         steal.js
+	 *       app/
+	 *         app.js
+	 *       mymodules/
+	 *         plugin/
+	 *           plugin.js
+	 *     
+	 * _app.js_ will load _root/mymodules/plugin/plugin.js_ where `root` is the
+	 * _myproject_ folder.
+	 * 
+	 * Say you wanted steal in a shared folder while your app's code would stay in myproject like:
+	 * 
+	 * 
+	 *     myproject/
+	 *       shared/
+	 *         stealconfig.js
+	 *         steal/
+	 *           steal.js
+	 *       app/
+	 *         app.js
+	 *       mymodules/
+	 *         plugin/
+	 *           plugin.js
+	 * 
+	 * `root` would be the _shared_ folder by default. To change that, you could have the 
+	 * following in stealconfig.js:
+	 * 
+	 *     steal.config({
+	 *       root: steal.config("root").join("..")
+	 *     })
+	 * 
+	 * 
 	 */
 	root: function( relativeURI ) {
 		if ( relativeURI !== undefined ) {
