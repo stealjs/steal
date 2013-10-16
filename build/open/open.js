@@ -281,6 +281,9 @@ steal('steal',function(s){
 				"jquery.1.8.1.js": function( script ) {
 					window.jQuery && jQuery.holdReady(true);
 				},
+				"jquery.1.9.1.js": function( script ) {
+					window.jQuery && jQuery.holdReady(true);
+				},
 				"steal.js": function(script){
 					if(stealData.skipAll){
 						window.steal.config({
