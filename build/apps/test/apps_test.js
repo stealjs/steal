@@ -28,26 +28,26 @@ steal('steal', 'steal/test', function( s ) {
          * Modules should be grouped up into packages, based upon shared
          * dependencies. The packages should be structured as follows:
          *
-         * packages/0 -> (contains) -> nested_plugin_xyz
+         * packages/84b2b8c9 -> (contains) -> nested_plugin_xyz
          *
-         * packages/1 -> (depends on) -> packages/0 for nested_plugin_xyz
-         *            -> (contains) -> plugin_xy
+         * packages/9a69c596 -> (depends on) -> packages/84b2b8c9 for nested_plugin_xyz
+         *                   -> (contains) -> plugin_xy
          *
          *
-         * packages/2 -> (depends on) -> packages/0 for nested_plugin_xyz
-         *            -> (contains) -> plugin_yz
+         * packages/66533546 -> (depends on) -> packages/84b2b8c9 for nested_plugin_xyz
+         *                   -> (contains) -> plugin_yz
          *
-         * app_x/production -> (loads) -> packages/0 for nested_plugin_xyz
-         *                  -> (loads) -> packages/1 for plugin_xy
+         * app_x/production -> (loads) -> packages/84b2b8c9 for nested_plugin_xyz
+         *                  -> (loads) -> packages/9a69c596 for plugin_xy
          *                  -> (contains) -> app_x
          *
-         * app_y/production -> (loads) -> packages/0 for nested_plugin_xyz
-         *                  -> (loads) -> packages/1 for plugin_xy
-         *                  -> (loads) -> packages/2 for plugin_yz
+         * app_y/production -> (loads) -> packages/84b2b8c9 for nested_plugin_xyz
+         *                  -> (loads) -> packages/9a69c596 for plugin_xy
+         *                  -> (loads) -> packages/66533546 for plugin_yz
          *                  -> (contains) -> app_y
          *
-         * app_z/production -> (loads) -> packages/0 for nested_plugin_xyz
-         *                  -> (loads) -> packages/2 for plugin_yz
+         * app_z/production -> (loads) -> packages/84b2b8c9 for nested_plugin_xyz
+         *                  -> (loads) -> packages/66533546 for plugin_yz
          *                  -> (contains) -> plugin_z
          *                  -> (contains) -> app_z
          *
@@ -91,28 +91,28 @@ steal('steal', 'steal/test', function( s ) {
             s.test.remove("steal/build/apps/test/multibuild/app_x/production.css");
             s.test.remove("steal/build/apps/test/multibuild/app_y/production.css");
             s.test.remove("steal/build/apps/test/multibuild/app_z/production.css");
-            s.test.remove("packages/0.js");
-            s.test.remove("packages/1.js");
-            s.test.remove("packages/2.js");
-            s.test.remove("packages/0.css");
-            s.test.remove("packages/1.css");
-            s.test.remove("packages/2.css");
+            s.test.remove("packages/84b2b8c9.js");
+            s.test.remove("packages/9a69c596.js");
+            s.test.remove("packages/66533546.js");
+            s.test.remove("packages/84b2b8c9.css");
+            s.test.remove("packages/9a69c596.css");
+            s.test.remove("packages/66533546.css");
         });
     };
 
     s.test.test("multibuild creates JS/CSS packages with the right contents", function(){
         setupMultiBuild(function(){
             var contents;
-            contents = readFile("packages/app_x-app_y-app_z.js");
+            contents = readFile("packages/84b2b8c9.js");
 
             s.test.equals(/init_nested_plugin_xyz/.test(contents), true,
                     "content of nested_plugin_xyz.js should be packaged");
 
-            contents = readFile("packages/app_x-app_y.js");
+            contents = readFile("packages/9a69c596.js");
             s.test.equals(/init_plugin_xy/.test(contents), true,
                     "content of plugin_xy.js should be packaged");
 
-            contents = readFile("packages/app_y-app_z.js");
+            contents = readFile("packages/66533546.js");
             s.test.equals(/init_plugin_yz/.test(contents), true,
                     "content of plugin_yz.js should be packaged");
 
@@ -131,15 +131,15 @@ steal('steal', 'steal/test', function( s ) {
                     "content of plugin_z.js should be packaged");
                     
                     
-            contents = readFile("packages/app_x-app_y-app_z.css");
+            contents = readFile("packages/84b2b8c9.css");
             s.test.equals(/#nested_plugin_xyz_styles/.test(contents), true,
                     "content of nested_plugin_xyz.css should be packaged");
 
-            contents = readFile("packages/app_x-app_y.css");
+            contents = readFile("packages/9a69c596.css");
             s.test.equals(/#plugin_xy_styles/.test(contents), true,
                     "content of plugin_xy.css should be packaged");
 
-            contents = readFile("packages/app_y-app_z.css");
+            contents = readFile("packages/66533546.css");
             s.test.equals(/#plugin_yz_styles/.test(contents), true,
                     "content of plugin_yz.css should be packaged");
 
@@ -161,9 +161,9 @@ steal('steal', 'steal/test', function( s ) {
 
             s.test.open("steal/build/apps/test/multibuild/app_x/app_x.prod.html");
             linkTags = document.getElementsByTagName("link");
-            s.test.equals(/packages\/app_x-app_y-app_z\.css/.test(linkTags[0].href), true,
+            s.test.equals(/packages\/84b2b8c9\.css/.test(linkTags[0].href), true,
                     "loaded direct dependencies stylesheet");
-            s.test.equals(/packages\/app_x-app_y\.css/.test(linkTags[1].href), true,
+            s.test.equals(/packages\/9a69c596\.css/.test(linkTags[1].href), true,
                     "loaded indirect dependencies stylesheet");
             s.test.equals(/multibuild\/app_x\/production\.css/.test(linkTags[2].href), true,
                     "loaded app dependencies stylesheet");

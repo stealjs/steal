@@ -614,8 +614,7 @@ steal('steal',
 			return appNamesToMake(appModuleIds)
 		}							
 	}
-	var appNamesToName = {},
-		usedNames = {}
+	var appNamesToName = {};
 	var appNamesToMake = function(appNames){
 					
 		//remove js if it's there
@@ -627,17 +626,11 @@ steal('steal',
 		if(appNamesToName[expanded]){
 			return appNamesToName[expanded];
 		}
-		// try with just the last part
-		var shortened = appNames.map(function(l){
-			return steal.URI(l).filename()
-		}).join('-');
-		
-		if(!usedNames[shortened]){
-			usedNames[shortened] = true;
-			return appNamesToName[expanded] = "packages/"+shortened;
-		} else {
-			return appNamesToName[expanded] = "packages/"+expanded.replace(/\//g,'_') ;
-		}
+
+        // Hash the filename to prevent big packages exceeding the limit
+        // for a filename.
+        var expandedHash = shareUtil.md5(expanded).slice(0, 8);
+        return appNamesToName[expanded] = "packages/" + expandedHash;
 	};
 	return steal.build.apps;
 })
