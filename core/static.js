@@ -8,7 +8,7 @@ h.extend(st, {
 	extend: h.extend,
 	Deferred: Deferred,
 	// Currently used a few places
-	isRhino: h.win.load && h.win.readUrl && h.win.readFile,
+	isNode: typeof process !== "undefined" && process.versions && !!process.versions.node,
 	/**
 	 * @hide
 	 * Makes options
@@ -241,7 +241,7 @@ h.extend(st, {
 // Determine if we're running in IE older than IE9. This 
 // will affect loading strategy for JavaScripts.
 h.useIEShim = (function(){
-	if(st.isRhino || typeof document === 'undefined') { return false; }
+	if(st.isNode || typeof document === 'undefined') { return false; }
 
 	var d = document.createElement('div');
 	d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";

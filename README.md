@@ -1,3 +1,7 @@
+# Pre-release version - DO NOT USE
+
+This is a pre-release version of `steal.js` and is not ready for public consumption. Use [steal](https://github.com/bitovi/steal) instead.
+
 @page stealjs StealJS
 @parent javascriptmvc 2
 @group stealjs.pages Pages

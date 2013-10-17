@@ -1,7 +1,7 @@
 {
-  "name" : "StealJS",
+  "name" : "steal",
   "description" : "Gets JavaScript.",
-  "version" : "3.3.0pre",
+	"version": "3.3.20-pre",
   "author" : {
     "name" : "Bitovi",
     "email" : "contact@bitovi.com",
@@ -12,12 +12,17 @@
     "grunt-closure-tools" : "> 0.6.2",
     "grunt-contrib-uglify": "0.2.1",
     "node-promise" : ">= 0.5.4",
-    "grunt-contrib-connect": "0.1.2"
+    "grunt-contrib-connect": "0.1.2",
+		"mocha": "~1.9.0",
+		"grunt-mocha-test": "0.4.0",
+		"qunit-mocha-ui": "0.0.1",
+		"testee": "0.0.4"
   },
+  "main": "lib/index",
   "homepage" : "http://javascriptmvc.com/docs.html#!stealjs",
   "repository" : {
     "type" : "git",
-    "url" : "git://github.com/jupiterjs/steal.git"
+    "url" : "git://github.com/bitovi/steal.js.git"
   },
   "licenses" : [
     {

@@ -911,9 +911,14 @@ h.extend(ConfigManager.prototype, {
 		}
 		this.stealConfig.root =  root || URI("");
 	},
-	//var stealConfig = configs[configContext];
 	cloneContext: function(){
-		return new ConfigManager( h.extend( {}, this.stealConfig ) );
+		var configManager = new ConfigManager(h.extend({}, this.stealConfig));
+		var stealConfig = configManager.stealConfig;
+
+		// Types are likely messed up at this point.
+		stealConfig.types = h.extend({}, this.stealConfig.types);
+
+		return configManager;
 	}
 })
 // ConfigManager's defaults
@@ -1135,6 +1140,7 @@ ConfigManager.defaults = {
 	 */
 	// code in core.js w/i config.on callback
 };
+
 
 	// ### TYPES ##
 /**
@@ -1652,7 +1658,7 @@ ConfigManager.defaults.types = {
 		// - checks what has been stolen (in pending)
 		// - wires up pendings steal's deferreds to eventually complete this
 		// - this is where all of steal's complexity is
-		executed: function( script ) {
+		executed: function( script, moduleValue ) {
 			var myqueue, 
 				stel, 
 				src = this.options.src,
@@ -1703,6 +1709,11 @@ ConfigManager.defaults.types = {
 				Module.pending = [];
 			}
 
+			// Set the value, if we have it.
+			if(moduleValue) {
+				this.value = moduleValue;
+			}
+
 			// if we have nothing, mark us as complete
 			if (!myqueue.length ) {
 				this.complete();
@@ -1723,7 +1734,7 @@ ConfigManager.defaults.types = {
 					return;
 				}
 				
-				if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
+				if ( (isProduction && item.ignore) || (!isProduction && !steal.isNode && item.prodonly)) {
 					return;
 				}
 				
@@ -1894,8 +1905,8 @@ ConfigManager.defaults.types = {
 			if (!self.executing ) {
 				self.executing = true;
 
-				config.require(self.options, function( value ) {
-					self.executed( value );
+				config.require(self.options, function() {
+					self.executed.apply(self, arguments);
 				}, function( error, src ) {
 					var abortFlag = self.options.abort,
 						errorCb = self.options.error;
@@ -1977,7 +1988,7 @@ ConfigManager.defaults.types = {
 	h.extend(Module.prototype, {
 		load: h.after(Module.prototype.load, function( stel ) {
 			var self = this;
-			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
+			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isNode && (self.options.src.protocol == "file" || !h.support.error) ) {
 				self.completeTimeout = setTimeout(function() {
 					throw "steal.js : " + self.options.src + " not completed"
 				}, 5000);
@@ -2044,6 +2055,7 @@ ConfigManager.defaults.types = {
 	Module.modules = modules;
 	return Module;
 }
+
 
 	function stealManager(kickoff, config, setStealOnWindow){
 
@@ -2322,6 +2334,7 @@ st.getScriptOptions = function (script) {
 
 	return options;
 };
+
 		
 		/**
  * @function steal.id
@@ -2581,7 +2594,7 @@ h.extend(st, {
 	extend: h.extend,
 	Deferred: Deferred,
 	// Currently used a few places
-	isRhino: h.win.load && h.win.readUrl && h.win.readFile,
+	isNode: typeof process !== "undefined" && process.versions && !!process.versions.node,
 	/**
 	 * @hide
 	 * Makes options
@@ -2814,12 +2827,13 @@ h.extend(st, {
 // Determine if we're running in IE older than IE9. This 
 // will affect loading strategy for JavaScripts.
 h.useIEShim = (function(){
-	if(st.isRhino || typeof document === 'undefined') { return false; }
+	if(st.isNode || typeof document === 'undefined') { return false; }
 
 	var d = document.createElement('div');
 	d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";
 	return !!(h.scriptTag().readyState && d.innerText === "ie");
 })()
+
 
 		//  ============================== Packages ===============================
 /**
@@ -3166,7 +3180,7 @@ h.extend(st, {
 			// brief timeout before executing the rootModule.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
-			if ( h.win.setTimeout ) {
+			if ( !st.isNode ) {
 				// we want to insert a "wait" after the current pending
 				st.pushPending();
 				setTimeout(function() {
@@ -3334,7 +3348,7 @@ startup = h.after(startup, function() {
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({
-				id: "steal/dev/dev.js",
+				id: st.isNode ? "dev/dev.js" : "steal/dev/dev.js",
 				ignore: true
 			});
 		}
@@ -3347,6 +3361,7 @@ startup = h.after(startup, function() {
 		st.apply(h.win, steals);
 	}
 });
+
 
 		// =========== INTERACTIVE STUFF ===========
 // Logic that deals with making steal work with IE.  IE executes scripts out of order, so in order to tell which scripts are

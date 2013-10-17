@@ -1,8 +1,10 @@
 .tmp*
 dist
 test/myapp/production.js
-node_modules
+/node_modules
 build/apps/test/multibuild/*/*.production.js
 build/apps/test/multibuild/*/*.production.css
 less/test/production.js
 less/test/production.css
+.DS_Store
+testee.log

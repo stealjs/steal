@@ -74,7 +74,7 @@ h.extend(st, {
 			// brief timeout before executing the rootModule.
 			// This allows embeded script tags with steal to be part of 
 			// the initial set
-			if ( h.win.setTimeout ) {
+			if ( !st.isNode ) {
 				// we want to insert a "wait" after the current pending
 				st.pushPending();
 				setTimeout(function() {
@@ -242,7 +242,7 @@ startup = h.after(startup, function() {
 
 		if ( options.loadDev !== false ) {
 			steals.unshift({
-				id: "steal/dev/dev.js",
+				id: st.isNode ? "dev/dev.js" : "steal/dev/dev.js",
 				ignore: true
 			});
 		}

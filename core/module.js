@@ -240,7 +240,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 		// - checks what has been stolen (in pending)
 		// - wires up pendings steal's deferreds to eventually complete this
 		// - this is where all of steal's complexity is
-		executed: function( script ) {
+		executed: function( script, moduleValue ) {
 			var myqueue, 
 				stel, 
 				src = this.options.src,
@@ -291,6 +291,11 @@ var moduleManager = function(steal, stealModules, interactives, config){
 				Module.pending = [];
 			}
 
+			// Set the value, if we have it.
+			if(moduleValue) {
+				this.value = moduleValue;
+			}
+
 			// if we have nothing, mark us as complete
 			if (!myqueue.length ) {
 				this.complete();
@@ -311,7 +316,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 					return;
 				}
 				
-				if ( (isProduction && item.ignore) || (!isProduction && !steal.isRhino && item.prodonly)) {
+				if ( (isProduction && item.ignore) || (!isProduction && !steal.isNode && item.prodonly)) {
 					return;
 				}
 				
@@ -482,8 +487,8 @@ var moduleManager = function(steal, stealModules, interactives, config){
 			if (!self.executing ) {
 				self.executing = true;
 
-				config.require(self.options, function( value ) {
-					self.executed( value );
+				config.require(self.options, function() {
+					self.executed.apply(self, arguments);
 				}, function( error, src ) {
 					var abortFlag = self.options.abort,
 						errorCb = self.options.error;
@@ -565,7 +570,7 @@ var moduleManager = function(steal, stealModules, interactives, config){
 	h.extend(Module.prototype, {
 		load: h.after(Module.prototype.load, function( stel ) {
 			var self = this;
-			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isRhino && (self.options.src.protocol == "file" || !h.support.error) ) {
+			if ( h.doc && !self.completed && !self.completeTimeout && !steal.isNode && (self.options.src.protocol == "file" || !h.support.error) ) {
 				self.completeTimeout = setTimeout(function() {
 					throw "steal.js : " + self.options.src + " not completed"
 				}, 5000);

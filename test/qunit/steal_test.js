@@ -617,7 +617,7 @@ test("don't abort on error", function(){
 
 // Following test always fails in IE8 and lower so we don't run it for these browsers
 var shouldRun = (function(){
-	if(steal.isRhino) { return false; }
+	if(steal.isNode) { return false; }
 
 	var d = document.createElement('div');
 	d.innerHTML = "<!--[if lt IE 9]>ie<![endif]-->";
