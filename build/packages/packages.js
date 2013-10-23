@@ -252,6 +252,7 @@ steal('steal',
 					s.print("         "+destCSS);
 					s.URI(destCSS).save( filterCode(pack.css.code, 'css') );
 				}
+				buildOptions.done && buildOptions.done()
 			});
 		});
 	};

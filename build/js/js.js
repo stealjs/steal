@@ -133,7 +133,7 @@ steal('steal','steal/build/css',function( steal ) {
 			moduleOptions.forEach(function(file){
 				if(file.buildType == 'js'){
 					var source = steal.build.js.clean(file.text);
-					if(file.minify !== false){
+					if(file.minify !== false && buildOptions.minify !== false){
 						try{
 							source = steal.build.js.minify(source);
 						} catch(error){
@@ -242,7 +242,10 @@ steal('steal','steal/build/css',function( steal ) {
 		
 		if(canCompressPackage){
 			jsCode = steal.build.js.clean(jsCode);
-			jsCode = steal.build.js.minify(jsCode,{currentLineMap: lineMap, compressor: buildOptions.compressor});
+			if(buildOptions.minify !== false){
+				jsCode = steal.build.js.minify(jsCode,{currentLineMap: lineMap, compressor: buildOptions.compressor});
+			}
+			
 		}
 		
 		var csspackage = steal.build.css.makePackage(csses, cssPackage);
