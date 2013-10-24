@@ -225,13 +225,9 @@ h.extend(st, {
 	type: function( type, cb ) {
 		var typs = type.split(" ");
 		if (!cb ) {
-			return config.attr('types')[typs.shift()].require
-		}
-		
-		var typs = type.split(" ");
-		if (!cb) {
 			return config.attr('types')[typs.shift()].require;
 		}
+		
 		var obj = {};
 		obj[type] = cb;
 		config.attr('types', obj);
