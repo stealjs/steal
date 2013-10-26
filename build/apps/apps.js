@@ -1,4 +1,3 @@
-
 if(!steal.build){
 	steal.build = {};	
 }
@@ -566,7 +565,7 @@ steal('steal',
 				}
 				
 				//the source of the package
-				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css", options.exclude)
+				var pack = steal.build.js.makePackage(filesForPackaging, dependencies,packageName+ ".css", buildOptions)
 
 				//save the file
 				steal.print("saving " + steal.config('root').join(packageName+".js"));
