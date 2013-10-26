@@ -192,15 +192,15 @@ steal('steal','steal/parse',function(steal, parse){
 						throw options
 					}
 					else {
-						var errMatch;
-						while (errMatch = /\:(\d+)\:\s(.*)/g.exec(options.err)) {
-							
-							var lineNbr = parseInt(errMatch[1], 10), 
+						var matches, errMatch = /:(\d+):\s(.*)/g;
+						while ((matches = errMatch.exec(options.err)) !== null) {
+
+							var lineNbr = parseInt(matches[1], 10),
 								realLine,
-								error = errMatch[2];
+								error = matches[2];
 								
 							var lastNum, lastId; 
-							print(lineNbr);
+							//print(lineNbr);
 							for( var lineNum in currentLineMap ) {
 								if( lineNbr < parseInt( lineNum) ){
 									break;
@@ -214,8 +214,7 @@ steal('steal','steal/parse',function(steal, parse){
 							
 							steal.print('ERROR in ' + lastId + ' at line ' + realLine + ': ' + error + '\n');
 							
-							
-							var text = readFile(lastId), 
+							var text = readFile(lastId),
 								split = text.split(/\n/), 
 								start = realLine - 2, 
 								end = realLine + 2;
