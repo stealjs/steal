@@ -687,7 +687,7 @@ h.extend(URI.prototype, {
 		uri = URI(uri);
 		// uri is absolute, but "this" is relative
 		if(uri.protocol && !this.protocol){
-			return uri+"";
+			return uri;
 		}
 		var uriParts = uri.path.split("/"),
 			thisParts = this.path.split("/"),
@@ -698,11 +698,11 @@ h.extend(URI.prototype, {
 		}
 		// same directory
 		if(uriParts.length === 1 && thisParts.length === 1){
-			return uriParts.join("/");
+			return URI(uriParts.join("/"));
 		}
 		h.each(thisParts, function() {
 			result.push("../")
-		})
+		});
 		return URI(result.join("") + uriParts.join("/"));
 	},
 	mapJoin: function( url ) {
@@ -1370,30 +1370,37 @@ ConfigManager.defaults.types = {
 		}, error)
 	},
 	// loads css files and works around IE's 31 sheet limit
-	"css": function( options, success, error ) {
-		if ( options.ext === "css" ) { // do not run this for less
-            if ( createSheet ) {
-                // IE has a 31 sheet and 31 import per sheet limit
-                if (!cssCount++ ) {
-                    lastSheet = h.doc.createStyleSheet(options.src);
-                    lastSheetOptions = options;
-                } else {
-                    var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
-                    lastSheet.addImport(relative);
-                    if ( cssCount == 30 ) {
-                        cssCount = 0;
-                    }
-                }
-                success();
-                return;
-            }
+	"css": function (options, success, error) {
+		var completed = false;
+		var completedIds = steal.config('completed') ? steal.config('completed') : [];
+		h.each(completedIds,function(idx,id){
+			if(id === options.id.toString()){
+				completed = true;
+			}
+		});
+		if (options.ext === "css" && !completed) { // do not run this for less or for completed ids
+			if (createSheet) {
+				// IE has a 31 sheet and 31 import per sheet limit
+				if (!cssCount++) {
+					lastSheet = h.doc.createStyleSheet(options.src);
+					lastSheetOptions = options;
+				} else {
+					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
+					lastSheet.addImport(relative);
+					if (cssCount == 30) {
+						cssCount = 0;
+					}
+				}
+				success();
+				return;
+			}
 
-            options = options || {};
-            var link = h.createElement("link");
-            link.rel = options.rel || "stylesheet";
-            link.href = options.src;
-            link.type = "text/css";
-            h.head().appendChild(link);
+			options = options || {};
+			var link = h.createElement("link");
+			link.rel = options.rel || "stylesheet";
+			link.href = options.src;
+			link.type = "text/css";
+			h.head().appendChild(link);
 		}
 
 		success();
