@@ -224,34 +224,24 @@ ConfigManager.defaults.types = {
 		}, error)
 	},
 	// loads css files and works around IE's 31 sheet limit
-	"css": function( options, success, error ) {
-		if ( options.text ) { // less
-			var css = h.createElement("style");
-			css.type = "text/css";
-			if ( css.styleSheet ) { // IE
-				css.styleSheet.cssText = options.text;
-			} else {
-				(function( node ) {
-					if ( css.childNodes.length ) {
-						if ( css.firstChild.nodeValue !== node.nodeValue ) {
-							css.replaceChild(node, css.firstChild);
-						}
-					} else {
-						css.appendChild(node);
-					}
-				})(h.doc.createTextNode(options.text));
+	"css": function (options, success, error) {
+		var completed = false;
+		var completedIds = steal.config('completed') ? steal.config('completed') : [];
+		h.each(completedIds,function(idx,id){
+			if(id === options.id.toString()){
+				completed = true;
 			}
-			h.head().appendChild(css);
-		} else {
-			if ( createSheet ) {
+		});
+		if (options.ext === "css" && !completed) { // do not run this for less or for completed ids
+			if (createSheet) {
 				// IE has a 31 sheet and 31 import per sheet limit
-				if (!cssCount++ ) {
+				if (!cssCount++) {
 					lastSheet = h.doc.createStyleSheet(options.src);
 					lastSheetOptions = options;
 				} else {
 					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
 					lastSheet.addImport(relative);
-					if ( cssCount == 30 ) {
+					if (cssCount == 30) {
 						cssCount = 0;
 					}
 				}
