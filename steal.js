@@ -20,7 +20,7 @@
 (function( undefined ) {
 
 	var requestFactory = function() {
-	return h.win.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
+	return h.win.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
 };
 
 // ## Helpers ##
