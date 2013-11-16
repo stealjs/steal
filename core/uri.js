@@ -300,6 +300,10 @@ h.extend(URI.prototype, {
 	 */
 	pathTo: function( uri ) {
 		uri = URI(uri);
+		// uri is absolute, but "this" is relative
+		if(uri.protocol && !this.protocol){
+			return uri;
+		}
 		var uriParts = uri.path.split("/"),
 			thisParts = this.path.split("/"),
 			result = [];
@@ -307,9 +311,13 @@ h.extend(URI.prototype, {
 			uriParts.shift();
 			thisParts.shift();
 		}
+		// same directory
+		if(uriParts.length === 1 && thisParts.length === 1){
+			return URI(uriParts.join("/"));
+		}
 		h.each(thisParts, function() {
 			result.push("../")
-		})
+		});
 		return URI(result.join("") + uriParts.join("/"));
 	},
 	mapJoin: function( url ) {

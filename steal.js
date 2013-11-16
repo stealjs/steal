@@ -685,6 +685,10 @@ h.extend(URI.prototype, {
 	 */
 	pathTo: function( uri ) {
 		uri = URI(uri);
+		// uri is absolute, but "this" is relative
+		if(uri.protocol && !this.protocol){
+			return uri;
+		}
 		var uriParts = uri.path.split("/"),
 			thisParts = this.path.split("/"),
 			result = [];
@@ -692,9 +696,13 @@ h.extend(URI.prototype, {
 			uriParts.shift();
 			thisParts.shift();
 		}
+		// same directory
+		if(uriParts.length === 1 && thisParts.length === 1){
+			return URI(uriParts.join("/"));
+		}
 		h.each(thisParts, function() {
 			result.push("../")
-		})
+		});
 		return URI(result.join("") + uriParts.join("/"));
 	},
 	mapJoin: function( url ) {
@@ -887,13 +895,70 @@ h.extend(ConfigManager.prototype, {
 	 * @function steal.config.root
 	 * @parent steal.config
 	 *
-	 * @signature `steal.config("root", "http://foo.com/app/files/")`
+	 * @signature `steal.config("root", [newRoot])`
 	 *
-	 * Read or define the path relative URI's should be referenced from.
+	 * Read or define the path relative URI's should be 
+	 * referenced from.  The `root` value is the default location
+	 * used to find [steal.moduleId moduleIds].
 	 * 
-	 *     window.location //-> "http://foo.com/site/index.html"
-	 *     st.URI.root("http://foo.com/app/files/")
-	 *     st.root.toString() //-> "../../app/files/"
+	 * By default `root` is the parent folder of the `steal` folder.
+	 * 
+	 * @param {String} [newRoot] If provided, updates `root` to point to this
+	 * location.
+	 * 
+	 * @return {steal.URI|undefined} If a `newRoot` value is provided
+	 * undefined is returned. If `newRoot` is not provided a URI of the path to the root folder from the 
+	 * current page is returned.
+	 * 
+	 * ## Use
+	 * 
+	 * `steal.root("root",newRoot)` configures the default location where 
+	 * steal should find module ids.  By default `root` is the parent folder of 
+	 * the `steal` folder.
+	 * 
+	 * For example, if _app.js_ looks like:
+	 * 
+	 *     steal("mymodules/plugin", function(){
+	 *     
+	 *     })
+	 * 
+	 * And your app's folders and files look like:
+	 * 
+	 *     myproject/
+	 *       stealconfig.js
+	 *       steal/
+	 *         steal.js
+	 *       app/
+	 *         app.js
+	 *       mymodules/
+	 *         plugin/
+	 *           plugin.js
+	 *     
+	 * _app.js_ will load _root/mymodules/plugin/plugin.js_ where `root` is the
+	 * _myproject_ folder.
+	 * 
+	 * Say you wanted steal in a shared folder while your app's code would stay in myproject like:
+	 * 
+	 * 
+	 *     myproject/
+	 *       shared/
+	 *         stealconfig.js
+	 *         steal/
+	 *           steal.js
+	 *       app/
+	 *         app.js
+	 *       mymodules/
+	 *         plugin/
+	 *           plugin.js
+	 * 
+	 * `root` would be the _shared_ folder by default. To change that, you could have the 
+	 * following in stealconfig.js:
+	 * 
+	 *     steal.config({
+	 *       root: steal.config("root").join("..")
+	 *     })
+	 * 
+	 * 
 	 */
 	root: function( relativeURI ) {
 		if ( relativeURI !== undefined ) {
@@ -1368,34 +1433,24 @@ ConfigManager.defaults.types = {
 		}, error)
 	},
 	// loads css files and works around IE's 31 sheet limit
-	"css": function( options, success, error ) {
-		if ( options.text ) { // less
-			var css = h.createElement("style");
-			css.type = "text/css";
-			if ( css.styleSheet ) { // IE
-				css.styleSheet.cssText = options.text;
-			} else {
-				(function( node ) {
-					if ( css.childNodes.length ) {
-						if ( css.firstChild.nodeValue !== node.nodeValue ) {
-							css.replaceChild(node, css.firstChild);
-						}
-					} else {
-						css.appendChild(node);
-					}
-				})(h.doc.createTextNode(options.text));
+	"css": function (options, success, error) {
+		var completed = false;
+		var completedIds = steal.config('completed') ? steal.config('completed') : [];
+		h.each(completedIds,function(idx,id){
+			if(id === options.id.toString()){
+				completed = true;
 			}
-			h.head().appendChild(css);
-		} else {
-			if ( createSheet ) {
+		});
+		if (options.ext === "css" && !completed) { // do not run this for less or for completed ids
+			if (createSheet) {
 				// IE has a 31 sheet and 31 import per sheet limit
-				if (!cssCount++ ) {
+				if (!cssCount++) {
 					lastSheet = h.doc.createStyleSheet(options.src);
 					lastSheetOptions = options;
 				} else {
 					var relative = "" + URI(URI(lastSheetOptions.src).dir()).pathTo(options.src);
 					lastSheet.addImport(relative);
-					if ( cssCount == 30 ) {
+					if (cssCount == 30) {
 						cssCount = 0;
 					}
 				}
