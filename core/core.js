@@ -119,6 +119,10 @@
 		 * 
 		 *     steal.config("env","production")
 		 * 
+		 * @body
+		 * 
+		 * ## Configurable options
+		 * 
 		 * Steal supports the following configuration options:
 		 * 
 		 * - [steal.config.map map] - maps ids passed to steal to another id.
