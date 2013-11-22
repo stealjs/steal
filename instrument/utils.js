@@ -93,15 +93,14 @@ steal.instrument.utils = {
 			return;
 		}
 		var win = window;
-		if(top !== window){
-			win = top;
-		}
 		try{
 			if(win.opener && win.opener.steal){
 				win = win.opener;
+			}else if (win.iframe && win.iframe.contentWindow.steal) {
+				win = win.iframe.contentWindow;
 			}
 		}catch(e){}
-		
+
 		return win;
 	}
 }
