@@ -83,12 +83,16 @@ steal({id: "./less_engine.js",ignore: true}, function(){
 			pathParts[pathParts.length - 1] = ''; // Remove filename
 			paths = [pathParts.join('/')];
 		}
-		new (less.Parser)({
-            optimization: less.optimization,
-            paths: [pathParts.join('/')]
-        }).parse(options.text, function (e, root) {
-			options.text = root.toCSS();
-			success();
-		});
+		try {
+			new (less.Parser)({
+	            optimization: less.optimization,
+	            paths: [pathParts.join('/')]
+	        }).parse(options.text, function (e, root) {
+				options.text = root.toCSS();
+				success();
+			});
+		} catch(e) {
+			console.log(e);
+		}
 	});
 })
