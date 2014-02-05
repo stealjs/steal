@@ -3726,7 +3726,6 @@ loop:   for (;;) {
             case 'text':
             case 'file':
             case 'password':
-            case 'file':
             case 'hidden':
             case 'image':
                 if (option.adsafe && a.autocomplete !== 'off') {
