@@ -623,7 +623,8 @@ h.extend(URI.prototype, {
 			part = right[0];
 		}
 		return h.extend(URI(this.domain() + left.concat(right).join("/")), {
-			query: uri.query
+			query: uri.query,
+			fragment: uri.fragment
 		});
 	},
 	/**
@@ -695,7 +696,7 @@ h.extend(URI.prototype, {
 		h.each(thisParts, function() {
 			result.push("../")
 		})
-		return URI(result.join("") + uriParts.join("/"));
+		return URI(result.join("") + uriParts.join("/") + (uri.query ? ("?" + uri.query) : ""));
 	},
 	mapJoin: function( url ) {
 		return this.join(URI(url).insertMapping());
