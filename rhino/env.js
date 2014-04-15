@@ -2193,7 +2193,7 @@ Envjs.connection = function(xhr, responseHandler, data){
 
         //write data to output stream if required
         if(data){
-            if(data instanceof Document){
+            if(data instanceof Envjs.Document){
                 if ( xhr.method == "PUT" || xhr.method == "POST" ) {
                     connection.setDoOutput(true);
                     outstream = connection.getOutputStream(),
@@ -5110,7 +5110,7 @@ __extend__(DOMImplementation.prototype,{
 
         var doc = null, documentElement;
 
-        doc = new Document(this, null);
+        doc = new Envjs.Document(this, null);
         if(doctype){
             doc.doctype = doctype;
         }
@@ -5438,6 +5438,7 @@ Document = function(implementation, docParentWindow) {
 
     this.importing = false;
 };
+Envjs.Document = Document;
 
 Document.prototype = new Node();
 __extend__(Document.prototype,{
@@ -5695,7 +5696,7 @@ DOMParser = function(principle, documentURI, baseURI) {
 };
 __extend__(DOMParser.prototype,{
     parseFromString: function(xmlstring, mimetype){
-        var doc = new Document(new DOMImplementation()),
+        var doc = new Envjs.Document(new DOMImplementation()),
             e4;
 
         // The following are e4x directives.
@@ -7141,7 +7142,7 @@ function __setArray__( target, array ) {
  * @extends Document
  */
 HTMLDocument = function(implementation, ownerWindow, referrer) {
-    Document.apply(this, arguments);
+    Envjs.Document.apply(this, arguments);
     this.referrer = referrer || '';
     this.baseURI = "about:blank";
     this.ownerWindow = ownerWindow;
@@ -7302,7 +7303,7 @@ __extend__(HTMLDocument.prototype, {
         } else if ("http://www.w3.org/2000/svg" == uri) {
  			return this.createElement(local);
 		} else {
-            return Document.prototype.createElementNS.apply(this,[uri, local]);
+            return Envjs.Document.prototype.createElementNS.apply(this,[uri, local]);
         }
     },
     get anchors(){
@@ -7312,7 +7313,7 @@ __extend__(HTMLDocument.prototype, {
         return new HTMLCollection(this.getElementsByTagName('applet'));
     },
     get documentElement(){
-        var html = Document.prototype.__lookupGetter__('documentElement').apply(this,[]);
+        var html = Envjs.Document.prototype.__lookupGetter__('documentElement').apply(this,[]);
         if( html === null){
             html = this.createElement('html');
             this.appendChild(html);
@@ -23718,7 +23719,7 @@ __extend__(DOMParser.prototype,{
 
 XMLParser.parseDocument = function(xmlstring, xmldoc, mimetype){
     //console.log('XMLParser.parseDocument');
-    var tmpdoc = new Document(new DOMImplementation()),
+    var tmpdoc = new Envjs.Document(new DOMImplementation()),
         parent,
         importedNode,
         tmpNode;
