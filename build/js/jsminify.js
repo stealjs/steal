@@ -185,6 +185,9 @@ steal('steal','steal/parse',function(steal, parse){
 					runCommand("java", "-jar", "steal/build/js/compiler.jar", "--compilation_level", "SIMPLE_OPTIMIZATIONS", 
 						"--js", filename, options);
 				}
+				
+				tmpFile.remove();
+				
 				// print(options.err);
 				// if there's an error, go through the lines and find the right location
 				if( /ERROR/.test(options.err) ){
@@ -226,8 +229,8 @@ steal('steal','steal/parse',function(steal, parse){
 							steal.print(split.slice(start, end).join('\n') + '\n')
 						}
 					}
+					throw new Error("Google Closure compress FAILED");
 				}
-				tmpFile.remove();
 				return ""+outBaos.toString();
 			};
 		},
