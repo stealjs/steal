@@ -1628,7 +1628,9 @@ Envjs.getcwd = function() {
  
  */
 Envjs.uri = function(path, base, allow) {
-	path = path.replace(/\\/g, '/');
+	path = "" + path
+                    .replace(/\\/g, '/')
+                    .replace(/ /g, '%20');
     //console.log('constructing uri from path %s and base %s', path, base);
 
     // Semi-common trick is to make an iframe with src='javascript:false'
