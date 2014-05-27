@@ -1,5 +1,4 @@
-	
-
+	var LESS_ENGINE = "less-1.7.0";
 	var getScriptOptions = function () {
 	
 		var options = {},
@@ -41,10 +40,12 @@
 			parts = src.split("/");
 			var lastPart = parts.pop();
 			
-			if(lastPart.indexOf("steal") === 0 && !System.paths["steal/dev/dev"]) {
+			if(lastPart.indexOf("steal") === 0 && !System.paths["steal/dev"]) {
 				options.paths = {
 					"steal/*": parts.join("/")+"/*.js",
-					"@traceur": parts.slice(0,-1).join("/")+"/traceur/traceur.js"
+					"less" :  parts.join("/")+"/"+LESS_ENGINE+".js",
+					"@traceur": parts.slice(0,-1).join("/")+"/traceur/traceur.js",
+					
 				};
 				
 			}
@@ -73,12 +74,17 @@
 	
 	var getOptionsFromStealLocation = function(){
 		var options = {};
-		if(typeof __dirname === "string" && !System.paths["steal/dev/dev"]) {
+		if(typeof __dirname === "string" && !System.paths["steal/dev"]) {
 			options.paths = {
 				"steal/*": __dirname+"/*.js",
 				"@traceur": __dirname.split("/").slice(0,-1).join("/")+"/traceur/traceur.js"
 			};
 		}
+		
+		System.register("less",[], function(){
+			var r = require;
+			return { __useDefault: true, 'default': r('less') };
+		});
 		return options;
 	};
 	
@@ -90,9 +96,11 @@
 		} else {
 			var urlOptions = getOptionsFromStealLocation();
 		}
-		if(!System.map.css) {
-			System.map.css = "steal/css";	
-		}
+
+		extend(System.ext,{
+			css: 'steal/css',
+			less: 'steal/less'
+		});
 
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
@@ -133,10 +141,10 @@
 					steal.config(config);
 				}
 
-				return steal("steal/dev");
+				return steal.System.import("steal/dev");
 			},function(){
 				console.log("steal - error loading stealconfig.");
-				return steal("steal/dev");
+				return steal.System.import("steal/dev");
 			});
 			
 			appDeferred = devDeferred.then(function(){
@@ -158,4 +166,4 @@
 	};
 
 	return steal;	
-};
+

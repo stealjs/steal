@@ -16,10 +16,11 @@ module.exports = function (grunt) {
           'bower_components/systemjs/dist/system.js',
           'src/start.js',
           'src/normalize.js',
-          'src/core.js',
-          'src/normalize.js',
+          'src/core.js',     	// starts makeSteal 
+          'src/system-extension-ext.js',
           'src/config.js',
-          'src/startup.js',
+          'src/startup.js',		
+          'src/make-steal-end.js', // ends makeSteal
           'src/system-format-steal.js',
           'src/end.js'
         ],
@@ -53,11 +54,10 @@ module.exports = function (grunt) {
     },
     copy: {
 		toTest: {
-			files: [{expand: true, src: ['<%= pkg.name %>.js','<%= pkg.name %>.production.js'], dest: 'test/', filter: 'isFile'},
-					{expand: true, src: ['<%= pkg.name %>.js','<%= pkg.name %>.production.js'], dest: 'test/steal/', filter: 'isFile'},
-					{expand: true, src: ['<%= pkg.name %>.js','<%= pkg.name %>.production.js'], dest: 'test/bower_components/steal/', filter: 'isFile'},
-					{expand: true, cwd: 'bower_components/traceur/', src: ['*'], dest: 'test/bower_components/traceur/', filter: 'isFile'},
-					{expand: true, cwd: 'dev/', src: ['**'], dest: 'test/bower_components/steal/dev/', filter: 'isFile'}]
+			files: [{expand: true, src: ['<%= pkg.name %>.js','<%= pkg.name %>.production.js','dev.js'], dest: 'test/', filter: 'isFile'},
+					{expand: true, src: ['<%= pkg.name %>.js','<%= pkg.name %>.production.js','dev.js'], dest: 'test/steal/', filter: 'isFile'},
+					{expand: true, src: ['<%= pkg.name %>.js','<%= pkg.name %>.production.js','dev.js'], dest: 'test/bower_components/steal/', filter: 'isFile'},
+					{expand: true, cwd: 'bower_components/traceur/', src: ['*'], dest: 'test/bower_components/traceur/', filter: 'isFile'}]
 		}
     },
 	watch: {

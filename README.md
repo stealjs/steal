@@ -10,7 +10,7 @@ Steal builds from [SystemJS](https://github.com/systemjs/systemjs) and
  - plugin extension mapping _(upcoming)_
  - production builds with [steal-tools](https://github.com/bitovi/steal-tools/tree/systemjs)
 
-But its __killer__ feature - progressively loaded apps that balance caching and the 
+But it's __killer__ feature - progressively loaded apps that balance caching and the 
 number of script requests.
 
 StealJS supports IE8+ with AMD, CommonJS, and Steal syntax and IE9+ for ES6 syntax.

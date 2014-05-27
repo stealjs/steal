@@ -3441,7 +3441,6 @@ function versions(loader) {
 	};
 
 
-
 var makeSteal = function(System){
 	
 	var configDeferred,
@@ -3483,6 +3482,31 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 
+
+
+	// System.ext = {bar: "path/to/bar"}
+	// foo.bar! -> foo.bar!path/to/bar
+	var addExt = function(loader) {
+		loader.ext = {};
+		
+		var normalize = loader.normalize,
+			endingExtension = /\.(\w+)!$/;
+			
+		loader.normalize = function(name, parentName, parentAddress){
+			var matches = name.match(endingExtension);
+				ext;
+			
+			if(matches && loader.ext[ext = matches[1]]) {
+				name = name + loader.ext[ext];
+			}
+			return normalize.call(this, name, parentName, parentAddress);
+		};
+	};
+
+	if(typeof System){
+		addExt(System);
+	}
+	
 
 	var configData = {
 		env: "development"
@@ -3592,8 +3616,7 @@ var addProductionBundles = function(){
 	}
 };
 
-	
-
+		var LESS_ENGINE = "less-1.7.0";
 	var getScriptOptions = function () {
 	
 		var options = {},
@@ -3635,10 +3658,12 @@ var addProductionBundles = function(){
 			parts = src.split("/");
 			var lastPart = parts.pop();
 			
-			if(lastPart.indexOf("steal") === 0 && !System.paths["steal/dev/dev"]) {
+			if(lastPart.indexOf("steal") === 0 && !System.paths["steal/dev"]) {
 				options.paths = {
 					"steal/*": parts.join("/")+"/*.js",
-					"@traceur": parts.slice(0,-1).join("/")+"/traceur/traceur.js"
+					"less" :  parts.join("/")+"/"+LESS_ENGINE+".js",
+					"@traceur": parts.slice(0,-1).join("/")+"/traceur/traceur.js",
+					
 				};
 				
 			}
@@ -3667,12 +3692,17 @@ var addProductionBundles = function(){
 	
 	var getOptionsFromStealLocation = function(){
 		var options = {};
-		if(typeof __dirname === "string" && !System.paths["steal/dev/dev"]) {
+		if(typeof __dirname === "string" && !System.paths["steal/dev"]) {
 			options.paths = {
 				"steal/*": __dirname+"/*.js",
 				"@traceur": __dirname.split("/").slice(0,-1).join("/")+"/traceur/traceur.js"
 			};
 		}
+		
+		System.register("less",[], function(){
+			var r = require;
+			return { __useDefault: true, 'default': r('less') };
+		});
 		return options;
 	};
 	
@@ -3684,9 +3714,11 @@ var addProductionBundles = function(){
 		} else {
 			var urlOptions = getOptionsFromStealLocation();
 		}
-		if(!System.map.css) {
-			System.map.css = "steal/css";	
-		}
+
+		extend(System.ext,{
+			css: 'steal/css',
+			less: 'steal/less'
+		});
 
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
@@ -3727,10 +3759,10 @@ var addProductionBundles = function(){
 					steal.config(config);
 				}
 
-				return steal("steal/dev");
+				return steal.System.import("steal/dev");
 			},function(){
 				console.log("steal - error loading stealconfig.");
-				return steal("steal/dev");
+				return steal.System.import("steal/dev");
 			});
 			
 			appDeferred = devDeferred.then(function(){
@@ -3752,8 +3784,9 @@ var addProductionBundles = function(){
 	};
 
 	return steal;	
-};
 
+
+};
 
   
 
@@ -3871,7 +3904,7 @@ var addProductionBundles = function(){
     else {
     	var steal = makeSteal(System);
 		steal.System = System;
-		steal.dev = require("./dev/dev.js");
+		steal.dev = require("./dev.js");
 		steal.clone = makeSteal;
 		module.exports = steal;
 		global.steal = steal;
