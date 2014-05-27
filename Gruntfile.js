@@ -83,7 +83,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('testee');
 
-  grunt.registerTask('lint', ['jshint']);
-  grunt.registerTask('test', ['testee']);
+  grunt.registerTask('lint', [ 'jshint' ]);
+  grunt.registerTask('test', [ /*'jshint', */'testee' ]);
   grunt.registerTask('default', [/*'jshint', */'concat', 'uglify', 'copy:toTest']);
 };
