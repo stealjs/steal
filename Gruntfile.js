@@ -66,6 +66,12 @@ module.exports = function (grunt) {
       files: [ "src/*.js", "bower_components/systemjs/dist/**"],
       tasks: "default"
     },
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc'
+      },
+      lib: ['src/**/*.js']
+    },
     testee: {
       tests: {
         options: {
@@ -83,7 +89,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('testee');
 
-  grunt.registerTask('lint', [ 'jshint' ]);
   grunt.registerTask('test', [ /*'jshint', */'testee' ]);
   grunt.registerTask('default', [/*'jshint', */'concat', 'uglify', 'copy:toTest']);
 };

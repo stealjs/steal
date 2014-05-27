@@ -7,7 +7,7 @@
     "email": "contact@bitovi.com",
     "web": "http://bitovi.com/"
   },
-  "script": {
+  "scripts": {
     "test": "grunt test"
   },
   "devDependencies": {
