@@ -1,26 +1,31 @@
 {
-  "name" : "steal",
-  "description" : "Gets JavaScript.",
-  "version" : "0.1.0",
-  "author" : {
-    "name" : "Bitovi",
-    "email" : "contact@bitovi.com",
-    "web" : "http://bitovi.com/"
+  "name": "steal",
+  "description": "Gets JavaScript.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitovi",
+    "email": "contact@bitovi.com",
+    "web": "http://bitovi.com/"
   },
-  "devDependencies" : {
-  	"bower": "1.2.8",
+  "script": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "bower": "1.2.8",
     "es6-module-loader": "~0.5.4",
     "grunt": "~0.4.1",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-cli": "^0.1.13",
     "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.3.0",
-    "grunt-contrib-copy": "~0.5.0"
+    "testee": "0.0.13"
   },
-  "licenses" : [
+  "licenses": [
     {
-      "type" : "MIT",
-      "url" : "http://opensource.org/licenses/mit-license.php"
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/mit-license.php"
     }
   ],
   "main": "steal"
