@@ -1,3 +1,7 @@
+# StealJS
+
+[![Build Status](https://travis-ci.org/bitovi/steal.svg?branch=master)](https://travis-ci.org/bitovi/steal)
+
 StealJS is an ES6, AMD, CommonJS, and steal client-side loader. Combined with 
 [steal-tools](https://github.com/bitovi/steal-tools/tree/systemjs), its designed
 to simplify dependency management while being extremely powerful and flexible.
