@@ -95,13 +95,13 @@ Lets see how to get a basic app up and running.
 
 2. Configure jQuery's path and export:
 
-   Add a `System.paths` config to `stealconfig.js` to tell steal where to find
-   jQuery. Add a `System.meta` config to tell SystemJS that jQuery exports the "jQuery"
+   Add a config for `System.paths` to `stealconfig.js` to tell steal where to find
+   jQuery. Add a config for `System.meta` to tell SystemJS that jQuery exports the "jQuery"
    variable.
    
    ```js
-   System.paths = {jquery: 'bower_components/jquery/dist/jquery.js'};
-   System.meta = {jquery: { exports: "jQuery" } };
+   System.paths.jquery = "bower_components/jquery/dist/jquery.js";
+   System.meta.jquery = { exports: "jQuery" };
    ```
 
 3. Load jQuery.
