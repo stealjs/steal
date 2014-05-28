@@ -8,8 +8,7 @@
     "web": "http://bitovi.com/"
   },
   "scripts": {
-    "test": "grunt test --stack",
-    "install": "node node_modules/bower/bin/bower install"
+    "test": "grunt test --stack"
   },
   "devDependencies": {
     "bower": "1.2.8",
