@@ -75,7 +75,7 @@ module.exports = function (grunt) {
     testee: {
       tests: {
         options: {
-          browsers: ['phantom'],
+          browsers: ['firefox'],
           urls: ['test/test.html']
         }
       }
