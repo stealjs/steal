@@ -14,7 +14,6 @@
 		}
 	};
 
-
 	var pluginCache = {};
 	
 	var normalize = function(name, loader){
