@@ -21,7 +21,7 @@
     "grunt-contrib-jshint": "~0.6.0",
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.3.0",
-    "testee": "0.0.13"
+    "testee": "git://github.com/bitovi/testee.js.git#master"
   },
   "licenses": [
     {
