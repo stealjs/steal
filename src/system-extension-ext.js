@@ -8,7 +8,7 @@
 			endingExtension = /\.(\w+)!$/;
 			
 		loader.normalize = function(name, parentName, parentAddress){
-			var matches = name.match(endingExtension);
+			var matches = name.match(endingExtension),
 				ext;
 			
 			if(matches && loader.ext[ext = matches[1]]) {
