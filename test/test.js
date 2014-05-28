@@ -3,7 +3,7 @@ module("steal via system import");
 
 
 (function(){
-	
+
 	var writeIframe = function(html){
 		var iframe = document.createElement('iframe');
 		window.removeMyself = function(){
@@ -20,7 +20,7 @@ module("steal via system import");
 			window.QUnit = window.parent.QUnit;\
 			window.removeMyself = window.parent.removeMyself;\
 			</script>";
-			
+
 	};
 	var makeStealHTML = function(url, src, code){
 		return "<!doctype html>\
@@ -58,8 +58,8 @@ module("steal via system import");
 			start()
 		});
 	});
-	
-	
+
+
 	asyncTest("steal's normalize", function(){
 		System['import']('tests/mod/mod').then(function(m){
 		  equal(m.name,"mod", "mod returned" );
@@ -94,15 +94,15 @@ module("steal via html");
 
 	asyncTest("basics", function(){
 		makeIframe("basics/basics.html");
-		
+
 	});
-	
+
 	asyncTest("basics with generated html", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
 			'src="../../steal.js?basics" data-config="../config.js"'));
 	});
-	
+
 	asyncTest("default config path", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
@@ -114,51 +114,51 @@ module("steal via html");
 			"basics/basics.html",
 			'src="../steal/steal.js?basics"'));
 	});
-	
-	
+
+
 	asyncTest("inline", function(){
 		makeIframe("basics/inline_basics.html");
-		
+
 	});
-	
+
 	asyncTest("default bower_components config path", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
 			'src="../bower_components/steal/steal.js?basics"'));
 	});
-	
-	
+
+
 	asyncTest("default bower_components without config still works", function(){
 		makeIframe("basics/noconfig.html");
 	});
-	
+
 	asyncTest("map works", function(){
 		makeIframe("map/map.html");
 	});
-	
-	
+
+
 	asyncTest("read config", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
 			'src="../../steal.js?configed" data-config="../config.js"'));
 	});
-	
+
 	asyncTest("compat - product bundle works", function(){
 		makeIframe("production/prod.html");
 	});
-	
+
 	asyncTest("product bundle specifying main works", function(){
 		makeIframe("production/prod-main.html");
 	});
-	
+
 	asyncTest("automatic loading of css plugin", function(){
 		makeIframe("plugins/site.html");
 	});
-	
+
 	asyncTest("product bundle with css", function(){
 		makeIframe("production/prod-bar.html");
 	});
-	
+
 	asyncTest("automatic loading of less plugin", function(){
 		makeIframe("dep_plugins/site.html");
 	});
@@ -168,13 +168,17 @@ module("steal via html");
 			"basics/basics.html",
 			'src="../steal.js?../paths" data-config="../paths/config.js"'));
 	});
-	
+
 	asyncTest("url paths in css work", function(){
 		makeIframe("css_paths/site.html");
 	});
-	
+
 	asyncTest("ext extension", function(){
 		makeIframe("extensions/site.html");
 	});
-	
+
+	asyncTest("forward slash extension", function(){
+		makeIframe("forward_slash/site.html");
+	});
+
 })();

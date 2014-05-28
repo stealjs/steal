@@ -16,8 +16,9 @@ module.exports = function (grunt) {
           'bower_components/systemjs/dist/system.js',
           'src/start.js',
           'src/normalize.js',
-          'src/core.js',     	// starts makeSteal 
+          'src/core.js',     	// starts makeSteal
           'src/system-extension-ext.js',
+          'src/system-extension-forward-slash.js',
           'src/config.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal
