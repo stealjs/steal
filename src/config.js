@@ -91,7 +91,8 @@ var configSpecial = {
 			addProductionBundles();
 		}
 	},
-	meta: getSetToSystem("meta")
+	meta: getSetToSystem("meta"),
+	ext: getSetToSystem("ext")
 };
 
 
