@@ -102,7 +102,7 @@ This imports jQuery with ES6 module syntax.
 
 Open `index.html` in the browser.  You should see a big "Hello World".
 
-### Build Setup
+### Build
 
 Create a `Gruntfile.js` in your ROOT folder. Configure grunt to 
 call `stealBuild`
@@ -121,8 +121,10 @@ After saving `Gruntfile.js` run:
     > grunt build
     
 This will read `index.html` and build `dist/index.html` to load 
-`dist/bundles/main.js`.  `dist/bundles/main.js` will include `steal.js`, the `main` module,
+`dist/bundles/main.js`.  `dist/bundles/main.js` will include `steal.js`, `stealconfig.js`, the `main` module
 and its dependencies.
+
+Open `dist/index.html` to see your built app in action.
 
 
 ## Steal
