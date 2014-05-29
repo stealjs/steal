@@ -110,13 +110,19 @@ call `stealBuild`
     module.exports = function (grunt) {
       grunt.initConfig({
         stealBuild: {
-          config: __dirname + "/stealconfig.js",
-          main: "main"
+          html: "index.html"
         }
       });
       grunt.registerTask('build',['stealBuild']);
     };
 
+After saving `Gruntfile.js` run:
+
+    > grunt build
+    
+This will read `index.html` and build `dist/index.html` to load 
+`dist/bundles/main.js`.  `dist/bundles/main.js` will include `steal.js`, the `main` module,
+and its dependencies.
 
 
 ## Steal
