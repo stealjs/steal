@@ -12,7 +12,7 @@ Steal builds from [SystemJS](https://github.com/systemjs/systemjs) and
  - global configuration
  - css and less support
  - plugin extension mapping _(upcoming)_
- - production builds with [steal-tools](https://github.com/bitovi/steal-tools/tree/systemjs)
+ - production builds with [steal-tools](https://github.com/bitovi/steal-tools)
 
 But it's __killer__ feature - progressively loaded apps that balance caching and the 
 number of script requests.
