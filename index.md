@@ -138,3 +138,18 @@ Open `dist/index.html` to see your built app in action.
 ### Build
 
 ### Pluginify
+
+
+## Migrating from old Steal
+
+Config changes
+
+ - no map `"*" : {}` .. flatten instead.
+ - add "*" within paths.  For example: `"can/" : "place/can/"` becomes `"can/*" : "place/can/*.js"`
+ - change ext - no css / less needed, but add .mustache, .stache, etc
+ - no .then ... use deps
+
+
+Build
+
+ - no longer production.js ... it's put in /bundles
