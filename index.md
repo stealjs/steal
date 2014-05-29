@@ -24,7 +24,8 @@ Its builder, [steal-tools](https://github.com/bitovi/steal-tools),
 lets you build an application or export your project to AMD, 
 CommonJS or standalone formats. But steal-tools 
 killer feature, it can build progressively loaded apps that 
-balance caching and the number of script requests.
+balance caching and the number of script requests, resulting
+in lightening fast load times.
 
 ## Quick Start
 
