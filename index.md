@@ -5,48 +5,28 @@ version: 0.2.0
 downloadUrl: http://canjs.us/release/1.1.5
 ---
 
-# Welcome to StealJS!
+# Good artists copy; great artists steal.
 
-CanJS is a MIT-licensed, client-side, JavaScript framework that makes building
-rich web applications easy. Use it because it's:
+StealJS is a client module loader and builder that will
+help you create the next great app. Its designed to simplify 
+dependency management while being extremely powerful and flexible.
 
-<ul class="checkmarks cf">
-  <li>
-    <a href="#why_canjs-size">Smaller</a>
-    <div class="overlay oneliner">
-      Only 11k!
-      <div class="arrow"></div>
-    </div>
-  </li>
-  <li>
-    <a href="#why_canjs-speed">Faster</a>
-    <div class="overlay">
-      <a href="http://canjs.us/#why_canjs-speed">Fastest</a> control initialization and live binding
-      <div class="arrow"></div>
-    </div>
-  </li>
-  <li>
-    <a href="#can_control">Safer</a>
-    <div class="overlay">
-      <a href="http://canjs.us/#why_canjs-safety">Memory safe</a> controls and model stores
-      <div class="arrow"></div>
-    </div>
-  </li>
-  <li>
-    <a href="#examples">Easier</a>
-    <div class="overlay">
-      <a href="http://donejs.com/docs.html#!">Through documentation</a>, <a href="#examples">example apps</a> and <a href="http://canjs.us/recipes.html">example recipes</a>
-      <div class="arrow"></div>
-    </div>
-  </li>
-  <li>
-    <a href="#get_canned">Library-er</a>
-    <div class="overlay">
-      Integrates with jQuery, Dojo, YUI, Zepto, Mootools.
-      <div class="arrow"></div>
-    </div>
-  </li>
-</ul>
+Its client loader, [steal] supports the future - 
+[ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader) syntax -
+with everything [traceur supports](https://github.com/google/traceur-compiler/wiki/LanguageFeatures),
+while supporting AMD, and CommonJS.
 
-## Foo
+It also makes common use cases as simply as possible. Steal automatically
+loads a config file, supports css and less, and can load plugins by 
+extension (no more writing `!less` in `styles.less!less`).
 
+Its builder, [steal-tools] lets you build an application or export
+your project to AMD, CommonJS or standalone formats. But steal-tools 
+killer feature, it can build progressively loaded apps that 
+balance caching and the number of script requests.
+
+## Get
+
+## Steal
+
+## StealTools
