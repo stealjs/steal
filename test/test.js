@@ -181,4 +181,8 @@ module("steal via html");
 		makeIframe("forward_slash/site.html");
 	});
 
+	asyncTest("a steal object in the page before steal.js is loaded will be used for configuration",function(){
+		makeIframe("configed/steal_object.html");
+	});
+
 })();
