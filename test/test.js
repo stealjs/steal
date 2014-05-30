@@ -1,6 +1,6 @@
 module("steal via system import");
 
-
+QUnit.config.testTimeout = 30000;
 
 (function(){
 
