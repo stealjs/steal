@@ -170,7 +170,7 @@ When specifying that a folder's children should also be pathed, include an aster
 
     steal.config({
       paths: {
-        "can/": "lib/foo/"
+        "can/": "lib/can/"
       }
     });
 
@@ -193,5 +193,3 @@ The old Steal was chainable using `.then`, but this produced numerous problems t
 ### Build
 
 The old Steal always produced a `production.js` file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in `/bundles` and it will be named after your main module.
-
- - no longer production.js ... it's put in /bundles
