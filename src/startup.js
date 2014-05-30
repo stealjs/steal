@@ -104,6 +104,11 @@
 
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
+		if(typeof urlOptions.distPath === "string") {
+			System.distPath = urlOptions.distPath;
+			delete urlOptions.distPath;
+		}
+
 		steal.config(urlOptions);
 		
 		var options = steal.config();

@@ -3632,8 +3632,10 @@ var configSpecial = {
 var addProductionBundles = function(){
 	if(configData.env === "production" && System.main) {		
 		var main = System.main,
-			bundlesDir = System.bundlesPath || "bundles/",
+			distPath = System.distPath != null ? System.distPath : "dist/",
+			bundlesDir = distPath + "bundles/",
 			bundleName = bundlesDir+filename(main);
+
 		
 		System.meta[bundleName] = {format:"amd"};
 		System.bundles[bundleName] = [main];
@@ -3746,6 +3748,11 @@ var addProductionBundles = function(){
 
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
+		if(typeof urlOptions.distPath === "string") {
+			System.distPath = urlOptions.distPath;
+			delete urlOptions.distPath;
+		}
+
 		steal.config(urlOptions);
 		
 		var options = steal.config();

@@ -99,8 +99,10 @@ var configSpecial = {
 var addProductionBundles = function(){
 	if(configData.env === "production" && System.main) {		
 		var main = System.main,
-			bundlesDir = System.bundlesPath || "bundles/",
+			distPath = System.distPath != null ? System.distPath : "dist/",
+			bundlesDir = distPath + "bundles/",
 			bundleName = bundlesDir+filename(main);
+
 		
 		System.meta[bundleName] = {format:"amd"};
 		System.bundles[bundleName] = [main];
