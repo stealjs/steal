@@ -3700,8 +3700,7 @@ var addProductionBundles = function(){
 					parts.pop();
 				}
 			}
-			var root = parts.join("/");
-			options.root = root+"/";
+			
 			each(script.attributes, function(attr){
 				var optionName = 
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
@@ -3710,7 +3709,9 @@ var addProductionBundles = function(){
 						 
 				options[optionName] = attr.value;
 			});
-			
+			if(!options.root && !options.baseUrl){
+				options.root = parts.join("/")+"/";
+			}
 		}
 	
 		return options;
