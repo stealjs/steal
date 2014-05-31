@@ -65,6 +65,7 @@ var configSpecial = {
 			return val;
 		}
 	},
+	baseURL: getSetToSystem("baseURL"),
 	root: getSetToSystem("baseURL"),
 	config: {
 		set: function(val){
