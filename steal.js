@@ -3532,6 +3532,7 @@ var makeSteal = function(System){
 	}
 
 	var configData = {
+		distPath: "dist/",
 		env: "development"
 	};
 	
@@ -3626,6 +3627,14 @@ var configSpecial = {
 			addProductionBundles();
 		}
 	},
+	distPath: {
+		get: function(){
+			if(typeof System.distPath === "string") {
+				return System.distPath;
+			}
+			return configData.distPath;
+		}
+	},
 	meta: getSetToSystem("meta"),
 	ext: getSetToSystem("ext")
 };
@@ -3634,7 +3643,7 @@ var configSpecial = {
 var addProductionBundles = function(){
 	if(configData.env === "production" && System.main) {		
 		var main = System.main,
-			distPath = System.distPath != null ? System.distPath : "dist/",
+			distPath = configSpecial.distPath.get(),
 			bundlesDir = distPath + "bundles/",
 			bundleName = bundlesDir+filename(main);
 

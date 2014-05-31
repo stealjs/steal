@@ -1,4 +1,9 @@
 if( steal.config('env') === 'production' ) {
+		exports.locate = function(load) {
+			var distPath = steal.config('distPath');
+			return distPath + load.name;
+		};
+
 	  exports.fetch = function(load) {
 	    // return a thenable for fetching (as per specification)
 	    // alternatively return new Promise(function(resolve, reject) { ... })
