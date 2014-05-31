@@ -3598,6 +3598,8 @@ var configSpecial = {
 			return val;
 		}
 	},
+	baseUrl: getSetToSystem("baseURL"),
+	baseURL: getSetToSystem("baseURL"),
 	root: getSetToSystem("baseURL"),
 	config: {
 		set: function(val){
@@ -3700,8 +3702,7 @@ var addProductionBundles = function(){
 					parts.pop();
 				}
 			}
-			var root = parts.join("/");
-			options.root = root+"/";
+			
 			each(script.attributes, function(attr){
 				var optionName = 
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
@@ -3710,7 +3711,9 @@ var addProductionBundles = function(){
 						 
 				options[optionName] = attr.value;
 			});
-			
+			if(!options.root && !options.baseUrl){
+				options.root = parts.join("/")+"/";
+			}
 		}
 	
 		return options;
@@ -3754,9 +3757,14 @@ var addProductionBundles = function(){
 		}
 
 		steal.config(urlOptions);
+		if(config){
+			steal.config(config);
+		}
+		
 		
 		var options = steal.config();
-	
+		// Read the env now because we can't overwrite everything yet
+
 		// mark things that have already been loaded
 		each(options.executed || [], function( i, stel ) {
 			System.register(stel,[],function(){});
@@ -3773,7 +3781,7 @@ var addProductionBundles = function(){
 		}
 	
 		// we only load things with force = true
-		if ( options.env == "production" ) {
+		if ( options.env == "production" && steal.System.main ) {
 			
 			return appDeferred = steal.System.import(steal.System.main)["catch"](function(e){
 				console.log(e);
@@ -3786,6 +3794,7 @@ var addProductionBundles = function(){
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
  				// what was loaded in stealconfig.js
+ 				// This means we call it twice, but that's ok
 				if(config) {
 					steal.config(config);
 				}
@@ -3927,18 +3936,19 @@ var addProductionBundles = function(){
   
 
 
+	
 	if (typeof window != 'undefined') {
+		var oldSteal = window.steal;
 		window.steal = makeSteal(System);
-		window.steal.startup();
+		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addFormat = addFormat;
     }
     else {
-    	var steal = makeSteal(System);
-		steal.System = System;
-		steal.dev = require("./dev.js");
+    	global.steal = makeSteal(System);
+		global.steal.System = System;
+		global.steal.dev = require("./dev.js");
 		steal.clone = makeSteal;
-		module.exports = steal;
-		global.steal = steal;
+		module.exports = global.steal;
 		global.steal.addFormat = addFormat;
     }
     

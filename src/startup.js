@@ -56,8 +56,7 @@
 					parts.pop();
 				}
 			}
-			var root = parts.join("/");
-			options.root = root+"/";
+			
 			each(script.attributes, function(attr){
 				var optionName = 
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
@@ -66,7 +65,9 @@
 						 
 				options[optionName] = attr.value;
 			});
-			
+			if(!options.root && !options.baseUrl){
+				options.root = parts.join("/")+"/";
+			}
 		}
 	
 		return options;
@@ -110,9 +111,14 @@
 		}
 
 		steal.config(urlOptions);
+		if(config){
+			steal.config(config);
+		}
+		
 		
 		var options = steal.config();
-	
+		// Read the env now because we can't overwrite everything yet
+
 		// mark things that have already been loaded
 		each(options.executed || [], function( i, stel ) {
 			System.register(stel,[],function(){});
@@ -129,7 +135,7 @@
 		}
 	
 		// we only load things with force = true
-		if ( options.env == "production" ) {
+		if ( options.env == "production" && steal.System.main ) {
 			
 			return appDeferred = steal.System.import(steal.System.main)["catch"](function(e){
 				console.log(e);
@@ -142,6 +148,7 @@
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
  				// what was loaded in stealconfig.js
+ 				// This means we call it twice, but that's ok
 				if(config) {
 					steal.config(config);
 				}
