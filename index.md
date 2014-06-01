@@ -170,10 +170,10 @@ AMD also provides a conventient syntax that can be used rather than providing a 
 CommonJS is a popular format used in Node.js, but has also caught on in the browser. People like CommonJS because it doesn't require a wrapper function. You might define a module like so:
 
     var can = require("can");
-		var _ = require("underscore");
-		var myModule = require("some_module/some_module");
+    var _ = require("underscore");
+    var myModule = require("some_module/some_module");
 
-		module.exports = can.Component.extend({
+    module.exports = can.Component.extend({
 
     });
 
