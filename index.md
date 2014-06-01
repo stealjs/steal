@@ -133,6 +133,15 @@ Open `dist/index.html` to see your built app in action.
 
 ### Config Options
 
+#### distPath
+
+Only relevant when `env` is **production**, `distPath` is the path to the production files, by default `dist/`. This option only needs to be set if you specify an alternative `distDir` when doing a build. If used, include this option in the script tag:
+
+    <script src="steal.js"
+		        data-env="production"
+						data-main="main"
+						data-dist-path="build/"></script>
+
 ## StealTools
 
 ### Build
