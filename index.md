@@ -231,6 +231,8 @@ Because Traceur is a full ES6 to ES5 compiler you can use many ES6 features beyo
 
 #### env
 
+#### bundles
+
 The environment steal is running in. Options are **development** and **production**, with development being the default. If running in production specify the env option in the script tag:
 
     <script src="steal.js" data-env="production"></script>
@@ -251,6 +253,44 @@ Only relevant when `env` is **production**, `distPath` is the path to the produc
     npm install steal-tools -g
 
 ### Build
+
+Steal's build will transform your dependency graph into distinct bundles of JavaScript and CSSto be run in production. If using all of the default options you only need to specify the location to your config file and a main module like so:
+
+    steal build --config app/config.js --main app/app
+
+If using with Grunt these options are part of the `system` options, like so:
+
+    grunt.initConfig({
+      stealBuild: {
+        default: {
+          options: {
+            system: {
+              config: __dirname + "/app/config.js",
+              main: "app/app"
+            },
+            buildOptions: {
+              minify: false
+            }
+          }
+        }
+      }
+    });
+
+As you can see, the grunt task takes 2 object as its options, `system` and `buildOptions`. **buildOptions** is where you specify additional options specific to building, as described in the section below.
+
+#### Options
+
+##### minify
+
+**minify** specifies where to minify the output bundles; defaults to `true`.
+
+##### distDir
+
+By default build will save the bundles to `dist/bundles/`. With **distDir** you can specify an alternative dist directory such as `distDir: build` in which case the bundles will be saved to `build/bundles/`. If using distDir you'll also need to specify the [distPath](#distpath) in your production.html file.
+
+##### bundleSteal
+
+If using the **bundleSteal** option, Steal itself will be included in your bundled JavaScript file. This prevents the need for a second HTTP Request to load the main module.
 
 ### Pluginify
 
@@ -307,4 +347,4 @@ The old Steal was chainable using `.then`, but this produced numerous problems t
 
 ### Build
 
-The old Steal always produced a `production.js` file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in `/bundles` and it will be named after your main module.
+The old Steal always produced a `production.js` file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in `dist/bundles` and it will be named after your main module.
