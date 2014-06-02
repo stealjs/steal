@@ -294,6 +294,39 @@ If using the **bundleSteal** option, Steal itself will be included in your bundl
 
 ### Pluginify
 
+**Pluginify** is a way to build Steal projects without needing to include steal.js in production at all. Some of Steal's advanced features such as [bundles](#bundles) need steal.js to work, but for more simple projects Pluginify is a good option. Pluginify is also used when building open source projects where you want to split your modules into individual module file (hence *plugins*) and distribute them that way.
+
+Like [build](#build), Pluginify can be used from the command-line, from Grunt, or programmatically in Node.js. For this example we're going to use Pluginify programmatically in order to showcase it's more advanced functionality:
+
+    var pluginify = require("steal-tools").pluginify;
+    var fs = require("fs");
+
+    pluginify({
+      config: __dirname + "/config.js",
+      main: "main"
+    }).then(function(pluginify){
+      // Get the main module and it's dependencies as a string
+      var main = pluginify();
+
+      // Get just a dependency and it's own dependencies as a string
+      var myModule = pluginify("my_module");
+
+      // Get the main module, ignoring a dependency we don't want.
+      var mainAlone = pluginify("main", {
+        ignore: ["my_module"]
+      });
+
+      // Now you can do whatever you want with the module.
+      fs.writeFileSync("out_main.js", mainAlone, "utf8");
+    });
+
+As you can see, pluginify takes an object containing the System configuration and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). The promise will return another function (also named pluginify in this example) that can be used to generate a string containing a module and it's dependencies. By default the pluginify function will return the main module, but can be used to generate any dependency in the graph.
+
+#### Options
+
+##### ignore
+
+Pluginify takes an array of strings specifying dependencies to ignore when building a module's string representation. For example, your project might depend on jQuery but you don't want to include jQuery in your production build, specifying `ignore: ["jquery"]` will prevent it from being included.
 
 ## Migrating from old Steal
 
