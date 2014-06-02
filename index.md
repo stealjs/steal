@@ -223,15 +223,51 @@ Because Traceur is a full ES6 to ES5 compiler you can use many ES6 features beyo
 
 #### map
 
+**Map** provides a way to map a module id to a different module id. This is useful in cases where you have many implementations of a module and want to specify which to use. For example:
+
+    map: {
+      "can/util", "can/util/jquery"
+    }
+
+This tells steal that when a module asks for `can/util` to give it `can/util/query`.
+
 #### paths
+
+**Paths** is used to specify where a module's JavaScript code can be found. This is useful to translate a short module id into which file represents it:
+
+    paths: {
+      "my_module": "path/to/my_module.js"
+    }
+
+With paths you can also specify submodules. For example, if importing anything under `can/` you can map that to where Can is installed within your bower components folder like so:
+
+    paths: {
+      "can/*": "bower_components/canjs/steal/canjs/*.js"
+    }
+
+Note that the old Steal had this same functionality but it is slightly different now. The [migration section](#paths_2) explains the difference.
 
 #### ext
 
+**Ext** is used to map a file extension to a plugin that is used to load it, like so:
+
+    ext: {
+     "stache": "canjs/view/stache/system.js"
+    }
+
 #### main
 
-#### env
+The main module to load as your application's entry point. Usually this will be specified as a `data-` option in the script tag that loads Steal.
 
 #### bundles
+
+An array of module names that specify sections of your application. **Bundles** is a way to break up your application into many parts and progressively load assets as you visit the different sections. This makes it easy to write an single-page application and have the performance benefits of a multi-page application. To specify bundles pass an array of the bundles into this option like so:
+
+    bundles: ["todos", "groceries", "notes"]
+
+Each module id is the entry point for that bundle. Steal will intelligently break apart your code into different shared bundles and only load those needed depending on which section the user is visiting.
+
+#### env
 
 The environment steal is running in. Options are **development** and **production**, with development being the default. If running in production specify the env option in the script tag:
 
