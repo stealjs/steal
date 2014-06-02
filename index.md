@@ -221,6 +221,20 @@ Because Traceur is a full ES6 to ES5 compiler you can use many ES6 features beyo
 
 ### Config Options
 
+#### map
+
+#### paths
+
+#### ext
+
+#### main
+
+#### env
+
+The environment steal is running in. Options are **development** and **production**, with development being the default. If running in production specify the env option in the script tag:
+
+    <script src="steal.js" data-env="production"></script>
+
 #### distPath
 
 Only relevant when `env` is **production**, `distPath` is the path to the production files, by default `dist/`. This option only needs to be set if you specify an alternative `distDir` when doing a build. If used, include this option in the script tag:
@@ -231,6 +245,10 @@ Only relevant when `env` is **production**, `distPath` is the path to the produc
             data-dist-path="build/"></script>
 
 ## StealTools
+
+**StealTools** are a set of tools that aid with building Steal projects. They can be used from the command line, with [Grunt](http://gruntjs.com/), or programmatically in Node.js. If using from the command line you'll likely want to install StealTools globally:
+
+    npm install steal-tools -g
 
 ### Build
 
