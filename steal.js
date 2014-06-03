@@ -3693,7 +3693,7 @@ var addProductionBundles = function(){
 				};
 				
 			}
-			
+
 			if ( last(parts) === "steal" ) {
 				parts.pop();
 				if ( last(parts) === "bower_components" ) {
@@ -3711,6 +3711,19 @@ var addProductionBundles = function(){
 			});
 			if(!options.root && !options.baseUrl){
 				options.root = parts.join("/")+"/";
+			}
+
+			// Set the bundles paths if in production
+			if(options.env === "production") {
+				var paths = options.paths = options.paths || {};
+				var bundlesCSS = "bundles/*.css";
+				var bundlesJS = "bundles/*";
+				if(!paths[bundlesCSS]) {
+					paths[bundlesCSS] = "dist/bundles/*css";
+				}
+				if(!paths[bundlesJS]) {
+					paths[bundlesJS] = "dist/bundles/*.js";
+				}
 			}
 		}
 	
