@@ -185,4 +185,8 @@ module("steal via html");
 		makeIframe("configed/steal_object.html");
 	});
 
+	asyncTest("set options to less.js plugin", function() {
+		makeIframe("less_options/site.html");
+	});
+
 })();
