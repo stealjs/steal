@@ -273,15 +273,6 @@ The environment steal is running in. Options are **development** and **productio
 
     <script src="steal.js" data-env="production"></script>
 
-#### distPath
-
-Only relevant when `env` is **production**, `distPath` is the path to the production files, by default `dist/`. This option only needs to be set if you specify an alternative `distDir` when doing a build. If used, include this option in the script tag:
-
-    <script src="steal.js"
-		        data-env="production"
-            data-main="main"
-            data-dist-path="build/"></script>
-
 ## StealTools
 
 **StealTools** are a set of tools that aid with building Steal projects. They can be used from the command line, with [Grunt](http://gruntjs.com/), or programmatically in Node.js. If using from the command line you'll likely want to install StealTools globally:
@@ -322,7 +313,11 @@ As you can see, the grunt task takes 2 object as its options, `system` and `buil
 
 ##### distDir
 
-By default build will save the bundles to `dist/bundles/`. With **distDir** you can specify an alternative dist directory such as `distDir: build` in which case the bundles will be saved to `build/bundles/`. If using distDir you'll also need to specify the [distPath](#distpath) in your production.html file.
+By default build will save the bundles to `dist/bundles/`. With **distDir** you can specify an alternative dist directory such as `distDir: build` in which case the bundles will be saved to `build/bundles/`. If using distDir you have to specify the location of your app's main module in your production.html file, like so:
+
+    <script>
+      steal = { paths: { "bundles/main": "build/bundles/main.js" } };
+    </script>
 
 ##### bundleSteal
 
