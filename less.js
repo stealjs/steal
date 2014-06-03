@@ -1,9 +1,9 @@
-import css from 'steal/css';
-import lessEngine from 'less';
+var css = require("steal/css");
+var lessEngine = require("less");
 
-export var instantiate = css.instantiate;
+exports.instantiate = css.instantiate;
 
-export function translate(load) {
+exports.translate = function(load) {
 	var pathParts = (load.address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
@@ -25,7 +25,6 @@ export function translate(load) {
 			}
 		});
 	});
-
 };
 
-export var buildType = "css";
+exports.buildType = "css";
