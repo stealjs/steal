@@ -3532,7 +3532,6 @@ var makeSteal = function(System){
 	}
 
 	var configData = {
-		distPath: "dist/",
 		env: "development"
 	};
 	
@@ -3627,14 +3626,6 @@ var configSpecial = {
 			addProductionBundles();
 		}
 	},
-	distPath: {
-		get: function(){
-			if(typeof System.distPath === "string") {
-				return System.distPath;
-			}
-			return configData.distPath;
-		}
-	},
 	meta: getSetToSystem("meta"),
 	ext: getSetToSystem("ext")
 };
@@ -3643,10 +3634,8 @@ var configSpecial = {
 var addProductionBundles = function(){
 	if(configData.env === "production" && System.main) {		
 		var main = System.main,
-			distPath = configSpecial.distPath.get(),
-			bundlesDir = distPath + "bundles/",
+			bundlesDir = System.bundlesPath || "bundles/",
 			bundleName = bundlesDir+filename(main);
-
 		
 		System.meta[bundleName] = {format:"amd"};
 		System.bundles[bundleName] = [main];
@@ -3704,7 +3693,7 @@ var addProductionBundles = function(){
 				};
 				
 			}
-			
+
 			if ( last(parts) === "steal" ) {
 				parts.pop();
 				if ( last(parts) === "bower_components" ) {
@@ -3722,6 +3711,19 @@ var addProductionBundles = function(){
 			});
 			if(!options.root && !options.baseUrl){
 				options.root = parts.join("/")+"/";
+			}
+
+			// Set the bundles paths if in production
+			if(options.env === "production") {
+				var paths = options.paths = options.paths || {};
+				var bundlesCSS = "bundles/*.css";
+				var bundlesJS = "bundles/*";
+				if(!paths[bundlesCSS]) {
+					paths[bundlesCSS] = "dist/bundles/*css";
+				}
+				if(!paths[bundlesJS]) {
+					paths[bundlesJS] = "dist/bundles/*.js";
+				}
 			}
 		}
 	
@@ -3760,11 +3762,6 @@ var addProductionBundles = function(){
 
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
-		if(typeof urlOptions.distPath === "string") {
-			System.distPath = urlOptions.distPath;
-			delete urlOptions.distPath;
-		}
-
 		steal.config(urlOptions);
 		if(config){
 			steal.config(config);

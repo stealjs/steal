@@ -1,5 +1,4 @@
 	var configData = {
-		distPath: "dist/",
 		env: "development"
 	};
 	
@@ -94,14 +93,6 @@ var configSpecial = {
 			addProductionBundles();
 		}
 	},
-	distPath: {
-		get: function(){
-			if(typeof System.distPath === "string") {
-				return System.distPath;
-			}
-			return configData.distPath;
-		}
-	},
 	meta: getSetToSystem("meta"),
 	ext: getSetToSystem("ext")
 };
@@ -110,10 +101,8 @@ var configSpecial = {
 var addProductionBundles = function(){
 	if(configData.env === "production" && System.main) {		
 		var main = System.main,
-			distPath = configSpecial.distPath.get(),
-			bundlesDir = distPath + "bundles/",
+			bundlesDir = System.bundlesPath || "bundles/",
 			bundleName = bundlesDir+filename(main);
-
 		
 		System.meta[bundleName] = {format:"amd"};
 		System.bundles[bundleName] = [main];
