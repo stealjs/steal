@@ -83,7 +83,7 @@ function addSteal(loader) {
         load.metadata.execute = stealInstantiateResult.execute;
       }
     }
-
+    console.log("called", load.metadata.deps );
     return loaderInstantiate.call(loader, load);
   };
 }

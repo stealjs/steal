@@ -46,7 +46,7 @@ QUnit.config.testTimeout = 30000;
 
 
 
-
+	/*
 	asyncTest('steal basics', function(){
 		System['import']('tests/module').then(function(m){
 		  equal(m.name,"module.js", "module returned" );
@@ -70,7 +70,7 @@ QUnit.config.testTimeout = 30000;
 			ok(false, "steal not loaded");
 			start()
 		});
-	});
+	});*/
 
 	asyncTest("steal's normalize with a plugin", function(){
 		System.instantiate({
@@ -78,7 +78,6 @@ QUnit.config.testTimeout = 30000;
 			metadata: {format: "steal"},
 			source: 'steal("foo/bar!foo/bar", function(){})'
 		}).then(function(result){
-
 			equal(result.deps[0], "foo/bar/bar!foo/bar", "normalize fixed part before !");
 			start();
 		});
@@ -87,11 +86,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("steal's normalize with plugin only the bang", function(){
 		System.instantiate({
-			name: "foo",
+			name: "foobar",
 			metadata: {format: "steal"},
 			source: 'steal("./rdfa.stache!", function(){})'
 		}).then(function(result){
-
 			System.normalize(result.deps[0], "foo","http://abc.com").then(function(result){
 				equal(result, "rdfa.stache!stache", "normalize fixed part before !");
 				start();
@@ -99,6 +97,7 @@ QUnit.config.testTimeout = 30000;
 			
 		});
 	});
+	return;
 
 module("steal via html");
 
