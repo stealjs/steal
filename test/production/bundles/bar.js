@@ -4,27 +4,23 @@ System.bundles = {"bundles/bar":["bar"],"bundles/bar.css!":["bar.css!steal/css"]
 
 define("steal/css",[], function(){
 	return {
-		
 		instantiate: function(load) {
-	    
-		    return {
-				deps: [],
-				execute: function(){
-					var head = document.head || document.getElementsByTagName('head')[0],
-						style = document.createElement('style');
-					
-					style.type = 'text/css';
-					if (style.styleSheet){
-					  style.styleSheet.cssText = load.source;
-					} else {
-					  style.appendChild(document.createTextNode(load.source));
-					}
-					head.appendChild(style);
-					return new System.global.Module({});
+			load.metadata.format = "css";
+			load.metadata.buildType = "css";
+			load.metadata.execute = function(){
+				var head = document.head || document.getElementsByTagName('head')[0],
+					style = document.createElement('style');
+			
+				style.type = 'text/css';
+				if (style.styleSheet){
+					style.styleSheet.cssText = load.source;
+				} else {
+					style.appendChild(document.createTextNode(load.source));
 				}
+				head.appendChild(style);
+				return new System.global.Module({});
 			};
-		},
-		buildType: "css"
+		}
 	};
 });
 

@@ -73,21 +73,31 @@ QUnit.config.testTimeout = 30000;
 	});
 
 	asyncTest("steal's normalize with a plugin", function(){
-		var stealFormat = System.format.steal;
-		stealFormat.normalize("foo/bar!foo/bar", "foo", "http://foo", System.normalize)
-			.then(function(result){
-				equal(result, "foo/bar/bar!foo/bar", "normalize fixed part before !");
-				start();
-			});
+		System.instantiate({
+			name: "foo",
+			metadata: {format: "steal"},
+			source: 'steal("foo/bar!foo/bar", function(){})'
+		}).then(function(result){
+
+			equal(result.deps[0], "foo/bar/bar!foo/bar", "normalize fixed part before !");
+			start();
+		});
+		
 	});
 
 	asyncTest("steal's normalize with plugin only the bang", function(){
-		var stealFormat = System.format.steal;
-		stealFormat.normalize("./rdfa.stache!", "foo", "http://foo", System.normalize)
-			.then(function(result){
-				equal(result, "rdfa.stache!stache", "normalize added the extension as plugin name");
+		System.instantiate({
+			name: "foo",
+			metadata: {format: "steal"},
+			source: 'steal("./rdfa.stache!", function(){})'
+		}).then(function(result){
+
+			System.normalize(result.deps[0], "foo","http://abc.com").then(function(result){
+				equal(result, "rdfa.stache!stache", "normalize fixed part before !");
 				start();
 			});
+			
+		});
 	});
 
 module("steal via html");

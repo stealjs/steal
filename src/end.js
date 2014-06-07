@@ -4,7 +4,7 @@
 		var oldSteal = window.steal;
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
-		window.steal.addFormat = addFormat;
+		window.steal.addSteal = addSteal;
     }
     else {
     	global.steal = makeSteal(System);
@@ -12,7 +12,7 @@
 		global.steal.dev = require("./dev.js");
 		steal.clone = makeSteal;
 		module.exports = global.steal;
-		global.steal.addFormat = addFormat;
+		global.steal.addSteal = addSteal;
     }
     
 })(typeof window == "undefined" ? global : window);
