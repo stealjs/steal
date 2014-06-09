@@ -44,33 +44,28 @@ QUnit.config.testTimeout = 30000;
 		iframe.src = src;
 	};
 
-
-
-	/*
 	asyncTest('steal basics', function(){
 		System['import']('tests/module').then(function(m){
-		  equal(m.name,"module.js", "module returned" );
-		  equal(m.bar.name, "bar", "module.js was not able to get bar");
-	      start();
+			equal(m.name,"module.js", "module returned" );
+			equal(m.bar.name, "bar", "module.js was not able to get bar");
+			start();
 		}, function(err){
-			console.log(err)
 			ok(false, "steal not loaded");
-			start()
+			start();
 		});
 	});
 
-
 	asyncTest("steal's normalize", function(){
 		System['import']('tests/mod/mod').then(function(m){
-		  equal(m.name,"mod", "mod returned" );
-		  equal(m.module.bar.name, "bar", "module.js was able to get bar");
-		  equal(m.widget(), "widget", "got a function");
-	      start();
+			equal(m.name,"mod", "mod returned" );
+			equal(m.module.bar.name, "bar", "module.js was able to get bar");
+			equal(m.widget(), "widget", "got a function");
+			start();
 		}, function(){
 			ok(false, "steal not loaded");
-			start()
+			start();
 		});
-	});*/
+	});
 
 	asyncTest("steal's normalize with a plugin", function(){
 		System.instantiate({
@@ -81,7 +76,6 @@ QUnit.config.testTimeout = 30000;
 			equal(result.deps[0], "foo/bar/bar!foo/bar", "normalize fixed part before !");
 			start();
 		});
-		
 	});
 
 	asyncTest("steal's normalize with plugin only the bang", function(){
@@ -94,16 +88,14 @@ QUnit.config.testTimeout = 30000;
 				equal(result, "rdfa.stache!stache", "normalize fixed part before !");
 				start();
 			});
-			
 		});
 	});
-	return;
+
 
 module("steal via html");
 
 	asyncTest("basics", function(){
 		makeIframe("basics/basics.html");
-
 	});
 
 	asyncTest("basics with generated html", function(){
@@ -124,10 +116,8 @@ module("steal via html");
 			'src="../steal/steal.js?basics"'));
 	});
 
-
 	asyncTest("inline", function(){
 		makeIframe("basics/inline_basics.html");
-
 	});
 
 	asyncTest("default bower_components config path", function(){
@@ -136,7 +126,6 @@ module("steal via html");
 			'src="../bower_components/steal/steal.js?basics"'));
 	});
 
-
 	asyncTest("default bower_components without config still works", function(){
 		makeIframe("basics/noconfig.html");
 	});
@@ -144,7 +133,6 @@ module("steal via html");
 	asyncTest("map works", function(){
 		makeIframe("map/map.html");
 	});
-
 
 	asyncTest("read config", function(){
 		writeIframe(makeStealHTML(

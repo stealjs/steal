@@ -2031,8 +2031,14 @@ function logloads(loads) {
 
 (function(__$global) {
 
-__$global.upgradeSystemLoader = function() {
-  __$global.upgradeSystemLoader = undefined;
+var __upgradeSystemLoader = function(baseLoader) {
+
+  var extend = function(d, s){
+    for(var prop in s) {
+      d[prop] = s[prop];
+    }
+    return d;
+  };
 
   // indexOf polyfill for IE
   var indexOf = Array.prototype.indexOf || function(item) {
@@ -2040,7 +2046,7 @@ __$global.upgradeSystemLoader = function() {
       if (this[i] === item)
         return i;
     return -1;
-  }
+  };
 
   // Absolute URL parsing, from https://gist.github.com/Yaffle/1088850
   function parseURI(url) {
@@ -2084,7 +2090,7 @@ __$global.upgradeSystemLoader = function() {
   }
 
   // clone the original System loader
-  var originalSystem = __$global.System;
+  var originalSystem = baseLoader;
   var System = __$global.System = new LoaderPolyfill(originalSystem);
   System.baseURL = originalSystem.baseURL;
   System.paths = { '*': '*.js' };
@@ -2093,7 +2099,7 @@ __$global.upgradeSystemLoader = function() {
   System.noConflict = function() {
     __$global.SystemJS = System;
     __$global.System = System.originalSystem;
-  }
+  };
 
   /*
  * Meta Extension
@@ -3968,6 +3974,8 @@ function depCache(loader) {
         ? __$curScript.src.substr(0, __$curScript.src.lastIndexOf('/') + 1) 
         : System.baseURL + (System.baseURL.lastIndexOf('/') == System.baseURL.length - 1 ? '' : '/')
         ) + 'traceur.js';
+
+  return System;
 };
 
 function __eval(__source, __global, __address, __sourceMap) {
@@ -3989,6 +3997,15 @@ function __eval(__source, __global, __address, __sourceMap) {
 var __$curScript;
 
 (function(global) {
+  global.upgradeSystemLoader = function() {
+    global.upgradeSystemLoader = undefined;
+    var originalSystem = global.System;
+    global.System = __upgradeSystemLoader(global.System);
+    global.System.clone = function() {
+      return __upgradeSystemLoader(originalSystem);
+    };
+  };
+
   if (typeof window != 'undefined') {
     var scripts = document.getElementsByTagName('script');
     __$curScript = scripts[scripts.length - 1];
@@ -4574,12 +4591,9 @@ var addProductionBundles = function(){
 */
 function addSteal(loader) {
 
-  var isNode = typeof module != 'undefined' && module.exports;
-
   // Steal Module Format Detection RegEx
   // steal(module, ...)
   var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
-  
 
   // What we stole.
   var stealInstantiateResult;
@@ -4591,50 +4605,50 @@ function addSteal(loader) {
     loader.global.module = undefined;
     loader.global.exports = undefined;
 
-
     function steal() {
       var deps = [];
       var factory;
       
       for( var i = 0; i < arguments.length; i++ ) {
-	      if (typeof arguments[i] == 'string') {
-	        deps.push( normalize(arguments[i]) );
-	      } else {
-	        factory = arguments[i];
-	      }
+        if (typeof arguments[i] === 'string') {
+          deps.push( normalize(arguments[i]) );
+        } else {
+          factory = arguments[i];
+        }
       }
-      if (typeof factory != 'function')
+
+      if (typeof factory !== 'function') {
         factory = (function(factory) {
-          return function() { return factory; }
+          return function() { return factory; };
         })(factory);
-        
+      }
+
       stealInstantiateResult = {
         deps: deps,
         execute: function(require, exports, moduleName) {
 
           var depValues = [];
-          for (var i = 0; i < deps.length; i++)
+          for (var i = 0; i < deps.length; i++) {
             depValues.push(require(deps[i]));
+          }
 
           var output = factory.apply(loader.global, depValues);
 
-          if (typeof output != 'undefined')
+          if (typeof output !== 'undefined') {
             return output;
+          }
         }
       };
-      
-    };
+    }
 
     loader.global.steal = steal;
   }
-
-  
 
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
     var loader = this;
 
-    if (load.metadata.format == 'steal' || !load.metadata.format && load.source.match(stealRegEx)) {
+    if (load.metadata.format === 'steal' || !load.metadata.format && load.source.match(stealRegEx)) {
       load.metadata.format = 'steal';
 
       var oldSteal = loader.global.steal;
@@ -4645,26 +4659,22 @@ function addSteal(loader) {
 
       loader.global.steal = oldSteal;
 
-      if (!stealInstantiateResult )
+      if (!stealInstantiateResult) {
         throw "Steal module " + load.name + " did not call steal";
+      }
 
       if (stealInstantiateResult) {
         load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(stealInstantiateResult.deps) : stealInstantiateResult.deps;
         load.metadata.execute = stealInstantiateResult.execute;
       }
     }
-    console.log("called", load.metadata.deps );
     return loaderInstantiate.call(loader, load);
   };
 }
 
-  
-  if(typeof System !== "undefined") {
-  	addSteal(System);
-  }
-
-
-  
+if (typeof System !== "undefined") {
+  addSteal(System);
+}
 
 
 	
