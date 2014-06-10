@@ -4672,6 +4672,8 @@ function addSteal(loader) {
     }
     return loaderInstantiate.call(loader, load);
   };
+
+  return loader;
 }
 
 if (typeof System !== "undefined") {
