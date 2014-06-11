@@ -12,32 +12,34 @@ if( steal.config('env') === 'production' ) {
 		return "";
 	};
 } else {
-
 	exports.instantiate = function(load) {
-		load.metadata.format = "css";
-		load.metadata.buildType = "css";
-		load.metadata.includeInBuild = true;
-		load.metadata.execute = function(){
-			if(load.source) {
-				var head = document.head || document.getElementsByTagName('head')[0],
-					style = document.createElement('style'),
-					source = load.source+"/*# sourceURL="+load.address+" */";
+		return {
+			deps: [],
+			execute: function(){
+				if(load.source) {
+					var head = document.head || document.getElementsByTagName('head')[0],
+						style = document.createElement('style'),
+						source = load.source+"/*# sourceURL="+load.address+" */";
 
-				// make source load relative to the current page
-				source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
-					return "url(" + steal.joinURIs( load.address, part) + ")";
-				});
-				style.type = 'text/css';
+					// make source load relative to the current page
+					source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
+						return "url(" + steal.joinURIs( load.address, part) + ")";
+					});
+					style.type = 'text/css';
 
-				if (style.styleSheet){
-					style.styleSheet.cssText = source;
-				} else {
-				  style.appendChild(document.createTextNode(source));
+					if (style.styleSheet){
+						style.styleSheet.cssText = source;
+					} else {
+						style.appendChild(document.createTextNode(source));
+					}
+					head.appendChild(style);
 				}
-				head.appendChild(style);
+
+				return new System.global.Module({});
 			}
-			return new System.global.Module({});
 		};
 	};
 }
+
+exports.buildType = "css";
 exports.includeInBuild = true;
