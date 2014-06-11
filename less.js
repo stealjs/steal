@@ -1,23 +1,23 @@
-import css from 'steal/css';
-import lessEngine from 'less';
+var css = require("steal/css");
+var lessEngine = require("less");
 
-export var instantiate = css.instantiate;
+exports.instantiate = css.instantiate;
 
-export function translate(load) {
+exports.translate = function(load) {
 	var pathParts = (load.address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
 	var paths = [];
 	if (typeof window !== 'undefined') {
-		var pathParts = (load.address+'').split('/');
+		pathParts = (load.address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 		paths = [pathParts.join('/')];
 	}
 	return new Promise(function(resolve, reject){
 		new (lessEngine.Parser)({
-	        optimization: lessEngine.optimization,
-	        paths: [pathParts.join('/')]
-	    }).parse(load.source, function (e, root) {
+			optimization: lessEngine.optimization,
+			paths: [pathParts.join('/')]
+		}).parse(load.source, function (e, root) {
 			if(e){
 				reject(e);
 			} else {
@@ -25,7 +25,6 @@ export function translate(load) {
 			}
 		});
 	});
-
 };
 
-export var buildType = "css";
+exports.buildType = "css";
