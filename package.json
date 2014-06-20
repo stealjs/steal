@@ -12,7 +12,6 @@
   },
   "devDependencies": {
     "bower": "1.2.8",
-    "es6-module-loader": "~0.5.4",
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-concat": "~0.3.0",

@@ -8,6 +8,6 @@
     "systemjs" : "git://github.com/bitovi/systemjs.git#f2dbcede232200d501b34123b17bdd8121270d90"
   },
   "dependencies": {
-    "traceur": "0.0.32"
+    "traceur": "0.0.41"
   }
 }
