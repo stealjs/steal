@@ -4000,31 +4000,38 @@ function __eval(__source, __global, __address, __sourceMap) {
 var __$curScript;
 
 (function(global) {
+  global.upgradeSystemLoader = function() {
+    global.upgradeSystemLoader = undefined;
+    var originalSystem = global.System;
+    global.System = __upgradeSystemLoader(global.System);
+    global.System.clone = function() {
+      return __upgradeSystemLoader(originalSystem);
+    };
+  };
 
-  if (!global.System || !global.LoaderPolyfill) {
+  if (typeof window != 'undefined') {
+    var scripts = document.getElementsByTagName('script');
+    __$curScript = scripts[scripts.length - 1];
 
-    if (typeof window != 'undefined') {
-      var scripts = document.getElementsByTagName('script');
-      __$curScript = scripts[scripts.length - 1];
-
-    
+    if (!global.System || !global.LoaderPolyfill) {
       // determine the current script path as the base path
       var curPath = __$curScript.src;
       var basePath = curPath.substr(0, curPath.lastIndexOf('/') + 1);
       document.write(
         '<' + 'script type="text/javascript" src="' + basePath + 'es6-module-loader.js" data-init="upgradeSystemLoader">' + '<' + '/script>'
       );
-      
-    } else {
-      var es6ModuleLoader = require('es6-module-loader');
-      global.System = es6ModuleLoader.System;
-      global.Loader = es6ModuleLoader.Loader;
-      global.Module = es6ModuleLoader.Module;
-      global.upgradeSystemLoader();
-      module.exports = global.System;
     }
-  } else {
+    else {
+      global.upgradeSystemLoader();
+    }
+  }
+  else {
+    var es6ModuleLoader = require('es6-module-loader');
+    global.System = es6ModuleLoader.System;
+    global.Loader = es6ModuleLoader.Loader;
+    global.Module = es6ModuleLoader.Module;
     global.upgradeSystemLoader();
+    module.exports = global.System;
   }
 })(__$global);
 
@@ -4673,16 +4680,18 @@ if (typeof System !== "undefined") {
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addSteal = addSteal;
-    }
-    else {
-    		var System = require('systemjs');
-    		
-    		global.steal = makeSteal(System);
+		
+	} else {
+    	
+		require('systemjs');
+			
+		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./dev.js");
 		steal.clone = makeSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
-    }
+	}
+    
     
 })(typeof window == "undefined" ? global : window);

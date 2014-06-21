@@ -641,16 +641,18 @@ if (typeof System !== "undefined") {
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addSteal = addSteal;
-    }
-    else {
-    		var System = require('systemjs');
-    		
-    		global.steal = makeSteal(System);
+		
+	} else {
+    	
+		require('systemjs');
+			
+		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./dev.js");
 		steal.clone = makeSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
-    }
+	}
+    
     
 })(typeof window == "undefined" ? global : window);
