@@ -35,6 +35,21 @@ module.exports = function (grunt) {
           'src/system-format-end.js'
         ],
         dest: 'system-format-steal.js'
+      },
+      nodeMain: {
+		src: [
+          'src/start.js',
+          'src/normalize.js',
+          'src/core.js',     	// starts makeSteal
+          'src/system-extension-ext.js',
+          'src/system-extension-forward-slash.js',
+          'src/config.js',
+          'src/startup.js',
+          'src/make-steal-end.js', // ends makeSteal
+          'src/system-format-steal.js',
+          'src/end.js'
+        ],
+        dest: 'main.js'
       }
     },
     uglify: {

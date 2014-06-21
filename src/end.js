@@ -6,7 +6,9 @@
 		window.steal.addSteal = addSteal;
     }
     else {
-    	global.steal = makeSteal(System);
+    		var System = require('systemjs');
+    		
+    		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./dev.js");
 		steal.clone = makeSteal;

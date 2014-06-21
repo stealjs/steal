@@ -10,6 +10,9 @@
   "scripts": {
     "test": "grunt test --stack"
   },
+  "dependencies": {
+    "systemjs": "git://github.com/bitovi/systemjs.git#add-clone"
+  },
   "devDependencies": {
     "bower": "1.2.8",
     "grunt": "~0.4.1",
@@ -27,5 +30,5 @@
       "url": "http://opensource.org/licenses/mit-license.php"
     }
   ],
-  "main": "steal"
+  "main": "main"
 }
