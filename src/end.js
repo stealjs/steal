@@ -1,4 +1,3 @@
-
 	
 	if (typeof window != 'undefined') {
 		var oldSteal = window.steal;

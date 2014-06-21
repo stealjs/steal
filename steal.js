@@ -4000,38 +4000,31 @@ function __eval(__source, __global, __address, __sourceMap) {
 var __$curScript;
 
 (function(global) {
-  global.upgradeSystemLoader = function() {
-    global.upgradeSystemLoader = undefined;
-    var originalSystem = global.System;
-    global.System = __upgradeSystemLoader(global.System);
-    global.System.clone = function() {
-      return __upgradeSystemLoader(originalSystem);
-    };
-  };
 
-  if (typeof window != 'undefined') {
-    var scripts = document.getElementsByTagName('script');
-    __$curScript = scripts[scripts.length - 1];
+  if (!global.System || !global.LoaderPolyfill) {
 
-    if (!global.System || !global.LoaderPolyfill) {
+    if (typeof window != 'undefined') {
+      var scripts = document.getElementsByTagName('script');
+      __$curScript = scripts[scripts.length - 1];
+
+    
       // determine the current script path as the base path
       var curPath = __$curScript.src;
       var basePath = curPath.substr(0, curPath.lastIndexOf('/') + 1);
       document.write(
         '<' + 'script type="text/javascript" src="' + basePath + 'es6-module-loader.js" data-init="upgradeSystemLoader">' + '<' + '/script>'
       );
-    }
-    else {
+      
+    } else {
+      var es6ModuleLoader = require('es6-module-loader');
+      global.System = es6ModuleLoader.System;
+      global.Loader = es6ModuleLoader.Loader;
+      global.Module = es6ModuleLoader.Module;
       global.upgradeSystemLoader();
+      module.exports = global.System;
     }
-  }
-  else {
-    var es6ModuleLoader = require('es6-module-loader');
-    global.System = es6ModuleLoader.System;
-    global.Loader = es6ModuleLoader.Loader;
-    global.Module = es6ModuleLoader.Module;
+  } else {
     global.upgradeSystemLoader();
-    module.exports = global.System;
   }
 })(__$global);
 
@@ -4673,7 +4666,6 @@ function addSteal(loader) {
 if (typeof System !== "undefined") {
   addSteal(System);
 }
-
 
 	
 	if (typeof window != 'undefined') {
