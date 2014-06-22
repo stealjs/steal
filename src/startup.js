@@ -92,9 +92,9 @@
 			};
 		}
 
-		System.register("less",[], function(){
+		System.register("less",[], false, function(){
 			var r = require;
-			return { __useDefault: true, 'default': r('less') };
+			return r('less');
 		});
 		return options;
 	};
