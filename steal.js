@@ -3103,7 +3103,7 @@ function cjs(loader) {
 
         var execLoad = {
           name: load.name,
-          source: glString + '(function() { ' + load.source + '\n}).call(exports)',
+          source: '(function() { ' + glString + '(function() { ' + load.source + '\n}).call(this); }).call(exports)',
           address: load.address
         };
         loader.__exec(execLoad);
@@ -4189,7 +4189,6 @@ var __$curScript;
 		}
 	};
 
-
 var makeSteal = function(System){
 	
 	var configDeferred,
@@ -4231,7 +4230,6 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
-
 
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar

@@ -152,7 +152,6 @@
 		}
 	};
 
-
 var makeSteal = function(System){
 	
 	var configDeferred,
@@ -194,7 +193,6 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
-
 
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar

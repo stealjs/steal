@@ -57,7 +57,6 @@
 		}
 	};
 
-
 /*
   SystemJS Steal Format
   Provides the Steal module format definition.
