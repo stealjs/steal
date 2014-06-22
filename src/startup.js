@@ -159,8 +159,8 @@
 				}
 
 				return steal.System.import("steal/dev");
-			},function(){
-				console.log("steal - error loading stealconfig.");
+			},function(e){
+				console.log("steal - error loading stealconfig.",e);
 				return steal.System.import("steal/dev");
 			});
 
