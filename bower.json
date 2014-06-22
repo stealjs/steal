@@ -5,7 +5,7 @@
   "version": "0.1.1",
   "devDependencies": {
     "qunit": "~1.12.0",
-    "systemjs" : "git://github.com/bitovi/systemjs.git#49e1c66ab76db803ee0a7be63eba7145b4e062ee"
+    "systemjs" : "git://github.com/bitovi/systemjs.git#6cd761e4e562abf627515878e8714ab30536332d"
   },
   "dependencies": {
     "traceur": "0.0.41"
