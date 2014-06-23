@@ -3130,7 +3130,7 @@ function amd(loader) {
   // AMD Module Format Detection RegEx
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
-  var amdRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*("[^"]+"|'[^']+')\s*,)*(\s*("[^"]+"|'[^']+')\s*)?\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
+  var amdRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*("[^"]+"|'[^']+')\s*,)*(\s*("[^"]+"|'[^']+')\s*,?\s*)?\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
 
   /*
     AMD-compatible require
@@ -3317,7 +3317,26 @@ function amd(loader) {
 
       createDefine(loader);
 
-      loader.__exec(load);
+      try {
+        loader.__exec(load);
+      }
+      catch (e) {
+        if (loader.execute === false && isNode) {
+          // use a regular expression to pull out deps
+          var match = load.source.match(amdRegEx);
+          if (match) {
+            // named or anonymous
+            if (match[1] && match[1][0] == '[')
+              define(match[1].substr(match[1].length - 2), eval(match[2]), function() {});
+            else if (match[2] && match[2][0] == '[')
+              define(eval(match[2]), function() {});
+            else
+              define(function() {});
+          }
+        }
+        else
+          throw e;
+      }
 
       if (isNode)
         loader.global.define = undefined;
@@ -3990,7 +4009,7 @@ function __eval(__source, __global, __address, __sourceMap) {
     if (e.name == 'SyntaxError')
       e.message = 'Evaluating ' + __address + '\n\t' + e.message;
     if (System.trace && System.execute == false)
-      console.log('Execution error for ' + __address + ': ' + e.stack || e);
+      e = 'Execution error for ' + __address + ': ' + e.stack || e;
     throw e;
   }
 }
@@ -4669,7 +4688,6 @@ if (typeof System !== "undefined") {
   addSteal(System);
 }
 
-	
 	if (typeof window != 'undefined') {
 		var oldSteal = window.steal;
 		window.steal = makeSteal(System);

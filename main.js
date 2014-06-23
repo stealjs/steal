@@ -632,7 +632,6 @@ if (typeof System !== "undefined") {
   addSteal(System);
 }
 
-	
 	if (typeof window != 'undefined') {
 		var oldSteal = window.steal;
 		window.steal = makeSteal(System);
