@@ -26,17 +26,13 @@
 		if (pluginIndex != -1) {
 			// argumentName is the part before the !
 			var argumentName = name.substr(0, pluginIndex);
-			var pluginName = name.substr(pluginIndex + 1) || argumentName.substr(argumentName.lastIndexOf('.') + 1);
+			var pluginName = name.substr(pluginIndex + 1);
 			pluginPart = "!" + pluginName;
-			pluginCache[pluginName] = true;
 
 			// Set the name to the argument name so that we can normalize it alone.
 			name = argumentName;
-		} else if(pluginCache[name]) {
-			// This is a plugin so just return the name unnormalized.
-			return name;
-		}
-
+		} 
+		
 		var last = filename(name),
 			extension = ext(name);
 		// if the name ends with /
