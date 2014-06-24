@@ -9,6 +9,7 @@ module.exports = function (grunt) {
         ' *  Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
         ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n */'
     },
+    release: {},
     concat: {
       dist: {
         src: [
@@ -103,6 +104,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('testee');
 
   grunt.registerTask('test', [ 'build', 'testee' ]);
