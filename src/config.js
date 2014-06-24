@@ -43,66 +43,66 @@
 		}
 	};
 
-var getSetToSystem = function(prop){
-	return {
-		get: function(){
-			return steal.System[prop];
-		},
-		set: function(val){
-			if(typeof val === "object" && typeof steal.System[prop] === "object") {
-				steal.System[prop] = extend(steal.System[prop] || {},val || {});
-			} else {
-				steal.System[prop] = val;
+	var getSetToSystem = function(prop){
+		return {
+			get: function(){
+				return steal.System[prop];
+			},
+			set: function(val){
+				if(typeof val === "object" && typeof steal.System[prop] === "object") {
+					steal.System[prop] = extend(steal.System[prop] || {},val || {});
+				} else {
+					steal.System[prop] = val;
+				}
 			}
+		};
+	};
+	
+	var configSpecial = {
+		env: {
+			set: function(val){
+				addProductionBundles();
+				return val;
+			}
+		},
+		baseUrl: getSetToSystem("baseURL"),
+		root: getSetToSystem("baseURL"),
+		config: {
+			set: function(val){
+				var name = filename(val),
+					root = dir(val);
+				System.paths["stealconfig"] = name;
+				configSpecial.root.set( (root === val ? "." : root)  +"/");
+			}
+		},
+		paths: getSetToSystem("paths"),
+		map: getSetToSystem("map"),
+		startId: {
+			set: function(val){
+				configSpecial.main.set(  normalize(val) );
+			},
+			get: function(){
+				return System.main;
+			}
+		},
+		main: {
+			get: getSetToSystem("main").get,
+			set: function(val){
+				System.main = val;
+				addProductionBundles();
+			}
+		},
+		meta: getSetToSystem("meta"),
+		ext: getSetToSystem("ext")
+	};
+	
+	var addProductionBundles = function(){
+		if(configData.env === "production" && System.main) {
+			var main = System.main,
+				bundlesDir = System.bundlesPath || "bundles/",
+				bundleName = bundlesDir+filename(main);
+	
+			System.meta[bundleName] = {format:"amd"};
+			System.bundles[bundleName] = [main];
 		}
 	};
-};
-
-var configSpecial = {
-	env: {
-		set: function(val){
-			addProductionBundles();
-			return val;
-		}
-	},
-	baseUrl: getSetToSystem("baseURL"),
-	root: getSetToSystem("baseURL"),
-	config: {
-		set: function(val){
-			var name = filename(val),
-				root = dir(val);
-			System.paths["stealconfig"] = name;
-			configSpecial.root.set( (root === val ? "." : root)  +"/");
-		}
-	},
-	paths: getSetToSystem("paths"),
-	map: getSetToSystem("map"),
-	startId: {
-		set: function(val){
-			configSpecial.main.set(  normalize(val) );
-		},
-		get: function(){
-			return System.main;
-		}
-	},
-	main: {
-		get: getSetToSystem("main").get,
-		set: function(val){
-			System.main = val;
-			addProductionBundles();
-		}
-	},
-	meta: getSetToSystem("meta"),
-	ext: getSetToSystem("ext")
-};
-
-var addProductionBundles = function(){
-	if(configData.env === "production" && System.main) {
-		var main = System.main,
-			bundlesDir = System.bundlesPath || "bundles/",
-			bundleName = bundlesDir+filename(main);
-
-		System.meta[bundleName] = {format:"amd"};
-		System.bundles[bundleName] = [main];
-	}
-};
