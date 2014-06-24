@@ -35,7 +35,7 @@ if( steal.config('env') === 'production' ) {
 					head.appendChild(style);
 				}
 
-				return new System.global.Module({});
+				return System.newModule({});
 			}
 		};
 	};

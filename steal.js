@@ -1,710 +1,1249 @@
-(function() {
-var define, requireModule, require, requirejs;
-
-(function() {
-  var registry = {}, seen = {};
-
-  define = function(name, deps, callback) {
-    registry[name] = { deps: deps, callback: callback };
-  };
-
-  requirejs = require = requireModule = function(name) {
-  requirejs._eak_seen = registry;
-
-    if (seen[name]) { return seen[name]; }
-    seen[name] = {};
-
-    if (!registry[name]) {
-      throw new Error("Could not find module " + name);
-    }
-
-    var mod = registry[name],
-        deps = mod.deps,
-        callback = mod.callback,
-        reified = [],
-        exports;
-
-    for (var i=0, l=deps.length; i<l; i++) {
-      if (deps[i] === 'exports') {
-        reified.push(exports = {});
-      } else {
-        reified.push(requireModule(resolve(deps[i])));
-      }
-    }
-
-    var value = callback.apply(this, reified);
-    return seen[name] = exports || value;
-
-    function resolve(child) {
-      if (child.charAt(0) !== '.') { return child; }
-      var parts = child.split("/");
-      var parentBase = name.split("/").slice(0, -1);
-
-      for (var i=0, l=parts.length; i<l; i++) {
-        var part = parts[i];
-
-        if (part === '..') { parentBase.pop(); }
-        else if (part === '.') { continue; }
-        else { parentBase.push(part); }
-      }
-
-      return parentBase.join("/");
-    }
-  };
-})();
-
-define("promise/all", 
-  ["./utils","exports"],
-  function(__dependency1__, __exports__) {
-    "use strict";
-    /* global toString */
-
-    var isArray = __dependency1__.isArray;
-    var isFunction = __dependency1__.isFunction;
-
-    /**
-      Returns a promise that is fulfilled when all the given promises have been
-      fulfilled, or rejected if any of them become rejected. The return promise
-      is fulfilled with an array that gives all the values in the order they were
-      passed in the `promises` array argument.
-
-      Example:
-
-      ```javascript
-      var promise1 = RSVP.resolve(1);
-      var promise2 = RSVP.resolve(2);
-      var promise3 = RSVP.resolve(3);
-      var promises = [ promise1, promise2, promise3 ];
-
-      RSVP.all(promises).then(function(array){
-        // The array here would be [ 1, 2, 3 ];
-      });
-      ```
-
-      If any of the `promises` given to `RSVP.all` are rejected, the first promise
-      that is rejected will be given as an argument to the returned promises's
-      rejection handler. For example:
-
-      Example:
-
-      ```javascript
-      var promise1 = RSVP.resolve(1);
-      var promise2 = RSVP.reject(new Error("2"));
-      var promise3 = RSVP.reject(new Error("3"));
-      var promises = [ promise1, promise2, promise3 ];
-
-      RSVP.all(promises).then(function(array){
-        // Code here never runs because there are rejected promises!
-      }, function(error) {
-        // error.message === "2"
-      });
-      ```
-
-      @method all
-      @for RSVP
-      @param {Array} promises
-      @param {String} label
-      @return {Promise} promise that is fulfilled when all `promises` have been
-      fulfilled, or rejected if any of them become rejected.
-    */
-    function all(promises) {
-      /*jshint validthis:true */
-      var Promise = this;
-
-      if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to all.');
-      }
-
-      return new Promise(function(resolve, reject) {
-        var results = [], remaining = promises.length,
-        promise;
-
-        if (remaining === 0) {
-          resolve([]);
-        }
-
-        function resolver(index) {
-          return function(value) {
-            resolveAll(index, value);
-          };
-        }
-
-        function resolveAll(index, value) {
-          results[index] = value;
-          if (--remaining === 0) {
-            resolve(results);
-          }
-        }
-
-        for (var i = 0; i < promises.length; i++) {
-          promise = promises[i];
-
-          if (promise && isFunction(promise.then)) {
-            promise.then(resolver(i), reject);
-          } else {
-            resolveAll(i, promise);
-          }
-        }
-      });
-    }
-
-    __exports__.all = all;
-  });
-define("promise/asap", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    var browserGlobal = (typeof window !== 'undefined') ? window : {};
-    var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
-
-    // node
-    function useNextTick() {
-      return function() {
-        process.nextTick(flush);
-      };
-    }
-
-    function useMutationObserver() {
-      var iterations = 0;
-      var observer = new BrowserMutationObserver(flush);
-      var node = document.createTextNode('');
-      observer.observe(node, { characterData: true });
-
-      return function() {
-        node.data = (iterations = ++iterations % 2);
-      };
-    }
-
-    function useSetTimeout() {
-      return function() {
-        local.setTimeout(flush, 1);
-      };
-    }
-
-    var queue = [];
-    function flush() {
-      for (var i = 0; i < queue.length; i++) {
-        var tuple = queue[i];
-        var callback = tuple[0], arg = tuple[1];
-        callback(arg);
-      }
-      queue = [];
-    }
-
-    var scheduleFlush;
-
-    // Decide what async method to use to triggering processing of queued callbacks:
-    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
-      scheduleFlush = useNextTick();
-    } else if (BrowserMutationObserver) {
-      scheduleFlush = useMutationObserver();
-    } else {
-      scheduleFlush = useSetTimeout();
-    }
-
-    function asap(callback, arg) {
-      var length = queue.push([callback, arg]);
-      if (length === 1) {
-        // If length is 1, that means that we need to schedule an async flush.
-        // If additional callbacks are queued before the queue is flushed, they
-        // will be processed by this flush that we are scheduling.
-        scheduleFlush();
-      }
-    }
-
-    __exports__.asap = asap;
-  });
-define("promise/config", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    var config = {
-      instrument: false
-    };
-
-    function configure(name, value) {
-      if (arguments.length === 2) {
-        config[name] = value;
-      } else {
-        return config[name];
-      }
-    }
-
-    __exports__.config = config;
-    __exports__.configure = configure;
-  });
-define("promise/polyfill", 
-  ["./promise","./utils","exports"],
-  function(__dependency1__, __dependency2__, __exports__) {
-    "use strict";
-    /*global self*/
-    var RSVPPromise = __dependency1__.Promise;
-    var isFunction = __dependency2__.isFunction;
-
-    function polyfill() {
-      var local;
-
-      if (typeof global !== 'undefined') {
-        local = global;
-      } else if (typeof window !== 'undefined' && window.document) {
-        local = window;
-      } else {
-        local = self;
-      }
-
-      var es6PromiseSupport = 
-        "Promise" in local &&
-        // Some of these methods are missing from
-        // Firefox/Chrome experimental implementations
-        "resolve" in local.Promise &&
-        "reject" in local.Promise &&
-        "all" in local.Promise &&
-        "race" in local.Promise &&
-        // Older version of the spec had a resolver object
-        // as the arg rather than a function
-        (function() {
-          var resolve;
-          new local.Promise(function(r) { resolve = r; });
-          return isFunction(resolve);
-        }());
-
-      if (!es6PromiseSupport) {
-        local.Promise = RSVPPromise;
-      }
-    }
-
-    __exports__.polyfill = polyfill;
-  });
-define("promise/promise", 
-  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
-  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
-    "use strict";
-    var config = __dependency1__.config;
-    var configure = __dependency1__.configure;
-    var objectOrFunction = __dependency2__.objectOrFunction;
-    var isFunction = __dependency2__.isFunction;
-    var now = __dependency2__.now;
-    var all = __dependency3__.all;
-    var race = __dependency4__.race;
-    var staticResolve = __dependency5__.resolve;
-    var staticReject = __dependency6__.reject;
-    var asap = __dependency7__.asap;
-
-    var counter = 0;
-
-    config.async = asap; // default async is asap;
-
-    function Promise(resolver) {
-      if (!isFunction(resolver)) {
-        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-      }
-
-      if (!(this instanceof Promise)) {
-        throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-      }
-
-      this._subscribers = [];
-
-      invokeResolver(resolver, this);
-    }
-
-    function invokeResolver(resolver, promise) {
-      function resolvePromise(value) {
-        resolve(promise, value);
-      }
-
-      function rejectPromise(reason) {
-        reject(promise, reason);
-      }
-
-      try {
-        resolver(resolvePromise, rejectPromise);
-      } catch(e) {
-        rejectPromise(e);
-      }
-    }
-
-    function invokeCallback(settled, promise, callback, detail) {
-      var hasCallback = isFunction(callback),
-          value, error, succeeded, failed;
-
-      if (hasCallback) {
-        try {
-          value = callback(detail);
-          succeeded = true;
-        } catch(e) {
-          failed = true;
-          error = e;
-        }
-      } else {
-        value = detail;
-        succeeded = true;
-      }
-
-      if (handleThenable(promise, value)) {
-        return;
-      } else if (hasCallback && succeeded) {
-        resolve(promise, value);
-      } else if (failed) {
-        reject(promise, error);
-      } else if (settled === FULFILLED) {
-        resolve(promise, value);
-      } else if (settled === REJECTED) {
-        reject(promise, value);
-      }
-    }
-
-    var PENDING   = void 0;
-    var SEALED    = 0;
-    var FULFILLED = 1;
-    var REJECTED  = 2;
-
-    function subscribe(parent, child, onFulfillment, onRejection) {
-      var subscribers = parent._subscribers;
-      var length = subscribers.length;
-
-      subscribers[length] = child;
-      subscribers[length + FULFILLED] = onFulfillment;
-      subscribers[length + REJECTED]  = onRejection;
-    }
-
-    function publish(promise, settled) {
-      var child, callback, subscribers = promise._subscribers, detail = promise._detail;
-
-      for (var i = 0; i < subscribers.length; i += 3) {
-        child = subscribers[i];
-        callback = subscribers[i + settled];
-
-        invokeCallback(settled, child, callback, detail);
-      }
-
-      promise._subscribers = null;
-    }
-
-    Promise.prototype = {
-      constructor: Promise,
-
-      _state: undefined,
-      _detail: undefined,
-      _subscribers: undefined,
-
-      then: function(onFulfillment, onRejection) {
-        var promise = this;
-
-        var thenPromise = new this.constructor(function() {});
-
-        if (this._state) {
-          var callbacks = arguments;
-          config.async(function invokePromiseCallback() {
-            invokeCallback(promise._state, thenPromise, callbacks[promise._state - 1], promise._detail);
-          });
-        } else {
-          subscribe(this, thenPromise, onFulfillment, onRejection);
-        }
-
-        return thenPromise;
-      },
-
-      'catch': function(onRejection) {
-        return this.then(null, onRejection);
-      }
-    };
-
-    Promise.all = all;
-    Promise.race = race;
-    Promise.resolve = staticResolve;
-    Promise.reject = staticReject;
-
-    function handleThenable(promise, value) {
-      var then = null,
-      resolved;
-
-      try {
-        if (promise === value) {
-          throw new TypeError("A promises callback cannot return that same promise.");
-        }
-
-        if (objectOrFunction(value)) {
-          then = value.then;
-
-          if (isFunction(then)) {
-            then.call(value, function(val) {
-              if (resolved) { return true; }
-              resolved = true;
-
-              if (value !== val) {
-                resolve(promise, val);
-              } else {
-                fulfill(promise, val);
-              }
-            }, function(val) {
-              if (resolved) { return true; }
-              resolved = true;
-
-              reject(promise, val);
-            });
-
-            return true;
-          }
-        }
-      } catch (error) {
-        if (resolved) { return true; }
-        reject(promise, error);
-        return true;
-      }
-
-      return false;
-    }
-
-    function resolve(promise, value) {
-      if (promise === value) {
-        fulfill(promise, value);
-      } else if (!handleThenable(promise, value)) {
-        fulfill(promise, value);
-      }
-    }
-
-    function fulfill(promise, value) {
-      if (promise._state !== PENDING) { return; }
-      promise._state = SEALED;
-      promise._detail = value;
-
-      config.async(publishFulfillment, promise);
-    }
-
-    function reject(promise, reason) {
-      if (promise._state !== PENDING) { return; }
-      promise._state = SEALED;
-      promise._detail = reason;
-
-      config.async(publishRejection, promise);
-    }
-
-    function publishFulfillment(promise) {
-      publish(promise, promise._state = FULFILLED);
-    }
-
-    function publishRejection(promise) {
-      publish(promise, promise._state = REJECTED);
-    }
-
-    __exports__.Promise = Promise;
-  });
-define("promise/race", 
-  ["./utils","exports"],
-  function(__dependency1__, __exports__) {
-    "use strict";
-    /* global toString */
-    var isArray = __dependency1__.isArray;
-
-    /**
-      `RSVP.race` allows you to watch a series of promises and act as soon as the
-      first promise given to the `promises` argument fulfills or rejects.
-
-      Example:
-
-      ```javascript
-      var promise1 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          resolve("promise 1");
-        }, 200);
-      });
-
-      var promise2 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          resolve("promise 2");
-        }, 100);
-      });
-
-      RSVP.race([promise1, promise2]).then(function(result){
-        // result === "promise 2" because it was resolved before promise1
-        // was resolved.
-      });
-      ```
-
-      `RSVP.race` is deterministic in that only the state of the first completed
-      promise matters. For example, even if other promises given to the `promises`
-      array argument are resolved, but the first completed promise has become
-      rejected before the other promises became fulfilled, the returned promise
-      will become rejected:
-
-      ```javascript
-      var promise1 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          resolve("promise 1");
-        }, 200);
-      });
-
-      var promise2 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          reject(new Error("promise 2"));
-        }, 100);
-      });
-
-      RSVP.race([promise1, promise2]).then(function(result){
-        // Code here never runs because there are rejected promises!
-      }, function(reason){
-        // reason.message === "promise2" because promise 2 became rejected before
-        // promise 1 became fulfilled
-      });
-      ```
-
-      @method race
-      @for RSVP
-      @param {Array} promises array of promises to observe
-      @param {String} label optional string for describing the promise returned.
-      Useful for tooling.
-      @return {Promise} a promise that becomes fulfilled with the value the first
-      completed promises is resolved with if the first completed promise was
-      fulfilled, or rejected with the reason that the first completed promise
-      was rejected with.
-    */
-    function race(promises) {
-      /*jshint validthis:true */
-      var Promise = this;
-
-      if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to race.');
-      }
-      return new Promise(function(resolve, reject) {
-        var results = [], promise;
-
-        for (var i = 0; i < promises.length; i++) {
-          promise = promises[i];
-
-          if (promise && typeof promise.then === 'function') {
-            promise.then(resolve, reject);
-          } else {
-            resolve(promise);
-          }
-        }
-      });
-    }
-
-    __exports__.race = race;
-  });
-define("promise/reject", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    /**
-      `RSVP.reject` returns a promise that will become rejected with the passed
-      `reason`. `RSVP.reject` is essentially shorthand for the following:
-
-      ```javascript
-      var promise = new RSVP.Promise(function(resolve, reject){
-        reject(new Error('WHOOPS'));
-      });
-
-      promise.then(function(value){
-        // Code here doesn't run because the promise is rejected!
-      }, function(reason){
-        // reason.message === 'WHOOPS'
-      });
-      ```
-
-      Instead of writing the above, your code now simply becomes the following:
-
-      ```javascript
-      var promise = RSVP.reject(new Error('WHOOPS'));
-
-      promise.then(function(value){
-        // Code here doesn't run because the promise is rejected!
-      }, function(reason){
-        // reason.message === 'WHOOPS'
-      });
-      ```
-
-      @method reject
-      @for RSVP
-      @param {Any} reason value that the returned promise will be rejected with.
-      @param {String} label optional string for identifying the returned promise.
-      Useful for tooling.
-      @return {Promise} a promise that will become rejected with the given
-      `reason`.
-    */
-    function reject(reason) {
-      /*jshint validthis:true */
-      var Promise = this;
-
-      return new Promise(function (resolve, reject) {
-        reject(reason);
-      });
-    }
-
-    __exports__.reject = reject;
-  });
-define("promise/resolve", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    function resolve(value) {
-      /*jshint validthis:true */
-      if (value && typeof value === 'object' && value.constructor === this) {
-        return value;
-      }
-
-      var Promise = this;
-
-      return new Promise(function(resolve) {
-        resolve(value);
-      });
-    }
-
-    __exports__.resolve = resolve;
-  });
-define("promise/utils", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    function objectOrFunction(x) {
-      return isFunction(x) || (typeof x === "object" && x !== null);
-    }
-
-    function isFunction(x) {
-      return typeof x === "function";
-    }
-
-    function isArray(x) {
-      return Object.prototype.toString.call(x) === "[object Array]";
-    }
-
-    // Date.now is not available in browsers < IE9
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
-    var now = Date.now || function() { return new Date().getTime(); };
-
-
-    __exports__.objectOrFunction = objectOrFunction;
-    __exports__.isFunction = isFunction;
-    __exports__.isArray = isArray;
-    __exports__.now = now;
-  });
-requireModule('promise/polyfill').polyfill();
-}());
+!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.Promise=e():"undefined"!=typeof global?global.Promise=e():"undefined"!=typeof self&&(self.Promise=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+/**
+ * ES6 global Promise shim
+ */
+var unhandledRejections = require('../lib/decorators/unhandledRejection');
+var PromiseConstructor = module.exports = unhandledRejections(require('../lib/Promise'));
+
+var g = typeof global !== 'undefined' && global
+	|| typeof self !== 'undefined' && self;
+
+if(typeof g !== 'undefined' && typeof g.Promise === 'undefined') {
+	g['Promise'] = PromiseConstructor;
+}
+
+},{"../lib/Promise":2,"../lib/decorators/unhandledRejection":5}],2:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function (require) {
+
+	var makePromise = require('./makePromise');
+	var Scheduler = require('./scheduler');
+	var async = require('./async');
+
+	return makePromise({
+		scheduler: new Scheduler(async)
+	});
+
+});
+})(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
+
+},{"./async":4,"./makePromise":6,"./scheduler":7}],3:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+	/**
+	 * Circular queue
+	 * @param {number} capacityPow2 power of 2 to which this queue's capacity
+	 *  will be set initially. eg when capacityPow2 == 3, queue capacity
+	 *  will be 8.
+	 * @constructor
+	 */
+	function Queue(capacityPow2) {
+		this.head = this.tail = this.length = 0;
+		this.buffer = new Array(1 << capacityPow2);
+	}
+
+	Queue.prototype.push = function(x) {
+		if(this.length === this.buffer.length) {
+			this._ensureCapacity(this.length * 2);
+		}
+
+		this.buffer[this.tail] = x;
+		this.tail = (this.tail + 1) & (this.buffer.length - 1);
+		++this.length;
+		return this.length;
+	};
+
+	Queue.prototype.shift = function() {
+		var x = this.buffer[this.head];
+		this.buffer[this.head] = void 0;
+		this.head = (this.head + 1) & (this.buffer.length - 1);
+		--this.length;
+		return x;
+	};
+
+	Queue.prototype._ensureCapacity = function(capacity) {
+		var head = this.head;
+		var buffer = this.buffer;
+		var newBuffer = new Array(capacity);
+		var i = 0;
+		var len;
+
+		if(head === 0) {
+			len = this.length;
+			for(; i<len; ++i) {
+				newBuffer[i] = buffer[i];
+			}
+		} else {
+			capacity = buffer.length;
+			len = this.tail;
+			for(; head<capacity; ++i, ++head) {
+				newBuffer[i] = buffer[head];
+			}
+
+			for(head=0; head<len; ++i, ++head) {
+				newBuffer[i] = buffer[head];
+			}
+		}
+
+		this.buffer = newBuffer;
+		this.head = 0;
+		this.tail = this.length;
+	};
+
+	return Queue;
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}],4:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+
+	// Sniff "best" async scheduling option
+	// Prefer process.nextTick or MutationObserver, then check for
+	// vertx and finally fall back to setTimeout
+
+	/*jshint maxcomplexity:6*/
+	/*global process,document,setTimeout,MutationObserver,WebKitMutationObserver*/
+	var nextTick, MutationObs;
+
+	if (typeof process !== 'undefined' && process !== null &&
+		typeof process.nextTick === 'function') {
+		nextTick = function(f) {
+			process.nextTick(f);
+		};
+
+	} else if (MutationObs =
+		(typeof MutationObserver === 'function' && MutationObserver) ||
+		(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver)) {
+		nextTick = (function (document, MutationObserver) {
+			var scheduled;
+			var el = document.createElement('div');
+			var o = new MutationObserver(run);
+			o.observe(el, { attributes: true });
+
+			function run() {
+				var f = scheduled;
+				scheduled = void 0;
+				f();
+			}
+
+			return function (f) {
+				scheduled = f;
+				el.setAttribute('class', 'x');
+			};
+		}(document, MutationObs));
+
+	} else {
+		nextTick = (function(cjsRequire) {
+			try {
+				// vert.x 1.x || 2.x
+				return cjsRequire('vertx').runOnLoop || cjsRequire('vertx').runOnContext;
+			} catch (ignore) {}
+
+			// capture setTimeout to avoid being caught by fake timers
+			// used in time based tests
+			var capturedSetTimeout = setTimeout;
+			return function (t) {
+				capturedSetTimeout(t, 0);
+			};
+		}(require));
+	}
+
+	return nextTick;
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{}],5:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+
+	var timer = require('../timer');
+
+	return function unhandledRejection(Promise) {
+		var logError = noop;
+		var logInfo = noop;
+
+		if(typeof console !== 'undefined') {
+			logError = typeof console.error !== 'undefined'
+				? function (e) { console.error(e); }
+				: function (e) { console.log(e); };
+
+			logInfo = typeof console.info !== 'undefined'
+				? function (e) { console.info(e); }
+				: function (e) { console.log(e); };
+		}
+
+		Promise.onPotentiallyUnhandledRejection = function(rejection) {
+			enqueue(report, rejection);
+		};
+
+		Promise.onPotentiallyUnhandledRejectionHandled = function(rejection) {
+			enqueue(unreport, rejection);
+		};
+
+		Promise.onFatalRejection = function(rejection) {
+			enqueue(throwit, rejection.value);
+		};
+
+		var tasks = [];
+		var reported = [];
+		var running = false;
+
+		function report(r) {
+			if(!r.handled) {
+				reported.push(r);
+				logError('Potentially unhandled rejection [' + r.id + '] ' + formatError(r.value));
+			}
+		}
+
+		function unreport(r) {
+			var i = reported.indexOf(r);
+			if(i >= 0) {
+				reported.splice(i, 1);
+				logInfo('Handled previous rejection [' + r.id + '] ' + formatObject(r.value));
+			}
+		}
+
+		function enqueue(f, x) {
+			tasks.push(f, x);
+			if(!running) {
+				running = true;
+				running = timer.set(flush, 0);
+			}
+		}
+
+		function flush() {
+			running = false;
+			while(tasks.length > 0) {
+				tasks.shift()(tasks.shift());
+			}
+		}
+
+		return Promise;
+	};
+
+	function formatError(e) {
+		var s = typeof e === 'object' && e.stack ? e.stack : formatObject(e);
+		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
+	}
+
+	function formatObject(o) {
+		var s = String(o);
+		if(s === '[object Object]' && typeof JSON !== 'undefined') {
+			s = tryStringify(o, s);
+		}
+		return s;
+	}
+
+	function tryStringify(e, defaultValue) {
+		try {
+			return JSON.stringify(e);
+		} catch(e) {
+			// Ignore. Cannot JSON.stringify e, stick with String(e)
+			return defaultValue;
+		}
+	}
+
+	function throwit(e) {
+		throw e;
+	}
+
+	function noop() {}
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{"../timer":8}],6:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+
+	return function makePromise(environment) {
+
+		var tasks = environment.scheduler;
+
+		var objectCreate = Object.create ||
+			function(proto) {
+				function Child() {}
+				Child.prototype = proto;
+				return new Child();
+			};
+
+		/**
+		 * Create a promise whose fate is determined by resolver
+		 * @constructor
+		 * @returns {Promise} promise
+		 * @name Promise
+		 */
+		function Promise(resolver, handler) {
+			this._handler = resolver === Handler ? handler : init(resolver);
+		}
+
+		/**
+		 * Run the supplied resolver
+		 * @param resolver
+		 * @returns {makePromise.DeferredHandler}
+		 */
+		function init(resolver) {
+			var handler = new DeferredHandler();
+
+			try {
+				resolver(promiseResolve, promiseReject, promiseNotify);
+			} catch (e) {
+				promiseReject(e);
+			}
+
+			return handler;
+
+			/**
+			 * Transition from pre-resolution state to post-resolution state, notifying
+			 * all listeners of the ultimate fulfillment or rejection
+			 * @param {*} x resolution value
+			 */
+			function promiseResolve (x) {
+				handler.resolve(x);
+			}
+			/**
+			 * Reject this promise with reason, which will be used verbatim
+			 * @param {Error|*} reason rejection reason, strongly suggested
+			 *   to be an Error type
+			 */
+			function promiseReject (reason) {
+				handler.reject(reason);
+			}
+
+			/**
+			 * Issue a progress event, notifying all progress listeners
+			 * @param {*} x progress event payload to pass to all listeners
+			 */
+			function promiseNotify (x) {
+				handler.notify(x);
+			}
+		}
+
+		// Creation
+
+		Promise.resolve = resolve;
+		Promise.reject = reject;
+		Promise.never = never;
+
+		Promise._defer = defer;
+
+		/**
+		 * Returns a trusted promise. If x is already a trusted promise, it is
+		 * returned, otherwise returns a new trusted Promise which follows x.
+		 * @param  {*} x
+		 * @return {Promise} promise
+		 */
+		function resolve(x) {
+			return isPromise(x) ? x
+				: new Promise(Handler, new AsyncHandler(getHandler(x)));
+		}
+
+		/**
+		 * Return a reject promise with x as its reason (x is used verbatim)
+		 * @param {*} x
+		 * @returns {Promise} rejected promise
+		 */
+		function reject(x) {
+			return new Promise(Handler, new AsyncHandler(new RejectedHandler(x)));
+		}
+
+		/**
+		 * Return a promise that remains pending forever
+		 * @returns {Promise} forever-pending promise.
+		 */
+		function never() {
+			return foreverPendingPromise; // Should be frozen
+		}
+
+		/**
+		 * Creates an internal {promise, resolver} pair
+		 * @private
+		 * @returns {Promise}
+		 */
+		function defer() {
+			return new Promise(Handler, new DeferredHandler());
+		}
+
+		// Transformation and flow control
+
+		/**
+		 * Transform this promise's fulfillment value, returning a new Promise
+		 * for the transformed result.  If the promise cannot be fulfilled, onRejected
+		 * is called with the reason.  onProgress *may* be called with updates toward
+		 * this promise's fulfillment.
+		 * @param {function=} onFulfilled fulfillment handler
+		 * @param {function=} onRejected rejection handler
+		 * @deprecated @param {function=} onProgress progress handler
+		 * @return {Promise} new promise
+		 */
+		Promise.prototype.then = function(onFulfilled, onRejected) {
+			var parent = this._handler;
+
+			if (typeof onFulfilled !== 'function' && parent.join().state() > 0) {
+				// Short circuit: value will not change, simply share handler
+				return new Promise(Handler, parent);
+			}
+
+			var p = this._beget();
+			var child = p._handler;
+
+			parent.when({
+				resolve: child.resolve,
+				notify: child.notify,
+				context: child,
+				receiver: parent.receiver,
+				fulfilled: onFulfilled,
+				rejected: onRejected,
+				progress: arguments.length > 2 ? arguments[2] : void 0
+			});
+
+			return p;
+		};
+
+		/**
+		 * If this promise cannot be fulfilled due to an error, call onRejected to
+		 * handle the error. Shortcut for .then(undefined, onRejected)
+		 * @param {function?} onRejected
+		 * @return {Promise}
+		 */
+		Promise.prototype['catch'] = function(onRejected) {
+			return this.then(void 0, onRejected);
+		};
+
+		/**
+		 * Private function to bind a thisArg for this promise's handlers
+		 * @private
+		 * @param {object} thisArg `this` value for all handlers attached to
+		 *  the returned promise.
+		 * @returns {Promise}
+		 */
+		Promise.prototype._bindContext = function(thisArg) {
+			return new Promise(Handler, new BoundHandler(this._handler, thisArg));
+		};
+
+		/**
+		 * Creates a new, pending promise of the same type as this promise
+		 * @private
+		 * @returns {Promise}
+		 */
+		Promise.prototype._beget = function() {
+			var parent = this._handler;
+			var child = new DeferredHandler(parent.receiver, parent.join().context);
+			return new this.constructor(Handler, child);
+		};
+
+		/**
+		 * Check if x is a rejected promise, and if so, delegate to handler._fatal
+		 * @private
+		 * @param {*} x
+		 */
+		Promise.prototype._maybeFatal = function(x) {
+			if(!maybeThenable(x)) {
+				return;
+			}
+
+			var handler = getHandler(x);
+			var context = this._handler.context;
+			handler.catchError(function() {
+				this._fatal(context);
+			}, handler);
+		};
+
+		// Array combinators
+
+		Promise.all = all;
+		Promise.race = race;
+
+		/**
+		 * Return a promise that will fulfill when all promises in the
+		 * input array have fulfilled, or will reject when one of the
+		 * promises rejects.
+		 * @param {array} promises array of promises
+		 * @returns {Promise} promise for array of fulfillment values
+		 */
+		function all(promises) {
+			/*jshint maxcomplexity:8*/
+			var resolver = new DeferredHandler();
+			var pending = promises.length >>> 0;
+			var results = new Array(pending);
+
+			var i, h, x, s;
+			for (i = 0; i < promises.length; ++i) {
+				x = promises[i];
+
+				if (x === void 0 && !(i in promises)) {
+					--pending;
+					continue;
+				}
+
+				if (maybeThenable(x)) {
+					h = isPromise(x)
+						? x._handler.join()
+						: getHandlerUntrusted(x);
+
+					s = h.state();
+					if (s === 0) {
+						resolveOne(resolver, results, h, i);
+					} else if (s > 0) {
+						results[i] = h.value;
+						--pending;
+					} else {
+						resolver.become(h);
+						break;
+					}
+
+				} else {
+					results[i] = x;
+					--pending;
+				}
+			}
+
+			if(pending === 0) {
+				resolver.become(new FulfilledHandler(results));
+			}
+
+			return new Promise(Handler, resolver);
+			function resolveOne(resolver, results, handler, i) {
+				handler.map(function(x) {
+					results[i] = x;
+					if(--pending === 0) {
+						this.become(new FulfilledHandler(results));
+					}
+				}, resolver);
+			}
+		}
+
+		/**
+		 * Fulfill-reject competitive race. Return a promise that will settle
+		 * to the same state as the earliest input promise to settle.
+		 *
+		 * WARNING: The ES6 Promise spec requires that race()ing an empty array
+		 * must return a promise that is pending forever.  This implementation
+		 * returns a singleton forever-pending promise, the same singleton that is
+		 * returned by Promise.never(), thus can be checked with ===
+		 *
+		 * @param {array} promises array of promises to race
+		 * @returns {Promise} if input is non-empty, a promise that will settle
+		 * to the same outcome as the earliest input promise to settle. if empty
+		 * is empty, returns a promise that will never settle.
+		 */
+		function race(promises) {
+			// Sigh, race([]) is untestable unless we return *something*
+			// that is recognizable without calling .then() on it.
+			if(Object(promises) === promises && promises.length === 0) {
+				return never();
+			}
+
+			var h = new DeferredHandler();
+			var i, x;
+			for(i=0; i<promises.length; ++i) {
+				x = promises[i];
+				if (x !== void 0 && i in promises) {
+					getHandler(x).chain(h, h.resolve, h.reject);
+				}
+			}
+			return new Promise(Handler, h);
+		}
+
+		// Promise internals
+
+		/**
+		 * Get an appropriate handler for x, without checking for cycles
+		 * @private
+		 * @param {*} x
+		 * @returns {object} handler
+		 */
+		function getHandler(x) {
+			if(isPromise(x)) {
+				return x._handler.join();
+			}
+			return maybeThenable(x) ? getHandlerUntrusted(x) : new FulfilledHandler(x);
+		}
+
+		function isPromise(x) {
+			return x instanceof Promise;
+		}
+
+		/**
+		 * Get a handler for potentially untrusted thenable x
+		 * @param {*} x
+		 * @returns {object} handler
+		 */
+		function getHandlerUntrusted(x) {
+			try {
+				var untrustedThen = x.then;
+				return typeof untrustedThen === 'function'
+					? new ThenableHandler(untrustedThen, x)
+					: new FulfilledHandler(x);
+			} catch(e) {
+				return new RejectedHandler(e);
+			}
+		}
+
+		/**
+		 * Handler for a promise that is pending forever
+		 * @private
+		 * @constructor
+		 */
+		function Handler() {}
+
+		Handler.prototype.when
+			= Handler.prototype.resolve
+			= Handler.prototype.reject
+			= Handler.prototype.notify
+			= Handler.prototype._fatal
+			= Handler.prototype._unreport
+			= Handler.prototype._report
+			= noop;
+
+		Handler.prototype.inspect = toPendingState;
+
+		Handler.prototype._state = 0;
+
+		Handler.prototype.state = function() {
+			return this._state;
+		};
+
+		/**
+		 * Recursively collapse handler chain to find the handler
+		 * nearest to the fully resolved value.
+		 * @returns {object} handler nearest the fully resolved value
+		 */
+		Handler.prototype.join = function() {
+			var h = this;
+			while(h.handler !== void 0) {
+				h = h.handler;
+			}
+			return h;
+		};
+
+		Handler.prototype.chain = function(to, fulfilled, rejected, progress) {
+			this.when({
+				resolve: noop,
+				notify: noop,
+				context: void 0,
+				receiver: to,
+				fulfilled: fulfilled,
+				rejected: rejected,
+				progress: progress
+			});
+		};
+
+		Handler.prototype.map = function(f, to) {
+			this.chain(to, f, to.reject, to.notify);
+		};
+
+		Handler.prototype.catchError = function(f, to) {
+			this.chain(to, to.resolve, f, to.notify);
+		};
+
+		Handler.prototype.fold = function(to, f, z) {
+			this.join().map(function(x) {
+				getHandler(z).map(function(z) {
+					this.resolve(tryCatchReject2(f, z, x, this.receiver));
+				}, this);
+			}, to);
+		};
+
+		/**
+		 * Handler that manages a queue of consumers waiting on a pending promise
+		 * @private
+		 * @constructor
+		 */
+		function DeferredHandler(receiver, inheritedContext) {
+			Promise.createContext(this, inheritedContext);
+
+			this.consumers = void 0;
+			this.receiver = receiver;
+			this.handler = void 0;
+			this.resolved = false;
+		}
+
+		inherit(Handler, DeferredHandler);
+
+		DeferredHandler.prototype._state = 0;
+
+		DeferredHandler.prototype.inspect = function() {
+			return this.resolved ? this.join().inspect() : toPendingState();
+		};
+
+		DeferredHandler.prototype.resolve = function(x) {
+			if(!this.resolved) {
+				this.become(getHandler(x));
+			}
+		};
+
+		DeferredHandler.prototype.reject = function(x) {
+			if(!this.resolved) {
+				this.become(new RejectedHandler(x));
+			}
+		};
+
+		DeferredHandler.prototype.join = function() {
+			if (this.resolved) {
+				var h = this;
+				while(h.handler !== void 0) {
+					h = h.handler;
+					if(h === this) {
+						return this.handler = new Cycle();
+					}
+				}
+				return h;
+			} else {
+				return this;
+			}
+		};
+
+		DeferredHandler.prototype.run = function() {
+			var q = this.consumers;
+			var handler = this.join();
+			this.consumers = void 0;
+
+			for (var i = 0; i < q.length; ++i) {
+				handler.when(q[i]);
+			}
+		};
+
+		DeferredHandler.prototype.become = function(handler) {
+			this.resolved = true;
+			this.handler = handler;
+			if(this.consumers !== void 0) {
+				tasks.enqueue(this);
+			}
+
+			if(this.context !== void 0) {
+				handler._report(this.context);
+			}
+		};
+
+		DeferredHandler.prototype.when = function(continuation) {
+			if(this.resolved) {
+				tasks.enqueue(new ContinuationTask(continuation, this.handler));
+			} else {
+				if(this.consumers === void 0) {
+					this.consumers = [continuation];
+				} else {
+					this.consumers.push(continuation);
+				}
+			}
+		};
+
+		DeferredHandler.prototype.notify = function(x) {
+			if(!this.resolved) {
+				tasks.enqueue(new ProgressTask(this, x));
+			}
+		};
+
+		DeferredHandler.prototype._report = function(context) {
+			this.resolved && this.handler.join()._report(context);
+		};
+
+		DeferredHandler.prototype._unreport = function() {
+			this.resolved && this.handler.join()._unreport();
+		};
+
+		DeferredHandler.prototype._fatal = function(context) {
+			var c = typeof context === 'undefined' ? this.context : context;
+			this.resolved && this.handler.join()._fatal(c);
+		};
+
+		/**
+		 * Abstract base for handler that delegates to another handler
+		 * @private
+		 * @param {object} handler
+		 * @constructor
+		 */
+		function DelegateHandler(handler) {
+			this.handler = handler;
+		}
+
+		inherit(Handler, DelegateHandler);
+
+		DelegateHandler.prototype.inspect = function() {
+			return this.join().inspect();
+		};
+
+		DelegateHandler.prototype._report = function(context) {
+			this.join()._report(context);
+		};
+
+		DelegateHandler.prototype._unreport = function() {
+			this.join()._unreport();
+		};
+
+		/**
+		 * Wrap another handler and force it into a future stack
+		 * @private
+		 * @param {object} handler
+		 * @constructor
+		 */
+		function AsyncHandler(handler) {
+			DelegateHandler.call(this, handler);
+		}
+
+		inherit(DelegateHandler, AsyncHandler);
+
+		AsyncHandler.prototype.when = function(continuation) {
+			tasks.enqueue(new ContinuationTask(continuation, this.join()));
+		};
+
+		/**
+		 * Handler that follows another handler, injecting a receiver
+		 * @private
+		 * @param {object} handler another handler to follow
+		 * @param {object=undefined} receiver
+		 * @constructor
+		 */
+		function BoundHandler(handler, receiver) {
+			DelegateHandler.call(this, handler);
+			this.receiver = receiver;
+		}
+
+		inherit(DelegateHandler, BoundHandler);
+
+		BoundHandler.prototype.when = function(continuation) {
+			// Because handlers are allowed to be shared among promises,
+			// each of which possibly having a different receiver, we have
+			// to insert our own receiver into the chain if it has been set
+			// so that callbacks (f, r, u) will be called using our receiver
+			if(this.receiver !== void 0) {
+				continuation.receiver = this.receiver;
+			}
+			this.join().when(continuation);
+		};
+
+		/**
+		 * Handler that wraps an untrusted thenable and assimilates it in a future stack
+		 * @private
+		 * @param {function} then
+		 * @param {{then: function}} thenable
+		 * @constructor
+		 */
+		function ThenableHandler(then, thenable) {
+			DeferredHandler.call(this);
+			tasks.enqueue(new AssimilateTask(then, thenable, this));
+		}
+
+		inherit(DeferredHandler, ThenableHandler);
+
+		/**
+		 * Handler for a fulfilled promise
+		 * @private
+		 * @param {*} x fulfillment value
+		 * @constructor
+		 */
+		function FulfilledHandler(x) {
+			Promise.createContext(this);
+			this.value = x;
+		}
+
+		inherit(Handler, FulfilledHandler);
+
+		FulfilledHandler.prototype._state = 1;
+
+		FulfilledHandler.prototype.inspect = function() {
+			return { state: 'fulfilled', value: this.value };
+		};
+
+		FulfilledHandler.prototype.when = function(cont) {
+			var x;
+
+			if (typeof cont.fulfilled === 'function') {
+				Promise.enterContext(this);
+				x = tryCatchReject(cont.fulfilled, this.value, cont.receiver);
+				Promise.exitContext();
+			} else {
+				x = this.value;
+			}
+
+			cont.resolve.call(cont.context, x);
+		};
+
+		var id = 0;
+		/**
+		 * Handler for a rejected promise
+		 * @private
+		 * @param {*} x rejection reason
+		 * @constructor
+		 */
+		function RejectedHandler(x) {
+			Promise.createContext(this);
+
+			this.id = ++id;
+			this.value = x;
+			this.handled = false;
+			this.reported = false;
+
+			this._report();
+		}
+
+		inherit(Handler, RejectedHandler);
+
+		RejectedHandler.prototype._state = -1;
+
+		RejectedHandler.prototype.inspect = function() {
+			return { state: 'rejected', reason: this.value };
+		};
+
+		RejectedHandler.prototype.when = function(cont) {
+			var x;
+
+			if (typeof cont.rejected === 'function') {
+				this._unreport();
+				Promise.enterContext(this);
+				x = tryCatchReject(cont.rejected, this.value, cont.receiver);
+				Promise.exitContext();
+			} else {
+				x = new Promise(Handler, this);
+			}
+
+
+			cont.resolve.call(cont.context, x);
+		};
+
+		RejectedHandler.prototype._report = function(context) {
+			tasks.afterQueue(reportUnhandled, this, context);
+		};
+
+		RejectedHandler.prototype._unreport = function() {
+			this.handled = true;
+			tasks.afterQueue(reportHandled, this);
+		};
+
+		RejectedHandler.prototype._fatal = function(context) {
+			Promise.onFatalRejection(this, context);
+		};
+
+		function reportUnhandled(rejection, context) {
+			if(!rejection.handled) {
+				rejection.reported = true;
+				Promise.onPotentiallyUnhandledRejection(rejection, context);
+			}
+		}
+
+		function reportHandled(rejection) {
+			if(rejection.reported) {
+				Promise.onPotentiallyUnhandledRejectionHandled(rejection);
+			}
+		}
+
+		// Unhandled rejection hooks
+		// By default, everything is a noop
+
+		// TODO: Better names: "annotate"?
+		Promise.createContext
+			= Promise.enterContext
+			= Promise.exitContext
+			= Promise.onPotentiallyUnhandledRejection
+			= Promise.onPotentiallyUnhandledRejectionHandled
+			= Promise.onFatalRejection
+			= noop;
+
+		// Errors and singletons
+
+		var foreverPendingHandler = new Handler();
+		var foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
+
+		function Cycle() {
+			RejectedHandler.call(this, new TypeError('Promise cycle'));
+		}
+
+		inherit(RejectedHandler, Cycle);
+
+		// Snapshot states
+
+		/**
+		 * Creates a pending state snapshot
+		 * @private
+		 * @returns {{state:'pending'}}
+		 */
+		function toPendingState() {
+			return { state: 'pending' };
+		}
+
+		// Task runners
+
+		/**
+		 * Run a single consumer
+		 * @private
+		 * @constructor
+		 */
+		function ContinuationTask(continuation, handler) {
+			this.continuation = continuation;
+			this.handler = handler;
+		}
+
+		ContinuationTask.prototype.run = function() {
+			this.handler.join().when(this.continuation);
+		};
+
+		/**
+		 * Run a queue of progress handlers
+		 * @private
+		 * @constructor
+		 */
+		function ProgressTask(handler, value) {
+			this.handler = handler;
+			this.value = value;
+		}
+
+		ProgressTask.prototype.run = function() {
+			var q = this.handler.consumers;
+			if(q === void 0) {
+				return;
+			}
+			// First progress handler is at index 1
+			for (var i = 0; i < q.length; ++i) {
+				this._notify(q[i]);
+			}
+		};
+
+		ProgressTask.prototype._notify = function(continuation) {
+			var x = typeof continuation.progress === 'function'
+				? tryCatchReturn(continuation.progress, this.value, continuation.receiver)
+				: this.value;
+
+			continuation.notify.call(continuation.context, x);
+		};
+
+		/**
+		 * Assimilate a thenable, sending it's value to resolver
+		 * @private
+		 * @param {function} then
+		 * @param {object|function} thenable
+		 * @param {object} resolver
+		 * @constructor
+		 */
+		function AssimilateTask(then, thenable, resolver) {
+			this._then = then;
+			this.thenable = thenable;
+			this.resolver = resolver;
+		}
+
+		AssimilateTask.prototype.run = function() {
+			var h = this.resolver;
+			tryAssimilate(this._then, this.thenable, _resolve, _reject, _notify);
+
+			function _resolve(x) { h.resolve(x); }
+			function _reject(x)  { h.reject(x); }
+			function _notify(x)  { h.notify(x); }
+		};
+
+		function tryAssimilate(then, thenable, resolve, reject, notify) {
+			try {
+				then.call(thenable, resolve, reject, notify);
+			} catch (e) {
+				reject(e);
+			}
+		}
+
+		// Other helpers
+
+		/**
+		 * @param {*} x
+		 * @returns {boolean} false iff x is guaranteed not to be a thenable
+		 */
+		function maybeThenable(x) {
+			return (typeof x === 'object' || typeof x === 'function') && x !== null;
+		}
+
+		/**
+		 * Return f.call(thisArg, x), or if it throws return a rejected promise for
+		 * the thrown exception
+		 * @private
+		 */
+		function tryCatchReject(f, x, thisArg) {
+			try {
+				return f.call(thisArg, x);
+			} catch(e) {
+				return reject(e);
+			}
+		}
+
+		/**
+		 * Same as above, but includes the extra argument parameter.
+		 * @private
+		 */
+		function tryCatchReject2(f, x, y, thisArg) {
+			try {
+				return f.call(thisArg, x, y);
+			} catch(e) {
+				return reject(e);
+			}
+		}
+
+		/**
+		 * Return f.call(thisArg, x), or if it throws, *return* the exception
+		 * @private
+		 */
+		function tryCatchReturn(f, x, thisArg) {
+			try {
+				return f.call(thisArg, x);
+			} catch(e) {
+				return e;
+			}
+		}
+
+		function inherit(Parent, Child) {
+			Child.prototype = objectCreate(Parent.prototype);
+			Child.prototype.constructor = Child;
+		}
+
+		function noop() {}
+
+		return Promise;
+	};
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}],7:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+
+	var Queue = require('./Queue');
+
+	// Credit to Twisol (https://github.com/Twisol) for suggesting
+	// this type of extensible queue + trampoline approach for next-tick conflation.
+
+	function Scheduler(enqueue) {
+		this._enqueue = enqueue;
+		this._handlerQueue = new Queue(15);
+		this._afterQueue = new Queue(5);
+		this._running = false;
+
+		var self = this;
+		this.drain = function() {
+			self._drain();
+		};
+	}
+
+	/**
+	 * Enqueue a task. If the queue is not currently scheduled to be
+	 * drained, schedule it.
+	 * @param {function} task
+	 */
+	Scheduler.prototype.enqueue = function(task) {
+		this._handlerQueue.push(task);
+		if(!this._running) {
+			this._running = true;
+			this._enqueue(this.drain);
+		}
+	};
+
+	Scheduler.prototype.afterQueue = function(f, x, y) {
+		this._afterQueue.push(f);
+		this._afterQueue.push(x);
+		this._afterQueue.push(y);
+		if(!this._running) {
+			this._running = true;
+			this._enqueue(this.drain);
+		}
+	};
+
+	/**
+	 * Drain the handler queue entirely, being careful to allow the
+	 * queue to be extended while it is being processed, and to continue
+	 * processing until it is truly empty.
+	 */
+	Scheduler.prototype._drain = function() {
+		var q = this._handlerQueue;
+		while(q.length > 0) {
+			q.shift().run();
+		}
+
+		this._running = false;
+
+		q = this._afterQueue;
+		while(q.length > 0) {
+			q.shift()(q.shift(), q.shift());
+		}
+	};
+
+	return Scheduler;
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{"./Queue":3}],8:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+	/*global setTimeout,clearTimeout*/
+	var cjsRequire, vertx, setTimer, clearTimer;
+
+	cjsRequire = require;
+
+	try {
+		vertx = cjsRequire('vertx');
+		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
+		clearTimer = vertx.cancelTimer;
+	} catch (e) {
+		setTimer = function(f, ms) { return setTimeout(f, ms); };
+		clearTimer = function(t) { return clearTimeout(t); };
+	}
+
+	return {
+		set: setTimer,
+		clear: clearTimer
+	};
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{}]},{},[1])
+(1)
+});
+;
 /*
 *********************************************************************************************
 
   Loader Polyfill
 
-    - Implemented exactly to the 2014-04-27 Specification Draft.
-      Loader implemented to the modules draft from
-      https://github.com/jorendorff/js-loaders/blob/e60d3651/specs/es6-modules-2013-12-02.pdf
-    
-    - All functions are commented with their spec numbers, with spec differences commented.
+    - Implemented exactly to the 2014-05-22 Specification Draft.
 
-    - All spec bugs are commented in this code with links to the spec bugs.
+    - Functions are commented with their spec numbers, with spec differences commented.
+
+    - Spec bugs are commented in this code with links.
 
     - Abstract functions have been combined where possible, and their associated functions
       commented.
 
-    - When the traceur global is detected, declarative modules are transformed by Traceur
-      into the `instantiate` System.register output.
+    - Realm implementation is entirely omitted.
 
-    - Realm implementation is entirely omitted. As such, the Loader.realm accessor will 
-      throw an error, as well as Loader.eval. Realm arguments are not passed.
-
-    - Loader module table iteration currently not yet implemented
+    - Loader module table iteration currently not yet implemented.
 
 *********************************************************************************************
 */
@@ -738,7 +1277,7 @@ function logloads(loads) {
 
   var loads = System._loader.loads;
   var linkSets = [];
-  
+
   for (var i = 0; i < loads.length; i++) {
     var load = loads[i];
     console.assert(load.status == 'loading' || load.status == 'loaded', 'Each load is loading or loaded');
@@ -795,7 +1334,7 @@ function logloads(loads) {
 
 (function (__global) {
   (function() {
-    var Promise = __global.Promise || require('es6-promise').Promise;
+    var Promise = __global.Promise || require('when/es6-shim/Promise');
 
     var traceur;
 
@@ -815,7 +1354,7 @@ function logloads(loads) {
 
     console.assert = console.assert || function() {};
 
-    // Define an IE-friendly shim good-enough for purposes
+    // IE8 support
     var indexOf = Array.prototype.indexOf || function(item) {
       for (var i = 0, thisLen = this.length; i < thisLen; i++) {
         if (this[i] === item) {
@@ -824,6 +1363,127 @@ function logloads(loads) {
       }
       return -1;
     };
+
+    // --- <Specific Traceur Parsing Code> ---
+    // parse function is used to parse a load record
+    // tree traversal, NB should use visitor pattern here
+    function traverse(object, iterator, parent, parentProperty) {
+      var key, child;
+      if (iterator(object, parent, parentProperty) === false)
+        return;
+      for (key in object) {
+        if (!object.hasOwnProperty(key))
+          continue;
+        if (key == 'location' || key == 'type')
+          continue;
+        child = object[key];
+        if (typeof child == 'object' && child !== null)
+          traverse(child, iterator, object, key);
+      }
+    }
+    // given a syntax tree, return the import list
+    function getImports(moduleTree) {
+      var imports = [];
+
+      function addImport(name) {
+        if (indexOf.call(imports, name) == -1)
+          imports.push(name);
+      }
+
+      traverse(moduleTree, function(node) {
+        // import {} from 'foo';
+        // export * from 'foo';
+        // export { ... } from 'foo';
+        // module x from 'foo';
+        if (node.type == 'EXPORT_DECLARATION') {
+          if (node.declaration.moduleSpecifier)
+            addImport(node.declaration.moduleSpecifier.token.processedValue);
+        }
+        else if (node.type == 'IMPORT_DECLARATION')
+          addImport(node.moduleSpecifier.token.processedValue);
+        else if (node.type == 'MODULE_DECLARATION')
+          addImport(node.expression.token.processedValue);
+      });
+      return imports;
+    }
+    // Returns an array of ModuleSpecifiers
+    function parse(load) {
+      if (!traceur) {
+        if (typeof window == 'undefined')
+          traceur = require('traceur');
+        else if (__global.traceur)
+          traceur = __global.traceur;
+        else
+          throw new TypeError('Include Traceur for module syntax support');
+      }
+
+      console.assert(load.source, 'Non-empty source');
+
+      var depsList;
+      try {
+        var parser = new traceur.syntax.Parser(new traceur.syntax.SourceFile(load.address, load.source));
+        var body = parser.parseModule();
+
+        load.kind = 'declarative';
+        depsList = getImports(body);
+
+        var oldSourceMaps = traceur.options.sourceMaps;
+        var oldModules = traceur.options.modules;
+
+        traceur.options.sourceMaps = true;
+        traceur.options.modules = 'instantiate';
+
+        var reporter = new traceur.util.ErrorReporter();
+
+        reporter.reportMessageInternal = function(location, kind, format, args) {
+          throw new SyntaxError(kind, location.start && location.start.line_, location.start && location.start.column_);
+        }
+
+        // traceur expects its version of System
+        var curSystem = __global.System;
+        __global.System = __global.traceurSystem;
+
+        var tree = (new traceur.codegeneration.module.AttachModuleNameTransformer(load.name)).transformAny(body);
+        tree = (new traceur.codegeneration.FromOptionsTransformer(reporter)).transform(tree);
+
+        var sourceMapGenerator = new traceur.outputgeneration.SourceMapGenerator({ file: load.address });
+        var options = { sourceMapGenerator: sourceMapGenerator };
+
+        var source = traceur.outputgeneration.TreeWriter.write(tree, options);
+
+        if (__global.btoa)
+          source += '\n//# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(options.sourceMap))) + '\n';
+
+        // now run System.register
+        var curRegister = System.register;
+
+        System.register = function(name, deps, declare) {
+          // store the registered declaration as load.declare
+          load.declare = typeof name == 'string' ? declare : deps;
+        }
+
+        __eval(source, __global, load.name);
+      }
+      catch(e) {
+        if (e.name == 'SyntaxError' || e.name == 'TypeError')
+          e.message = 'Evaluating ' + (load.name || load.address) + '\n\t' + e.message;
+        if (curRegister)
+          System.register = curRegister;
+        if (curSystem)
+          __global.System = curSystem;
+        if (oldSourceMaps)
+          traceur.options.sourceMaps = oldSourceMaps;
+        if (oldModules)
+          traceur.options.modules = oldModules;
+        throw e;
+      }
+      System.register = curRegister;
+      __global.System = curSystem;
+      traceur.options.sourceMaps = oldSourceMaps;
+      traceur.options.modules = oldModules;
+      return depsList;
+    }
+    // --- </Specific Traceur Parsing Code> ---
 
     // 15.2.3 - Runtime Semantics: Loader State
 
@@ -851,7 +1511,7 @@ function logloads(loads) {
     }
 
     // 15.2.3.2.2 createLoadRequestObject, absorbed into calling functions
-    
+
     // 15.2.4
 
     // 15.2.4.1
@@ -876,12 +1536,11 @@ function logloads(loads) {
       .then(function(name) {
         var load;
         if (loader.modules[name]) {
-          return { name: name };
-          // See https://bugs.ecmascript.org/show_bug.cgi?id=2795
-          /* load = createLoad(name);
+          load = createLoad(name);
           load.status = 'linked';
-          load.module = loader.modules[name];
-          return load; */
+          // https://bugs.ecmascript.org/show_bug.cgi?id=2795
+          // load.module = loader.modules[name];
+          return load;
         }
 
         for (var i = 0, l = loader.loads.length; i < l; i++) {
@@ -900,7 +1559,7 @@ function logloads(loads) {
         return load;
       });
     }
-    
+
     // 15.2.4.3
     function proceedToLocate(loader, load) {
       proceedToFetch(loader, load,
@@ -928,6 +1587,8 @@ function logloads(loads) {
       );
     }
 
+    var anonCnt = 0;
+
     // 15.2.4.5
     function proceedToTranslate(loader, load, p) {
       p
@@ -953,75 +1614,8 @@ function logloads(loads) {
 
         var depsList;
         if (instantiateResult === undefined) {
-          if (!__global.traceur)
-            throw new TypeError('Include Traceur for module syntax support');
-
-          traceur = traceur || __global.traceur;
           load.address = load.address || 'anon' + ++anonCnt;
-
-          console.assert(load.source, 'Non-empty source');
-
-          try {
-            var parser = new traceur.syntax.Parser(new traceur.syntax.SourceFile(load.address, load.source));
-            var body = parser.parseModule();
-
-            load.kind = 'declarative';
-            depsList = getImports(body);
-
-            var oldSourceMaps = traceur.options.sourceMaps;
-            var oldModules = traceur.options.modules;
-
-            traceur.options.sourceMaps = true;
-            traceur.options.modules = 'instantiate';
-
-            var reporter = new traceur.util.ErrorReporter();
-
-            reporter.reportMessageInternal = function(location, kind, format, args) {
-              throw new SyntaxError(kind, location.start && location.start.line_, location.start && location.start.column_);
-            }
-
-            // traceur expects its version of System
-            var curSystem = __global.System;
-            __global.System = __global.traceurSystem;
-
-            var tree = (new traceur.codegeneration.module.AttachModuleNameTransformer(load.name)).transformAny(body);
-            tree = (new traceur.codegeneration.FromOptionsTransformer(reporter)).transform(tree);
-
-            var sourceMapGenerator = new traceur.outputgeneration.SourceMapGenerator({ file: load.address });
-            var options = { sourceMapGenerator: sourceMapGenerator };
-
-            var source = traceur.outputgeneration.TreeWriter.write(tree, options);
-
-            if (__global.btoa)
-              source += '\n//# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(options.sourceMap))) + '\n';
-
-            // now run System.register
-            var curRegister = System.register;
-            
-            System.register = function(name, deps, declare) {
-              // store the registered declaration as load.declare
-              load.declare = typeof name == 'string' ? declare : deps;
-            }
-
-            __eval(source, __global, load.name);
-          }
-          catch(e) {
-            if (e.name == 'SyntaxError' || e.name == 'TypeError') 
-              e.message = 'Evaluating ' + (load.name || load.address) + '\n\t' + e.message;
-            if (curRegister)
-              System.register = curRegister;
-            if (curSystem)
-              __global.System = curSystem;
-            if (oldSourceMaps)
-              traceur.options.sourceMaps = oldSourceMaps;
-            if (oldModules)
-              traceur.options.modules = oldModules;
-            throw e;
-          }
-          System.register = curRegister;
-          __global.System = curSystem;
-          traceur.options.sourceMaps = oldSourceMaps;
-          traceur.options.modules = oldModules;
+          depsList = parse(load);
         }
         else if (typeof instantiateResult == 'object') {
           depsList = instantiateResult.deps || [];
@@ -1036,7 +1630,7 @@ function logloads(loads) {
         load.depsList = depsList;
 
         var loadPromises = [];
-        for (var i = 0, l = depsList.length; i < l; i++) (function(request) {
+        for (var i = 0, l = depsList.length; i < l; i++) (function(request, index) {
           loadPromises.push(
             requestLoad(loader, request, load.name, load.address)
 
@@ -1047,13 +1641,12 @@ function logloads(loads) {
                 return dep.key == request;
               }), 'not already a dependency');
 
-              load.dependencies.push({
+              // adjusted from spec to maintain dependency order
+              // this is due to the System.register internal implementation needs
+              load.dependencies[index] = {
                 key: request,
                 value: depLoad.name
-              });
-
-              if (!depLoad.status)
-                return;
+              };
 
               if (depLoad.status != 'linked') {
                 var linkSets = load.linkSets.concat([]);
@@ -1065,7 +1658,7 @@ function logloads(loads) {
               // snapshot(loader);
             })
           );
-        })(depsList[i]);
+        })(depsList[i], i);
 
         return Promise.all(loadPromises);
       })
@@ -1107,17 +1700,18 @@ function logloads(loads) {
         var name = stepState.moduleName;
         var step = stepState.step;
 
-        if (loader.modules[name]) 
+        if (loader.modules[name])
           throw new TypeError('"' + name + '" already exists in the module table');
 
         // NB this still seems wrong for LoadModule as we may load a dependency
         // of another module directly before it has finished loading.
+        // see https://bugs.ecmascript.org/show_bug.cgi?id=2994
         for (var i = 0, l = loader.loads.length; i < l; i++)
           if (loader.loads[i].name == name)
             throw new TypeError('"' + name + '" already loading');
 
         var load = createLoad(name);
-        
+
         load.metadata = stepState.moduleMetadata;
 
         var linkSet = createLinkSet(loader, load);
@@ -1150,6 +1744,7 @@ function logloads(loads) {
       var linkSet = {
         loader: loader,
         loads: [],
+        startingLoad: startingLoad, // added see spec bug https://bugs.ecmascript.org/show_bug.cgi?id=2995
         loadingCount: 0
       };
       linkSet.done = new Promise(function(resolve, reject) {
@@ -1186,7 +1781,7 @@ function logloads(loads) {
         for (var j = 0, d = loader.loads.length; j < d; j++) {
           if (loader.loads[j].name != name)
             continue;
-          
+
           addLoadToLinkSet(linkSet, loader.loads[j]);
           break;
         }
@@ -1195,19 +1790,30 @@ function logloads(loads) {
       // snapshot(linkSet.loader);
     }
 
+    function doLink(linkSet) {
+      try {
+        link(linkSet);
+      }
+      catch(exc) {
+        linkSetFailed(linkSet, exc);
+        return true;
+      }
+    }
+
     // 15.2.5.2.3
     function updateLinkSetOnLoad(linkSet, load) {
-      console.assert(load.status == 'loaded' || load.status == 'linked', 'loaded or linked');
-
       // console.log('update linkset on load ' + load.name);
       // snapshot(linkSet.loader);
+
+      console.assert(load.status == 'loaded' || load.status == 'linked', 'loaded or linked');
 
       linkSet.loadingCount--;
 
       if (linkSet.loadingCount > 0)
         return;
 
-      var startingLoad = linkSet.loads[0];
+      // adjusted for spec bug https://bugs.ecmascript.org/show_bug.cgi?id=2995
+      var startingLoad = linkSet.startingLoad;
 
       // non-executing link variation for loader tracing
       // on the server. Not in spec.
@@ -1217,10 +1823,10 @@ function logloads(loads) {
         for (var i = 0; i < loads.length; i++) {
           var load = loads[i];
           load.module = load.kind == 'dynamic' ? {
-            module: Module({})
+            module: _newModule({})
           } : {
             name: load.name,
-            module: Module({}),
+            module: _newModule({}),
             evaluated: true
           };
           load.status = 'linked';
@@ -1230,12 +1836,10 @@ function logloads(loads) {
       }
       /***/
 
-      try {
-        link(linkSet);
-      }
-      catch(exc) {
-        return linkSetFailed(linkSet, exc);
-      }
+      var abrupt = doLink(linkSet);
+
+      if (abrupt)
+        return;
 
       console.assert(linkSet.loads.length == 0, 'loads cleared');
 
@@ -1251,7 +1855,7 @@ function logloads(loads) {
 
         // store all failed load records
         loader.loaderObj.failed = loader.loaderObj.failed || [];
-        if (loader.loaderObj.failed.indexOf(load) == -1)
+        if (indexOf.call(loader.loaderObj.failed, load) == -1)
           loader.loaderObj.failed.push(load);
 
         var linkIndex = indexOf.call(load.linkSets, linkSet);
@@ -1335,10 +1939,10 @@ function logloads(loads) {
 
             // the group index of an entry is always the maximum
             if (loadDep.groupIndex === undefined || loadDep.groupIndex < loadDepGroupIndex) {
-              
+
               // if already in a group, remove from the old group
               if (loadDep.groupIndex) {
-                groups[loadDep.groupIndex].splice(groups[loadDep.groupIndex].indexOf(loadDep), 1);
+                groups[loadDep.groupIndex].splice(indexOf.call(groups[loadDep.groupIndex], loadDep), 1);
 
                 // if the old group is empty, then we have a mixed depndency cycle
                 if (groups[loadDep.groupIndex].length == 0)
@@ -1359,7 +1963,10 @@ function logloads(loads) {
 
       var loader = linkSet.loader;
 
-      // console.log('linking {' + logloads(loads) + '}');
+      if (!linkSet.loads.length)
+        return;
+
+      // console.log('linking {' + logloads(linkSet.loads) + '}');
       // snapshot(loader);
 
       // 15.2.5.3.1 LinkageGroups alternative implementation
@@ -1388,7 +1995,7 @@ function logloads(loads) {
           // 15.2.5.6 LinkDynamicModules adjusted
           else {
             var module = load.execute();
-            if (!module || !module.__esModule)
+            if (!module || !(module instanceof Module))
               throw new TypeError('Execution must define a Module instance');
             load.module = {
               module: module
@@ -1441,11 +2048,11 @@ function logloads(loads) {
           for (var j = 0; j < loads.length; j++) {
             if (loads[j].name != depName)
               continue;
-            
+
             // only link if already not already started linking (stops at circular / dynamic)
             if (!loads[j].module)
               linkDeclarativeModule(loads[j], loads, loader);
-            
+
             depModule = loads[j].module;
           }
         }
@@ -1478,7 +2085,7 @@ function logloads(loads) {
 
       load.status = 'linked';
     }
-      
+
 
 
     // 15.2.5.5.1 LinkImports not implemented
@@ -1490,6 +2097,7 @@ function logloads(loads) {
     // 15.2.6.1
     function evaluateLoadedModule(loader, load) {
       console.assert(load.status == 'linked', 'is linked ' + load.name);
+
       ensureEvaluated(load.module, [], loader);
       return load.module.module;
     }
@@ -1500,8 +2108,21 @@ function logloads(loads) {
      * module.module        bound module object
      * module.execute       execution function for module
      * module.dependencies  list of module objects for dependencies
-     * 
+     *
      */
+
+    // execution errors don't propogate in the pipeline
+    // see https://bugs.ecmascript.org/show_bug.cgi?id=2993
+    function doExecute(module) {
+      try {
+        module.execute.call(__global);
+      }
+      catch(e) {
+        setTimeout(function() {
+          throw e;
+        });
+      }
+    }
 
     // 15.2.6.2 EnsureEvaluated adjusted
     function ensureEvaluated(module, seen, loader) {
@@ -1522,12 +2143,14 @@ function logloads(loads) {
         return;
 
       module.evaluated = true;
-      module.execute.call(__global);
-      module.module = Module(module.exports);
+      doExecute(module);
+      module.module = _newModule(module.exports);
       delete module.execute;
     }
 
-    // Loader
+    // 26.3 Loader
+
+    // 26.3.1.1
     function Loader(options) {
       if (typeof options != 'object')
         throw new TypeError('Options must be an object');
@@ -1549,44 +2172,97 @@ function logloads(loads) {
         modules: {}
       };
 
+      // 26.3.3.6
       defineProperty(this, 'global', {
         get: function() {
           return __global;
         }
       });
-      defineProperty(this, 'realm', {
-        get: function() {
-          throw new TypeError('Realms not implemented in polyfill');
-        }
-      });
+
+      // 26.3.3.13 realm not implemented
     }
+
+    function Module() {}
 
     // importPromises adds ability to import a module twice without error - https://bugs.ecmascript.org/show_bug.cgi?id=2601
     var importPromises = {};
+    function createImportPromise(name, promise) {
+      importPromises[name] = promise;
+      promise.then(function() {
+        importPromises[name] = undefined;
+      });
+      promise['catch'](function() {
+        importPromises[name] = undefined;
+      });
+      return promise;
+    }
+
     Loader.prototype = {
+      // 26.3.3.1
+      constructor: Loader,
+      // 26.3.3.2
       define: function(name, source, options) {
+        // check if already defined
         if (importPromises[name])
           throw new TypeError('Module is already loading.');
-        importPromises[name] = new Promise(asyncStartLoadPartwayThrough({
-          step: options && options.address ? 'fetch' : 'translate',
+        return createImportPromise(name, new Promise(asyncStartLoadPartwayThrough({
+          step: 'translate',
           loader: this._loader,
           moduleName: name,
           moduleMetadata: options && options.metadata || {},
           moduleSource: source,
           moduleAddress: options && options.address
-        }));
-        return importPromises[name].then(function() { delete importPromises[name]; });
+        })));
       },
-      load: function(request, options) {
-        if (this._loader.modules[request]) {
-          ensureEvaluated(this._loader.modules[request], [], this._loader);
-          return Promise.resolve(this._loader.modules[request].module);
+      // 26.3.3.3
+      'delete': function(name) {
+        return this._loader.modules[name] ? delete this._loader.modules[name] : false;
+      },
+      // 26.3.3.4 entries not implemented
+      // 26.3.3.5
+      get: function(key) {
+        if (!this._loader.modules[key])
+          return;
+        ensureEvaluated(this._loader.modules[key], [], this);
+        return this._loader.modules[key].module;
+      },
+      // 26.3.3.7
+      has: function(name) {
+        return !!this._loader.modules[name];
+      },
+      // 26.3.3.8
+      'import': function(name, options) {
+        // run normalize first
+        var loaderObj = this;
+
+        // added, see https://bugs.ecmascript.org/show_bug.cgi?id=2659
+        return Promise.resolve(loaderObj.normalize(name, options && options.name, options && options.address))
+        .then(function(name) {
+          var loader = loaderObj._loader;
+
+          if (loader.modules[name]) {
+            ensureEvaluated(loader.modules[name], [], loader._loader);
+            return loader.modules[name].module;
+          }
+
+          return importPromises[name] || createImportPromise(name, 
+            loadModule(loader, name, options || {})
+            .then(function(load) {
+              delete importPromises[name];
+              return evaluateLoadedModule(loader, load);
+            }));
+        });
+      },
+      // 26.3.3.9 keys not implemented
+      // 26.3.3.10
+      load: function(name, options) {
+        if (this._loader.modules[name]) {
+          ensureEvaluated(this._loader.modules[name], [], this._loader);
+          return Promise.resolve(this._loader.modules[name].module);
         }
-        if (importPromises[request])
-          return importPromises[request];
-        importPromises[request] = loadModule(this._loader, request, {});
-        return importPromises[request].then(function() { delete importPromises[request]; })
+        return importPromises[name] || createImportPromise(name, loadModule(this._loader, name, {}));
       },
+      // 26.3.3.11
       module: function(source, options) {
         var load = createLoad();
         load.address = options && options.address;
@@ -1599,145 +2275,66 @@ function logloads(loads) {
         proceedToTranslate(loader, load, sourcePromise);
         return p;
       },
-      'import': function(name, options) {
-        // run normalize first
-        var loaderObj = this;
+      // 26.3.3.12
+      newModule: function (obj) {
+        if (typeof obj != 'object')
+          throw new TypeError('Expected object');
 
-        // added, see https://bugs.ecmascript.org/show_bug.cgi?id=2659
-        return Promise.resolve(loaderObj.normalize(name, options && options.name, options && options.address))
-        .then(function(name) {
-          var loader = loaderObj._loader;
-          
-          if (loader.modules[name]) {
-            ensureEvaluated(loader.modules[name], [], loader._loader);
-            return Promise.resolve(loader.modules[name].module);
-          }
-          
-          return (importPromises[name] || (importPromises[name] = loadModule(loader, name, options || {})))
-            .then(function(load) {
-              delete importPromises[name];
-              return evaluateLoadedModule(loader, load);
+        // we do this to be able to tell if a module is a module privately in ES5
+        // by doing m instanceof Module
+        var m = new Module();
+
+        for (var key in obj) {
+          (function (key) {
+            defineProperty(m, key, {
+              configurable: false,
+              enumerable: true,
+              get: function () {
+                return obj[key];
+              }
             });
-        });
+          })(key);
+        }
+
+        if (Object.preventExtensions)
+          Object.preventExtensions(m);
+
+        return m;
       },
-      eval: function(source) {
-        throw new TypeError('Eval not implemented in polyfill')
-      },
-      get: function(key) {
-        if (!this._loader.modules[key])
-          return;
-        ensureEvaluated(this._loader.modules[key], [], this);
-        return this._loader.modules[key].module;
-      },
-      has: function(name) {
-        return !!this._loader.modules[name];
-      },
+      // 26.3.3.14
       set: function(name, module) {
-        if (!(module.__esModule))
+        if (!(module instanceof Module))
           throw new TypeError('Set must be a module');
         this._loader.modules[name] = {
           module: module
         };
       },
-      'delete': function(name) {
-        return this._loader.modules[name] ? delete this._loader.modules[name] : false;
-      },
-      // NB implement iterations
-      entries: function() {
-        throw new TypeError('Iteration not yet implemented in the polyfill');
-      },
-      keys: function() {
-        throw new TypeError('Iteration not yet implemented in the polyfill');
-      },
-      values: function() {
-        throw new TypeError('Iteration not yet implemented in the polyfill');
-      },
+      // 26.3.3.15 values not implemented
+      // 26.3.3.16 @@iterator not implemented
+      // 26.3.3.17 @@toStringTag not implemented
+
+      // 26.3.3.18.1
       normalize: function(name, referrerName, referrerAddress) {
         return name;
       },
+      // 26.3.3.18.2
       locate: function(load) {
         return load.name;
       },
+      // 26.3.3.18.3
       fetch: function(load) {
         throw new TypeError('Fetch not implemented');
       },
+      // 26.3.3.18.4
       translate: function(load) {
         return load.source;
       },
+      // 26.3.3.18.5
       instantiate: function(load) {
       }
     };
 
-    // tree traversal, NB should use visitor pattern here
-    function traverse(object, iterator, parent, parentProperty) {
-      var key, child;
-      if (iterator(object, parent, parentProperty) === false)
-        return;
-      for (key in object) {
-        if (!object.hasOwnProperty(key))
-          continue;
-        if (key == 'location' || key == 'type')
-          continue;
-        child = object[key];
-        if (typeof child == 'object' && child !== null)
-          traverse(child, iterator, object, key);
-      }
-    }
-
-    // given a syntax tree, return the import list
-    function getImports(moduleTree) {
-      var imports = [];
-
-      function addImport(name) {
-        if (indexOf.call(imports, name) == -1)
-          imports.push(name);
-      }
-
-      traverse(moduleTree, function(node) {
-        // import {} from 'foo';
-        // export * from 'foo';
-        // export { ... } from 'foo';
-        // module x from 'foo';
-        if (node.type == 'EXPORT_DECLARATION') {
-          if (node.declaration.moduleSpecifier)
-            addImport(node.declaration.moduleSpecifier.token.processedValue);
-        }
-        else if (node.type == 'IMPORT_DECLARATION')
-          addImport(node.moduleSpecifier.token.processedValue);
-        else if (node.type == 'MODULE_DECLARATION')
-          addImport(node.expression.token.processedValue);
-      });
-      return imports;
-    }
-    var anonCnt = 0;
-
-    // Module Object
-    function Module(obj) {
-      if (typeof obj != 'object')
-        throw new TypeError('Expected object');
-
-      var self = {
-        __esModule: true
-      };
-
-      for (var key in obj) {
-        (function (key) {
-          defineProperty(self, key, {
-            configurable: false,
-            enumerable: true,
-            get: function () {
-              return obj[key];
-            }
-          });
-        })(key);
-      }
-
-      if (Object.preventExtensions)
-        Object.preventExtensions(self);
-
-      return self;
-    }
-
+    var _newModule = Loader.prototype.newModule;
 
     if (typeof exports === 'object')
       module.exports = Loader;
@@ -1745,12 +2342,11 @@ function logloads(loads) {
     __global.Reflect = __global.Reflect || {};
     __global.Reflect.Loader = __global.Reflect.Loader || Loader;
     __global.LoaderPolyfill = Loader;
-    __global.Module = Module;
 
   })();
 
   function __eval(__source, __global, __moduleName) {
-    eval('var __moduleName = "' + (__moduleName || '').replace('"', '\"') + '"; with(__global) { (function() { ' + __source + ' \n }).call(__global); }');
+    eval('var __moduleName = "' + (__moduleName || '').replace('"', '\"') + '"; (function() { ' + __source + ' \n }).call(__global);');
   }
 
 })(typeof global !== 'undefined' ? global : this);
@@ -1789,20 +2385,20 @@ function logloads(loads) {
       hash     : m[8] || ''
     } : null);
   }
+  function removeDotSegments(input) {
+    var output = [];
+    input.replace(/^(\.\.?(\/|$))+/, '')
+      .replace(/\/(\.(\/|$))+/g, '/')
+      .replace(/\/\.\.$/, '/../')
+      .replace(/\/?[^\/]*/g, function (p) {
+        if (p === '/..')
+          output.pop();
+        else
+          output.push(p);
+    });
+    return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
+  }
   function toAbsoluteURL(base, href) {
-    function removeDotSegments(input) {
-      var output = [];
-      input.replace(/^(\.\.?(\/|$))+/, '')
-        .replace(/\/(\.(\/|$))+/g, '/')
-        .replace(/\/\.\.$/, '/../')
-        .replace(/\/?[^\/]*/g, function (p) {
-          if (p === '/..')
-            output.pop();
-          else
-            output.push(p);
-      });
-      return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
-    }
 
     href = parseURI(href || '');
     base = parseURI(base || '');
@@ -1855,8 +2451,9 @@ function logloads(loads) {
     }
   }
   else {
-    var fs = require('fs');
+    var fs;
     fetchTextFromURL = function(url, fulfill, reject) {
+      fs = fs || require('fs');
       return fs.readFile(url, function(err, data) {
         if (err)
           return reject(err);
@@ -2223,12 +2820,11 @@ function register(loader) {
 
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
-  var curSystem, curModule;
+  var curSystem;
   function exec(load) {
     var loader = this;
     if (load.name == '@traceur') {
       curSystem = System;
-      curModule = Module;
     }
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
@@ -2247,7 +2843,6 @@ function register(loader) {
     if (load.name == '@traceur') {
       loader.global.traceurSystem = loader.global.System;
       loader.global.System = curSystem;
-      //loader.global.Module = curModule;
     }
   }
   loader.__exec = exec;
@@ -2673,7 +3268,7 @@ function register(loader) {
       return {
         deps: [],
         execute: function() {
-          return Module({});
+          return loader.newModule({});
         }
       };
 
@@ -2718,7 +3313,7 @@ function register(loader) {
           // remove from the registry
           delete loader.defined[load.name];
 
-          var module = Module(entry.module);
+          var module = loader.newModule(entry.module);
 
           // if the entry is an alias, set the alias too
           for (var name in loader.defined) {
@@ -2746,7 +3341,7 @@ function core(loader) {
     __useDefault
     
     When a module object looks like:
-    Module({
+    newModule({
       __useDefault: true,
       default: 'some-module'
     })
@@ -2764,7 +3359,7 @@ function core(loader) {
   };
 
   // support the empty module, as a concept
-  loader.set('@empty', Module({}));
+  loader.set('@empty', loader.newModule({}));
 
   /*
     Config
@@ -2868,7 +3463,7 @@ function core(loader) {
       return {
         deps: [],
         execute: function() {
-          return Module({});
+          return loader.newModule({});
         }
       };
     }
@@ -2897,7 +3492,7 @@ function global(loader) {
     var curGlobalObj;
     var ignoredGlobalProps;
 
-    loader.set('@@global-helpers', Module({
+    loader.set('@@global-helpers', loader.newModule({
       prepareGlobal: function(moduleName, deps) {
         // first, we add all the dependency modules to the global
         for (var i = 0; i < deps.length; i++) {
@@ -3051,13 +3646,13 @@ function cjs(loader) {
   loader._getCJSDeps = getCJSDeps;
 
   if (!loader.has('@@nodeProcess'))
-    loader.set('@@nodeProcess', Module({ 'default': nodeProcess, __useDefault: true }));
+    loader.set('@@nodeProcess', loader.newModule({ 'default': nodeProcess, __useDefault: true }));
 
   var loaderTranslate = loader.translate;
   loader.translate = function(load) {
     var loader = this;
     if (!loader.has('@@nodeProcess'))
-      loader.set('@@nodeProcess', Module({ 'default': nodeProcess, __useDefault: true }));
+      loader.set('@@nodeProcess', loader.newModule({ 'default': nodeProcess, __useDefault: true }));
     if (!loader._getCJSDeps)
       loader._getCJSDeps = getCJSDeps;
     return loaderTranslate.call(loader, load);
@@ -3103,7 +3698,7 @@ function cjs(loader) {
 
         var execLoad = {
           name: load.name,
-          source: '(function() { ' + glString + '(function() { ' + load.source + '\n}).call(this); }).call(exports)',
+          source: '(function() {' + glString + '\n(function(){\n' + load.source + '\n}).call(exports);})();',
           address: load.address
         };
         loader.__exec(execLoad);
@@ -3630,7 +4225,7 @@ function plugins(loader) {
       load.metadata.format = 'defined';
       load.metadata.deps.push(load.metadata.pluginName);
       load.metadata.execute = function() {
-        return Module({});
+        return loader.newModule({});
       };
       return loaderInstantiate.call(loader, load);
     }
@@ -4210,6 +4805,7 @@ var __$curScript;
 
 var makeSteal = function(System){
 	
+		
 	var configDeferred,
 		devDeferred,
 		appDeferred;
