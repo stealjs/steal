@@ -1339,18 +1339,20 @@ function logloads(loads) {
     var traceur;
 
     var defineProperty;
-    try {
-      if (!!Object.defineProperty({}, 'a', {})) {
-        defineProperty = Object.defineProperty;
-      }
-    } catch (e) {
-      defineProperty = function (obj, prop, opt) {
-        try {
-          obj[prop] = opt.value || opt.get.call(obj);
+    (function () {
+      try {
+        if (!!Object.defineProperty({}, 'a', {})) {
+          defineProperty = Object.defineProperty;
         }
-        catch(e) {}
+      } catch (e) {
+        defineProperty = function (obj, prop, opt) {
+          try {
+            obj[prop] = opt.value || opt.get.call(obj);
+          }
+          catch(e) {}
+        }
       }
-    }
+    }());
 
     console.assert = console.assert || function() {};
 
@@ -1419,64 +1421,66 @@ function logloads(loads) {
 
       console.assert(load.source, 'Non-empty source');
 
-      var depsList;
-      try {
-        var parser = new traceur.syntax.Parser(new traceur.syntax.SourceFile(load.address, load.source));
-        var body = parser.parseModule();
+      var depsList, curRegister, curSystem, oldSourceMaps, oldModules;
+      (function () {
+        try {
+          var parser = new traceur.syntax.Parser(new traceur.syntax.SourceFile(load.address, load.source));
+          var body = parser.parseModule();
 
-        load.kind = 'declarative';
-        depsList = getImports(body);
+          load.kind = 'declarative';
+          depsList = getImports(body);
 
-        var oldSourceMaps = traceur.options.sourceMaps;
-        var oldModules = traceur.options.modules;
+          oldSourceMaps = traceur.options.sourceMaps;
+          oldModules = traceur.options.modules;
 
-        traceur.options.sourceMaps = true;
-        traceur.options.modules = 'instantiate';
+          traceur.options.sourceMaps = true;
+          traceur.options.modules = 'instantiate';
 
-        var reporter = new traceur.util.ErrorReporter();
+          var reporter = new traceur.util.ErrorReporter();
 
-        reporter.reportMessageInternal = function(location, kind, format, args) {
-          throw new SyntaxError(kind, location.start && location.start.line_, location.start && location.start.column_);
+          reporter.reportMessageInternal = function(location, kind, format, args) {
+            throw new SyntaxError(kind, location.start && location.start.line_, location.start && location.start.column_);
+          }
+
+          // traceur expects its version of System
+          curSystem = __global.System;
+          __global.System = __global.traceurSystem;
+
+          var tree = (new traceur.codegeneration.module.AttachModuleNameTransformer(load.name)).transformAny(body);
+          tree = (new traceur.codegeneration.FromOptionsTransformer(reporter)).transform(tree);
+
+          var sourceMapGenerator = new traceur.outputgeneration.SourceMapGenerator({ file: load.address });
+          var options = { sourceMapGenerator: sourceMapGenerator };
+
+          var source = traceur.outputgeneration.TreeWriter.write(tree, options);
+
+          if (__global.btoa)
+            source += '\n//# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(options.sourceMap))) + '\n';
+
+          // now run System.register
+          curRegister = System.register;
+
+          System.register = function(name, deps, declare) {
+            // store the registered declaration as load.declare
+            load.declare = typeof name == 'string' ? declare : deps;
+          }
+
+          __eval(source, __global, load.name);
         }
-
-        // traceur expects its version of System
-        var curSystem = __global.System;
-        __global.System = __global.traceurSystem;
-
-        var tree = (new traceur.codegeneration.module.AttachModuleNameTransformer(load.name)).transformAny(body);
-        tree = (new traceur.codegeneration.FromOptionsTransformer(reporter)).transform(tree);
-
-        var sourceMapGenerator = new traceur.outputgeneration.SourceMapGenerator({ file: load.address });
-        var options = { sourceMapGenerator: sourceMapGenerator };
-
-        var source = traceur.outputgeneration.TreeWriter.write(tree, options);
-
-        if (__global.btoa)
-          source += '\n//# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(options.sourceMap))) + '\n';
-
-        // now run System.register
-        var curRegister = System.register;
-
-        System.register = function(name, deps, declare) {
-          // store the registered declaration as load.declare
-          load.declare = typeof name == 'string' ? declare : deps;
+        catch(e) {
+          if (e.name == 'SyntaxError' || e.name == 'TypeError')
+            e.message = 'Evaluating ' + (load.name || load.address) + '\n\t' + e.message;
+          if (curRegister)
+            System.register = curRegister;
+          if (curSystem)
+            __global.System = curSystem;
+          if (oldSourceMaps)
+            traceur.options.sourceMaps = oldSourceMaps;
+          if (oldModules)
+            traceur.options.modules = oldModules;
+          throw e;
         }
-
-        __eval(source, __global, load.name);
-      }
-      catch(e) {
-        if (e.name == 'SyntaxError' || e.name == 'TypeError')
-          e.message = 'Evaluating ' + (load.name || load.address) + '\n\t' + e.message;
-        if (curRegister)
-          System.register = curRegister;
-        if (curSystem)
-          __global.System = curSystem;
-        if (oldSourceMaps)
-          traceur.options.sourceMaps = oldSourceMaps;
-        if (oldModules)
-          traceur.options.modules = oldModules;
-        throw e;
-      }
+      }());
       System.register = curRegister;
       __global.System = curSystem;
       traceur.options.sourceMaps = oldSourceMaps;
@@ -2098,7 +2102,7 @@ function logloads(loads) {
     function evaluateLoadedModule(loader, load) {
       console.assert(load.status == 'linked', 'is linked ' + load.name);
 
-      ensureEvaluated(load.module, [], loader);
+      doEnsureEvaluated(load.module, [], loader);
       return load.module.module;
     }
 
@@ -2110,20 +2114,22 @@ function logloads(loads) {
      * module.dependencies  list of module objects for dependencies
      *
      */
-
-    // execution errors don't propogate in the pipeline
-    // see https://bugs.ecmascript.org/show_bug.cgi?id=2993
     function doExecute(module) {
       try {
         module.execute.call(__global);
       }
       catch(e) {
-        setTimeout(function() {
-          throw e;
-        });
+        return e;
       }
     }
 
+    // propogate execution errors
+    // see https://bugs.ecmascript.org/show_bug.cgi?id=2993
+    function doEnsureEvaluated(module, seen, loader) {
+      var err = ensureEvaluated(module, seen, loader);
+      if (err)
+        throw err;
+    }
     // 15.2.6.2 EnsureEvaluated adjusted
     function ensureEvaluated(module, seen, loader) {
       if (module.evaluated || !module.dependencies)
@@ -2132,20 +2138,31 @@ function logloads(loads) {
       seen.push(module);
 
       var deps = module.dependencies;
+      var err;
 
       for (var i = 0; i < deps.length; i++) {
         var dep = deps[i];
-        if (indexOf.call(seen, dep) == -1)
-          ensureEvaluated(dep, seen, loader);
+        if (indexOf.call(seen, dep) == -1) {
+          err = ensureEvaluated(dep, seen, loader);
+          // stop on error, see https://bugs.ecmascript.org/show_bug.cgi?id=2996
+          if (err)
+            return err + '\n  in module ' + dep.name;
+        }
       }
+
+      if (module.failed)
+        return new Error('Module failed execution.');
 
       if (module.evaluated)
         return;
 
       module.evaluated = true;
-      doExecute(module);
+      err = doExecute(module);
+      if (err)
+        module.failed = true;
       module.module = _newModule(module.exports);
-      delete module.execute;
+      module.execute = undefined;
+      return err;
     }
 
     // 26.3 Loader
@@ -2223,7 +2240,7 @@ function logloads(loads) {
       get: function(key) {
         if (!this._loader.modules[key])
           return;
-        ensureEvaluated(this._loader.modules[key], [], this);
+        doEnsureEvaluated(this._loader.modules[key], [], this);
         return this._loader.modules[key].module;
       },
       // 26.3.3.7
@@ -2241,7 +2258,7 @@ function logloads(loads) {
           var loader = loaderObj._loader;
 
           if (loader.modules[name]) {
-            ensureEvaluated(loader.modules[name], [], loader._loader);
+            doEnsureEvaluated(loader.modules[name], [], loader._loader);
             return loader.modules[name].module;
           }
 
@@ -2257,7 +2274,7 @@ function logloads(loads) {
       // 26.3.3.10
       load: function(name, options) {
         if (this._loader.modules[name]) {
-          ensureEvaluated(this._loader.modules[name], [], this._loader);
+          doEnsureEvaluated(this._loader.modules[name], [], this._loader);
           return Promise.resolve(this._loader.modules[name].module);
         }
         return importPromises[name] || createImportPromise(name, loadModule(this._loader, name, {}));
@@ -2620,7 +2637,7 @@ function logloads(loads) {
 })(typeof global !== 'undefined' ? global : this);
 
 /*
- * SystemJS v0.6.2
+ * SystemJS v0.6.7
  * 
  * Copyright (c) 2014 Guy Bedford
  * MIT License
@@ -3132,21 +3149,15 @@ function register(loader) {
     }
 
     // now execute
-    try {
-      entry.evaluated = true;
-      var output = entry.execute.call(loader.global, function(name) {
-        for (var i = 0; i < entry.deps.length; i++) {
-          if (entry.deps[i] != name)
-            continue;
-          return getModule(entry.normalizedDeps[i], loader);
-        }
-      }, entry.module['default'], moduleName);
-    }
-    catch(e) {
-      throw e;
-    }
-    
-    if (output && output.__esModule)
+    entry.evaluated = true;
+    var output = entry.execute.call(loader.global, function(name) {
+      for (var i = 0; i < entry.deps.length; i++) {
+        if (entry.deps[i] != name)
+          continue;
+        return getModule(entry.normalizedDeps[i], loader);
+      }
+    }, entry.module['default'], moduleName);
+    if ( output && output.__esModule )
       entry.module = output;
     else if (output)
       entry.module['default'] = output;
@@ -3254,7 +3265,14 @@ function register(loader) {
       anonRegister = null;
       calledRegister = false;
 
+      var System = loader.global.System = loader.global.System || loader;
+
+      var curRegister = System.register;
+      System.register = register;
+
       loader.__exec(load);
+
+      System.register = curRegister;
 
       if (anonRegister)
         entry = anonRegister;
@@ -3299,7 +3317,7 @@ function register(loader) {
         execute: function() {
           // this avoids double duplication allowing a bundle to equal its last defined module
           if (entry.esmodule) {
-            delete loader.defined[load.name];
+            loader.defined[load.name] = undefined;
             return entry.esmodule;
           }
 
@@ -3311,12 +3329,14 @@ function register(loader) {
           ensureEvaluated(load.name, [], loader);
 
           // remove from the registry
-          delete loader.defined[load.name];
+          loader.defined[load.name] = undefined;
 
           var module = loader.newModule(entry.module);
 
           // if the entry is an alias, set the alias too
           for (var name in loader.defined) {
+            if (!loader.defined[name])
+              continue;
             if (entry.declarative && loader.defined[name].execute != entry.execute)
               continue;
             if (!entry.declarative && loader.defined[name].declare != entry.declare);
@@ -3608,13 +3628,19 @@ function cjs(loader) {
   // CJS Module Format
   // require('...') || exports[''] = ... || exports.asd = ... || module.exports = ...
   var cjsExportsRegEx = /(?:^\s*|[}{\(\);,\n=:\?\&]\s*|module\.)(exports\s*\[\s*('[^']+'|"[^"]+")\s*\]|\exports\s*\.\s*[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*|exports\s*\=)/;
-  var cjsRequireRegEx = /(?:^\s*|[}{\(\);,\n=:\?\&]\s*)require\s*\(\s*("([^"]+)"|'([^']+)')\s*\)/g;
+  var cjsRequirePre = "(?:^\\s*|[}{\\(\\);,\\n=:\\?\\&]\\s*)";
+  var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
+  var cjsRequireRegEx = new RegExp(cjsRequirePre+"require"+cjsRequirePost,"g");
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
-  function getCJSDeps(source) {
+  function getCJSDeps(source, requireAlias) {
     cjsExportsRegEx.lastIndex = 0;
-    cjsRequireRegEx.lastIndex = 0;
-
+    
+    // If a requireAlias is given, generate the regexp; otherwise, use the cached version.
+    var requireRegEx =  requireAlias ?
+        new RegExp(cjsRequirePre+(requireAlias)+cjsRequirePost,"g") :
+        cjsRequireRegEx;
+    requireRegEx.lastIndex = 0;
     var deps = [];
 
     // remove comments from the source first
@@ -3622,7 +3648,7 @@ function cjs(loader) {
 
     var match;
 
-    while (match = cjsRequireRegEx.exec(source))
+    while (match = requireRegEx.exec(source))
       deps.push(match[2] || match[3]);
 
     return deps;
@@ -3722,11 +3748,26 @@ function amd(loader) {
 
   var isNode = typeof module != 'undefined' && module.exports;
 
+  // Matches parenthesis
+  var parensRegExp = /\(([^)]+)/;
+  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+  var argRegEx = /[\w\d]+/g;
+  function getRequireAlias(source, index){
+    var match = source.match(parensRegExp);
+    if(match){
+      var args = [];
+      match[1].replace(commentRegEx,"").replace(argRegEx, function(arg){
+        args.push(arg);
+      });
+      return args[index||0];
+    }
+  };
+  
+
   // AMD Module Format Detection RegEx
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*("[^"]+"|'[^']+')\s*,)*(\s*("[^"]+"|'[^']+')\s*,?\s*)?\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
-
   /*
     AMD-compatible require
     To copy RequireJS, set window.require = window.requirejs = loader.require
@@ -3801,10 +3842,7 @@ function amd(loader) {
       }
       if (!(deps instanceof Array)) {
         factory = deps;
-        // CommonJS AMD form
-        if (!loader._getCJSDeps)
-          throw "AMD extension needs CJS extension for AMD CJS support";
-        deps = ['require', 'exports', 'module'].concat(loader._getCJSDeps(factory.toString()));
+        deps = ['require','exports','module']
       }
 
       if (typeof factory != 'function')
@@ -3814,8 +3852,17 @@ function amd(loader) {
 
       // remove system dependencies
       var requireIndex, exportsIndex, moduleIndex
-      if ((requireIndex = indexOf.call(deps, 'require')) != -1)
-        deps.splice(requireIndex, 1);
+      
+      if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
+      	
+      	deps.splice(requireIndex, 1);
+        // CommonJS AMD form
+        if (!loader._getCJSDeps)
+          throw "AMD extension needs CJS extension for AMD CJS support";
+        var factoryText = factory.toString();
+        deps = deps.concat(loader._getCJSDeps(factoryText, getRequireAlias(factoryText, requireIndex)));
+      }
+        
 
       if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
         deps.splice(exportsIndex, 1);
@@ -3973,26 +4020,39 @@ function amd(loader) {
 function map(loader) {
   loader.map = loader.map || {};
 
-  // return the number of prefix parts (separated by '/') matching the name
-  // eg prefixMatchLength('jquery/some/thing', 'jquery') -> 1
-  function prefixMatchLength(name, prefix) {
-    var prefixParts = prefix.split('/');
-    var nameParts = name.split('/');
-    if (prefixParts.length > nameParts.length)
-      return 0;
-    for (var i = 0; i < prefixParts.length; i++)
-      if (nameParts[i] != prefixParts[i])
-        return 0;
-    return prefixParts.length;
+  // return if prefix parts (separated by '/') match the name
+  // eg prefixMatch('jquery/some/thing', 'jquery') -> true
+  //    prefixMatch('jqueryhere/', 'jquery') -> false
+  function prefixMatch(name, prefix) {
+    if (name.length < prefix.length)
+      return false;
+    if (name.substr(0, prefix.length) != prefix)
+      return false;
+    if (name[prefix.length] && name[prefix.length] != '/')
+      return false;
+    return true;
   }
 
+  // get the depth of a given path
+  // eg pathLen('some/name') -> 2
+  function pathLen(name) {
+    var len = 1;
+    for (var i = 0, l = name.length; i < l; i++)
+      if (name[i] === '/')
+        len++;
+    return len;
+  }
+
+  function doMap(name, matchLen, map) {
+    return map + name.substr(matchLen);
+  }
 
   // given a relative-resolved module name and normalized parent name,
   // apply the map configuration
   function applyMap(name, parentName, loader) {
-
     var curMatch, curMatchLength = 0;
     var curParent, curParentMatchLength = 0;
+    var tmpParentLength, tmpPrefixLength;
     var subPath;
     var nameParts;
     
@@ -4004,29 +4064,32 @@ function map(loader) {
           continue;
 
         // most specific parent match wins first
-        if (prefixMatchLength(parentName, p) <= curParentMatchLength)
+        if (!prefixMatch(parentName, p))
+          continue;
+
+        tmpParentLength = pathLen(p);
+        if (tmpParentLength <= curParentMatchLength)
           continue;
 
         for (var q in curMap) {
           // most specific name match wins
-          if (prefixMatchLength(name, q) <= curMatchLength)
+          if (!prefixMatch(name, q))
+            continue;
+          tmpPrefixLength = pathLen(q);
+          if (tmpPrefixLength <= curMatchLength)
             continue;
 
           curMatch = q;
-          curMatchLength = q.split('/').length;
+          curMatchLength = tmpPrefixLength;
           curParent = p;
-          curParentMatchLength = p.split('/').length;
+          curParentMatchLength = tmpParentLength;
         }
       }
     }
 
     // if we found a contextual match, apply it now
-    if (curMatch) {
-      nameParts = name.split('/');
-      subPath = nameParts.splice(curMatchLength, nameParts.length - curMatchLength).join('/');
-      name = loader.map[curParent][curMatch] + (subPath ? '/' + subPath : '');
-      curMatchLength = 0;
-    }
+    if (curMatch)
+      return doMap(name, curMatch.length, loader.map[curParent][curMatch]);
 
     // now do the global map
     for (var p in loader.map) {
@@ -4034,20 +4097,22 @@ function map(loader) {
       if (typeof curMap != 'string')
         continue;
 
-      if (prefixMatchLength(name, p) <= curMatchLength)
+      if (!prefixMatch(name, p))
+        continue;
+
+      var tmpPrefixLength = pathLen(p);
+
+      if (tmpPrefixLength <= curMatchLength)
         continue;
 
       curMatch = p;
-      curMatchLength = p.split('/').length;
+      curMatchLength = tmpPrefixLength;
     }
-    
-    // return a match if any
-    if (!curMatchLength)
-      return name;
-    
-    nameParts = name.split('/');
-    subPath = nameParts.splice(curMatchLength, nameParts.length - curMatchLength).join('/');
-    return loader.map[curMatch] + (subPath ? '/' + subPath : '');
+
+    if (curMatch)
+      return doMap(name, curMatch.length, loader.map[curMatch]);
+
+    return name;
   }
 
   var loaderNormalize = loader.normalize;
@@ -4211,7 +4276,7 @@ function plugins(loader) {
   loader.instantiate = function(load) {
     var loader = this;
     if (load.metadata.plugin && load.metadata.plugin.instantiate)
-      return Promise.resolve(load.metadata.plugin.instantiate.call(loader, load)).then(function(result) {
+       return Promise.resolve(load.metadata.plugin.instantiate.call(loader, load)).then(function(result) {
         if (result) {
           // load.metadata.format = 'defined';
           // load.metadata.execute = function() {
@@ -4641,7 +4706,6 @@ var __$curScript;
     var es6ModuleLoader = require('es6-module-loader');
     global.System = es6ModuleLoader.System;
     global.Loader = es6ModuleLoader.Loader;
-    global.Module = es6ModuleLoader.Module;
     global.upgradeSystemLoader();
     module.exports = global.System;
   }
