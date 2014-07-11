@@ -194,9 +194,11 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("System.instantiate preventing production css bundle", function(){
 		makeIframe("production/prod-inst.html");
 	});
+
 	asyncTest("Multi mains", function(){
 		makeIframe("multi-main/dev.html");
 	});
+
 	asyncTest("@loader is current loader", function(){
 		makeIframe("current-loader/dev.html");
 	});
@@ -206,4 +208,9 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("less loads in the right spot", function(){
 		makeIframe("less-imports/dev.html");
 	});
+
+	asyncTest("set options to less plugin", function(){
+		makeIframe("less_options/site.html");
+	});
+
 })();
