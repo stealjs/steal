@@ -6,6 +6,14 @@ System.config({
 	bundle: ["foo"],
 	ext : {
 		crazy : "extensions/text"
+	},
+	lessOptions: {
+		parse: {
+			dumpLineNumbers: "comments" // default false
+		},
+		eval: {
+			strictMath: true // default false
+		}
 	}
 });
 
