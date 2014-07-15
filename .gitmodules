@@ -1,0 +1,6 @@
+[submodule "steal"]
+	path = steal
+	url = git@github.com:bitovi/steal
+[submodule "steal-tools"]
+	path = steal-tools
+	url = git@github.com:bitovi/steal-tools

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>StealJS - Migrating </title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link rel="stylesheet" type="text/css" 
+		
+			href="./static/bundles/static.css"
+		 />
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="./static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="./index.html">JavaScriptMVC</a>
+			</div>
+
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<div class="container api">
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		
+			<li class="search-container active">
+			<a href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+			
+	<ul>
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>apis</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="Steal.html" data-search="steal">
+						steal
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="StealTools.html" data-search="steal-tools">
+						steal-tools
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>guides</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
+						Migrating
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="StealTools.guides.progressive_loading.html" data-search="Progressive Loading">
+						Progressive Loading
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+	</ul>
+
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	<article class="content docs">
+		<section class="title">
+			<div class="heading">
+<h1>Migrating</h1>
+	<ul class="tags">
+		<li>page</li>
+	</ul>
+	
+	
+	
+		<span class="module">StealJS.migrating</span>
+	
+	
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+    
+	
+		<li><a href="">source</a></li>
+	
+	
+		
+	
+	
+</ul>
+<br />
+		</section>
+
+		<section class="contents">
+		</section>
+
+		
+
+		<section class="description">
+			
+		</section>
+
+		
+
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h2>Migrating from old Steal</h2>
+
+<h3>Config changes</h3>
+
+<h4>Map</h4>
+
+<p>There is no longer a <code>"*"</code> mapping like before:</p>
+
+<pre><code>steal.config({
+  map: {
+    "*": {
+      "can/util": "can/util/jquery"
+            }
+  }
+});
+</code></pre>
+
+<p>Instead flatten these out:</p>
+
+<pre><code>steal.config({
+  map: {
+    "can/util": "can/util/jquery"
+  }
+});
+</code></pre>
+
+<h4>Paths</h4>
+
+<p>When specifying that a folder's children should also be pathed, include an astericks to denote:</p>
+
+<pre><code>steal.config({
+  paths: {
+    "can/": "lib/can/"
+  }
+});
+</code></pre>
+
+<p>Add the astericks and specify the file type:</p>
+
+<pre><code>steal.config({
+  paths: {
+    "can/*": "lib/can/*.js"
+  }
+});
+</code></pre>
+
+<h4>Ext</h4>
+
+<p>CSS and Less plugins come by default, you no longer need to specify these in <code>steal.config</code>'s ext option. But do add mustache and stache if using those with CanJS.</p>
+
+<h4>Then</h4>
+
+<p>The old Steal was chainable using <code>.then</code>, but this produced numerous problems that are better fixed inside the config. If you need a module to load before loading another, specify this with <code>deps</code> inside of the <code>meta</code> configuration for that module.</p>
+
+<h3>Build</h3>
+
+<p>The old Steal always produced a <code>production.js</code> file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in <code>dist/bundles</code> and it will be named after your main module.</p>
+		</section>
+		
+
+		
+	</article>
+</div>
+
+<script type="text/javascript">
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","forceBuild":true,"type":"page","name":"StealJS.migrating","description":"","title":"Migrating","src":"steal/docs/pages/migrating.md"};
+
+	console.log(docData);
+</script>
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+		steal = {
+			paths: {"bundles/*": "bundles/*.js"}
+		};
+	</script>
+	<script type='text/javascript' 
+			data-main="static"
+	
+		src="./static/steal.production.js"
+	
+		></script>
+</body>
+
+</html>

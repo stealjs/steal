@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>StealJS - pluginifier </title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link rel="stylesheet" type="text/css" 
+		
+			href="./static/bundles/static.css"
+		 />
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="./static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="./index.html">JavaScriptMVC</a>
+			</div>
+
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<div class="container api">
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		<li class="search-container active parent">
+			<a href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a href="StealTools.html" data-search="steal-tools">
+				steal-tools
+			</a>
+			
+	<ul>
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>JavaScript</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="stealTools.build.html" data-search="build">
+						build
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="stealTools.pluginifier.html" data-search="pluginifier">
+						pluginifier
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="stealTools.pluginify.html" data-search="pluginify">
+						pluginify
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Command Line</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="stealTools.cmd.build.html" data-search="stealTools build">
+						stealTools build
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="stealTools.cmd.pluginify.html" data-search="stealTools pluginify">
+						stealTools pluginify
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Grunt Tasks</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="stealTools.grunt.build.html" data-search="stealBuild">
+						stealBuild
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
+						stealPluginify
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+	</ul>
+
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	<article class="content docs">
+		<section class="title">
+			<div class="heading">
+<h1>pluginifier</h1>
+	<ul class="tags">
+		<li>function</li>
+	</ul>
+	
+	
+	
+		<span class="module">stealTools.pluginifier</span>
+	
+	
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+    
+	
+		<li><a href="">source</a></li>
+	
+	
+		
+	
+	
+</ul>
+<br />
+		</section>
+
+		<section class="contents">
+		</section>
+
+		
+
+		<section class="description">
+			<p>Build a module and its dependencies to work independently of <code>steal.js</code>.</p>
+		</section>
+
+		
+		<section class="signature">
+			<h2 id="sig_stealTools_pluginifier_config_pluginifierOptions_">stealTools.pluginifier(config, pluginifierOptions)
+</h2>
+<div class="signature-wrapper">
+<p>Loads a module and all of its dependencies and returns a function that
+can write out all or parts of the module and its dependency graph
+so that they dont depend on <code>steal.js</code>.</p>
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>config
+				<code>{Object}</code></h4>
+			<div class="description">
+				<p>Specifies configuration values to set on 
+a [System] loader. The <a href="System.main.html">main</a> option must be specified. Typically
+<a href="System.configPath.html">configPath</a> is also specified as that is used to set 
+<a href="System.baseURL.html">baseURL</a>.  Any System <a href="System.config.html">configuration</a> can be specified; however,
+most other <strong>build</strong> configuration values are specified in
+by <a href="System.buildConfig.html">System.buildConfig</a> in the config file.</p>
+			</div>
+			
+			
+			<ul class="options">
+				
+				<li class="option">
+					<h5>main 
+						<code>{String}</code>
+					</h5>
+					<div class="description">
+						<p>The module whos dependencies should be built.</p>
+					</div>
+				</li>
+				
+				<li class="option">
+					<h5>config 
+						<code>{String}</code>
+					</h5>
+					<div class="description">
+						<p>The path to a configuration file. This
+will also specify <code>baseURL</code>.</p>
+					</div>
+				</li>
+				
+				<li class="option">
+					<h5>baseURL 
+						<code>{String}</code>
+					</h5>
+					<div class="description">
+						<p>If a configuration file is not used, 
+the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
+					</div>
+				</li>
+				
+			</ul>
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>pluginifierOptions
+				<code>{Object}</code></h4>
+			<div class="description">
+				<p>Configures the behavior of loading the modules and acts as default values
+for the resulting <a href="stealTools.pluginify.html">pluginify function's</a> options argument.</p>
+			</div>
+			
+			
+			<ul class="options">
+				
+				<li class="option">
+					<h5>verbose 
+						<code>{Boolean}</code>
+					</h5>
+					<div class="description">
+						<p>Set to true to get a lot of warning messages.</p>
+					</div>
+				</li>
+				
+				<li class="option">
+					<h5>quiet 
+						<code>{Boolean}</code>
+					</h5>
+					<div class="description">
+						<p>Set to true to log nothing.</p>
+					</div>
+				</li>
+				
+			</ul>
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Promise&lt;<a href="stealTools.pluginify.html" >pluginify</a>(<a href="moduleName.html" >moduleName</a>, options)&gt;}</code></h4>
+		<div class="description">
+			<p>A deferred that resolves to a function
+that can write out all or part of the loaded dependency tree.</p>
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+		</section>
+		
+
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h2>Use</h2>
+
+<p><code>stealTools.pluginifier</code> is a way to build projects without needing to include steal.js in production at 
+all. Some of Steal's advanced features such as <a href="#bundles">bundles</a> need steal.js to work, but for 
+more simple projects pluginifier is a good option. Plugnifier is also used when building open source projects 
+where you want to split your modules into individual module file (hence <em>plugins</em>) and 
+distribute them that way.</p>
+
+<p>Like <a href="stealTools.build.html">stealTools.build</a>, pluginifier can be used from the command-line, from Grunt, or 
+programmatically in Node.js. For this example we're going to use 
+pluginifier programmatically in order to showcase 
+it's more advanced functionality:</p>
+
+<pre><code>var pluginifier = require("steal-tools").pluginifier;
+var fs = require("fs");
+
+pluginifier({
+  config: __dirname + "/config.js",
+  main: "main"
+}).then(function(pluginify){
+  // Get the main module and it's dependencies as a string
+  var main = pluginify();
+
+  // Get just a dependency and it's own dependencies as a string
+  var myModule = pluginify("my_module");
+
+  // Get the main module, ignoring a dependency we don't want.
+  var mainAlone = pluginify("main", {
+    ignore: ["my_module"]
+  });
+
+  // Now you can do whatever you want with the module.
+  fs.writeFileSync("out_main.js", mainAlone, "utf8");
+});
+</code></pre>
+
+<p>As you can see, pluginifier takes an object containing the 
+System configuration and returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>. 
+The promise will return another function (named pluginify in this example) that can be used to generate 
+a string containing a module and it's dependencies. By default the pluginify 
+function will return the main module, but can be used to generate any dependency in the graph.</p>
+		</section>
+		
+
+		
+	</article>
+</div>
+
+<script type="text/javascript">
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealTools.JS","forceBuild":true,"type":"function","name":"stealTools.pluginifier","description":"<p>Build a module and its dependencies to work independently of <code>steal.js</code>.</p>","title":"pluginifier","signatures":[{"code":"stealTools.pluginifier(config, pluginifierOptions)","description":"<p>Loads a module and all of its dependencies and returns a function that\ncan write out all or parts of the module and its dependency graph\nso that they dont depend on <code>steal.js</code>.</p>","params":[{"types":[{"type":"Object","options":[{"name":"main","description":"<p>The module whos dependencies should be built.</p>","types":[{"type":"String"}]},{"name":"config","description":"<p>The path to a configuration file. This\nwill also specify <code>baseURL</code>.</p>","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"<p>If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.</p>","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"<p>Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other <strong>build</strong> configuration values are specified in\nby [System.buildConfig] in the config file.</p>"},{"types":[{"type":"Object","options":[{"name":"verbose","description":"<p>Set to true to get a lot of warning messages.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"<p>Set to true to log nothing.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"pluginifierOptions","description":"<p>Configures the behavior of loading the modules and acts as default values\nfor the resulting [stealTools.pluginify pluginify function's] options argument.</p>"}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"stealTools.pluginify"}]}]}],"description":"<p>A deferred that resolves to a function\nthat can write out all or part of the loaded dependency tree.</p>"}}],"types":[],"comment":" ","src":"steal-tools/doc/pluginifier.md"};
+
+	console.log(docData);
+</script>
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+		steal = {
+			paths: {"bundles/*": "bundles/*.js"}
+		};
+	</script>
+	<script type='text/javascript' 
+			data-main="static"
+	
+		src="./static/steal.production.js"
+	
+		></script>
+</body>
+
+</html>

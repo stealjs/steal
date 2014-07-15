@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>CanJS  - progressive_loading</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link rel="stylesheet" type="text/css" 
+		
+			href="./static/bundles/static.css"
+		 />
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="./static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="./index.html">JavaScriptMVC</a>
+			</div>
+
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<div class="container api">
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		<li class="search-container active parent">
+			<a href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a href="progressive_loading.html" data-search="progressive_loading">
+				progressive_loading
+			</a>
+			
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	<article class="content docs">
+		<section class="title">
+			<div class="heading">
+<h1>progressive_loading</h1>
+	<ul class="tags">
+		<li>page</li>
+	</ul>
+	
+	
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+    
+	
+		<li><a href="">source</a></li>
+	
+	
+		
+	
+	
+</ul>
+<br />
+		</section>
+
+		<section class="contents">
+		</section>
+
+		
+
+		<section class="description">
+			<p>If you have a large single page app, you may want to progressively load parts 
+of the app.  Here's how you might do that:</p>
+		</section>
+
+		
+
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h3>Write your modules</h3>
+
+<p>Write out your main module to load only the bare minimum to determine what "page" you 
+are on. A bare bones example might have a file structure like:</p>
+
+<pre><code>bower_components/
+  steal/
+    steal.js
+  jquery/
+    jquery.js
+node_modules/
+  steal-tools/
+site/
+  app.js
+  homepage.js
+  signup.js
+  login.js
+  site.html
+  config.js
+</code></pre>
+
+<p><code>app.js</code>:</p>
+
+<pre><code>import $ from 'jquery';
+$(function(){
+  var onhashchange = function(){
+    if(window.location.hash === "#login") {
+      System.import("login").then(function(){
+        $("#main").login();
+      });
+    } else if(window.location.hash === "#signup" ) {
+      System.import("login").then(function(){
+        $("#main").signup();
+      });
+    } else {
+      System.import("homepage").then(function(){
+        $("#main").hompage();
+      });
+    }
+  }
+  $(document).bind("hashchange",onhashchange);
+  onhashchange();
+});
+</code></pre>
+
+<p><code>homepage.js</code></p>
+
+<pre><code>define(['jquery'], function($){
+  return $.fn.homepage = function(){
+    this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+  };
+});
+</code></pre>
+
+<p><code>signup.js</code></p>
+
+<pre><code>var $ = require('jquery');
+module.exports = $.fn.signup = function(){
+  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+};
+</code></pre>
+
+<p><code>login.js</code></p>
+
+<pre><code>$.fn.login = function(){
+  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+};
+</code></pre>
+
+<p><code>config.js</code></p>
+
+<pre><code>System.bundle = ["homepage","signup","login"];
+System.meta = {
+  login: {exports: "$.fn.login"}
+}
+</code></pre>
+
+<h2>Write out your page</h2>
+
+<p>The following will load <code>steal.js</code>, <code>config.js</code> and <code>app.js</code></p>
+
+<p><code>site.html</code></p>
+
+<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
+&lt;script src="../bower_components/steal/steal.js"
+        data-main="app"
+        data-config="./config.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<h2>Build your site</h2>
+
+<p>From your main folder, run:</p>
+
+<pre><code>&gt; steal-tools build main=app config=site/config.js
+</code></pre>
+
+<p>Notice that the path to config must be relative to your cwd. This will create a 
+<code>site/bundles</code> directory with the following contents:</p>
+
+<pre><code>site/bundles/
+  app.js
+  homepage.js
+  signup.js
+  login.js
+</code></pre>
+
+<p>If you want to limit the number of scripts any bundle might load, configure that like:</p>
+
+<pre><code>&gt; steal-tools build main=app config=site/config bundleDepth=3
+</code></pre>
+
+<h2>See it live</h2>
+
+<p>If you add <code>data-env="production"</code> to your site, you can see it live:</p>
+
+<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
+&lt;script src="../bower_components/steal/steal.js"
+        data-main="app"
+        data-config="./config"
+        data-env="production"&gt;&lt;/script&gt;
+</code></pre>
+		</section>
+		
+
+		
+	</article>
+</div>
+
+<script type="text/javascript">
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS","forceBuild":true,"type":"page","name":"progressive_loading","description":"<p>If you have a large single page app, you may want to progressively load parts \nof the app.  Here's how you might do that:</p>","src":"steal-tools/doc/progressive_loading.md"};
+
+	console.log(docData);
+</script>
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+		steal = {
+			paths: {"bundles/*": "bundles/*.js"}
+		};
+	</script>
+	<script type='text/javascript' 
+			data-main="static"
+	
+		src="./static/steal.production.js"
+	
+		></script>
+</body>
+
+</html>

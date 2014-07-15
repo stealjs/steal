@@ -1,0 +1,26 @@
+{
+  "name": "stealjs.com",
+  "description": "A JavaScript documentation engine",
+  "version": "4.0.0",
+  "maintainers": [
+    {
+      "name": "Bitovi",
+      "email": "contact@bitovi.com",
+      "web": "http://bitovi.com/"
+    }
+  ],
+  "dependencies": {
+    "documentjs": "git://github.com/bitovi/documentjs#systemjs"
+  },
+  "homepage": "http://stealjs.com",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bitovi/documentjs.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/mit-license.php"
+    }
+  ]
+}
