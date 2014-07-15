@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>CanJS  - System.bundlesPath</title>
+	<title>StealJS  - System.bundlesPath</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -69,8 +69,8 @@
 		
 		
 			<li class="search-container active">
-			<a href="Steal.html" data-search="Steal API">
-				Steal API
+			<a href="Steal.html" data-search="steal">
+				steal
 			</a>
 			
 	<ul>
@@ -495,7 +495,8 @@
 		
 
 		<section class="description">
-			
+			<p>A convience configuration property for setting the path of where the <a href="System.env.html">production</a> 
+bundles folder is located.</p>
 		</section>
 
 		
@@ -507,7 +508,8 @@
   <h2 id="sig_">String
 </h2>
 <div class="signature-wrapper">
-
+<p>A folder name that specifies the path to the production bundles.  By default,
+<code>System.bundlesPath</code> is <code>"dist/bundles"</code>.</p>
 
 
 
@@ -525,13 +527,63 @@
 		
 
 		
+		<section class="comment">
+			<h2>Use</h2>
+
+<p>In <a href="System.env.html">production</a>, the <a href="System.main.html">System.main</a> module will be assumed to be within a 
+<em>"bundles/[MAIN_MODULE_NAME]"</em> module. For example, if the main module is <code>"myapp"</code>,
+a <code>"bundles/myapp"</code> module is automatically configured to contain it:</p>
+
+<pre><code>&lt;script src="steal/steal.js"
+        config="./config.js"
+        main="myapp"
+        env="production"&gt;&lt;/script&gt;
+&lt;script&gt;
+  System.bundles["bundles/myapp"] //-&gt; ["myapp"]
+&lt;/script&gt;
+</code></pre>
+
+<p><code>System.bundlesPath</code> tells the client where all bundles can be found by configuring
+<a href="System.paths.html">System.paths</a>. For example, if bundlesPath is set to "packages":</p>
+
+<pre><code>&lt;script src="steal/steal.js"
+        config="./config.js"
+        main="myapp"
+        env="production"
+        bundles-path="packages"&gt;&lt;/script&gt;
+&lt;script&gt;
+  System.bundles["bundles/myapp"] //-&gt; ["myapp"]
+  System.paths["bundles/*"] = "packages/*.js";
+  System.paths["bundles/*.css"] = "packages/*.css";
+&lt;/script&gt;
+</code></pre>
+
+<p>Often, <code>bundlesPath</code> should be the same value as what's passed in <a href="stealTools.build.html">stealTools.build</a>. If
+<code>bundlesPath</code> is not set, it will set the default bundles paths:</p>
+
+<pre><code>&lt;script src="steal/steal.js"
+        config="./config.js"
+        main="myapp"
+        env="production"
+        bundles-path="packages"&gt;&lt;/script&gt;
+&lt;script&gt;
+  System.bundles["bundles/myapp"] //-&gt; ["myapp"]
+  System.paths["bundles/*"] = "dist/bundles/*.js";
+  System.paths["bundles/*.css"] = "dist/bundles/*.css";
+&lt;/script&gt;
+</code></pre>
+
+<p>If a path rule for <code>System.paths["bundles/*"]</code> or <code>System.paths["bundles/*.css"]</code>
+exist, <code>buildsPath</code> will not overwrite them.</p>
+		</section>
+		
 
 		
 	</article>
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.bundlesPath","description":"","types":[{"type":"String"}],"title":"","src":"steal/docs/system-bundlesPath.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.bundlesPath","description":"<p>A convience configuration property for setting the path of where the [System.env production] \nbundles folder is located.</p>","types":[{"type":"String","description":"<p>A folder name that specifies the path to the production bundles.  By default,\n<code>System.bundlesPath</code> is <code>\"dist/bundles\"</code>.</p>"}],"title":"","comment":" ","src":"steal/docs/system-bundlesPath.md"};
 
 	console.log(docData);
 </script>

@@ -135,6 +135,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.bundlesPath.html" data-search="System.bundlesPath">
+						System.bundlesPath
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.config.html" data-search="System.config">
 						System.config
 					</a>
@@ -185,18 +197,6 @@
 				<li class="search-container">
 					<a class="property" href="System.main.html" data-search="System.main">
 						System.main
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="property" href="System.mainBundle.html" data-search="System.mainBundle">
-						System.mainBundle
 					</a>
 				</li>
 				
@@ -511,9 +511,6 @@
 are bundle <a href="moduleName.html">moduleNames</a> and values are Arrays of <a href="moduleName.html">moduleNames</a> that
 the bundle contains.</p>
 
-<p>In <a href="System.env.html">production</a> the <a href="System.mainBundle.html">System.mainBundle</a> is written out to 
-contain the <a href="System.main.html">System.main</a> module.</p>
-
 
 
 
@@ -546,18 +543,18 @@ and <code>"jqueryui.datepicker"</code> are in <code>"jqueryui.custom"</code>, yo
 
 <h2>Production Default Values</h2>
 
-<p>In <a href="System.env.html">production</a> the <a href="System.mainBundle.html">System.mainBundle</a> is written out to 
+<p>In <a href="System.env.html">production</a> a bundles is written out to 
 contain the <a href="System.main.html">System.main</a> module.  For example:</p>
 
 <pre><code>System.config({
   main: "myapp",
   env: "production"
 });
-System.mainBundle //-&gt; "bundles/myapp";
 System.bundles["bundles/myapp"] = ["myapp"]
 </code></pre>
 
-<p>This way, when the <code>"myapp"</code> module is imported, System will load ["bundles/myapp"].</p>
+<p>This way, when the <code>"myapp"</code> module is imported, System will load ["bundles/myapp"].  Use <a href="System.bundlesPath.html">System.bundlesPath</a>
+to configure where bundles are found.</p>
 
 <h2>Implementation</h2>
 
@@ -570,7 +567,7 @@ System.bundles["bundles/myapp"] = ["myapp"]
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.bundles","description":"<p>Bundles configuration allows a single bundle file to be loaded in place of separate module files.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>An object where keys\nare bundle [moduleName moduleNames] and values are Arrays of [moduleName moduleNames] that\nthe bundle contains.</p>\n\n<p>In [System.env production] the [System.mainBundle] is written out to \ncontain the [System.main] module.</p>"}],"title":"","comment":" ","src":"steal/docs/system-bundles.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.bundles","description":"<p>Bundles configuration allows a single bundle file to be loaded in place of separate module files.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>An object where keys\nare bundle [moduleName moduleNames] and values are Arrays of [moduleName moduleNames] that\nthe bundle contains.</p>"}],"title":"","comment":" ","src":"steal/docs/system-bundles.md"};
 
 	console.log(docData);
 </script>
