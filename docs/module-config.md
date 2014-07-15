@@ -2,7 +2,7 @@
 @parent StealJS.modules
 
 @option {*} The `@config` module is loaded prior to the [@dev] and [System.main] module
-in [System.env development] and assumed to be packaged in [System.mainBundle] in
+in [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in
 production.
 
 If System.paths["@config"] is not specified, its default path will obey the following rules:
