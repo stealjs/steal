@@ -1,6 +1,6 @@
 [submodule "steal"]
 	path = steal
-	url = http://github.com/bitovi/steal
+	url = https://github.com/bitovi/steal
 [submodule "steal-tools"]
 	path = steal-tools
-	url = http://github.com/bitovi/steal-tools
+	url = https://github.com/bitovi/steal-tools
