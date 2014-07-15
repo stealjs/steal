@@ -1,5 +1,5 @@
-@page Steal Steal API
-@parent StealJS
+@page Steal steal
+@parent StealJS.api
 @group StealJS.syntaxes syntaxes
 @group StealJS.config config
 @group StealJS.modules modules
@@ -12,3 +12,5 @@ These pages document the behavior of the `steal.js` module loader. `steal.js` pa
    like [System.paths], [System.map] and the [syntax.amd AMD] and [syntax.CommonJS CommonJS] syntaxes.
 
 `steal.js` improves workflows by adding conventional behavior, CSS and LESS plugins, and the [syntax.steal steal] syntax. 
+
+
