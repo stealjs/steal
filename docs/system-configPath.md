@@ -2,7 +2,7 @@
 @parent StealJS.config
 @alias steal.config
 
-A shortcut for specifying the [@config] module [System.paths path]. 
+A shortcut for specifying the [@config] module [System.paths path] and [System.baseURL baseURL]. 
 
 @option {String}
 

@@ -5,7 +5,10 @@ Configures plugin loading by module extension.
 
 @option {Object.<String,moduleName>}
 
-Specifies a plugin to add when an extension is matched in a module name.
+Specifies a plugin to add when an extension is matched in a module name. `steal.js` includes
+defauls of:
+
+    System.ext //-> {"css": "$css", "less": "$less"}
 
 @body
 
@@ -25,7 +28,7 @@ Without having to write:
 
     System.import("foo.css!steal/css");
 
-By default, `steal.js` configures `css` to point to "@css" and `less` to point to "@less".
+By default, `steal.js` configures `css` to point to "$css" and `less` to point to "$less".
 
 ## Implementation
 
