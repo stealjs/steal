@@ -92,11 +92,16 @@ QUnit.config.testTimeout = 30000;
 	});
 
 
-module("steal via html");
+	module("steal via html");
 
 	asyncTest("basics", function(){
 		makeIframe("basics/basics.html");
 	});
+	
+	asyncTest("basics with steal.config backwards compatability", function(){
+		makeIframe("basics/basics-steal-config.html");
+	});
+
 
 	asyncTest("basics with generated html", function(){
 		writeIframe(makeStealHTML(

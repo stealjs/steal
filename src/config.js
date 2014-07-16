@@ -1,108 +1,150 @@
-	var configData = {
-		env: "development"
+	// Overwrites System.config with setter hooks
+	
+	var setterConfig = function(loader, configSpecial){
+		var oldConfig = loader.config;
+		
+		loader.config =  function(cfg){
+			
+			var data = extend({},cfg);
+			// check each special
+			each(configSpecial, function(special, name){
+				// if there is a setter and a value
+				if(special.set && data[name]){
+					// call the setter
+					var res = special.set.call(loader,data[name], cfg);
+					// if the setter returns a value
+					if(res !== undefined) {
+						// set that on the loader
+						loader[name] = res;
+					} 
+					// delete the property b/c setting is done
+					delete data[name];
+				}
+			});
+			oldConfig.call(this, data);
+		};
+	};
+	System.paths["@config"] = "stealconfig.js";
+	System.env = "development";
+	System.ext = {
+		css: '@css',
+		less: '@less'
 	};
 	
-	steal.config = function(data, value){
-		if(isString(data)) {
-			var name = data;
-			if(arguments.length >= 2) {
-				
-			} else {
-				
-				var special = configSpecial[name];
-				if(special && special.get) {
-					return special.get();
-				} else {
-					return configData[name];
-				}
-			}
-		} else if(typeof data === "object") {
-			data = extend({},data);
-			each(configSpecial, function(special, name){
-				if(special.set && data[name]){
-					var res = special.set(data[name]);
-					if(res !== undefined) {
-						configData[name] = res;
-					} 
-					delete data[name];
-					
-				}
-			});
-			
-			extend(configData, data);
-			
-		} else {
-			var config = {};
-			
-			each(configSpecial, function(special, name){
-				if(special.get){
-					config[name] = special.get();
-				}
-			});
-			return extend(config, configData);	
+	var configSetter = {
+		set: function(val){
+			var name = filename(val),
+				root = dir(val);
+			this.paths["@config"] = name;
+			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
-	};
-
-	var getSetToSystem = function(prop){
+	},
+		mainSetter = {
+			set: function(val){
+				this.main = val;
+				addProductionBundles.call(this);
+			}
+		};
+		
+	var setToSystem = function(prop){
 		return {
-			get: function(){
-				return steal.System[prop];
-			},
 			set: function(val){
 				if(typeof val === "object" && typeof steal.System[prop] === "object") {
-					steal.System[prop] = extend(steal.System[prop] || {},val || {});
+					this[prop] = extend(this[prop] || {},val || {});
 				} else {
-					steal.System[prop] = val;
+					this[prop] = val;
 				}
 			}
 		};
 	};
 	
-	var configSpecial = {
-		env: {
-			set: function(val){
-				addProductionBundles();
-				return val;
-			}
-		},
-		baseUrl: getSetToSystem("baseURL"),
-		root: getSetToSystem("baseURL"),
-		config: {
-			set: function(val){
-				var name = filename(val),
-					root = dir(val);
-				System.paths["stealconfig"] = name;
-				configSpecial.root.set( (root === val ? "." : root)  +"/");
-			}
-		},
-		paths: getSetToSystem("paths"),
-		map: getSetToSystem("map"),
-		startId: {
-			set: function(val){
-				configSpecial.main.set(  normalize(val) );
-			},
-			get: function(){
-				return System.main;
-			}
-		},
-		main: {
-			get: getSetToSystem("main").get,
-			set: function(val){
-				System.main = val;
-				addProductionBundles();
-			}
-		},
-		meta: getSetToSystem("meta"),
-		ext: getSetToSystem("ext")
+	var setIfNotPresent = function(obj, prop, value){
+		if(!obj[prop]) {
+			obj[prop] = value;	
+		}
 	};
 	
 	var addProductionBundles = function(){
-		if(configData.env === "production" && System.main) {
-			var main = System.main,
-				bundlesDir = System.bundlesPath || "bundles/",
-				bundleName = bundlesDir+filename(main);
+		if(this.env === "production" && this.main) {
+			var main = this.main,
+				bundlesDir = this.bundlesName || "bundles/",
+				mainBundleName = bundlesDir+filename(main),
+				cssBundlesNameGlob = "bundles/*.css",
+				jsBundlesNameGlob = "bundles/*";
 	
-			System.meta[bundleName] = {format:"amd"};
-			System.bundles[bundleName] = [main];
+			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
+			setIfNotPresent(this.bundles, mainBundleName, [main]);
+			setIfNotPresent(this.paths,cssBundlesNameGlob, "dist/bundles/*css");
+			setIfNotPresent(this.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 		}
 	};
+	
+	var isNode = typeof module != 'undefined' && module.exports;
+	var LESS_ENGINE = "less-1.7.0";
+	
+	setterConfig(System,{
+		env: {
+			set: function(val){
+				System.env =  val;
+				addProductionBundles.call(this);
+			}
+		},
+		baseUrl: setToSystem("baseURL"),
+		root: setToSystem("baseURL"),
+		config: configSetter,
+		configPath: configSetter,
+		startId: {
+			set: function(val){
+				mainSetter.set.call(this, normalize(val) );
+			}
+		},
+		main: mainSetter,
+		// this gets called with the __dirname steal is in
+		stealPath: {
+			set: function(dirname, cfg) {
+				var parts = dirname.split("/");
+
+				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
+				setIfNotPresent(this.paths,"@css", dirname+"/css.js");
+				setIfNotPresent(this.paths,"@less", dirname+"/less.js");
+				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
+				
+				if(isNode) {
+					System.register("less",[], false, function(){
+						var r = require;
+						return r('less');
+					});
+				} else {
+					setIfNotPresent(this.paths,"less",  dirname+"/"+LESS_ENGINE+".js");
+					
+					// make sure we don't set baseURL if something else is going to set it
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
+						if ( last(parts) === "steal" ) {
+							parts.pop();
+							if ( last(parts) === "bower_components" ) {
+								parts.pop();
+							}
+						}
+						this.baseURL =  parts.join("/")+"/";
+					}
+				}
+			}
+		},
+		// System.config does not like being passed arrays.
+		bundle: {
+			set: function(val){
+				System.bundle = val;
+			}
+		}
+	});
+	
+	steal.config = function(cfg){
+		if(typeof cfg === "string") {
+			return System[cfg];
+		} else {
+			System.config(cfg);
+		}
+		
+	};
+	
+

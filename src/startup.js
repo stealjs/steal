@@ -1,4 +1,3 @@
-	var LESS_ENGINE = "less-1.7.0";
 	var getScriptOptions = function () {
 
 		var options = {},
@@ -12,7 +11,6 @@
 			// Split on question mark to get query
 			parts = script.src.split("?");
 			src = parts.shift();
-
 			query = parts.join("?");
 
 			// Split on comma to get startFile and env
@@ -22,38 +20,19 @@
 				options.env = "production";
 			}
 
-			// Grab startFile
-			startFile = parts[0];
-
-			if (startFile) {
-				options.startId = startFile;
+			if (parts[0]) {
+				options.startId = parts[0];
 			}
-
 			// Grab env
-			env = parts[1];
-
-			if (env) {
-				options.env = env;
+			if (parts[1]) {
+				options.env = parts[1];
 			}
 
 			// Split on / to get rootUrl
 			parts = src.split("/");
 			var lastPart = parts.pop();
-
-			if(lastPart.indexOf("steal") === 0 && !System.paths["steal/dev"]) {
-				options.paths = {
-					"steal/*": parts.join("/")+"/*.js",
-					"less" :  parts.join("/")+"/"+LESS_ENGINE+".js",
-					"@traceur": parts.slice(0,-1).join("/")+"/traceur/traceur.js",
-				};
-			}
-
-			if ( last(parts) === "steal" ) {
-				parts.pop();
-				if ( last(parts) === "bower_components" ) {
-					parts.pop();
-				}
-			}
+			
+			options.stealPath = parts.join("/");
 
 			each(script.attributes, function(attr){
 				var optionName = 
@@ -62,114 +41,73 @@
 						attr.nodeName );
 				options[optionName] = attr.value;
 			});
-			if(!options.root && !options.baseUrl){
-				options.root = parts.join("/")+"/";
-			}
 
-			// Set the bundles paths if in production
-			if(options.env === "production") {
-				var paths = options.paths = options.paths || {};
-				var bundlesCSS = "bundles/*.css";
-				var bundlesJS = "bundles/*";
-				if(!paths[bundlesCSS]) {
-					paths[bundlesCSS] = "dist/bundles/*css";
-				}
-				if(!paths[bundlesJS]) {
-					paths[bundlesJS] = "dist/bundles/*.js";
-				}
-			}
 		}
 
-		return options;
-	};
-
-	var getOptionsFromStealLocation = function(){
-		var options = {};
-		if(typeof __dirname === "string" && !System.paths["steal/dev"]) {
-			options.paths = {
-				"steal/*": __dirname+"/*.js",
-				"@traceur": __dirname.split("/").slice(0,-1).join("/")+"/traceur/traceur.js"
-			};
-		}
-
-		System.register("less",[], false, function(){
-			var r = require;
-			return r('less');
-		});
 		return options;
 	};
 
 	steal.startup = function(config){
 
-		// get options from the script tag
+		// Get options from the script tag
 		if(global.document) {
 			var urlOptions = getScriptOptions();
 		} else {
-			var urlOptions = getOptionsFromStealLocation();
+			// or the only option is where steal is.
+			var urlOptions = {
+				stealPath: __dirname
+			};
 		}
-
-		extend(System.ext,{
-			css: 'steal/css',
-			less: 'steal/less'
-		});
 
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
-		steal.config(urlOptions);
+		System.config(urlOptions);
+		
 		if(config){
-			steal.config(config);
+			System.config(config);
 		}
 
-
-		var options = steal.config();
 		// Read the env now because we can't overwrite everything yet
 
 		// mark things that have already been loaded
-		each(options.executed || [], function( i, stel ) {
+		each(System.instantiated || [], function( i, stel ) {
 			System.register(stel,[],function(){});
 		});
 
 		// immediate steals we do
 		var steals = [];
 
-		// add start files first
-		if ( options.startIds ) {
-			/// this can be a string or an array
-			steals.push.apply(steals, isString(options.startIds) ? [options.startIds] : options.startIds);
-			options.startIds = steals.slice(0);
-		}
-
 		// we only load things with force = true
-		if ( options.env == "production" && steal.System.main ) {
+		if ( System.env == "production" && System.main ) {
 
-			return appDeferred = steal.System.import(steal.System.main)["catch"](function(e){
+			return appDeferred = System.import(System.main)["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(options.env == "development"){
+		} else if(System.env == "development"){
 
-			configDeferred = steal.System.import("stealconfig");
+			configDeferred = System.import("@config");
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
 				// what was loaded in stealconfig.js
 				// This means we call it twice, but that's ok
 				if(config) {
-					steal.config(config);
+					System.config(config);
 				}
 
-				return steal.System.import("steal/dev");
+				return System.import("@dev");
 			},function(e){
-				console.log("steal - error loading stealconfig.",e);
-				return steal.System.import("steal/dev");
+				console.log("steal - error loading @config.",e);
+				return steal.System.import("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
 
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				return steal.System.main ? 
-					System.import(steal.System.main):
+				return System.main ? 
+					System.import(System.main):
 					configDeferred;
 			}).then(function(){
 				if(steal.dev) {

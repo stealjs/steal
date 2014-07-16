@@ -9,12 +9,13 @@
 			
 		loader.normalize = function(name, parentName, parentAddress){
 			var matches = name.match(endingExtension),
-				ext;
+				ext,
+				newName = name;
 			
 			if(matches && loader.ext[ext = matches[1]]) {
-				name = name + loader.ext[ext];
+				newName = name + loader.ext[ext];
 			}
-			return normalize.call(this, name, parentName, parentAddress);
+			return normalize.call(this, newName, parentName, parentAddress);
 		};
 	};
 

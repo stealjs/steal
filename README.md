@@ -29,7 +29,7 @@ Lets see how to get a basic app up and running.
   
   With [Bower](http://bower.io/)
 
-  > bower install steal#0.1.1 -S
+  > bower install steal -S
 
 2. Create `stealconfig.js`:
 
