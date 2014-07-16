@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - @config</title>
+	<title>StealJS  - $css</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -272,7 +272,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="typedef" href="$css.html" data-search="$css">
 						$css
 					</a>
@@ -296,7 +296,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="@config.html" data-search="@config">
 						@config
 					</a>
@@ -471,7 +471,7 @@
 	<article class="content docs">
 		<section class="title">
 			<div class="heading">
-<h1>@config</h1>
+<h1>$css</h1>
 	<ul class="tags">
 		<li>typedef</li>
 	</ul>
@@ -483,7 +483,7 @@
 
 <div class="sub-heading">
 	
-	<h2><code>{*}</code></h2>
+	<h2><code>{Object}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -516,24 +516,33 @@
 		<section class='primary-options'>
 			
 
-  <h2 id="sig_">*
+  <h2 id="sig_">Object
 </h2>
 <div class="signature-wrapper">
-<p>The <code>@config</code> module is loaded prior to the <a href="@dev.html">@dev</a> and <a href="System.main.html">System.main</a> module
-in <a href="System.env.html">development</a> and assumed to be packaged in <a href="System.bundlesPath.html">bundle</a> in
-production.</p>
-
-<p>If System.paths["@config"] is not specified, its default path will obey the following rules:</p>
-
-<ul>
-<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in
-<i>ROOT/stealconfig.js</i>.</li>
-<li>Otherwise, it will be looked for in <em><a href="System.baseURL.html">baseURL</a>/stealconfig.js</em>.</li>
-</ul>
 
 
 
 
+
+
+  <h3>Properties</h3>
+  
+  <ol class="parameters">
+	
+	<li class="parameter">
+		<h4>The
+			<code>{Object}</code></h4>
+		<div class="description">
+			<p><code>$css</code> module is configured to process CSS modules.  By default, 
+extensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>
+module is <code>steal/css.js</code>.</p>
+		</div>
+		
+		
+		
+	</li>
+	
+</ol>
 
 
 </div>
@@ -550,15 +559,10 @@ production.</p>
 		<section class="comment">
 			<h2>Use</h2>
 
-<p>The path to <code>@config</code> is typically specified in steal.js <code>&lt;script&gt;</code> tag like:</p>
+<p>Specify a CSS dependency like:</p>
 
-<pre><code>&lt;script src="../path/to/steal/steal.js"
-        path.@config="../path/to/stealconfig.js"
-        main="app"&gt;
-&lt;/script&gt;
+<pre><code>require("my.css!");
 </code></pre>
-
-<p>But it can be specified with any of the approaches in <a href="System.config.html">System.config</a>.</p>
 		</section>
 		
 
@@ -567,7 +571,7 @@ production.</p>
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"type":"typedef","name":"@config","description":"","title":"","types":[{"type":"*","description":"<p>The <code>@config</code> module is loaded prior to the [@dev] and [System.main] module\nin [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in\nproduction.</p>\n\n<p>If System.paths[\"@config\"] is not specified, its default path will obey the following rules:</p>\n\n<ul>\n<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in\n<i>ROOT/stealconfig.js</i>.</li>\n<li>Otherwise, it will be looked for in <em>[System.baseURL baseURL]/stealconfig.js</em>.</li>\n</ul>"}],"comment":" ","src":"steal/docs/module-config.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"type":"typedef","name":"$css","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>$css</code> module is configured to process CSS modules.  By default, \nextensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/css.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"comment":" ","src":"steal/docs/module-css.md"};
 
 	console.log(docData);
 </script>

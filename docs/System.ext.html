@@ -239,6 +239,18 @@
 			
 			
 		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.stealPath.html" data-search="System.stealPath">
+						System.stealPath
+					</a>
+				</li>
+				
+			
+			
+		
 	</ul>
 
 
@@ -261,6 +273,30 @@
 				
 				
 				<li class="search-container">
+					<a class="typedef" href="$css.html" data-search="$css">
+						$css
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="$less.html" data-search="$less">
+						$less
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="typedef" href="@config.html" data-search="@config">
 						@config
 					</a>
@@ -273,32 +309,8 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="@css.html" data-search="@css">
-						@css
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="@less.html" data-search="@less">
-						@less
 					</a>
 				</li>
 				
@@ -507,7 +519,11 @@
   <h2 id="sig_">Object&lt;String,<a href="moduleName.html" >moduleName</a>&gt;
 </h2>
 <div class="signature-wrapper">
-<p>Specifies a plugin to add when an extension is matched in a module name.</p>
+<p>Specifies a plugin to add when an extension is matched in a module name. <code>steal.js</code> includes
+defauls of:</p>
+
+<pre><code>System.ext //-&gt; {"css": "$css", "less": "$less"}
+</code></pre>
 
 
 
@@ -545,7 +561,7 @@
 <pre><code>System.import("foo.css!steal/css");
 </code></pre>
 
-<p>By default, <code>steal.js</code> configures <code>css</code> to point to "@css" and <code>less</code> to point to "@less".</p>
+<p>By default, <code>steal.js</code> configures <code>css</code> to point to "$css" and <code>less</code> to point to "$less".</p>
 
 <h2>Implementation</h2>
 
@@ -558,7 +574,7 @@
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.ext","description":"<p>Configures plugin loading by module extension.</p>","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"<p>Specifies a plugin to add when an extension is matched in a module name.</p>"}],"title":"","comment":" ","src":"steal/docs/system-ext.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.ext","description":"<p>Configures plugin loading by module extension.</p>","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"<p>Specifies a plugin to add when an extension is matched in a module name. <code>steal.js</code> includes\ndefauls of:</p>\n\n<pre><code>System.ext //-&gt; {\"css\": \"$css\", \"less\": \"$less\"}\n</code></pre>"}],"title":"","comment":" ","src":"steal/docs/system-ext.md"};
 
 	console.log(docData);
 </script>

@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - @config</title>
+	<title>StealJS  - System.stealPath</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -242,7 +242,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="System.stealPath.html" data-search="System.stealPath">
 						System.stealPath
 					</a>
@@ -296,7 +296,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="@config.html" data-search="@config">
 						@config
 					</a>
@@ -471,9 +471,9 @@
 	<article class="content docs">
 		<section class="title">
 			<div class="heading">
-<h1>@config</h1>
+<h1>System.stealPath</h1>
 	<ul class="tags">
-		<li>typedef</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -483,7 +483,7 @@
 
 <div class="sub-heading">
 	
-	<h2><code>{*}</code></h2>
+	<h2><code>{String}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -507,7 +507,8 @@
 		
 
 		<section class="description">
-			
+			<p>Specify the path to <code>steal.js</code>'s root folder and set many other configuration
+values as side effects. This should not typically be called directly.</p>
 		</section>
 
 		
@@ -516,20 +517,13 @@
 		<section class='primary-options'>
 			
 
-  <h2 id="sig_">*
+  <h2 id="sig_">String
 </h2>
 <div class="signature-wrapper">
-<p>The <code>@config</code> module is loaded prior to the <a href="@dev.html">@dev</a> and <a href="System.main.html">System.main</a> module
-in <a href="System.env.html">development</a> and assumed to be packaged in <a href="System.bundlesPath.html">bundle</a> in
-production.</p>
+<p>The folder that contains <code>steal.js</code>.</p>
 
-<p>If System.paths["@config"] is not specified, its default path will obey the following rules:</p>
-
-<ul>
-<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in
-<i>ROOT/stealconfig.js</i>.</li>
-<li>Otherwise, it will be looked for in <em><a href="System.baseURL.html">baseURL</a>/stealconfig.js</em>.</li>
-</ul>
+<p><code>steal.js</code> set this internally when loading to setup default paths for
+<a href="@dev.html">@dev</a>, <a href="$css.html">$css</a>, <a href="$less.html">$less</a>, <a href="@traceur.html">@traceur</a> and <a href="System.baseURL.html">System.baseURL</a>.</p>
 
 
 
@@ -550,15 +544,23 @@ production.</p>
 		<section class="comment">
 			<h2>Use</h2>
 
-<p>The path to <code>@config</code> is typically specified in steal.js <code>&lt;script&gt;</code> tag like:</p>
+<p><code>steal.js</code> calls <a href="System.config.html">System.config</a> with the path to <code>steal.js</code> internally. 
+This sets up the following default values in <a href="System.paths.html">System.paths</a>:</p>
 
-<pre><code>&lt;script src="../path/to/steal/steal.js"
-        path.@config="../path/to/stealconfig.js"
-        main="app"&gt;
-&lt;/script&gt;
-</code></pre>
+<ul>
+<li><a href="@dev.html">@dev</a> - <code>PATH/dev.js</code></li>
+<li><a href="$css.html">$css</a> - <code>PATH/css.js</code></li>
+<li><a href="$less.html">$less</a> - <code>PATH/less.js</code></li>
+<li><a href="@traceur.html">@traceur</a> - <code>PATH/../traceur/traceur.js</code> - Assumes traceur is in a folder next to steal.</li>
+</ul>
 
-<p>But it can be specified with any of the approaches in <a href="System.config.html">System.config</a>.</p>
+<p>Finally, it will set <a href="System.baseURL.html">System.baseURL</a> provided nothing else is setting it to:</p>
+
+<ul>
+<li><code>PATH/../..</code> - if <code>PATH</code> ends with <em>/bower_components/steal</em>.</li>
+<li><code>PATH/..</code> - if <code>PATH</code> ends with <em>/steal</em>.</li>
+<li><code>PATH</code> - if the first two conditions are not met.</li>
+</ul>
 		</section>
 		
 
@@ -567,7 +569,7 @@ production.</p>
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"type":"typedef","name":"@config","description":"","title":"","types":[{"type":"*","description":"<p>The <code>@config</code> module is loaded prior to the [@dev] and [System.main] module\nin [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in\nproduction.</p>\n\n<p>If System.paths[\"@config\"] is not specified, its default path will obey the following rules:</p>\n\n<ul>\n<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in\n<i>ROOT/stealconfig.js</i>.</li>\n<li>Otherwise, it will be looked for in <em>[System.baseURL baseURL]/stealconfig.js</em>.</li>\n</ul>"}],"comment":" ","src":"steal/docs/module-config.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.stealPath","description":"<p>Specify the path to <code>steal.js</code>'s root folder and set many other configuration\nvalues as side effects. This should not typically be called directly.</p>","types":[{"type":"String","description":"<p>The folder that contains <code>steal.js</code>.</p>\n\n<p><code>steal.js</code> set this internally when loading to setup default paths for\n[@dev], [$css], [$less], [@traceur] and [System.baseURL].</p>"}],"title":"","comment":" ","src":"steal/docs/system-stealPath.md"};
 
 	console.log(docData);
 </script>
