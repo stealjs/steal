@@ -27,8 +27,8 @@
 	System.paths["@config"] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
-		css: '@css',
-		less: '@less'
+		css: '$css',
+		less: '$less'
 	};
 	
 	var configSetter = {
@@ -105,8 +105,8 @@
 				var parts = dirname.split("/");
 
 				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
-				setIfNotPresent(this.paths,"@css", dirname+"/css.js");
-				setIfNotPresent(this.paths,"@less", dirname+"/less.js");
+				setIfNotPresent(this.paths,"$css", dirname+"/css.js");
+				setIfNotPresent(this.paths,"$less", dirname+"/less.js");
 				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
 				
 				if(isNode) {
