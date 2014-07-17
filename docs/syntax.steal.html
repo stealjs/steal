@@ -62,14 +62,14 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="Steal.html" data-search="steal">
+			<a class="sidebar-title" href="Steal.html" data-search="steal">
 				steal
 			</a>
 			
@@ -546,7 +546,7 @@ In the above example <code>can</code> will look for the module at <code>can/can.
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.syntaxes","forceBuild":true,"type":"function","name":"syntax.steal","description":"","title":"steal ","comment":" ","src":"steal/docs/syntax-steal.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.syntaxes","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","type":"function","name":"syntax.steal","description":"","title":"steal ","comment":" ","src":"steal/docs/syntax-steal.md"};
 
 	console.log(docData);
 </script>
@@ -567,15 +567,14 @@ In the above example <code>can</code> will look for the module at <code>can/can.
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 

@@ -62,14 +62,14 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="StealJS.guides.html" data-search="guides">
+			<a class="sidebar-title" href="StealJS.guides.html" data-search="guides">
 				guides
 			</a>
 			
@@ -164,7 +164,7 @@
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS","forceBuild":true,"name":"StealJS.guides","title":"guides","type":"group","description":"","order":0,"children":[{"type":"page","name":"StealJS.migrating","description":"","title":"Migrating","parent":"StealJS.guides","src":"steal/docs/pages/migrating.md"},{"type":"page","name":"StealTools.guides.progressive_loading","description":"<p>If you have a large single page app, you may want to progressively load parts \nof the app.  Here's how you might do that:</p>","title":"Progressive Loading","parent":"StealJS.guides","src":"steal-tools/doc/guides/progressive_loading.md"}]};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","name":"StealJS.guides","title":"guides","type":"group","description":"","order":0,"children":[{"type":"page","name":"StealJS.migrating","description":"","title":"Migrating","parent":"StealJS.guides","src":"steal/docs/pages/migrating.md"},{"type":"page","name":"StealTools.guides.progressive_loading","description":"<p>If you have a large single page app, you may want to progressively load parts \nof the app.  Here's how you might do that:</p>","title":"Progressive Loading","parent":"StealJS.guides","src":"steal-tools/doc/guides/progressive_loading.md"}]};
 
 	console.log(docData);
 </script>
@@ -185,15 +185,14 @@
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 

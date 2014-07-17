@@ -10,7 +10,7 @@
     }
   ],
   "dependencies": {
-    "documentjs": "git://github.com/bitovi/documentjs#systemjs"
+    "documentjs": "git://github.com/bitovi/documentjs#default-theme-style"
   },
   "homepage": "http://stealjs.com",
   "repository": {

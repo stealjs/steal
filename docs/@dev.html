@@ -62,14 +62,14 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="Steal.html" data-search="steal">
+			<a class="sidebar-title" href="Steal.html" data-search="steal">
 				steal
 			</a>
 			
@@ -605,7 +605,7 @@ from the built output.</p>
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"comment":" ","src":"steal/docs/module-dev.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"comment":" ","src":"steal/docs/module-dev.md"};
 
 	console.log(docData);
 </script>
@@ -626,15 +626,14 @@ from the built output.</p>
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 

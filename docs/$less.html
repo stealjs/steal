@@ -62,14 +62,14 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="Steal.html" data-search="steal">
+			<a class="sidebar-title" href="Steal.html" data-search="steal">
 				steal
 			</a>
 			
@@ -571,7 +571,7 @@ module is <code>steal/less.js</code>.</p>
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"type":"typedef","name":"$less","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>@less</code> module is configured to process <a href=\"http://lesscss.org\">LESS</a> modules.  By default, \nextensions that end with <code>.less!</code> will use the <code>$less</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/less.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"comment":" ","src":"steal/docs/module-less.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","type":"typedef","name":"$less","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>@less</code> module is configured to process <a href=\"http://lesscss.org\">LESS</a> modules.  By default, \nextensions that end with <code>.less!</code> will use the <code>$less</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/less.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"comment":" ","src":"steal/docs/module-less.md"};
 
 	console.log(docData);
 </script>
@@ -592,15 +592,14 @@ module is <code>steal/less.js</code>.</p>
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 

@@ -62,14 +62,14 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="Steal.html" data-search="steal">
+			<a class="sidebar-title" href="Steal.html" data-search="steal">
 				steal
 			</a>
 			
@@ -564,7 +564,7 @@ System.import("mylib")      // looks in ../libs/mylib
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.baseURL","description":"<p>Specifies the root path to use for all module lookups.</p>","types":[{"type":"String","description":"<p>The root path to use for all \nmodule lookups. If baseURL is not specified, the baseURL is treated\nas the page's directory in a browser and <code>process.cwd()</code> in node.</p>\n\n<p>Specifying [System.config] will set <code>baseURL</code> to the config's parent directory.</p>"}],"title":"","alias":"System.baseUrl","comment":" ","src":"steal/docs/system-baseURL.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","type":"property","name":"System.baseURL","description":"<p>Specifies the root path to use for all module lookups.</p>","types":[{"type":"String","description":"<p>The root path to use for all \nmodule lookups. If baseURL is not specified, the baseURL is treated\nas the page's directory in a browser and <code>process.cwd()</code> in node.</p>\n\n<p>Specifying [System.config] will set <code>baseURL</code> to the config's parent directory.</p>"}],"title":"","alias":"System.baseUrl","comment":" ","src":"steal/docs/system-baseURL.md"};
 
 	console.log(docData);
 </script>
@@ -585,15 +585,14 @@ System.import("mylib")      // looks in ../libs/mylib
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 

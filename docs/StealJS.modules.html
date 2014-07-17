@@ -62,20 +62,20 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		<li class="search-container active parent">
-			<a href="Steal.html" data-search="steal">
+			<a class="sidebar-title" href="Steal.html" data-search="steal">
 				steal
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="StealJS.modules.html" data-search="modules">
+			<a class="sidebar-title" href="StealJS.modules.html" data-search="modules">
 				modules
 			</a>
 			
@@ -206,7 +206,7 @@
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"Steal","forceBuild":true,"name":"StealJS.modules","title":"modules","type":"group","description":"","order":0,"children":[{"type":"typedef","name":"@config","description":"","title":"","types":[{"type":"*","description":"<p>The <code>@config</code> module is loaded prior to the [@dev] and [System.main] module\nin [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in\nproduction.</p>\n\n<p>If System.paths[\"@config\"] is not specified, its default path will obey the following rules:</p>\n\n<ul>\n<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in\n<i>ROOT/stealconfig.js</i>.</li>\n<li>Otherwise, it will be looked for in <em>[System.baseURL baseURL]/stealconfig.js</em>.</li>\n</ul>"}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-config.md"},{"type":"typedef","name":"$css","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>$css</code> module is configured to process CSS modules.  By default, \nextensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/css.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-css.md"},{"type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-dev.md"},{"type":"typedef","name":"$less","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>@less</code> module is configured to process <a href=\"http://lesscss.org\">LESS</a> modules.  By default, \nextensions that end with <code>.less!</code> will use the <code>$less</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/less.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-less.md"},{"type":"typedef","name":"@traceur","description":"","title":"","types":[{"type":"Object","options":[{"description":"<p>The <a href=\"https://github.com/google/traceur-compiler\">traceur compiler</a> which\nis used to convert ES6 to ES6.  The defaut path to <code>@traceur</code> is specified in\n[System.paths].</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","src":"steal/docs/module-traceur.md"}]};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"Steal","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","name":"StealJS.modules","title":"modules","type":"group","description":"","order":0,"children":[{"type":"typedef","name":"@config","description":"","title":"","types":[{"type":"*","description":"<p>The <code>@config</code> module is loaded prior to the [@dev] and [System.main] module\nin [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in\nproduction.</p>\n\n<p>If System.paths[\"@config\"] is not specified, its default path will obey the following rules:</p>\n\n<ul>\n<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in\n<i>ROOT/stealconfig.js</i>.</li>\n<li>Otherwise, it will be looked for in <em>[System.baseURL baseURL]/stealconfig.js</em>.</li>\n</ul>"}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-config.md"},{"type":"typedef","name":"$css","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>$css</code> module is configured to process CSS modules.  By default, \nextensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/css.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-css.md"},{"type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-dev.md"},{"type":"typedef","name":"$less","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>@less</code> module is configured to process <a href=\"http://lesscss.org\">LESS</a> modules.  By default, \nextensions that end with <code>.less!</code> will use the <code>$less</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/less.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-less.md"},{"type":"typedef","name":"@traceur","description":"","title":"","types":[{"type":"Object","options":[{"description":"<p>The <a href=\"https://github.com/google/traceur-compiler\">traceur compiler</a> which\nis used to convert ES6 to ES6.  The defaut path to <code>@traceur</code> is specified in\n[System.paths].</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","src":"steal/docs/module-traceur.md"}]};
 
 	console.log(docData);
 </script>
@@ -227,15 +227,14 @@
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 

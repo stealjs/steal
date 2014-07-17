@@ -62,14 +62,14 @@
 	
 		
 		<li class="search-container active parent">
-			<a href="index.html" data-search="StealJS">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
 		</li>
 		
 		
 			<li class="search-container active">
-			<a href="Steal.html" data-search="steal">
+			<a class="sidebar-title" href="Steal.html" data-search="steal">
 				steal
 			</a>
 			
@@ -563,7 +563,7 @@ be specified globaly or limited to a specific path.</p>
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"type":"property","name":"System.map","description":"<p>Alter [moduleName]s.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"},{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>Specifies rules to convert an imported moduleName to another module name. The rules can\nbe specified globaly or limited to a specific path.</p>\n\n<p>The following will alter \"glob/*\" modules across the whole application.</p>\n\n<pre><code>System.map[\"glob/*\"] = \"moduleName/*\" \n</code></pre>\n\n<p>The following limits converting \"jquery\" to \"jquery@1.2\" to only within modules that match\n\"oldcode/*\":</p>\n\n<pre><code>System.map[\"oldcode/*\"] = {\n  \"jquery\": \"jquery@1.2\"\n};\n</code></pre>"}],"title":"","comment":" ","src":"steal/docs/system-map.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","forceBuild":true,"static":"/Users/justin/dev/steal.com/theme/static","type":"property","name":"System.map","description":"<p>Alter [moduleName]s.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"},{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>Specifies rules to convert an imported moduleName to another module name. The rules can\nbe specified globaly or limited to a specific path.</p>\n\n<p>The following will alter \"glob/*\" modules across the whole application.</p>\n\n<pre><code>System.map[\"glob/*\"] = \"moduleName/*\" \n</code></pre>\n\n<p>The following limits converting \"jquery\" to \"jquery@1.2\" to only within modules that match\n\"oldcode/*\":</p>\n\n<pre><code>System.map[\"oldcode/*\"] = {\n  \"jquery\": \"jquery@1.2\"\n};\n</code></pre>"}],"title":"","comment":" ","src":"steal/docs/system-map.md"};
 
 	console.log(docData);
 </script>
@@ -584,15 +584,14 @@ be specified globaly or limited to a specific path.</p>
 				CDN: ''
 			}
 		};
-		steal = {
-			paths: {"bundles/*": "bundles/*.js"}
-		};
+
 	</script>
 	<script type='text/javascript' 
 			data-main="static"
 	
 		src="./static/steal.production.js"
 	
+	    bundles-path="bundles"
 		></script>
 </body>
 
