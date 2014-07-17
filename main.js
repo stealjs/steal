@@ -306,13 +306,15 @@ var makeSteal = function(System){
 		}
 	};
 	
+	var cssBundlesNameGlob = "bundles/*.css",
+		jsBundlesNameGlob = "bundles/*";
+	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
-				mainBundleName = bundlesDir+filename(main),
-				cssBundlesNameGlob = "bundles/*.css",
-				jsBundlesNameGlob = "bundles/*";
+				mainBundleName = bundlesDir+filename(main);
+				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
 			setIfNotPresent(this.bundles, mainBundleName, [main]);
@@ -376,6 +378,13 @@ var makeSteal = function(System){
 		bundle: {
 			set: function(val){
 				System.bundle = val;
+			}
+		},
+		bundlesPath: {
+			set: function(val){
+				this.paths[cssBundlesNameGlob] = val+"/*css";
+				this.paths[jsBundlesNameGlob]  = val+"/*.js";
+				return val;
 			}
 		}
 	});

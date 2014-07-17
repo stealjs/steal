@@ -187,4 +187,8 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("configed/steal_object.html");
 	});
 
+	asyncTest("compat - product bundle works", function(){
+		makeIframe("prod-bundlesPath/prod.html");
+	});
+
 })();
