@@ -4932,7 +4932,6 @@ var makeSteal = function(System){
 	}
 	
 
-
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
 		var normalize = loader.normalize;
