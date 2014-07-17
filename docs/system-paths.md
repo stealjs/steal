@@ -9,7 +9,7 @@ If a [moduleName] matches one of the keys of the `paths` config, it is located
 with at the value of the key. 
 
 If paths for [@config], [@dev], [@traceur],
-[@css], [@less], "bundles/*", and "bundles/*.css" are not set, `steal.js` 
+[$css], [$less], "bundles/*", and "bundles/*.css" are not set, `steal.js` 
 will provide [default paths](#section_Defaultpathsconfiguredbysteal).
 
  
@@ -36,8 +36,8 @@ to the following rules:
   _[System.baseURL baseURL]/stealconfig.js_. Specifying `@config` will specify [System.baseURL baseURL].
 - [@dev] - defaults to _STEAL\_BASE/steal/dev.js_
 - [@traceur] - defaults to _STEAL\_BASE/traceur/traceur.js_
-- [@css] - defaults to _STEAL\_BASE/steal/css.js_
-- [@less] - defaults to _STEAL\_BASE/steal/less.js_
+- [$css] - defaults to _STEAL\_BASE/steal/css.js_
+- [$less] - defaults to _STEAL\_BASE/steal/less.js_
 - `"bundles/*"` - defaults to _"dist/bundles/*.js"_
 - `"bundles/*.css"` - defaults to _"dist/bundles/*css"_
 
