@@ -24,12 +24,24 @@
 			oldConfig.call(this, data);
 		};
 	};
+	var setIfNotPresent = function(obj, prop, value){
+		if(!obj[prop]) {
+			obj[prop] = value;	
+		}
+	};
+	
+	// steal.js's default configuration values
 	System.paths["@config"] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
 		css: '$css',
 		less: '$less'
 	};
+	var cssBundlesNameGlob = "bundles/*.css",
+		jsBundlesNameGlob = "bundles/*";
+	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
+	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
+	
 	
 	var configSetter = {
 		set: function(val){
@@ -58,14 +70,9 @@
 		};
 	};
 	
-	var setIfNotPresent = function(obj, prop, value){
-		if(!obj[prop]) {
-			obj[prop] = value;	
-		}
-	};
+
 	
-	var cssBundlesNameGlob = "bundles/*.css",
-		jsBundlesNameGlob = "bundles/*";
+
 	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
@@ -76,8 +83,7 @@
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
 			setIfNotPresent(this.bundles, mainBundleName, [main]);
-			setIfNotPresent(this.paths,cssBundlesNameGlob, "dist/bundles/*css");
-			setIfNotPresent(this.paths,jsBundlesNameGlob, "dist/bundles/*.js");
+
 		}
 	};
 	
