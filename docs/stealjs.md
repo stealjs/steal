@@ -8,16 +8,16 @@ StealJS is a module loader and builder that will
 help you create the next great app. Its designed to simplify 
 dependency management while being extremely powerful and flexible.
 
-Its module loader, [Steal], supports 
+Its module loader, [Steal steal], supports 
 the future - [ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader) syntax -
 with everything [traceur supports](https://github.com/google/traceur-compiler/wiki/LanguageFeatures),
 while supporting AMD, and CommonJS.
 
 Steal makes common use cases as simply as possible. Steal automatically
-loads a config file, supports css and less, and can load plugins by 
-extension (no more `!less` in `styles.less!less`).
+loads a [@config config] and [@dev development tools] module, supports css and less, and makes it easy to switch
+between development and production [System.env environments].
 
-Its builder, [StealTools], 
+Its builder, [StealTools steal-tools], 
 lets you build an application or export your project to AMD, 
 CommonJS or standalone formats. But steal-tools 
 killer feature, it can build progressively loaded apps that 
@@ -38,16 +38,16 @@ Install [Node.js](http://nodejs.org/) on your
 computer. Within your `ROOT` folder,
 use npm to install bower, grunt, and steal-tools:
 
-    > npm install -g bower
-    > npm install grunt --save-dev
-    > npm install steal-tools --save-dev
+    a npm install -g bower
+    a npm install grunt --save-dev
+    a npm install steal-tools --save-dev
 
 Use bower to install steal and jQuery:
 
     > bower install steal -S
     > bower install jquery -S
 
-Your `ROOT` folder should contain all your static scripts and 
+Your `ROOT` (aka [System.baseURL baseURL]) folder should contain all your static scripts and 
 resources.  It should now look like this:
 
       ROOT/
@@ -113,7 +113,8 @@ call `stealBuild`
           default: {
             options: {
               system: {
-                main: "main"
+                main: "main",
+                config: _dirname+"/stealconfig.js"
               }
             }
           }
@@ -126,8 +127,19 @@ After saving `Gruntfile.js` run:
 
     > grunt build
     
-This will read `index.html` and build `dist/index.html` to load 
-`dist/bundles/main.js`.  `dist/bundles/main.js` will include `steal.js`, `stealconfig.js`, the `main` module
-and its dependencies.
+### Switch to production
 
-Open `dist/index.html` to see your built app in action.
+Change `index.html` to look like:
+
+    <!DOCTYPE html>
+    <html>
+      <body>
+        <script src='./bower_components/steal/steal.production.js'
+                data-main='main'></script>
+      </body>
+    </html>
+
+### Run in production 
+
+Open `index.html` in the browser. You should see a big "Hello World". If you check
+the network tab, you should see only two scripts load.
