@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>{{parentTitle}} {{#if title}}- {{title}} {{else}} {{#if name}}- {{name}}{{/if}}{{/if}}</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<link rel="stylesheet" type="text/css" 
+		{{#staticLocation}}
+			href="{{.}}static/bundles/static.css"
+		{{else}}
+			href="{{url 'static/bundles/static.css'}}"
+		{{/staticLocation}} />
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="{{url 'static/html5shiv.js'}}"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="{{page}}">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="{{url 'index.html'}}">StealJS</a>
+				<ul class="dropdown-menu">
+		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
+		          <li><a href="http://canjs.com">CanJS</a></li>
+		          <li><a href="http://jquerypp.com">jQuery++</a></li>
+		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
+		          <li><a href="http://funcunit.com">FuncUnit</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
+		        </ul>
+			</div>
+			<ul class="nav">
+	          <li class="{{activePage 'index'}}"><a href="http://stealjs.com">Home</a></li>
+	          <li class="{{activePage 'docs'}}"><a href="{{url 'docs'}}/index.html">Api</a></li>
+	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
+		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+	        </ul>
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	{{{content}}}
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		window.Bitovi = {
+			URL: {
+				BUILDER: '{{url.builder}}',
+				BUILDER_DATA: '{{url.builderData}}',
+				BITHUB: '{{url.bithub}}',
+				CDN: '{{url.cdn}}'
+			}
+		};
+
+	</script>
+	<script type='text/javascript' 
+			data-main="static"
+	{{#staticLocation}}
+		src="{{.}}steal.js"
+	{{else}}
+		src="./static/steal.production.js"
+	{{/staticLocation}}
+	    bundles-path="bundles"
+		></script>
+</body>
+
+</html>
