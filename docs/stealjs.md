@@ -38,9 +38,9 @@ Install [Node.js](http://nodejs.org/) on your
 computer. Within your `ROOT` folder,
 use npm to install bower, grunt, and steal-tools:
 
-    a npm install -g bower
-    a npm install grunt --save-dev
-    a npm install steal-tools --save-dev
+    > npm install -g bower
+    > npm install grunt --save-dev
+    > npm install steal-tools --save-dev
 
 Use bower to install steal and jQuery:
 
