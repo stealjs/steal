@@ -8,7 +8,7 @@ documentjs({
 },{
 	out: path.join(__dirname,"docs"),
 	parent: "StealJS",
-	forceBuild: true,
+	//forceBuild: true,
 	"static": __dirname+"/theme/static",
 	templates:  __dirname+"/theme/templates"
 });

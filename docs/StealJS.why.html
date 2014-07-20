@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Progressive Loading </title>
+	<title>StealJS - Why StealJS </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -159,7 +159,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="page" href="StealJS.why.html" data-search="Why StealJS">
 						Why StealJS
 					</a>
@@ -171,7 +171,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="page" href="StealTools.guides.progressive_loading.html" data-search="Progressive Loading">
 						Progressive Loading
 					</a>
@@ -214,7 +214,7 @@
 	<article class="content docs">
 		<section class="title">
 			<div class="heading">
-<h1>Progressive Loading</h1>
+<h1>Why StealJS</h1>
 	<ul class="tags">
 		<li>page</li>
 	</ul>
@@ -225,7 +225,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealTools.guides.progressive_loading</span>
+		<span class="module">StealJS.why</span>
 	
 	
 	
@@ -251,8 +251,7 @@
 		
 
 		<section class="description">
-			<p>If you have a large single page app, you may want to progressively load parts 
-of the app.  Here's how you might do that:</p>
+			<p>Everyone should use <a href="StealJS.html">StealJS</a> to do dependency management on their projects.  Here's why:</p>
 		</section>
 
 		
@@ -264,127 +263,30 @@ of the app.  Here's how you might do that:</p>
 
 		
 		<section class="comment">
-			<h2>Write your modules</h2>
+			<h2>Faster Loading Sites</h2>
 
-<p>Write out your main module to load only the bare minimum to determine what "page" you 
-are on. A bare bones example might have a file structure like:</p>
+<p><a href="stealTools.build.html">stealTools.build</a> heavily optimizes load times by balancing cache hits against
+the number of total css and script requests. If you've ever found yourself trying to
+package common scripts together, stop!  <a href="StealTools.html">steal-tools</a> will do this for
+you and better than you can do yourself.</p>
 
-<pre><code>bower_components/
-  steal/
-    steal.js
-  jquery/
-    jquery.js
-node_modules/
-  steal-tools/
-site/
-  app.js
-  homepage.js
-  signup.js
-  login.js
-  site.html
-  config.js
-</code></pre>
+<h2>Just Refresh</h2>
 
-<p><code>app.js</code>:</p>
+<p>You don't need to build everytime you change code.  Just refresh.</p>
 
-<pre><code>import $ from 'jquery';
-$(function(){
-  var onhashchange = function(){
-    if(window.location.hash === "#login") {
-      System.import("login").then(function(){
-        $("#main").login();
-      });
-    } else if(window.location.hash === "#signup" ) {
-      System.import("login").then(function(){
-        $("#main").signup();
-      });
-    } else {
-      System.import("homepage").then(function(){
-        $("#main").hompage();
-      });
-    }
-  }
-  $(document).bind("hashchange",onhashchange);
-  onhashchange();
-});
-</code></pre>
+<h2>Transition to the future</h2>
 
-<p><code>homepage.js</code></p>
+<p>If your project currently uses AMD, CommonJS, or Steal, you can
+keep those syntaxes and start writing ES6 today.</p>
 
-<pre><code>define(['jquery'], function($){
-  return $.fn.homepage = function(){
-    this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
-  };
-});
-</code></pre>
+<h2>The Future is bright (and small)</h2>
 
-<p><code>signup.js</code></p>
-
-<pre><code>var $ = require('jquery');
-module.exports = $.fn.signup = function(){
-  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
-};
-</code></pre>
-
-<p><code>login.js</code></p>
-
-<pre><code>$.fn.login = function(){
-  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
-};
-</code></pre>
-
-<p><code>config.js</code></p>
-
-<pre><code>System.bundle = ["homepage","signup","login"];
-System.meta = {
-  login: {exports: "$.fn.login"}
-}
-</code></pre>
-
-<h2>Write out your page</h2>
-
-<p>The following will load <code>steal.js</code>, <code>config.js</code> and <code>app.js</code></p>
-
-<p><code>site.html</code></p>
-
-<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
-&lt;script src="../bower_components/steal/steal.js"
-        data-main="app"
-        data-config="./config.js"&gt;&lt;/script&gt;
-</code></pre>
-
-<h2>Build your site</h2>
-
-<p>From your main folder, run:</p>
-
-<pre><code>&gt; steal-tools build main=app config=site/config.js
-</code></pre>
-
-<p>Notice that the path to config must be relative to your cwd. This will create a 
-<code>site/bundles</code> directory with the following contents:</p>
-
-<pre><code>site/bundles/
-  app.js
-  homepage.js
-  signup.js
-  login.js
-</code></pre>
-
-<p>If you want to limit the number of scripts any bundle might load, configure that like:</p>
-
-<pre><code>&gt; steal-tools build main=app config=site/config bundleDepth=3
-</code></pre>
-
-<h2>See it live</h2>
-
-<p>If you add <code>data-env="production"</code> to your site, you can see it live:</p>
-
-<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
-&lt;script src="../bower_components/steal/steal.js"
-        data-main="app"
-        data-config="./config"
-        data-env="production"&gt;&lt;/script&gt;
-</code></pre>
+<p>The ES6 module loader is an extremely well thought out specification that
+allows almost any behavior to woven into the <code>System</code> 
+loader. Both <a href="http://github.com/systemjs/systemjs">SystemJS</a> and 
+<a href="Steal.html">steal</a> are written as groups of extensions applied to the
+<code>System</code> loader. When ES6 modules do land in browsers, you'll be able to
+use just the <code>System</code> extensions you need. </p>
 		</section>
 		
 
@@ -393,7 +295,7 @@ System.meta = {
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"StealTools.guides.progressive_loading","description":"<p>If you have a large single page app, you may want to progressively load parts \nof the app.  Here's how you might do that:</p>","title":"Progressive Loading","src":"steal-tools/doc/guides/progressive_loading.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"StealJS.why","description":"<p>Everyone should use [StealJS] to do dependency management on their projects.  Here's why:</p>","title":"Why StealJS","src":"steal/docs/pages/why.md"};
 
 	console.log(docData);
 </script>
