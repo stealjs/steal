@@ -27,7 +27,7 @@ var makeSteal = function(System){
 				return modules;
 			}
 		};
-		if(steal.config().env === "production") {
+		if(System.env === "production") {
 			return afterConfig();
 		} else {
 			// wait until the config has loaded

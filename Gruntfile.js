@@ -63,7 +63,6 @@ module.exports = function (grunt) {
       dist: {
         options: {
           banner: '<%= meta.banner %>\n'
-            + '/*\n *  ES6 Promises shim from when.js, Copyright (c) 2010-2014 Brian Cavalier, John Hann, MIT License\n */\n'
         },
         src: '<%= pkg.name %>.js',
         dest: '<%= pkg.name %>.production.js'
@@ -106,7 +105,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('testee');
-
+  
   grunt.registerTask('test', [ 'build', 'testee' ]);
   grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:toTest' ]);
   grunt.registerTask('default', [ 'build' ]);

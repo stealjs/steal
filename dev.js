@@ -86,7 +86,7 @@ var dev = {
 	 * 
 	 */
 	log: function( out ) {
-		var ll = steal.config().logLevel;
+		var ll = System.logLevel;
 		if (ll < 1) {
 			if (window.console && console.log) {
 				Array.prototype.unshift.call(arguments, 'steal.js INFO:');
