@@ -143,3 +143,8 @@ Change `index.html` to look like:
 
 Open `index.html` in the browser. You should see a big "Hello World". If you check
 the network tab, you should see only two scripts load.
+
+
+## Why StealJS
+
+There are many ways to manage JavaScript dependencies. [Browserify] and [RequireJS] 
