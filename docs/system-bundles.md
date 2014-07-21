@@ -20,7 +20,7 @@ and `"jqueryui.datepicker"` are in `"jqueryui.custom"`, you can specify that lik
       "jqueryui.datepicker"
     ];
 
-If `bundle` is passed to [StealTools], it will write out where to load bundles in the production bundles. 
+If `bundle` is passed to [steal-tools], it will write out where to load bundles in the production bundles. 
 
 ## Production Default Values
 

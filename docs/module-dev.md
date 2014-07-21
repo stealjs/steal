@@ -26,7 +26,7 @@ Call `steal.dev.warn` to log warning information.  For example:
 
     steal.dev.warn("something went wrong");
 
-By default, [StealTools] will remove `steal.dev.log` and `steal.dev.warn` calls
+By default, [steal-tools] will remove `steal.dev.log` and `steal.dev.warn` calls
 from the built output.
 
 
