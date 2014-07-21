@@ -153,6 +153,7 @@
 		instantiated: {
 			set: function(val){
 				var loader = this;
+				
 				each(val || {}, function(value, name){
 					loader.set(name,  loader.newModule(value));
 				});

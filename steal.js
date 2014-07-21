@@ -5109,6 +5109,7 @@ var makeSteal = function(System){
 		instantiated: {
 			set: function(val){
 				var loader = this;
+				
 				each(val || {}, function(value, name){
 					loader.set(name,  loader.newModule(value));
 				});
@@ -5197,11 +5198,6 @@ var makeSteal = function(System){
 		}
 
 		// Read the env now because we can't overwrite everything yet
-
-		// mark things that have already been loaded
-		each(System.instantiated || [], function( i, stel ) {
-			System.register(stel,[],function(){});
-		});
 
 		// immediate steals we do
 		var steals = [];

@@ -69,11 +69,6 @@
 
 		// Read the env now because we can't overwrite everything yet
 
-		// mark things that have already been loaded
-		each(System.instantiated || [], function( i, stel ) {
-			System.register(stel,[],function(){});
-		});
-
 		// immediate steals we do
 		var steals = [];
 
