@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -14,7 +14,7 @@
     "systemjs": "git://github.com/bitovi/systemjs.git#77d972c83018fdcbb29de68053d4f705fae8272e"
   },
   "devDependencies": {
-    "bower": "1.2.8",
+    "bower": "1.3.8",
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-concat": "~0.3.0",
