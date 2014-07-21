@@ -154,9 +154,7 @@
 			set: function(val){
 				var loader = this;
 				each(val || {}, function(value, name){
-					if(typeof value === "object") {
-						loader.set(name,  loader.newModule(value));
-					}
+					loader.set(name,  loader.newModule(value));
 				});
 			}
 		}
