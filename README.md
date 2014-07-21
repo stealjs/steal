@@ -86,7 +86,7 @@ Lets see how to get a basic app up and running.
   </html>
   ```
   
-  To build this app, read [StealTools](https://github.com/bitovi/steal-tools/tree/systemjs) docs.
+  To build this app, read [steal-tools](https://github.com/bitovi/steal-tools/tree/systemjs) docs.
 
 
 ### Adding jQuery

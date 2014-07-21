@@ -15,10 +15,10 @@ If System.paths["@config"] is not specified, its default path will obey the foll
 
 ## Use
 
-The path to `@config` is typically specified in steal.js `<script>` tag like:
+The path to `@config` is typically specified with [System.configPath] in the steal.js `<script>` tag like:
 
     <script src="../path/to/steal/steal.js"
-            path.@config="../path/to/stealconfig.js"
+            config-path="../path/to/stealconfig.js"
             main="app">
     </script>
 

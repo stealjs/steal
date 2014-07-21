@@ -8,7 +8,7 @@ StealJS is a module loader and builder that will
 help you create the next great app. Its designed to simplify 
 dependency management while being extremely powerful and flexible.
 
-Its module loader, [Steal steal], supports 
+Its module loader, [steal], supports 
 the future - [ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader) syntax -
 with everything [traceur supports](https://github.com/google/traceur-compiler/wiki/LanguageFeatures),
 while supporting AMD, and CommonJS.
@@ -17,12 +17,12 @@ Steal makes common use cases as simply as possible. Steal automatically
 loads a [@config config] and [@dev development tools] module, supports css and less, and makes it easy to switch
 between development and production [System.env environments].
 
-Its builder, [StealTools steal-tools], 
+Its builder, [steal-tools steal-tools], 
 lets you build an application or export your project to AMD, 
 CommonJS or standalone formats. But steal-tools 
 killer feature, it can build progressively loaded apps that 
 balance caching and the number of script requests, resulting
-in lightening fast load times.
+in lightning-fast load times.
 
 
 ## Quick Start
@@ -35,8 +35,10 @@ to work.  This is just a common way.
 ### Install
 
 Install [Node.js](http://nodejs.org/) on your 
-computer. Within your `ROOT` folder,
-use npm to install bower, grunt, and steal-tools:
+computer. Locate the folder that contains all your static content, scripts, and 
+styles. This is your [System.baseURL BASE] folder.  Within that folder,
+use [npm](https://www.npmjs.org/) to 
+install [bower](http://bower.io/), [grunt](http://gruntjs.com/), and steal-tools:
 
     > npm install -g bower
     > npm install grunt --save-dev
@@ -47,10 +49,10 @@ Use bower to install steal and jQuery:
     > bower install steal -S
     > bower install jquery -S
 
-Your `ROOT` (aka [System.baseURL baseURL]) folder should contain all your static scripts and 
+Your `BASE` folder should contain all your static scripts and 
 resources.  It should now look like this:
 
-      ROOT/
+      BASE/
         bower_components/
         bower.json
         node_modules/
@@ -58,9 +60,9 @@ resources.  It should now look like this:
          
 ### Setup
 
-Create `index.html`, `stealconfig.js`, and `main.js`, files in your ROOT folder so it looks like:
+Create `index.html`, `stealconfig.js`, and `main.js`, files in your BASE folder so it looks like:
 
-      ROOT/
+      BASE/
         bower_components/
         bower.json
         node_modules/
@@ -80,7 +82,7 @@ tells steal to load the `main` module.
       </body>
     </html>
 
-`stealconfig.js` is loaded by every page in your 
+[@config stealconfig.js] is loaded by every page in your 
 project. It is used to configure the location to modules and 
 other behavior.  Use it to configure the location of the `"jquery"` module by adding the following
 code:
@@ -104,7 +106,7 @@ Open `index.html` in the browser.  You should see a big "Hello World".
 
 ### Build
 
-Create a `Gruntfile.js` in your ROOT folder. Configure grunt to 
+Create a `Gruntfile.js` in your BASE folder. Configure grunt to 
 call `stealBuild`
 
     module.exports = function (grunt) {
@@ -144,7 +146,3 @@ Change `index.html` to look like:
 Open `index.html` in the browser. You should see a big "Hello World". If you check
 the network tab, you should see only two scripts load.
 
-
-## Why StealJS
-
-There are many ways to manage JavaScript dependencies. [Browserify] and [RequireJS] 

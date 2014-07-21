@@ -165,7 +165,7 @@ To __test__, run:
 
 ## Understanding steal-tools code
 
-On a high level, [StealTools steal-tools] uses `lib/trace.js` to 
+On a high level, [steal-tools steal-tools] uses `lib/trace.js` to 
 figure out all of the 
 dependencies for a module and arange them into a graph. It
 then transforms that graph into bundles and finally writes
@@ -228,7 +228,7 @@ graphs.  Bundle graphs look like:
        bundles: [bundleName1, bundleName2]	
      }
 
-[StealTools steal-tools] code is organized in folders around certain concepts:
+[steal-tools steal-tools] code is organized in folders around certain concepts:
 
  - build - high level build modules like the multi build and pluginify.
  - buildTypes - utitlies for specific buildTypes (like CSS or JS).
