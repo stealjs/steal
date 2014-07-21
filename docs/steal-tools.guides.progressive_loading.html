@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Migrating </title>
+	<title>StealJS - Progressive Loading </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -135,7 +135,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
 						Migrating
 					</a>
@@ -183,7 +183,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
 						Progressive Loading
 					</a>
@@ -214,7 +214,7 @@
 	<article class="content docs">
 		<section class="title">
 			<div class="heading">
-<h1>Migrating</h1>
+<h1>Progressive Loading</h1>
 	<ul class="tags">
 		<li>page</li>
 	</ul>
@@ -225,7 +225,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.migrating</span>
+		<span class="module">steal-tools.guides.progressive_loading</span>
 	
 	
 	
@@ -251,7 +251,8 @@
 		
 
 		<section class="description">
-			
+			<p>If you have a large single page app, you may want to progressively load parts 
+of the app.  Here's how you might do that:</p>
 		</section>
 
 		
@@ -263,63 +264,127 @@
 
 		
 		<section class="comment">
-			<h2>Migrating from old Steal</h2>
+			<h2>Write your modules</h2>
 
-<h3>Config changes</h3>
+<p>Write out your main module to load only the bare minimum to determine what "page" you 
+are on. A bare bones example might have a file structure like:</p>
 
-<h4>Map</h4>
+<pre><code>bower_components/
+  steal/
+    steal.js
+  jquery/
+    jquery.js
+node_modules/
+  steal-tools/
+site/
+  app.js
+  homepage.js
+  signup.js
+  login.js
+  site.html
+  config.js
+</code></pre>
 
-<p>There is no longer a <code>"*"</code> mapping like before:</p>
+<p><code>app.js</code>:</p>
 
-<pre><code>steal.config({
-  map: {
-    "*": {
-      "can/util": "can/util/jquery"
-            }
+<pre><code>import $ from 'jquery';
+$(function(){
+  var onhashchange = function(){
+    if(window.location.hash === "#login") {
+      System.import("login").then(function(){
+        $("#main").login();
+      });
+    } else if(window.location.hash === "#signup" ) {
+      System.import("login").then(function(){
+        $("#main").signup();
+      });
+    } else {
+      System.import("homepage").then(function(){
+        $("#main").hompage();
+      });
+    }
   }
+  $(document).bind("hashchange",onhashchange);
+  onhashchange();
 });
 </code></pre>
 
-<p>Instead flatten these out:</p>
+<p><code>homepage.js</code></p>
 
-<pre><code>steal.config({
-  map: {
-    "can/util": "can/util/jquery"
-  }
+<pre><code>define(['jquery'], function($){
+  return $.fn.homepage = function(){
+    this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+  };
 });
 </code></pre>
 
-<h4>Paths</h4>
+<p><code>signup.js</code></p>
 
-<p>When specifying that a folder's children should also be pathed, include an astericks to denote:</p>
-
-<pre><code>steal.config({
-  paths: {
-    "can/": "lib/can/"
-  }
-});
+<pre><code>var $ = require('jquery');
+module.exports = $.fn.signup = function(){
+  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+};
 </code></pre>
 
-<p>Add the astericks and specify the file type:</p>
+<p><code>login.js</code></p>
 
-<pre><code>steal.config({
-  paths: {
-    "can/*": "lib/can/*.js"
-  }
-});
+<pre><code>$.fn.login = function(){
+  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+};
 </code></pre>
 
-<h4>Ext</h4>
+<p><code>config.js</code></p>
 
-<p>CSS and Less plugins come by default, you no longer need to specify these in <code>steal.config</code>'s ext option. But do add mustache and stache if using those with CanJS.</p>
+<pre><code>System.bundle = ["homepage","signup","login"];
+System.meta = {
+  login: {exports: "$.fn.login"}
+}
+</code></pre>
 
-<h4>Then</h4>
+<h2>Write out your page</h2>
 
-<p>The old Steal was chainable using <code>.then</code>, but this produced numerous problems that are better fixed inside the config. If you need a module to load before loading another, specify this with <code>deps</code> inside of the <code>meta</code> configuration for that module.</p>
+<p>The following will load <code>steal.js</code>, <code>config.js</code> and <code>app.js</code></p>
 
-<h3>Build</h3>
+<p><code>site.html</code></p>
 
-<p>The old Steal always produced a <code>production.js</code> file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in <code>dist/bundles</code> and it will be named after your main module.</p>
+<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
+&lt;script src="../bower_components/steal/steal.js"
+        data-main="app"
+        data-config="./config.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<h2>Build your site</h2>
+
+<p>From your main folder, run:</p>
+
+<pre><code>&gt; steal-tools build main=app config=site/config.js
+</code></pre>
+
+<p>Notice that the path to config must be relative to your cwd. This will create a 
+<code>site/bundles</code> directory with the following contents:</p>
+
+<pre><code>site/bundles/
+  app.js
+  homepage.js
+  signup.js
+  login.js
+</code></pre>
+
+<p>If you want to limit the number of scripts any bundle might load, configure that like:</p>
+
+<pre><code>&gt; steal-tools build main=app config=site/config bundleDepth=3
+</code></pre>
+
+<h2>See it live</h2>
+
+<p>If you add <code>data-env="production"</code> to your site, you can see it live:</p>
+
+<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
+&lt;script src="../bower_components/steal/steal.js"
+        data-main="app"
+        data-config="./config"
+        data-env="production"&gt;&lt;/script&gt;
+</code></pre>
 		</section>
 		
 
@@ -328,7 +393,7 @@
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"StealJS.migrating","description":"","title":"Migrating","src":"steal/docs/pages/migrating.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"steal-tools.guides.progressive_loading","description":"<p>If you have a large single page app, you may want to progressively load parts \nof the app.  Here's how you might do that:</p>","title":"Progressive Loading","src":"steal-tools/doc/guides/progressive_loading.md"};
 
 	console.log(docData);
 </script>
