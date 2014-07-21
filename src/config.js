@@ -1,5 +1,4 @@
 	// Overwrites System.config with setter hooks
-	
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
 		
