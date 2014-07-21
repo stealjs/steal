@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "main": "steal.js",
-  "ignore": ["test","src","core"],
+  "ignore": ["test","src","core","docs"],
   "version": "0.3.0",
   "devDependencies": {
     "qunit": "~1.12.0",
