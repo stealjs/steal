@@ -191,4 +191,8 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("prod-bundlesPath/prod.html");
 	});
 
+	asyncTest("System.instantiate preventing production css bundle", function(){
+		makeIframe("production/prod-inst.html");
+	});
+
 })();

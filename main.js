@@ -391,6 +391,16 @@ var makeSteal = function(System){
 				this.paths[jsBundlesNameGlob]  = val+"/*.js";
 				return val;
 			}
+		},
+		instantiated: {
+			set: function(val){
+				var loader = this;
+				each(val || {}, function(value, name){
+					if(typeof value === "object") {
+						loader.set(name,  loader.newModule(value));
+					}
+				});
+			}
 		}
 	});
 	
