@@ -129,9 +129,7 @@
 		
 
 		<section class="description">
-			<p>steal-tools is a collection of command-line utilities
-that make building, packaging, and sharing ES6, CommonJS, AMD, and <a href="https://github.com/bitovi/steal">Steal</a>
-applications easy.</p>
+			<h1>steal-tools</h1>
 		</section>
 
 		
@@ -143,68 +141,22 @@ applications easy.</p>
 
 		
 		<section class="comment">
-			<h2>Use</h2>
+			<p><a href="https://travis-ci.org/bitovi/steal-tools"><img src="https://travis-ci.org/bitovi/steal-tools.svg?branch=master" alt="Build Status" title="" /></a></p>
 
-<p>Currently, steal-tools depends 
-on <a href="https://github.com/bitovi/steal">StealJS</a>. Before doing a build, make
-sure StealJS loads your app successfully in the browser.</p>
+<p><code>steal-tools</code> is a collection of command-line utilities
+that:</p>
 
-<h3>Hello World</h3>
+<ul>
+<li>makes building ES6, CommonJS, AMD, and applications <em>easy</em>, and </li>
+<li>writes those builds so your apps load <em>fast</em>.</li>
+</ul>
 
-<p>If you followed <a href="https://github.com/bitovi/steal">StealJS's Hello World Example</a>,
-the following will walk you through setting up steal-tools to build that app.  That app has a 
-structure that looks like:</p>
+<p>It is one half of the <a href="http://stealjs.com">StealJS</a> project.  It's other half,
+<a href="https://github.com/bitovi/steal">steal</a> provides client-side dependency management.</p>
 
-<pre><code>ROOT/
-  bower.json
-  bower_components/
-  stealconfig.js
-  index.html
-  main.js
-</code></pre>
+<p>For more information on <code>steal-tools</code>, visit <a href="http://stealjs.com">stealjs.com</a>.</p>
 
-<p><code>stealconfig.js</code> is the config file and <code>main.js</code> is the main module.</p>
-
-<ol>
-<li><p>Install steal-tools.</p>
-
-<p>Using npm:</p>
-
-<blockquote>
-  <p>npm install steal-tools --save-dev</p>
-</blockquote></li>
-<li><p>Create a build script.</p>
-
-<p>In your build script, add:</p>
-
-<p><code>js
-var stealTools = require('steal-tools');
-stealTools.build({
-config: "path/to/ROOT/stealconfig.js",
-main: "main"
-}).then(function(){
-console.log("build is successful")
-})
-</code></p>
-
-<p>Notice that the <code>config</code> option includes the path to the configuration file.  Your script
-might want to use <code>__dirname</code>.  <code>stealTools.build</code> returns a deferred when the build is complete.</p></li>
-<li><p>Run your build script.</p>
-
-<p>This will produce a <code>ROOT/bundles/main.js</code>.</p></li>
-<li><p>Switch to production.  </p>
-
-<p>In <code>index.html</code>, switch to production by adding <code>data-env='production'</code> to the steal <code>&lt;script&gt;</code> tag:</p>
-
-<p>```html</p>
-
-<script src='./bower_components/steal/steal.js'
-      data-config='stealconfig.js'
-      data-main='main'
-      data-env-'production'></script>
-
-<p>```</p></li>
-</ol>
+<p>For information on contributing and developing <code>steal-tools</code>, go <a href="http://127.0.0.1:8125/steal.com/docs/guides.Contributing.html">here</a>.</p>
 		</section>
 		
 
@@ -213,7 +165,7 @@ might want to use <code>__dirname</code>.  <code>stealTools.build</code> returns
 </div>
 
 <script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"README","description":"<p>steal-tools is a collection of command-line utilities\nthat make building, packaging, and sharing ES6, CommonJS, AMD, and <a href=\"https://github.com/bitovi/steal\">Steal</a>\napplications easy.</p>","src":"steal/README.md"};
+	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"README","description":"<h1>steal-tools</h1>","src":"steal/README.md"};
 
 	console.log(docData);
 </script>
