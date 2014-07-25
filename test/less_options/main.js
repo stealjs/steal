@@ -15,5 +15,5 @@ if (typeof window !== "undefined" && window.QUnit) {
 		return systemInstantiate.apply(this, arguments);
 	};
 
-	steal("less_options/main.less!steal/less");
+	steal("less_options/main.less!");
 }
