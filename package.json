@@ -11,7 +11,7 @@
     "test": "grunt test --stack"
   },
   "dependencies": {
-    "systemjs": "git://github.com/bitovi/systemjs.git#77d972c83018fdcbb29de68053d4f705fae8272e"
+    "systemjs": "git://github.com/bitovi/systemjs.git#1ea63e1d855694aab0ba73e742b2c9cd00388669"
   },
   "devDependencies": {
     "bower": "1.3.8",

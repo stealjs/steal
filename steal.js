@@ -2854,7 +2854,7 @@ function register(loader) {
       }
     }
 
-    __eval(load.source, loader.global, load.address, sourceMappingURL);
+    __eval(load.source, loader.global, load.address, sourceMappingURL, load.metadata && load.metadata.scriptEval);
 
     // traceur overwrites System and Module - write them back
     if (load.name == '@traceur') {
@@ -3537,6 +3537,7 @@ function global(loader) {
       },
       retrieveGlobal: function(moduleName, exportName, init) {
         var singleGlobal;
+        var multipleExports;
         var exports = {};
 
         // run init
@@ -3564,9 +3565,9 @@ function global(loader) {
               exports[g] = loader.global[g];
               if (singleGlobal) {
                 if (singleGlobal !== loader.global[g])
-                  singleGlobal = undefined;
+                  multipleExports = true;
               }
-              else if (singleGlobal !== false) {
+              else if (singleGlobal === undefined) {
                 singleGlobal = loader.global[g];
               }
             }
@@ -3575,7 +3576,7 @@ function global(loader) {
 
         moduleGlobals[moduleName] = exports;
 
-        return typeof singleGlobal != 'undefined' ? singleGlobal : exports;
+        return multipleExports ? exports: singleGlobal;
       }
     }));
   }
@@ -4658,12 +4659,21 @@ function depCache(loader) {
   return System;
 };
 
-function __eval(__source, __global, __address, __sourceMap) {
+function __eval(__source, __global, __address, __sourceMap, __useScript) {
   try {
-    __source = (__global != __$global ? 'with(__global) { (function() { ' + __source + ' \n }).call(__global); }' : __source)
-      + '\n//# sourceURL=' + __address
-      + (__sourceMap ? '\n//# sourceMappingURL=' + __sourceMap : '');
-    eval(__source);
+    if(__useScript && typeof document !== "undefined") {
+    	    var script = document.createElement("script");
+    	    script.text = __source
+    	      + '\n//# sourceURL=' + __address;
+    	    (document.head || document.body || document.documentElement).appendChild(script); 
+    } else {
+	    	__source = (__global != __$global ? 'with(__global) { (function() { ' + __source + ' \n }).call(__global); }' : __source)
+	      + '\n//# sourceURL=' + __address
+	      + (__sourceMap ? '\n//# sourceMappingURL=' + __sourceMap : '');
+	    eval(__source);
+    }
+    
+    
   }
   catch(e) {
     if (e.name == 'SyntaxError')
