@@ -5238,12 +5238,18 @@ var makeSteal = function(System){
 			});
 
 			appDeferred = devDeferred.then(function(){
-
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				return System.main ? 
-					System.import(System.main):
-					configDeferred;
+				if(!System.main) {
+					return configDeferred;
+				}
+				var main = System.main;
+				if(typeof main === "string") {
+					main = [main];
+				}
+				return Promise.all( map(main,function(main){
+					return System.import(main)
+				}) );
 			}).then(function(){
 				if(steal.dev) {
 					steal.dev.log("app loaded successfully")
@@ -5254,7 +5260,9 @@ var makeSteal = function(System){
 			return appDeferred;
 		}
 	};
-
+	steal.done = function(){
+		return appDeferred;
+	};
 	return steal;
 
 
