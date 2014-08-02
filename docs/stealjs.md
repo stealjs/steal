@@ -41,7 +41,7 @@ use [npm](https://www.npmjs.org/) to
 install [bower](http://bower.io/), [grunt](http://gruntjs.com/), and steal-tools:
 
     > npm install -g bower
-    > npm install grunt --save-dev
+    > npm install -g grunt-cli
     > npm install steal-tools --save-dev
 
 Use bower to install steal and jQuery:
@@ -116,12 +116,13 @@ call `stealBuild`
             options: {
               system: {
                 main: "main",
-                config: _dirname+"/stealconfig.js"
+                config: __dirname+"/stealconfig.js"
               }
             }
           }
         }
       });
+      grunt.loadNpmTasks('steal-tools');
       grunt.registerTask('build',['stealBuild']);
     };
 
