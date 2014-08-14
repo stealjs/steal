@@ -1,0 +1,9 @@
+<body>
+<script type="text/javascript" src='../steal.js' data-config="./config.js"></script>
+<script>
+	System.logLevel = -1;
+	System["import"]("@dev").then(function(){
+		steal.dev.log("Holler", "back");
+	});
+</script>
+</body>
