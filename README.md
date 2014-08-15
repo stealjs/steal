@@ -6,7 +6,7 @@
 CSS modules. It makes development workflows simple.
 
 It is one half of the [StealJS](http://stealjs.com) project.  It's other half,
-[steal-tool](https://github.com/bitovi/steal-tools) provides high performance builds.
+[steal-tools](https://github.com/bitovi/steal-tools) provides high performance builds.
 
 For more information on `steal`, visit [stealjs.com](http://stealjs.com).
 
