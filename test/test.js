@@ -197,4 +197,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Multi mains", function(){
 		makeIframe("multi-main/dev.html");
 	});
+	asyncTest("Bower extension", function(){
+		makeIframe("bower/site.html");
+	});
 })();

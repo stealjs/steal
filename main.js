@@ -413,6 +413,73 @@ var makeSteal = function(System){
 	
 
 
+
+var bowerConfiged = function(loader){
+	var rootBowerConfig, depMains = {};
+	var getBowerPath = function(stealPath){
+		var path = steal.joinURIs(stealPath, "../bower.json");
+		return path;
+	};
+	var getBowerJson = function(bowerPath){
+		return loader.fetch({
+			address: bowerPath,
+			metadata: {}
+		}).then(function(bowerJson) {
+			return JSON.parse(bowerJson);
+		});
+	};
+
+	// overwrite config to trap when someone sets a config we can use to get
+	// bowerPath from
+	var oldConfig = loader.config;
+	loader.config = function(cfg){
+		if(typeof cfg === 'object') {
+			if(cfg.stealPath && /bower_components/.test(cfg.stealPath)){
+				rootBowerConfig = getBowerJson(getBowerPath(cfg.stealPath));
+			}
+			if(cfg.bowerPath){
+				rootBowerConfig = getBowerJson(cfg.bowerPath);
+			}
+		}
+
+		return oldConfig.call(this, cfg)
+	}
+
+	// overwrite locate to load module's bower and get the real address
+	var oldLocate = loader.locate;
+	loader.locate = function(load){
+		var promise = Promise.resolve(oldLocate.call(this, load));
+
+		return promise.then(function(proposedAddress){
+			if(rootBowerConfig) {
+				return rootBowerConfig.then(function(bower) {
+					var deps = bower.dependencies;
+					if(deps[load.name]) {
+						var depBowerPath = steal.joinURIs(loader.baseURL, "bower_components/" +
+																							 load.name + "/");
+						var depBowerJson = depBowerPath + "bower.json";
+
+						depMains[load.name] = depMains[load.name] ||
+							getBowerJson(depBowerJson);
+						return depMains[load.name].then(function(depBower) {
+							var main = depBower.main;
+							return depBowerPath + main;
+						});
+					}
+
+					return proposedAddress;
+				});
+			}
+
+			return proposedAddress;
+		});
+	};
+};
+
+if(typeof System !== "undefined") {
+	bowerConfiged(System);
+}
+
 	var getScriptOptions = function () {
 
 		var options = {},
