@@ -200,4 +200,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("@loader is current loader", function(){
 		makeIframe("current-loader/dev.html");
 	});
+	asyncTest("@loader is current loader with es6", function(){
+		makeIframe("current-loader/dev-es6.html");
+	});
 })();
