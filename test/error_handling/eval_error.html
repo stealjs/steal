@@ -1,0 +1,17 @@
+<body>
+<script>
+	window.QUnit = window.parent.QUnit;
+	window.removeMyself = window.parent.removeMyself;
+    window.onerror = function() {
+        if (window.QUnit) {
+            QUnit.ok(true, "error raised during module evaluation should be uncaught");
+            QUnit.start();
+            removeMyself();
+        }
+        else {
+            console.log("OK - error raised during module eval should be uncaught");
+        }
+    }
+</script>
+<script type="text/javascript" src='../../steal.js' main='error_handling/eval_error' data-config="../config.js"></script>
+</body>
