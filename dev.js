@@ -15,6 +15,7 @@
  * 
  */
 (function(){
+
 var dev = {
 	regexps: {
 		colons: /::/,
@@ -88,11 +89,12 @@ var dev = {
 	log: function( out ) {
 		var ll = System.logLevel;
 		if (ll < 1) {
-			if (window.console && console.log) {
+			var g = typeof window !== "undefined" ? window : global;
+			if (g.console && console.log) {
 				Array.prototype.unshift.call(arguments, 'steal.js INFO:');
 				this._logger( "log", Array.prototype.slice.call(arguments) );
 			}
-			else if (window.opera && window.opera.postError) {
+			else if (g.opera && g.opera.postError) {
 				opera.postError("steal.js INFO: " + out);
 			}
 		}
