@@ -28,7 +28,7 @@ Instead flatten these out:
 
 #### Paths
 
-When specifying that a folder's children should also be pathed, include an astericks to denote:
+When specifying that a folder's children should also be pathed, include an asterisks to denote:
 
     steal.config({
       paths: {
@@ -36,7 +36,7 @@ When specifying that a folder's children should also be pathed, include an aster
       }
     });
 
-Add the astericks and specify the file type:
+Add the asterisks and specify the file type:
 
     steal.config({
       paths: {
