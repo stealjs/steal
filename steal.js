@@ -1795,13 +1795,13 @@ function logloads(loads) {
     }
 
     function doLink(linkSet) {
-      try {
+//      try {
         link(linkSet);
-      }
-      catch(exc) {
-        linkSetFailed(linkSet, exc);
-        return true;
-      }
+//      }
+//      catch(exc) {
+//        linkSetFailed(linkSet, exc);
+//        return true;
+//      }
     }
 
     // 15.2.5.2.3
