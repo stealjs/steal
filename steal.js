@@ -1079,11 +1079,11 @@ define(function() {
 		 * @private
 		 */
 		function tryCatchReject(f, x, thisArg) {
-			try {
+//			try {
 				return f.call(thisArg, x);
-			} catch(e) {
-				return reject(e);
-			}
+//			} catch(e) {
+//				return reject(e);
+//			}
 		}
 
 		/**
