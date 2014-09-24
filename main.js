@@ -529,8 +529,6 @@ var makeSteal = function(System){
 				if(steal.dev) {
 					steal.dev.log("app loaded successfully")
 				}
-			}, function(error){
-				console.log("error",error,  error.stack);
 			});
 			return appDeferred;
 		}

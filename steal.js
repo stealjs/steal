@@ -1079,11 +1079,11 @@ define(function() {
 		 * @private
 		 */
 		function tryCatchReject(f, x, thisArg) {
-			try {
+//			try {
 				return f.call(thisArg, x);
-			} catch(e) {
-				return reject(e);
-			}
+//			} catch(e) {
+//				return reject(e);
+//			}
 		}
 
 		/**
@@ -1795,13 +1795,13 @@ function logloads(loads) {
     }
 
     function doLink(linkSet) {
-      try {
+//      try {
         link(linkSet);
-      }
-      catch(exc) {
-        linkSetFailed(linkSet, exc);
-        return true;
-      }
+//      }
+//      catch(exc) {
+//        linkSetFailed(linkSet, exc);
+//        return true;
+//      }
     }
 
     // 15.2.5.2.3
@@ -5254,8 +5254,6 @@ var makeSteal = function(System){
 				if(steal.dev) {
 					steal.dev.log("app loaded successfully")
 				}
-			}, function(error){
-				console.log("error",error,  error.stack);
 			});
 			return appDeferred;
 		}
