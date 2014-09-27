@@ -2446,6 +2446,10 @@ function logloads(loads) {
         xhr.onload = load;
         xhr.onerror = error;
         xhr.ontimeout = error;
+        // IE8/IE9 bug may hang requests unless all properties are defined. 
+        // See: http://stackoverflow.com/a/9928073/3949247
+        xhr.onprogress = function() {};
+        xhr.timeout = 0;
       }
       function load() {
         fulfill(xhr.responseText);
