@@ -1,6 +1,7 @@
 /*bundlesConfig*/
 System.bundles = {"bundles/bar":["bar"],"bundles/bar.css!":["bar.css!$css"]};
-/*stealconfig*/
+/*@config*/
+System.define("@config","System.config({});",{address:"@config",metadata:{deps:[],format:"global"}});
 
 define("$css",[], function(){
 	return {
