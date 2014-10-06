@@ -13,10 +13,13 @@ exports.translate = function(load) {
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 		paths = [pathParts.join('/')];
 	}
+	
+	paths.push(this.baseURL)
+	
 	return new Promise(function(resolve, reject){
 		new (lessEngine.Parser)({
 			optimization: lessEngine.optimization,
-			paths: [pathParts.join('/')],
+			paths: [paths],
 			filename: load.address
 		}).parse(load.source, function (e, root) {
 			if(e){
