@@ -1,0 +1,16 @@
+{
+	"siteDefaults": {
+		"templates": "theme/templates",
+		"static": "theme/static"
+	},
+	"sites": {
+		"docs": {
+			"glob": {
+				"pattern": "{steal,steal-tools}/**/*.+(md)",
+				"ignore": ["**/{node_modules,bower_components}/**/*"]
+			},
+			"parent": "StealJS",
+			"dest": "docs"
+		}
+	}
+}
