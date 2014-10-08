@@ -1,15 +1,21 @@
-@property {Boolean} System.bower
+@property {Boolean|String|Object} System.bower
 @parent StealJS.config
 
-Enables the Bower extension
+Enables the Bower extension and sets where to lookup bower depdendencies.
 
-@option {Boolean|String|Object}
+@option {Boolean}
 
-Enables the Bower extension which will retrieve the `bower.json` file and use it
-to automatically load dependencies. This eliminates the need to manually set the
-`System.paths` property for every dependency you have installed from Bower. Instead
-simply enable this extension and set the [bowerPath](system-bowerpath) if Steal
-is not installed via Bower.
+Setting the value to `true` enables the Bower extension with the default options. The `bower.json` file will be fetched from `{System.baseURL}/bower.json` and components will be found in `{System.baseURL}/bower_components/{dependencyName}`.
+
+@option {String}
+
+This is if it's a string
+
+@option {Object}
+
+This is if it's an object
+
+@body
 
 ## Implementation
 
