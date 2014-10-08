@@ -3,7 +3,7 @@
 
 Enables the Bower extension
 
-@option {Boolean}
+@option {Boolean|String|Object}
 
 Enables the Bower extension which will retrieve the `bower.json` file and use it
 to automatically load dependencies. This eliminates the need to manually set the

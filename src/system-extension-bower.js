@@ -1,6 +1,17 @@
 
 var bowerConfiged = function(loader){
-	var depMains = {};
+	// Cached reference of each dependency's own bower.json
+	var depBowers = {};
+
+	// Utility function to fetch a bower.json file
+	var getBowerJson = function(address){
+		return loader.fetch({
+			address: address,
+			metadata: {}
+		}).then(function(bowerJson){
+			return JSON.parse(bowerJson);
+		});
+  };
 
   var bowerOptionsPromise;
   var getBowerOptions = function(){
@@ -24,11 +35,12 @@ var bowerConfiged = function(loader){
 				bowerConfigPath = bower.config;
 			}
 
-			bowerOptionsPromise = loader.fetch({
-				address.bowerConfigPath,
-				metadata: {}
-			}).then(function(bowerJson){
-				return JSON.parse(bowerJson);
+			// Create a promise to retrieve the root bower.json
+			bowerOptionsPromise = getBowerJson(bowerConfigPath).then(function(data){
+				return {
+					rootBower: data,
+					bowerPath: bowerPath
+				};
 			});
 		}
 
@@ -36,9 +48,9 @@ var bowerConfiged = function(loader){
 	};
 
 	// overwrite locate to load module's bower and get the real address
-	var oldLocate = loader.locate;
+	var loaderLocate = loader.locate;
 	loader.locate = function(load){
-		var promise = Promise.resolve(oldLocate.call(this, load));
+		var promise = Promise.resolve(loaderLocate.call(this, load));
 
 		return promise.then(function(proposedAddress){
 			if(loader.bower) {
@@ -48,9 +60,8 @@ var bowerConfiged = function(loader){
 				}
 
 				return getBowerOptions().then(function(options){
-					var rootBowerConfig = options.rootBowerConfig;
+					var bower = options.rootBower;
 					var bowerPath = options.bowerPath;
-
 					var deps = bower.dependencies;
 
 					if(deps[load.name]) {
@@ -59,9 +70,9 @@ var bowerConfiged = function(loader){
 
             // Cache a copy of this dependency's own `bower.json` so that we can
             // look at it's contents in the future without fetching a new copy.
-						depMains[load.name] = depMains[load.name] ||
+						depBowers[load.name] = depBowers[load.name] || 
 							getBowerJson(depBowerJson);
-						return depMains[load.name].then(function(depBower) {
+						return depBowers[load.name].then(function(depBower) {
               // Some invalid `bower.json` files do not contain a main. If so
               // we have to bail on the attempt to automatically load this
               // dependency.
