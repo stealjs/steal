@@ -3,9 +3,10 @@ var lessEngine = require("less");
 
 exports.instantiate = css.instantiate;
 
-var opts = steal.config('lessOptions') || {},
-	parseOpts = opts.parse || {},
-	evalOpts = opts.eval || {};
+var options = steal.config('lessOptions') || {};
+
+// default optimization value.
+options.optimization |= lessEngine.optimization;
 
 exports.translate = function(load) {
 	var pathParts = (load.address+'').split('/');
@@ -18,16 +19,15 @@ exports.translate = function(load) {
 		paths = [pathParts.join('/')];
 	}
 	return new Promise(function(resolve, reject){
-		parseOpts.filename = load.address;
-		parseOpts.paths = [pathParts.join('/')];
-		parseOpts.optimization |= lessEngine.optimization;
+		options.filename = load.address;
+		options.paths = [pathParts.join('/')];
 
 		var Parser = lessEngine.Parser;
-		new Parser(parseOpts).parse(load.source, function (e, root) {
+		new Parser(options).parse(load.source, function (e, root) {
 			if(e){
 				reject(e);
 			} else {
-				resolve(root.toCSS(evalOpts));
+				resolve(root.toCSS(options));
 			}
 		});
 	});
