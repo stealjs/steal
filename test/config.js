@@ -8,12 +8,8 @@ System.config({
 		crazy : "extensions/text"
 	},
 	lessOptions: {
-		parse: {
-			dumpLineNumbers: "comments" // default false
-		},
-		eval: {
-			strictMath: true // default false
-		}
+		dumpLineNumbers: "comments", // default false
+		strictMath: true, // default false
 	}
 });
 
