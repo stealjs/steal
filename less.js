@@ -9,17 +9,19 @@ var options = steal.config('lessOptions') || {};
 options.optimization |= lessEngine.optimization;
 
 exports.translate = function(load) {
-	var pathParts = (load.address+'').split('/');
-		pathParts[pathParts.length - 1] = ''; // Remove filename
 
-	var paths = [];
-	if (typeof window !== 'undefined') {
-		pathParts = (load.address+'').split('/');
+	// paths option is used only in node.js
+	if (typeof window === 'undefined') {
+
+		var sep = (load.address + '').indexOf('\\') > 0 ? '\\' : '/' // determine path separator
+
+		var pathParts = (load.address +'' ).split(sep);
 		pathParts[pathParts.length - 1] = ''; // Remove filename
-		paths = [pathParts.join('/')];
+		// allow to have custom paths in options and add path
+		options.paths = (options.paths || []).concat(pathParts.join(sep));
 	}
 	return new Promise(function(resolve, reject){
-		options.paths = [pathParts.join('/')];
+
 
 		var Parser = lessEngine.Parser;
 		new Parser(options).parse(load.source, function (e, root) {
