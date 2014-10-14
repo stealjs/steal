@@ -1,2 +1,4 @@
 
-System.bower = true;
+System.config({
+	bower: true
+});

@@ -91,7 +91,6 @@ QUnit.config.testTimeout = 30000;
 		});
 	});
 
-
 	module("steal via html");
 
 	asyncTest("basics", function(){
@@ -197,7 +196,23 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Multi mains", function(){
 		makeIframe("multi-main/dev.html");
 	});
-	asyncTest("Bower extension", function(){
+
+	module("Bower extension");
+
+	asyncTest("System.bower = true", function(){
 		makeIframe("bower/site.html");
 	});
+	asyncTest("System.bower = 'some/path'", function(){
+		makeIframe("bower/dep_option/site.html");
+	});
+	asyncTest("System.bower = {}", function(){
+		makeIframe("bower/config_option/site.html");
+	});
+	asyncTest("Doesn't overwrite paths", function(){
+		makeIframe("bower/with_paths/site.html");
+	});
+	asyncTest("Doesn't run in production", function(){
+		makeIframe("bower/production/site.html");
+	});
+
 })();
