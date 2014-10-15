@@ -208,6 +208,9 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("System.bower = {}", function(){
 		makeIframe("bower/config_option/site.html");
 	});
+	asyncTest("Loads dependencies' dependencies", function(){
+		makeIframe("bower/with_deps/site.html");
+	});
 	asyncTest("Doesn't overwrite paths", function(){
 		makeIframe("bower/with_paths/site.html");
 	});

@@ -82,6 +82,15 @@ var bowerConfiged = function(loader){
 						// Cache a copy of this dependency's own `bower.json` so that we can
 						// look at it's contents in the future without fetching a new copy.
 						return depBowers[load.name].then(function(depBower) {
+							var bowerDeps = [];
+							if(depBower.dependencies) {
+								for(var d in depBower.dependencies) {
+									bowerDeps.push(d);
+									deps[d] = true;
+								}
+								load.metadata.bowerDeps = bowerDeps.length ? bowerDeps : undefined;
+							}
+
 							// Some invalid `bower.json` files do not contain a main. If so
 							// we have to bail on the attempt to automatically load this
 							// dependency.
@@ -101,6 +110,25 @@ var bowerConfiged = function(loader){
 			}
 
 			return proposedAddress;
+		});
+	};
+
+	var loaderInstantiate = loader.instantiate;
+	loader.instantiate = function(load){
+		var basePromise = Promise.resolve(loaderInstantiate.call(this, load));
+		return basePromise.then(function(instantiateResult){
+			if(depBowers[load.name] && load.metadata.bowerDeps) {
+				// Import all bower dependencies
+				var deps = load.metadata.bowerDeps;
+				var imports = [];
+				for(var i = 0, len = deps.length; i < len; i++) {
+					imports.push(loader.import(deps[i]));
+				}
+				return Promise.all(imports).then(function() {
+					return instantiateResult;
+				});
+			}
+			return instantiateResult;
 		});
 	};
 };
