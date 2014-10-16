@@ -23,7 +23,7 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.3.0",
     "grunt-release": "^0.7.0",
-    "testee": "git://github.com/bitovi/testee.js.git#master"
+    "testee": "~0.1.1"
   },
   "licenses": [
     {
