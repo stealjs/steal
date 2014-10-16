@@ -1,9 +1,11 @@
-steal.config({
+define("@config", ["@loader"], function(loader) {
+loader.config({
 	meta: {
 		"jquerty": {
 			exports: "jQuerty"
 		}
 	}
+});
 });
 System.define("jquerty","var jQuerty = {name: 'jQuerty'}")
 define("bar", ["jquerty"],function(jquerty){

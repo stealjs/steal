@@ -4,6 +4,7 @@
 @group StealJS.config config
 @group StealJS.modules modules
 @group StealJS.types types
+@group StealJS.functions functions
 
 Steal is a  module loader that supports a wide variety of 
 syntaxes and configuration options. It makes modular development, test,

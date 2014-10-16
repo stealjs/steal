@@ -43,4 +43,4 @@ Because Traceur is a full ES6 to ES5 compiler you can use many ES6 features beyo
 
 ## Browser Support
 
-The ES6 syntax is only available in IE9+.  The [@traceur Tracer Runtime] requires `Object.defineProperty`.
+The ES6 syntax is only available in IE9+. The [@traceur Tracer Runtime] requires `Object.defineProperty`. PhantomJS 1.x is also not supported due to limited support for getters and setters.
