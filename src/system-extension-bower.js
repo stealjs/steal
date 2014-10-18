@@ -16,24 +16,24 @@ var bowerConfiged = function(loader){
   var bowerOptionsPromise;
   var getBowerOptions = function(){
 		if(!bowerOptionsPromise) {
-			var bowerPath, bowerConfigPath;
+      var config, deps;
 			var bower = loader.bower;
 			var baseURL = loader.baseURL;
 			if(typeof bower === "boolean") {
-				bowerPath = loader.normalize("bower_components", baseURL);
-				bowerConfigPath = loader.normalize("bower.json", baseURL);
+				deps = loader.normalize("bower_components", baseURL);
+				config = loader.normalize("bower.json", baseURL);
 			} else if(typeof bower === "string") {
-				bowerPath = loader.normalize(bower, baseURL);
-				bowerConfigPath = loader.normalize("bower.json", baseURL);
+				deps = loader.normalize(bower, baseURL);
+				config = loader.normalize("bower.json", baseURL);
 			} else {
-				bowerPath = bower.dependencies;
-				bowerConfigPath = bower.config;
+				deps = bower.dependencies;
+				config = bower.config;
 			}
 
 			// Create a promise to retrieve the root bower.json
 			bowerOptionsPromise = Promise.all([
-				Promise.resolve(bowerPath),
-				Promise.resolve(bowerConfigPath)
+				Promise.resolve(deps),
+				Promise.resolve(config)
 			]).then(function(res){
 				return getBowerJSON(res[1]).then(function(data){
 					return {
@@ -48,10 +48,14 @@ var bowerConfiged = function(loader){
 	};
 
 	var loaderConfig = loader.config;
-	loader.config = function(options){
+	loader.config = function(cfg){
 		// Disable when in production mode
-		if(options.env === "production") {
+		if(cfg.env === "production") {
 			loader.locate = loaderLocate;
+		} else if(cfg.stealPath && /bower_components/.test(cfg.stealPath) &&
+						 loader.bower !== false) {
+			// Turn on bower extension.
+			loader.bower = true;
 		}
 
 		return loaderConfig.apply(this, arguments);

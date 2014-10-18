@@ -1,4 +1,2 @@
 
-System.config({
-	bower: true
-});
+
