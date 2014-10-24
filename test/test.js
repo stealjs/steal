@@ -209,4 +209,8 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("@config with dependencies", function(){
 		makeIframe("config_deps/dev.html");
 	});
+	asyncTest("@config with dependencies - production", function(){
+		makeIframe("config_deps/prod.html");
+	});
+
 })();

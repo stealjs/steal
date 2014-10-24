@@ -7,7 +7,8 @@ function configFirst(loader){
 	};
 	loader.instantiate = function(load) {
 		var loader = this;
-		if(!deps[load.name]) {
+		debugger;
+		if(!loader.bundles[load.name] && !deps[load.name]) {
 			return loader.import("@config").then(function() {
 				loader.instantiate = loaderInstantiate;
 				return loaderInstantiate.call(loader, load);
