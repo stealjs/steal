@@ -206,4 +206,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("less loads in the right spot", function(){
 		makeIframe("less-imports/dev.html");
 	});
+	asyncTest("@config with dependencies", function(){
+		makeIframe("config_deps/dev.html");
+	});
 })();
