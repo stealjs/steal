@@ -11,7 +11,7 @@
     "test": "grunt test --stack"
   },
   "dependencies": {
-    "systemjs": "git://github.com/bitovi/systemjs.git#1ea63e1d855694aab0ba73e742b2c9cd00388669"
+    "systemjs": "git://github.com/bitovi/systemjs.git#747c62d3d7850f76aeff375318f396dcea6801cc"
   },
   "devDependencies": {
     "bower": "1.3.8",
@@ -23,7 +23,7 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.3.0",
     "grunt-release": "^0.7.0",
-    "testee": "git://github.com/bitovi/testee.js.git#master"
+    "testee": "~0.1.1"
   },
   "licenses": [
     {

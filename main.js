@@ -150,6 +150,8 @@
 
 var makeSteal = function(System){
 	
+	
+	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 		
 	var configDeferred,
 		devDeferred,
@@ -489,6 +491,30 @@ var makeSteal = function(System){
 
 		// we only load things with force = true
 		if ( System.env == "production" && System.main ) {
+			
+			// Override instantiate temporarily to ensure @config is loaded
+			// before System.main
+			var baseInstantiate = System.instantiate;
+			var configDeps = [];
+			System.instantiate = function(load) {
+				var loader = this;
+				if(loader.defined["@config"] && load.name !== "@config" &&
+				   configDeps.indexOf(load.name) === -1) {
+					return loader.import("@config").then(function() {
+						System.instantiate = baseInstantiate;
+						return baseInstantiate.call(loader, load);
+					});
+				}
+
+				if(load.name === "@config") {
+					return baseInstantiate.call(this, load).then(function(instantiateResult) {
+						configDeps = instantiateResult.deps.slice();
+						return instantiateResult;
+					});
+				}
+				
+				return baseInstantiate.call(this, load);
+			};
 
 			return appDeferred = System.import(System.main)["catch"](function(e){
 				console.log(e);
@@ -640,6 +666,7 @@ if (typeof System !== "undefined") {
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addSteal = addSteal;
+		global.define = System.amdDefine;
 		
 	} else {
     	

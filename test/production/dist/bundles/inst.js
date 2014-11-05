@@ -2,6 +2,7 @@
 System.bundles = {"bundles/inst":["inst"],"bundles/bar.css!":["bar.css!$css"]};
 /*stealconfig*/
 
+
 define("$css",[], function(){
 	return {
 		instantiate: function(load) {

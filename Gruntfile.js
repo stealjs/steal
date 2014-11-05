@@ -91,9 +91,9 @@ module.exports = function (grunt) {
     testee: {
       tests: {
         options: {
-          browsers: ['firefox'],
-          urls: ['test/test.html']
-        }
+          browsers: ['firefox']
+        },
+        src: ['test/test.html']
       }
     }
   });

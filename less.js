@@ -16,7 +16,8 @@ exports.translate = function(load) {
 	return new Promise(function(resolve, reject){
 		new (lessEngine.Parser)({
 			optimization: lessEngine.optimization,
-			paths: [pathParts.join('/')]
+			paths: [pathParts.join('/')],
+			filename: load.address
 		}).parse(load.source, function (e, root) {
 			if(e){
 				reject(e);
