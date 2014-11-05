@@ -46,7 +46,11 @@
 			</div>
 			<ul class="nav">
         <li {{#ifCurrentFromConfig "index.html"}}class="active"{{/ifCurrentFromConfig}}><a href="http://stealjs.com">Home</a></li>
-	          <li {{#ifCurrentFromConfig "docs/index.html"}}class="active"{{/ifCurrentFromConfig}}><a href="{{urlFromConfig 'docs'}}/index.html">Api</a></li>
+        {{#ifEqual page "index"}}
+          <li><a href="{{urlFromConfig 'docs'}}/index.html">Api</a></li>
+        {{else}}
+          <li class="active"><a href="{{urlFromConfig 'docs'}}/index.html">Api</a></li>
+        {{/ifEqual}}
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
