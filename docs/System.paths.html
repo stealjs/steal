@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>System.paths</h1>
@@ -518,37 +570,40 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
 			<p>Configure the location of a module or modules.</p>
+
 		</section>
-
 		
 
 		
-		<section class='primary-options'>
 			
+			<section class='primary-options'>
+				
 
   <h2 id="sig_">Object&lt;glob,glob&gt;
 </h2>
 <div class="signature-wrapper">
-<p>If a <a href="moduleName.html">moduleName</a> matches one of the keys of the <code>paths</code> config, it is located 
-with at the value of the key. </p>
-
+<p>If a <a href="moduleName.html">moduleName</a> matches one of the keys of the <code>paths</code> config, it is located
+with at the value of the key.</p>
 <p>If paths for <a href="@config.html">@config</a>, <a href="@dev.html">@dev</a>, <a href="@traceur.html">@traceur</a>,
-<a href="$css.html">$css</a>, <a href="$less.html">$less</a>, "bundles/<em>", and "bundles/</em>.css" are not set, <code>steal.js</code> 
+<a href="$css.html">$css</a>, <a href="$less.html">$less</a>, &quot;bundles/<em>&quot;, and &quot;bundles/</em>.css&quot; are not set, <code>steal.js</code>
 will provide <a href="#section_Defaultpathsconfiguredbysteal">default paths</a>.</p>
+
 
 
 
@@ -559,7 +614,8 @@ will provide <a href="#section_Defaultpathsconfiguredbysteal">default paths</a>.
 
   
 
-		</section>
+			</section>
+			
 		
 		
 		
@@ -568,50 +624,58 @@ will provide <a href="#section_Defaultpathsconfiguredbysteal">default paths</a>.
 		
 		<section class="comment">
 			<h2>Use</h2>
-
-<p><code>System.paths</code> can be configued with any of the approaches in <a href="System.config.html">System.config</a>. For example:</p>
-
-<pre><code>System.paths['lodash/*'] = '/js/lodash/*.js'
-System.paths["theme/*"] = "jquery-ui/themes/base/jquery.ui.*css"
+<p><code>System.paths</code> can be configured with any of the approaches in <a href="System.config.html">System.config</a>. It
+is used to provide the path of a module. You might use this if you install a module
+with a package manager, for example with bower. For example:</p>
+<pre><code>System.paths.jquery = &quot;bower_components/jquery/dist/jquery.js&quot;
 </code></pre>
-
+<p>Will map the the <code>jquery</code> module to where the JavaScript file is located in bower_components.</p>
+<h3>Wildcard paths</h3>
+<p>The <code>*</code> is used to denote wildcard paths. These allow substitution in cases where
+you want a common pattern for referring to module names. A common example of this
+would be a package where you want to load only certain modules and not the <code>main</code>
+module.</p>
+<p>For example:</p>
+<pre><code>System.paths['lodash/*'] = '/js/lodash/*.js'
+System.paths[&quot;theme/*&quot;] = &quot;jquery-ui/themes/base/jquery.ui.*css&quot;
+</code></pre>
+<p>This would allow you to do: <code>import throttle from &quot;lodash/functions/throttle&quot;</code> to
+load only the throttle function.</p>
 <p>See <a href="https://github.com/systemjs/systemjs/issues/113">this issue</a> on why <code>css</code> and other extensions have
 strange rules.</p>
-
 <h2>Default paths configured by steal</h2>
-
 <p>If the following paths are not specified, <code>steal.js</code> will use a default path according
 to the following rules:</p>
-
 <ul>
 <li><a href="@config.html">@config</a> - If <code>steal.js</code> is in <em>ROOT/bower_components/steal/steal.js</em>, <code>@config</code> defaults to
-<i>ROOT/stealconfig.js</i>; otherwise, it defaults to 
+<i>ROOT/stealconfig.js</i>; otherwise, it defaults to
 <em><a href="System.baseURL.html">baseURL</a>/stealconfig.js</em>. Specifying <code>@config</code> will specify <a href="System.baseURL.html">baseURL</a>.</li>
 <li><a href="@dev.html">@dev</a> - defaults to <em>STEAL_BASE/steal/dev.js</em></li>
 <li><a href="@traceur.html">@traceur</a> - defaults to <em>STEAL_BASE/traceur/traceur.js</em></li>
 <li><a href="$css.html">$css</a> - defaults to <em>STEAL_BASE/steal/css.js</em></li>
 <li><a href="$less.html">$less</a> - defaults to <em>STEAL_BASE/steal/less.js</em></li>
-<li><code>"bundles/*"</code> - defaults to <em>"dist/bundles/*.js"</em></li>
-<li><code>"bundles/*.css"</code> - defaults to <em>"dist/bundles/*css"</em></li>
+<li><code>&quot;bundles/*&quot;</code> - defaults to _&quot;dist/bundles/*.js&quot;_</li>
+<li><code>&quot;bundles/*.css&quot;</code> - defaults to _&quot;dist/bundles/*css&quot;_</li>
 </ul>
-
 <p><em>Note: <code>STEAL_BASE</code> is the parent folder of the steal folder.</em></p>
-
 <h2>Implementation</h2>
-
 <p>Implemented in <a href="https://github.com/ModuleLoader/es6-module-loader/#paths-implementation">ES6ModuleLoader</a></p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"property","name":"System.paths","description":"<p>Configure the location of a module or modules.</p>","types":[{"type":"Object","template":[{"types":[{"type":"glob"}]},{"types":[{"type":"glob"}]}],"description":"<p>If a [moduleName] matches one of the keys of the <code>paths</code> config, it is located \nwith at the value of the key. </p>\n\n<p>If paths for [@config], [@dev], [@traceur],\n[$css], [$less], \"bundles/<em>\", and \"bundles/</em>.css\" are not set, <code>steal.js</code> \nwill provide <a href=\"#section_Defaultpathsconfiguredbysteal\">default paths</a>.</p>"}],"title":"","comment":" ","src":"steal/docs/system-paths.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

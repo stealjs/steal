@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>System.map</h1>
@@ -518,46 +570,46 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
 			<p>Alter <a href="moduleName.html">moduleName</a>s.</p>
+
 		</section>
-
 		
 
 		
-		<section class='primary-options'>
 			
+			<section class='primary-options'>
+				
 
   <h2 id="sig_">Object&lt;moduleGlob,<a href="moduleName.html" >moduleName</a> | Object&lt;moduleGlob,<a href="moduleName.html" >moduleName</a>&gt;&gt;
 </h2>
 <div class="signature-wrapper">
 <p>Specifies rules to convert an imported moduleName to another module name. The rules can
 be specified globaly or limited to a specific path.</p>
-
-<p>The following will alter "glob/*" modules across the whole application.</p>
-
-<pre><code>System.map["glob/*"] = "moduleName/*" 
+<p>The following will alter &quot;glob/*&quot; modules across the whole application.</p>
+<pre><code>System.map[&quot;glob/*&quot;] = &quot;moduleName/*&quot; 
 </code></pre>
-
-<p>The following limits converting "jquery" to "jquery@1.2" to only within modules that match
-"oldcode/*":</p>
-
-<pre><code>System.map["oldcode/*"] = {
-  "jquery": "jquery@1.2"
+<p>The following limits converting &quot;jquery&quot; to &quot;jquery@1.2&quot; to only within modules that match
+&quot;oldcode/*&quot;:</p>
+<pre><code>System.map[&quot;oldcode/*&quot;] = {
+  &quot;jquery&quot;: &quot;jquery@1.2&quot;
 };
 </code></pre>
+
 
 
 
@@ -568,7 +620,8 @@ be specified globaly or limited to a specific path.</p>
 
   
 
-		</section>
+			</section>
+			
 		
 		
 		
@@ -577,20 +630,23 @@ be specified globaly or limited to a specific path.</p>
 		
 		<section class="comment">
 			<h2>Implementation</h2>
+<p>Implemented by <a href="https://github.com/systemjs/systemjs#map-configuration">SystemJS</a>.</p>
 
-<p>Implemented by <a href="https://github.com/systemjs/systemjs#map-configuration">SystemJS</a>. </p>
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"property","name":"System.map","description":"<p>Alter [moduleName]s.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"},{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>Specifies rules to convert an imported moduleName to another module name. The rules can\nbe specified globaly or limited to a specific path.</p>\n\n<p>The following will alter \"glob/*\" modules across the whole application.</p>\n\n<pre><code>System.map[\"glob/*\"] = \"moduleName/*\" \n</code></pre>\n\n<p>The following limits converting \"jquery\" to \"jquery@1.2\" to only within modules that match\n\"oldcode/*\":</p>\n\n<pre><code>System.map[\"oldcode/*\"] = {\n  \"jquery\": \"jquery@1.2\"\n};\n</code></pre>"}],"title":"","comment":" ","src":"steal/docs/system-map.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

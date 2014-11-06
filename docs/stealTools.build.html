@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -208,7 +212,7 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
+					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
 						stealPluginify
 					</a>
 				</li>
@@ -235,7 +239,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>build</h1>
@@ -262,25 +272,30 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
 			<p>Build a module and all of its dependencies and optionally other bundles to progressively load.</p>
+
 		</section>
+		
 
 		
-		<section class="signature">
-			<h2 id="sig_stealTools_build_config_options_">stealTools.build(config, options)
+			
+				<section class="signature">
+					<h2 id="sig_stealTools_build_config_options_">stealTools.build(config, options)
 </h2>
 <div class="signature-wrapper">
 
@@ -293,12 +308,13 @@
 			<h4>config
 				<code>{Object}</code></h4>
 			<div class="description">
-				<p>Specifies configuration values to set on 
+				<p>Specifies configuration values to set on
 a [System] loader. The <a href="System.main.html">main</a> option must be specified. Typically
-<a href="System.configPath.html">configPath</a> is also specified as that is used to set 
+<a href="System.configPath.html">configPath</a> is also specified as that is used to set
 <a href="System.baseURL.html">baseURL</a>.  Any System <a href="System.config.html">configuration</a> can be specified; however,
 most other <strong>build</strong> configuration values are specified in
 by <a href="System.buildConfig.html">System.buildConfig</a> in the config file.</p>
+
 			</div>
 			
 			
@@ -309,8 +325,9 @@ by <a href="System.buildConfig.html">System.buildConfig</a> in the config file.<
 						<code>{String | Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code>
 					</h5>
 					<div class="description">
-						<p>The module or modules whos dependencies 
+						<p>The module or modules whos dependencies
 should be built.  If main is specified as an Array,</p>
+
 					</div>
 				</li>
 				
@@ -321,6 +338,7 @@ should be built.  If main is specified as an Array,</p>
 					<div class="description">
 						<p>The path to a configuration file. This
 will also specify <code>baseURL</code>.</p>
+
 					</div>
 				</li>
 				
@@ -329,8 +347,9 @@ will also specify <code>baseURL</code>.</p>
 						<code>{String}</code>
 					</h5>
 					<div class="description">
-						<p>If a configuration file is not used, 
+						<p>If a configuration file is not used,
 the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
+
 					</div>
 				</li>
 				
@@ -339,16 +358,15 @@ the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
 						<code>{String}</code>
 					</h5>
 					<div class="description">
-						<p>Specifies the path where the production bundles should be 
-placed. Often, this is the same value as <a href="System.bundlesPath.html">System.bundlesPath</a>. By default, the location is <code>"dist/bundles"</code>.</p>
-
+						<p>Specifies the path where the production bundles should be
+placed. Often, this is the same value as <a href="System.bundlesPath.html">System.bundlesPath</a>. By default, the location is <code>&quot;dist/bundles&quot;</code>.</p>
 <p>The path can be specified in three ways:</p>
-
 <ul>
-<li>Absolute path - bundlesPath starts with <code>/</code> or matches <em>/^\w+:[\/\]/</em> like:  <code>__dirname+"/place"</code> or <code>"c:\my\bundles"</code>.</li>
-<li>Relative to <code>process.cwd()</code> - bundlesPath starts with <code>./</code> like <code>"./place"</code>.</li>
-<li>Relative to <a href="System.baseURL.html">baseURL</a> - bundlesPath looks like: "packages", "foo/bar".</li>
+<li>Absolute path - bundlesPath starts with <code>/</code> or matches <em>/^\w+:[/\]/</em> like:  <code>__dirname+&quot;/place&quot;</code> or <code>&quot;c:\my\bundles&quot;</code>.</li>
+<li>Relative to <code>process.cwd()</code> - bundlesPath starts with <code>./</code> like <code>&quot;./place&quot;</code>.</li>
+<li>Relative to <a href="System.baseURL.html">baseURL</a> - bundlesPath looks like: &quot;packages&quot;, &quot;foo/bar&quot;.</li>
 </ul>
+
 					</div>
 				</li>
 				
@@ -362,6 +380,7 @@ placed. Often, this is the same value as <a href="System.bundlesPath.html">Syste
 				<code>{Object}</code><span class="pull-right optional">Optional</span></h4>
 			<div class="description">
 				<p>Specifies the behavior of the build.</p>
+
 			</div>
 			
 			
@@ -373,6 +392,7 @@ placed. Often, this is the same value as <a href="System.bundlesPath.html">Syste
 					</h5>
 					<div class="description">
 						<p>Prevents minification.</p>
+
 					</div>
 				</li>
 				
@@ -382,6 +402,7 @@ placed. Often, this is the same value as <a href="System.bundlesPath.html">Syste
 					</h5>
 					<div class="description">
 						<p><code>true</code> turns on debug messages.</p>
+
 					</div>
 				</li>
 				
@@ -391,6 +412,7 @@ placed. Often, this is the same value as <a href="System.bundlesPath.html">Syste
 					</h5>
 					<div class="description">
 						<p>No logging.</p>
+
 					</div>
 				</li>
 				
@@ -400,6 +422,7 @@ placed. Often, this is the same value as <a href="System.bundlesPath.html">Syste
 					</h5>
 					<div class="description">
 						<p>Set to true to include steal in the main bundle.</p>
+
 					</div>
 				</li>
 				
@@ -410,6 +433,7 @@ placed. Often, this is the same value as <a href="System.bundlesPath.html">Syste
 					<div class="description">
 						<p>An array of module names that should be
 progressively loaded.</p>
+
 					</div>
 				</li>
 				
@@ -420,6 +444,7 @@ progressively loaded.</p>
 					<div class="description">
 						<p>The maximum number of bundles that need to be loaded
 for any <code>bundle</code> module.</p>
+
 					</div>
 				</li>
 				
@@ -430,6 +455,17 @@ for any <code>bundle</code> module.</p>
 					<div class="description">
 						<p>The maximum number of bundles that will be loaded for any <code>main</code>
 module.</p>
+
+					</div>
+				</li>
+				
+				<li class="option">
+					<h5>removeDevelopmentCode 
+						<code>{Boolean}</code>
+					</h5>
+					<div class="description">
+						<p>Remove any development code from the bundle specified using <code>//!steal-remove-start</code> and <code>//!steal-remove-end</code> comments.</p>
+
 					</div>
 				</li>
 				
@@ -457,6 +493,7 @@ module.</p>
 				</h5>
 				<div class="description">
 					<p>A map of moduleNames to node.</p>
+
 				</div>
 			</li>
 			
@@ -466,6 +503,7 @@ module.</p>
 				</h5>
 				<div class="description">
 					<p>The steal function used to load the main module.</p>
+
 				</div>
 			</li>
 			
@@ -475,6 +513,7 @@ module.</p>
 				</h5>
 				<div class="description">
 					<p>The loader used to load the main module.</p>
+
 				</div>
 			</li>
 			
@@ -484,6 +523,7 @@ module.</p>
 				</h5>
 				<div class="description">
 					<p>The builds written out.</p>
+
 				</div>
 			</li>
 			
@@ -498,9 +538,8 @@ module.</p>
 
 </div>
 
-		</section>
-		
-
+				</section>
+			
 		
 		
 		
@@ -509,12 +548,11 @@ module.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-
-<pre><code>var stealTools = require("steal-tools");
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
 
 stealTools.build({
-  main: ["login","homepage"],
-  config: __dirname+"/config.js"
+  main: [&quot;login&quot;,&quot;homepage&quot;],
+  config: __dirname+&quot;/config.js&quot;
 },{
   bundleSteal: true,
   // the following are the default values, so you don't need
@@ -526,22 +564,24 @@ stealTools.build({
   mainDepth: 3
 })
 </code></pre>
-
 <h2>Implementation</h2>
-
 <p>Implemented in <a href="https://github.com/bitovi/steal-tools">steal-tools</a>.</p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"steal-tools.JS","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"function","name":"stealTools.build","description":"<p>Build a module and all of its dependencies and optionally other bundles to progressively load.</p>","title":"build","signatures":[{"code":"stealTools.build(config, options)","description":"","params":[{"types":[{"type":"Object","options":[{"name":"main","description":"<p>The module or modules whos dependencies \nshould be built.  If main is specified as an Array,</p>","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"<p>The path to a configuration file. This\nwill also specify <code>baseURL</code>.</p>","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"<p>If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.</p>","types":[{"type":"String"}],"optional":true},{"name":"bundlesPath","description":"<p>Specifies the path where the production bundles should be \nplaced. Often, this is the same value as [System.bundlesPath]. By default, the location is <code>\"dist/bundles\"</code>.</p>\n\n<p>The path can be specified in three ways:</p>\n\n<ul>\n<li>Absolute path - bundlesPath starts with <code>/</code> or matches <em>/^\\w+:[\\/\\]/</em> like:  <code>__dirname+\"/place\"</code> or <code>\"c:\\my\\bundles\"</code>.</li>\n<li>Relative to <code>process.cwd()</code> - bundlesPath starts with <code>./</code> like <code>\"./place\"</code>.</li>\n<li>Relative to [System.baseURL baseURL] - bundlesPath looks like: \"packages\", \"foo/bar\".</li>\n</ul>","types":[{"type":"String"}],"optional":true,"defaultValue":"'dist/bundle'"}]}],"name":"config","description":"<p>Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other <strong>build</strong> configuration values are specified in\nby [System.buildConfig] in the config file.</p>"},{"types":[{"type":"Object","options":[{"name":"minify","description":"<p>Prevents minification.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"debug","description":"<p><code>true</code> turns on debug messages.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"<p>No logging.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundleSteal","description":"<p>Set to true to include steal in the main bundle.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundle","description":"<p>An array of module names that should be\nprogressively loaded.</p>","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"bundleDepth","description":"<p>The maximum number of bundles that need to be loaded\nfor any <code>bundle</code> module.</p>","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"mainDepth","description":"<p>The maximum number of bundles that will be loaded for any <code>main</code>\nmodule.</p>","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"}]}],"optional":true,"name":"options","description":"<p>Specifies the behavior of the build.</p>"}],"returns":{"types":[{"type":"Object","options":[{"name":"graph","description":"<p>A map of moduleNames to node.</p>","types":[{"type":"buildGraph"}]},{"name":"steal","description":"<p>The steal function used to load the main module.</p>","types":[{"type":"steal"}]},{"name":"loader","description":"<p>The loader used to load the main module.</p>","types":[{"type":"Loader"}]},{"name":"bundles","description":"<p>The builds written out.</p>","types":[{"type":"Array","options":[]}]}]}],"description":""}}],"types":[],"comment":" ","src":"steal-tools/doc/build.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

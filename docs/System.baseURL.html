@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>System.baseURL</h1>
@@ -518,36 +570,39 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
 			<p>Specifies the root path to use for all module lookups.</p>
+
 		</section>
-
 		
 
 		
-		<section class='primary-options'>
 			
+			<section class='primary-options'>
+				
 
   <h2 id="sig_">String
 </h2>
 <div class="signature-wrapper">
-<p>The root path to use for all 
+<p>The root path to use for all
 module lookups. If baseURL is not specified, the baseURL is treated
 as the page's directory in a browser and <code>process.cwd()</code> in node.</p>
-
 <p>Specifying <a href="System.config.html">System.config</a> will set <code>baseURL</code> to the config's parent directory.</p>
+
 
 
 
@@ -558,7 +613,8 @@ as the page's directory in a browser and <code>process.cwd()</code> in node.</p>
 
   
 
-		</section>
+			</section>
+			
 		
 		
 		
@@ -567,31 +623,30 @@ as the page's directory in a browser and <code>process.cwd()</code> in node.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-
-<p>When a module is imported, the <code>baseURL</code> will be the prepended to the module location by 
+<p>When a module is imported, the <code>baseURL</code> will be the prepended to the module location by
 default. For example:</p>
-
-<pre><code>System.baseURL = "../libs";
-System.import("mylib")      // looks in ../libs/mylib
+<pre><code>System.baseURL = &quot;../libs&quot;;
+System.import(&quot;mylib&quot;)      // looks in ../libs/mylib
 </code></pre>
-
 <p>This behavior can futher be modified by <a href="System.paths.html">System.paths</a></p>
-
 <h2>Implementation</h2>
-
 <p>Provided by <a href="https://github.com/ModuleLoader/es6-module-loader#baseurl">ES6 Module Loader</a>.</p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"property","name":"System.baseURL","description":"<p>Specifies the root path to use for all module lookups.</p>","types":[{"type":"String","description":"<p>The root path to use for all \nmodule lookups. If baseURL is not specified, the baseURL is treated\nas the page's directory in a browser and <code>process.cwd()</code> in node.</p>\n\n<p>Specifying [System.config] will set <code>baseURL</code> to the config's parent directory.</p>"}],"title":"","alias":"System.baseUrl","comment":" ","src":"steal/docs/system-baseURL.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

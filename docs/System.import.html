@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - global  </title>
+	<title>StealJS  - System.import</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -301,7 +301,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="System.import.html" data-search="System.import">
 						System.import
 					</a>
@@ -457,7 +457,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="function" href="syntax.global.html" data-search="global ">
 						global 
 					</a>
@@ -548,9 +548,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>global </h1>
+<h1>System.import</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -559,9 +559,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">syntax.global</span>
-	
-	
+	<h2><code>{function(moduleName)}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -587,13 +585,61 @@
 
 		
 		<section class="description">
-			<p>If a script simply writes exports its values on the global or window object,
-it uses the &quot;global&quot; syntax.</p>
+			<p>Dynamically import modules from any location into your application.</p>
 
 		</section>
 		
 
 		
+			
+			<section class='primary-options'>
+				
+
+  <h2 id="sig_">function(moduleName)
+</h2>
+<div class="signature-wrapper">
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>moduleName
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>The <a href="moduleName.html">moduleName</a> of the module you want to load.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Promise}</code></h4>
+		<div class="description">
+			<p>A promise that will resolve with the value of the module. It will resolve once the module and all of the module's dependencies have been fully resolved and executed.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+  
+
+			</section>
 			
 		
 		
@@ -603,22 +649,22 @@ it uses the &quot;global&quot; syntax.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>A global module might look like:</p>
-<pre><code>// app/sample-global.js
-hello = 'world';
+<p><code>System.import</code> is used to dynamically import a module. This is counter to the syntaxes which are statically parsed and dependencies loaded prior to running the code. In the following example we are importing the &quot;lodash&quot; module and assigning it's value to the <code>_</code> variable in the Promise callback function.</p>
+<pre><code>System.import(&quot;lodash&quot;).then(function(_) {
+  // Use lodash
+  _.isString(&quot;hello world&quot;); // -&gt; true
+});
 </code></pre>
-<p>Use <a href="System.meta.html">System.meta</a> to configure this module as the global format like:</p>
-<pre><code>System.meta[&quot;app/sample-global&quot;] = {format: &quot;global&quot;}
-</code></pre>
-<p>Using <a href="System.meta.html">System.meta</a> you can also set a module's dependencies and what it exports.  These configurations
-can also be set inline like:</p>
-<pre><code>// app/sample-global.js
-&quot;format global&quot;;
-&quot;exports hello&quot;;
-hello = 'world';
-</code></pre>
-<h2>Implementation</h2>
-<p>Implemented in <a href="https://github.com/systemjs/systemjs#global-module-format-support">SystemJS</a></p>
+<h3>When to use</h3>
+<p>Typically you won't need to use <code>System.import</code> very often in your application. There are two primary cases when you might want to use it:</p>
+<ol>
+<li><p>Load a module whose <a href="moduleName.html">moduleName</a> is <em>determined at runtime</em>. If you need to concat a string in order to determine which module to load, <code>System.import</code> is a good candidate:</p>
+<pre><code> System.import(&quot;browser-hacks/&quot; + browserId).then(function() {
+   // Browser workaround code loaded.
+ });
+</code></pre></li>
+<li><p>For use with progressive loading. If you use <a href="System.bundle.html">System.bundle</a> in your application to determine bundles that will be progressively loaded, you use <code>System.import</code> to load a particular bundle. For example, if one of your bundles is <code>checkout</code> you would load that dynamically with <code>System.import(&quot;checkout&quot;)</code>.</p></li>
+</ol>
 
 		</section>
 		

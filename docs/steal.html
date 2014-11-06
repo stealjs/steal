@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>steal</h1>
@@ -516,26 +568,30 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
-			<p>Steal is a  module loader that supports a wide variety of 
+			<p>Steal is a  module loader that supports a wide variety of
 syntaxes and configuration options. It makes modular development, test,
 and production workflows simple.</p>
-		</section>
 
+		</section>
 		
 
+		
+			
 		
 		
 		
@@ -544,159 +600,129 @@ and production workflows simple.</p>
 		
 		<section class="comment">
 			<h2>Basics</h2>
-
 <p>After installing with bower or
 <a href="https://github.com/bitovi/steal/archive/master.zip">downloading</a>,
 add <code>steal.js</code> to your page like:</p>
-
 <pre><code>&lt;script src='../path/to/steal/steal.js`
         config='./config.js'
         main='myapp'&gt;
 &lt;/script&gt;
 </code></pre>
-
 <p>This will load <code>config.js</code> which can be used to configure the behavior of
 your site's modules. For example, to load jQuery from a CDN:</p>
-
 <pre><code> //config.js
  System.config({
-   paths: {'jquery': "http://code.jquery.com/jquery-1.11.0.min.js"}
+   paths: {'jquery': &quot;http://code.jquery.com/jquery-1.11.0.min.js&quot;}
  });
 </code></pre>
-
 <p>And it will load <code>myapp.js</code>. <code>myapp.js</code> can import
-dependencies in any syntax it choses. For those betting on the future, 
+dependencies in any syntax it choses. For those betting on the future,
 use the upcoming <a href="syntax.es6.html">ES6 module syntax</a>:</p>
-
 <pre><code>// myapp.js
 import $ from 'jquery'
-$(document.body).appendChild("&lt;h1&gt;Hello World&lt;/h1&gt;");
+$(document.body).appendChild(&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;);
 </code></pre>
-
 <h2>Client Use</h2>
-
 <p>The basic use of <code>steal.js</code> is broken into three parts:</p>
-
 <ol>
 <li>Loading <code>steal.js</code>.</li>
 <li>Configuring the <code>System</code> loader and plugins.</li>
 <li>Writing modules in a supported syntax.</li>
 </ol>
-
 <h3>Loading <code>steal.js</code></h3>
-
 <p>To load <a href="steal.html">steal</a> in the browser add a <code>&lt;script&gt;</code> tag who's source
 points to <code>steal.js</code> like:</p>
-
 <pre><code>&lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
 </code></pre>
-
-<p>With this, you can begin loading modules using [System.import]. For example:</p>
-
+<p>With this, you can begin loading modules using <a href="System.import.html">System.import</a>. For example:</p>
 <pre><code>&lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
 &lt;script&gt;
-  System.import("myapp").then(function(main){
+  System.import(&quot;myapp&quot;).then(function(main){
     // main loaded successfully
   }, function(err){
     // an error loading main
   });
 &lt;/script&gt;
 </code></pre>
-
 <p>This technique is great for example pages.</p>
-
 <h3>Configuring the <code>System</code> loader</h3>
-
 <p>Once steal.js loads, its startup behavior is determined
 configuration values.  Configuration values can be set in three ways:</p>
-
 <ul>
 <li><p>Set on a <code>steal</code> object prior to loading steal.js like:</p>
-
-<pre><code>&lt;script&gt;
-  steal = {main: "myapp"};
-&lt;/script&gt;
-&lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
+<pre><code> &lt;script&gt;
+   steal = {main: &quot;myapp&quot;};
+ &lt;/script&gt;
+ &lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
 </code></pre></li>
 <li><p>Attributes on the steal.js script tag like:</p>
-
-<pre><code>&lt;script src='../path/to/steal/steal.js'
-        main="myapp"&gt;&lt;/script&gt;
+<pre><code> &lt;script src='../path/to/steal/steal.js'
+         main=&quot;myapp&quot;&gt;&lt;/script&gt;
 </code></pre></li>
 <li><p>Calling <a href="System.config.html">System.config</a> or setting <code>System</code> configuration properties
 after <code>steal.js</code> has loaded. This technique is typically used in the <a href="@config.html">@config</a> module.</p>
-
-<pre><code>System.config({
-  paths: {"can/*" : "http://canjs.com/release/2.0.1/can/*"}
-})
-System.meta["jquery"] = {format: "global"}
+<pre><code> System.config({
+   paths: {&quot;can/*&quot; : &quot;http://canjs.com/release/2.0.1/can/*&quot;}
+ })
+ System.meta[&quot;jquery&quot;] = {format: &quot;global&quot;}
 </code></pre></li>
 </ul>
-
-<p>Typically, developers configure the <a href="System.main.html">System.main</a> and <a href="System.configPath.html">System.configPath</a> properties 
+<p>Typically, developers configure the <a href="System.main.html">System.main</a> and <a href="System.configPath.html">System.configPath</a> properties
 with attributes on the steal.js script tag like:</p>
-
 <pre><code>&lt;script src='../path/to/steal/steal.js'
-        main="myapp"
-        config-path="../config.js"
+        main=&quot;myapp&quot;
+        config-path=&quot;../config.js&quot;
         &gt;&lt;/script&gt;
 </code></pre>
-
-<p>Setting <a href="System.configPath.html">System.configPath</a> sets <a href="System.baseURL.html">System.baseURL</a> to the 
+<p>Setting <a href="System.configPath.html">System.configPath</a> sets <a href="System.baseURL.html">System.baseURL</a> to the
 configPath's parent directory.  This would load <code>config.js</code> prior to
 loading <code>../myapp.js</code>.</p>
-
 <p>When steal.js loads, it sets <a href="System.stealPath.html">System.stealPath</a>.  This sets default values
 for <a href="System.baseURL.html">System.baseURL</a> and <a href="System.configPath.html">System.configPath</a>. If <code>steal.js</code> is in <code>bower_components</code>,
 <a href="System.configPath.html">System.configPath</a> defaults to <code>bower_components</code> parent folder. So if you write:</p>
-
 <pre><code>&lt;script src='../../bower_components/steal/steal.js'
-        main="myapp"&gt;&lt;/script&gt;
+        main=&quot;myapp&quot;&gt;&lt;/script&gt;
 </code></pre>
-
 <p>This will load <code>../../stealconfig.js</code> before it loads <code>../../myapp.js</code>.</p>
-
 <h3>Writing Modules</h3>
-
-<p>Once you've loaded and configured steal's behavior, it's time to start 
+<p>Once you've loaded and configured steal's behavior, it's time to start
 writing and loading modules.  Currently, <a href="syntax.es6.html">ES6 syntax</a> is supported
 in IE9+.  ES6 syntax looks like:</p>
-
-<pre><code>import can from "can";
+<pre><code>import can from &quot;can&quot;;
 </code></pre>
-
-<p><a href="@traceur.html">Traceur Compiler</a> is used and all of 
+<p><a href="@traceur.html">Traceur Compiler</a> is used and all of
 of its <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">language</a> will work.</p>
-
-<p>If you must support <IE8, use any of the other syntaxes.</p>
-
+<p>If you must support &lt;IE8, use any of the other syntaxes.</p>
 <p>Finally, steal supports <a href="$less.html">less</a> and <a href="$css.html">css</a> out of the box. Import, require, or
-steal them into your project by adding a "!" after the filename.</p>
-
+steal them into your project by adding a &quot;!&quot; after the filename.</p>
 <pre><code>// ES6
-import "style.less!";
+import &quot;style.less!&quot;;
 
 // AMD
-define(["style.less!"],function(){ ... });
+define([&quot;style.less!&quot;],function(){ ... });
 
 // CommonJS
-require("style.less!");
+require(&quot;style.less!&quot;);
 
 // steal
-steal("style.less!")
+steal(&quot;style.less!&quot;)
 </code></pre>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.api","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"steal","description":"<p>Steal is a  module loader that supports a wide variety of \nsyntaxes and configuration options. It makes modular development, test,\nand production workflows simple.</p>","src":"steal/docs/steal.md","children":[{"name":"StealJS.syntaxes","title":"syntaxes","type":"group","parent":"steal","description":"","order":0,"children":[{"type":"function","name":"syntax.amd","description":"","title":"AMD ","parent":"StealJS.syntaxes","comment":" ","src":"steal/docs/syntax-amd.md"},{"type":"function","name":"syntax.CommonJS","description":"","title":"CommonJS ","parent":"StealJS.syntaxes","signatures":[{"code":"require(moduleName)","description":"<p>The <a href=\"http://wiki.commonjs.org/wiki/CommonJS\">CommonJS</a> syntax used commonly in \nNodeJS environments.</p>","params":[{"types":[{"type":"String"}],"name":"moduleName","description":"<p>The name of module to load.</p>"}],"returns":{"types":[{"type":"*"}],"description":"<p>The module value.</p>"}}],"comment":" ","src":"steal/docs/syntax-commonjs.md"},{"type":"function","name":"syntax.es6","description":"","title":"ES6 ","parent":"StealJS.syntaxes","comment":" ","src":"steal/docs/syntax-es6.md"},{"type":"function","name":"syntax.global","description":"<p>If a script simply writes exports its values on the global or window object, \nit uses the \"global\" syntax.</p>","title":"global ","parent":"StealJS.syntaxes","comment":" ","src":"steal/docs/syntax-global.md"},{"type":"function","name":"syntax.steal","description":"","title":"steal ","parent":"StealJS.syntaxes","comment":" ","src":"steal/docs/syntax-steal.md"}]},{"name":"StealJS.config","title":"config","type":"group","parent":"steal","description":"","order":0,"children":[{"type":"property","name":"System.baseURL","description":"<p>Specifies the root path to use for all module lookups.</p>","types":[{"type":"String","description":"<p>The root path to use for all \nmodule lookups. If baseURL is not specified, the baseURL is treated\nas the page's directory in a browser and <code>process.cwd()</code> in node.</p>\n\n<p>Specifying [System.config] will set <code>baseURL</code> to the config's parent directory.</p>"}],"title":"","alias":"System.baseUrl","parent":"StealJS.config","comment":" ","src":"steal/docs/system-baseURL.md"},{"type":"property","name":"System.buildConfig","description":"<p>An object of [System.config] overwrites to use when loading plugins while building.</p>","types":[{"type":"Object","options":[]}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-buildConfig.md"},{"type":"property","name":"System.bundle","description":"<p>Specifies which modules will be progressively loaded.  This is \nused by the build.</p>","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}],"description":""}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-bundle.md"},{"type":"property","name":"System.bundles","description":"<p>Bundles configuration allows a single bundle file to be loaded in place of separate module files.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>An object where keys\nare bundle [moduleName moduleNames] and values are Arrays of [moduleName moduleNames] that\nthe bundle contains.</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-bundles.md"},{"type":"property","name":"System.bundlesPath","description":"<p>A convience configuration property for setting the path of where the [System.env production] \nbundles folder is located.</p>","types":[{"type":"String","description":"<p>A folder name that specifies the path to the production bundles.  By default,\n<code>System.bundlesPath</code> is <code>\"dist/bundles\"</code>.</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-bundlesPath.md"},{"type":"property","name":"System.config","description":"<p>Specifies configuration values on System. This should be used to\nset properties like [System.configPath] and [System.env].</p>","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Object","options":[]}],"name":"config","description":"<p>An object of configuration values.</p>"}]}],"title":"","parent":"StealJS.config","alias":"steal.config","comment":" ","src":"steal/docs/system-config.md"},{"type":"property","name":"System.configPath","description":"<p>A shortcut for specifying the [@config] module [System.paths path] and [System.baseURL baseURL].</p>","types":[{"type":"String","description":"<p>Specifies the path to the [@config] configuration file that will be loaded before the\n[System.main main] module. This will also set [System.baseURL baseURL] to\nthe <code>main</code> module directory.</p>\n\n<p>If a path to [@config] is not specified, is default value is specified in\n<a href=\"System.paths.html#section_Defaultpathsconfiguredbysteal\">paths</a>.</p>"}],"title":"","parent":"StealJS.config","alias":"steal.config","comment":" ","src":"steal/docs/system-configPath.md"},{"type":"property","name":"System.env","description":"<p>Specifies which environment the application is loading within.</p>","types":[{"type":"String","description":"<p>Possible values\nare <code>\"development\"</code> and <code>\"production\"</code>.  Defaults to <code>\"development\"</code>.</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-env.md"},{"type":"property","name":"System.ext","description":"<p>Configures plugin loading by module extension.</p>","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"<p>Specifies a plugin to add when an extension is matched in a module name. <code>steal.js</code> includes\ndefauls of:</p>\n\n<pre><code>System.ext //-&gt; {\"css\": \"$css\", \"less\": \"$less\"}\n</code></pre>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-ext.md"},{"type":"property","name":"System.instantiated","description":"<p>Specify modules that have already been loaded prior to loading <code>steal.js</code>.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"*"}]}],"description":"<p>An object of moduleName keys to \nmodule values.  All values will be converted into a module.</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-instantiated.md"},{"type":"property","name":"System.main","description":"","types":[{"type":"String","description":"<p>The main module to load. This is the starting point of the application. In\n[System.env development], the <code>main</code> module is loaded after the [@config] and [@dev] \nmodules. In [System.env production], only the <code>main</code> module is loaded, but \nit is configured to load in a bundle.</p>\n\n<p>In [System.env production], a [System.bundlesPath] + [System.main] bundle is\nset to include the <code>main</code> module.</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-main.md"},{"type":"property","name":"System.map","description":"<p>Alter [moduleName]s.</p>","types":[{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"},{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"}]}]}]}],"description":"<p>Specifies rules to convert an imported moduleName to another module name. The rules can\nbe specified globaly or limited to a specific path.</p>\n\n<p>The following will alter \"glob/*\" modules across the whole application.</p>\n\n<pre><code>System.map[\"glob/*\"] = \"moduleName/*\" \n</code></pre>\n\n<p>The following limits converting \"jquery\" to \"jquery@1.2\" to only within modules that match\n\"oldcode/*\":</p>\n\n<pre><code>System.map[\"oldcode/*\"] = {\n  \"jquery\": \"jquery@1.2\"\n};\n</code></pre>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-map.md"},{"type":"property","name":"System.meta","description":"<p>Specify properties on the [load.metadata metadata] object.</p>","types":[{"type":"Object","options":[],"description":"<p>An object of module names that\npoint to metadata values.</p>","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"load.metadata"}]}]}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-meta.md"},{"type":"property","name":"System.paths","description":"<p>Configure the location of a module or modules.</p>","types":[{"type":"Object","template":[{"types":[{"type":"glob"}]},{"types":[{"type":"glob"}]}],"description":"<p>If a [moduleName] matches one of the keys of the <code>paths</code> config, it is located \nwith at the value of the key. </p>\n\n<p>If paths for [@config], [@dev], [@traceur],\n[$css], [$less], \"bundles/<em>\", and \"bundles/</em>.css\" are not set, <code>steal.js</code> \nwill provide <a href=\"#section_Defaultpathsconfiguredbysteal\">default paths</a>.</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-paths.md"},{"type":"property","name":"System.stealPath","description":"<p>Specify the path to <code>steal.js</code>'s root folder and set many other configuration\nvalues as side effects. This should not typically be called directly.</p>","types":[{"type":"String","description":"<p>The folder that contains <code>steal.js</code>.</p>\n\n<p><code>steal.js</code> set this internally when loading to setup default paths for\n[@dev], [$css], [$less], [@traceur] and [System.baseURL].</p>"}],"title":"","parent":"StealJS.config","comment":" ","src":"steal/docs/system-stealPath.md"}]},{"name":"StealJS.modules","title":"modules","type":"group","parent":"steal","description":"","order":0,"children":[{"type":"typedef","name":"@config","description":"","title":"","types":[{"type":"*","description":"<p>The <code>@config</code> module is loaded prior to the [@dev] and [System.main] module\nin [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in\nproduction.</p>\n\n<p>If System.paths[\"@config\"] is not specified, its default path will obey the following rules:</p>\n\n<ul>\n<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in\n<i>ROOT/stealconfig.js</i>.</li>\n<li>Otherwise, it will be looked for in <em>[System.baseURL baseURL]/stealconfig.js</em>.</li>\n</ul>"}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-config.md"},{"type":"typedef","name":"$css","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>$css</code> module is configured to process CSS modules.  By default, \nextensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/css.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-css.md"},{"type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-dev.md"},{"type":"typedef","name":"$less","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>@less</code> module is configured to process <a href=\"http://lesscss.org\">LESS</a> modules.  By default, \nextensions that end with <code>.less!</code> will use the <code>$less</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/less.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-less.md"},{"type":"typedef","name":"@traceur","description":"","title":"","types":[{"type":"Object","options":[{"description":"<p>The <a href=\"https://github.com/google/traceur-compiler\">traceur compiler</a> which\nis used to convert ES6 to ES6.  The defaut path to <code>@traceur</code> is specified in\n[System.paths].</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","src":"steal/docs/module-traceur.md"}]},{"name":"StealJS.types","title":"types","type":"group","parent":"steal","description":"","order":0,"children":[{"type":"typedef","name":"load.metadata","description":"<p>An object that is passed between <code>Loader</code> hooks.  Any values can be set.  These are the ones that <code>steal.js</code> and\nSystemJS recognize.</p>","title":"metadata","types":[{"type":"Object","options":[{"name":"format","description":"<p>Specifies what type of Syntax is used.  This can be specified like:</p>\n\n<pre><code>\"format amd\";\n</code></pre>","types":[{"type":"String"}]},{"name":"deps","description":"<p>dependencies.</p>","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"exports","description":"<p>What should be exported.</p>","types":[{"type":"String"}]},{"name":"init","description":"<p>Allows for calling noConflict and\nfor other cleanup.  <code>this</code> will be the global object.</p>","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Module"}],"variable":true}],"context":{"types":[{"type":"Global"}]}}]}]}],"parent":"StealJS.types","comment":" ","src":"steal/docs/type-metadata.md"},{"type":"typedef","name":"moduleName","description":"","title":"","types":[{"type":"String","description":"<p>A Loader-unique string that represents a module.</p>"}],"parent":"StealJS.types","src":"steal/docs/type-moduleName.md"}]}]};
 
-	console.log(docData);
-</script>
+
 
 
 

@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container active">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>@dev</h1>
@@ -518,30 +570,33 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
-			<p>A module loaded in <a href="System.env.html">development</a> after <a href="@config.html">@config</a> but 
-before <a href="System.main.html">System.main</a>.  It typically loads development-only 
+			<p>A module loaded in <a href="System.env.html">development</a> after <a href="@config.html">@config</a> but
+before <a href="System.main.html">System.main</a>.  It typically loads development-only
 tools.  By default, it loads <code>steal/dev.js</code> which provides the following
 values on a global <code>steal.dev</code>:</p>
+
 		</section>
-
 		
 
 		
-		<section class='primary-options'>
 			
+			<section class='primary-options'>
+				
 
   <h2 id="sig_">Object
 </h2>
@@ -562,6 +617,7 @@ values on a global <code>steal.dev</code>:</p>
 		<div class="description">
 			<p>Controls what types of messages will be logged. By
 default the logLevel is 0 so all messages will be logged.</p>
+
 		</div>
 		
 		
@@ -574,6 +630,7 @@ default the logLevel is 0 so all messages will be logged.</p>
 		<div class="description">
 			<p>Writes out a warning message if <code>logLevel</code> is less
 than 2.</p>
+
 		</div>
 		
 		
@@ -586,6 +643,7 @@ than 2.</p>
 		<div class="description">
 			<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is
 less than 1.</p>
+
 		</div>
 		
 		
@@ -599,7 +657,8 @@ less than 1.</p>
 
   
 
-		</section>
+			</section>
+			
 		
 		
 		
@@ -608,31 +667,30 @@ less than 1.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-
 <p>Call <code>steal.dev.log</code> to log development info.  For example:</p>
-
-<pre><code>steal.dev.log("app is initializing");
+<pre><code>steal.dev.log(&quot;app is initializing&quot;);
 </code></pre>
-
 <p>Call <code>steal.dev.warn</code> to log warning information.  For example:</p>
-
-<pre><code>steal.dev.warn("something went wrong");
+<pre><code>steal.dev.warn(&quot;something went wrong&quot;);
 </code></pre>
-
 <p>By default, <a href="steal-tools.html">steal-tools</a> will remove <code>steal.dev.log</code> and <code>steal.dev.warn</code> calls
 from the built output.</p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.modules","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"comment":" ","src":"steal/docs/module-dev.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

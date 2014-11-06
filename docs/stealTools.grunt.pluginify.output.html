@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - syntaxes </title>
+	<title>StealJS - output </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -84,82 +84,12 @@
 			</a>
 		</li>
 		
-		<li class="search-container active parent">
-			<a class="sidebar-title" href="steal.html" data-search="steal">
-				steal
-			</a>
-		</li>
-		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.syntaxes.html" data-search="syntaxes">
-				syntaxes
+			<a class="sidebar-title" href="stealTools.grunt.pluginify.output.html" data-search="output">
+				output
 			</a>
 			
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.CommonJS.html" data-search="CommonJS ">
-						CommonJS 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.amd.html" data-search="AMD ">
-						AMD 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.es6.html" data-search="ES6 ">
-						ES6 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.global.html" data-search="global ">
-						global 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.steal.html" data-search="steal ">
-						steal 
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -176,9 +106,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>syntaxes</h1>
+<h1>output</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -187,15 +117,19 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.syntaxes</span>
+		<span class="module">stealTools.grunt.pluginify.output</span>
 	
 	
 	
-	<span class="inherits">&nbsp;</span>
+	<h2><code>{Object}</code></h2>
+	
+	<span class="inherits">inherits: <a href="stealTools.pluginify.options.html">stealTools.pluginify.options</a></span>
 </div>
 
 <ul class="links">
     
+	
+		<li><a href="">source</a></li>
 	
 	
 	
@@ -212,8 +146,115 @@
 		
 
 		
+		<section class="description">
+			<p>Specifies the behavior for an output in <a href="stealTools.grunt.pluginify.html">stealPluginify</a>. These properties are in
+addition to <a href="stealTools.pluginify.options.html">pluginifyOptions</a>.</p>
+
+		</section>
+		
 
 		
+			
+			<section class='primary-options'>
+				
+
+  <h2 id="sig_">Object
+</h2>
+<div class="signature-wrapper">
+
+
+
+
+
+
+  <h3>Properties</h3>
+  
+  <ol class="parameters">
+	
+	<li class="parameter">
+		<h4>modules
+			<code>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Builds all the modules in <code>modules</code> together with their dependencies.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>eachModule
+			<code>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Builds each module in the list
+with its dependendencies individually.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>graphs
+			<code>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Builds each item in the graph on its own. Each dependency is
+built individually.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>dest
+			<code>{String | function(<a href="moduleName.html" >moduleName</a>, moduleData)}</code></h4>
+		<div class="description">
+			<p>Specifies where the
+output should be written.  Dest can be provided as a string or a function that returns the
+location.</p>
+
+		</div>
+		
+		
+		
+		
+		<ul class="options">
+			
+			<li class="option">
+				<h5> 
+					<code>{<a href="moduleName.html" >moduleName</a>}</code>
+				</h5>
+				<div class="description">
+					
+				</div>
+			</li>
+			
+			<li class="option">
+				<h5> 
+					<code>{moduleData}</code>
+				</h5>
+				<div class="description">
+					
+				</div>
+			</li>
+			
+		</ul>
+		
+		
+	</li>
+	
+</ol>
+
+
+</div>
+
+  
+
+			</section>
 			
 		
 		

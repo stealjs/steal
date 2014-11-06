@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - global  </title>
+	<title>StealJS  - @loader</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -379,7 +379,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="typedef" href="@loader.html" data-search="@loader">
 						@loader
 					</a>
@@ -457,7 +457,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="function" href="syntax.global.html" data-search="global ">
 						global 
 					</a>
@@ -548,9 +548,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>global </h1>
+<h1>@loader</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -559,9 +559,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">syntax.global</span>
-	
-	
+	<h2><code>{*}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -587,13 +585,37 @@
 
 		
 		<section class="description">
-			<p>If a script simply writes exports its values on the global or window object,
-it uses the &quot;global&quot; syntax.</p>
+			<p><code>@loader</code> is primarily only needed to be used in your <a href="@config.html">@config</a> to ensure that you are configuring
+the correct loader. Since [System] represents the global System loader using it within your
+config doesn't guarantee that you are configuring the correct loader. In scenarios where
+you want to build multiple apps in parallel -- for example if you have several apps set
+up to build in a Grunt task -- using <code>loader</code> is necessarily so that your <a href="@config.html">@config</a> options
+are set on the proper loader.</p>
 
 		</section>
 		
 
 		
+			
+			<section class='primary-options'>
+				
+
+  <h2 id="sig_">*
+</h2>
+<div class="signature-wrapper">
+<p>The <code>@loader</code> module is the <code>Loader</code> that is loading your code.</p>
+
+
+
+
+
+
+
+</div>
+
+  
+
+			</section>
 			
 		
 		
@@ -603,22 +625,17 @@ it uses the &quot;global&quot; syntax.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>A global module might look like:</p>
-<pre><code>// app/sample-global.js
-hello = 'world';
+<p>To use <code>@loader</code> simply import it into your config and use it in the same way you
+would use [System].</p>
+<pre><code>import loader from &quot;@loader&quot;;
+
+loader.config({
+    map: {
+        &quot;can/util/util&quot;: &quot;can/util/jquery/jquery&quot;
+    }
+});
 </code></pre>
-<p>Use <a href="System.meta.html">System.meta</a> to configure this module as the global format like:</p>
-<pre><code>System.meta[&quot;app/sample-global&quot;] = {format: &quot;global&quot;}
-</code></pre>
-<p>Using <a href="System.meta.html">System.meta</a> you can also set a module's dependencies and what it exports.  These configurations
-can also be set inline like:</p>
-<pre><code>// app/sample-global.js
-&quot;format global&quot;;
-&quot;exports hello&quot;;
-hello = 'world';
-</code></pre>
-<h2>Implementation</h2>
-<p>Implemented in <a href="https://github.com/systemjs/systemjs#global-module-format-support">SystemJS</a></p>
+<p>This works with any syntax supported by StealJS.</p>
 
 		</section>
 		

@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -146,6 +150,18 @@
 				
 				
 				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="typedef" href="@traceur.html" data-search="@traceur">
 						@traceur
 					</a>
@@ -163,7 +179,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>modules</h1>
@@ -188,40 +210,42 @@
     
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
+		
+		
+		
 
 		
 
-		<section class="description">
+		
 			
-		</section>
-
-		
-
 		
 		
 		
 		
 
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"steal","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","name":"StealJS.modules","title":"modules","type":"group","description":"","order":0,"children":[{"type":"typedef","name":"@config","description":"","title":"","types":[{"type":"*","description":"<p>The <code>@config</code> module is loaded prior to the [@dev] and [System.main] module\nin [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in\nproduction.</p>\n\n<p>If System.paths[\"@config\"] is not specified, its default path will obey the following rules:</p>\n\n<ul>\n<li>If <code>steal.js</code> is in <i>ROOT/bower_components/steal/steal.js</i>, <code>@config</code> will be looked for in\n<i>ROOT/stealconfig.js</i>.</li>\n<li>Otherwise, it will be looked for in <em>[System.baseURL baseURL]/stealconfig.js</em>.</li>\n</ul>"}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-config.md"},{"type":"typedef","name":"$css","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>$css</code> module is configured to process CSS modules.  By default, \nextensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/css.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-css.md"},{"type":"typedef","name":"@dev","description":"<p>A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads <code>steal/dev.js</code> which provides the following\nvalues on a global <code>steal.dev</code>:</p>","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"<p>Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.</p>","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a warning message if <code>logLevel</code> is less\nthan 2.</p>"},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"<p>Writes out a message with <code>console.log</code> if <code>logLevel</code> is\nless than 1.</p>"}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-dev.md"},{"type":"typedef","name":"$less","description":"","title":"","types":[{"type":"Object","options":[{"name":"The","description":"<p><code>@less</code> module is configured to process <a href=\"http://lesscss.org\">LESS</a> modules.  By default, \nextensions that end with <code>.less!</code> will use the <code>$less</code> module.  The default path to <code>$css</code>\nmodule is <code>steal/less.js</code>.</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","src":"steal/docs/module-less.md"},{"type":"typedef","name":"@traceur","description":"","title":"","types":[{"type":"Object","options":[{"description":"<p>The <a href=\"https://github.com/google/traceur-compiler\">traceur compiler</a> which\nis used to convert ES6 to ES6.  The defaut path to <code>@traceur</code> is specified in\n[System.paths].</p>","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","src":"steal/docs/module-traceur.md"}]};
 
-	console.log(docData);
-</script>
+
 
 
 

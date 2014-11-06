@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -211,7 +215,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>Contributing</h1>
@@ -238,24 +248,28 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
 			<p>Thank you for contributing!</p>
-		</section>
 
+		</section>
 		
 
+		
+			
 		
 		
 		
@@ -264,56 +278,41 @@
 		
 		<section class="comment">
 			<h2>Bugs and Feature Requests</h2>
-
-<p>Bugs and feature requests should be submitted to 
+<p>Bugs and feature requests should be submitted to
 <a href="http://github.com/bitovi/steal/issues/new">steal</a> for issues
 with module loading and <a href="http://github.com/bitovi/steal-tools/issues/new">steal-tools</a>
-for issues building.  </p>
-
-<p>The best issues are those submitted with tests.  Learn about how 
-to setup a test in the "Developing" sections below.</p>
-
+for issues building.</p>
+<p>The best issues are those submitted with tests.  Learn about how
+to setup a test in the &quot;Developing&quot; sections below.</p>
 <h2>Developing steal</h2>
-
 <p>To develop steal, fork and clone <a href="http://github.com/bitovi/steal">steal</a>. Make
 sure you have NodeJS installed. Then:</p>
-
 <ol>
 <li><p>Install npm modules</p>
-
 <pre><code>&gt; npm install
 </code></pre></li>
 <li><p>Install bower modules</p>
-
-<pre><code>&gt; bower install
+<pre><code> &gt; bower install
 </code></pre></li>
 <li><p>Setup grunt watch</p>
-
-<pre><code>&gt; grunt watch
+<pre><code> &gt; grunt watch
 </code></pre></li>
 </ol>
-
 <p>This will automatically build <code>steal.js</code> and <code>steal.production.js</code>
-when anything in <code>src</code> changes.  </p>
-
+when anything in <code>src</code> changes.</p>
 <p>To <strong>test</strong>, open <code>test/test.html</code>, and make sure everything passes.</p>
-
 <h2>Understanding steal's code</h2>
-
 <p><code>steal.js</code> packages two other projects:</p>
-
 <ul>
 <li><a href="https://github.com/ModuleLoader/es6-module-loader">ES6ModuleLoader</a> - Provides the [Loader] and [System] Polyfill.</li>
-<li><a href="https://github.com/systemjs/systemjs">SystemJS</a> - Provides most System extensions 
+<li><a href="https://github.com/systemjs/systemjs">SystemJS</a> - Provides most System extensions
 like <a href="System.paths.html">System.paths</a>, <a href="System.map.html">System.map</a> and the <a href="syntax.amd.html">AMD</a> and <a href="syntax.CommonJS.html">CommonJS</a> syntaxes.</li>
 </ul>
-
 <p>And <code>steal.js</code> includes everything in the <code>src</code> folder.  On a high level, steal.js is
 organized like:</p>
-
 <pre><code>/* ES6ModuleLoader */
     /* - Promise polyfill */
-!function(e){"object"==typeof ...}
+!function(e){&quot;object&quot;==typeof ...}
     /* - Loader Polyfill */
     /* - System Polyfill */
 
@@ -381,23 +380,18 @@ organized like:</p>
         global.steal = makeSteal(System);
         ...
     }
-})(typeof window == "undefined" ? global : window);
+})(typeof window == &quot;undefined&quot; ? global : window);
 </code></pre>
-
 <h2>Writing a steal test</h2>
-
 <p>All tests are in <code>test/test.js</code>.  Most tests
 create an iframe that opens another page like:</p>
-
-<pre><code>asyncTest("test description", function(){
-    makeIframe("path/to/page.html");
+<pre><code>asyncTest(&quot;test description&quot;, function(){
+    makeIframe(&quot;path/to/page.html&quot;);
 });
 </code></pre>
-
-<p>That page typically uses steal to import some 
+<p>That page typically uses steal to import some
 modules and when complete calls to the parent window's
 QUnit assertion methods.  For example:</p>
-
 <pre><code>&lt;!-- page.html --&gt;
 &lt;html&gt;
    &lt;script src='../../steal/steal.js'
@@ -405,45 +399,33 @@ QUnit assertion methods.  For example:</p>
 &lt;/html&gt;
 
 //test-module.js
-window.parent.QUnit.ok(true, "test-module-loaded");
+window.parent.QUnit.ok(true, &quot;test-module-loaded&quot;);
 window.parent.QUnit.start();
 </code></pre>
-
 <h2>Developing steal-tools</h2>
-
 <p>To develop steal, fork and clone <a href="http://github.com/bitovi/steal-tools">steal-tools</a>. Make
 sure you have NodeJS installed. Then:</p>
-
 <ol>
 <li><p>Install npm modules</p>
-
 <pre><code>&gt; npm install
 </code></pre></li>
 <li><p>Install bower modules</p>
-
-<pre><code>&gt; bower install
+<pre><code> &gt; bower install
 </code></pre></li>
 <li><p>Install mocha</p>
-
-<pre><code>&gt; npm install -g mocha
+<pre><code> &gt; npm install -g mocha
 </code></pre></li>
 </ol>
-
 <p>To <strong>test</strong>, run:</p>
-
 <pre><code>    &gt; mocha test/test.js
 </code></pre>
-
 <h2>Understanding steal-tools code</h2>
-
-<p>On a high level, <a href="steal-tools.html">steal-tools</a> uses <code>lib/trace.js</code> to 
-figure out all of the 
+<p>On a high level, <a href="steal-tools.html">steal-tools</a> uses <code>lib/trace.js</code> to
+figure out all of the
 dependencies for a module and arange them into a graph. It
 then transforms that graph into bundles and finally writes
 out the bundles so they can be loaded by the client in production.</p>
-
 <p>A dependency graph that <code>trace.js</code> produces looks like:</p>
-
 <pre><code>{
   moduleName: Node({
     load: Load({
@@ -456,56 +438,47 @@ out the bundles so they can be loaded by the client in production.</p>
   })
 }
 </code></pre>
-
 <p>Here's an example:</p>
-
 <pre><code>{
-  "jquery": {
+  &quot;jquery&quot;: {
     load: {
-      name: "jquery",
-      source: "jQuery = function(){ ... }"
+      name: &quot;jquery&quot;,
+      source: &quot;jQuery = function(){ ... }&quot;
     },
     dependencies: [],
-    bundles: ["profile","settings","login", ...]
+    bundles: [&quot;profile&quot;,&quot;settings&quot;,&quot;login&quot;, ...]
   },
-  "can/util": {
+  &quot;can/util&quot;: {
     load: {
-      name: "can/util",
-      source: "define(['jquery'], function($){ ... })" 
+      name: &quot;can/util&quot;,
+      source: &quot;define(['jquery'], function($){ ... })&quot; 
     },
-    dependencies: ["jquery"],
-    bundles: ["profile","login"]
+    dependencies: [&quot;jquery&quot;],
+    bundles: [&quot;profile&quot;,&quot;login&quot;]
   }
 }
 </code></pre>
-
 <p>A <code>Load</code> is a ES6 load record.</p>
-
-<p>A <code>Node</code> is an object that contains the load and other 
+<p>A <code>Node</code> is an object that contains the load and other
 useful information like the modules:</p>
-
 <ul>
 <li>dependencies</li>
 <li>bundles</li>
 <li>transformed and/or minified source</li>
 </ul>
-
 <p>The build tools only write to <code>Node</code> to keep <code>Load</code> from being changed.
-They manipulate this graph and eventually creates "bundle" 
+They manipulate this graph and eventually creates &quot;bundle&quot;
 graphs.  Bundle graphs look like:</p>
-
 <pre><code> {
    // How many bytes this bundle is minified
    size: 231231,
    // The Nodes (and therefore modules) this bundle contains
    nodes: [node1, node2, ...],
    // The <a href="System.bundle.html">System.bundle</a> moduleNames this bundle is a dependency of
-   bundles: [bundleName1, bundleName2]    
+   bundles: [bundleName1, bundleName2]  
  }
 </code></pre>
-
 <p><a href="steal-tools.html">steal-tools</a> code is organized in folders around certain concepts:</p>
-
 <ul>
 <li>build - high level build modules like the multi build and pluginify.</li>
 <li>buildTypes - utitlies for specific buildTypes (like CSS or JS).</li>
@@ -514,52 +487,48 @@ graphs.  Bundle graphs look like:</p>
 <li>graph - graph creation and transformation utilities.</li>
 <li>node - utilities around a node in a graph</li>
 </ul>
-
 <h2>Website and Documentation</h2>
-
 <p><a href="https://github.com/bitovi/steal/tree/gh-pages">steal's gh-pages branch</a>
-contains <a href="http://stealjs.com">stealjs.com</a>'s code. It 
-uses <a href="http://github.com/bitovi/documentjs">DocumentJS</a> to produce the 
+contains <a href="http://stealjs.com">stealjs.com</a>'s code. It
+uses <a href="http://github.com/bitovi/documentjs">DocumentJS</a> to produce the
 website.  To edit the docs:</p>
-
 <ol>
 <li><p>Fork/Clone https://github.com/bitovi/steal/tree/gh-pages:</p>
-
-<pre><code>&gt; git clone git@github.com:bitovi/steal -b gh-pages
+<pre><code> &gt; git clone git@github.com:bitovi/steal -b gh-pages
 </code></pre></li>
 <li><p>Install NPM dependencies:</p>
-
-<pre><code>&gt; npm install
+<pre><code> &gt; npm install
 </code></pre></li>
 <li><p>Install steal and steal-tools submodules:</p>
-
-<pre><code>&gt; git submodule init
-&gt; git submodule update
+<pre><code> &gt; git submodule init
+ &gt; git submodule update
 </code></pre></li>
 <li><p>Generate site</p>
-
-<pre><code>&gt; node build.js
+<pre><code> &gt; node build.js
 </code></pre></li>
 <li><p>Edit markdown files in <code>steal/docs</code> or <code>steal-tools/doc</code></p></li>
 <li><p>Regenerate site and check changes</p>
-
-<pre><code>&gt; node build.js
+<pre><code> &gt; node build.js
 </code></pre></li>
 <li><p>Checkin and push markdown changes to steal or steal-tools.</p></li>
-<li>Checkin and push gh-pages branch changes.  </li>
+<li><p>Checkin and push gh-pages branch changes.</p></li>
 </ol>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"guides.Contributing","description":"<p>Thank you for contributing!</p>","title":"Contributing","src":"steal/docs/pages/contributing.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

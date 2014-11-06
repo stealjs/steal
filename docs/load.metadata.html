@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>metadata</h1>
@@ -522,28 +574,31 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
 			<p>An object that is passed between <code>Loader</code> hooks.  Any values can be set.  These are the ones that <code>steal.js</code> and
 SystemJS recognize.</p>
+
 		</section>
-
 		
 
 		
-		<section class='primary-options'>
 			
+			<section class='primary-options'>
+				
 
   <h2 id="sig_">Object
 </h2>
@@ -563,9 +618,9 @@ SystemJS recognize.</p>
 			<code>{String}</code></h4>
 		<div class="description">
 			<p>Specifies what type of Syntax is used.  This can be specified like:</p>
-
-<pre><code>"format amd";
+<pre><code>&quot;format amd&quot;;
 </code></pre>
+
 		</div>
 		
 		
@@ -577,6 +632,7 @@ SystemJS recognize.</p>
 			<code>{Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code></h4>
 		<div class="description">
 			<p>dependencies.</p>
+
 		</div>
 		
 		
@@ -588,6 +644,7 @@ SystemJS recognize.</p>
 			<code>{String}</code></h4>
 		<div class="description">
 			<p>What should be exported.</p>
+
 		</div>
 		
 		
@@ -600,6 +657,7 @@ SystemJS recognize.</p>
 		<div class="description">
 			<p>Allows for calling noConflict and
 for other cleanup.  <code>this</code> will be the global object.</p>
+
 		</div>
 		
 		
@@ -626,7 +684,8 @@ for other cleanup.  <code>this</code> will be the global object.</p>
 
   
 
-		</section>
+			</section>
+			
 		
 		
 		
@@ -635,20 +694,23 @@ for other cleanup.  <code>this</code> will be the global object.</p>
 		
 		<section class="comment">
 			<h2>Implementation</h2>
-
 <p>Implemented in SystemJS.</p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.types","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"typedef","name":"load.metadata","description":"<p>An object that is passed between <code>Loader</code> hooks.  Any values can be set.  These are the ones that <code>steal.js</code> and\nSystemJS recognize.</p>","title":"metadata","types":[{"type":"Object","options":[{"name":"format","description":"<p>Specifies what type of Syntax is used.  This can be specified like:</p>\n\n<pre><code>\"format amd\";\n</code></pre>","types":[{"type":"String"}]},{"name":"deps","description":"<p>dependencies.</p>","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"exports","description":"<p>What should be exported.</p>","types":[{"type":"String"}]},{"name":"init","description":"<p>Allows for calling noConflict and\nfor other cleanup.  <code>this</code> will be the global object.</p>","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Module"}],"variable":true}],"context":{"types":[{"type":"Global"}]}}]}]}],"comment":" ","src":"steal/docs/type-metadata.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

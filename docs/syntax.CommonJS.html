@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>CommonJS </h1>
@@ -520,29 +572,30 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
+		
+		
+		
 
 		
 
-		<section class="description">
+		
 			
-		</section>
-
-		
-		<section class="signature">
-			<h2 id="sig_require_moduleName_">require(moduleName)
+				<section class="signature">
+					<h2 id="sig_require_moduleName_">require(moduleName)
 </h2>
 <div class="signature-wrapper">
-<p>The <a href="http://wiki.commonjs.org/wiki/CommonJS">CommonJS</a> syntax used commonly in 
+<p>The <a href="http://wiki.commonjs.org/wiki/CommonJS">CommonJS</a> syntax used commonly in
 NodeJS environments.</p>
+
 
 	<h3>Parameters</h3>
 
@@ -553,6 +606,7 @@ NodeJS environments.</p>
 				<code>{String}</code></h4>
 			<div class="description">
 				<p>The name of module to load.</p>
+
 			</div>
 			
 			
@@ -567,6 +621,7 @@ NodeJS environments.</p>
 		<h4><code>{*}</code></h4>
 		<div class="description">
 			<p>The module value.</p>
+
 		</div>
 		
 		
@@ -579,9 +634,8 @@ NodeJS environments.</p>
 
 </div>
 
-		</section>
-		
-
+				</section>
+			
 		
 		
 		
@@ -590,39 +644,37 @@ NodeJS environments.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-
-<p>CommonJS is a popular format used in Node.js, but has also caught on in the browser. People 
+<p>CommonJS is a popular format used in Node.js, but has also caught on in the browser. People
 like CommonJS because it doesn't require a wrapper function. You might define a module like so:</p>
-
-<pre><code>var can = require("can");
-var _ = require("underscore");
-var myModule = require("some_module/some_module");
+<pre><code>var can = require(&quot;can&quot;);
+var _ = require(&quot;underscore&quot;);
+var myModule = require(&quot;some_module/some_module&quot;);
 
 module.exports = can.Component.extend({
 
 });
 </code></pre>
-
 <p>With CommonJS a single file will always define a single module. In includes 3 key objects, <code>require</code>, <code>exports</code>, and <code>module</code>.</p>
-
 <p><strong>require</strong> is used to import modules as dependencies. In the above example, <code>can</code> is being imported using require.</p>
-
 <p><strong>exports</strong> is an object that can be used to attach properties to the exported module definition.</p>
-
-<p><strong>module</strong> is an object representing the module definition. You'll often use either <code>exports</code> or <code>module</code>. 
+<p><strong>module</strong> is an object representing the module definition. You'll often use either <code>exports</code> or <code>module</code>.
 Usually module is used when you want to export a single value, like a function.</p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.syntaxes","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"function","name":"syntax.CommonJS","description":"","title":"CommonJS ","signatures":[{"code":"require(moduleName)","description":"<p>The <a href=\"http://wiki.commonjs.org/wiki/CommonJS\">CommonJS</a> syntax used commonly in \nNodeJS environments.</p>","params":[{"types":[{"type":"String"}],"name":"moduleName","description":"<p>The name of module to load.</p>"}],"returns":{"types":[{"type":"*"}],"description":"<p>The module value.</p>"}}],"comment":" ","src":"steal/docs/syntax-commonjs.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

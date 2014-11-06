@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -211,7 +215,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>Progressive Loading</h1>
@@ -238,25 +248,29 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
-			<p>If you have a large single page app, you may want to progressively load parts 
+			<p>If you have a large single page app, you may want to progressively load parts
 of the app.  Here's how you might do that:</p>
-		</section>
 
+		</section>
 		
 
+		
+			
 		
 		
 		
@@ -265,10 +279,8 @@ of the app.  Here's how you might do that:</p>
 		
 		<section class="comment">
 			<h2>Write your modules</h2>
-
-<p>Write out your main module to load only the bare minimum to determine what "page" you 
+<p>Write out your main module to load only the bare minimum to determine what &quot;page&quot; you
 are on. A bare bones example might have a file structure like:</p>
-
 <pre><code>bower_components/
   steal/
     steal.js
@@ -284,119 +296,99 @@ site/
   site.html
   config.js
 </code></pre>
-
 <p><code>app.js</code>:</p>
-
 <pre><code>import $ from 'jquery';
 $(function(){
   var onhashchange = function(){
-    if(window.location.hash === "#login") {
-      System.import("login").then(function(){
-        $("#main").login();
+    if(window.location.hash === &quot;#login&quot;) {
+      System.import(&quot;login&quot;).then(function(){
+        $(&quot;#main&quot;).login();
       });
-    } else if(window.location.hash === "#signup" ) {
-      System.import("login").then(function(){
-        $("#main").signup();
+    } else if(window.location.hash === &quot;#signup&quot; ) {
+      System.import(&quot;login&quot;).then(function(){
+        $(&quot;#main&quot;).signup();
       });
     } else {
-      System.import("homepage").then(function(){
-        $("#main").hompage();
+      System.import(&quot;homepage&quot;).then(function(){
+        $(&quot;#main&quot;).hompage();
       });
     }
   }
-  $(document).bind("hashchange",onhashchange);
+  $(document).bind(&quot;hashchange&quot;,onhashchange);
   onhashchange();
 });
 </code></pre>
-
 <p><code>homepage.js</code></p>
-
 <pre><code>define(['jquery'], function($){
   return $.fn.homepage = function(){
-    this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+    this.html(&quot;&lt;h1&gt;Homepage&lt;/h1&gt;&quot;);
   };
 });
 </code></pre>
-
 <p><code>signup.js</code></p>
-
 <pre><code>var $ = require('jquery');
 module.exports = $.fn.signup = function(){
-  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+  this.html(&quot;&lt;h1&gt;Homepage&lt;/h1&gt;&quot;);
 };
 </code></pre>
-
 <p><code>login.js</code></p>
-
 <pre><code>$.fn.login = function(){
-  this.html("&lt;h1&gt;Homepage&lt;/h1&gt;");
+  this.html(&quot;&lt;h1&gt;Homepage&lt;/h1&gt;&quot;);
 };
 </code></pre>
-
 <p><code>config.js</code></p>
-
-<pre><code>System.bundle = ["homepage","signup","login"];
+<pre><code>System.bundle = [&quot;homepage&quot;,&quot;signup&quot;,&quot;login&quot;];
 System.meta = {
-  login: {exports: "$.fn.login"}
+  login: {exports: &quot;$.fn.login&quot;}
 }
 </code></pre>
-
 <h2>Write out your page</h2>
-
 <p>The following will load <code>steal.js</code>, <code>config.js</code> and <code>app.js</code></p>
-
 <p><code>site.html</code></p>
-
-<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
-&lt;script src="../bower_components/steal/steal.js"
-        data-main="app"
-        data-config="./config.js"&gt;&lt;/script&gt;
+<pre><code>&lt;div id=&quot;main&quot;&gt;&lt;/div&gt;
+&lt;script src=&quot;../bower_components/steal/steal.js&quot;
+        data-main=&quot;app&quot;
+        data-config=&quot;./config.js&quot;&gt;&lt;/script&gt;
 </code></pre>
-
 <h2>Build your site</h2>
-
 <p>From your main folder, run:</p>
-
 <pre><code>&gt; steal-tools build main=app config=site/config.js
 </code></pre>
-
-<p>Notice that the path to config must be relative to your cwd. This will create a 
+<p>Notice that the path to config must be relative to your cwd. This will create a
 <code>site/bundles</code> directory with the following contents:</p>
-
 <pre><code>site/bundles/
   app.js
   homepage.js
   signup.js
   login.js
 </code></pre>
-
 <p>If you want to limit the number of scripts any bundle might load, configure that like:</p>
-
 <pre><code>&gt; steal-tools build main=app config=site/config bundleDepth=3
 </code></pre>
-
 <h2>See it live</h2>
-
-<p>If you add <code>data-env="production"</code> to your site, you can see it live:</p>
-
-<pre><code>&lt;div id="main"&gt;&lt;/div&gt;
-&lt;script src="../bower_components/steal/steal.js"
-        data-main="app"
-        data-config="./config"
-        data-env="production"&gt;&lt;/script&gt;
+<p>If you add <code>data-env=&quot;production&quot;</code> to your site, you can see it live:</p>
+<pre><code>&lt;div id=&quot;main&quot;&gt;&lt;/div&gt;
+&lt;script src=&quot;../bower_components/steal/steal.js&quot;
+        data-main=&quot;app&quot;
+        data-config=&quot;./config&quot;
+        data-env=&quot;production&quot;&gt;&lt;/script&gt;
 </code></pre>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.guides","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"page","name":"steal-tools.guides.progressive_loading","description":"<p>If you have a large single page app, you may want to progressively load parts \nof the app.  Here's how you might do that:</p>","title":"Progressive Loading","src":"steal-tools/doc/guides/progressive_loading.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>System.bundlesPath</h1>
@@ -518,34 +570,38 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
-			<p>A convience configuration property for setting the path of where the <a href="System.env.html">production</a> 
+			<p>A convience configuration property for setting the path of where the <a href="System.env.html">production</a>
 bundles folder is located.</p>
+
 		</section>
-
 		
 
 		
-		<section class='primary-options'>
 			
+			<section class='primary-options'>
+				
 
   <h2 id="sig_">String
 </h2>
 <div class="signature-wrapper">
 <p>A folder name that specifies the path to the production bundles.  By default,
-<code>System.bundlesPath</code> is <code>"dist/bundles"</code>.</p>
+<code>System.bundlesPath</code> is <code>&quot;dist/bundles&quot;</code>.</p>
+
 
 
 
@@ -556,7 +612,8 @@ bundles folder is located.</p>
 
   
 
-		</section>
+			</section>
+			
 		
 		
 		
@@ -565,64 +622,61 @@ bundles folder is located.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-
-<p>In <a href="System.env.html">production</a>, the <a href="System.main.html">System.main</a> module will be assumed to be within a 
-<em>"bundles/[MAIN_MODULE_NAME]"</em> module. For example, if the main module is <code>"myapp"</code>,
-a <code>"bundles/myapp"</code> module is automatically configured to contain it:</p>
-
-<pre><code>&lt;script src="steal/steal.js"
-        config="./config.js"
-        main="myapp"
-        env="production"&gt;&lt;/script&gt;
+<p>In <a href="System.env.html">production</a>, the <a href="System.main.html">System.main</a> module will be assumed to be within a
+<em>&quot;bundles/[MAIN_MODULE_NAME]&quot;</em> module. For example, if the main module is <code>&quot;myapp&quot;</code>,
+a <code>&quot;bundles/myapp&quot;</code> module is automatically configured to contain it:</p>
+<pre><code>&lt;script src=&quot;steal/steal.js&quot;
+        config=&quot;./config.js&quot;
+        main=&quot;myapp&quot;
+        env=&quot;production&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
-  System.bundles["bundles/myapp"] //-&gt; ["myapp"]
+  System.bundles[&quot;bundles/myapp&quot;] //-&gt; [&quot;myapp&quot;]
 &lt;/script&gt;
 </code></pre>
-
 <p><code>System.bundlesPath</code> tells the client where all bundles can be found by configuring
-<a href="System.paths.html">System.paths</a>. For example, if bundlesPath is set to "packages":</p>
-
-<pre><code>&lt;script src="steal/steal.js"
-        config="./config.js"
-        main="myapp"
-        env="production"
-        bundles-path="packages"&gt;&lt;/script&gt;
+<a href="System.paths.html">System.paths</a>. For example, if bundlesPath is set to &quot;packages&quot;:</p>
+<pre><code>&lt;script src=&quot;steal/steal.js&quot;
+        config=&quot;./config.js&quot;
+        main=&quot;myapp&quot;
+        env=&quot;production&quot;
+        bundles-path=&quot;packages&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
-  System.bundles["bundles/myapp"] //-&gt; ["myapp"]
-  System.paths["bundles/*"] = "packages/*.js";
-  System.paths["bundles/*.css"] = "packages/*.css";
+  System.bundles[&quot;bundles/myapp&quot;] //-&gt; [&quot;myapp&quot;]
+  System.paths[&quot;bundles/*&quot;] = &quot;packages/*.js&quot;;
+  System.paths[&quot;bundles/*.css&quot;] = &quot;packages/*.css&quot;;
 &lt;/script&gt;
 </code></pre>
-
-<p>Often, <code>bundlesPath</code> should be the same value as what's passed in <a href="stealTools.build.html">stealTools.build</a>. If
+<p>Often, <code>bundlesPath</code> should be the same value as what's passed in <a href="stealTools.build.html">build</a>. If
 <code>bundlesPath</code> is not set, it will set the default bundles paths:</p>
-
-<pre><code>&lt;script src="steal/steal.js"
-        config="./config.js"
-        main="myapp"
-        env="production"
-        bundles-path="packages"&gt;&lt;/script&gt;
+<pre><code>&lt;script src=&quot;steal/steal.js&quot;
+        config=&quot;./config.js&quot;
+        main=&quot;myapp&quot;
+        env=&quot;production&quot;
+        bundles-path=&quot;packages&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
-  System.bundles["bundles/myapp"] //-&gt; ["myapp"]
-  System.paths["bundles/*"] = "dist/bundles/*.js";
-  System.paths["bundles/*.css"] = "dist/bundles/*.css";
+  System.bundles[&quot;bundles/myapp&quot;] //-&gt; [&quot;myapp&quot;]
+  System.paths[&quot;bundles/*&quot;] = &quot;dist/bundles/*.js&quot;;
+  System.paths[&quot;bundles/*.css&quot;] = &quot;dist/bundles/*.css&quot;;
 &lt;/script&gt;
 </code></pre>
-
-<p>If a path rule for <code>System.paths["bundles/*"]</code> or <code>System.paths["bundles/*.css"]</code>
+<p>If a path rule for <code>System.paths[&quot;bundles/*&quot;]</code> or <code>System.paths[&quot;bundles/*.css&quot;]</code>
 exist, <code>buildsPath</code> will not overwrite them.</p>
+
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.config","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"property","name":"System.bundlesPath","description":"<p>A convience configuration property for setting the path of where the [System.env production] \nbundles folder is located.</p>","types":[{"type":"String","description":"<p>A folder name that specifies the path to the production bundles.  By default,\n<code>System.bundlesPath</code> is <code>\"dist/bundles\"</code>.</p>"}],"title":"","comment":" ","src":"steal/docs/system-bundlesPath.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

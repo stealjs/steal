@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -208,7 +212,7 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
+					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
 						stealPluginify
 					</a>
 				</li>
@@ -235,7 +239,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>pluginify</h1>
@@ -262,25 +272,30 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
-			<p>A function provided by <a href="stealTools.pluginifier.html">stealTools.pluginifier</a> that can build out a specific module.</p>
+			<p>A function provided by <a href="stealTools.pluginifier.html">pluginifier</a> that can build out a specific module.</p>
+
 		</section>
+		
 
 		
-		<section class="signature">
-			<h2 id="sig_pluginify_moduleName_options_">pluginify(moduleName, options)
+			
+				<section class="signature">
+					<h2 id="sig_pluginify_moduleName_options_">pluginify(moduleName, options)
 </h2>
 <div class="signature-wrapper">
 
@@ -294,6 +309,7 @@
 				<code>{<a href="moduleName.html" >moduleName</a>}</code><span class="pull-right optional">Optional</span></h4>
 			<div class="description">
 				<p>The module name to build.</p>
+
 			</div>
 			
 			
@@ -302,43 +318,13 @@
 		
 		<li class="parameter">
 			<h4>options
-				<code>{Object}</code><span class="pull-right optional">Optional</span></h4>
+				<code>{<a href="stealTools.pluginify.options.html" >pluginifyOptions</a>}</code><span class="pull-right optional">Optional</span></h4>
 			<div class="description">
-				<p>Options that configure how the files are compiled.  These options overwrite the 
-<code>pluginifierOptions</code> argument passed to <a href="stealTools.pluginifier.html">stealTools.pluginifier</a>.</p>
+				<p>Options that configure how the files are compiled.  These options overwrite the
+<code>pluginifierOptions</code> argument passed to <a href="stealTools.pluginifier.html">pluginifier</a>.</p>
+
 			</div>
 			
-			
-			<ul class="options">
-				
-				<li class="option">
-					<h5>ignores 
-						<code>{RegExp | Array&lt;RegExp&gt;}</code>
-					</h5>
-					<div class="description">
-						<p>A JavaScript RegExp or
-an Array of RegExp's that
-matches module names that should not be included in the pluginified output.</p>
-					</div>
-				</li>
-				
-				<li class="option">
-					<h5>keepDevTags 
-						<code>{Boolean}</code>
-					</h5>
-					<div class="description">
-						<p>By default, removes code in between comments like:</p>
-
-<pre><code>//!steal-remove-start
-REMOVE.THIS;
-//!steal-remove-end
-</code></pre>
-
-<p>If keepDevTags is true, this code is not removed.</p>
-					</div>
-				</li>
-				
-			</ul>
 			
 			
 		</li>
@@ -351,6 +337,7 @@ REMOVE.THIS;
 		<h4><code>{String}</code></h4>
 		<div class="description">
 			<p>The result of <code>moduleName</code> being pluginified.</p>
+
 		</div>
 		
 		
@@ -363,25 +350,76 @@ REMOVE.THIS;
 
 </div>
 
+				</section>
+			
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h2>Use</h2>
+<p>After getting <code>pluginify</code> from <a href="stealTools.pluginifier.html">pluginifier</a> you can call it like:</p>
+<pre><code>var result = pluginify(&quot;module/name/to/build&quot;, {
+  // specifies modules to ignore
+  ignore: [
+    // ignores this module and all of its dependencies
+    &quot;module/name/to/ignore&quot;,
+    // ignores modules names matching this pattern
+    /can\//
+  ],
+  
+  // Remove code between !steal-remove-start and !steal-remove-end.
+  // true by default.
+  removeDevelopmentCode: true,
+  
+  // Transpile the code to either &quot;amd&quot;,&quot;steal&quot;,&quot;cjs&quot; or &quot;global&quot;.
+  // &quot;global&quot;, the default, allows the file to work without any module loader.
+  format: &quot;global&quot;,
+  
+  // Minify the file using uglify.
+  // `false` by default.
+  minify: true,
+  
+  // Only write the module specified by `moduleName` instead of its dependencies.
+  // `false` by default.
+  ignoreAllDependencies: false
+  
+  // Map module names to their name on the global object. Useful for
+  // building &quot;global&quot; modules that depend on other scripts already in the page.
+  exports: {&quot;jquery&quot;: &quot;jQuery&quot;},
+  
+  // Transpile to normalized dependency names.
+  // `true` by default.
+  useNormalizedDependencies: true
+  
+  // Custom normalization behavior
+  // By default the normalized name is used.
+  normalize: function(name, currentModule, address){
+    return name;
+  }
+  
+});
+</code></pre>
+<p>Most of these options are optional.  For more
+information, read <a href="stealTools.pluginify.options.html">pluginifyOptions</a>.</p>
+
 		</section>
 		
-
-		
-		
-		
 		
 
 		
-
-		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"steal-tools.JS","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"function","name":"stealTools.pluginify","description":"<p>A function provided by [stealTools.pluginifier] that can build out a specific module.</p>","title":"pluginify","signatures":[{"code":"pluginify(moduleName, options)","description":"","params":[{"types":[{"type":"moduleName"}],"optional":true,"name":"moduleName","defaultValue":"config.main","description":"<p>The module name to build.</p>"},{"types":[{"type":"Object","options":[{"name":"ignores","description":"<p>A JavaScript RegExp or\nan Array of RegExp's that\nmatches module names that should not be included in the pluginified output.</p>","types":[{"type":"RegExp"},{"type":"Array","template":[{"types":[{"type":"RegExp"}]}]}],"optional":true},{"name":"keepDevTags","description":"<p>By default, removes code in between comments like:</p>\n\n<pre><code>//!steal-remove-start\nREMOVE.THIS;\n//!steal-remove-end\n</code></pre>\n\n<p>If keepDevTags is true, this code is not removed.</p>","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"optional":true,"name":"options","description":"<p>Options that configure how the files are compiled.  These options overwrite the \n<code>pluginifierOptions</code> argument passed to [stealTools.pluginifier].</p>"}],"returns":{"types":[{"type":"String"}],"description":"<p>The result of <code>moduleName</code> being pluginified.</p>"}}],"types":[],"src":"steal-tools/doc/pluginify.md"};
 
-	console.log(docData);
-</script>
+
 
 
 

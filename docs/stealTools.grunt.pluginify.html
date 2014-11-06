@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -208,7 +212,7 @@
 				
 				
 				<li class="search-container active">
-					<a class="function" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
+					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
 						stealPluginify
 					</a>
 				</li>
@@ -235,12 +239,18 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>stealPluginify</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -253,6 +263,8 @@
 	
 	
 	
+	<h2><code>{Object}</code></h2>
+	
 	<span class="inherits">&nbsp;</span>
 </div>
 
@@ -262,40 +274,129 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
-
+		
+		
 		
 
+		
 		<section class="description">
-			
+			<p>Write out modules that are optionally transpiled, minified, and bundled.</p>
+
 		</section>
-
 		
 
 		
-		
-		
-		
+			
+			<section class='primary-options'>
+				
 
-		
+  <h2 id="sig_">Object
+</h2>
+<div class="signature-wrapper">
 
+
+
+
+
+
+  <h3>Properties</h3>
+  
+  <ol class="parameters">
+	
+	<li class="parameter">
+		<h4>tasks
+			<code>{Object&lt;<a href="stealTools.grunt.pluginify.task.html" >task</a>&gt;}</code></h4>
+		<div class="description">
+			<p>Specify pluginify tasks with their own set of <code>system</code>, <code>options</code>, and <a href="stealTools.grunt.pluginify.output.html">outputs</a>.</p>
+
+		</div>
 		
-	</article>
+		
+		
+	</li>
+	
+</ol>
+
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"steal-tools.grunt","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"function","name":"stealTools.grunt.pluginify","description":"","title":"stealPluginify","comment":" ","src":"steal-tools/doc/grunt-pluginify.md"};
+  
 
-	console.log(docData);
-</script>
+			</section>
+			
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h2>Use</h2>
+<p><code>stealPluginify</code> is a grunt <a href="http://gruntjs.com/creating-tasks#multi-tasks">multi-task</a> that is used to build library projects to a variety of formats. This means that to build output</p>
+<pre><code>grunt.initConfig({
+  stealPluginify: {
+    main: {
+      system: { ... },
+      options: { ... },
+      outputs: {
+        &quot;output 1 name&quot; : { ... }
+      }
+    }
+  }
+});
+</code></pre>
+<p>Each <code>stealPluginify</code> task is configured by three values:</p>
+<ul>
+<li>system - describes the <a href="System.config.html">System.config</a> values used to load modules, this is passed to <a href="stealTools.pluginifier.html">pluginifier</a>.</li>
+<li>options - configures special behavior of the loader such as logging.</li>
+<li>outputs - configures the modules that should be written out, how they
+should be written out, and where they should be written.</li>
+</ul>
+<h2>system</h2>
+<p>These are <a href="System.config.html">System.config</a> values that are used to load modules during the build process. Typically you will want to specify at least the <code>config</code> and <code>main</code> options like so:</p>
+<pre><code>{
+  config: __dirname + &quot;/config.js&quot;,
+  main: [&quot;math/add&quot;, &quot;math/subtract&quot;]
+}
+</code></pre>
+<h2>options</h2>
+<p>Options are the <a href="stealTools.buildOptions.html">buildOptions</a> used for configuration the behavior of the build, such as whether minification is turned on or not.</p>
+<h2>outputs</h2>
+<p>Outputs is an object names and <a href="stealTools.grunt.pluginify.output.html">output configuration</a> objects.  Each configuration object contains</p>
+<pre><code>{
+  eachModule: [],
+  graphs: [],
+  modules: [],
+  ignore: [],
+  format: [],
+  dest: 
+}
+</code></pre>
+
+		</section>
+		
+		
+
+		
+	
+	
+	</article>
+	
+	
+
+</div>
+
+
+
 
 
 

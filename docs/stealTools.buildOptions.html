@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - syntaxes </title>
+	<title>StealJS - buildOptions </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -84,82 +84,12 @@
 			</a>
 		</li>
 		
-		<li class="search-container active parent">
-			<a class="sidebar-title" href="steal.html" data-search="steal">
-				steal
-			</a>
-		</li>
-		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.syntaxes.html" data-search="syntaxes">
-				syntaxes
+			<a class="sidebar-title" href="stealTools.buildOptions.html" data-search="buildOptions">
+				buildOptions
 			</a>
 			
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.CommonJS.html" data-search="CommonJS ">
-						CommonJS 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.amd.html" data-search="AMD ">
-						AMD 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.es6.html" data-search="ES6 ">
-						ES6 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.global.html" data-search="global ">
-						global 
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="syntax.steal.html" data-search="steal ">
-						steal 
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -176,9 +106,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>syntaxes</h1>
+<h1>buildOptions</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -187,15 +117,19 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.syntaxes</span>
+		<span class="module">stealTools.buildOptions</span>
 	
 	
+	
+	<h2><code>{Object}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
 
 <ul class="links">
     
+	
+		<li><a href="">source</a></li>
 	
 	
 	
@@ -212,8 +146,102 @@
 		
 
 		
+		<section class="description">
+			<p>Options used throughout the build process.</p>
+
+		</section>
+		
 
 		
+			
+			<section class='primary-options'>
+				
+
+  <h2 id="sig_">Object
+</h2>
+<div class="signature-wrapper">
+
+
+
+
+
+
+  <h3>Properties</h3>
+  
+  <ol class="parameters">
+	
+	<li class="parameter">
+		<h4>minify<code>=true</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Whether the source code is minified prior to writing.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>bundleSteal<code>=false</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>removeDevelopmentCode<code>=true</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Whether development code (code wrapped with <code>@steal-remove-{start/stop}</code>) will be removed.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>ignore
+			<code>{Array&lt;String&gt;}</code></h4>
+		<div class="description">
+			<p>Specify modules to not include in the final output. For example if you wanted to load jQuery from a cdn you would provide this option:</p>
+<pre><code>{
+  ignore: [ &quot;jquery&quot; ]
+}
+</code></pre>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>format
+			<code>{stealTools.format}</code></h4>
+		<div class="description">
+			<p>Specifies a format to transpile the dependency graph to. In the multiBuild all code is automatically transpiled to <strong>amd</strong> format. In <a href="stealTools.pluginify.html">pluginify</a> the default is to <strong>global</strong>.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+</ol>
+
+
+</div>
+
+  
+
+			</section>
 			
 		
 		

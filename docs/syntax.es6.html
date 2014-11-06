@@ -21,21 +21,20 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
-	<link rel="stylesheet" type="text/css" 
-		
-			href="./static/bundles/static.css"
-		 />
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
 	<!--[if lt IE 9]>
-   <script type="text/javascript" src="./static/html5shiv.js"></script>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
     <!--<![endif]-->
 </head>
 
-<body class="docs">
+<body class="docs ">
 	<header>
 		<nav class="container">
 
 			<div class="logo-menu">
-				<a class="brand" href="./index.html">StealJS</a>
+				<a class="brand" href="../index.html">StealJS</a>
 				<ul class="dropdown-menu">
 		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
 		          <li><a href="http://canjs.com">CanJS</a></li>
@@ -46,8 +45,10 @@
 		        </ul>
 			</div>
 			<ul class="nav">
-	          <li class=""><a href="http://stealjs.com">Home</a></li>
-	          <li class="active"><a href="./docs/index.html">Api</a></li>
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
 	        </ul>
@@ -68,7 +69,10 @@
 		</nav>
 	</header>
 
-	<div class="container api">
+	
+<div class="container api">
+
+	
 	<nav class="sidebar">
 		
 		<ul class="api cascading primary-grouping"> 
@@ -290,6 +294,36 @@
 				
 					
 					<li class="heading search-container">
+						<span>functions</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.import.html" data-search="System.import">
+						System.import
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>modules</span>
 						
 	<ul>
@@ -336,6 +370,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@dev.html" data-search="@dev">
 						@dev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="@loader.html" data-search="@loader">
+						@loader
 					</a>
 				</li>
 				
@@ -493,7 +539,13 @@
 </ul>
 
 	</nav>
+	
+	
+	
 	<article class="content docs">
+	
+	
+		
 		<section class="title">
 			<div class="heading">
 <h1>ES6 </h1>
@@ -520,24 +572,23 @@
 		<li><a href="">source</a></li>
 	
 	
-		
-	
 	
 </ul>
 <br />
 		</section>
-
+		
+		
+		
 		<section class="contents">
 		</section>
+		
+		
+		
 
 		
 
-		<section class="description">
+		
 			
-		</section>
-
-		
-
 		
 		
 		
@@ -546,20 +597,15 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-
-<p>The ES6 syntax in the module syntax that will be part of the EMCAScript 6 standard currently in development. 
-Because ES6 syntax is not valid in ES5 it requires compilation to use. 
-Steal brings along <a href="@traceur.html">Traceur</a> to act as the ES6 compiler, which it does on the 
-fly. When developing you won't even notice that it is loaded, and when 
+<p>The ES6 syntax in the module syntax that will be part of the EMCAScript 6 standard currently in development.
+Because ES6 syntax is not valid in ES5 it requires compilation to use.
+Steal brings along <a href="@traceur.html">Traceur</a> to act as the ES6 compiler, which it does on the
+fly. When developing you won't even notice that it is loaded, and when
 built your modules are compiled down to ES5.</p>
-
 <p>ES6 uses the keywords <code>import</code> and <code>export</code> for importing and exporting respectively. For example:</p>
-
-<pre><code>import can from "can";
+<pre><code>import can from &quot;can&quot;;
 </code></pre>
-
 <p>This will import <code>can</code> from the can module, assuming it is the default exported value. If a module exports several values you can specify which to import using curl braces. Take an example of a Math module that exports several functions to do operations, it might be defined like so:</p>
-
 <pre><code>export function add(a, b) {
   return a + b;
 }
@@ -568,41 +614,36 @@ export function subtract(a, b) {
   return a - b;
 }
 </code></pre>
-
 <p>To import one or more of these exported values use curl braces in your module like so:</p>
-
-<pre><code>import { add, subtract } from "math";
+<pre><code>import { add, subtract } from &quot;math&quot;;
 </code></pre>
-
 <p>You can export any type of value, like a normal var:</p>
-
-<pre><code>export var foo = "bar";
+<pre><code>export var foo = &quot;bar&quot;;
 </code></pre>
-
 <p>If you want to export a single value you can do so using the <code>default</code> keyword like so:</p>
-
 <pre><code>export default function add(a, b){
   return a + b;
 }
 </code></pre>
-
 <p>Because Traceur is a full ES6 to ES5 compiler you can use many ES6 features beyond just module loading. Listing these is beyond the scope of this document, but you can check out many of the language features Traceur supports <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">here</a>.</p>
-
 <h2>Browser Support</h2>
+<p>The ES6 syntax is only available in IE9+. The <a href="@traceur.html">Tracer Runtime</a> requires <code>Object.defineProperty</code>. PhantomJS 1.x is also not supported due to limited support for getters and setters.</p>
 
-<p>The ES6 syntax is only available in IE9+.  The <a href="@traceur.html">Tracer Runtime</a> requires <code>Object.defineProperty</code>.</p>
 		</section>
 		
+		
 
 		
+	
+	
 	</article>
+	
+	
+
 </div>
 
-<script type="text/javascript">
-	var docData = {"root":".","page":"docs","out":"/Users/justin/dev/steal.com/docs","parent":"StealJS.syntaxes","static":"/Users/justin/dev/steal.com/theme/static","templates":"/Users/justin/dev/steal.com/theme/templates","type":"function","name":"syntax.es6","description":"","title":"ES6 ","comment":" ","src":"steal/docs/syntax-es6.md"};
 
-	console.log(docData);
-</script>
+
 
 
 
