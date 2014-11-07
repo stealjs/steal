@@ -4,7 +4,7 @@ if (typeof window !== "undefined" && window.QUnit) {
 
 	System.instantiate = function(load) {
 		if (load.name.indexOf("main.less") !== -1) {
-			var hasLineNumber = load.source.indexOf("line 1, input") !== -1,
+			var hasLineNumber = load.source.indexOf("line 1") !== -1,
 				hasStrictMath = load.source.indexOf("100%") !== -1;
 
 			QUnit.ok(hasLineNumber, "less set to dump line numbers");
