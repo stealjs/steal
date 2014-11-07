@@ -45,7 +45,6 @@ var dev = {
 		
 	},
 
-	logLevel : 0,
 	/**
 	 * @function steal.dev.warn
 	 * @parent steal.dev
@@ -60,7 +59,7 @@ var dev = {
 	 * 
 	 */
 	warn: function( out ) {
-		var ll = steal.config().logLevel;
+		var ll = steal.config('logLevel');
 		if(ll < 2){
 			Array.prototype.unshift.call(arguments, 'steal.js WARN:');
 			if ( window.console && console.warn ) {
@@ -87,7 +86,7 @@ var dev = {
 	 * 
 	 */
 	log: function( out ) {
-		var ll = System.logLevel;
+		var ll = steal.config('logLevel');
 		if (ll < 1) {
 			var g = typeof window !== "undefined" ? window : global;
 			if (g.console && console.log) {
