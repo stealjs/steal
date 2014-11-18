@@ -20,6 +20,7 @@ prevents the production bundle from loading:
         }
       }
     </script>
-    <script src='../../steal/steal.js'
-            main='myapp'
-            env='production'></script>
+    <script src="../../steal/steal.js"
+            main="myapp"
+            env="production">
+    </script>
