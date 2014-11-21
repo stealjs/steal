@@ -20,7 +20,8 @@ a `"bundles/myapp"` module is automatically configured to contain it:
     <script src="steal/steal.js"
             config="./config.js"
             main="myapp"
-            env="production"></script>
+            env="production">
+    </script>
     <script>
       System.bundles["bundles/myapp"] //-> ["myapp"]
     </script>
@@ -33,7 +34,8 @@ a `"bundles/myapp"` module is automatically configured to contain it:
             config="./config.js"
             main="myapp"
             env="production"
-            bundles-path="packages"></script>
+            bundles-path="packages">
+    </script>
     <script>
       System.bundles["bundles/myapp"] //-> ["myapp"]
       System.paths["bundles/*"] = "packages/*.js";
@@ -47,7 +49,8 @@ Often, `bundlesPath` should be the same value as what's passed in [stealTools.bu
             config="./config.js"
             main="myapp"
             env="production"
-            bundles-path="packages"></script>
+            bundles-path="packages">
+    </script>
     <script>
       System.bundles["bundles/myapp"] //-> ["myapp"]
       System.paths["bundles/*"] = "dist/bundles/*.js";

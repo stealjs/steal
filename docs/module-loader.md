@@ -20,9 +20,9 @@ would use [System].
     import loader from "@loader";
 
     loader.config({
-		map: {
-			"can/util/util": "can/util/jquery/jquery"
-		}
+      map: {
+        "can/util/util": "can/util/jquery/jquery"
+      }
     });
 
 This works with any syntax supported by StealJS.

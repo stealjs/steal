@@ -11,7 +11,7 @@ it uses the "global" syntax.
 A global module might look like:
 
     // app/sample-global.js
-    hello = 'world';
+    hello = "world";
      
 Use [System.meta] to configure this module as the global format like:
 
@@ -23,7 +23,7 @@ can also be set inline like:
     // app/sample-global.js
     "format global";
     "exports hello";
-    hello = 'world';
+    hello = "world";
 
 ## Implementation 
 

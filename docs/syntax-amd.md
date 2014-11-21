@@ -24,8 +24,8 @@ AMD also provides a conventient syntax that can be used rather than providing a 
 
     define(function(require, exports, module){
       var can = require("can/can");
-			var _ = require("underscore/underscore");
-			var myModule = require("my_module/my_module");
+      var _ = require("underscore/underscore");
+      var myModule = require("my_module/my_module");
 
-			return ...
+      return ...
     });

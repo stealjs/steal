@@ -34,7 +34,7 @@ module.
 
 For example:
 
-    System.paths['lodash/*'] = '/js/lodash/*.js'
+    System.paths["lodash/*"] = "/js/lodash/*.js"
     System.paths["theme/*"] = "jquery-ui/themes/base/jquery.ui.*css"
 
 This would allow you to do: `import throttle from "lodash/functions/throttle"` to

@@ -16,17 +16,17 @@ After installing with bower or
 [downloading](https://github.com/bitovi/steal/archive/master.zip),
 add `steal.js` to your page like:
 
-    <script src='../path/to/steal/steal.js`
-            config='./config.js'
-            main='myapp'>
+    <script src="../path/to/steal/steal.js"
+            config="./config.js"
+            main="myapp">
     </script>
 
 This will load `config.js` which can be used to configure the behavior of
 your site's modules. For example, to load jQuery from a CDN:
 
-     //config.js
+     // config.js
      System.config({
-       paths: {'jquery': "http://code.jquery.com/jquery-1.11.0.min.js"}
+       paths: {"jquery": "http://code.jquery.com/jquery-1.11.0.min.js"}
      });
 
 And it will load `myapp.js`. `myapp.js` can import
@@ -34,7 +34,7 @@ dependencies in any syntax it choses. For those betting on the future,
 use the upcoming [syntax.es6 ES6 module syntax]:
 
     // myapp.js
-    import $ from 'jquery'
+    import $ from "jquery"
     $(document.body).appendChild("<h1>Hello World</h1>");
 
 ## Client Use
@@ -50,11 +50,11 @@ The basic use of `steal.js` is broken into three parts:
 To load [steal] in the browser add a `<script>` tag who's source
 points to `steal.js` like:
 
-    <script src='../path/to/steal/steal.js'></script>
+    <script src="../path/to/steal/steal.js"></script>
 
 With this, you can begin loading modules using [System.import]. For example:
 
-    <script src='../path/to/steal/steal.js'></script>
+    <script src="../path/to/steal/steal.js"></script>
     <script>
       System.import("myapp").then(function(main){
         // main loaded successfully
@@ -75,29 +75,30 @@ configuration values.  Configuration values can be set in three ways:
         <script>
           steal = {main: "myapp"};
         </script>
-        <script src='../path/to/steal/steal.js'></script>
+        <script src="../path/to/steal/steal.js"></script>
    
  - Attributes on the steal.js script tag like:
   
-        <script src='../path/to/steal/steal.js'
-                main="myapp"></script>
+        <script src="../path/to/steal/steal.js"
+                main="myapp">
+        </script>
  
  - Calling [System.config] or setting `System` configuration properties
    after `steal.js` has loaded. This technique is typically used in the [@config] module.
-  
+
         System.config({
           paths: {"can/*" : "http://canjs.com/release/2.0.1/can/*"}
         })
         System.meta["jquery"] = {format: "global"}
-        
+
 Typically, developers configure the [System.main] and [System.configPath] properties 
 with attributes on the steal.js script tag like:
 
-    <script src='../path/to/steal/steal.js'
+    <script src="../path/to/steal/steal.js"
             main="myapp"
-            config-path="../config.js"
-            ></script>
-        
+            config-path="../config.js">
+    </script>
+
 Setting [System.configPath] sets [System.baseURL] to the 
 configPath's parent directory.  This would load `config.js` prior to
 loading `../myapp.js`.
@@ -106,8 +107,9 @@ When steal.js loads, it sets [System.stealPath].  This sets default values
 for [System.baseURL] and [System.configPath]. If `steal.js` is in `bower_components`,
 [System.configPath] defaults to `bower_components` parent folder. So if you write:
 
-    <script src='../../bower_components/steal/steal.js'
-            main="myapp"></script>
+    <script src="../../bower_components/steal/steal.js"
+            main="myapp">
+    </script>
 
 This will load `../../stealconfig.js` before it loads `../../myapp.js`.
 
