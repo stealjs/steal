@@ -91,6 +91,16 @@ QUnit.config.testTimeout = 30000;
 		});
 	});
 
+	asyncTest("ignoring an import by mapping to @empty", function(){
+		System.map["map-empty/other"] = "@empty";
+		System["import"]("map-empty/main").then(function(m) {
+			var empty = System.get("@empty");
+			equal(m.other, empty, "Other is an empty module because it was mapped to empty in the config");
+		}, function(){
+			ok(false, "Loaded a module that should have been ignored");
+		}).then(start);
+	});
+
 
 	module("steal via html");
 
