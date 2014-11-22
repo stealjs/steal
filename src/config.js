@@ -41,7 +41,6 @@
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 	
-	
 	var configSetter = {
 		set: function(val){
 			var name = filename(val),
@@ -114,6 +113,7 @@
 				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/less.js");
+				setIfNotPresent(this.paths,"$bower", dirname+"/bower.js");
 				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
 				
 				if(isNode) {
@@ -160,7 +160,7 @@
 			}
 		}
 	});
-	
+
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
 			return System[cfg];
@@ -169,5 +169,3 @@
 		}
 		
 	};
-	
-

@@ -77,13 +77,13 @@ module.exports = function (grunt) {
         files: [
           {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/', filter: 'isFile'},
           {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/steal/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/bower_components/steal/', filter: 'isFile'},
+          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js', 'bower.js'], dest: 'test/bower_components/steal/', filter: 'isFile'},
           {expand: true, cwd: 'bower_components/traceur/', src: ['*'], dest: 'test/bower_components/traceur/', filter: 'isFile'}
         ]
       }
     },
     watch: {
-      files: [ "src/*.js", "bower_components/systemjs/dist/**"],
+      files: [ "src/*.js", "bower_components/systemjs/dist/**", "bower.js"],
       tasks: "default"
     },
     jshint: {

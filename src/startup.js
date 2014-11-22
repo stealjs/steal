@@ -97,7 +97,14 @@
 				return steal.System.import("@dev");
 			});
 
-			appDeferred = devDeferred.then(function(){
+      bowerDeferred = configDeferred.then(function() {
+        var bower = System.bower;
+        if(bower !== false) {
+          return System.import(bower.config + "!$bower");
+        }
+      });
+
+			appDeferred = bowerDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
 				if(!System.main) {
