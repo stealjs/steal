@@ -21,6 +21,7 @@ module.exports = function (grunt) {
           'src/system-extension-ext.js',
           'src/system-extension-forward-slash.js',
           'src/config.js',
+          'src/system-extension-packages.js',
           'src/system-extension-bower.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal
@@ -46,6 +47,7 @@ module.exports = function (grunt) {
           'src/system-extension-ext.js',
           'src/system-extension-forward-slash.js',
           'src/config.js',
+          'src/system-extension-packages.js',
 					'src/system-extension-bower.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal

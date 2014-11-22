@@ -1,8 +1,5 @@
 
 var bowerConfiged = function(loader){
-	// Cached reference of each dependency's own bower.json
-	var depBowers = {};
-
 	// Utility function to fetch a bower.json file
 	var getBowerJSON = function(address){
 		return loader.fetch({
@@ -35,12 +32,10 @@ var bowerConfiged = function(loader){
 				Promise.resolve(deps),
 				Promise.resolve(config)
 			]).then(function(res){
-				return getBowerJSON(res[1]).then(function(data){
-					return {
-						rootBower: data,
-						bowerPath: res[0]
-					};
-				});
+        return {
+          bowerPath: res[0],
+          bowerAddress: res[1]
+        };
 			});
 		}
 
@@ -61,79 +56,50 @@ var bowerConfiged = function(loader){
 		return loaderConfig.apply(this, arguments);
 	};
 
-	// overwrite locate to load module's bower and get the real address
-	var loaderLocate = loader.locate;
-	loader.locate = function(load){
-		var promise = Promise.resolve(loaderLocate.call(this, load));
+	function withoutJs(name) {
+		var len = name.length;
+		if(name.substr(len - 3) === ".js") {
+			return name.substr(0, len - 3);
+		}
+		return name;
+	}
 
-		return promise.then(function(proposedAddress){
-			if(loader.bower) {
-				// If the user has set a path, do not override that.
-				if(loader.paths[load.name]) {
-					return proposedAddress;
-				}
+	function applyPackageConfig(packageName, bowerAddress, bowerPath) {
+		return getBowerJSON(bowerAddress).then(function(bower) {
+			var main = bower.main;
+			if(packageName && main) {
+				main = typeof main === "string" ? main : main[0];
 
-				return getBowerOptions().then(function(options){
-					var bower = options.rootBower;
-					var bowerPath = options.bowerPath;
-					var deps = bower.dependencies;
-
-					if(deps[load.name]) {
-						var depBowerPath = bowerPath + "/" + load.name + "/";
-						depBowers[load.name] = depBowers[load.name] ||
-							getBowerJSON(depBowerPath + "bower.json");
-
-						// Cache a copy of this dependency's own `bower.json` so that we can
-						// look at it's contents in the future without fetching a new copy.
-						return depBowers[load.name].then(function(depBower) {
-							var bowerDeps = [];
-							if(depBower.dependencies) {
-								for(var d in depBower.dependencies) {
-									bowerDeps.push(d);
-									deps[d] = true;
-								}
-								load.metadata.bowerDeps = bowerDeps.length ? bowerDeps : undefined;
-							}
-
-							// Some invalid `bower.json` files do not contain a main. If so
-							// we have to bail on the attempt to automatically load this
-							// dependency.
-							var main = depBower.main;
-							if(main) {
-							  return depBowerPath + main;
-							}
-
-							return proposedAddress;
-						});
-
-					}
-
-					return proposedAddress;
-				});
-
+				loader.paths[packageName + "/*"] = bowerPath + "/" + packageName + "/*.js";
+				loader.packages[packageName] = {
+					main: withoutJs(main)
+				};
+			}
+			var deps = bower.dependencies || {},
+				depPromises = [],
+				depAddress;
+			for(var depName in deps) {
+				depAddress = bowerPath + "/" + depName + "/bower.json";
+				depPromises.push(
+					applyPackageConfig(depName, depAddress, bowerPath)
+				);
 			}
 
-			return proposedAddress;
+			return Promise.all(depPromises);
 		});
-	};
+	}
 
-	var loaderInstantiate = loader.instantiate;
-	loader.instantiate = function(load){
-		var basePromise = Promise.resolve(loaderInstantiate.call(this, load));
-		return basePromise.then(function(instantiateResult){
-			if(depBowers[load.name] && load.metadata.bowerDeps) {
-				// Import all bower dependencies
-				var deps = load.metadata.bowerDeps;
-				var imports = [];
-				for(var i = 0, len = deps.length; i < len; i++) {
-					imports.push(loader.import(deps[i]));
-				}
-				return Promise.all(imports).then(function() {
-					return instantiateResult;
-				});
-			}
-			return instantiateResult;
-		});
+
+	var loaderNormalize = loader.normalize;
+	loader.normalize = function(name, parentName, parentAddress){
+  	if(name === this.main && this.bower) {
+			return getBowerOptions().then(function(options){
+        return applyPackageConfig(null, options.bowerAddress, options.bowerPath);
+			}).then(function() {
+        return loaderNormalize.call(loader, name, parentName, parentAddress);
+      });
+		}
+		return loaderNormalize.apply(this, arguments);
 	};
 };
 
