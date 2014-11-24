@@ -31,7 +31,7 @@ Call `steal.dev.assert` to test for truthiness of the expression provided. For e
 
     steal.dev.assert("foo" === "bar"); // throws!
 
-By default, [steal-tools] will remove `steal.dev.log` and `steal.dev.warn` calls
-from the built output.
+By default, [steal-tools] will remove `steal.dev.log`, `steal.dev.warn` and
+`steal.dev.assert` calls from the built output.
 
 
