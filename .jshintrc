@@ -15,7 +15,9 @@
     "notStrictEqual": true,
     "raises": true,
     "start": true,
-    "stop": true
+    "stop": true,
+    "System": true,
+    "Promise": true
   },
 
   "curly": true,
