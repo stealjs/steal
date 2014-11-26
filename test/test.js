@@ -101,6 +101,26 @@ QUnit.config.testTimeout = 30000;
 		}).then(start);
 	});
 
+	asyncTest("steal.dev.assert", function() {
+		System["import"]("dev").then(function(dev){
+			throws(
+				function() {
+					dev.assert(false);
+				},
+				/Expected/,
+				"throws an error with default message"
+			);
+			throws(
+				function() {
+					dev.assert(false, "custom message");
+				},
+				/custom message/,
+				"throws an error with custom message"
+			);
+			start();
+		});
+	});
+
 
 	module("steal via html");
 

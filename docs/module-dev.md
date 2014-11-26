@@ -13,6 +13,7 @@ less than 1.
 than 2.
 @option {Number} [logLevel=0] Controls what types of messages will be logged. By
 default the logLevel is 0 so all messages will be logged.
+@option {function()} assert Throws an error if the expression passed to it is falsy.
 
 @body
 
@@ -26,7 +27,11 @@ Call `steal.dev.warn` to log warning information.  For example:
 
     steal.dev.warn("something went wrong");
 
-By default, [steal-tools] will remove `steal.dev.log` and `steal.dev.warn` calls
-from the built output.
+Call `steal.dev.assert` to test for truthiness of the expression provided. For example:
+
+    steal.dev.assert("foo" === "bar"); // throws!
+
+By default, [steal-tools] will remove `steal.dev.log`, `steal.dev.warn` and
+`steal.dev.assert` calls from the built output.
 
 
