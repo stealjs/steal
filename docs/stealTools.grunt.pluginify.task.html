@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - task </title>
+	<title>StealJS - PluginifyTask </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -86,8 +86,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="stealTools.grunt.pluginify.task.html" data-search="task">
-				task
+			<a class="sidebar-title" href="stealTools.grunt.pluginify.task.html" data-search="PluginifyTask">
+				PluginifyTask
 			</a>
 			
 
@@ -106,7 +106,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>task</h1>
+<h1>PluginifyTask</h1>
 	<ul class="tags">
 		<li>typedef</li>
 	</ul>
@@ -147,7 +147,7 @@
 
 		
 		<section class="description">
-			<p>A task of the <a href="stealTools.grunt.pluginify.html">pluginify</a> grunt task.</p>
+			<p>A task object of the <a href="stealTools.grunt.pluginify.html">pluginify</a> grunt task.</p>
 
 		</section>
 		
@@ -174,7 +174,14 @@
 		<h4>system
 			<code>{Object}</code></h4>
 		<div class="description">
-			<p>Specifies the <a href="System.config.html">System.config</a> values used to load modules.</p>
+			<p>Specifies the <a href="System.config.html">System.config</a> values used
+to load modules.  At a minimum <a href="System.main.html">main</a> and either <a href="System.baseURL.html">baseURL</a>
+or <a href="System.configPath.html">configPath</a> must be specified.</p>
+<pre><code>system: {
+  main: ['mymodule'],
+  config: __dirname+&quot;/config.js&quot;
+}
+</code></pre>
 
 		</div>
 		
@@ -196,7 +203,7 @@
 	
 	<li class="parameter">
 		<h4>outputs
-			<code>{<a href="stealTools.grunt.pluginify.output.html" >output</a>}</code></h4>
+			<code>{<a href="stealTools.grunt.pluginify.output.html" >PluginifyOutput</a>}</code></h4>
 		<div class="description">
 			<p>Configures output files to be written.</p>
 
@@ -221,6 +228,10 @@
 		
 
 		
+		<section class="comment">
+			
+		</section>
+		
 		
 
 		
@@ -243,23 +254,22 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"stealTools.grunt.pluginify.task","src":"steal-tools/doc/grunt-pluginify-task.md","description":"A task object of the [stealTools.grunt.pluginify pluginify] grunt task.","title":"PluginifyTask","types":[{"type":"Object","options":[{"name":"system","description":"Specifies the [System.config] values used \nto load modules.  At a minimum [System.main main] and either [System.baseURL baseURL]\nor [System.configPath configPath] must be specified.\n\n```\nsystem: {\n  main: ['mymodule'],\n  config: __dirname+\"/config.js\"\n}\n```","types":[{"type":"Object","options":[]}]},{"name":"options","description":"Options for the pluginify task such as minification.","types":[{"type":"Object","options":[]}]},{"name":"outputs","description":"Configures output files to be written.","types":[{"type":"stealTools.grunt.pluginify.output"}]}]}],"templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

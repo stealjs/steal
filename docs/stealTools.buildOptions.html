@@ -271,23 +271,22 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"stealTools.buildOptions","src":"steal-tools/doc/build-options.md","description":"Options used throughout the build process.","title":"buildOptions","types":[{"type":"Object","options":[{"name":"minify","description":"Whether the source code is minified prior to writing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"bundleSteal","description":"Whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"removeDevelopmentCode","description":"Whether development code (code wrapped with `@steal-remove-{start/stop}`) will be removed.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"ignore","description":"Specify modules to not include in the final output. For example if you wanted to load jQuery from a cdn you would provide this option:\n\n    {\n      ignore: [ \"jquery\" ]\n    }","types":[{"type":"Array","template":[{"types":[{"type":"String"}]}]}]},{"name":"format","description":"Specifies a format to transpile the dependency graph to. In the multiBuild all code is automatically transpiled to **amd** format. In [stealTools.pluginify] the default is to **global**.","types":[{"type":"stealTools.format"}]}]}],"templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

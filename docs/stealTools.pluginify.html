@@ -318,7 +318,7 @@
 		
 		<li class="parameter">
 			<h4>options
-				<code>{<a href="stealTools.pluginify.options.html" >pluginifyOptions</a>}</code><span class="pull-right optional">Optional</span></h4>
+				<code>{<a href="stealTools.pluginify.options.html" >PluginifyOptions</a>}</code><span class="pull-right optional">Optional</span></h4>
 			<div class="description">
 				<p>Options that configure how the files are compiled.  These options overwrite the
 <code>pluginifierOptions</code> argument passed to <a href="stealTools.pluginifier.html">pluginifier</a>.</p>
@@ -429,23 +429,22 @@ information, read <a href="stealTools.pluginify.options.html">pluginifyOptions</
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"function","name":"stealTools.pluginify","src":"steal-tools/doc/pluginify.md","description":"A function provided by [stealTools.pluginifier] that can build out a specific module.","title":"pluginify","parent":"steal-tools.JS","signatures":[{"code":"pluginify(moduleName, options)","description":"","params":[{"types":[{"type":"moduleName"}],"optional":true,"name":"moduleName","defaultValue":"config.main","description":"The module name to build."},{"types":[{"type":"stealTools.pluginify.options"}],"optional":true,"name":"options","description":"Options that configure how the files are compiled.  These options overwrite the \n`pluginifierOptions` argument passed to [stealTools.pluginifier]."}],"returns":{"types":[{"type":"String"}],"description":"The result of `moduleName` being pluginified."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

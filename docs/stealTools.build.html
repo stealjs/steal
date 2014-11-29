@@ -591,23 +591,22 @@ stealTools.build({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"function","name":"stealTools.build","src":"steal-tools/doc/build.md","description":"Build a module and all of its dependencies and optionally other bundles to progressively load.","title":"build","parent":"steal-tools.JS","signatures":[{"code":"stealTools.build(config, options)","description":"","params":[{"types":[{"type":"Object","options":[{"name":"main","description":"The module or modules whos dependencies \nshould be built.  If main is specified as an Array,","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true},{"name":"bundlesPath","description":"Specifies the path where the production bundles should be \nplaced. Often, this is the same value as [System.bundlesPath]. By default, the location is `\"dist/bundles\"`.\n\nThe path can be specified in three ways:\n\n\n - Absolute path - bundlesPath starts with `/` or matches _/^\\w+:[\\/\\\\]/_ like:  `__dirname+\"/place\"` or `\"c:\\my\\bundles\"`.\n - Relative to `process.cwd()` - bundlesPath starts with `./` like `\"./place\"`.\n - Relative to [System.baseURL baseURL] - bundlesPath looks like: \"packages\", \"foo/bar\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'dist/bundle'"}]}],"name":"config","description":"Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified in\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"minify","description":"Prevents minification.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"debug","description":"`true` turns on debug messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundleSteal","description":"Set to true to include steal in the main bundle.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundle","description":"An array of module names that should be\nprogressively loaded.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"bundleDepth","description":"The maximum number of bundles that need to be loaded\nfor any `bundle` module.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"mainDepth","description":"The maximum number of bundles that will be loaded for any `main`\nmodule.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"removeDevelopmentCode","description":"Remove any development code from the bundle specified using `//!steal-remove-start` and `//!steal-remove-end` comments.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"}]}],"optional":true,"name":"options","description":"Specifies the behavior of the build."}],"returns":{"types":[{"type":"Object","options":[{"name":"graph","description":"A map of moduleNames to node.","types":[{"type":"buildGraph"}]},{"name":"steal","description":"The steal function used to load the main module.","types":[{"type":"steal"}]},{"name":"loader","description":"The loader used to load the main module.","types":[{"type":"Loader"}]},{"name":"bundles","description":"The builds written out.","types":[{"type":"Array","options":[]}]}]}],"description":""}}],"types":[],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

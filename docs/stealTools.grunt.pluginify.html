@@ -289,7 +289,7 @@
 
 		
 		<section class="description">
-			<p>Write out modules that are optionally transpiled, minified, and bundled.</p>
+			<p>A <a href="http://gruntjs.com/">Grunt</a> multi task that load modules and write them out in different formats.</p>
 
 		</section>
 		
@@ -314,9 +314,33 @@
 	
 	<li class="parameter">
 		<h4>tasks
-			<code>{Object&lt;<a href="stealTools.grunt.pluginify.task.html" >task</a>&gt;}</code></h4>
+			<code>{Object&lt;String,<a href="stealTools.grunt.pluginify.task.html" >PluginifyTask</a>&gt;}</code></h4>
 		<div class="description">
-			<p>Specify pluginify tasks with their own set of <code>system</code>, <code>options</code>, and <a href="stealTools.grunt.pluginify.output.html">outputs</a>.</p>
+			<p>An object of task names as keys
+and PluginifyTask objects as values.</p>
+<pre><code>grunt.initConfig({
+  stealPluginify: {
+    taskName1: { PluginifyTask1 },
+    taskName2: { PluginifyTask2 }
+  }
+});
+</code></pre>
+<p>Each <a href="stealTools.grunt.pluginify.task.html">PluginifyTask</a> specifies:</p>
+<ul>
+<li>A <code>system</code> object that specifies the modules to be loaded.</li>
+<li>An <code>options</code> object that specifies any special loading behavior like turning logging.</li>
+<li>An <code>outputs</code> object that specifies how the modules should be written out.</li>
+</ul>
+<pre><code>grunt.initConfig({
+  stealPluginify: {
+    taskName: {
+      system : { .. },
+      options: { .. },
+      outputs: { .. }
+    }
+  }
+});
+</code></pre>
 
 		</div>
 		
@@ -341,14 +365,30 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p><code>stealPluginify</code> is a grunt <a href="http://gruntjs.com/creating-tasks#multi-tasks">multi-task</a> that is used to build library projects to a variety of formats. This means that to build output</p>
+<p><code>stealPluginify</code> is a grunt <a href="http://gruntjs.com/creating-tasks#multi-tasks">multi-task</a> that is
+used to build library projects to a variety of formats. For example, to load a &quot;main&quot; module and
+transpile it and all of its dependencies (except jQuery) to AMD and CommonJS with debug output:</p>
 <pre><code>grunt.initConfig({
   stealPluginify: {
-    main: {
-      system: { ... },
-      options: { ... },
+    transpile: {
+      system: {
+        main: &quot;main&quot;,
+        config: __dirname + &quot;/config.js&quot;
+      },
+      options: {
+        debug: true
+      },
       outputs: {
-        &quot;output 1 name&quot; : { ... }
+        amd: {
+          graphs: [&quot;main&quot;],
+          format: &quot;amd&quot;,
+          ignore: [&quot;jquery&quot;]
+        },
+        cjs: {
+          graphs: [&quot;main&quot;],
+          format: &quot;amd&quot;,
+          ignore: [&quot;jquery&quot;]
+        }
       }
     }
   }
@@ -371,14 +411,44 @@ should be written out, and where they should be written.</li>
 <h2>options</h2>
 <p>Options are the <a href="stealTools.buildOptions.html">buildOptions</a> used for configuration the behavior of the build, such as whether minification is turned on or not.</p>
 <h2>outputs</h2>
-<p>Outputs is an object names and <a href="stealTools.grunt.pluginify.output.html">output configuration</a> objects.  Each configuration object contains</p>
-<pre><code>{
-  eachModule: [],
-  graphs: [],
-  modules: [],
-  ignore: [],
-  format: [],
-  dest: 
+<p><code>outputs</code> specifies different ways the modules loaded by <code>system</code> are written out. It's
+an object of <a href="stealTools.grunt.pluginify.output.html">PluginifyOutput</a> objects.  Each <a href="stealTools.grunt.pluginify.output.html">PluginifyOutput</a>
+supports the following options:</p>
+<ul>
+<li>modules <i>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</i></li>
+<li>eachModule <i>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</i></li>
+<li>graphs <i>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</i></li>
+<li>dest <i>{String | function(<a href="moduleName.html" >moduleName</a>, moduleData)}</i></li>
+</ul>
+<p>And the options available to <a href="stealTools.pluginify.options.html">PluginifyOptions</a>.</p>
+<ul>
+<li>ignore <i>{Array&lt;RegExp | String&gt;}</i></li>
+<li>removeDevelopmentCode <i>{Boolean}</i></li>
+<li>format <i>{String}</i></li>
+<li>export <i>{Object&lt;<a href="moduleName.html" >moduleName</a>,String&gt;}</i></li>
+<li>useNormalizedDependencies <i>{Boolean}</i></li>
+<li>normalize <i>{function(name, currentModule, address)}</i></li>
+<li>minify <i>{Boolean}</i></li>
+<li>ignoreAllDependencies <i>{Boolean}</i></li>
+<li>includeTraceurRuntime <i>{includeTraceurRuntime}</i></li>
+</ul>
+<p>Only one of <code>modules</code>, <code>eachModule</code> or <code>graphs</code> should be specified.</p>
+<p>Example:</p>
+<pre><code>outputs: {
+  &quot;global first and second together without jQuery&quot;: {
+    modules: [&quot;first&quot;,&quot;second&quot;],
+    ignore: [&quot;jquery&quot;],
+    format: &quot;global&quot;
+  },
+  &quot;first and second seperately without jQuery&quot;: {
+    eachModule: [&quot;first&quot;,&quot;second&quot;],
+    ignore: [&quot;jquery&quot;],
+    format: &quot;global&quot;
+  },
+  &quot;first and second and their dependencies individually converted to amd&quot;: {
+    graph: [&quot;first&quot;,&quot;second&quot;],
+    format: &quot;amd&quot;
+  }
 }
 </code></pre>
 
@@ -406,23 +476,22 @@ should be written out, and where they should be written.</li>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"stealTools.grunt.pluginify","src":"steal-tools/doc/grunt-pluginify.md","description":"A [http://gruntjs.com/ Grunt] multi task that load modules and write them out in different formats.","title":"stealPluginify","types":[{"type":"Object","options":[{"name":"tasks","description":"An object of task names as keys\nand PluginifyTask objects as values.\n\n```\ngrunt.initConfig({\n  stealPluginify: {\n    taskName1: { PluginifyTask1 },\n    taskName2: { PluginifyTask2 }\n  }\n});\n```\n\nEach [stealTools.grunt.pluginify.task] specifies:\n\n - A `system` object that specifies the modules to be loaded.\n - An `options` object that specifies any special loading behavior like turning logging.\n - An `outputs` object that specifies how the modules should be written out.\n \n```\ngrunt.initConfig({\n  stealPluginify: {\n    taskName: {\n      system : { .. },\n      options: { .. },\n      outputs: { .. }\n    }\n  }\n});\n```","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"stealTools.grunt.pluginify.task"}]}]}]}]}],"parent":"steal-tools.grunt","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

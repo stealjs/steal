@@ -10,7 +10,7 @@
     }
   ],
   "dependencies": {
-    "documentjs": "0.1.3"
+    "documentjs": "git://github.com/bitovi/documentjs#mustache-body-84"
   },
   "homepage": "http://stealjs.com",
   "repository": {

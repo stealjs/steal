@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - pluginifyOptions </title>
+	<title>StealJS - PluginifyOptions </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -86,8 +86,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="stealTools.pluginify.options.html" data-search="pluginifyOptions">
-				pluginifyOptions
+			<a class="sidebar-title" href="stealTools.pluginify.options.html" data-search="PluginifyOptions">
+				PluginifyOptions
 			</a>
 			
 
@@ -106,7 +106,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>pluginifyOptions</h1>
+<h1>PluginifyOptions</h1>
 	<ul class="tags">
 		<li>typedef</li>
 	</ul>
@@ -175,13 +175,12 @@
 			<code>{Array&lt;RegExp | String&gt;}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
 			<p>An Array of regular expression or strings that
-are used to specify <a href="moduleName.html">moduleName</a>'s that should not be included in the
-output.</p>
+specify <a href="moduleName.html">moduleName</a>'s that should not be included in the output.</p>
 <p>Module names that match the regular expressions are not included. The following
 ignores everything in <em>can/util/</em>.</p>
 <pre><code>pluginify(&quot;can/construct&quot;,{ignore: [/^can\/util\/]});
 </code></pre>
-<p>Module names and their dependenceis that match the
+<p>Module names and their dependencies that match the
 strings in the array are not included. The following will not include
 &quot;can/construct&quot; and all of its dependencies:</p>
 <pre><code>pluginify(&quot;can/component&quot;,{ignore: [&quot;can/construct&quot;]});
@@ -359,6 +358,10 @@ prevents that behavior.</p>
 		
 
 		
+		<section class="comment">
+			
+		</section>
+		
 		
 
 		
@@ -381,23 +384,22 @@ prevents that behavior.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"stealTools.pluginify.options","src":"steal-tools/doc/pluginify-options.md","description":"Specify the behavior of pluginify.","title":"PluginifyOptions","types":[{"type":"Object","options":[{"name":"ignore","description":"An Array of regular expression or strings that \nspecify [moduleName]'s that should not be included in the output. \n\nModule names that match the regular expressions are not included. The following\nignores everything in _can/util/_.\n\n    pluginify(\"can/construct\",{ignore: [/^can\\/util\\/]});\n\n\nModule names and their dependencies that match the \nstrings in the array are not included. The following will not include\n\"can/construct\" and all of its dependencies:\n\n    pluginify(\"can/component\",{ignore: [\"can/construct\"]});","types":[{"type":"Array","template":[{"types":[{"type":"RegExp"},{"type":"String"}]}]}],"optional":true},{"name":"removeDevelopmentCode","description":"By default, removes code in between comments like:\n\n    //!steal-remove-start\n    REMOVE.THIS;\n    //!steal-remove-end\n\nIf removeDevelopmentCode is `false`, this code is not removed.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"format","description":"What format the output will be transpiled to.  By default\nthe format is `\"global\"`.  `\"global\"` means the code will be transpiled to work\nstandalone.  Module dependencies that are not included should be mapped to their\nname on the global object in exports.\n\nThe other possible format values are \"steal\",\"amd\", and \"cjs\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'global'"},{"name":"export","description":"A mapping of module names to their name on the\nglobal object.  For example, if an output depends on jQuery, but does not include it, you\nshould include:\n\n    pluginify(\"mywidget\",{exports: {\"jquery\": \"jQuery\"}})\n\n__note__ - In future release, \nthese values will be taken directly from [System.shim] configuration values.","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"String"}]}]}]},{"name":"useNormalizedDependencies","description":"Use normalized dependency names instead of\nrelative module names.  For example \"foo/bar\" will be used instead of \"./bar\".","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"normalize","description":"An\noptional function that will normalize all module names written out. Use this for custom normalization\nbehavior.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"String"}],"name":"name"},{"types":[{"type":"String"}],"name":"currentModule"},{"types":[{"type":"String"}],"name":"address"}]}],"optional":true},{"name":"minify","description":"By default, the output is not minified.\nSet to `true` to minify the result.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"ignoreAllDependencies","description":"By default, the dependencies of\nthe module specified are included unless they are explicitly ignored.  Setting\n_ignoreAllDependencies_ to `true` only results in returning that individual module\nas the output.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"includeTraceurRuntime","description":"By default, if an ES6 module\nis found, the [@traceur] runtime is packaged with the output.  Setting this to `false`\nprevents that behavior.","types":[{"type":"includeTraceurRuntime"}],"optional":true,"defaultValue":"true"}]}],"templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

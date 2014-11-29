@@ -685,23 +685,22 @@ to the following rules:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"property","name":"System.paths","src":"steal/docs/system-paths.md","description":"Configure the location of a module or modules.","types":[{"type":"Object","template":[{"types":[{"type":"glob"}]},{"types":[{"type":"glob"}]}],"description":"If a [moduleName] matches one of the keys of the `paths` config, it is located \nwith at the value of the key. \n\nIf paths for [@config], [@dev], [@traceur],\n[$css], [$less], \"bundles/*\", and \"bundles/*.css\" are not set, `steal.js` \nwill provide [default paths](#section_Defaultpathsconfiguredbysteal)."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

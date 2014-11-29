@@ -490,23 +490,22 @@ function will return the main module, but can be used to generate any dependency
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"function","name":"stealTools.pluginifier","src":"steal-tools/doc/pluginifier.md","description":"Build a module and its dependencies to work independently of `steal.js`.","title":"pluginifier","parent":"steal-tools.JS","signatures":[{"code":"stealTools.pluginifier(config, pluginifierOptions)","description":"Loads a module and all of its dependencies and returns a function that\ncan write out all or parts of the module and its dependency graph\nso that they dont depend on `steal.js`.","params":[{"types":[{"type":"Object","options":[{"name":"main","description":"The module whos dependencies should be built.","types":[{"type":"String"}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified in\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"verbose","description":"Set to true to get a lot of warning messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"Set to true to log nothing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"pluginifierOptions","description":"Configures the behavior of loading the modules and acts as default values\nfor the resulting [stealTools.pluginify pluginify function's] options argument."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"stealTools.pluginify"}]}]}],"description":"A deferred that resolves to a function\nthat can write out all or part of the loaded dependency tree."}}],"types":[],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

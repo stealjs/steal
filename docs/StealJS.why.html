@@ -263,7 +263,7 @@
 
 		
 		<section class="description">
-			<p>Everyone should use <a href="StealJS.html">StealJS</a> to do dependency management on their projects.  Here's why:</p>
+			<p>Everyone should use <a href="index.html">StealJS</a> to do dependency management on their projects.  Here's why:</p>
 
 		</section>
 		
@@ -320,23 +320,22 @@ use just the <code>System</code> extensions you need.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"page","name":"StealJS.why","src":"steal/docs/pages/why.md","description":"Everyone should use [StealJS] to do dependency management on their projects.  Here's why:","title":"Why StealJS","parent":"StealJS.guides","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

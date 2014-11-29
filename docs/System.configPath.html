@@ -668,23 +668,22 @@ the <code>main</code> module directory.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"property","name":"System.configPath","src":"steal/docs/system-configPath.md","description":"A shortcut for specifying the [@config] module [System.paths path] and [System.baseURL baseURL].","types":[{"type":"String","description":"Specifies the path to the [@config] configuration file that will be loaded before the\n[System.main main] module. This will also set [System.baseURL baseURL] to\nthe `main` module directory.\n   \nIf a path to [@config] is not specified, is default value is specified in\n[paths](System.paths.html#section_Defaultpathsconfiguredbysteal)."}],"title":"","parent":"StealJS.config","alias":"steal.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

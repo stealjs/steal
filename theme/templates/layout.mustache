@@ -79,25 +79,27 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '{{url.builder}}',
-				BUILDER_DATA: '{{url.builderData}}',
-				BITHUB: '{{url.bithub}}',
-				CDN: '{{url.cdn}}'
-			}
-		};
-
+		var docObject = {{{docObjectString}}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
-	{{#staticLocation}}
-		src="{{.}}steal.js"
+	
+	{{#if devBuild}}
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal/steal.js"></script>
 	{{else}}
-		src="./static/steal.production.js"
-	{{/staticLocation}}
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	{{/if}}
 </body>
 
 </html>

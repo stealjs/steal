@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - output </title>
+	<title>StealJS - PluginifyOutput </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -86,8 +86,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="stealTools.grunt.pluginify.output.html" data-search="output">
-				output
+			<a class="sidebar-title" href="stealTools.grunt.pluginify.output.html" data-search="PluginifyOutput">
+				PluginifyOutput
 			</a>
 			
 
@@ -106,7 +106,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>output</h1>
+<h1>PluginifyOutput</h1>
 	<ul class="tags">
 		<li>typedef</li>
 	</ul>
@@ -148,7 +148,7 @@
 		
 		<section class="description">
 			<p>Specifies the behavior for an output in <a href="stealTools.grunt.pluginify.html">stealPluginify</a>. These properties are in
-addition to <a href="stealTools.pluginify.options.html">pluginifyOptions</a>.</p>
+addition to <a href="stealTools.pluginify.options.html">PluginifyOptions</a>.</p>
 
 		</section>
 		
@@ -262,6 +262,10 @@ location.</p>
 		
 
 		
+		<section class="comment">
+			
+		</section>
+		
 		
 
 		
@@ -284,23 +288,22 @@ location.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"stealTools.grunt.pluginify.output","src":"steal-tools/doc/grunt-pluginify-output.md","description":"Specifies the behavior for an output in [stealTools.grunt.pluginify]. These properties are in\naddition to [stealTools.pluginify.options].","title":"PluginifyOutput","types":[{"type":"Object","options":[{"name":"modules","description":"Builds all the modules in `modules` together with their dependencies.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"},{"type":"comparitor"}]}]}],"optional":true},{"name":"eachModule","description":"Builds each module in the list \nwith its dependendencies individually.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"},{"type":"comparitor"}]}]}],"optional":true},{"name":"graphs","description":"Builds each item in the graph on its own. Each dependency is \nbuilt individually.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"},{"type":"comparitor"}]}]}],"optional":true},{"name":"dest","description":"Specifies where the \noutput should be written.  Dest can be provided as a string or a function that returns the\nlocation.","types":[{"type":"String"},{"type":"function","returns":{"types":[{"type":"String"}]},"params":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"moduleData"}]}]}]}]}],"inherits":"stealTools.pluginify.options","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>
