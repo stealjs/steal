@@ -325,7 +325,7 @@ var makeSteal = function(System){
 				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main]);
+			setIfNotPresent(this.bundles, mainBundleName, [main, "@config"]);
 
 		}
 	};
@@ -492,32 +492,12 @@ var makeSteal = function(System){
 
 		// we only load things with force = true
 		if ( System.env == "production" && System.main ) {
-			
-			// Override instantiate temporarily to ensure @config is loaded
-			// before System.main
-			var baseInstantiate = System.instantiate;
-			var configDeps = [];
-			System.instantiate = function(load) {
-				var loader = this;
-				if(loader.defined["@config"] && load.name !== "@config" &&
-				   configDeps.indexOf(load.name) === -1) {
-					return loader.import("@config").then(function() {
-						System.instantiate = baseInstantiate;
-						return baseInstantiate.call(loader, load);
-					});
-				}
 
-				if(load.name === "@config") {
-					return baseInstantiate.call(this, load).then(function(instantiateResult) {
-						configDeps = instantiateResult.deps.slice();
-						return instantiateResult;
-					});
-				}
-				
-				return baseInstantiate.call(this, load);
-			};
+			configDeferred = System.import("@config");
 
-			return appDeferred = System.import(System.main)["catch"](function(e){
+			return appDeferred = configDeferred.then(function(){
+				return System.import(System.main);
+			})["catch"](function(e){
 				console.log(e);
 			});
 

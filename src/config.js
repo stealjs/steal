@@ -82,7 +82,7 @@
 				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main]);
+			setIfNotPresent(this.bundles, mainBundleName, [main, "@config"]);
 
 		}
 	};
