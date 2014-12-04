@@ -77,7 +77,8 @@ module.exports = function (grunt) {
           {expand: true, cwd: 'bower_components/traceur/', src: ['*'], dest: 'test/bower_components/traceur/', filter: 'isFile'},
 		  {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower_components/system-bower/', filter: 'isFile'},
           {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/bower_components/system-bower/', filter: 'isFile'},
-          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/with_paths/bower_components/system-bower/', filter: 'isFile'}
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/with_paths/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/as_config/vendor/system-bower/', filter: 'isFile'}
         ]
       }
     },
