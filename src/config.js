@@ -115,6 +115,7 @@
 				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/less.js");
+				this.paths["bower"] = parts.slice(0,-1).join("/")+"/system-bower/bower.js";
 				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
 				
 				if(isNode) {

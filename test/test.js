@@ -243,4 +243,16 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("less_options/site.html");
 	});
 
+
+	module("Bower extension");
+
+	asyncTest("Basics work", function(){
+		makeIframe("bower/site.html");
+	});
+	asyncTest("Doesn't overwrite paths", function(){
+		makeIframe("bower/with_paths/site.html");
+	});
+	asyncTest("Works in place of @config", function(){
+		makeIframe("bower/as_config/site.html");
+	});
 })();

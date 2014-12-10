@@ -85,6 +85,11 @@
 
 		} else if(System.env == "development"){
 
+			if(/bower.json/.test(System.paths["@config"])) {
+				var configPath = System.paths["@config"];
+				System.define("@config", 'define(["' + configPath + '!bower"]);');
+			}
+
 			configDeferred = System.import("@config");
 
 			devDeferred = configDeferred.then(function(){
