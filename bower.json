@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "traceur": "0.0.58",
-	"system-bower": "~0.0.1"
+	"system-bower": "^0.0.3"
   }
 }
