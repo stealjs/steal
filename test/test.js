@@ -243,6 +243,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("less_options/site.html");
 	});
 
+	asyncTest("allow truthy script options", function(){
+		makeIframe("basics/truthy_script_options.html");
+	});
+
 
 	module("Bower extension");
 

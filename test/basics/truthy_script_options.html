@@ -1,0 +1,17 @@
+<script>
+	if(window.parent) {
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	}
+</script>
+
+<script src="../steal.js" data-foo></script>
+
+<script>
+	if(window.QUnit) {
+		QUnit.ok(System.foo, "Sytem.foo should be truthy");
+		QUnit.equal(typeof System.foo, "boolean", "System.foo should be boolean");
+		QUnit.start();
+		removeMyself();
+	}
+</script>

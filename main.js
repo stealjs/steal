@@ -458,7 +458,7 @@ var makeSteal = function(System){
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
-				options[optionName] = attr.value;
+				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
 		}
