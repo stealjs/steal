@@ -101,6 +101,13 @@ QUnit.config.testTimeout = 30000;
 		}).then(start);
 	});
 
+	asyncTest("AMD and ES6 both importing an ES6 module", function(){
+		System["import"]("amd-es6/es6-amd-es6").then(function(m) {
+			equal(m.default.amd, "I am AMD", "Imported AMD module");
+			equal(m.default.es6, "ES6 Module", "Imported ES6 module");
+		}).then(start);
+	});
+
 	asyncTest("steal.dev.assert", function() {
 		System["import"]("dev").then(function(dev){
 			throws(
