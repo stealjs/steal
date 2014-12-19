@@ -1,0 +1,3 @@
+<img src="~/hello-world.png"></img>
+
+{{> ~/partial}}

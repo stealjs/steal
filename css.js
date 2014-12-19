@@ -41,5 +41,7 @@ if( steal.config('env') === 'production' ) {
 	
 }
 
+exports.tildeModules = /url\(['"](~\/.+)['"]/g;
+
 exports.buildType = "css";
 exports.includeInBuild = true;

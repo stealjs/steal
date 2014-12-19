@@ -33,4 +33,9 @@ exports.translate = function(load) {
 	});
 };
 
+exports.tildeModules = [
+	/@import ['"](~\/.+)['"]/g,
+	/url\(['"](~\/.+)['"]/g
+];
+
 exports.buildType = "css";

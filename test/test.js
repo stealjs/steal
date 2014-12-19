@@ -255,4 +255,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Works in place of @config", function(){
 		makeIframe("bower/as_config/site.html");
 	});
+
+	module("Tilde extension");
+
+	asyncTest("Basics work", function(){
+		makeIframe("tilde/site.html");
+	});
 })();

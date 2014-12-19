@@ -20,6 +20,7 @@ module.exports = function (grunt) {
           'src/core.js',     	// starts makeSteal
           'src/system-extension-ext.js',
           'src/system-extension-forward-slash.js',
+          'src/system-extension-tilde.js',
           'src/config.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal
@@ -44,6 +45,7 @@ module.exports = function (grunt) {
           'src/core.js',     	// starts makeSteal
           'src/system-extension-ext.js',
           'src/system-extension-forward-slash.js',
+          'src/system-extension-tilde.js',
           'src/config.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal
