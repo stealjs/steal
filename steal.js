@@ -5156,9 +5156,6 @@ if (typeof System !== "undefined") {
 		};
 	};
 	
-
-	
-
 	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {

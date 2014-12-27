@@ -71,9 +71,6 @@
 		};
 	};
 	
-
-	
-
 	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {

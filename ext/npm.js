@@ -575,9 +575,12 @@ var translateConfig = function(loader, packages){
 	} else {
 		g = global;
 	}
-	g.process = {
-		cwd: function(){}
-	};
+	if(!g.process) {
+		g.process = {
+			cwd: function(){}
+		};
+	}
+	
 	if(!loader.npm) {
 		loader.npm = {};
 		loader.npmPaths = {};
