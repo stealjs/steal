@@ -680,7 +680,7 @@ if (typeof System !== "undefined") {
 			
 		global.steal = makeSteal(System);
 		global.steal.System = System;
-		global.steal.dev = require("./dev.js");
+		global.steal.dev = require("./ext/dev.js");
 		steal.clone = makeSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
