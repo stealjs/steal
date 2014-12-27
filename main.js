@@ -96,7 +96,7 @@
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/"),
-			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.]+/);
+			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
 	
@@ -290,7 +290,8 @@ var makeSteal = function(System){
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			this.paths[System.configName] = name;
+			System.configName = name;
+			System.paths[name] = name;
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},

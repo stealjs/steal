@@ -47,7 +47,8 @@
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			this.paths[System.configName] = name;
+			System.configName = name;
+			System.paths[name] = name;
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},
