@@ -524,7 +524,7 @@ var makeSteal = function(System){
 				console.log(e);
 			});
 
-		} else if(System.env == "development"){
+		} else if(System.env == "development" || System.env == "build"){
 
 			configDeferred = System.import(System.configName);
 
@@ -545,7 +545,7 @@ var makeSteal = function(System){
 			appDeferred = devDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				if(!System.main) {
+				if(!System.main || System.env === "build") {
 					return configDeferred;
 				}
 				var main = System.main;
