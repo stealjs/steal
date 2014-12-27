@@ -206,4 +206,17 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("less loads in the right spot", function(){
 		makeIframe("less-imports/dev.html");
 	});
+	
+	asyncTest("json extension", function(){
+		makeIframe("json/dev.html");
+	});
+	
+	asyncTest("npm defaut-main", function(){
+		makeIframe("npm/default-main.html");
+	});
+	
+	asyncTest("npm alt-main", function(){
+		makeIframe("npm/alt-main.html");
+	});
+	
 })();

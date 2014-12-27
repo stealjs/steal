@@ -81,15 +81,15 @@
 			var configDeps = [];
 			System.instantiate = function(load) {
 				var loader = this;
-				if(loader.defined["@config"] && load.name !== "@config" &&
+				if(loader.defined[System.configName] && load.name !== System.configName &&
 				   configDeps.indexOf(load.name) === -1) {
-					return loader.import("@config").then(function() {
+					return loader.import(System.configName).then(function() {
 						System.instantiate = baseInstantiate;
 						return baseInstantiate.call(loader, load);
 					});
 				}
 
-				if(load.name === "@config") {
+				if(load.name === System.configName) {
 					return baseInstantiate.call(this, load).then(function(instantiateResult) {
 						configDeps = instantiateResult.deps.slice();
 						return instantiateResult;
@@ -105,7 +105,7 @@
 
 		} else if(System.env == "development"){
 
-			configDeferred = System.import("@config");
+			configDeferred = System.import(System.configName);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite

@@ -23,6 +23,7 @@
 			oldConfig.call(this, data);
 		};
 	};
+	
 	var setIfNotPresent = function(obj, prop, value){
 		if(!obj[prop]) {
 			obj[prop] = value;	
@@ -30,7 +31,8 @@
 	};
 	
 	// steal.js's default configuration values
-	System.paths["@config"] = "stealconfig.js";
+	System.configName = "@config";
+	System.paths[System.configName] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
 		css: '$css',
@@ -41,12 +43,11 @@
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 	
-	
 	var configSetter = {
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			this.paths["@config"] = name;
+			this.paths[System.configName] = name;
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},
@@ -111,10 +112,12 @@
 			set: function(dirname, cfg) {
 				var parts = dirname.split("/");
 
-				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
-				setIfNotPresent(this.paths,"$css", dirname+"/css.js");
-				setIfNotPresent(this.paths,"$less", dirname+"/less.js");
-				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
+				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
+				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
+				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
+				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				this.paths["@traceur"] = dirname+"/ext/traceur.js";
 				
 				if(isNode) {
 					System.register("less",[], false, function(){
@@ -122,13 +125,17 @@
 						return r('less');
 					});
 				} else {
-					setIfNotPresent(this.paths,"less",  dirname+"/"+LESS_ENGINE+".js");
+					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
 					
 					// make sure we don't set baseURL if something else is going to set it
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
+								parts.pop();
+							}
+							if (last(parts) === "node_modules") {
+								System.configName = "package.json!npm";
 								parts.pop();
 							}
 						}
@@ -170,4 +177,3 @@
 		
 	};
 	
-

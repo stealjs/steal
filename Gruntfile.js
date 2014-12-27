@@ -1,5 +1,7 @@
 'use strict';
 module.exports = function (grunt) {
+	
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     meta: {
@@ -20,6 +22,7 @@ module.exports = function (grunt) {
           'src/core.js',     	// starts makeSteal
           'src/system-extension-ext.js',
           'src/system-extension-forward-slash.js',
+          'node_modules/system-json/json.js',
           'src/config.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal
@@ -69,14 +72,24 @@ module.exports = function (grunt) {
       }
     },
     copy: {
+    	// copy plugins that steal should contain
+      extensions: {
+        files: [
+          {src:["node_modules/system-npm/npm.js"], dest: "ext/npm.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: 'isFile'},
+          {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: 'isFile'}
+        ]
+      },
       toTest: {
         files: [
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/steal/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/bower_components/steal/', filter: 'isFile'},
-          {expand: true, cwd: 'bower_components/traceur/', src: ['*'], dest: 'test/bower_components/traceur/', filter: 'isFile'}
+          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/', filter: 'isFile'},
+          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/steal/', filter: 'isFile'},
+          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/bower_components/steal/', filter: 'isFile'},
+          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/npm/node_modules/steal/', filter: 'isFile'},
+          {expand: true, src: ['node_modules/jquery/**'], dest: 'test/npm/', filter: 'isFile'}
         ]
-      }
+      },
+      
     },
     watch: {
       files: [ "src/*.js", "bower_components/systemjs/dist/**"],
@@ -107,6 +120,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('testee');
   
   grunt.registerTask('test', [ 'build', 'testee' ]);
-  grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:toTest' ]);
+  grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:extensions','copy:toTest' ]);
   grunt.registerTask('default', [ 'build' ]);
 };
