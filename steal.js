@@ -4890,7 +4890,6 @@ var $__curScript, __eval;
 					href.hash;
 		};
 
-
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/"),
 			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);

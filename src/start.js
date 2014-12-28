@@ -92,4 +92,3 @@
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		};
-
