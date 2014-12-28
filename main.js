@@ -291,6 +291,7 @@ var makeSteal = function(System){
 				root = dir(val);
 			System.configName = name;
 			System.paths[name] = name;
+			addProductionBundles.call(this);
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},
@@ -313,6 +314,13 @@ var makeSteal = function(System){
 		};
 	};
 	
+	var pluginPart = function(name) {
+		var bang = name.lastIndexOf("!");
+		if(bang !== -1) {
+			return name.substr(bang+1);
+		}
+	};
+	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
 			var main = this.main,
@@ -321,8 +329,15 @@ var makeSteal = function(System){
 				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main, System.configName]);
-
+			
+			// If the configName has a plugin like package.json!npm,
+			// plugin has to be defined prior to importing.
+			var plugin = pluginPart(System.configName);
+			var bundle = [main, System.configName];
+			if(plugin){
+				System.set(plugin, System.newModule({}));
+			}
+			this.bundles[mainBundleName] = bundle;
 		}
 	};
 	
@@ -494,12 +509,12 @@ var makeSteal = function(System){
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
+		if ( System.env == "production" ) {
 
 			configDeferred = System.import(System.configName);
 
-			return appDeferred = configDeferred.then(function(){
-				return System.import(System.main);
+			return appDeferred = configDeferred.then(function(cfg){
+				return System.main ? System.import(System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});

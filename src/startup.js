@@ -73,12 +73,12 @@
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
+		if ( System.env == "production" ) {
 
 			configDeferred = System.import(System.configName);
 
-			return appDeferred = configDeferred.then(function(){
-				return System.import(System.main);
+			return appDeferred = configDeferred.then(function(cfg){
+				return System.main ? System.import(System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});

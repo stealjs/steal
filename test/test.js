@@ -259,7 +259,9 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("npm/alt-main.html");
 	});
 	
-
+	asyncTest("production", function(){
+		makeIframe("npm/prod.html");
+	});
 
 	
 

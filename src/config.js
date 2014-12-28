@@ -50,6 +50,7 @@
 				root = dir(val);
 			System.configName = name;
 			System.paths[name] = name;
+			addProductionBundles.call(this);
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},
@@ -72,6 +73,13 @@
 		};
 	};
 	
+	var pluginPart = function(name) {
+		var bang = name.lastIndexOf("!");
+		if(bang !== -1) {
+			return name.substr(bang+1);
+		}
+	};
+	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
 			var main = this.main,
@@ -80,8 +88,15 @@
 				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main, System.configName]);
-
+			
+			// If the configName has a plugin like package.json!npm,
+			// plugin has to be defined prior to importing.
+			var plugin = pluginPart(System.configName);
+			var bundle = [main, System.configName];
+			if(plugin){
+				System.set(plugin, System.newModule({}));
+			}
+			this.bundles[mainBundleName] = bundle;
 		}
 	};
 	
