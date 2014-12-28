@@ -327,7 +327,6 @@ var makeSteal = function(System){
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+filename(main);
 				
-	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
 			
 			// If the configName has a plugin like package.json!npm,
@@ -389,10 +388,12 @@ var makeSteal = function(System){
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
 								System.configName = "bower.json!bower";
+								addProductionBundles.call(this);
 								parts.pop();
 							}
 							if (last(parts) === "node_modules") {
 								System.configName = "package.json!npm";
+								addProductionBundles.call(this);
 								parts.pop();
 							}
 						}
