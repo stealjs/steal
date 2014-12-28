@@ -79,8 +79,6 @@ var extension = function(System){
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
 		
-		console.log("normalize",name, parentName, parentAddress);
-	
 		var refPkg = findPackageByAddress(this, parentName, parentAddress);
 		
 		// this isn't in a package, so ignore
@@ -121,7 +119,6 @@ var extension = function(System){
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		console.log("locate", load.name);
 	
 		var parsedModuleName = parseModuleName(load.name);
 		
