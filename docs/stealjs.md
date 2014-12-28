@@ -77,8 +77,9 @@ tells steal to load the `main` module.
     <!DOCTYPE html>
     <html>
       <body>
-        <script src='./bower_components/steal/steal.js'
-                data-main='main'></script>
+        <script src="./bower_components/steal/steal.js"
+                data-main="main">
+        </script>
       </body>
     </html>
 
@@ -122,8 +123,8 @@ call `stealBuild`
           }
         }
       });
-      grunt.loadNpmTasks('steal-tools');
-      grunt.registerTask('build',['stealBuild']);
+      grunt.loadNpmTasks("steal-tools");
+      grunt.registerTask("build",["stealBuild"]);
     };
 
 After saving `Gruntfile.js` run:
@@ -137,8 +138,9 @@ Change `index.html` to look like:
     <!DOCTYPE html>
     <html>
       <body>
-        <script src='./bower_components/steal/steal.production.js'
-                data-main='main'></script>
+        <script src="./bower_components/steal/steal.production.js"
+                data-main="main">
+        </script>
       </body>
     </html>
 

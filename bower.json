@@ -2,10 +2,11 @@
   "name": "steal",
   "main": "steal.js",
   "ignore": ["test","src","core","docs"],
-  "version": "0.3.0",
+  "version": "0.4.0",
   "devDependencies": {
     "qunit": "~1.12.0",
     "systemjs" : "git://github.com/bitovi/systemjs.git#747c62d3d7850f76aeff375318f396dcea6801cc",
-    "traceur": "0.0.58"
+    "traceur": "0.0.58",
+    "system-bower": "~0.0.1"
   }
 }

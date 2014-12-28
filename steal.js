@@ -5123,6 +5123,7 @@ if (typeof System !== "undefined") {
 		css: '$css',
 		less: '$less'
 	};
+	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -5156,7 +5157,6 @@ if (typeof System !== "undefined") {
 		};
 	};
 	
-	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
 			var main = this.main,
@@ -5165,7 +5165,7 @@ if (typeof System !== "undefined") {
 				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main]);
+			setIfNotPresent(this.bundles, mainBundleName, [main, System.configName]);
 
 		}
 	};
@@ -5200,6 +5200,7 @@ if (typeof System !== "undefined") {
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				this.paths["@traceur"] = dirname+"/ext/traceur.js";
 				
 				if(isNode) {
@@ -5215,6 +5216,7 @@ if (typeof System !== "undefined") {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
+								System.configName = "bower.json!bower";
 								parts.pop();
 							}
 							if (last(parts) === "node_modules") {
@@ -5260,7 +5262,6 @@ if (typeof System !== "undefined") {
 		
 	};
 	
-
 	var getScriptOptions = function () {
 
 		var options = {},
@@ -5337,36 +5338,17 @@ if (typeof System !== "undefined") {
 
 		// we only load things with force = true
 		if ( System.env == "production" && System.main ) {
-			
-			// Override instantiate temporarily to ensure @config is loaded
-			// before System.main
-			var baseInstantiate = System.instantiate;
-			var configDeps = [];
-			System.instantiate = function(load) {
-				var loader = this;
-				if(loader.defined[System.configName] && load.name !== System.configName &&
-				   configDeps.indexOf(load.name) === -1) {
-					return loader.import(System.configName).then(function() {
-						System.instantiate = baseInstantiate;
-						return baseInstantiate.call(loader, load);
-					});
-				}
 
-				if(load.name === System.configName) {
-					return baseInstantiate.call(this, load).then(function(instantiateResult) {
-						configDeps = instantiateResult.deps.slice();
-						return instantiateResult;
-					});
-				}
-				
-				return baseInstantiate.call(this, load);
-			};
+			configDeferred = System.import(System.configName);
 
-			return appDeferred = System.import(System.main)["catch"](function(e){
+			return appDeferred = configDeferred.then(function(){
+				return System.import(System.main);
+			})["catch"](function(e){
 				console.log(e);
 			});
 
 		} else if(System.env == "development" || System.env == "build"){
+
 
 			configDeferred = System.import(System.configName);
 

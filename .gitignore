@@ -6,3 +6,4 @@ test/steal.production.js
 test/steal/
 bower_components/
 test/ext/
+test/bower/as_config/vendor/system-bower/

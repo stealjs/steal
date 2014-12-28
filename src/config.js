@@ -38,6 +38,7 @@
 		css: '$css',
 		less: '$less'
 	};
+	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -71,7 +72,6 @@
 		};
 	};
 	
-	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
 			var main = this.main,
@@ -80,7 +80,7 @@
 				
 	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main]);
+			setIfNotPresent(this.bundles, mainBundleName, [main, System.configName]);
 
 		}
 	};
@@ -115,6 +115,7 @@
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				this.paths["@traceur"] = dirname+"/ext/traceur.js";
 				
 				if(isNode) {
@@ -130,6 +131,7 @@
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
+								System.configName = "bower.json!bower";
 								parts.pop();
 							}
 							if (last(parts) === "node_modules") {

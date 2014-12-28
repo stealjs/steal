@@ -74,36 +74,17 @@
 
 		// we only load things with force = true
 		if ( System.env == "production" && System.main ) {
-			
-			// Override instantiate temporarily to ensure @config is loaded
-			// before System.main
-			var baseInstantiate = System.instantiate;
-			var configDeps = [];
-			System.instantiate = function(load) {
-				var loader = this;
-				if(loader.defined[System.configName] && load.name !== System.configName &&
-				   configDeps.indexOf(load.name) === -1) {
-					return loader.import(System.configName).then(function() {
-						System.instantiate = baseInstantiate;
-						return baseInstantiate.call(loader, load);
-					});
-				}
 
-				if(load.name === System.configName) {
-					return baseInstantiate.call(this, load).then(function(instantiateResult) {
-						configDeps = instantiateResult.deps.slice();
-						return instantiateResult;
-					});
-				}
-				
-				return baseInstantiate.call(this, load);
-			};
+			configDeferred = System.import(System.configName);
 
-			return appDeferred = System.import(System.main)["catch"](function(e){
+			return appDeferred = configDeferred.then(function(){
+				return System.import(System.main);
+			})["catch"](function(e){
 				console.log(e);
 			});
 
 		} else if(System.env == "development" || System.env == "build"){
+
 
 			configDeferred = System.import(System.configName);
 

@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "0.4.0-pre",
+  "version": "0.4.0",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -25,7 +25,7 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.3.0",
     "grunt-release": "^0.7.0",
-    "testee": "~0.1.1",
+    "testee": "0.1.1",
     "jquery": ">2.0"
   },
   "licenses": [

@@ -1,7 +1,8 @@
 'use strict';
 module.exports = function (grunt) {
 	
-
+  var core = ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'];
+  
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     meta: {
@@ -77,16 +78,23 @@ module.exports = function (grunt) {
         files: [
           {src:["node_modules/system-npm/npm.js"], dest: "ext/npm.js", filter: 'isFile'},
           {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: 'isFile'},
-          {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: 'isFile'}
+          {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: 'isFile'},
+          {src:["bower_components/system-bower/bower.js"], dest: "ext/bower.js", filter: 'isFile'}
         ]
       },
       toTest: {
         files: [
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/steal/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/bower_components/steal/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'], dest: 'test/npm/node_modules/steal/', filter: 'isFile'},
-          {expand: true, src: ['node_modules/jquery/**'], dest: 'test/npm/', filter: 'isFile'}
+          {expand: true, src: core, dest: 'test/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/steal/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/bower_components/steal/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/npm/node_modules/steal/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/bower/bower_components/steal/', filter: 'isFile'},
+          
+          {expand: true, src: ['node_modules/jquery/**'], dest: 'test/npm/', filter: 'isFile'},
+		  {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/with_paths/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/as_config/vendor/system-bower/', filter: 'isFile'}
         ]
       },
       

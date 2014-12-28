@@ -14,7 +14,7 @@ There is no longer a `"*"` mapping like before:
       map: {
         "*": {
           "can/util": "can/util/jquery"
-				}
+        }
       }
     });
 
@@ -70,11 +70,11 @@ Steal compiles the `less` files in a slightly different way than the legacy vers
 
 In the legacy Steal, you `@import`-ed stuff relative from the location of the `.less` file:
 
-    @import '../../../styles/variables.less';
+    @import "../../../styles/variables.less";
 
 In the new Steal `@import` path are relative to the steal root folder - folder that contains the `stealconfig.js` file:
 
-    @import 'styles/variables.less';
+    @import "styles/variables.less";
 
 The opposite is the case for the image urls in your `.less` files:
 

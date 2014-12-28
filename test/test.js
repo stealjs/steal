@@ -91,6 +91,36 @@ QUnit.config.testTimeout = 30000;
 		});
 	});
 
+	asyncTest("ignoring an import by mapping to @empty", function(){
+		System.map["map-empty/other"] = "@empty";
+		System["import"]("map-empty/main").then(function(m) {
+			var empty = System.get("@empty");
+			equal(m.other, empty, "Other is an empty module because it was mapped to empty in the config");
+		}, function(){
+			ok(false, "Loaded a module that should have been ignored");
+		}).then(start);
+	});
+
+	asyncTest("steal.dev.assert", function() {
+		System["import"]("ext/dev").then(function(dev){
+			throws(
+				function() {
+					dev.assert(false);
+				},
+				/Expected/,
+				"throws an error with default message"
+			);
+			throws(
+				function() {
+					dev.assert(false, "custom message");
+				},
+				/custom message/,
+				"throws an error with custom message"
+			);
+			start();
+		});
+	});
+
 
 	module("steal via html");
 
@@ -194,9 +224,11 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("System.instantiate preventing production css bundle", function(){
 		makeIframe("production/prod-inst.html");
 	});
+
 	asyncTest("Multi mains", function(){
 		makeIframe("multi-main/dev.html");
 	});
+
 	asyncTest("@loader is current loader", function(){
 		makeIframe("current-loader/dev.html");
 	});
@@ -206,17 +238,45 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("less loads in the right spot", function(){
 		makeIframe("less-imports/dev.html");
 	});
+
+	asyncTest("set options to less plugin", function(){
+		makeIframe("less_options/site.html");
+	});
+	
+	module("json extension");
 	
 	asyncTest("json extension", function(){
 		makeIframe("json/dev.html");
 	});
 	
-	asyncTest("npm defaut-main", function(){
+	module("npm");
+	
+	asyncTest("defaut-main", function(){
 		makeIframe("npm/default-main.html");
 	});
 	
-	asyncTest("npm alt-main", function(){
+	asyncTest("alt-main", function(){
 		makeIframe("npm/alt-main.html");
 	});
 	
+
+
+	
+
+
+	module("Bower extension");
+
+	asyncTest("Basics work", function(){
+		makeIframe("bower/site.html");
+	});
+	asyncTest("Doesn't overwrite paths", function(){
+		makeIframe("bower/with_paths/site.html");
+	});
+	asyncTest("Works in place of @config", function(){
+		makeIframe("bower/as_config/site.html");
+	});
+	
+	asyncTest("Loads config automatically", function(){
+		makeIframe("bower/default-config.html");
+	});
 })();

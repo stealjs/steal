@@ -33,7 +33,8 @@ be [System.config configured] via the `steal.js` script tag like:
 
     <script src="../path/to/steal/steal.js"
             data-env="production"
-            data-main="myapp"></script>
+            data-main="myapp">
+    </script>
             
 Or specified prior to steal loading like:
 
@@ -41,5 +42,6 @@ Or specified prior to steal loading like:
       steal = {env: "production"}
     </script>
     <script src="../path/to/steal/steal.js"
-            data-env="production"></script>
+            data-env="production">
+    </script>
 
