@@ -138,6 +138,13 @@ var extension = function(System){
 		return oldLocate.call(this, load);
 	};
 
+	var extend = function(d, s){
+		for(var prop in s) {
+			d[prop] = s[prop];
+		}
+		return d;
+	};
+
 	// PACKAGE HELPERS ========================
 	// Help locate modules based on packages info
 	function findPackageByAddress(loader, parentName, parentAddress) {
