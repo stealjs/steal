@@ -278,7 +278,7 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 	var packageName = pkg.name;
 	
 	var fromParsed = parseModuleName(fromName, packageName),
-		  toParsed = parseModuleName(toName, packageName);
+		  toParsed = toName  ? parseModuleName(toName, packageName): "@empty";
 	
 	map[createModuleName(fromParsed)] = createModuleName(toParsed);
 }
