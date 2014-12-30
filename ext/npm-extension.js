@@ -112,27 +112,38 @@ var extension = function(System){
 			return createModuleName(parsedModuleName);
 		} else {
 			// it could be a local module like components/foo
-			return oldNormalize.call(this, createModuleName(parsedModuleName, true), parentName, parentAddress);
+			parsedModuleName.version = refPkg.version;
+			var modName = createModuleName({
+				version: refPkg.version,
+				packageName: refPkg.name,
+				modulePath: name
+			});
+			return oldNormalize.call(this, modName, parentName, parentAddress);
 		}
 		
 	};
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-	
-		var parsedModuleName = parseModuleName(load.name);
+		console.log("locate",load.name);
+		var parsedModuleName = parseModuleName(load.name),
+			loader = this;
 		
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm) {
 			var pkg = this.npm[parsedModuleName.packageName];
-			if(pkg === this.npmPaths.__default) {
-				var loadCopy = extend({},load);
-				loadCopy.name = parsedModuleName.modulePath;
-				return oldLocate.call(this, loadCopy);
-			} else if(pkg) {
-				if(parsedModuleName.modulePath) {
-					return joinURL( packageFolderAddress(pkg.fileUrl), addJS(parsedModuleName.modulePath));
-				} 
+			if(pkg) {
+				return oldLocate.call(this, load).then(function(address){
+					var root = pkg === loader.npmPaths.__default ?
+						removePackage( pkg.fileUrl ) :
+						packageFolderAddress(pkg.fileUrl);
+					
+					if(parsedModuleName.modulePath) {
+						return joinURL( root, addJS(parsedModuleName.modulePath));
+					} 
+					
+					return address;
+				});
 			}
 		}
 		return oldLocate.call(this, load);
@@ -227,6 +238,9 @@ var extension = function(System){
 		} else {
 			return path+".js";
 		}
+	}
+	function removePackage(path){
+		return path.replace(/\/package\.json.*/,"");
 	}
 	
 	function packageFolderAddress(address){

@@ -81,7 +81,7 @@ exports.translate = function(load){
 					version: pkg.version,
 					fileUrl: pkg.fileUrl,
 					main: pkg.main,
-					system: pkg.system,
+					system: convertSystem(context, pkg, pkg.system),
 					globalBrowser: convertBrowser(pkg, pkg.globalBrowser ),
 					browser: convertBrowser(pkg,  pkg.browser )
 				});
@@ -109,6 +109,7 @@ function processPkg(context, pkg, source) {
 }
 // processes a package.json's dependencies
 function processDeps(context, pkg) {
+
 	var deps = getDependencies(context.loader, pkg);
 	return Promise.all(deps.map(function(childPkg){
 
@@ -180,9 +181,7 @@ function addDeps(packageJSON, dependencies, deps){
 		}
 	}
 }
-
-// Combines together dependencies and devDependencies (if npmDev option is enabled)
-function getDependencies(loader, packageJSON){
+function getDependencyMap(loader, packageJSON){
 	var deps = {};
 	
 	addDeps(packageJSON, packageJSON.peerDependencies || {}, deps);
@@ -193,6 +192,11 @@ function getDependencies(loader, packageJSON){
 		addDeps(packageJSON, packageJSON.devDependencies || {}, deps);
 		loader._npmMainLoaded = true;
 	}
+	return deps;
+}
+// Combines together dependencies and devDependencies (if npmDev option is enabled)
+function getDependencies(loader, packageJSON){
+	var deps = getDependencyMap(loader, packageJSON);
 	
 	var dependencies = [];
 	for(var name in deps) {
@@ -237,7 +241,15 @@ function npmTraverseUp(context, pkg, fileUrl) {
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
-
+function convertSystem(context, pkg, system) {
+	if(!system) {
+		return system;
+	}
+	if(system.meta) {
+		system.meta = convertPropertyNames(context, pkg, system.meta);
+	}
+	return system;
+}
 function convertBrowser(pkg, browser) {
 	if(typeof browser === "string") {
 		return browser;
@@ -247,6 +259,38 @@ function convertBrowser(pkg, browser) {
 		convertBrowserProperty(map, pkg, fromName, browser[fromName]);
 	}
 	return map;
+}
+
+function convertPropertyNames (context, pkg, map ) {
+	if(!map) {
+		return map;
+	}
+	var clone = {};
+	for( property in map ) {
+		var parsed = parseModuleName(property, pkg.name);
+		if(property.indexOf("#") >= 0) {
+			
+			if(parsed.packageName === pkg.name) {
+				parsed.version = pkg.version;
+			} else {
+				// Get the requested version's actual version.
+				var requestedVersion = getDependencyMap(context.loader, pkg)[parsed.packageName].version;
+				var depPkg = context.versions[parsed.packageName][requestedVersion];
+				parsed.version = depPkg.version;
+			}
+			clone[ createModuleName(parsed) ] = map[property];
+		} else {
+			// this is for a module within the package
+			clone[ createModuleName({
+				packageName: pkg.name,
+				modulePath: property,
+				version: pkg.version,
+				plugin: parsed.plugin
+			}) ] = map[property];
+		}
+		
+	}
+	return clone;
 }
 
 /**
