@@ -15,7 +15,7 @@ function createModuleName (descriptor, standard) {
 		return descriptor.packageName
 			+ (descriptor.version ? '@' + descriptor.version : '')
 			+ (descriptor.modulePath ? '#' + descriptor.modulePath : '')
-			+ (descriptor.plugin ? '!' + descriptor.plugin : '');
+			+ (descriptor.plugin ? descriptor.plugin : '');
 	}
 };
 
@@ -52,7 +52,7 @@ function parseModuleName (moduleName, currentPackageName) {
 	}
 	
 	return {
-		plugin: pluginParts[1],
+		plugin: pluginParts.length === 2 ? "!"+pluginParts[1] : undefined,
 		version: versionParts[1],
 		modulePath: modulePath,
 		packageName: packageName,
@@ -125,7 +125,8 @@ var extension = function(System){
 			return oldNormalize.call(this, createModuleName(parsedModuleName), parentName, parentAddress);
 		} else {
 			if(depPkg === this.npmPaths.__default) {
-				var localName = parsedModuleName.modulePath ? parsedModuleName.modulePath : pkgMain(depPkg);
+				//debugger;
+				var localName = parsedModuleName.modulePath ? parsedModuleName.modulePath+(parsedModuleName.plugin? parsedModuleName.plugin: "") : pkgMain(depPkg);
 				return oldNormalize.call(this, localName, parentName, parentAddress);
 			}
 			return oldNormalize.call(this, name, parentName, parentAddress);
