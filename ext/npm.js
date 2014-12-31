@@ -74,16 +74,17 @@ exports.translate = function(load){
 		// clean up packages so everything is unique
 		var names = {};
 		var packages = [];
-		context.packages.forEach(function(pkg){
+		context.packages.forEach(function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
+				
 				packages.push({
 					name: pkg.name,
 					version: pkg.version,
 					fileUrl: pkg.fileUrl,
 					main: pkg.main,
-					system: convertSystem(context, pkg, pkg.system),
-					globalBrowser: convertBrowser(pkg, pkg.globalBrowser ),
-					browser: convertBrowser(pkg,  pkg.browser )
+					system: convertSystem(context, pkg, pkg.system, index === 0 ),
+					globalBrowser: convertBrowser( pkg, pkg.globalBrowser ),
+					browser: convertBrowser( pkg,  pkg.browser )
 				});
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
@@ -241,12 +242,12 @@ function npmTraverseUp(context, pkg, fileUrl) {
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
-function convertSystem(context, pkg, system) {
+function convertSystem(context, pkg, system, root) {
 	if(!system) {
 		return system;
 	}
 	if(system.meta) {
-		system.meta = convertPropertyNames(context, pkg, system.meta);
+		system.meta = convertPropertyNames(context, pkg, system.meta, root);
 	}
 	return system;
 }
@@ -261,7 +262,7 @@ function convertBrowser(pkg, browser) {
 	return map;
 }
 
-function convertPropertyNames (context, pkg, map ) {
+function convertPropertyNames (context, pkg, map , root) {
 	if(!map) {
 		return map;
 	}
@@ -280,13 +281,19 @@ function convertPropertyNames (context, pkg, map ) {
 			}
 			clone[ createModuleName(parsed) ] = map[property];
 		} else {
-			// this is for a module within the package
-			clone[ createModuleName({
-				packageName: pkg.name,
-				modulePath: property,
-				version: pkg.version,
-				plugin: parsed.plugin
-			}) ] = map[property];
+			
+			if(root && property.substr(0,2) === "./" ) {
+				clone[property.substr(2)] = map[property];
+			} else {
+				// this is for a module within the package
+				clone[ createModuleName({
+					packageName: pkg.name,
+					modulePath: property,
+					version: pkg.version,
+					plugin: parsed.plugin
+				}) ] = map[property];
+			}
+			
 		}
 		
 	}

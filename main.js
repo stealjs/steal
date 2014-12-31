@@ -148,7 +148,6 @@
 
 var makeSteal = function(System){
 	
-	
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 		
 	var configDeferred,

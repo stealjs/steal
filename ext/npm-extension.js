@@ -78,9 +78,7 @@ var extension = function(System){
 	
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
-		if(name[0] === "$" || name[0] === "@") {
-			
-		}
+		
 		var refPkg = findPackageByAddress(this, parentName, parentAddress);
 		
 		// this isn't in a package, so ignore
@@ -105,32 +103,22 @@ var extension = function(System){
 			}
 		}
 		
-		if( depPkg ) {
+		if( depPkg && depPkg !== this.npmPaths.__default ) {
 			parsedModuleName.version = depPkg.version;
 			// add the main path
 			if(!parsedModuleName.modulePath) {
 				parsedModuleName.modulePath = (typeof depPkg.browser === "string" && depPkg.browser) || depPkg.main || 'index';
 			}
-			return createModuleName(parsedModuleName);
+			return oldNormalize.call(this, createModuleName(parsedModuleName), parentName, parentAddress);
 		} else {
-			// it could be a local module like components/foo
-			parsedModuleName.version = refPkg.version;
-			var modName = createModuleName({
-				version: refPkg.version,
-				packageName: refPkg.name,
-				modulePath: name
-			});
-			if(name[0] === "$" || name[0] === "@") {
-				modName = name;
-			}
-			return oldNormalize.call(this, modName, parentName, parentAddress);
+			return oldNormalize.call(this, name, parentName, parentAddress);
 		}
 		
 	};
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		console.log("locate",load.name);
+		
 		var parsedModuleName = parseModuleName(load.name),
 			loader = this;
 		
