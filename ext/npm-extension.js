@@ -77,6 +77,18 @@ function parentNodeModuleAddress(address) {
 
 var extension = function(System){
 	
+	/**
+	 * Normalize has to deal with a "tricky" situation.  There are module names like
+	 * "css" -> "css" normalize like normal
+	 * "./qunit" //-> "qunit"  ... could go to steal-qunit#qunit, but then everything would?
+	 * 
+	 * isRoot?
+	 *   "can-slider" //-> "path/to/main"
+	 * 
+	 * else
+	 * 
+	 *   "can-slider" //-> "can-slider#path/to/main"
+	 */
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
 		
@@ -108,19 +120,25 @@ var extension = function(System){
 			parsedModuleName.version = depPkg.version;
 			// add the main path
 			if(!parsedModuleName.modulePath) {
-				parsedModuleName.modulePath = (typeof depPkg.browser === "string" && depPkg.browser) || depPkg.main || 'index';
+				parsedModuleName.modulePath = pkgMain(depPkg);
 			}
 			return oldNormalize.call(this, createModuleName(parsedModuleName), parentName, parentAddress);
 		} else {
+			if(depPkg === this.npmPaths.__default) {
+				var localName = parsedModuleName.modulePath ? parsedModuleName.modulePath : pkgMain(depPkg);
+				return oldNormalize.call(this, localName, parentName, parentAddress);
+			}
 			return oldNormalize.call(this, name, parentName, parentAddress);
 		}
 		
 	};
+	function pkgMain(pkg) {
+		return removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' );
+	}
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		console.log("locate",load.name);
-
+		
 		var parsedModuleName = parseModuleName(load.name),
 			loader = this;
 		
@@ -233,6 +251,9 @@ var extension = function(System){
 		} else {
 			return path+".js";
 		}
+	}
+	function removeJS(path) {
+		return path.replace(/\.js(!|$)/,function(whole, part){return part;});
 	}
 	function removePackage(path){
 		return path.replace(/\/package\.json.*/,"");
