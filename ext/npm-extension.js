@@ -78,7 +78,9 @@ var extension = function(System){
 	
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
-		
+		if(name[0] === "$" || name[0] === "@") {
+			
+		}
 		var refPkg = findPackageByAddress(this, parentName, parentAddress);
 		
 		// this isn't in a package, so ignore
@@ -118,6 +120,9 @@ var extension = function(System){
 				packageName: refPkg.name,
 				modulePath: name
 			});
+			if(name[0] === "$" || name[0] === "@") {
+				modName = name;
+			}
 			return oldNormalize.call(this, modName, parentName, parentAddress);
 		}
 		
