@@ -108,13 +108,26 @@ function processPkg(context, pkg, source) {
 	context.packages.push(pkg);
 	return pkg;
 }
+
+function nodeModuleAddress(address) {
+	if(!address) debugger;
+	var nodeModules = "/node_modules/",
+		nodeModulesIndex = address.lastIndexOf(nodeModules);
+	if(nodeModulesIndex >= 0) {
+		return address.substr(0, nodeModulesIndex+nodeModules.length - 1 );
+	}
+}
 // processes a package.json's dependencies
 function processDeps(context, pkg) {
 
 	var deps = getDependencies(context.loader, pkg);
 	return Promise.all(deps.map(function(childPkg){
-
-		childPkg.origFileUrl = npmExtension.childPackageAddress(pkg.fileUrl, childPkg.name);
+		if(childPkg._isPeerDependency) {
+			childPkg.origFileUrl = nodeModuleAddress(pkg.fileUrl)+"/"+childPkg.name+"/package.json";
+		} else {
+			childPkg.origFileUrl = npmExtension.childPackageAddress(pkg.fileUrl, childPkg.name);
+		}
+		
 		
 		// check if childPkg matches a parent's version ... if it does ... do nothing
 		if(hasParentPackageThatMatches(context, childPkg)) {
@@ -175,17 +188,17 @@ function hasParentPackageThatMatches(context, childPkg){
 	}
 }
 
-function addDeps(packageJSON, dependencies, deps){
+function addDeps(packageJSON, dependencies, deps, defaultProps){
 	for(var name in dependencies) {
 		if(!packageJSON.system || !packageJSON.system.npmIgnore || !packageJSON.system.npmIgnore[name]) {
-			deps[name] = {name: name, version: dependencies[name]};
+			deps[name] = extend(defaultProps || {}, {name: name, version: dependencies[name]});
 		}
 	}
 }
 function getDependencyMap(loader, packageJSON){
 	var deps = {};
 	
-	addDeps(packageJSON, packageJSON.peerDependencies || {}, deps);
+	addDeps(packageJSON, packageJSON.peerDependencies || {}, deps, {_isPeerDependency: true});
 	addDeps(packageJSON, packageJSON.dependencies || {}, deps);
 	// Only get the devDependencies if this is the root bower and the 
 	// `npmDev` option is enabled
@@ -249,6 +262,9 @@ function convertSystem(context, pkg, system, root) {
 	if(system.meta) {
 		system.meta = convertPropertyNames(context, pkg, system.meta, root);
 	}
+	if(system.map) {
+		system.map = convertPropertyNamesAndValues(context, pkg, system.map, root);
+	}
 	return system;
 }
 function convertBrowser(pkg, browser) {
@@ -268,36 +284,66 @@ function convertPropertyNames (context, pkg, map , root) {
 	}
 	var clone = {};
 	for( property in map ) {
-		var parsed = parseModuleName(property, pkg.name);
-		if(property.indexOf("#") >= 0) {
-			
-			if(parsed.packageName === pkg.name) {
-				parsed.version = pkg.version;
-			} else {
-				// Get the requested version's actual version.
-				var requestedVersion = getDependencyMap(context.loader, pkg)[parsed.packageName].version;
-				var depPkg = context.versions[parsed.packageName][requestedVersion];
-				parsed.version = depPkg.version;
-			}
-			clone[ createModuleName(parsed) ] = map[property];
+		clone[convertName(context, pkg, map, root, property)] = map[property];
+	}
+	return clone;
+}
+function convertPropertyNamesAndValues (context, pkg, map , root) {
+	if(!map) {
+		return map;
+	}
+	var clone = {};
+	for( property in map ) {
+		clone[convertName(context, pkg, map, root, property)] = convertName(context, pkg, map, root, map[property]);
+	}
+	return clone;
+}
+function convertName (context, pkg, map, root, name) {
+	var parsed = parseModuleName(name, pkg.name);
+	if(name.indexOf("#") >= 0) {
+		
+		if(parsed.packageName === pkg.name) {
+			parsed.version = pkg.version;
 		} else {
-			
-			if(root && property.substr(0,2) === "./" ) {
-				clone[property.substr(2)] = map[property];
-			} else {
-				// this is for a module within the package
-				clone[ createModuleName({
+			// Get the requested version's actual version.
+			var requestedVersion = getDependencyMap(context.loader, pkg)[parsed.packageName].version;
+			var depPkg = context.versions[parsed.packageName][requestedVersion];
+			parsed.version = depPkg.version;
+		}
+		return createModuleName(parsed);
+		
+	} else {
+		
+		if(root && property.substr(0,2) === "./" ) {
+			return property.substr(2);
+		} else {
+			// this is for a module within the package
+			if (property.substr(0,2) === "./" ) {
+				return createModuleName({
 					packageName: pkg.name,
-					modulePath: property,
+					modulePath: name,
 					version: pkg.version,
 					plugin: parsed.plugin
-				}) ] = map[property];
+				});
+			} else {
+				// TODO: share code better!
+				var depPkg;
+				if( pkg.name === parsed.packageName ) {
+					depPkg = pkg;
+				} else {
+					var requestedVersion = getDependencyMap(context.loader, pkg)[parsed.packageName].version;
+					var depPkg = context.versions[parsed.packageName][requestedVersion];
+				}
+				parsed.version = depPkg.version;
+				if(!parsed.modulePath) {
+					parsed.modulePath = (typeof depPkg.browser === "string" && depPkg.browser) || depPkg.main || 'index';
+				}
+				return createModuleName(parsed);
 			}
 			
 		}
 		
 	}
-	return clone;
 }
 
 /**

@@ -65,6 +65,7 @@ function childPackageAddress(parentPackageAddress, childName){
 	return (packageFolderName ? packageFolderName+"/" : "")+"node_modules/" + childName + "/package.json";
 }
 
+
 function parentNodeModuleAddress(address) {
 	var nodeModules = "/node_modules/",
 		nodeModulesIndex = address.lastIndexOf(nodeModules),
@@ -118,7 +119,8 @@ var extension = function(System){
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		
+		console.log("locate",load.name);
+
 		var parsedModuleName = parseModuleName(load.name),
 			loader = this;
 		
