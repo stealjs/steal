@@ -146,7 +146,7 @@ var extension = function(System){
 	}
 
 	function pkgMain(pkg) {
-		return makeRelative( removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) );
+		return  removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) ;
 	}
 	
 	var oldLocate = System.locate;
