@@ -12,9 +12,13 @@ function createModuleName (descriptor, standard) {
 	if(standard) {
 		return descriptor.moduleName;
 	} else {
+		var modulePath;
+		if(descriptor.modulePath) {
+			modulePath = descriptor.modulePath.substr(0,2) === "./" ? descriptor.modulePath.substr(2) : descriptor.modulePath;
+		}
 		return descriptor.packageName
 			+ (descriptor.version ? '@' + descriptor.version : '')
-			+ (descriptor.modulePath ? '#' + descriptor.modulePath : '')
+			+ (modulePath ? '#' + modulePath : '')
 			+ (descriptor.plugin ? descriptor.plugin : '');
 	}
 };
@@ -133,13 +137,21 @@ var extension = function(System){
 		}
 		
 	};
+	function makeRelative(path){
+		if( isRelative(path) && path.substr(0,1) !== "/" ) {
+			return path;
+		} else {
+			return "./"+path;
+		}
+	}
+
 	function pkgMain(pkg) {
-		return removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' );
+		return makeRelative( removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) );
 	}
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		
+		console.log("locate", load.name);
 		var parsedModuleName = parseModuleName(load.name),
 			loader = this;
 		
@@ -222,7 +234,7 @@ var extension = function(System){
 		if( isRelative( parsedModuleName.modulePath ) ) {
 			var parentParsed = parseModuleName( parentName, packageName );
 			if( parentParsed.packageName === parsedModuleName.packageName && parentParsed.modulePath ) {
-				parsedModuleName.modulePath = joinURIs(parentParsed.modulePath, parsedModuleName.modulePath);
+				parsedModuleName.modulePath = makeRelative( joinURIs(parentParsed.modulePath, parsedModuleName.modulePath) );
 			}
 		}
 		var mapName = createModuleName(parsedModuleName),
@@ -342,6 +354,7 @@ exports.createModuleName = createModuleName;
 exports.parseModuleName = parseModuleName;
 exports.childPackageAddress = childPackageAddress;
 exports.parentNodeModuleAddress= parentNodeModuleAddress;
+exports.isRelative= isRelative;
 
 exports.out = function(){
 	return [createModuleName,parseModuleName,isRelative, childPackageAddress, parentNodeModuleAddress].join("\n")+"\n"+

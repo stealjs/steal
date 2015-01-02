@@ -4622,7 +4622,6 @@ var $__curScript, __eval;
 				hash     : m[8] || ''
 			} : null);
 		},
-		  
 		joinURIs = function(base, href) {
 			function removeDotSegments(input) {
 				var output = [];
