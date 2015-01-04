@@ -122,7 +122,7 @@ function processDeps(context, pkg) {
 
 	var deps = getDependencies(context.loader, pkg);
 	return Promise.all(deps.map(function(childPkg){
-		if(childPkg._isPeerDependency) {
+		if(childPkg._isPeerDependency && nodeModuleAddress(pkg.fileUrl) ) {
 			childPkg.origFileUrl = nodeModuleAddress(pkg.fileUrl)+"/"+childPkg.name+"/package.json";
 		} else {
 			childPkg.origFileUrl = npmExtension.childPackageAddress(pkg.fileUrl, childPkg.name);
