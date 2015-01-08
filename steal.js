@@ -4555,6 +4555,7 @@ var $__curScript, __eval;
                                            self : global));
 
 (function(global){
+
 	// helpers
 	var camelize = function(str){
 		return str.replace(/-+(.)?/g, function(match, chr){ 

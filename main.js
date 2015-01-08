@@ -1,4 +1,5 @@
 (function(global){
+
 	// helpers
 	var camelize = function(str){
 		return str.replace(/-+(.)?/g, function(match, chr){ 
