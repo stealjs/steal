@@ -5,7 +5,12 @@
 function isRelative(path) {
 	return  path.substr(0,1) === ".";
 }
-
+function pkgMain(pkg) {
+	return  removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) ;
+}
+function removeJS(path) {
+	return path.replace(/\.js(!|$)/,function(whole, part){return part;});
+}
 
 // Converts a parsed module name to a string
 function createModuleName (descriptor, standard) {
@@ -145,9 +150,7 @@ var extension = function(System){
 		}
 	}
 
-	function pkgMain(pkg) {
-		return  removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) ;
-	}
+	
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
@@ -265,9 +268,7 @@ var extension = function(System){
 			return path+".js";
 		}
 	}
-	function removeJS(path) {
-		return path.replace(/\.js(!|$)/,function(whole, part){return part;});
-	}
+
 	function removePackage(path){
 		return path.replace(/\/package\.json.*/,"");
 	}
@@ -355,8 +356,9 @@ exports.parseModuleName = parseModuleName;
 exports.childPackageAddress = childPackageAddress;
 exports.parentNodeModuleAddress= parentNodeModuleAddress;
 exports.isRelative= isRelative;
+exports.pkgMain = pkgMain;
 
 exports.out = function(){
-	return [createModuleName,parseModuleName,isRelative, childPackageAddress, parentNodeModuleAddress].join("\n")+"\n"+
+	return [createModuleName,parseModuleName,isRelative, removeJS, pkgMain, childPackageAddress, parentNodeModuleAddress].join("\n")+"\n"+
 		"("+extension.toString()+")(loader);\n";
 };

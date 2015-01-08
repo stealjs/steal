@@ -336,7 +336,7 @@ function convertName (context, pkg, map, root, name) {
 				}
 				parsed.version = depPkg.version;
 				if(!parsed.modulePath) {
-					parsed.modulePath = (typeof depPkg.browser === "string" && depPkg.browser) || depPkg.main || 'index';
+					parsed.modulePath = npmExtension.pkgMain(depPkg);
 				}
 				return createModuleName(parsed);
 			}
