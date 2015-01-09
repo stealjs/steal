@@ -16,8 +16,8 @@ module.exports = function (grunt) {
     concat: {
       dist: {
         src: [
-          'bower_components/es6-module-loader/dist/es6-module-loader.js',
-          'bower_components/systemjs/dist/system.js',
+          'bower_components/es6-module-loader/dist/es6-module-loader.src.js',
+          'bower_components/systemjs/dist/system.src.js',
           'src/start.js',
           'src/normalize.js',
           'src/core.js',     	// starts makeSteal

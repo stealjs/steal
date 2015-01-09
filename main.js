@@ -665,7 +665,9 @@ if (typeof System !== "undefined") {
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addSteal = addSteal;
-		global.define = System.amdDefine;
+		
+		// I think production needs this
+		// global.define = System.amdDefine;
 		
 	} else {
     	
