@@ -124,6 +124,7 @@
 			set: function(dirname, cfg) {
 				var parts = dirname.split("/");
 
+				// steal keeps this around to make things easy no matter how you are using it.
 				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
@@ -132,6 +133,7 @@
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				this.paths["@traceur"] = dirname+"/ext/traceur.js";
+				this.paths["@traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				
 				if(isNode) {
 					System.register("less",[], false, function(){

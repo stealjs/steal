@@ -243,6 +243,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("less_options/site.html");
 	});
 	
+	asyncTest("Loads traceur-runtime automatically", function(){
+		makeIframe("traceur_runtime/dev.html");
+	});
+	
 	module("json extension");
 	
 	asyncTest("json extension", function(){
@@ -281,4 +285,6 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Loads config automatically", function(){
 		makeIframe("bower/default-config.html");
 	});
+	
+
 })();
