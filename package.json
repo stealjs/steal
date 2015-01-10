@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "0.4.0",
+  "version": "0.5.0-pre",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -27,6 +27,10 @@
     "grunt-release": "^0.7.0",
     "testee": "0.1.1",
     "jquery": ">2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bitovi/steal.git"
   },
   "licenses": [
     {
