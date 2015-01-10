@@ -271,17 +271,8 @@ function convertSystem(context, pkg, system, root) {
 	}
 	return system;
 }
-function convertBrowser(pkg, browser) {
-	if(typeof browser === "string") {
-		return browser;
-	}
-	var map = {};
-	for(var fromName in browser) {
-		convertBrowserProperty(map, pkg, fromName, browser[fromName]);
-	}
-	return map;
-}
 
+// converts only the property name
 function convertPropertyNames (context, pkg, map , root) {
 	if(!map) {
 		return map;
@@ -292,6 +283,8 @@ function convertPropertyNames (context, pkg, map , root) {
 	}
 	return clone;
 }
+
+// converts both property name and value
 function convertPropertyNamesAndValues (context, pkg, map , root) {
 	if(!map) {
 		return map;
@@ -302,6 +295,7 @@ function convertPropertyNamesAndValues (context, pkg, map , root) {
 	}
 	return clone;
 }
+
 function convertName (context, pkg, map, root, name) {
 	var parsed = parseModuleName(name, pkg.name);
 	if(name.indexOf("#") >= 0) {
@@ -350,6 +344,7 @@ function convertName (context, pkg, map, root, name) {
 	}
 }
 
+
 /**
  * Converts browser names into actual module names.
  * 
@@ -375,6 +370,18 @@ function convertName (context, pkg, map, root, name) {
  * }
  * ```
  */
+function convertBrowser(pkg, browser) {
+	if(typeof browser === "string") {
+		return browser;
+	}
+	var map = {};
+	for(var fromName in browser) {
+		convertBrowserProperty(map, pkg, fromName, browser[fromName]);
+	}
+	return map;
+}
+
+
 function convertBrowserProperty(map, pkg, fromName, toName) {
 	var packageName = pkg.name;
 	
@@ -383,6 +390,8 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 	
 	map[createModuleName(fromParsed)] = createModuleName(toParsed);
 }
+
+
 
 var translateConfig = function(loader, packages){
 	var g;
