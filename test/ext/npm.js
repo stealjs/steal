@@ -423,7 +423,11 @@ var translateConfig = function(loader, packages){
 	
 	packages.forEach(function(pkg){
 		if(pkg.system) {
+			// don't set system.main
+			var main = pkg.system.main;
 			loader.config(pkg.system);
+			pkg.system.main = main;
+			
 		}
 		if(pkg.globalBrowser) {
 			setGlobalBrowser(pkg.globalBrowser, pkg);
