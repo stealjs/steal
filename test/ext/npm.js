@@ -425,6 +425,7 @@ var translateConfig = function(loader, packages){
 		if(pkg.system) {
 			// don't set system.main
 			var main = pkg.system.main;
+			delete pkg.system.main;
 			loader.config(pkg.system);
 			pkg.system.main = main;
 			
