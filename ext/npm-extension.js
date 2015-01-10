@@ -6,7 +6,7 @@ function isRelative(path) {
 	return  path.substr(0,1) === ".";
 }
 function pkgMain(pkg) {
-	return  removeJS( (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) ;
+	return  removeJS( (pkg.system && pkg.system.main) || (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) ;
 }
 function removeJS(path) {
 	return path.replace(/\.js(!|$)/,function(whole, part){return part;});
@@ -154,7 +154,6 @@ var extension = function(System){
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		console.log("locate", load.name);
 		var parsedModuleName = parseModuleName(load.name),
 			loader = this;
 		
