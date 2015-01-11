@@ -414,6 +414,11 @@ var translateConfig = function(loader, packages){
 		loader.globalBrowser = {};
 	}
 	loader.npmPaths.__default = packages[0];
+	var lib = packages[0].system && packages[0].system.directories && packages[0].system.directories.lib;
+	
+	if(lib) {
+		loader.paths["*"] = lib+"/"+"*.js";
+	}
 	var setGlobalBrowser = function(globals, pkg){
 		for(var name in globals) {
 			loader.globalBrowser[name] = {

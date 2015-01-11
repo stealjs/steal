@@ -166,6 +166,11 @@ var extension = function(System){
 						removePackage( pkg.fileUrl ) :
 						packageFolderAddress(pkg.fileUrl);
 					
+					var lib = pkg.system && pkg.system.directories && pkg.system.directories.lib;
+					if(lib) {
+						root = joinURL(root, lib);
+					}
+					
 					if(parsedModuleName.modulePath) {
 						return joinURL( root, addJS(parsedModuleName.modulePath));
 					} 
