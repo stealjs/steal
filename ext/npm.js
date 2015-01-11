@@ -76,7 +76,9 @@ exports.translate = function(load){
 		var packages = [];
 		context.packages.forEach(function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
-				
+				if(pkg.browser){ 
+					delete pkg.browser.transform;
+				}
 				packages.push({
 					name: pkg.name,
 					version: pkg.version,
