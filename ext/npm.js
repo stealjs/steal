@@ -328,7 +328,12 @@ function convertName (context, pkg, map, root, name) {
 				if( pkg.name === parsed.packageName ) {
 					depPkg = pkg;
 				} else {
-					var requestedVersion = getDependencyMap(context.loader, pkg, root)[parsed.packageName].version;
+					var requestedProject = getDependencyMap(context.loader, pkg, root)[parsed.packageName];
+					if(!requestedProject) {
+						console.warn("WARN: Could not find ", name , "in node_modules. Ignoring.");
+						return name;
+					}
+					var requestedVersion = requestedProject.version;
 					var depPkg = context.versions[parsed.packageName][requestedVersion];
 				}
 				parsed.version = depPkg.version;
