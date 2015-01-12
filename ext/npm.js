@@ -166,11 +166,26 @@ function isSameRequestedVersionFound(context, childPkg) {
 		context.versions[childPkg.name] = {};
 	}
 	var versions = context.versions[childPkg.name];
-	if(!versions[childPkg.version]) {
-		versions[childPkg.version] = childPkg;
+	
+	var requestedRange = childPkg.version;
+	
+	if( !SemVer.validRange(childPkg.version) ) {
+		
+		if(/^[\w_\-]+\/[\w_\-]+(#[\w_\-]+)?$/.test(requestedRange)  ) {
+			
+			requestedRange = "git+https://github.com/"+requestedRange;
+			if(!/(#[\w_\-]+)?$/.test(requestedRange)) {
+				requestedRange += "#master";
+			}
+		}
+	}
+	var version = versions[requestedRange];
+	
+	if(!version) {
+		versions[requestedRange] = childPkg;
 	} else {
 		// add a placeholder at this path
-		context.paths[childPkg.origFileUrl] = versions[childPkg.version];
+		context.paths[childPkg.origFileUrl] = version;
 		return true;
 	}
 }
