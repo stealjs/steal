@@ -212,14 +212,14 @@ function addDeps(packageJSON, dependencies, deps, defaultProps){
 		}
 	}
 }
-function getDependencyMap(loader, packageJSON){
+function getDependencyMap(loader, packageJSON, isRoot){
 	var deps = {};
 	
 	addDeps(packageJSON, packageJSON.peerDependencies || {}, deps, {_isPeerDependency: true});
 	addDeps(packageJSON, packageJSON.dependencies || {}, deps);
 	// Only get the devDependencies if this is the root bower and the 
 	// `npmDev` option is enabled
-	if(loader.npmDev && !loader._npmMainLoaded) {
+	if(loader.npmDev && (isRoot || !loader._npmMainLoaded)) {
 		addDeps(packageJSON, packageJSON.devDependencies || {}, deps);
 		loader._npmMainLoaded = true;
 	}
@@ -346,7 +346,7 @@ function convertName (context, pkg, map, root, name) {
 				if( pkg.name === parsed.packageName ) {
 					depPkg = pkg;
 				} else {
-					var requestedVersion = getDependencyMap(context.loader, pkg)[parsed.packageName].version;
+					var requestedVersion = getDependencyMap(context.loader, pkg, root)[parsed.packageName].version;
 					var depPkg = context.versions[parsed.packageName][requestedVersion];
 				}
 				parsed.version = depPkg.version;
