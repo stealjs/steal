@@ -11,8 +11,6 @@ if(!System.has("@loader")) {
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 }
 
-// Don't bother loading these dependencies
-System.npmDev = true;
 
 // BAISC HELPERS
 var extend = function(d, s){
@@ -24,23 +22,6 @@ var extend = function(d, s){
 function truthy(x) {
 	return x;
 }
-
-
-// MODULE NAME AND PATH HELPERS ===============================
-
-
-
-
-
-
-
-
-
-
-// gives the parent node_module folder address
-
-
-
 
 
 
@@ -58,7 +39,8 @@ exports.translate = function(load){
 	if(load.source == "") {
 		return "define([]);";
 	}
-	// 
+	this.npmDev = true;
+
 	var context = {
 		packages: [],
 		loader: this,
