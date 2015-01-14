@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "0.5.0-npm.1",
+  "version": "0.5.0-npm.2",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -11,7 +11,8 @@
     "test": "grunt test --stack"
   },
   "dependencies": {
-    "systemjs": "git://github.com/bitovi/systemjs.git#b664e4cd359c013acb3445627d1e1e1799424542"
+    "systemjs": "git://github.com/bitovi/systemjs.git#b664e4cd359c013acb3445627d1e1e1799424542",
+    "less": "^1.7.0"
   },
   "devDependencies": {
     "system-npm": "bitovi/system-npm#master",
@@ -26,8 +27,7 @@
     "grunt-contrib-watch": "~0.3.0",
     "grunt-release": "^0.7.0",
     "testee": "0.1.1",
-    "jquery": ">2.0",
-    "less": "^1.7.0"
+    "jquery": ">2.0"
   },
   "repository": {
     "type": "git",
