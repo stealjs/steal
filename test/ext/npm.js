@@ -429,7 +429,12 @@ var translateConfig = function(loader, packages){
 			};
 		}
 	};
-	
+	var setInNpm = function(name, pkg){
+		if(!loader.npm[name]) {
+			loader.npm[name] = pkg;
+		}
+		loader.npm[name+"@"+pkg.version] = pkg;
+	};
 	packages.forEach(function(pkg){
 		if(pkg.system) {
 			// don't set system.main
@@ -441,6 +446,12 @@ var translateConfig = function(loader, packages){
 		}
 		if(pkg.globalBrowser) {
 			setGlobalBrowser(pkg.globalBrowser, pkg);
+		}
+		var systemName = pkg.system && pkg.system.name;
+		if(systemName) {
+			setInNpm(systemName, pkg);
+		} else {
+			setInNpm(pkg.name, pkg);
 		}
 		if(!loader.npm[pkg.name]) {
 			loader.npm[pkg.name] = pkg;
