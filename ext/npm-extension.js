@@ -235,7 +235,7 @@ var extension = function(System){
 	}
 	
 	function parsedModuleNameFromPackage(loader, refPkg, name, parentName) {
-		var packageName = refPkg.name,
+		var packageName = (refPkg.system && refPkg.system.name) || refPkg.name,
 		    parsedModuleName = parseModuleName(name, packageName);
 		    
 		if( isRelative( parsedModuleName.modulePath ) ) {

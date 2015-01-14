@@ -325,7 +325,8 @@ function convertName (context, pkg, map, root, name) {
 			} else {
 				// TODO: share code better!
 				var depPkg;
-				if( pkg.name === parsed.packageName ) {
+				// SYSTEM.NAME
+				if(  pkg.name === parsed.packageName || ( (pkg.system && pkg.system.name) === parsed.packageName) ) {
 					depPkg = pkg;
 				} else {
 					var requestedProject = getDependencyMap(context.loader, pkg, root)[parsed.packageName];
@@ -336,6 +337,11 @@ function convertName (context, pkg, map, root, name) {
 					var requestedVersion = requestedProject.version;
 					var depPkg = context.versions[parsed.packageName][requestedVersion];
 				}
+				// SYSTEM.NAME
+				if(depPkg.system && depPkg.system.name) {
+					parsed.packageName = depPkg.system.name;
+				}
+				
 				parsed.version = depPkg.version;
 				if(!parsed.modulePath) {
 					parsed.modulePath = npmExtension.pkgMain(depPkg);
