@@ -77,8 +77,10 @@ module.exports = function (grunt) {
       extensions: {
         files: [
           {src:["node_modules/system-npm/npm.js"], dest: "ext/npm.js", filter: 'isFile'},
-          {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: 'isFile'},
           {src:["node_modules/system-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: 'isFile'},
           {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: 'isFile'},
           {src:["bower_components/traceur-runtime/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: 'isFile'},
           {src:["bower_components/system-bower/bower.js"], dest: "ext/bower.js", filter: 'isFile'}
