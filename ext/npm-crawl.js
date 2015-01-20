@@ -63,7 +63,6 @@ var crawl = {
 			}).filter(truthy));
 		});
 	},
-	// Combines together dependencies and devDependencies (if npmDev option is enabled)
 	/**
 	 * Returns an array of the dependency names that should be crawled.
 	 * @param {Object} loader
@@ -167,22 +166,19 @@ function nodeModuleAddress(address) {
 		return address.substr(0, nodeModulesIndex+nodeModules.length - 1 );
 	}
 }
-// processes a package.json's dependencies
-
-
-
-
 
 function truthy(x) {
 	return x;
 }
+
+var alwaysIgnore = {"steal": 1,"steal-tools":1,"bower":1,"grunt":1, "grunt-cli": 1};
 
 function addDeps(packageJSON, dependencies, deps, defaultProps){
 	// convert an array to a map
 	var npmIgnore = packageJSON.system && packageJSON.system.npmIgnore;
 	
 	for(var name in dependencies) {
-		if(!npmIgnore || !npmIgnore[name]) {
+		if(!alwaysIgnore[name] && !npmIgnore || !npmIgnore[name]) {
 			deps[name] = utils.extend(defaultProps || {}, {name: name, version: dependencies[name]});
 		}
 	}

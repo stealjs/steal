@@ -27,7 +27,6 @@ exports.translate = function(load){
 	if(load.source == "") {
 		return "define([]);";
 	}
-	this.npmDev = true;
 
 	var context = {
 		packages: [],

@@ -15,8 +15,8 @@
     "less": "^1.7.0"
   },
   "devDependencies": {
-    "system-npm": "bitovi/system-npm#cleanup",
-    "system-json": "bitovi/system-json#master",
+    "system-npm": "0.0.2",
+    "system-json": "0.0.2",
     "bower": "1.3.8",
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
