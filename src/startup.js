@@ -75,18 +75,17 @@
 		// we only load things with force = true
 		if ( System.env == "production" ) {
 
-			configDeferred = System.import(System.configMain);
+			configDeferred = System["import"](System.configMain);
 
 			return appDeferred = configDeferred.then(function(cfg){
-				return System.main ? System.import(System.main) : cfg;
+				return System.main ? System["import"](System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});
 
 		} else if(System.env == "development" || System.env == "build"){
 
-
-			configDeferred = System.import(System.configMain);
+			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -96,10 +95,10 @@
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
@@ -113,7 +112,7 @@
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main)
 				}) );
 			}).then(function(){
 				if(steal.dev) {
