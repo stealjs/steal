@@ -120,7 +120,12 @@ module.exports = function (grunt) {
         },
         src: ['test/test.html']
       }
-    }
+    },
+    simplemocha: {
+		builders: {
+			src: ["test/node_test.js"]
+		}
+	}
   });
 
   grunt.loadNpmTasks("grunt-contrib-watch");
@@ -128,10 +133,11 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('testee');
   
-  grunt.registerTask('test', [ 'build', 'testee' ]);
+  grunt.registerTask('test', [ 'build', 'testee', 'simplemocha' ]);
   grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:extensions','copy:toTest' ]);
   grunt.registerTask('default', [ 'build' ]);
 };

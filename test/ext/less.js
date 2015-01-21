@@ -9,7 +9,9 @@ var options = steal.config('lessOptions') || {};
 options.optimization |= lessEngine.optimization;
 
 exports.translate = function(load) {
-	var pathParts = (load.address+'').split('/');
+	var address = load.address.replace(/^file\:/,"");
+	
+	var pathParts = (address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
 	var paths = [];
@@ -19,7 +21,7 @@ exports.translate = function(load) {
 		paths = [pathParts.join('/')];
 	}
 	return new Promise(function(resolve, reject){
-		options.filename = load.address;
+		options.filename = address;
 		options.paths = [pathParts.join('/')];
 
 		var Parser = lessEngine.Parser;
