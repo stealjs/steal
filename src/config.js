@@ -31,8 +31,8 @@
 	};
 	
 	// steal.js's default configuration values
-	System.configName = "@config";
-	System.paths[System.configName] = "stealconfig.js";
+	System.configMain = "@config";
+	System.paths[System.configMain] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
 		css: '$css',
@@ -48,7 +48,7 @@
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			System.configName = name;
+			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
 			this.baseURL =  (root === val ? "." : root)  +"/";
@@ -88,10 +88,10 @@
 				
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
 			
-			// If the configName has a plugin like package.json!npm,
+			// If the configMain has a plugin like package.json!npm,
 			// plugin has to be defined prior to importing.
-			var plugin = pluginPart(System.configName);
-			var bundle = [main, System.configName];
+			var plugin = pluginPart(System.configMain);
+			var bundle = [main, System.configMain];
 			if(plugin){
 				System.set(plugin, System.newModule({}));
 			}
@@ -150,12 +150,12 @@
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
-								System.configName = "bower.json!bower";
+								System.configMain = "bower.json!bower";
 								addProductionBundles.call(this);
 								parts.pop();
 							}
 							if (last(parts) === "node_modules") {
-								System.configName = "package.json!npm";
+								System.configMain = "package.json!npm";
 								addProductionBundles.call(this);
 								parts.pop();
 							}

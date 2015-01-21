@@ -75,7 +75,7 @@
 		// we only load things with force = true
 		if ( System.env == "production" ) {
 
-			configDeferred = System.import(System.configName);
+			configDeferred = System.import(System.configMain);
 
 			return appDeferred = configDeferred.then(function(cfg){
 				return System.main ? System.import(System.main) : cfg;
@@ -86,7 +86,7 @@
 		} else if(System.env == "development" || System.env == "build"){
 
 
-			configDeferred = System.import(System.configName);
+			configDeferred = System.import(System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite

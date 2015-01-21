@@ -270,8 +270,8 @@ var makeSteal = function(System){
 	};
 	
 	// steal.js's default configuration values
-	System.configName = "@config";
-	System.paths[System.configName] = "stealconfig.js";
+	System.configMain = "@config";
+	System.paths[System.configMain] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
 		css: '$css',
@@ -287,7 +287,7 @@ var makeSteal = function(System){
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			System.configName = name;
+			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
 			this.baseURL =  (root === val ? "." : root)  +"/";
@@ -327,10 +327,10 @@ var makeSteal = function(System){
 				
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
 			
-			// If the configName has a plugin like package.json!npm,
+			// If the configMain has a plugin like package.json!npm,
 			// plugin has to be defined prior to importing.
-			var plugin = pluginPart(System.configName);
-			var bundle = [main, System.configName];
+			var plugin = pluginPart(System.configMain);
+			var bundle = [main, System.configMain];
 			if(plugin){
 				System.set(plugin, System.newModule({}));
 			}
@@ -389,12 +389,12 @@ var makeSteal = function(System){
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
-								System.configName = "bower.json!bower";
+								System.configMain = "bower.json!bower";
 								addProductionBundles.call(this);
 								parts.pop();
 							}
 							if (last(parts) === "node_modules") {
-								System.configName = "package.json!npm";
+								System.configMain = "package.json!npm";
 								addProductionBundles.call(this);
 								parts.pop();
 							}
@@ -514,7 +514,7 @@ var makeSteal = function(System){
 		// we only load things with force = true
 		if ( System.env == "production" ) {
 
-			configDeferred = System.import(System.configName);
+			configDeferred = System.import(System.configMain);
 
 			return appDeferred = configDeferred.then(function(cfg){
 				return System.main ? System.import(System.main) : cfg;
@@ -525,7 +525,7 @@ var makeSteal = function(System){
 		} else if(System.env == "development" || System.env == "build"){
 
 
-			configDeferred = System.import(System.configName);
+			configDeferred = System.import(System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
