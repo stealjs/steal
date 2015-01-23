@@ -10,62 +10,152 @@ Steal is a  module loader that supports a wide variety of
 syntaxes and configuration options. It makes modular development, test,
 and production workflows simple.
 
-## Basics
+There are three basic steps when using Steal:
 
-After installing with bower or
-[downloading](https://github.com/bitovi/steal/archive/master.zip),
-add `steal.js` to your page like:
+ - Install steal
+ - Add the steal script tag
+ - Configure steal
+ - Import modules and make stuff happen
 
-    <script src="../path/to/steal/steal.js"
-            config="./config.js"
-            main="myapp">
-    </script>
+Steal works slightly differently depending on how it is installed.  There
+are three ways to install Steal:
 
-This will load `config.js` which can be used to configure the behavior of
+ - [npm](#section_NPMbasics)
+ - [bower](#section_Bowerbasics)
+ - [download](#section_Downloadbasics)
+
+## NPM basics
+
+The following details how to use steal installed via [npm](https://www.npmjs.com/) to make
+a simple jQuery app.
+
+### Install
+
+```
+> npm install steal -S
+> npm install jquery
+```
+
+Next to your application's _node_modules_ folder, create _myapp.js_ and
+_myapp.html_:
+
+    /
+      node_modules/
+      package.json
+      myapp.js
+      myapp.html
+
+### Add the script tag
+
+In _myapp.html_, add a script tag that that loads _steal.js_ and points
+to the [System.main main] entrypoint of your application. If
+main is not provided, [System.main] will be set to _package.json_'s main.
+
+```
+<!-- myapp.html -->
+<script src="./node_modules/steal/steal.js" main="myapp"></script>
+```
+
+### Configure
+
+Steal reads your application's _package.json_ and all of its 
+`dependencies`, `peerDependencies`, and `devDependencies` recursively.
+
+Most configuration is done in the `"system"` property of 
+package.json. The special npm configuration options are listed [npm here].
+
+
+The following _package.json_ only loads the "dependencies".
+
+```
+{
+  "name": "myapp",
+  "main": "myapp",
+  "dependencies": {
+    "jquery": "2.1.3"
+  },
+  "devDependencies": {...}
+  "system": {
+    "npmIgnore": ["devDependencies"]
+  }
+}
+```
+
+If there are problems loading some of your dependencies, read how to configure them on the [npm] page.
+
+### Import modules and make stuff happen
+
+In _myapp.js_, import your dependencies and write your app:
+
+```
+// myapp.js
+import $ from "jquery";
+$("body").append("<h1>Hello World</h1>")
+```
+
+
+## Bower basics
+
+... coming soon ...
+
+## Download basics
+
+The following details how to use steal installed via its download to
+make a basic jQuery app.
+
+### Install
+
+[Download Steal](https://github.com/bitovi/steal/archive/master.zip) and unzip into your public folder. 
+
+In your application's public folder, create _myapp.js_,
+_myapp.html_, and _config.js_. You should have something like:
+
+    /
+      steal/
+        ext/
+        steal.js
+        steal.production.js
+      myapp.js
+      myapp.html
+
+### Add the script tag
+
+In _myapp.html_, add a script tag that that loads _steal.js_ and points
+to the [System.configPath configPath] and [System.main main] entrypoint of your application.
+
+
+```
+<!-- myapp.html -->
+<script src="../path/to/steal/steal.js"
+        config="./config.js"
+        main="myapp">
+</script>
+```
+
+### Configure
+
+`config.js` is used to configure the behavior of
 your site's modules. For example, to load jQuery from a CDN:
 
-     // config.js
-     System.config({
-       paths: {"jquery": "http://code.jquery.com/jquery-1.11.0.min.js"}
-     });
+```
+// config.js
+System.config({
+  paths: {"jquery": "http://code.jquery.com/jquery-1.11.0.min.js"}
+});
+```
 
-And it will load `myapp.js`. `myapp.js` can import
-dependencies in any syntax it choses. For those betting on the future, 
-use the upcoming [syntax.es6 ES6 module syntax]:
+### Import modules and make stuff happen
 
-    // myapp.js
-    import $ from "jquery"
-    $(document.body).appendChild("<h1>Hello World</h1>");
+In _myapp.js_, import your dependencies and write your app:
 
-## Client Use
+```
+// myapp.js
+import $ from "jquery";
+$("body").append("<h1>Hello World</h1>")
+```
 
-The basic use of `steal.js` is broken into three parts:
 
-1. Loading `steal.js`.
-2. Configuring the `System` loader and plugins.
-3. Writing modules in a supported syntax.
-
-### Loading `steal.js`
-
-To load [steal] in the browser add a `<script>` tag who's source
-points to `steal.js` like:
-
-    <script src="../path/to/steal/steal.js"></script>
-
-With this, you can begin loading modules using [System.import]. For example:
-
-    <script src="../path/to/steal/steal.js"></script>
-    <script>
-      System.import("myapp").then(function(main){
-        // main loaded successfully
-      }, function(err){
-        // an error loading main
-      });
-    </script>
-
-This technique is great for example pages.
-
-### Configuring the `System` loader
+## Configuring the `System` loader
 
 Once steal.js loads, its startup behavior is determined
 configuration values.  Configuration values can be set in three ways:
@@ -84,12 +174,23 @@ configuration values.  Configuration values can be set in three ways:
         </script>
  
  - Calling [System.config] or setting `System` configuration properties
-   after `steal.js` has loaded. This technique is typically used in the [@config] module.
+   after `steal.js` has loaded. This technique is typically used in the [System.configMain] module.
 
         System.config({
           paths: {"can/*" : "http://canjs.com/release/2.0.1/can/*"}
         })
         System.meta["jquery"] = {format: "global"}
+        
+   If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. System
+   configuration happens in their `"system"` properties:
+   
+        {
+          "name": "myapp",
+          "dependencies": { ... },
+          "system": {
+            "map": {"can/util/util": "can/util/jquery/jquery"}
+          }
+        }
 
 Typically, developers configure the [System.main] and [System.configPath] properties 
 with attributes on the steal.js script tag like:
@@ -100,20 +201,20 @@ with attributes on the steal.js script tag like:
     </script>
 
 Setting [System.configPath] sets [System.baseURL] to the 
-configPath's parent directory.  This would load `config.js` prior to
-loading `../myapp.js`.
+configPath's parent directory.  This would load _config.js_ prior to
+loading _../myapp.js_.
 
-When steal.js loads, it sets [System.stealPath].  This sets default values
-for [System.baseURL] and [System.configPath]. If `steal.js` is in `bower_components`,
-[System.configPath] defaults to `bower_components` parent folder. So if you write:
+When _steal.js_ loads, it sets [System.stealPath stealPath].  [System.stealPath stealPath] sets default values
+for [System.baseURL baseURL] and [System.configPath configPath]. If _steal.js_ is in _bower_components_,
+[System.configPath] defaults to _bower_components_ parent folder. So if you write:
 
     <script src="../../bower_components/steal/steal.js"
             main="myapp">
     </script>
 
-This will load `../../stealconfig.js` before it loads `../../myapp.js`.
+This will load `../../bower.json` before it loads `../../myapp.js`.
 
-### Writing Modules
+## Writing Modules
 
 Once you've loaded and configured steal's behavior, it's time to start 
 writing and loading modules.  Currently, [syntax.es6 ES6 syntax] is supported
@@ -122,7 +223,7 @@ in IE9+.  ES6 syntax looks like:
     import can from "can";
     
 [@traceur Traceur Compiler] is used and all of 
-of its [language](https://github.com/google/traceur-compiler/wiki/LanguageFeatures) will work.
+of its [language features](https://github.com/google/traceur-compiler/wiki/LanguageFeatures) will work.
 
 If you must support <IE8, use any of the other syntaxes.
 
