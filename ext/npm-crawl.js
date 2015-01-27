@@ -178,7 +178,7 @@ function addDeps(packageJSON, dependencies, deps, defaultProps){
 	var npmIgnore = packageJSON.system && packageJSON.system.npmIgnore;
 	
 	for(var name in dependencies) {
-		if(!alwaysIgnore[name] && !npmIgnore || !npmIgnore[name]) {
+		if(!alwaysIgnore[name] &&  (!npmIgnore || !npmIgnore[name])  ) {
 			deps[name] = utils.extend(defaultProps || {}, {name: name, version: dependencies[name]});
 		}
 	}
