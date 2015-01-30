@@ -5,7 +5,7 @@ Everyone should use [StealJS] to do dependency management on their projects.  He
 
 ## Faster Loading Sites
 
-[stealTools.build] heavily optimizes load times by balancing cache hits against
+[steal-tools.build] heavily optimizes load times by balancing cache hits against
 the number of total css and script requests. If you've ever found yourself trying to
 package common scripts together, stop!  [steal-tools steal-tools] will do this for
 you and better than you can do yourself.
