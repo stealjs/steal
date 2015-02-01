@@ -151,7 +151,9 @@ we point at a grunt task that doesn't exist:
 
 ## Gruntfile.js
 
-Create a _Gruntfile.js_ that looks like the following:
+We use [Grunt](http://gruntjs.com/) for task automation. If Grunt isn't
+your thing, you can use [steal-tools.export steal-tool's export] method
+programatically. Create a _Gruntfile.js_ that looks like the following:
 
 ```
 module.exports = function (grunt) {
@@ -159,7 +161,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('steal-tools');
 	
 	grunt.initConfig({
-		stealPluginify: {
+		"steal-export": {
 			dist: {
 				system: {
 					config: "package.json!npm"
@@ -173,15 +175,141 @@ module.exports = function (grunt) {
 			}
 		}
 	});
-	grunt.registerTask('build',['stealPluginify']);
+	grunt.registerTask('build',['steal-export']);
 };
+```
+
+This uses the [steal-tools.grunt.export] task to export your project's main module
+and its dependencies to CommonJS, AMD, and a global export that works with plain `<script>` tags.
+
+> Create a _Gruntfile.js_ that looks like the previous code block.
+
+## Publishing
+
+To generate your project, run:
+
+```
+> npm run pre-publish
+```
+
+This should create the `dist/amd`, `dist/global`, and `lib` folders
+with the files needed to use your project with AMD, `<script>` tags, and
+CommonJS respectively. 
+
+For now, you should inspect these files and make sure they work. Eventually,
+we might release helpers that make it easy to test your 
+distributables.
+
+### To NPM
+
+Run:
+
+```
+> npm publish
+```
+
+### To Bower
+
+The first time you publish, you must regsiter your project and
+create a bower.json.
+
+Register your project's name:
+
+```
+> bower register can-tabs git://github.com/bitovi-components/can-tabs
+```
+
+Create a [bower.json](https://github.com/bower/bower.json-spec#name). The
+easist thing to do is copy your `package.json` and remove any node 
+specific values. 
+
+```
+{
+  "name": "can-tabs",
+  "version": "0.0.1-alpha.9",
+  "description": "",
+  "main": "lib/can-tabs",
+  "dependencies": {
+    "canjs": "2.2.0-alpha.8",
+    "jquery": ">1.9.0",
+  },
+  "system": {
+    "directories" : {
+      "lib": "src"
+    },
+    "main": "lib/can-tabs"
+  }
+}
+```
+
+Once bower is setup, publishing to bower just means pushing a 
+[semver](http://semver.org/) tag to github that matches
+your project's version.
+
+```
+> git tag v0.0.1-alpha.9
+> git push origin tag v0.0.1-alpha.9
 ```
 
 
 
+## Importing the Export
 
-Create a _Gruntfile.js_.
+Developers need to know how to use your project. The following demonstrates what you need to tell them
+depending on how they are using your project.
 
-## Publishing
+### NPM and StealJS
+
+Simply import, require, or use define to load your project.
+
+```
+import "can-tabs";
+require("can-tabs");
+define(["can-tabs"], function(){});
+```
 
 
+### NPM and CJS
+
+Simply require your project.
+
+```
+require("can-tabs")
+```
+
+### AMD
+
+They must configure your project as a package:
+
+```
+require.config({
+	    packages: [{
+		    	name: 'can-tabs',
+		    	location: 'path/to/can-tabs/dist/amd',
+		    	main: 'lib/can-tabs'
+	    }]
+});
+```
+
+And then they can use it as a dependency:
+
+```
+define(["can-tabs"], function(){
+
+});
+```
+
+### Global / Standalone
+
+They should add script tags for the dependencies and your project and a link
+tag for your project's css:
+
+```
+<link rel="stylesheet" type="text/css" 
+      href="./node_modules/can-tabs/dist/global/can-tabs.css">
+      
+<script src='./node_modules/jquery/dist/jquery.js'></script>
+<script src='./node_modules/canjs/dist/can.jquery.js'></script>
+<script src='./node_modules/canjs/dist/can.stache.js'></script>
+<script src='./node_modules/can-tabs/dist/global/can-tabs.js'></script>
+```

@@ -5,22 +5,22 @@
 _Good artists copy; great artists steal._
 
 StealJS is a module loader and builder that will
-help you create the next great app. Its designed to simplify 
+help you create the next great app or open source project. Its designed to simplify 
 dependency management while being extremely powerful and flexible.
 
 Its module loader, [steal], supports 
 the future - [ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader) syntax -
 with everything [traceur supports](https://github.com/google/traceur-compiler/wiki/LanguageFeatures),
-while supporting AMD, and CommonJS.
+while supporting AMD, and CommonJS. It can load [npm] modules without configuration.
 
 Steal makes common use cases as simply as possible. Steal automatically
 loads a [@config config] and [@dev development tools] module, supports css and less, and makes it easy to switch
 between development and production [System.env environments].
 
-Its builder, [steal-tools steal-tools], 
+Its builder, [steal-tools], 
 lets you build an application or export your project to AMD, 
-CommonJS or standalone formats. But steal-tools 
-killer feature, it can build progressively loaded apps that 
+CommonJS or standalone formats. But steal-tools' 
+killer feature, is it can build progressively loaded apps that 
 balance caching and the number of script requests, resulting
 in lightning-fast load times.
 
@@ -37,38 +37,41 @@ to work.  This is just a common way.
 Install [Node.js](http://nodejs.org/) on your 
 computer. Locate the folder that contains all your static content, scripts, and 
 styles. This is your [System.baseURL BASE] folder.  Within that folder,
-use [npm](https://www.npmjs.org/) to 
-install [bower](http://bower.io/), [grunt](http://gruntjs.com/), and steal-tools:
+create a __package.json__:
 
-    > npm install -g bower
-    > npm install -g grunt-cli
+    > npm init
+
+When it asks for the "main" entrypoint, write "main.js".
+
+Also within that folder,
+use [npm](https://www.npmjs.org/) to install steal, steal-tools, jquery, and
+[grunt](http://gruntjs.com/):
+
+    > npm install steal --save-dev
     > npm install steal-tools --save-dev
+    > npm install jquery --save-dev
+    > npm install grunt-cli --save-dev
 
-Use bower to install steal and jQuery:
-
-    > bower install steal -S
-    > bower install jquery -S
 
 Your `BASE` folder should contain all your static scripts and 
 resources.  It should now look like this:
 
       BASE/
-        bower_components/
-        bower.json
         node_modules/
+          steal/
+          steal-tools/
+          grunt-cli/
+          jquery/
         package.json
          
 ### Setup
 
-Create `index.html`, `stealconfig.js`, and `main.js`, files in your BASE folder so it looks like:
+Create `index.html` and `main.js`, files in your BASE folder so it looks like:
 
       BASE/
-        bower_components/
-        bower.json
         node_modules/
         package.json
         index.html
-        stealconfig.js
         main.js
         
 `index.html` loads your app. Add the following code that loads `steal` and
@@ -77,21 +80,26 @@ tells steal to load the `main` module.
     <!DOCTYPE html>
     <html>
       <body>
-        <script src="./bower_components/steal/steal.js"
+        <script src="./node_modules/steal/steal.js"
                 data-main="main">
         </script>
       </body>
     </html>
 
-[@config stealconfig.js] is loaded by every page in your 
-project. It is used to configure the location to modules and 
-other behavior.  Use it to configure the location of the `"jquery"` module by adding the following
-code:
+Steal uses _pacakge.json_ to configure its behavior. Find the full details on 
+the [npm npm extension page]. Most of the configuration happens within
+a special "system" property. Its worth creating it now in case you'll
+need it later.
 
-    System.config({
-      paths: {jquery: "bower_components/jquery/dist/jquery.js"},
-      meta: {jquery: { exports: "jQuery" } }
-    });
+```
+// package.json
+{
+  ...
+  "system": {},
+  ...
+}
+```
+
 
 `main.js` is the entrypoint of the application. It should load import your
 apps other modules and kickoff the application. Write the following in `main.js`:
@@ -112,7 +120,7 @@ call `stealBuild`
 
     module.exports = function (grunt) {
       grunt.initConfig({
-        stealBuild: {
+        "steal-build": {
           default: {
             options: {
               system: {
@@ -124,7 +132,7 @@ call `stealBuild`
         }
       });
       grunt.loadNpmTasks("steal-tools");
-      grunt.registerTask("build",["stealBuild"]);
+      grunt.registerTask("build",["steal-build"]);
     };
 
 After saving `Gruntfile.js` run:
@@ -138,7 +146,7 @@ Change `index.html` to look like:
     <!DOCTYPE html>
     <html>
       <body>
-        <script src="./bower_components/steal/steal.production.js"
+        <script src="./node_modules/steal/steal.production.js"
                 data-main="main">
         </script>
       </body>
