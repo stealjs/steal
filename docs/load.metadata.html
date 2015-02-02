@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -106,6 +107,30 @@
 				<li class="search-container">
 					<a class="property" href="System.baseURL.html" data-search="System.baseURL">
 						System.baseURL
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerDev.html" data-search="System.bowerDev">
+						System.bowerDev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerPath.html" data-search="System.bowerPath">
+						System.bowerPath
 					</a>
 				</li>
 				
@@ -176,6 +201,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.configMain.html" data-search="System.configMain">
+						System.configMain
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.configPath.html" data-search="System.configPath">
 						System.configPath
 					</a>
@@ -214,6 +251,18 @@
 				<li class="search-container">
 					<a class="property" href="System.instantiated.html" data-search="System.instantiated">
 						System.instantiated
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.lessOptions.html" data-search="System.lessOptions">
+						System.lessOptions
 					</a>
 				</li>
 				
@@ -394,6 +443,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@traceur.html" data-search="@traceur">
 						@traceur
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="npm.html" data-search="npm">
+						npm
 					</a>
 				</li>
 				
@@ -720,7 +781,7 @@ for other cleanup.  <code>this</code> will be the global object.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"load.metadata","src":"steal/docs/type-metadata.md","description":"An object that is passed between `Loader` hooks.  Any values can be set.  These are the ones that `steal.js` and\nSystemJS recognize.","title":"metadata","types":[{"type":"Object","options":[{"name":"format","description":"Specifies what type of Syntax is used.  This can be specified like:\n\n    \"format amd\";","types":[{"type":"String"}]},{"name":"deps","description":"dependencies.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"exports","description":"What should be exported.","types":[{"type":"String"}]},{"name":"init","description":"Allows for calling noConflict and\nfor other cleanup.  `this` will be the global object.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Module"}],"variable":true}],"context":{"types":[{"type":"Global"}]}}]}]}],"parent":"StealJS.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"load.metadata","src":"steal/docs/type-metadata.md","description":"An object that is passed between `Loader` hooks.  Any values can be set.  These are the ones that `steal.js` and\nSystemJS recognize.","title":"metadata","types":[{"type":"Object","options":[{"name":"format","description":"Specifies what type of Syntax is used.  This can be specified like:\n\n    \"format amd\";","types":[{"type":"String"}]},{"name":"deps","description":"dependencies.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"exports","description":"What should be exported.","types":[{"type":"String"}]},{"name":"init","description":"Allows for calling noConflict and\nfor other cleanup.  `this` will be the global object.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Module"}],"variable":true}],"context":{"types":[{"type":"Global"}]}}]}]}],"parent":"StealJS.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -733,6 +794,7 @@ for other cleanup.  <code>this</code> will be the global object.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

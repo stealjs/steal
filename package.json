@@ -1,7 +1,7 @@
 {
   "name": "stealjs.com",
   "description": "A JavaScript documentation engine",
-  "version": "4.0.0",
+  "version": "0.5.0",
   "maintainers": [
     {
       "name": "Bitovi",
@@ -10,7 +10,7 @@
     }
   ],
   "dependencies": {
-    "documentjs": "git://github.com/bitovi/documentjs#mustache-body-84"
+    "documentjs": "0.3.0-pre.0"
   },
   "homepage": "http://stealjs.com",
   "repository": {

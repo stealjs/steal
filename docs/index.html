@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -140,6 +141,54 @@
 				
 				
 				<li class="search-container">
+					<a class="page" href="StealJS.why.html" data-search="Why StealJS">
+						Why StealJS
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
+						Progressive Loading
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="StealJS.project-exporting.html" data-search="Project Exporting">
+						Project Exporting
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="StealJS.changelog.html" data-search="Changelog">
+						Changelog
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
 						Migrating
 					</a>
@@ -164,32 +213,8 @@
 				
 				
 				<li class="search-container">
-					<a class="page" href="StealJS.why.html" data-search="Why StealJS">
-						Why StealJS
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
 					<a class="page" href="guides.Contributing.html" data-search="Contributing">
 						Contributing
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
-						Progressive Loading
 					</a>
 				</li>
 				
@@ -274,57 +299,58 @@
 		
 		<section class="comment">
 			<p>StealJS is a module loader and builder that will
-help you create the next great app. Its designed to simplify
+help you create the next great app or open source project. Its designed to simplify
 dependency management while being extremely powerful and flexible.</p>
 <p>Its module loader, <a href="steal.html">steal</a>, supports
 the future - <a href="https://github.com/ModuleLoader/es6-module-loader">ES6 Module Loader</a> syntax -
 with everything <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">traceur supports</a>,
-while supporting AMD, and CommonJS.</p>
+while supporting <a href="syntax.amd.html">AMD </a>, and <a href="syntax.CommonJS.html">CommonJS </a>. It can load <a href="npm.html">npm</a> modules without configuration.</p>
 <p>Steal makes common use cases as simply as possible. Steal automatically
 loads a <a href="@config.html">config</a> and <a href="@dev.html">development tools</a> module, supports css and less, and makes it easy to switch
 between development and production <a href="System.env.html">environments</a>.</p>
 <p>Its builder, <a href="steal-tools.html">steal-tools</a>,
 lets you build an application or export your project to AMD,
-CommonJS or standalone formats. But steal-tools
-killer feature, it can build progressively loaded apps that
+CommonJS or standalone formats. But steal-tools'
+killer feature, is it can build progressively loaded apps that
 balance caching and the number of script requests, resulting
 in lightning-fast load times.</p>
 <h2>Quick Start</h2>
-<p>The following uses npm and bower to install steal, steal-tools, grunt,
+<p>The following uses npm to install steal, steal-tools, grunt,
 and jQuery and creates a little app that writes <code>Hello World</code> to
 the page and build it. An application does not need to be setup this way
-to work.  This is just a common way.</p>
+to work.  Other common ways of setting up steal can be found <a href="steal.html">here</a>.</p>
 <h3>Install</h3>
 <p>Install <a href="http://nodejs.org/">Node.js</a> on your
 computer. Locate the folder that contains all your static content, scripts, and
 styles. This is your <a href="System.baseURL.html">BASE</a> folder.  Within that folder,
-use <a href="https://www.npmjs.org/">npm</a> to
-install <a href="http://bower.io/">bower</a>, <a href="http://gruntjs.com/">grunt</a>, and steal-tools:</p>
-<pre><code>&gt; npm install -g bower
-&gt; npm install -g grunt-cli
-&gt; npm install steal-tools --save-dev
+create a <strong>package.json</strong>:</p>
+<pre><code>&gt; npm init
 </code></pre>
-<p>Use bower to install steal and jQuery:</p>
-<pre><code>&gt; bower install steal -S
-&gt; bower install jquery -S
+<p>When it asks for the &quot;main&quot; entrypoint, write &quot;main.js&quot;.</p>
+<p>Also within that folder,
+use <a href="https://www.npmjs.org/">npm</a> to install steal, steal-tools, jquery, and
+<a href="http://gruntjs.com/">grunt</a>:</p>
+<pre><code>&gt; npm install steal --save-dev
+&gt; npm install steal-tools --save-dev
+&gt; npm install jquery --save-dev
+&gt; npm install grunt-cli --save-dev
 </code></pre>
 <p>Your <code>BASE</code> folder should contain all your static scripts and
 resources.  It should now look like this:</p>
 <pre><code>  BASE/
-    bower_components/
-    bower.json
     node_modules/
+      steal/
+      steal-tools/
+      grunt-cli/
+      jquery/
     package.json
 </code></pre>
 <h3>Setup</h3>
-<p>Create <code>index.html</code>, <code>stealconfig.js</code>, and <code>main.js</code>, files in your BASE folder so it looks like:</p>
+<p>Create <code>index.html</code> and <code>main.js</code>, files in your BASE folder so it looks like:</p>
 <pre><code>  BASE/
-    bower_components/
-    bower.json
     node_modules/
     package.json
     index.html
-    stealconfig.js
     main.js
 </code></pre>
 <p><code>index.html</code> loads your app. Add the following code that loads <code>steal</code> and
@@ -332,19 +358,22 @@ tells steal to load the <code>main</code> module.</p>
 <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;body&gt;
-    &lt;script src='./bower_components/steal/steal.js'
-            data-main='main'&gt;&lt;/script&gt;
+    &lt;script src=&quot;./node_modules/steal/steal.js&quot;
+            data-main=&quot;main&quot;&gt;
+    &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
-<p><a href="@config.html">stealconfig.js</a> is loaded by every page in your
-project. It is used to configure the location to modules and
-other behavior.  Use it to configure the location of the <code>&quot;jquery&quot;</code> module by adding the following
-code:</p>
-<pre><code>System.config({
-  paths: {jquery: &quot;bower_components/jquery/dist/jquery.js&quot;},
-  meta: {jquery: { exports: &quot;jQuery&quot; } }
-});
+<p>Steal uses <em>pacakge.json</em> to configure its behavior. Find the full details on
+the <a href="npm.html">npm extension page</a>. Most of the configuration happens within
+a special &quot;system&quot; property. Its worth creating it now in case you'll
+need it later.</p>
+<pre><code>// package.json
+{
+  ...
+  &quot;system&quot;: {},
+  ...
+}
 </code></pre>
 <p><code>main.js</code> is the entrypoint of the application. It should load import your
 apps other modules and kickoff the application. Write the following in <code>main.js</code>:</p>
@@ -359,7 +388,7 @@ $(document.body).append(&quot;&lt;h1&gt;Hello World!&lt;/h1&gt;&quot;);
 call <code>stealBuild</code></p>
 <pre><code>module.exports = function (grunt) {
   grunt.initConfig({
-    stealBuild: {
+    &quot;steal-build&quot;: {
       default: {
         options: {
           system: {
@@ -370,8 +399,8 @@ call <code>stealBuild</code></p>
       }
     }
   });
-  grunt.loadNpmTasks('steal-tools');
-  grunt.registerTask('build',['stealBuild']);
+  grunt.loadNpmTasks(&quot;steal-tools&quot;);
+  grunt.registerTask(&quot;build&quot;,[&quot;steal-build&quot;]);
 };
 </code></pre>
 <p>After saving <code>Gruntfile.js</code> run:</p>
@@ -382,8 +411,9 @@ call <code>stealBuild</code></p>
 <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;body&gt;
-    &lt;script src='./bower_components/steal/steal.production.js'
-            data-main='main'&gt;&lt;/script&gt;
+    &lt;script src=&quot;./node_modules/steal/steal.production.js&quot;
+            data-main=&quot;main&quot;&gt;
+    &lt;/script&gt;
   &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
@@ -415,7 +445,7 @@ the network tab, you should see only two scripts load.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS","src":"steal/docs/stealjs.md","description":"_Good artists copy; great artists steal._","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS","src":"steal/docs/stealjs.md","description":"_Good artists copy; great artists steal._","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -428,6 +458,7 @@ the network tab, you should see only two scripts load.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

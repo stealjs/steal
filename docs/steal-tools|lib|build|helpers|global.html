@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - stealTools build </title>
+	<title>StealJS - global </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -104,7 +105,7 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.build.html" data-search="build">
+					<a class="function" href="steal-tools.build.html" data-search="build">
 						build
 					</a>
 				</li>
@@ -116,8 +117,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.pluginifier.html" data-search="pluginifier">
-						pluginifier
+					<a class="function" href="steal-tools.export.html" data-search="export">
+						export
 					</a>
 				</li>
 				
@@ -128,8 +129,20 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.pluginify.html" data-search="pluginify">
-						pluginify
+					<a class="function" href="steal-tools.transform.html" data-search="transform">
+						transform
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.transformImport.html" data-search="transformImport">
+						transformImport
 					</a>
 				</li>
 				
@@ -157,9 +170,9 @@
 			
 				
 				
-				<li class="search-container active">
-					<a class="function" href="stealTools.cmd.build.html" data-search="stealTools build">
-						stealTools build
+				<li class="search-container">
+					<a class="function" href="steal-tools.cmd.build.html" data-search="steal-tools build">
+						steal-tools build
 					</a>
 				</li>
 				
@@ -170,8 +183,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.cmd.pluginify.html" data-search="stealTools pluginify">
-						stealTools pluginify
+					<a class="function" href="steal-tools.cmd.transform.html" data-search="steal-tools transform">
+						steal-tools transform
 					</a>
 				</li>
 				
@@ -200,8 +213,8 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.build.html" data-search="stealBuild">
-						stealBuild
+					<a class="typedef" href="steal-tools.grunt.build.html" data-search="steal-build">
+						steal-build
 					</a>
 				</li>
 				
@@ -212,8 +225,140 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
-						stealPluginify
+					<a class="typedef" href="steal-tools.grunt.export.html" data-search="steal-export">
+						steal-export
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Export Helpers</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
+						amd
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+						cjs
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="module" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+						global
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Types</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.BuildOptions.html" data-search="BuildOptions">
+						BuildOptions
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
+						SystemConfig
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.object.html" data-search="ExportObject">
+						ExportObject
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.output.html" data-search="ExportOutput">
+						ExportOutput
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.transform.options.html" data-search="TransformOptions">
+						TransformOptions
 					</a>
 				</li>
 				
@@ -248,9 +393,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>stealTools build</h1>
+<h1>global</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>module</li>
 	</ul>
 	
 	
@@ -259,9 +404,11 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">stealTools.cmd.build</span>
+		<span class="module">steal-tools/lib/build/helpers/global</span>
 	
 	
+	
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -287,7 +434,7 @@
 
 		
 		<section class="description">
-			<p>Builds stealTools from the command line.</p>
+			<p>Helpers that make exporting to <a href="syntax.global.html">global </a> formats easier.</p>
 
 		</section>
 		
@@ -295,40 +442,27 @@
 		
 			
 				<section class="signature">
-					<h2 id="sig_stealToolsbuild___OPTION_NAMEOPTION_VALUE____">stealTools build [--OPTION_NAME OPTION_VALUE]...
+					<h2 id="sig___34__global_js__34______OVERWRITES____">&#34;+global-js&#34;: { ... OVERWRITES ... }
 </h2>
 <div class="signature-wrapper">
+<p>Exports all JS into a single file.</p>
 
 
-	<h3>Parameters</h3>
 
-	<ol class="parameters">
-		
-		<li class="parameter">
-			<h4>OPTION_NAME
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>Any <code>config</code> or <code>options</code> name in <a href="stealTools.build.html">build</a>.</p>
 
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>OPTION_VALUE
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>The value of <code>OPTION_NAME</code>.</p>
 
-			</div>
+
+
+</div>
+
+				</section>
 			
-			
-			
-		</li>
-		
-	</ol>
+				<section class="signature">
+					<h2 id="sig___34__global_css__34______OVERWRITES____">&#34;+global-css&#34;: { ... OVERWRITES ... }
+</h2>
+<div class="signature-wrapper">
+<p>Exports all CSS into a single file.</p>
+
 
 
 
@@ -346,14 +480,7 @@
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p>steal-tools must have been installed into the commandLine like:</p>
-<pre><code>npm install steal-tools -g
-</code></pre>
-<p>Then you can run <code>stealTools</code> like:</p>
-<pre><code>stealTools build --config app/config.js --main app/app
-</code></pre>
-
+			
 		</section>
 		
 		
@@ -378,7 +505,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"stealTools.cmd.build","src":"steal-tools/doc/command-build.md","description":"Builds stealTools from the command line.","title":"stealTools build","parent":"steal-tools.cmd","signatures":[{"code":"stealTools build [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config` or `options` name in [stealTools.build]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`."}]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"module","name":"steal-tools/lib/build/helpers/global","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/global.js","line":7,"codeLine":24,"description":"Helpers that make exporting to [syntax.global] formats easier.","title":"global","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+global-js\": { ... OVERWRITES ... }","description":"Exports all JS into a single file.","params":[]},{"code":"\"+global-css\": { ... OVERWRITES ... }","description":"Exports all CSS into a single file.","params":[]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -391,6 +518,7 @@
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

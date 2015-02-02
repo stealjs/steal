@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -106,6 +107,30 @@
 				<li class="search-container">
 					<a class="property" href="System.baseURL.html" data-search="System.baseURL">
 						System.baseURL
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerDev.html" data-search="System.bowerDev">
+						System.bowerDev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerPath.html" data-search="System.bowerPath">
+						System.bowerPath
 					</a>
 				</li>
 				
@@ -176,6 +201,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.configMain.html" data-search="System.configMain">
+						System.configMain
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.configPath.html" data-search="System.configPath">
 						System.configPath
 					</a>
@@ -214,6 +251,18 @@
 				<li class="search-container">
 					<a class="property" href="System.instantiated.html" data-search="System.instantiated">
 						System.instantiated
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.lessOptions.html" data-search="System.lessOptions">
+						System.lessOptions
 					</a>
 				</li>
 				
@@ -394,6 +443,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@traceur.html" data-search="@traceur">
 						@traceur
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="npm.html" data-search="npm">
+						npm
 					</a>
 				</li>
 				
@@ -599,53 +660,108 @@ and production workflows simple.</p>
 
 		
 		<section class="comment">
-			<h2>Basics</h2>
-<p>After installing with bower or
-<a href="https://github.com/bitovi/steal/archive/master.zip">downloading</a>,
-add <code>steal.js</code> to your page like:</p>
-<pre><code>&lt;script src='../path/to/steal/steal.js`
-        config='./config.js'
-        main='myapp'&gt;
-&lt;/script&gt;
+			<p>There are three basic steps when using Steal:</p>
+<ul>
+<li>Install steal</li>
+<li>Add the steal script tag</li>
+<li>Configure steal</li>
+<li>Import modules and make stuff happen</li>
+</ul>
+<p>Steal works slightly differently depending on how it is installed.  There
+are three ways to install Steal:</p>
+<ul>
+<li><a href="#section_NPMbasics">npm</a></li>
+<li><a href="#section_Bowerbasics">bower</a></li>
+<li><a href="#section_Downloadbasics">download</a></li>
+</ul>
+<h2>NPM basics</h2>
+<p>The following details how to use steal installed via <a href="https://www.npmjs.com/">npm</a> to make
+a simple jQuery app.</p>
+<h3>Install</h3>
+<pre><code>&gt; npm install steal -S
+&gt; npm install jquery
 </code></pre>
-<p>This will load <code>config.js</code> which can be used to configure the behavior of
-your site's modules. For example, to load jQuery from a CDN:</p>
-<pre><code> //config.js
- System.config({
-   paths: {'jquery': &quot;http://code.jquery.com/jquery-1.11.0.min.js&quot;}
- });
+<p>Next to your application's <em>node_modules</em> folder, create <em>myapp.js</em> and
+<em>myapp.html</em>:</p>
+<pre><code>/
+  node_modules/
+  package.json
+  myapp.js
+  myapp.html
 </code></pre>
-<p>And it will load <code>myapp.js</code>. <code>myapp.js</code> can import
-dependencies in any syntax it choses. For those betting on the future,
-use the upcoming <a href="syntax.es6.html">ES6 module syntax</a>:</p>
+<h3>Add the script tag</h3>
+<p>In <em>myapp.html</em>, add a script tag that that loads <em>steal.js</em> and points
+to the <a href="System.main.html">main</a> entrypoint of your application. If
+main is not provided, <a href="System.main.html">System.main</a> will be set to <em>package.json</em>'s main.</p>
+<pre><code>&lt;!-- myapp.html --&gt;
+&lt;script src=&quot;./node_modules/steal/steal.js&quot; main=&quot;myapp&quot;&gt;&lt;/script&gt;
+</code></pre>
+<h3>Configure</h3>
+<p>Steal reads your application's <em>package.json</em> and all of its
+<code>dependencies</code>, <code>peerDependencies</code>, and <code>devDependencies</code> recursively.</p>
+<p>Most configuration is done in the <code>&quot;system&quot;</code> property of
+package.json. The special npm configuration options are listed <a href="npm.html">here</a>.</p>
+<p>The following <em>package.json</em> only loads the &quot;dependencies&quot;.</p>
+<pre><code>{
+  &quot;name&quot;: &quot;myapp&quot;,
+  &quot;main&quot;: &quot;myapp&quot;,
+  &quot;dependencies&quot;: {
+    &quot;jquery&quot;: &quot;2.1.3&quot;
+  },
+  &quot;devDependencies&quot;: {...}
+  &quot;system&quot;: {
+    &quot;npmIgnore&quot;: [&quot;devDependencies&quot;]
+  }
+}
+</code></pre>
+<p>If there are problems loading some of your dependencies, read how to configure them on the <a href="npm.html">npm</a> page.</p>
+<h3>Import modules and make stuff happen</h3>
+<p>In <em>myapp.js</em>, import your dependencies and write your app:</p>
 <pre><code>// myapp.js
-import $ from 'jquery'
-$(document.body).appendChild(&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;);
+import $ from &quot;jquery&quot;;
+$(&quot;body&quot;).append(&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;)
 </code></pre>
-<h2>Client Use</h2>
-<p>The basic use of <code>steal.js</code> is broken into three parts:</p>
-<ol>
-<li>Loading <code>steal.js</code>.</li>
-<li>Configuring the <code>System</code> loader and plugins.</li>
-<li>Writing modules in a supported syntax.</li>
-</ol>
-<h3>Loading <code>steal.js</code></h3>
-<p>To load <a href="steal.html">steal</a> in the browser add a <code>&lt;script&gt;</code> tag who's source
-points to <code>steal.js</code> like:</p>
-<pre><code>&lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
+<h2>Bower basics</h2>
+<p>... coming soon ...</p>
+<h2>Download basics</h2>
+<p>The following details how to use steal installed via its download to
+make a basic jQuery app.</p>
+<h3>Install</h3>
+<p><a href="https://github.com/bitovi/steal/archive/master.zip">Download Steal</a> and unzip into your public folder.</p>
+<p>In your application's public folder, create <em>myapp.js</em>,
+<em>myapp.html</em>, and <em>config.js</em>. You should have something like:</p>
+<pre><code>/
+  steal/
+    ext/
+    steal.js
+    steal.production.js
+  myapp.js
+  myapp.html
 </code></pre>
-<p>With this, you can begin loading modules using <a href="System.import.html">System.import</a>. For example:</p>
-<pre><code>&lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
-&lt;script&gt;
-  System.import(&quot;myapp&quot;).then(function(main){
-    // main loaded successfully
-  }, function(err){
-    // an error loading main
-  });
+<h3>Add the script tag</h3>
+<p>In <em>myapp.html</em>, add a script tag that that loads <em>steal.js</em> and points
+to the <a href="System.configPath.html">configPath</a> and <a href="System.main.html">main</a> entrypoint of your application.</p>
+<pre><code>&lt;!-- myapp.html --&gt;
+&lt;script src=&quot;../path/to/steal/steal.js&quot;
+        config=&quot;./config.js&quot;
+        main=&quot;myapp&quot;&gt;
 &lt;/script&gt;
 </code></pre>
-<p>This technique is great for example pages.</p>
-<h3>Configuring the <code>System</code> loader</h3>
+<h3>Configure</h3>
+<p><code>config.js</code> is used to configure the behavior of
+your site's modules. For example, to load jQuery from a CDN:</p>
+<pre><code>// config.js
+System.config({
+  paths: {&quot;jquery&quot;: &quot;http://code.jquery.com/jquery-1.11.0.min.js&quot;}
+});
+</code></pre>
+<h3>Import modules and make stuff happen</h3>
+<p>In <em>myapp.js</em>, import your dependencies and write your app:</p>
+<pre><code>// myapp.js
+import $ from &quot;jquery&quot;;
+$(&quot;body&quot;).append(&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;)
+</code></pre>
+<h2>Configuring the <code>System</code> loader</h2>
 <p>Once steal.js loads, its startup behavior is determined
 configuration values.  Configuration values can be set in three ways:</p>
 <ul>
@@ -653,45 +769,57 @@ configuration values.  Configuration values can be set in three ways:</p>
 <pre><code> &lt;script&gt;
    steal = {main: &quot;myapp&quot;};
  &lt;/script&gt;
- &lt;script src='../path/to/steal/steal.js'&gt;&lt;/script&gt;
+ &lt;script src=&quot;../path/to/steal/steal.js&quot;&gt;&lt;/script&gt;
 </code></pre></li>
 <li><p>Attributes on the steal.js script tag like:</p>
-<pre><code> &lt;script src='../path/to/steal/steal.js'
-         main=&quot;myapp&quot;&gt;&lt;/script&gt;
+<pre><code> &lt;script src=&quot;../path/to/steal/steal.js&quot;
+         main=&quot;myapp&quot;&gt;
+ &lt;/script&gt;
 </code></pre></li>
 <li><p>Calling <a href="System.config.html">System.config</a> or setting <code>System</code> configuration properties
-after <code>steal.js</code> has loaded. This technique is typically used in the <a href="@config.html">@config</a> module.</p>
+after <code>steal.js</code> has loaded. This technique is typically used in the <a href="System.configMain.html">System.configMain</a> module.</p>
 <pre><code> System.config({
    paths: {&quot;can/*&quot; : &quot;http://canjs.com/release/2.0.1/can/*&quot;}
  })
  System.meta[&quot;jquery&quot;] = {format: &quot;global&quot;}
+</code></pre>
+<p>If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. System
+configuration happens in their <code>&quot;system&quot;</code> properties:</p>
+<pre><code> {
+   &quot;name&quot;: &quot;myapp&quot;,
+   &quot;dependencies&quot;: { ... },
+   &quot;system&quot;: {
+     &quot;map&quot;: {&quot;can/util/util&quot;: &quot;can/util/jquery/jquery&quot;}
+   }
+ }
 </code></pre></li>
 </ul>
 <p>Typically, developers configure the <a href="System.main.html">System.main</a> and <a href="System.configPath.html">System.configPath</a> properties
 with attributes on the steal.js script tag like:</p>
-<pre><code>&lt;script src='../path/to/steal/steal.js'
+<pre><code>&lt;script src=&quot;../path/to/steal/steal.js&quot;
         main=&quot;myapp&quot;
-        config-path=&quot;../config.js&quot;
-        &gt;&lt;/script&gt;
+        config-path=&quot;../config.js&quot;&gt;
+&lt;/script&gt;
 </code></pre>
 <p>Setting <a href="System.configPath.html">System.configPath</a> sets <a href="System.baseURL.html">System.baseURL</a> to the
-configPath's parent directory.  This would load <code>config.js</code> prior to
-loading <code>../myapp.js</code>.</p>
-<p>When steal.js loads, it sets <a href="System.stealPath.html">System.stealPath</a>.  This sets default values
-for <a href="System.baseURL.html">System.baseURL</a> and <a href="System.configPath.html">System.configPath</a>. If <code>steal.js</code> is in <code>bower_components</code>,
-<a href="System.configPath.html">System.configPath</a> defaults to <code>bower_components</code> parent folder. So if you write:</p>
-<pre><code>&lt;script src='../../bower_components/steal/steal.js'
-        main=&quot;myapp&quot;&gt;&lt;/script&gt;
+configPath's parent directory.  This would load <em>config.js</em> prior to
+loading <em>../myapp.js</em>.</p>
+<p>When <em>steal.js</em> loads, it sets <a href="System.stealPath.html">stealPath</a>.  <a href="System.stealPath.html">stealPath</a> sets default values
+for <a href="System.baseURL.html">baseURL</a> and <a href="System.configPath.html">configPath</a>. If <em>steal.js</em> is in <em>bower_components</em>,
+<a href="System.configPath.html">System.configPath</a> defaults to <em>bower_components</em> parent folder. So if you write:</p>
+<pre><code>&lt;script src=&quot;../../bower_components/steal/steal.js&quot;
+        main=&quot;myapp&quot;&gt;
+&lt;/script&gt;
 </code></pre>
-<p>This will load <code>../../stealconfig.js</code> before it loads <code>../../myapp.js</code>.</p>
-<h3>Writing Modules</h3>
+<p>This will load <code>../../bower.json</code> before it loads <code>../../myapp.js</code>.</p>
+<h2>Writing Modules</h2>
 <p>Once you've loaded and configured steal's behavior, it's time to start
 writing and loading modules.  Currently, <a href="syntax.es6.html">ES6 syntax</a> is supported
 in IE9+.  ES6 syntax looks like:</p>
 <pre><code>import can from &quot;can&quot;;
 </code></pre>
 <p><a href="@traceur.html">Traceur Compiler</a> is used and all of
-of its <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">language</a> will work.</p>
+of its <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">language features</a> will work.</p>
 <p>If you must support &lt;IE8, use any of the other syntaxes.</p>
 <p>Finally, steal supports <a href="$less.html">less</a> and <a href="$css.html">css</a> out of the box. Import, require, or
 steal them into your project by adding a &quot;!&quot; after the filename.</p>
@@ -732,7 +860,7 @@ steal(&quot;style.less!&quot;)
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"steal","src":"steal/docs/steal.md","description":"Steal is a  module loader that supports a wide variety of \nsyntaxes and configuration options. It makes modular development, test,\nand production workflows simple.","parent":"StealJS.api","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"steal","src":"steal/docs/steal.md","description":"Steal is a  module loader that supports a wide variety of \nsyntaxes and configuration options. It makes modular development, test,\nand production workflows simple.","parent":"StealJS.api","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -745,6 +873,7 @@ steal(&quot;style.less!&quot;)
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

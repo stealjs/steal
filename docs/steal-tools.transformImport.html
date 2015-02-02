@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - pluginifier </title>
+	<title>StealJS - transformImport </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -104,7 +105,7 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.build.html" data-search="build">
+					<a class="function" href="steal-tools.build.html" data-search="build">
 						build
 					</a>
 				</li>
@@ -115,9 +116,9 @@
 			
 				
 				
-				<li class="search-container active">
-					<a class="function" href="stealTools.pluginifier.html" data-search="pluginifier">
-						pluginifier
+				<li class="search-container">
+					<a class="function" href="steal-tools.export.html" data-search="export">
+						export
 					</a>
 				</li>
 				
@@ -128,8 +129,20 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.pluginify.html" data-search="pluginify">
-						pluginify
+					<a class="function" href="steal-tools.transform.html" data-search="transform">
+						transform
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="steal-tools.transformImport.html" data-search="transformImport">
+						transformImport
 					</a>
 				</li>
 				
@@ -158,8 +171,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.cmd.build.html" data-search="stealTools build">
-						stealTools build
+					<a class="function" href="steal-tools.cmd.build.html" data-search="steal-tools build">
+						steal-tools build
 					</a>
 				</li>
 				
@@ -170,8 +183,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.cmd.pluginify.html" data-search="stealTools pluginify">
-						stealTools pluginify
+					<a class="function" href="steal-tools.cmd.transform.html" data-search="steal-tools transform">
+						steal-tools transform
 					</a>
 				</li>
 				
@@ -200,8 +213,8 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.build.html" data-search="stealBuild">
-						stealBuild
+					<a class="typedef" href="steal-tools.grunt.build.html" data-search="steal-build">
+						steal-build
 					</a>
 				</li>
 				
@@ -212,8 +225,140 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
-						stealPluginify
+					<a class="typedef" href="steal-tools.grunt.export.html" data-search="steal-export">
+						steal-export
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Export Helpers</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
+						amd
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+						cjs
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+						global
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Types</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.BuildOptions.html" data-search="BuildOptions">
+						BuildOptions
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
+						SystemConfig
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.object.html" data-search="ExportObject">
+						ExportObject
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.output.html" data-search="ExportOutput">
+						ExportOutput
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.transform.options.html" data-search="TransformOptions">
+						TransformOptions
 					</a>
 				</li>
 				
@@ -248,7 +393,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>pluginifier</h1>
+<h1>transformImport</h1>
 	<ul class="tags">
 		<li>function</li>
 	</ul>
@@ -259,7 +404,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">stealTools.pluginifier</span>
+		<span class="module">steal-tools.transformImport</span>
 	
 	
 	
@@ -287,7 +432,8 @@
 
 		
 		<section class="description">
-			<p>Build a module and its dependencies to work independently of <code>steal.js</code>.</p>
+			<p>Load a module and its dependencies and provide a <a href="steal-tools.transform.html">transform</a>
+method so they can be written out in another form.</p>
 
 		</section>
 		
@@ -295,7 +441,7 @@
 		
 			
 				<section class="signature">
-					<h2 id="sig_stealTools_pluginifier_config_pluginifierOptions_">stealTools.pluginifier(config, pluginifierOptions)
+					<h2 id="sig_stealTools_transformImport_config_transformOptions_">stealTools.transformImport(config, transformOptions)
 </h2>
 <div class="signature-wrapper">
 <p>Loads a module and all of its dependencies and returns a function that
@@ -309,7 +455,7 @@ so that they dont depend on <code>steal.js</code>.</p>
 		
 		<li class="parameter">
 			<h4>config
-				<code>{Object}</code></h4>
+				<code>{<a href="steal-tools.SystemConfig.html" >SystemConfig</a>}</code></h4>
 			<div class="description">
 				<p>Specifies configuration values to set on
 a [System] loader. The <a href="System.main.html">main</a> option must be specified. Typically
@@ -361,11 +507,11 @@ the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
 		</li>
 		
 		<li class="parameter">
-			<h4>pluginifierOptions
+			<h4>transformOptions
 				<code>{Object}</code></h4>
 			<div class="description">
 				<p>Configures the behavior of loading the modules and acts as default values
-for the resulting <a href="stealTools.pluginify.html">pluginify function's</a> options argument.</p>
+for the resulting <a href="steal-tools.transform.html">transform function's</a> options argument.</p>
 
 			</div>
 			
@@ -402,7 +548,7 @@ for the resulting <a href="stealTools.pluginify.html">pluginify function's</a> o
 
 	<h3>Returns</h3>
 	<div class="returns">
-		<h4><code>{Promise&lt;<a href="stealTools.pluginify.html" >pluginify</a>(<a href="moduleName.html" >moduleName</a>, <a href="stealTools.pluginify.options.html" >options</a>)&gt;}</code></h4>
+		<h4><code>{Promise&lt;<a href="steal-tools.transform.html" >transform</a>(<a href="moduleName.html" >moduleName</a>, <a href="steal-tools.transform.options.html" >options</a>)&gt;}</code></h4>
 		<div class="description">
 			<p>A deferred that resolves to a function
 that can write out all or part of the loaded dependency tree.</p>
@@ -429,30 +575,36 @@ that can write out all or part of the loaded dependency tree.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p><code>stealTools.pluginifier</code> is a way to build projects without needing to include steal.js in production at
-all. Some of Steal's advanced features such as <a href="#bundles">bundles</a> need steal.js to work, but for
-more simple projects pluginifier is a good option. Plugnifier is also used when building open source projects
-where you want to split your modules into individual module file (hence <em>plugins</em>) and
-distribute them that way.</p>
-<p>Like <a href="stealTools.build.html">build</a>, pluginifier can be used from the command-line, from Grunt, or
+<p><code>stealTools.transformImport</code> lets you transform modules to a different
+format or form.  It's passed a <a href="steal-tools.SystemConfig.html">SystemConfig</a> which is used
+to load modules. Once all modules have been loaded it provides a
+<a href="steal-tools.transform.html">transform</a> method that can write out modules:</p>
+<ul>
+<li>in different formats (cjs, amd, global),</li>
+<li>minified, or</li>
+<li>with development code removed.</li>
+</ul>
+<p><code>transformImport</code> and <code>transform</code> are low level functionality. For most projects, <a href="steal-tools.export.html">export</a>
+will be a better fit for the most common transformation behavior.</p>
+<p>Like <a href="steal-tools.build.html">build</a>, transformImport can be used from the command-line, from Grunt, or
 programmatically in Node.js. For this example we're going to use
-pluginifier programmatically in order to showcase
+transformImport programmatically in order to showcase
 it's more advanced functionality:</p>
-<pre><code>var pluginifier = require(&quot;steal-tools&quot;).pluginifier;
+<pre><code>var transformImport = require(&quot;steal-tools&quot;).transformImport;
 var fs = require(&quot;fs&quot;);
 
-pluginifier({
+transformImport({
   config: __dirname + &quot;/config.js&quot;,
   main: &quot;main&quot;
-}).then(function(pluginify){
+}).then(function(transform){
   // Get the main module and it's dependencies as a string
-  var main = pluginify();
+  var main = transform();
 
   // Get just a dependency and it's own dependencies as a string
-  var myModule = pluginify(&quot;my_module&quot;);
+  var myModule = transform(&quot;my_module&quot;);
 
   // Get the main module, ignoring a dependency we don't want.
-  var mainAlone = pluginify(&quot;main&quot;, {
+  var mainAlone = transform(&quot;main&quot;, {
     ignore: [&quot;my_module&quot;]
   });
 
@@ -460,10 +612,10 @@ pluginifier({
   fs.writeFileSync(&quot;out_main.js&quot;, mainAlone, &quot;utf8&quot;);
 });
 </code></pre>
-<p>As you can see, pluginifier takes an object containing the
+<p>As you can see, transformImport takes an object containing the
 System configuration and returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>.
-The promise will return another function (named pluginify in this example) that can be used to generate
-a string containing a module and it's dependencies. By default the pluginify
+The promise will return another function (named transform in this example) that can be used to generate
+a string containing a module and it's dependencies. By default the transform
 function will return the main module, but can be used to generate any dependency in the graph.</p>
 
 		</section>
@@ -490,7 +642,7 @@ function will return the main module, but can be used to generate any dependency
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"stealTools.pluginifier","src":"steal-tools/doc/pluginifier.md","description":"Build a module and its dependencies to work independently of `steal.js`.","title":"pluginifier","parent":"steal-tools.JS","signatures":[{"code":"stealTools.pluginifier(config, pluginifierOptions)","description":"Loads a module and all of its dependencies and returns a function that\ncan write out all or parts of the module and its dependency graph\nso that they dont depend on `steal.js`.","params":[{"types":[{"type":"Object","options":[{"name":"main","description":"The module whos dependencies should be built.","types":[{"type":"String"}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified in\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"verbose","description":"Set to true to get a lot of warning messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"Set to true to log nothing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"pluginifierOptions","description":"Configures the behavior of loading the modules and acts as default values\nfor the resulting [stealTools.pluginify pluginify function's] options argument."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"stealTools.pluginify"}]}]}],"description":"A deferred that resolves to a function\nthat can write out all or part of the loaded dependency tree."}}],"types":[],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.transformImport","src":"steal-tools/doc/transformImport.md","description":"Load a module and its dependencies and provide a [steal-tools.transform] \nmethod so they can be written out in another form.","title":"transformImport","parent":"steal-tools.JS","signatures":[{"code":"stealTools.transformImport(config, transformOptions)","description":"Loads a module and all of its dependencies and returns a function that\ncan write out all or parts of the module and its dependency graph\nso that they dont depend on `steal.js`.","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"main","description":"The module whos dependencies should be built.","types":[{"type":"String"}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified in\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"verbose","description":"Set to true to get a lot of warning messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"Set to true to log nothing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"transformOptions","description":"Configures the behavior of loading the modules and acts as default values\nfor the resulting [steal-tools.transform transform function's] options argument."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.transform"}]}]}],"description":"A deferred that resolves to a function\nthat can write out all or part of the loaded dependency tree."}}],"types":[],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -503,6 +655,7 @@ function will return the main module, but can be used to generate any dependency
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

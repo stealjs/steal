@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - stealTools pluginify </title>
+	<title>StealJS - cjs </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -84,28 +85,26 @@
 			</a>
 		</li>
 		
-		
-			<li class="search-container active">
+		<li class="search-container active parent">
 			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
 				steal-tools
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+				cjs
 			</a>
 			
 	<ul>
 		
 			
 				
-					
-					<li class="heading search-container">
-						<span>JavaScript</span>
-						
-	<ul>
-		
-			
-				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.build.html" data-search="build">
-						build
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.dest.html" data-search="steal-tools/lib/build/helpers/cjs.dest">
+						dest
 					</a>
 				</li>
 				
@@ -116,8 +115,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.pluginifier.html" data-search="pluginifier">
-						pluginifier
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.format.html" data-search="steal-tools/lib/build/helpers/cjs.format">
+						format
 					</a>
 				</li>
 				
@@ -128,80 +127,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.pluginify.html" data-search="pluginify">
-						pluginify
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>Command Line</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="stealTools.cmd.build.html" data-search="stealTools build">
-						stealTools build
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container active">
-					<a class="function" href="stealTools.cmd.pluginify.html" data-search="stealTools pluginify">
-						stealTools pluginify
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>Grunt Tasks</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.build.html" data-search="stealBuild">
-						stealBuild
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.graphs.html" data-search="steal-tools/lib/build/helpers/cjs.graphs">
+						graphs
 					</a>
 				</li>
 				
@@ -212,20 +139,22 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
-						stealPluginify
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.ignore.html" data-search="steal-tools/lib/build/helpers/cjs.ignore">
+						ignore
 					</a>
 				</li>
 				
 			
 			
 		
-	</ul>
-
-
-					</li>
-					
+			
 				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.normalize.html" data-search="steal-tools/lib/build/helpers/cjs.normalize">
+						normalize
+					</a>
+				</li>
 				
 			
 			
@@ -248,9 +177,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>stealTools pluginify</h1>
+<h1>cjs</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>module</li>
 	</ul>
 	
 	
@@ -259,9 +188,11 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">stealTools.cmd.pluginify</span>
+		<span class="module">steal-tools/lib/build/helpers/cjs</span>
 	
 	
+	
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -287,7 +218,7 @@
 
 		
 		<section class="description">
-			<p>Pluginifies a module from the command line.</p>
+			<p>Helpers that make exporting to CJS projects easier.</p>
 
 		</section>
 		
@@ -295,55 +226,12 @@
 		
 			
 				<section class="signature">
-					<h2 id="sig_stealToolspluginify___OPTION_NAMEOPTION_VALUE____">stealTools pluginify [--OPTION_NAME OPTION_VALUE]...
+					<h2 id="sig___34__cjs__34______OVERWRITES____">&#34;+cjs&#34;: { ... OVERWRITES ... }
 </h2>
 <div class="signature-wrapper">
+<p>Adds helpers that export modules to a CJS format.</p>
 
 
-	<h3>Parameters</h3>
-
-	<ol class="parameters">
-		
-		<li class="parameter">
-			<h4>OPTION_NAME
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>Any <code>config</code>, <code>pluginifierOptions</code> or <code>options</code> name in
-<a href="stealTools.pluginifier.html">pluginifier</a> or <a href="stealTools.pluginify.html">pluginify</a>.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>OPTION_VALUE
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>The value of <code>OPTION_NAME</code>.  The <code>ignores</code> option
-will be converted to a regular expression.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-	</ol>
-
-
-	<h3>Returns</h3>
-	<div class="returns">
-		<h4><code>{String}</code></h4>
-		<div class="description">
-			<p>Writes the output to the console.</p>
-
-		</div>
-		
-		
-	</div>
-	
 
 
 
@@ -361,16 +249,34 @@ will be converted to a regular expression.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>steal-tools must have been installed into the commandLine like:</p>
-<pre><code>npm install steal-tools -g
+<p>Adding &quot;+cjs&quot; to a [steal-tools.exporter.output] name will mixin
+default [steal-tools.exporter.output] and [steal-tools.pluginify.options]
+values that export modules to a CommonJS format.</p>
+<pre><code>outputs: {
+  &quot;+cjs&quot;: {},
+  &quot;minified+cjs&quot;: {
+    minify: true
+  }
+}
 </code></pre>
-<p>Then you can run <code>stealTools</code> like:</p>
-<pre><code>stealTools pluginify \
-           --config app/config.js \
-           --main app \
-           --ignores foo/.+
-           &gt; app.js
+<p>This mixes in the following default values:</p>
+<ul>
+<li><a href="steal-tools|lib|build|helpers|cjs.graphs.html">graphs</a> - Writes out System.main and all of its dependencies.</li>
+<li><a href="steal-tools|lib|build|helpers|cjs.format.html">format</a> - Writes out all modules as CJS</li>
+<li><a href="steal-tools|lib|build|helpers|cjs.normalize.html">normalize</a> - Leaves moduleName references that reference modules in node_modules alone, makes
+all other moduleName references relative.</li>
+<li><a href="steal-tools|lib|build|helpers|cjs.dest.html">dest</a> - Writes out each module in <code>[baseURL]/dist/cjs</code></li>
+<li><a href="steal-tools|lib|build|helpers|cjs.ignore.html">ignore</a> - Ignores everything in node_modules.</li>
+</ul>
+<p>You can overwrite or alter the behavior of these default values by adding a value in the [steal-tools.exporter.output].
+The following writes out dest in a different location:</p>
+<pre><code>outputs: {
+  &quot;+cjs&quot;: {
+       dest: __dirname+&quot;/cjs&quot;
+  }
+}
 </code></pre>
+<p>The behavior for overwriting [steal-tools.exporter.output] values is documented in the default value API pages.</p>
 
 		</section>
 		
@@ -396,7 +302,7 @@ will be converted to a regular expression.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"stealTools.cmd.pluginify","src":"steal-tools/doc/command-pluginify.md","description":"Pluginifies a module from the command line.","title":"stealTools pluginify","parent":"steal-tools.cmd","signatures":[{"code":"stealTools pluginify [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config`, `pluginifierOptions` or `options` name in \n[stealTools.pluginifier] or [stealTools.pluginify pluginify]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`.  The `ignores` option\nwill be converted to a regular expression."}],"returns":{"types":[{"type":"String"}],"description":"Writes the output to the console."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"name":"steal-tools/lib/build/helpers/cjs","type":"module","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/cjs.js","line":7,"codeLine":57,"description":"Helpers that make exporting to CJS projects easier.","title":"cjs","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+cjs\": { ... OVERWRITES ... }","description":"Adds helpers that export modules to a CJS format.","params":[]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -409,6 +315,7 @@ will be converted to a regular expression.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

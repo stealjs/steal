@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - pluginify </title>
+	<title>StealJS - transform </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -104,7 +105,7 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.build.html" data-search="build">
+					<a class="function" href="steal-tools.build.html" data-search="build">
 						build
 					</a>
 				</li>
@@ -116,8 +117,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.pluginifier.html" data-search="pluginifier">
-						pluginifier
+					<a class="function" href="steal-tools.export.html" data-search="export">
+						export
 					</a>
 				</li>
 				
@@ -128,8 +129,20 @@
 				
 				
 				<li class="search-container active">
-					<a class="function" href="stealTools.pluginify.html" data-search="pluginify">
-						pluginify
+					<a class="function" href="steal-tools.transform.html" data-search="transform">
+						transform
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.transformImport.html" data-search="transformImport">
+						transformImport
 					</a>
 				</li>
 				
@@ -158,8 +171,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.cmd.build.html" data-search="stealTools build">
-						stealTools build
+					<a class="function" href="steal-tools.cmd.build.html" data-search="steal-tools build">
+						steal-tools build
 					</a>
 				</li>
 				
@@ -170,8 +183,8 @@
 				
 				
 				<li class="search-container">
-					<a class="function" href="stealTools.cmd.pluginify.html" data-search="stealTools pluginify">
-						stealTools pluginify
+					<a class="function" href="steal-tools.cmd.transform.html" data-search="steal-tools transform">
+						steal-tools transform
 					</a>
 				</li>
 				
@@ -200,8 +213,8 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.build.html" data-search="stealBuild">
-						stealBuild
+					<a class="typedef" href="steal-tools.grunt.build.html" data-search="steal-build">
+						steal-build
 					</a>
 				</li>
 				
@@ -212,8 +225,140 @@
 				
 				
 				<li class="search-container">
-					<a class="typedef" href="stealTools.grunt.pluginify.html" data-search="stealPluginify">
-						stealPluginify
+					<a class="typedef" href="steal-tools.grunt.export.html" data-search="steal-export">
+						steal-export
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Export Helpers</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
+						amd
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+						cjs
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+						global
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Types</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.BuildOptions.html" data-search="BuildOptions">
+						BuildOptions
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
+						SystemConfig
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.object.html" data-search="ExportObject">
+						ExportObject
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.output.html" data-search="ExportOutput">
+						ExportOutput
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.transform.options.html" data-search="TransformOptions">
+						TransformOptions
 					</a>
 				</li>
 				
@@ -248,7 +393,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>pluginify</h1>
+<h1>transform</h1>
 	<ul class="tags">
 		<li>function</li>
 	</ul>
@@ -259,7 +404,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">stealTools.pluginify</span>
+		<span class="module">steal-tools.transform</span>
 	
 	
 	
@@ -287,7 +432,8 @@
 
 		
 		<section class="description">
-			<p>A function provided by <a href="stealTools.pluginifier.html">pluginifier</a> that can build out a specific module.</p>
+			<p>A function provided by <a href="steal-tools.transformImport.html">transformImport</a> that returns a transformed
+module or modules.</p>
 
 		</section>
 		
@@ -295,7 +441,7 @@
 		
 			
 				<section class="signature">
-					<h2 id="sig_pluginify_moduleName_options_">pluginify(moduleName, options)
+					<h2 id="sig_transform_moduleName_options_">transform(moduleName, options)
 </h2>
 <div class="signature-wrapper">
 
@@ -318,10 +464,10 @@
 		
 		<li class="parameter">
 			<h4>options
-				<code>{<a href="stealTools.pluginify.options.html" >PluginifyOptions</a>}</code><span class="pull-right optional">Optional</span></h4>
+				<code>{<a href="steal-tools.transform.options.html" >TransformOptions</a>}</code><span class="pull-right optional">Optional</span></h4>
 			<div class="description">
 				<p>Options that configure how the files are compiled.  These options overwrite the
-<code>pluginifierOptions</code> argument passed to <a href="stealTools.pluginifier.html">pluginifier</a>.</p>
+<code>pluginifierOptions</code> argument passed to <a href="steal-tools.transformImport.html">transformImport</a>.</p>
 
 			</div>
 			
@@ -360,8 +506,8 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>After getting <code>pluginify</code> from <a href="stealTools.pluginifier.html">pluginifier</a> you can call it like:</p>
-<pre><code>var result = pluginify(&quot;module/name/to/build&quot;, {
+<p>After getting <code>transform</code> from <a href="steal-tools.transformImport.html">transformImport</a> you can call it like:</p>
+<pre><code>var result = transform(&quot;module/name/to/build&quot;, {
   // specifies modules to ignore
   ignore: [
     // ignores this module and all of its dependencies
@@ -403,7 +549,7 @@
 });
 </code></pre>
 <p>Most of these options are optional.  For more
-information, read <a href="stealTools.pluginify.options.html">pluginifyOptions</a>.</p>
+information, read <a href="steal-tools.transform.options.html">transformOptions</a>.</p>
 
 		</section>
 		
@@ -429,7 +575,7 @@ information, read <a href="stealTools.pluginify.options.html">pluginifyOptions</
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"stealTools.pluginify","src":"steal-tools/doc/pluginify.md","description":"A function provided by [stealTools.pluginifier] that can build out a specific module.","title":"pluginify","parent":"steal-tools.JS","signatures":[{"code":"pluginify(moduleName, options)","description":"","params":[{"types":[{"type":"moduleName"}],"optional":true,"name":"moduleName","defaultValue":"config.main","description":"The module name to build."},{"types":[{"type":"stealTools.pluginify.options"}],"optional":true,"name":"options","description":"Options that configure how the files are compiled.  These options overwrite the \n`pluginifierOptions` argument passed to [stealTools.pluginifier]."}],"returns":{"types":[{"type":"String"}],"description":"The result of `moduleName` being pluginified."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.transform","src":"steal-tools/doc/transform.md","description":"A function provided by [steal-tools.transformImport] that returns a transformed\nmodule or modules.","title":"transform","parent":"steal-tools.JS","signatures":[{"code":"transform(moduleName, options)","description":"","params":[{"types":[{"type":"moduleName"}],"optional":true,"name":"moduleName","defaultValue":"config.main","description":"The module name to build."},{"types":[{"type":"steal-tools.transform.options"}],"optional":true,"name":"options","description":"Options that configure how the files are compiled.  These options overwrite the \n`pluginifierOptions` argument passed to [steal-tools.transformImport]."}],"returns":{"types":[{"type":"String"}],"description":"The result of `moduleName` being pluginified."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -442,6 +588,7 @@ information, read <a href="stealTools.pluginify.options.html">pluginifyOptions</
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

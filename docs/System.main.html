@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -106,6 +107,30 @@
 				<li class="search-container">
 					<a class="property" href="System.baseURL.html" data-search="System.baseURL">
 						System.baseURL
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerDev.html" data-search="System.bowerDev">
+						System.bowerDev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerPath.html" data-search="System.bowerPath">
+						System.bowerPath
 					</a>
 				</li>
 				
@@ -176,6 +201,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.configMain.html" data-search="System.configMain">
+						System.configMain
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.configPath.html" data-search="System.configPath">
 						System.configPath
 					</a>
@@ -214,6 +251,18 @@
 				<li class="search-container">
 					<a class="property" href="System.instantiated.html" data-search="System.instantiated">
 						System.instantiated
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.lessOptions.html" data-search="System.lessOptions">
+						System.lessOptions
 					</a>
 				</li>
 				
@@ -400,6 +449,18 @@
 			
 			
 		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="npm.html" data-search="npm">
+						npm
+					</a>
+				</li>
+				
+			
+			
+		
 	</ul>
 
 
@@ -559,7 +620,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{String}</code></h2>
+	<h2><code>{<a href="moduleName.html" >moduleName</a> | Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -584,21 +645,37 @@
 		
 
 		
+		<section class="description">
+			<p>The name of the module(s) that loads all other modules in the application.</p>
+
+		</section>
+		
 
 		
 			
 			<section class='primary-options'>
 				
 
-  <h2 id="sig_">String
+  <h2 id="sig_"><a href="moduleName.html" >moduleName</a>
 </h2>
 <div class="signature-wrapper">
-<p>The main module to load. This is the starting point of the application. In
-<a href="System.env.html">development</a>, the <code>main</code> module is loaded after the <a href="@config.html">@config</a> and <a href="@dev.html">@dev</a>
-modules. In <a href="System.env.html">production</a>, only the <code>main</code> module is loaded, but
-it is configured to load in a bundle.</p>
-<p>In <a href="System.env.html">production</a>, a <a href="System.bundlesPath.html">System.bundlesPath</a> + <a href="System.main.html">System.main</a> bundle is
-set to include the <code>main</code> module.</p>
+<p>The main module to load after <a href="System.configMain.html">System.configMain</a>.</p>
+
+
+
+
+
+
+
+</div>
+
+  
+
+
+  <h2 id="sig_">Array&lt;<a href="moduleName.html" >moduleName</a>&gt;
+</h2>
+<div class="signature-wrapper">
+<p>An array of main modules that will be loaded after <a href="System.configMain.html">System.configMain</a>.</p>
 
 
 
@@ -620,7 +697,27 @@ set to include the <code>main</code> module.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
+<p>This is the starting point of the application. In
+<a href="System.env.html">development</a>, the <code>main</code> module is loaded after the <a href="System.configMain.html">System.configMain</a> and <a href="@dev.html">@dev</a>
+modules. In <a href="System.env.html">production</a>, only the <code>main</code> module is loaded, but
+it is configured to load in a bundle.</p>
 <p>Main should be configured by one of the approaches in <a href="System.config.html">System.config</a>.</p>
+<h2>Use with npm</h2>
+<p>In <a href="System.env.html">development</a>, your application's <code>package.json</code> will be read
+and the main module set automatically.  For instance, if
+your package.json looks like:</p>
+<pre><code>{
+  &quot;main&quot;: &quot;my/main.js&quot;,
+  ...
+}
+</code></pre>
+<p>The following will load <code>package.json</code> with the <a href="npm.html">npm</a> module and automatically load
+<code>my/main.js</code>:</p>
+<pre><code>&lt;script src=&quot;../node_modules/steal/steal.js&quot;&gt;
+&lt;/script&gt; 
+</code></pre>
+<p>In <a href="System.env.html">production</a>, make sure your script specifies <code>&quot;main&quot;</code> so the correct bundle to load
+can be known.</p>
 
 		</section>
 		
@@ -646,7 +743,7 @@ set to include the <code>main</code> module.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.main","src":"steal/docs/system-main.md","description":"","types":[{"type":"String","description":"The main module to load. This is the starting point of the application. In\n[System.env development], the `main` module is loaded after the [@config] and [@dev] \nmodules. In [System.env production], only the `main` module is loaded, but \nit is configured to load in a bundle.\n\nIn [System.env production], a [System.bundlesPath] + [System.main] bundle is\nset to include the `main` module."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.main","src":"steal/docs/system-main.md","description":"The name of the module(s) that loads all other modules in the application.","types":[{"type":"moduleName","description":"The main module to load after [System.configMain]."},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}],"description":"An array of main modules that will be loaded after [System.configMain]."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -659,6 +756,7 @@ set to include the <code>main</code> module.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

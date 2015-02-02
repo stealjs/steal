@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - README</title>
+	<title>StealJS  - steal-tools/lib/build/helpers/cjs.graphs</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -84,12 +85,82 @@
 			</a>
 		</li>
 		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
+				steal-tools
+			</a>
+		</li>
+		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="README.html" data-search="README">
-				README
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+				cjs
 			</a>
 			
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.dest.html" data-search="steal-tools/lib/build/helpers/cjs.dest">
+						dest
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.format.html" data-search="steal-tools/lib/build/helpers/cjs.format">
+						format
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.graphs.html" data-search="steal-tools/lib/build/helpers/cjs.graphs">
+						graphs
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.ignore.html" data-search="steal-tools/lib/build/helpers/cjs.ignore">
+						ignore
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.normalize.html" data-search="steal-tools/lib/build/helpers/cjs.normalize">
+						normalize
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
 
 		</li>
 		
@@ -106,9 +177,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>README</h1>
+<h1>graphs</h1>
 	<ul class="tags">
-		<li>page</li>
+		<li>function</li>
 	</ul>
 	
 	
@@ -141,7 +212,8 @@
 
 		
 		<section class="description">
-			<h1>steal-tools</h1>
+			<p>By default writes out System.main and all of its dependencies. Defaults to &quot;graphs&quot;
+default behavior if anything else is provided.</p>
 
 		</section>
 		
@@ -151,22 +223,48 @@
 		
 		
 		
+			<section class="signature">
+				<h2 id="sig_">cjs.graphs(modules)
+</h2>
+<div class="signature-wrapper">
+<p>By default writes out System.main and all of its dependencies. Defaults to &quot;graphs&quot;
+default behavior if anything else is provided.</p>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>modules
+				<code>{function() | Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code><span class="pull-right optional">Optional</span></h4>
+			<div class="description">
+				<p>An array of modules to overide the main file.</p>
+
+			</div>
+			
+			
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+			</section>
+		
 		
 
 		
 		<section class="comment">
-			<p><a href="https://travis-ci.org/bitovi/steal-tools"><img src="https://travis-ci.org/bitovi/steal-tools.svg?branch=master" alt="Build Status" /></a></p>
-<p><code>steal-tools</code> is a collection of command-line utilities
-that:</p>
-<ul>
-<li>makes building ES6, CommonJS, AMD, and applications <em>easy</em>, and</li>
-<li>writes those builds so your apps load <em>fast</em>.</li>
-</ul>
-<p>It is one half of the <a href="http://stealjs.com">StealJS</a> project.  It's other half,
-<a href="https://github.com/bitovi/steal">steal</a> provides client-side dependency management.</p>
-<p>For more information on <code>steal-tools</code>, visit <a href="http://stealjs.com">stealjs.com</a>.</p>
-<p>For information on contributing and developing <code>steal-tools</code>, go <a href="http://stealjs.com/docs/guides.Contributing.html">here</a>.</p>
-
+			
 		</section>
 		
 		
@@ -191,7 +289,7 @@ that:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"README","src":"steal-tools/README.md","description":"# steal-tools","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools/lib/build/helpers/cjs.graphs","params":[{"types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}],"optional":true,"name":"modules","description":"An array of modules to overide the main file."}],"parent":"steal-tools/lib/build/helpers/cjs","src":"steal-tools/lib/build/helpers/cjs.js","line":58,"codeLine":66,"description":"By default writes out System.main and all of its dependencies. Defaults to \"graphs\"\ndefault behavior if anything else is provided.","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -204,6 +302,7 @@ that:</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

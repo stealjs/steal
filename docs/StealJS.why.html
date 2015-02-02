@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -139,6 +140,54 @@
 			
 				
 				
+				<li class="search-container active">
+					<a class="page" href="StealJS.why.html" data-search="Why StealJS">
+						Why StealJS
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
+						Progressive Loading
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="StealJS.project-exporting.html" data-search="Project Exporting">
+						Project Exporting
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="StealJS.changelog.html" data-search="Changelog">
+						Changelog
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
 				<li class="search-container">
 					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
 						Migrating
@@ -163,33 +212,9 @@
 			
 				
 				
-				<li class="search-container active">
-					<a class="page" href="StealJS.why.html" data-search="Why StealJS">
-						Why StealJS
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
 				<li class="search-container">
 					<a class="page" href="guides.Contributing.html" data-search="Contributing">
 						Contributing
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
-						Progressive Loading
 					</a>
 				</li>
 				
@@ -278,12 +303,20 @@
 		
 		<section class="comment">
 			<h2>Faster Loading Sites</h2>
-<p><a href="stealTools.build.html">build</a> heavily optimizes load times by balancing cache hits against
+<p>StealTool's <a href="steal-tools.build.html">build</a> heavily optimizes load times by balancing cache hits against
 the number of total css and script requests. If you've ever found yourself trying to
 package common scripts together, stop!  <a href="steal-tools.html">steal-tools</a> will do this for
 you and better than you can do yourself.</p>
+<p>Read the <a href="steal-tools.guides.progressive_loading.html">Progressive Loading</a> guide.</p>
+<h2>Great Workflows</h2>
+<p>StealTools makes it easy to generate your project to every format and make it useful to
+npm/browserify and amd/bower. It's great for open source projects.</p>
+<p>Read the <a href="StealJS.project-exporting.html">Project Exporting</a> guide.</p>
+<p>What's more, you can use <a href="https://www.npmjs.com">npm</a> dependencies
+automatically. There's no need to use some other tool to install dependencies.</p>
+<p>Read more about the <a href="npm.html">npm</a> extension.</p>
 <h2>Just Refresh</h2>
-<p>You don't need to build everytime you change code.  Just refresh.</p>
+<p>You don't need to build everytime you change code or add files.  Just refresh.</p>
 <h2>Transition to the future</h2>
 <p>If your project currently uses AMD, CommonJS, or Steal, you can
 keep those syntaxes and start writing ES6 today.</p>
@@ -294,7 +327,6 @@ loader. Both <a href="http://github.com/systemjs/systemjs">SystemJS</a> and
 <a href="steal.html">steal</a> are written as groups of extensions applied to the
 <code>System</code> loader. When ES6 modules do land in browsers, you'll be able to
 use just the <code>System</code> extensions you need.</p>
-<h2>Great Workflows</h2>
 
 		</section>
 		
@@ -320,7 +352,7 @@ use just the <code>System</code> extensions you need.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.why","src":"steal/docs/pages/why.md","description":"Everyone should use [StealJS] to do dependency management on their projects.  Here's why:","title":"Why StealJS","parent":"StealJS.guides","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS.why","src":"steal/docs/pages/why.md","description":"Everyone should use [StealJS] to do dependency management on their projects.  Here's why:","title":"Why StealJS","parent":"StealJS.guides","order":0,"templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -333,6 +365,7 @@ use just the <code>System</code> extensions you need.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

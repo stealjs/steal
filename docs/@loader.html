@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -106,6 +107,30 @@
 				<li class="search-container">
 					<a class="property" href="System.baseURL.html" data-search="System.baseURL">
 						System.baseURL
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerDev.html" data-search="System.bowerDev">
+						System.bowerDev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerPath.html" data-search="System.bowerPath">
+						System.bowerPath
 					</a>
 				</li>
 				
@@ -176,6 +201,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.configMain.html" data-search="System.configMain">
+						System.configMain
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.configPath.html" data-search="System.configPath">
 						System.configPath
 					</a>
@@ -214,6 +251,18 @@
 				<li class="search-container">
 					<a class="property" href="System.instantiated.html" data-search="System.instantiated">
 						System.instantiated
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.lessOptions.html" data-search="System.lessOptions">
+						System.lessOptions
 					</a>
 				</li>
 				
@@ -394,6 +443,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@traceur.html" data-search="@traceur">
 						@traceur
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="npm.html" data-search="npm">
+						npm
 					</a>
 				</li>
 				
@@ -630,9 +691,9 @@ would use [System].</p>
 <pre><code>import loader from &quot;@loader&quot;;
 
 loader.config({
-    map: {
-        &quot;can/util/util&quot;: &quot;can/util/jquery/jquery&quot;
-    }
+  map: {
+    &quot;can/util/util&quot;: &quot;can/util/jquery/jquery&quot;
+  }
 });
 </code></pre>
 <p>This works with any syntax supported by StealJS.</p>
@@ -661,7 +722,7 @@ loader.config({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"@loader","src":"steal/docs/module-loader.md","description":"`@loader` is primarily only needed to be used in your [@config] to ensure that you are configuring\nthe correct loader. Since [System] represents the global System loader using it within your\nconfig doesn't guarantee that you are configuring the correct loader. In scenarios where\nyou want to build multiple apps in parallel -- for example if you have several apps set\nup to build in a Grunt task -- using `loader` is necessarily so that your [@config] options\nare set on the proper loader.","title":"","types":[{"type":"*","description":"The `@loader` module is the `Loader` that is loading your code."}],"parent":"StealJS.modules","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"@loader","src":"steal/docs/module-loader.md","description":"`@loader` is primarily only needed to be used in your [@config] to ensure that you are configuring\nthe correct loader. Since [System] represents the global System loader using it within your\nconfig doesn't guarantee that you are configuring the correct loader. In scenarios where\nyou want to build multiple apps in parallel -- for example if you have several apps set\nup to build in a Grunt task -- using `loader` is necessarily so that your [@config] options\nare set on the proper loader.","title":"","types":[{"type":"*","description":"The `@loader` module is the `Loader` that is loading your code."}],"parent":"StealJS.modules","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -674,6 +735,7 @@ loader.config({
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

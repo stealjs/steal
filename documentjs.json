@@ -6,7 +6,7 @@
 	"sites": {
 		"docs": {
 			"glob": {
-				"pattern": "{steal,steal-tools}/**/*.+(md)",
+				"pattern": "{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)",
 				"ignore": ["**/{node_modules,bower_components}/**/*"]
 			},
 			"parent": "StealJS",

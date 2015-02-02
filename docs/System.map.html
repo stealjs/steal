@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -106,6 +107,30 @@
 				<li class="search-container">
 					<a class="property" href="System.baseURL.html" data-search="System.baseURL">
 						System.baseURL
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerDev.html" data-search="System.bowerDev">
+						System.bowerDev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerPath.html" data-search="System.bowerPath">
+						System.bowerPath
 					</a>
 				</li>
 				
@@ -176,6 +201,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.configMain.html" data-search="System.configMain">
+						System.configMain
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.configPath.html" data-search="System.configPath">
 						System.configPath
 					</a>
@@ -214,6 +251,18 @@
 				<li class="search-container">
 					<a class="property" href="System.instantiated.html" data-search="System.instantiated">
 						System.instantiated
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.lessOptions.html" data-search="System.lessOptions">
+						System.lessOptions
 					</a>
 				</li>
 				
@@ -394,6 +443,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@traceur.html" data-search="@traceur">
 						@traceur
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="npm.html" data-search="npm">
+						npm
 					</a>
 				</li>
 				
@@ -599,7 +660,7 @@
 </h2>
 <div class="signature-wrapper">
 <p>Specifies rules to convert an imported moduleName to another module name. The rules can
-be specified globaly or limited to a specific path.</p>
+be specified globally or limited to a specific path.</p>
 <p>The following will alter &quot;glob/*&quot; modules across the whole application.</p>
 <pre><code>System.map[&quot;glob/*&quot;] = &quot;moduleName/*&quot; 
 </code></pre>
@@ -629,7 +690,29 @@ be specified globaly or limited to a specific path.</p>
 
 		
 		<section class="comment">
-			<h2>Implementation</h2>
+			<h2>Uses</h2>
+<p>Map is useful when you want to exchange one module for another.</p>
+<h3>Alternative implementation</h3>
+<p>There are many libraries that share a common API. Consider a legacy application
+that heavily used Underscore. You might want to migrate to Lodash for added
+features or performance reasons. You can use map to do this without updating all of
+your code that uses Underscore like so:</p>
+<pre><code>System.map.underscore = &quot;lodash&quot;;
+</code></pre>
+<p>This would save you from updating every module that had previously imported Underscore,
+however in some cases you are unable to update the modules in the first place<br />
+because they are third party libraries. Consider a MVC library that has a dependency
+on jQuery. If you wanted to use the smaller alternative Zepto you could simply
+map <code>jquery</code> to <code>zepto</code> and the MVC library would use that instead.</p>
+<h3>Ignoring optional dependencies</h3>
+<p>Some modules might have dependencies on other modules that they only use as an option
+if you need them. Because there isn't a standard way to define conditional dependencies
+they likely just import them explicitly. If you do not need this option you can
+elect to ignore the dependency by mapping it to <code>@empty</code>:</p>
+<pre><code>System.map[&quot;some/optional_dep&quot;] = &quot;@empty&quot;;
+</code></pre>
+<p><code>@empty</code> is a pseudo-module defined by SystemJS to represent a module with no value.</p>
+<h2>Implementation</h2>
 <p>Implemented by <a href="https://github.com/systemjs/systemjs#map-configuration">SystemJS</a>.</p>
 
 		</section>
@@ -656,7 +739,7 @@ be specified globaly or limited to a specific path.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.map","src":"steal/docs/system-map.md","description":"Alter [moduleName]s.","types":[{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"},{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"}]}]}]}],"description":"Specifies rules to convert an imported moduleName to another module name. The rules can\nbe specified globaly or limited to a specific path.\n\nThe following will alter \"glob/*\" modules across the whole application.\n\n    System.map[\"glob/*\"] = \"moduleName/*\" \n\nThe following limits converting \"jquery\" to \"jquery@1.2\" to only within modules that match\n\"oldcode/*\":\n\n    System.map[\"oldcode/*\"] = {\n      \"jquery\": \"jquery@1.2\"\n    };"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.map","src":"steal/docs/system-map.md","description":"Alter [moduleName]s.","types":[{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"},{"type":"Object","template":[{"types":[{"type":"moduleGlob"}]},{"types":[{"type":"moduleName"}]}]}]}],"description":"Specifies rules to convert an imported moduleName to another module name. The rules can\nbe specified globally or limited to a specific path.\n\nThe following will alter \"glob/*\" modules across the whole application.\n\n    System.map[\"glob/*\"] = \"moduleName/*\" \n\nThe following limits converting \"jquery\" to \"jquery@1.2\" to only within modules that match\n\"oldcode/*\":\n\n    System.map[\"oldcode/*\"] = {\n      \"jquery\": \"jquery@1.2\"\n    };"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -669,6 +752,7 @@ be specified globaly or limited to a specific path.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

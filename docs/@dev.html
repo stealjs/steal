@@ -51,6 +51,7 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
@@ -106,6 +107,30 @@
 				<li class="search-container">
 					<a class="property" href="System.baseURL.html" data-search="System.baseURL">
 						System.baseURL
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerDev.html" data-search="System.bowerDev">
+						System.bowerDev
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.bowerPath.html" data-search="System.bowerPath">
+						System.bowerPath
 					</a>
 				</li>
 				
@@ -176,6 +201,18 @@
 				
 				
 				<li class="search-container">
+					<a class="property" href="System.configMain.html" data-search="System.configMain">
+						System.configMain
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="property" href="System.configPath.html" data-search="System.configPath">
 						System.configPath
 					</a>
@@ -214,6 +251,18 @@
 				<li class="search-container">
 					<a class="property" href="System.instantiated.html" data-search="System.instantiated">
 						System.instantiated
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="property" href="System.lessOptions.html" data-search="System.lessOptions">
+						System.lessOptions
 					</a>
 				</li>
 				
@@ -394,6 +443,18 @@
 				<li class="search-container">
 					<a class="typedef" href="@traceur.html" data-search="@traceur">
 						@traceur
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="npm.html" data-search="npm">
+						npm
 					</a>
 				</li>
 				
@@ -650,6 +711,18 @@ less than 1.</p>
 		
 	</li>
 	
+	<li class="parameter">
+		<h4>assert
+			<code>{function()}</code></h4>
+		<div class="description">
+			<p>Throws an error if the expression passed to it is falsy.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
 </ol>
 
 
@@ -673,8 +746,11 @@ less than 1.</p>
 <p>Call <code>steal.dev.warn</code> to log warning information.  For example:</p>
 <pre><code>steal.dev.warn(&quot;something went wrong&quot;);
 </code></pre>
-<p>By default, <a href="steal-tools.html">steal-tools</a> will remove <code>steal.dev.log</code> and <code>steal.dev.warn</code> calls
-from the built output.</p>
+<p>Call <code>steal.dev.assert</code> to test for truthiness of the expression provided. For example:</p>
+<pre><code>steal.dev.assert(&quot;foo&quot; === &quot;bar&quot;); // throws!
+</code></pre>
+<p>By default, <a href="steal-tools.html">steal-tools</a> will remove <code>steal.dev.log</code>, <code>steal.dev.warn</code> and
+<code>steal.dev.assert</code> calls from the built output.</p>
 
 		</section>
 		
@@ -700,7 +776,7 @@ from the built output.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"@dev","src":"steal/docs/module-dev.md","description":"A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads `steal/dev.js` which provides the following\nvalues on a global `steal.dev`:","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"Writes out a warning message if `logLevel` is less\nthan 2."},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"Writes out a message with `console.log` if `logLevel` is\nless than 1."}]}],"parent":"StealJS.modules","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal,steal-tools}/**/*.+(md)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"@dev","src":"steal/docs/module-dev.md","description":"A module loaded in [System.env development] after [@config] but \nbefore [System.main].  It typically loads development-only \ntools.  By default, it loads `steal/dev.js` which provides the following\nvalues on a global `steal.dev`:","title":"","types":[{"type":"Object","options":[{"name":"logLevel","types":[{"type":"Number"}],"description":"Controls what types of messages will be logged. By\ndefault the logLevel is 0 so all messages will be logged.","optional":true,"defaultValue":"0"},{"name":"warn","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"Writes out a warning message if `logLevel` is less\nthan 2."},{"name":"log","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"description":"Writes out a message with `console.log` if `logLevel` is\nless than 1."},{"name":"assert","description":"Throws an error if the expression passed to it is falsy.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}]}]}],"parent":"StealJS.modules","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
@@ -713,6 +789,7 @@ from the built output.</p>
 		</script>
 		<script type='text/javascript' 
 				data-main="static"
+				data-config="./static/config.js"
 				src="./static/steal.production.js"
 		    		bundles-path="bundles"></script>
 	

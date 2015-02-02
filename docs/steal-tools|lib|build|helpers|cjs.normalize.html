@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>StealJS  - steal-tools/lib/build/helpers/cjs.normalize</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs ">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="../index.html">StealJS</a>
+				<ul class="dropdown-menu">
+		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
+		          <li><a href="http://canjs.com">CanJS</a></li>
+		          <li><a href="http://jquerypp.com">jQuery++</a></li>
+		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
+		          <li><a href="http://funcunit.com">FuncUnit</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
+		        </ul>
+			</div>
+			<ul class="nav">
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
+	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
+		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
+	        </ul>
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	
+<div class="container api">
+
+	
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+		</li>
+		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
+				steal-tools
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+				cjs
+			</a>
+			
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.dest.html" data-search="steal-tools/lib/build/helpers/cjs.dest">
+						dest
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.format.html" data-search="steal-tools/lib/build/helpers/cjs.format">
+						format
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.graphs.html" data-search="steal-tools/lib/build/helpers/cjs.graphs">
+						graphs
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.ignore.html" data-search="steal-tools/lib/build/helpers/cjs.ignore">
+						ignore
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="steal-tools|lib|build|helpers|cjs.normalize.html" data-search="steal-tools/lib/build/helpers/cjs.normalize">
+						normalize
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	
+	
+	
+	<article class="content docs">
+	
+	
+		
+		<section class="title">
+			<div class="heading">
+<h1>normalize</h1>
+	<ul class="tags">
+		<li>function</li>
+	</ul>
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+    
+	
+		<li><a href="">source</a></li>
+	
+	
+	
+</ul>
+<br />
+		</section>
+		
+		
+		
+		<section class="contents">
+		</section>
+		
+		
+		
+
+		
+		<section class="description">
+			<p>By default, makes everything not in node_modules relative. It also
+adds a &quot;.js&quot; or &quot;.css&quot; to files not ending with &quot;.js&quot; or &quot;.css&quot;. If a function is provided,
+it will overwrite this behavior.</p>
+
+		</section>
+		
+
+		
+			
+		
+		
+		
+			<section class="signature">
+				<h2 id="sig_">cjs.normalize(aliases)
+</h2>
+<div class="signature-wrapper">
+<p>By default, makes everything not in node_modules relative. It also
+adds a &quot;.js&quot; or &quot;.css&quot; to files not ending with &quot;.js&quot; or &quot;.css&quot;. If a function is provided,
+it will overwrite this behavior.</p>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>aliases
+				<code>{*}</code></h4>
+			<div class="description">
+				
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+			</section>
+		
+		
+
+		
+		<section class="comment">
+			
+		</section>
+		
+		
+
+		
+	
+	
+	</article>
+	
+	
+
+</div>
+
+
+
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		var docObject = {"type":"function","name":"steal-tools/lib/build/helpers/cjs.normalize","params":[{"name":"aliases","types":[{"type":"*"}]}],"parent":"steal-tools/lib/build/helpers/cjs","src":"steal-tools/lib/build/helpers/cjs.js","line":88,"codeLine":96,"description":"By default, makes everything not in node_modules relative. It also\nadds a \".js\" or \".css\" to files not ending with \".js\" or \".css\". If a function is provided,\nit will overwrite this behavior.","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+	</script>
+	
+	
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
+</body>
+
+</html>
