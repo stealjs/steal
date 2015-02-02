@@ -22,11 +22,11 @@ The following:
 
 allows:
 
-    System.import("foo.css")
+    System["import"]("foo.css")
 
 Without having to write:
 
-    System.import("foo.css!steal/css");
+    System["import"]("foo.css!steal/css");
 
 By default, `steal.js` configures `css` to point to "$css" and `less` to point to "$less".
 

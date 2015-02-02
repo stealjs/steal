@@ -1534,10 +1534,11 @@ function logloads(loads) {
 
           // 15.2.4.6.1 AddDependencyLoad (load is parentLoad)
           .then(function(depLoad) {
-
+/*
             console.assert(!load.dependencies.some(function(dep) {
               return dep.key == request;
             }), 'not already a dependency');
+*/
 
             // adjusted from spec to maintain dependency order
             // this is due to the System.register internal implementation needs
@@ -1829,7 +1830,7 @@ function logloads(loads) {
   // 1. groups is an already-interleaved array of group kinds
   // 2. load.groupIndex is set when this function runs
   // 3. load.groupIndex is the interleaved index ie 0 declarative, 1 dynamic, 2 declarative, ... (or starting with dynamic)
-  function buildLinkageGroups(load, loads, groups, loader) {
+  function buildLinkageGroups(load, loads, groups) {
     groups[load.groupIndex] = groups[load.groupIndex] || [];
 
     // if the load already has a group index and its in its group, its already been done
@@ -1857,7 +1858,7 @@ function logloads(loads) {
           if (loadDep.groupIndex === undefined || loadDep.groupIndex < loadDepGroupIndex) {
 
             // if already in a group, remove from the old group
-            if (loadDep.groupIndex) {
+            if (loadDep.groupIndex !== undefined) {
               groups[loadDep.groupIndex].splice(indexOf.call(groups[loadDep.groupIndex], loadDep), 1);
 
               // if the old group is empty, then we have a mixed depndency cycle
@@ -1868,7 +1869,7 @@ function logloads(loads) {
             loadDep.groupIndex = loadDepGroupIndex;
           }
 
-          buildLinkageGroups(loadDep, loads, groups, loader);
+          buildLinkageGroups(loadDep, loads, groups);
         }
       }
     }
@@ -1907,7 +1908,7 @@ function logloads(loads) {
     var groups = [];
     var startingLoad = linkSet.loads[0];
     startingLoad.groupIndex = 0;
-    buildLinkageGroups(startingLoad, linkSet.loads, groups, loader);
+    buildLinkageGroups(startingLoad, linkSet.loads, groups);
 
     // determine the kind of the bottom group
     var curGroupDeclarative = startingLoad.isDeclarative == groups.length % 2;
@@ -4969,14 +4970,14 @@ function _SYSTEM_addJSON(loader) {
   //    return address;
   //  });
   //};
-
+  var jsonTest = /^[\s\n\r]*[\{\[]/;
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
     var loader = this,
         parsed;
 
-    if (load.metadata.format === 'json' || !load.metadata.format ) {
-    	
+    if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
+      
       try{
         parsed = JSON.parse(load.source);
       } catch(e) {}
@@ -5275,10 +5276,10 @@ if (typeof System !== "undefined") {
 		// we only load things with force = true
 		if ( System.env == "production" ) {
 
-			configDeferred = System.import(System.configName);
+			configDeferred = System["import"](System.configName);
 
 			return appDeferred = configDeferred.then(function(cfg){
-				return System.main ? System.import(System.main) : cfg;
+				return System.main ? System["import"](System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});
@@ -5286,7 +5287,7 @@ if (typeof System !== "undefined") {
 		} else if(System.env == "development" || System.env == "build"){
 
 
-			configDeferred = System.import(System.configName);
+			configDeferred = System["import"](System.configName);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -5296,10 +5297,10 @@ if (typeof System !== "undefined") {
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
@@ -5313,7 +5314,7 @@ if (typeof System !== "undefined") {
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main)
 				}) );
 			}).then(function(){
 				if(steal.dev) {

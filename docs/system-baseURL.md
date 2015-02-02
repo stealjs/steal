@@ -19,7 +19,7 @@ When a module is imported, the `baseURL` will be the prepended to the module loc
 default. For example:
 
     System.baseURL = "../libs";
-    System.import("mylib")      // looks in ../libs/mylib
+    System["import"]("mylib")      // looks in ../libs/mylib
 
 This behavior can futher be modified by [System.paths]
 
