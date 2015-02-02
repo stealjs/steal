@@ -11,7 +11,7 @@ dependency management while being extremely powerful and flexible.
 Its module loader, [steal], supports 
 the future - [ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader) syntax -
 with everything [traceur supports](https://github.com/google/traceur-compiler/wiki/LanguageFeatures),
-while supporting AMD, and CommonJS. It can load [npm] modules without configuration.
+while supporting [syntax.amd], and [syntax.CommonJS]. It can load [npm] modules without configuration.
 
 Steal makes common use cases as simply as possible. Steal automatically
 loads a [@config config] and [@dev development tools] module, supports css and less, and makes it easy to switch
@@ -24,13 +24,12 @@ killer feature, is it can build progressively loaded apps that
 balance caching and the number of script requests, resulting
 in lightning-fast load times.
 
-
 ## Quick Start
 
-The following uses npm and bower to install steal, steal-tools, grunt,
+The following uses npm to install steal, steal-tools, grunt,
 and jQuery and creates a little app that writes `Hello World` to 
 the page and build it. An application does not need to be setup this way
-to work.  This is just a common way.
+to work.  Other common ways of setting up steal can be found [steal here].
 
 ### Install
 
