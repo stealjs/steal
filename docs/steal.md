@@ -96,7 +96,57 @@ $("body").append("<h1>Hello World</h1>")
 
 ## Bower basics
 
-... coming soon ...
+Using Bower is similar to using NPM but has a few options specific to how Bower works.
+
+### Install
+
+```
+> bower install steal --save
+> bower install canjs --save
+```
+
+### Use
+
+If you are using a typical installation of Bower using it can be as simple as:
+
+```html
+<script src="bower_components/steal/steal.js" main="myapp"></script>
+```
+
+This will load your `bower.json` file and use your `dependencies` to configure packages
+that you are using (such as CanJS in this example). Unlike NPM, with Bower your
+`devDependencies` are not configured by default, although this may change in the future.
+To enable the configuration of devDependencies add the following to your script tag:
+
+```html
+bower-dev="true"
+```
+
+#### Specifying components folder
+
+Unlike NPM, Bower allows you to configure an alternate folder to install dependencies
+rather than the default `bower_components`. If you are using a different folder
+you can specify that as an attribute in the script tag as well:
+
+```html
+bower-path="vendor"
+```
+
+Will look for dependencies in `System.baseURL` + "/vendor".
+
+### Importing in your app
+
+From here using packages is the same as if you used NPM, just import them into
+_myapp.js_ and do what you need:
+
+```js
+import can from "canjs";
+
+var renderer = can.stache("<h1>StealJS {{what}}</h1>");
+can.$("body").append(renderer({
+	what: "rocks!"
+}));
+```
 
 ## Download basics
 
@@ -148,12 +198,11 @@ System.config({
 
 In _myapp.js_, import your dependencies and write your app:
 
-```
+```js
 // myapp.js
 import $ from "jquery";
 $("body").append("<h1>Hello World</h1>")
 ```
-
 
 ## Configuring the `System` loader
 
