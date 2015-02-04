@@ -12,6 +12,6 @@ It is one half of the [StealJS](http://stealjs.com) project.  It's other half,
 
 For more information on `steal`, visit [stealjs.com](http://stealjs.com).
 
-For information on contributing and developing `steal`, go [here](http://127.0.0.1:8125/steal.com/docs/guides.Contributing.html).
+For information on contributing and developing `steal`, go [here](http://stealjs.com/docs/guides.Contributing.html).
 
 
