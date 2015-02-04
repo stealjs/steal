@@ -8,7 +8,8 @@ and [jquery](http://jquery.com/) to build a `Hello World` app. Steal supports a 
 
 ### Install
 
-Install [Node.js](http://nodejs.org/) on your computer.
+Install [Node.js](http://nodejs.org/) on your computer and that [grunt-cli](http://gruntjs.com/getting-started) is installed globally.
+
 Create a directory for all your static content, scripts, and styles.
 This is your [System.baseURL BASE] folder. Within that folder run `npm init` to, create a `package.json`:
 
@@ -16,15 +17,15 @@ Note: when it asks for the "entrypoint", write "main.js".
 
     > npm init
 
-Within the BASE folder, use [npm](https://www.npmjs.org/) to install steal, steal-tools, jquery,
-[grunt](http://gruntjs.com/) and a simple `http-server` to help get you started. Use `--save-dev` to save the configuration to `package.json`.
+Within the BASE folder, use [npm](https://www.npmjs.org/) to install steal, steal-tools, jquery and
+[grunt](http://gruntjs.com/). Use `--save-dev` to save the configuration to `package.json`.
 
-	> npm install steal --save-dev
-    > npm install steal-tools --save-dev
-    > npm install jquery --save-dev
-    > npm install grunt --save-dev
-    > npm install grunt-cli --save-dev
-    > npm install http-server --save-dev
+	> npm install steal steal-tools  --save-dev
+    > npm install grunt jquery --save-dev
+
+If you already have a webserver running locally, you can skip this step. If you don't have a web server, install this simple zero-configuration command-line [http-server](simple zero-configuration command-line http server) to help you get started.
+
+    > npm install http-server -g
 
 Your `BASE` should now look like this:
 
