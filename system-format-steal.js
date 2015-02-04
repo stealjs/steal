@@ -1,7 +1,7 @@
 (function(){
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/"),
-			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.]+/);
+			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
 	

@@ -42,7 +42,7 @@ a `"bundles/myapp"` module is automatically configured to contain it:
       System.paths["bundles/*.css"] = "packages/*.css";
     </script>
     
-Often, `bundlesPath` should be the same value as what's passed in [stealTools.build]. If
+Often, `bundlesPath` should be the same value as what's passed in [steal-tools.build]. If
 `bundlesPath` is not set, it will set the default bundles paths:
 
     <script src="steal/steal.js"

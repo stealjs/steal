@@ -73,24 +73,20 @@
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
+		if ( System.env == "production" ) {
 
-			configDeferred = System.import("@config");
+			configDeferred = System.import(System.configMain);
 
-			return appDeferred = configDeferred.then(function(){
-				return System.import(System.main);
+			return appDeferred = configDeferred.then(function(cfg){
+				return System.main ? System.import(System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(System.env == "development"){
+		} else if(System.env == "development" || System.env == "build"){
 
-			if(/bower.json/.test(System.paths["@config"])) {
-				var configPath = System.paths["@config"];
-				System.define("@config", 'define(["' + configPath + '!bower"]);');
-			}
 
-			configDeferred = System.import("@config");
+			configDeferred = System.import(System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -109,7 +105,7 @@
 			appDeferred = devDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				if(!System.main) {
+				if(!System.main || System.env === "build") {
 					return configDeferred;
 				}
 				var main = System.main;

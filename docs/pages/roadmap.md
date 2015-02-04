@@ -3,10 +3,9 @@
 
 Here's what we've got planned:
 
-## Multi-app build
+## Soure Maps
 
-Add the same high-performance builds to multi-page appliactions as happens
-for progressively loaded single page apps.
+We want source map support for everything.
 
 ## Watch Builds
 

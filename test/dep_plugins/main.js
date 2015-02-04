@@ -5,6 +5,6 @@ if(typeof window !== "undefined" && window.QUnit) {
 
 	QUnit.start();
 	removeMyself();
-} else {
+} else if(typeof document != "undefined") {
 	console.log("width", document.getElementById("test-element").clientWidth);
 }
