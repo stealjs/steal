@@ -4,7 +4,7 @@
 ## Quick Start
 
 The Quick Start is a simple demo that uses [npm](https://www.npmjs.org/) to install steal, steal-tools, [grunt](http://gruntjs.com/),
-and [jquery](http://jquery.com/) to build a `Hello World` app. Steal supports a wide variety of other configuration options which can be found [steal here].
+and [jquery](http://jquery.com/) to build a `Hello World` app. This guide is a step-by-step guide to create the app from scratch, or you can clone the source from the [GitHub Quick Start repo](https://github.com/stealjs/quick-start).
 
 ### Install
 
@@ -84,9 +84,10 @@ The line `import $ from "jquery";` is ES6 module syntax which loads jQuery.
 
 ### Run in the browser
 
-On the command line, navigate to the `quick-start` directory and run the following to start the webserver.
+If you installed `http-server` earlier, navigate to the `quick-start` directory and run the following command to start the server.
 
 ```
+> cd quick-start
 > http-server
 Starting up http-server, serving ./ on: http://0.0.0.0:8080
 Hit CTRL-C to stop the server
