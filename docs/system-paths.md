@@ -9,7 +9,7 @@ If a [moduleName] matches one of the keys of the `paths` config, it is located
 with at the value of the key. 
 
 If paths for [@config], [@dev], [@traceur],
-[$css], [$less], "bundles/*", and "bundles/*.css" are not set, `steal.js` 
+[$css], [$less], "bundles/\*" and "bundles/\*.css" are not set, `steal.js` 
 will provide [default paths](#section_Defaultpathsconfiguredbysteal).
 
  
@@ -37,8 +37,12 @@ For example:
     System.paths["lodash/*"] = "/js/lodash/*.js"
     System.paths["theme/*"] = "jquery-ui/themes/base/jquery.ui.*css"
 
-This would allow you to do: `import throttle from "lodash/functions/throttle"` to
-load only the throttle function.
+This would allow you to do:
+
+```
+import throttle from "lodash/functions/throttle"
+```
+to load only the throttle function.
 
 See [this issue](https://github.com/systemjs/systemjs/issues/113) on why `css` and other extensions have
 strange rules.
@@ -56,8 +60,8 @@ to the following rules:
 - [@traceur] - defaults to _STEAL\_BASE/traceur/traceur.js_
 - [$css] - defaults to _STEAL\_BASE/steal/css.js_
 - [$less] - defaults to _STEAL\_BASE/steal/less.js_
-- `"bundles/*"` - defaults to _"dist/bundles/*.js"_
-- `"bundles/*.css"` - defaults to _"dist/bundles/*css"_
+- `"bundles/*"` - defaults to _"dist/bundles/\*.js"_
+- `"bundles/*.css"` - defaults to _"dist/bundles/\*css"_
 
 _Note: `STEAL_BASE` is the parent folder of the steal folder._
 

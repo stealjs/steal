@@ -15,10 +15,12 @@ the bundle contains.
 Specify `bundles` if you are using a prebuilt bundle. For example, if `"jqueryui.autocomplete"` 
 and `"jqueryui.datepicker"` are in `"jqueryui.custom"`, you can specify that like:
 
-    System.bundles["jqueryui.custom"] = [
-      "jqueryui.autocomplete",
-      "jqueryui.datepicker"
-    ];
+```
+System.bundles["jqueryui.custom"] = [
+  "jqueryui.autocomplete",
+  "jqueryui.datepicker"
+];
+```
 
 If `bundle` is passed to [steal-tools], it will write out where to load bundles in the production bundles. 
 
@@ -27,11 +29,13 @@ If `bundle` is passed to [steal-tools], it will write out where to load bundles 
 In [System.env production] a bundles is written out to 
 contain the [System.main] module.  For example:
 
-    System.config({
-      main: "myapp",
-      env: "production"
-    });
-    System.bundles["bundles/myapp"] = ["myapp"]
+```
+System.config({
+  main: "myapp",
+  env: "production"
+});
+System.bundles["bundles/myapp"] = ["myapp"]
+```
 
 This way, when the `"myapp"` module is imported, System will load ["bundles/myapp"].  Use [System.bundlesPath]
 to configure where bundles are found.

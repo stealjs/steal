@@ -38,8 +38,10 @@ your package.json looks like:
 The following will load `package.json` with the [npm] module and automatically load
 `my/main.js`:
 
-    <script src="../node_modules/steal/steal.js">
-    </script> 
-    
-In [System.env production], make sure your script specifies `"main"` so the correct bundle to load
+```
+<script src="../node_modules/steal/steal.js">
+</script> 
+```
+
+In [System.env production], make sure your script specifies `main` so the correct bundle to load
 can be known.

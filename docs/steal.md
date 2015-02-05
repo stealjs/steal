@@ -7,10 +7,10 @@
 @group StealJS.functions functions
 
 Steal is a  module loader that supports a wide variety of 
-syntaxes and configuration options. It makes modular development, test,
+syntaxes and configuration options. It makes modular development, test
 and production workflows simple.
 
-There are three basic steps when using Steal:
+There are four basic steps when using Steal:
 
  - Install steal
  - Add the steal script tag
@@ -39,11 +39,13 @@ a simple jQuery app.
 Next to your application's _node_modules_ folder, create _myapp.js_ and
 _myapp.html_:
 
-    /
-      node_modules/
-      package.json
-      myapp.js
-      myapp.html
+```
+/
+  node_modules/
+  package.json
+  myapp.js
+  myapp.html
+```
 
 ### Add the script tag
 
@@ -61,11 +63,11 @@ main is not provided, [System.main] will be set to _package.json_'s main.
 Steal reads your application's _package.json_ and all of its 
 `dependencies`, `peerDependencies`, and `devDependencies` recursively.
 
-Most configuration is done in the `"system"` property of 
+Most configuration is done in the `system` property of 
 package.json. The special npm configuration options are listed [npm here].
 
 
-The following _package.json_ only loads the "dependencies".
+The following _package.json_ only loads the `dependencies`.
 
 ```
 {
@@ -105,18 +107,20 @@ make a basic jQuery app.
 
 ### Install
 
-[Download Steal](https://github.com/bitovi/steal/archive/master.zip) and unzip into your public folder. 
+[Download Steal](https://github.com/bitovi/steal/archive/master.zip) and unzip into your application's folder. 
 
-In your application's public folder, create _myapp.js_,
-_myapp.html_, and _config.js_. You should have something like:
+In your application's folder, create _myapp.js_,
+_myapp.html_ and _config.js_. You should have something like:
 
-    /
-      steal/
-        ext/
-        steal.js
-        steal.production.js
-      myapp.js
-      myapp.html
+```
+/
+  steal/
+    ext/
+    steal.js
+    steal.production.js
+  myapp.js
+  myapp.html
+```
 
 ### Add the script tag
 
@@ -144,6 +148,9 @@ System.config({
 });
 ```
 
+**Note: Steal makes an AJAX request for the above example. Both client and server will need to accept/handle CORS requests properly when using remote resources.**
+
+
 ### Import modules and make stuff happen
 
 In _myapp.js_, import your dependencies and write your app:
@@ -153,6 +160,14 @@ In _myapp.js_, import your dependencies and write your app:
 import $ from "jquery";
 $("body").append("<h1>Hello World</h1>")
 ```
+
+## Loader and System namespaces
+
+Loader is a proposed object, allowing for the creating of custom ES6 module loaders. Documentation can be found [here](http://whatwg.github.io/loader/).
+
+System is the proposed default Loader, allowing for APIs such as [System.import] and [System.config]. Documentation and polyfill information can be found [here](https://github.com/ModuleLoader/es6-module-loader).
+
+Loader and System are currently polyfilled by [SystemJS](https://github.com/systemjs/systemjs)
 
 
 ## Configuring the `System` loader
@@ -182,7 +197,7 @@ configuration values.  Configuration values can be set in three ways:
         System.meta["jquery"] = {format: "global"}
         
    If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. System
-   configuration happens in their `"system"` properties:
+   configuration happens in their `system` properties:
    
         {
           "name": "myapp",

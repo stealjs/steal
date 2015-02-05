@@ -8,7 +8,7 @@ SystemJS recognize.
 
     "format amd";
 
-@option {Array.<moduleName>} deps dependencies.
+@option {Array.<moduleName>} deps Dependencies.
 
 @option {String} exports What should be exported.
 

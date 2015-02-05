@@ -1,7 +1,7 @@
 @property {String} System.stealPath
 @parent StealJS.config
 
-Specify the path to `steal.js`'s root folder and set many other configuration
+Specify the path to the `steal.js` root folder and set many other configuration
 values as side effects. This should not typically be called directly.
 
 @option {String}

@@ -1,7 +1,7 @@
 @property {Object.<moduleGlob, moduleName|Object.<moduleGlob,moduleName>>} System.map
 @parent StealJS.config
 
-Alter [moduleName]s.
+Alter [moduleName] keys.
 
 @option {Object.<moduleGlob, moduleName|Object.<moduleGlob,moduleName>>} 
 

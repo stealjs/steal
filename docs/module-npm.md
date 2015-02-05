@@ -102,7 +102,7 @@ The moduleName of the initial module that should be loaded when the package is i
 }
 ```
 
-When `"my-module"` is imported, `my-module@1.2.3#my-main` will be the actual module name being 
+When `my-module` is imported, `my-module@1.2.3#my-main` will be the actual module name being 
 imported.  This path that `my-main` will be found depends on the `directories.lib` setting.
 
 
@@ -149,7 +149,7 @@ Example:
 ### package.system.npmIgnore
 
 Use npmIgnore to prevent package information from being loaded for specified dependencies
-or the `peerDependencies`, `devDependencies`, or `dependencies`.  The following
+in the `peerDependencies`, `devDependencies` or `dependencies`.  The following
 ignores a package.json's `devDependencies` and `cssify`.  But all other
 dependencies will be loaded:
 
@@ -176,7 +176,7 @@ The following packages are ignored by default:
 
 ### system.npm.ignoreBrowser
 
-Set to true to ignore browserfy's `"browser"` and `"browserify"` configurations.
+Set to true to ignore browserfy's `browser` and `browserify` configurations.
 
 ```js
 {
@@ -191,7 +191,7 @@ Set to true to ignore browserfy's `"browser"` and `"browserify"` configurations.
 Set a folder to look for module's within your project.  Only the `lib` 
 directory can be specified.
 
-In the following setup, `"my-project/my-utils"` will be looked for in
+In the following setup, `my-project/my-utils` will be looked for in
 `my-project/src/my-utils.js`:
 
 ```js
