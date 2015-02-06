@@ -148,7 +148,7 @@ System.config({
 });
 ```
 
-**Note: Steal makes an AJAX request for the above example. Both client and server will need to accept/handle CORS requests properly when using remote resources.**
+> Note: Steal makes an AJAX request for the above example. Both client and server will need to accept/handle CORS requests properly when using remote resources.
 
 
 ### Import modules and make stuff happen
@@ -161,9 +161,9 @@ import $ from "jquery";
 $("body").append("<h1>Hello World</h1>")
 ```
 
-## Loader and System namespaces
+## Loader and System objects
 
-Loader is a proposed object, allowing for the creating of custom ES6 module loaders. Documentation can be found [here](http://whatwg.github.io/loader/).
+Loader is a proposed constructor, allowing for the creating of custom ES6 module loaders. Documentation can be found [here](http://whatwg.github.io/loader/).
 
 System is the proposed default Loader, allowing for APIs such as [System.import] and [System.config]. Documentation and polyfill information can be found [here](https://github.com/ModuleLoader/es6-module-loader).
 
