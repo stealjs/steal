@@ -4,30 +4,28 @@
 ## Quick Start
 
 The Quick Start is a simple demo that uses [npm](https://www.npmjs.org/) to install steal, steal-tools, [grunt](http://gruntjs.com/),
-and [jquery](http://jquery.com/) to build a `Hello World` app. Steal supports a wide variety of other configuration options which can be found [steal here].
+and [jquery](http://jquery.com/) to build a `Hello World` app. This guide is a step-by-step guide to create the app from scratch, or you can clone the source from the [GitHub Quick Start repo](https://github.com/stealjs/quick-start).
 
 ### Install
 
-Install [Node.js](http://nodejs.org/) on your
-computer. Create a directory for all your static content, scripts, and
-styles. This is your [System.baseURL BASE] folder. Within that folder run `npm init` to ,
-create a `package.json`:
+Install [Node.js](http://nodejs.org/) on your computer and that [grunt-cli](http://gruntjs.com/getting-started) is installed globally.
+
+Create a directory for all your static content, scripts, and styles.
+This is your [System.baseURL BASE] folder. Within that folder run `npm init` to, create a `package.json`:
 
 Note: when it asks for the "entrypoint", write "main.js".
 
     > npm init
 
-
-
-Within the BASE folder, use [npm](https://www.npmjs.org/) to install steal, steal-tools, jquery, and
+Within the BASE folder, use [npm](https://www.npmjs.org/) to install steal, steal-tools, jquery and
 [grunt](http://gruntjs.com/). Use `--save-dev` to save the configuration to `package.json`.
 
-	> npm install steal --save-dev
-    > npm install steal-tools --save-dev
-    > npm install jquery --save-dev
-    > npm install grunt --save-dev
-    > npm install grunt-cli --save-dev
+	> npm install steal steal-tools  --save-dev
+    > npm install grunt jquery --save-dev
 
+If you already have a webserver running locally, you can skip this step. If you don't have a web server, install this simple zero-configuration command-line [http-server](simple zero-configuration command-line http server) to help you get started.
+
+    > npm install http-server -g
 
 Your `BASE` should now look like this:
 
@@ -86,9 +84,18 @@ The line `import $ from "jquery";` is ES6 module syntax which loads jQuery.
 
 ### Run in the browser
 
-Open `index.html` in the browser.  You should see a big "Hello World".
+If you installed `http-server` earlier, navigate to the `quick-start` directory and run the following command to start the server.
 
-### Build
+```
+> cd quick-start
+> http-server
+Starting up http-server, serving ./ on: http://0.0.0.0:8080
+Hit CTRL-C to stop the server
+```
+
+Open `http://localhost:8080/index.html` in the browser. You should see a big "Hello World". Open the Network tab in developer tools and you'll see several files including `main.js` were loaded.
+
+### Build Process
 
 Create a `Gruntfile.js` in your BASE folder. Configure grunt to
 call `stealBuild`
@@ -128,5 +135,5 @@ Change `index.html` to look like:
 
 ### Run in production
 
-Open `index.html` in the browser. You should see a big "Hello World". If you check
-the network tab, you will see only two scripts load.
+Open `http://localhost:8080/index.html` in the browser. You should see a big "Hello World". Check
+the network tab again, you will see only two scripts load. The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into `main.js`. 
