@@ -478,7 +478,7 @@ var makeSteal = function(System){
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
-				options[optionName] = attr.value;
+				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
 		}
@@ -514,18 +514,17 @@ var makeSteal = function(System){
 		// we only load things with force = true
 		if ( System.env == "production" ) {
 
-			configDeferred = System.import(System.configMain);
+			configDeferred = System["import"](System.configMain);
 
 			return appDeferred = configDeferred.then(function(cfg){
-				return System.main ? System.import(System.main) : cfg;
+				return System.main ? System["import"](System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});
 
 		} else if(System.env == "development" || System.env == "build"){
 
-
-			configDeferred = System.import(System.configMain);
+			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -535,10 +534,10 @@ var makeSteal = function(System){
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
@@ -552,7 +551,7 @@ var makeSteal = function(System){
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main)
 				}) );
 			}).then(function(){
 				if(steal.dev) {

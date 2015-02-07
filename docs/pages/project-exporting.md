@@ -1,5 +1,5 @@
 @page StealJS.project-exporting Project Exporting
-@parent StealJS.guides
+@parent StealJS.guides 2
 
 Learn how to use StealJS to export your project into commonly used
 formats and platforms.

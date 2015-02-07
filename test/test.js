@@ -247,6 +247,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("traceur_runtime/dev.html");
 	});
 	
+	asyncTest("allow truthy script options (#298)", function(){
+		makeIframe("basics/truthy_script_options.html");
+	});
+	
 	module("json extension");
 	
 	asyncTest("json extension", function(){
@@ -268,6 +272,8 @@ QUnit.config.testTimeout = 30000;
 	});
 
 	
+
+
 
 
 	module("Bower extension");
