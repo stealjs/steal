@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - module.exports</title>
+	<title>StealJS  - steal-tools/lib/build/helpers/amd.normalize</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -85,12 +85,58 @@
 			</a>
 		</li>
 		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
+				steal-tools
+			</a>
+		</li>
+		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="module.exports.html" data-search="module.exports">
-				module.exports
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
+				amd
 			</a>
 			
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|amd.dest.html" data-search="steal-tools/lib/build/helpers/amd.dest">
+						dest
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools|lib|build|helpers|amd.format.html" data-search="steal-tools/lib/build/helpers/amd.format">
+						format
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="steal-tools|lib|build|helpers|amd.normalize.html" data-search="steal-tools/lib/build/helpers/amd.normalize">
+						normalize
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
 
 		</li>
 		
@@ -107,7 +153,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>module.exports</h1>
+<h1>normalize</h1>
 	<ul class="tags">
 		<li>function</li>
 	</ul>
@@ -142,9 +188,7 @@
 
 		
 		<section class="description">
-			<p>Creating a mapping from pre-normalized dependency names to the normalized version.
-Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
-information.</p>
+			<p>Normalizes to the AMD format.</p>
 
 		</section>
 		
@@ -155,12 +199,10 @@ information.</p>
 		
 		
 			<section class="signature">
-				<h2 id="sig_">function(node)
+				<h2 id="sig_">amd.normalize(aliases)
 </h2>
 <div class="signature-wrapper">
-<p>Creating a mapping from pre-normalized dependency names to the normalized version.
-Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
-information.</p>
+<p>Normalizes to the AMD format.</p>
 
 
 	<h3>Parameters</h3>
@@ -168,10 +210,12 @@ information.</p>
 	<ol class="parameters">
 		
 		<li class="parameter">
-			<h4>node
-				<code>{*}</code></h4>
+			<h4>aliases
+				<code>{Object}</code><span class="pull-right optional">Optional</span></h4>
 			<div class="description">
-				
+				<p>An object of aliases that will be used
+to normalize module names.</p>
+
 			</div>
 			
 			
@@ -193,7 +237,11 @@ information.</p>
 
 		
 		<section class="comment">
-			
+			<h2>Use</h2>
+<p>By default, removes <code>.js</code> for js resources and prepends <code>css!</code>
+for css resources. It also removes the last part of &quot;repeat&quot; modules.
+For example <code>&quot;mods/module1/module1&quot;</code> becomes <code>&quot;mods/module1&quot;</code>.</p>
+
 		</section>
 		
 		
@@ -218,7 +266,7 @@ information.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"module.exports","params":[{"name":"node","types":[{"type":"*"}]}],"parent":"steal-tools/lib/node/dependency_map.js","src":"steal-tools/lib/node/dependency_map.js","line":1,"codeLine":7,"description":"Creating a mapping from pre-normalized dependency names to the normalized version.\nSave the mapping as `dependencyMap` on the node itself. Transpile will use this\ninformation.","method":"stealTools.node.dependencyMap","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools/lib/build/helpers/amd.normalize","params":[{"types":[{"type":"Object","options":[]}],"optional":true,"name":"aliases","description":"An object of aliases that will be used\nto normalize module names."}],"parent":"steal-tools/lib/build/helpers/amd","src":"steal-tools/lib/build/helpers/amd.js","line":67,"codeLine":85,"description":"Normalizes to the AMD format.","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

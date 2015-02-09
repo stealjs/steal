@@ -681,10 +681,10 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>When using the <a href="https://github.com/bitovi/system-bower">Bower plugin</a> by default it will assume dependencies are located at <code>System.baseURL</code> + <code>/bower_components</code>, which is the default location that Bower installs dependencies. Since this is configurable by Bower itself, <code>bowerPath</code> provices a way to point to the directory where you install Bower deps.  Using in the script tag is the best option:</p>
+<p>When using the <a href="https://github.com/bitovi/system-bower">Bower plugin</a> by default it will assume dependencies are located at <code>System.baseURL</code> + <code>/bower_components</code>, which is the default location that Bower installs dependencies. Since this is configurable by Bower itself, <code>bowerPath</code> provices a way to point to the directory where you install Bower dependencies.  Using in the script tag is the best option:</p>
 <pre><code>&lt;script src=&quot;vendor/steal/steal.js&quot;
-  data-bower-path=&quot;vendor&quot;
-  data-main=&quot;main&quot;&gt;&lt;/script&gt;
+    data-bower-path=&quot;vendor&quot;
+    data-main=&quot;main&quot;&gt;&lt;/script&gt;
 </code></pre>
 <p>Would load the Bower configuration file for, for example, <code>lodash</code> in <code>vendor/lodash/bower.json</code>.</p>
 <h2>Implementation</h2>
@@ -714,7 +714,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.bowerPath","src":"steal/docs/system-bowerPath.md","description":"Specifies the path to the folder where Bower dependencies can be found.","types":[{"type":"String","description":"The folder containing bower dependencies. Defaults to `bower_components`."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.bowerPath","src":"steal/docs/system-bowerPath.md","description":"Specifies the path to the folder where Bower dependencies can be found.","types":[{"type":"String","description":"The folder containing bower dependencies. Defaults to `bower_components`."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

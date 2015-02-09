@@ -645,7 +645,7 @@
 		
 		<section class="description">
 			<p>Steal is a  module loader that supports a wide variety of
-syntaxes and configuration options. It makes modular development, test,
+syntaxes and configuration options. It makes modular development, test
 and production workflows simple.</p>
 
 		</section>
@@ -660,7 +660,7 @@ and production workflows simple.</p>
 
 		
 		<section class="comment">
-			<p>There are three basic steps when using Steal:</p>
+			<p>There are four basic steps when using Steal:</p>
 <ul>
 <li>Install steal</li>
 <li>Add the steal script tag</li>
@@ -699,9 +699,9 @@ main is not provided, <a href="System.main.html">System.main</a> will be set to 
 <h3>Configure</h3>
 <p>Steal reads your application's <em>package.json</em> and all of its
 <code>dependencies</code>, <code>peerDependencies</code>, and <code>devDependencies</code> recursively.</p>
-<p>Most configuration is done in the <code>&quot;system&quot;</code> property of
+<p>Most configuration is done in the <code>system</code> property of
 package.json. The special npm configuration options are listed <a href="npm.html">here</a>.</p>
-<p>The following <em>package.json</em> only loads the &quot;dependencies&quot;.</p>
+<p>The following <em>package.json</em> only loads the <code>dependencies</code>.</p>
 <pre><code>{
   &quot;name&quot;: &quot;myapp&quot;,
   &quot;main&quot;: &quot;myapp&quot;,
@@ -722,14 +722,45 @@ import $ from &quot;jquery&quot;;
 $(&quot;body&quot;).append(&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;)
 </code></pre>
 <h2>Bower basics</h2>
-<p>... coming soon ...</p>
+<p>Using Bower is similar to using NPM but has a few options specific to how Bower works.</p>
+<h3>Install</h3>
+<pre><code>&gt; bower install steal --save
+&gt; bower install canjs --save
+</code></pre>
+<h3>Use</h3>
+<p>If you are using a typical installation of Bower using it can be as simple as:</p>
+<pre><code class="language-html">&lt;script src=&quot;bower_components/steal/steal.js&quot; main=&quot;myapp&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>This will load your <code>bower.json</code> file and use your <code>dependencies</code> to configure packages
+that you are using (such as CanJS in this example). Unlike NPM, with Bower your
+<code>devDependencies</code> are not configured by default, although this may change in the future.
+To enable the configuration of devDependencies add the following to your script tag:</p>
+<pre><code class="language-html">bower-dev=&quot;true&quot;
+</code></pre>
+<h4>Specifying components folder</h4>
+<p>Unlike NPM, Bower allows you to configure an alternate folder to install dependencies
+rather than the default <code>bower_components</code>. If you are using a different folder
+you can specify that as an attribute in the script tag as well:</p>
+<pre><code class="language-html">bower-path=&quot;vendor&quot;
+</code></pre>
+<p>Will look for dependencies in <code>System.baseURL</code> + &quot;/vendor&quot;.</p>
+<h3>Importing in your app</h3>
+<p>From here using packages is the same as if you used NPM, just import them into
+<em>myapp.js</em> and do what you need:</p>
+<pre><code class="language-js">import can from &quot;canjs&quot;;
+
+var renderer = can.stache(&quot;&lt;h1&gt;StealJS &lt;/h1&gt;&quot;);
+can.$(&quot;body&quot;).append(renderer({
+    what: &quot;rocks!&quot;
+}));
+</code></pre>
 <h2>Download basics</h2>
 <p>The following details how to use steal installed via its download to
 make a basic jQuery app.</p>
 <h3>Install</h3>
-<p><a href="https://github.com/bitovi/steal/archive/master.zip">Download Steal</a> and unzip into your public folder.</p>
-<p>In your application's public folder, create <em>myapp.js</em>,
-<em>myapp.html</em>, and <em>config.js</em>. You should have something like:</p>
+<p><a href="https://github.com/bitovi/steal/archive/master.zip">Download Steal</a> and unzip into your application's folder.</p>
+<p>In your application's folder, create <em>myapp.js</em>,
+<em>myapp.html</em> and <em>config.js</em>. You should have something like:</p>
 <pre><code>/
   steal/
     ext/
@@ -755,12 +786,24 @@ System.config({
   paths: {&quot;jquery&quot;: &quot;http://code.jquery.com/jquery-1.11.0.min.js&quot;}
 });
 </code></pre>
+<blockquote>
+<p>Note: Steal makes an AJAX request for the above example. Both client and server will need
+to accept/handle CORS requests properly when using remote resources.</p>
+</blockquote>
 <h3>Import modules and make stuff happen</h3>
 <p>In <em>myapp.js</em>, import your dependencies and write your app:</p>
-<pre><code>// myapp.js
+<pre><code class="language-js">// myapp.js
 import $ from &quot;jquery&quot;;
 $(&quot;body&quot;).append(&quot;&lt;h1&gt;Hello World&lt;/h1&gt;&quot;)
 </code></pre>
+<h2>Loader and System objects</h2>
+<p>Loader is a proposed constructor, allowing for the creating of custom ES6 module loaders. Documentation
+can be found <a href="http://whatwg.github.io/loader/">here</a>.</p>
+<p>System is the proposed default Loader, allowing for APIs such
+as <a href="System.import.html">System.import</a> and <a href="System.config.html">System.config</a>. Documentation and polyfill information can be
+found <a href="https://github.com/ModuleLoader/es6-module-loader">here</a>.</p>
+<p>Loader and System are currently
+polyfilled by <a href="https://github.com/systemjs/systemjs">SystemJS</a>.</p>
 <h2>Configuring the <code>System</code> loader</h2>
 <p>Once steal.js loads, its startup behavior is determined
 configuration values.  Configuration values can be set in three ways:</p>
@@ -784,7 +827,7 @@ after <code>steal.js</code> has loaded. This technique is typically used in the 
  System.meta[&quot;jquery&quot;] = {format: &quot;global&quot;}
 </code></pre>
 <p>If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. System
-configuration happens in their <code>&quot;system&quot;</code> properties:</p>
+configuration happens in their <code>system</code> properties:</p>
 <pre><code> {
    &quot;name&quot;: &quot;myapp&quot;,
    &quot;dependencies&quot;: { ... },
@@ -860,7 +903,7 @@ steal(&quot;style.less!&quot;)
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"steal","src":"steal/docs/steal.md","description":"Steal is a  module loader that supports a wide variety of \nsyntaxes and configuration options. It makes modular development, test,\nand production workflows simple.","parent":"StealJS.api","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"steal","src":"steal/docs/steal.md","description":"Steal is a  module loader that supports a wide variety of \nsyntaxes and configuration options. It makes modular development, test\nand production workflows simple.","parent":"StealJS.api","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

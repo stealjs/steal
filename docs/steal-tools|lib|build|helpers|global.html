@@ -85,292 +85,28 @@
 			</a>
 		</li>
 		
-		
-			<li class="search-container active">
+		<li class="search-container active parent">
 			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
 				steal-tools
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+				global
 			</a>
 			
 	<ul>
 		
 			
 				
-					
-					<li class="heading search-container">
-						<span>JavaScript</span>
-						
-	<ul>
-		
-			
-				
 				
 				<li class="search-container">
-					<a class="function" href="steal-tools.build.html" data-search="build">
-						build
+					<a class="function" href="steal-tools|lib|build|helpers|global.dest.html" data-search="steal-tools/lib/build/helpers/global.dest">
+						dest
 					</a>
 				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools.export.html" data-search="export">
-						export
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools.transform.html" data-search="transform">
-						transform
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools.transformImport.html" data-search="transformImport">
-						transformImport
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>Command Line</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools.cmd.build.html" data-search="steal-tools build">
-						steal-tools build
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools.cmd.transform.html" data-search="steal-tools transform">
-						steal-tools transform
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>Grunt Tasks</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.grunt.build.html" data-search="steal-build">
-						steal-build
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.grunt.export.html" data-search="steal-export">
-						steal-export
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>Export Helpers</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="module" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
-						amd
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="module" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
-						cjs
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container active">
-					<a class="module" href="steal-tools|lib|build|helpers|global.html" data-search="global">
-						global
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>Types</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.BuildOptions.html" data-search="BuildOptions">
-						BuildOptions
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
-						SystemConfig
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.export.object.html" data-search="ExportObject">
-						ExportObject
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.export.output.html" data-search="ExportOutput">
-						ExportOutput
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="steal-tools.transform.options.html" data-search="TransformOptions">
-						TransformOptions
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
 				
 			
 			
@@ -480,7 +216,22 @@
 
 		
 		<section class="comment">
-			
+			<h2>Use</h2>
+<p>Add in <code>+global-js</code> and <code>+global-css</code> in an output name to build
+a single file with all of the module and its dependencies JS and CSS
+that is not in <em>node_modules</em>.</p>
+<pre><code>stealTools.export({
+  system: {
+    main: &quot;my-module&quot;,
+    config: __dirname+&quot;/package.json!npm&quot;
+  },
+  outputs: {
+    &quot;+global-js&quot;: {},
+    &quot;+global-css&quot;: {}
+  }
+});
+</code></pre>
+
 		</section>
 		
 		
@@ -505,7 +256,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"module","name":"steal-tools/lib/build/helpers/global","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/global.js","line":7,"codeLine":24,"description":"Helpers that make exporting to [syntax.global] formats easier.","title":"global","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+global-js\": { ... OVERWRITES ... }","description":"Exports all JS into a single file.","params":[]},{"code":"\"+global-css\": { ... OVERWRITES ... }","description":"Exports all CSS into a single file.","params":[]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"module","name":"steal-tools/lib/build/helpers/global","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/global.js","line":7,"codeLine":42,"description":"Helpers that make exporting to [syntax.global] formats easier.","title":"global","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+global-js\": { ... OVERWRITES ... }","description":"Exports all JS into a single file.","params":[]},{"code":"\"+global-css\": { ... OVERWRITES ... }","description":"Exports all CSS into a single file.","params":[]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

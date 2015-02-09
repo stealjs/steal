@@ -432,7 +432,7 @@
 
 		
 		<section class="description">
-			<p>Builds steal-tools from the command line.</p>
+			<p>Call steal-tools <a href="steal-tools.build.html">build</a> from the command line.</p>
 
 		</section>
 		
@@ -492,11 +492,24 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>steal-tools must have been installed into the commandLine like:</p>
-<pre><code>npm install steal-tools -g
+<blockquote>
+<p>Note: The <code>steal-tools build</code> command-line
+utility calls <a href="steal-tools.build.html">steal-tools.build</a>
+internally. This page documents the specifics of the command-line utility. Read
+<a href="steal-tools.build.html">steal-tools.build's documentation</a> for how to use
+the build in various workflows and detailed information
+on the options available.</p>
+</blockquote>
+<p><code>steal-tools</code> can be installed into the command line, like:</p>
+<pre><code>&gt; npm install steal-tools -g
 </code></pre>
-<p>Then you can run <code>steal-tools</code> like:</p>
-<pre><code>steal-tools build --config app/config.js --main app/app
+<p>Then you can run <code>steal-tools build</code>, like:</p>
+<pre><code>&gt; steal-tools build --config app/config.js --main app/app
+</code></pre>
+<p>Or, you can access <code>steal-tools</code> in <em>node_modules/.bin</em>, like:</p>
+<pre><code>&gt; ./node_modules/.bin/steal-tools build \
+      --config app/config.js \
+      --main app/app
 </code></pre>
 
 		</section>
@@ -523,7 +536,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.cmd.build","src":"steal-tools/doc/command-build.md","description":"Builds steal-tools from the command line.","title":"steal-tools build","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools build [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config` or `options` name in [steal-tools.build]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`."}]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.cmd.build","src":"steal-tools/doc/command-build.md","description":"Call steal-tools [steal-tools.build] from the command line.","title":"steal-tools build","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools build [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config` or `options` name in [steal-tools.build]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`."}]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

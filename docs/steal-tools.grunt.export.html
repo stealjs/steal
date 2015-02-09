@@ -434,7 +434,7 @@
 
 		
 		<section class="description">
-			<p>A <a href="http://gruntjs.com/">Grunt</a> multi task that load modules and write them out in different formats.</p>
+			<p>A <a href="http://gruntjs.com/">Grunt</a> multi task that loads modules, and writes them out in different formats.</p>
 
 		</section>
 		
@@ -461,7 +461,7 @@
 		<h4>tasks
 			<code>{Object&lt;String,<a href="steal-tools.export.object.html" >ExportObject</a>&gt;}</code></h4>
 		<div class="description">
-			<p>An object of task names as keys
+			<p>An object with task names as keys,
 and exportObjects as values.</p>
 <pre><code>grunt.initConfig({
   &quot;steal-export&quot;: {
@@ -473,7 +473,7 @@ and exportObjects as values.</p>
 <p>Each <a href="steal-tools.export.object.html">ExportObject</a> specifies:</p>
 <ul>
 <li>A <code>system</code> object that specifies the modules to be loaded.</li>
-<li>An <code>options</code> object that specifies any special loading behavior like turning logging.</li>
+<li>An <code>options</code> object that specifies any special loading behavior, like turning logging.</li>
 <li>An <code>outputs</code> object that specifies how the modules should be written out.</li>
 </ul>
 <pre><code>grunt.initConfig({
@@ -510,9 +510,16 @@ and exportObjects as values.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p><code>steal-export</code> is a grunt <a href="http://gruntjs.com/creating-tasks#multi-tasks">multi-task</a> that is
+<blockquote>
+<p>Note: The <code>steal-export</code> Grunt task calls <a href="steal-tools.export.html">steal-tools.export</a>
+internally. This page documents the specifics of the Grunt task. Read
+<a href="steal-tools.export.html">steal-tools.export's documentation</a> for how to use
+the export in various workflows and detailed information
+on the system and options arguments.</p>
+</blockquote>
+<p><code>steal-export</code> is a Grunt <a href="http://gruntjs.com/creating-tasks#multi-tasks">multi-task</a> that is
 used to build library projects to a variety of formats. For example, to load a &quot;main&quot; module and
-transpile it and all of its dependencies (except jQuery) to AMD and CommonJS with debug output:</p>
+transpile it, and all of its dependencies (except jQuery), to AMD and CommonJS with debug output:</p>
 <pre><code>grunt.initConfig({
   &quot;steal-export&quot;: {
     transpile: {
@@ -541,15 +548,15 @@ transpile it and all of its dependencies (except jQuery) to AMD and CommonJS wit
 </code></pre>
 <p>Each <a href="steal-tools.export.object.html">ExportObject</a> task is configured by three values:</p>
 <ul>
-<li>system - describes the <a href="System.config.html">System.config</a> values used to load modules, this is passed to <a href="steal-tools.transformImport.html">transformImport</a>.</li>
-<li>options - configures special behavior of the loader such as logging.</li>
+<li>system - describes the <a href="System.config.html">System.config</a> values used to load modules; this is passed to <a href="steal-tools.transformImport.html">transformImport</a>.</li>
+<li>options - configures special behavior of the loader, such as logging.</li>
 <li>outputs - configures the modules that should be written out, how they
 should be written out, and where they should be written.</li>
 </ul>
 <p>The <a href="steal-tools.export.object.html">ExportObject</a> documentation has more information.</p>
 <h2>meta.steal.export-helpers</h2>
-<p>You can add your own export helpers on your grunt config's
-<code>meta.steal.export-helpers</code> object like the following:</p>
+<p>You can add your own export helpers on your Grunt config's
+<code>meta.steal.export-helpers</code> object, as follows:</p>
 <pre><code>grunt.initConfig({
   meta: {
     steal: {
@@ -595,7 +602,7 @@ should be written out, and where they should be written.</li>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.grunt.export","src":"steal-tools/doc/grunt-export.md","description":"A [http://gruntjs.com/ Grunt] multi task that load modules and write them out in different formats.","title":"steal-export","types":[{"type":"Object","options":[{"name":"tasks","description":"An object of task names as keys\nand exportObjects as values.\n\n```\ngrunt.initConfig({\n  \"steal-export\": {\n    taskName1: { ExportObject1 },\n    taskName2: { ExportObject2 }\n  }\n});\n```\n\nEach [steal-tools.export.object] specifies:\n\n - A `system` object that specifies the modules to be loaded.\n - An `options` object that specifies any special loading behavior like turning logging.\n - An `outputs` object that specifies how the modules should be written out.\n \n```\ngrunt.initConfig({\n  \"steal-export\": {\n    taskName: {\n      system : { .. },\n      options: { .. },\n      outputs: { .. }\n    }\n  }\n});\n```","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"steal-tools.export.object"}]}]}]}]}],"parent":"steal-tools.grunt","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.grunt.export","src":"steal-tools/doc/grunt-export.md","description":"A [http://gruntjs.com/ Grunt] multi task that loads modules, and writes them out in different formats.","title":"steal-export","types":[{"type":"Object","options":[{"name":"tasks","description":"An object with task names as keys,\nand exportObjects as values.\n\n```\ngrunt.initConfig({\n  \"steal-export\": {\n    taskName1: { ExportObject1 },\n    taskName2: { ExportObject2 }\n  }\n});\n```\n\nEach [steal-tools.export.object] specifies:\n\n - A `system` object that specifies the modules to be loaded.\n - An `options` object that specifies any special loading behavior, like turning logging.\n - An `outputs` object that specifies how the modules should be written out.\n \n```\ngrunt.initConfig({\n  \"steal-export\": {\n    taskName: {\n      system : { .. },\n      options: { .. },\n      outputs: { .. }\n    }\n  }\n});\n```","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"steal-tools.export.object"}]}]}]}]}],"parent":"steal-tools.grunt","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

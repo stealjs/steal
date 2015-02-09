@@ -506,13 +506,13 @@ module or modules.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>After getting <code>transform</code> from <a href="steal-tools.transformImport.html">transformImport</a> you can call it like:</p>
+<p>After getting <code>transform</code> from <a href="steal-tools.transformImport.html">transformImport</a> you can call it, like:</p>
 <pre><code>var result = transform(&quot;module/name/to/build&quot;, {
   // specifies modules to ignore
   ignore: [
-    // ignores this module and all of its dependencies
+    // ignores this module, and all of its dependencies
     &quot;module/name/to/ignore&quot;,
-    // ignores modules names matching this pattern
+    // ignores modules with names matching this pattern
     /can\//
   ],
   
@@ -520,20 +520,22 @@ module or modules.</p>
   // true by default.
   removeDevelopmentCode: true,
   
-  // Transpile the code to either &quot;amd&quot;,&quot;steal&quot;,&quot;cjs&quot; or &quot;global&quot;.
-  // &quot;global&quot;, the default, allows the file to work without any module loader.
+  // Transpile the code to either &quot;amd&quot;, &quot;steal&quot;, &quot;cjs&quot; or &quot;global&quot;.
+  // &quot;global&quot;, the default, allows the file to work without any 
+  // module loader.
   format: &quot;global&quot;,
   
   // Minify the file using uglify.
   // `false` by default.
   minify: true,
   
-  // Only write the module specified by `moduleName` instead of its dependencies.
-  // `false` by default.
+  // Only write the module specified by `moduleName`, instead of its 
+  // dependencies. `false` by default.
   ignoreAllDependencies: false
   
   // Map module names to their name on the global object. Useful for
-  // building &quot;global&quot; modules that depend on other scripts already in the page.
+  // building &quot;global&quot; modules that depend on other scripts already in 
+  // the page.
   exports: {&quot;jquery&quot;: &quot;jQuery&quot;},
   
   // Transpile to normalized dependency names.
@@ -541,7 +543,7 @@ module or modules.</p>
   useNormalizedDependencies: true
   
   // Custom normalization behavior
-  // By default the normalized name is used.
+  // By default, the normalized name is used.
   normalize: function(name, currentModule, address){
     return name;
   }
@@ -575,7 +577,7 @@ information, read <a href="steal-tools.transform.options.html">transformOptions<
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.transform","src":"steal-tools/doc/transform.md","description":"A function provided by [steal-tools.transformImport] that returns a transformed\nmodule or modules.","title":"transform","parent":"steal-tools.JS","signatures":[{"code":"transform(moduleName, options)","description":"","params":[{"types":[{"type":"moduleName"}],"optional":true,"name":"moduleName","defaultValue":"config.main","description":"The module name to build."},{"types":[{"type":"steal-tools.transform.options"}],"optional":true,"name":"options","description":"Options that configure how the files are compiled.  These options overwrite the \n`pluginifierOptions` argument passed to [steal-tools.transformImport]."}],"returns":{"types":[{"type":"String"}],"description":"The result of `moduleName` being pluginified."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.transform","src":"steal-tools/doc/transform.md","description":"A function provided by [steal-tools.transformImport] that returns a transformed\nmodule or modules.","title":"transform","parent":"steal-tools.JS","signatures":[{"code":"transform(moduleName, options)","description":"","params":[{"types":[{"type":"moduleName"}],"optional":true,"name":"moduleName","defaultValue":"config.main","description":"The module name to build."},{"types":[{"type":"steal-tools.transform.options"}],"optional":true,"name":"options","description":"Options that configure how the files are compiled.  These options overwrite the \n`pluginifierOptions` argument passed to [steal-tools.transformImport]."}],"returns":{"types":[{"type":"String"}],"description":"The result of `moduleName` being pluginified."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

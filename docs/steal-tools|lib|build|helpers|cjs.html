@@ -249,8 +249,8 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>Adding &quot;+cjs&quot; to a [steal-tools.exporter.output] name will mixin
-default [steal-tools.exporter.output] and [steal-tools.pluginify.options]
+<p>Adding &quot;+cjs&quot; to a <a href="steal-tools.export.output.html">ExportOutput</a> name will mixin
+default <a href="steal-tools.export.output.html">ExportOutput</a> and <a href="steal-tools.transform.options.html">TransformOptions</a>
 values that export modules to a CommonJS format.</p>
 <pre><code>outputs: {
   &quot;+cjs&quot;: {},
@@ -262,13 +262,14 @@ values that export modules to a CommonJS format.</p>
 <p>This mixes in the following default values:</p>
 <ul>
 <li><a href="steal-tools|lib|build|helpers|cjs.graphs.html">graphs</a> - Writes out System.main and all of its dependencies.</li>
-<li><a href="steal-tools|lib|build|helpers|cjs.format.html">format</a> - Writes out all modules as CJS</li>
-<li><a href="steal-tools|lib|build|helpers|cjs.normalize.html">normalize</a> - Leaves moduleName references that reference modules in node_modules alone, makes
+<li><a href="steal-tools|lib|build|helpers|cjs.format.html">format</a> - Writes out all modules as CJS.</li>
+<li><a href="steal-tools|lib|build|helpers|cjs.normalize.html">normalize</a> - Leaves moduleName references that reference modules in node_modules alone; makes
 all other moduleName references relative.</li>
-<li><a href="steal-tools|lib|build|helpers|cjs.dest.html">dest</a> - Writes out each module in <code>[baseURL]/dist/cjs</code></li>
+<li><a href="steal-tools|lib|build|helpers|cjs.dest.html">dest</a> - Writes out each module in <code>[baseURL]/dist/cjs</code>.</li>
 <li><a href="steal-tools|lib|build|helpers|cjs.ignore.html">ignore</a> - Ignores everything in node_modules.</li>
 </ul>
-<p>You can overwrite or alter the behavior of these default values by adding a value in the [steal-tools.exporter.output].
+<p>You can overwrite or alter the behavior of these default values by adding a value in
+the <a href="steal-tools.export.output.html">ExportOutput</a>.
 The following writes out dest in a different location:</p>
 <pre><code>outputs: {
   &quot;+cjs&quot;: {
@@ -276,7 +277,8 @@ The following writes out dest in a different location:</p>
   }
 }
 </code></pre>
-<p>The behavior for overwriting [steal-tools.exporter.output] values is documented in the default value API pages.</p>
+<p>The behavior for overwriting <a href="steal-tools.export.output.html">ExportOutput</a> values is
+documented in the default value API pages.</p>
 
 		</section>
 		
@@ -302,7 +304,7 @@ The following writes out dest in a different location:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"steal-tools/lib/build/helpers/cjs","type":"module","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/cjs.js","line":7,"codeLine":57,"description":"Helpers that make exporting to CJS projects easier.","title":"cjs","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+cjs\": { ... OVERWRITES ... }","description":"Adds helpers that export modules to a CJS format.","params":[]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"name":"steal-tools/lib/build/helpers/cjs","type":"module","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/cjs.js","line":7,"codeLine":59,"description":"Helpers that make exporting to CJS projects easier.","title":"cjs","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+cjs\": { ... OVERWRITES ... }","description":"Adds helpers that export modules to a CJS format.","params":[]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

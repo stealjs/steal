@@ -461,7 +461,7 @@
 		<h4>minify<code>=true</code>
 			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
-			<p>Whether the source code is minified prior to writing.</p>
+			<p>Sets whether the source code is minified prior to writing.</p>
 
 		</div>
 		
@@ -473,7 +473,7 @@
 		<h4>bundleSteal<code>=false</code>
 			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
-			<p>Whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.</p>
+			<p>Sets whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.</p>
 
 		</div>
 		
@@ -485,7 +485,7 @@
 		<h4>removeDevelopmentCode<code>=true</code>
 			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
-			<p>Whether development code (code wrapped with <code>@steal-remove-{start/stop}</code>) will be removed.</p>
+			<p>Sets whether development code (code wrapped with <code>@steal-remove-{start/stop}</code>) will be removed.</p>
 
 		</div>
 		
@@ -497,7 +497,7 @@
 		<h4>ignore
 			<code>{Array&lt;String&gt;}</code></h4>
 		<div class="description">
-			<p>Specify modules to not include in the final output. For example if you wanted to load jQuery from a cdn you would provide this option:</p>
+			<p>Specify modules to exclude in the final output. For example, if you wanted to load jQuery from a cdn, you would provide this option:</p>
 <pre><code>{
   ignore: [ &quot;jquery&quot; ]
 }
@@ -513,7 +513,7 @@
 		<h4>format
 			<code>{steal-tools.format}</code></h4>
 		<div class="description">
-			<p>Specifies a format to transpile the dependency graph to. In the multiBuild all code is automatically transpiled to <strong>amd</strong> format. In <a href="steal-tools.transform.html">transform</a> the default is to <strong>global</strong>.</p>
+			<p>Specifies a format for transpiling the dependency graph. In the multiBuild, all code is automatically transpiled to <strong>amd</strong> format. In <a href="steal-tools.transform.html">transform</a>, the default is to <strong>global</strong>.</p>
 
 		</div>
 		
@@ -562,7 +562,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.BuildOptions","src":"steal-tools/doc/types/build-options.md","description":"Options used to configure the build process.","title":"BuildOptions","types":[{"type":"Object","options":[{"name":"minify","description":"Whether the source code is minified prior to writing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"bundleSteal","description":"Whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"removeDevelopmentCode","description":"Whether development code (code wrapped with `@steal-remove-{start/stop}`) will be removed.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"ignore","description":"Specify modules to not include in the final output. For example if you wanted to load jQuery from a cdn you would provide this option:\n\n    {\n      ignore: [ \"jquery\" ]\n    }","types":[{"type":"Array","template":[{"types":[{"type":"String"}]}]}]},{"name":"format","description":"Specifies a format to transpile the dependency graph to. In the multiBuild all code is automatically transpiled to **amd** format. In [steal-tools.transform] the default is to **global**.","types":[{"type":"steal-tools.format"}]}]}],"parent":"steal-tools.types","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.BuildOptions","src":"steal-tools/doc/types/build-options.md","description":"Options used to configure the build process.","title":"BuildOptions","types":[{"type":"Object","options":[{"name":"minify","description":"Sets whether the source code is minified prior to writing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"bundleSteal","description":"Sets whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"removeDevelopmentCode","description":"Sets whether development code (code wrapped with `@steal-remove-{start/stop}`) will be removed.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"ignore","description":"Specify modules to exclude in the final output. For example, if you wanted to load jQuery from a cdn, you would provide this option:\n\n    {\n      ignore: [ \"jquery\" ]\n    }","types":[{"type":"Array","template":[{"types":[{"type":"String"}]}]}]},{"name":"format","description":"Specifies a format for transpiling the dependency graph. In the multiBuild, all code is automatically transpiled to **amd** format. In [steal-tools.transform], the default is to **global**.","types":[{"type":"steal-tools.format"}]}]}],"parent":"steal-tools.types","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

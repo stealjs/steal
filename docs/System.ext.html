@@ -660,7 +660,7 @@
 </h2>
 <div class="signature-wrapper">
 <p>Specifies a plugin to add when an extension is matched in a module name. <code>steal.js</code> includes
-defauls of:</p>
+defaults of:</p>
 <pre><code>System.ext //-&gt; {&quot;css&quot;: &quot;$css&quot;, &quot;less&quot;: &quot;$less&quot;}
 </code></pre>
 
@@ -685,19 +685,19 @@ defauls of:</p>
 		<section class="comment">
 			<h2>Use</h2>
 <p>The following:</p>
-<pre><code>System.ext = {
-  &quot;ejs&quot; : &quot;lib/ejs.ejs&quot;
-};
+<pre><code>System.config({
+    ext: {
+        stache: 'can/view/stache/system'
+    }
+})
 </code></pre>
 <p>allows:</p>
-<pre><code>System.import(&quot;foo.css&quot;)
+<pre><code>System.import(&quot;foo.stache!&quot;)
 </code></pre>
 <p>Without having to write:</p>
-<pre><code>System.import(&quot;foo.css!steal/css&quot;);
+<pre><code>System.import(&quot;foo.stache!can/view/system/stache&quot;);
 </code></pre>
 <p>By default, <code>steal.js</code> configures <code>css</code> to point to &quot;$css&quot; and <code>less</code> to point to &quot;$less&quot;.</p>
-<h2>Implementation</h2>
-<p>Implemented by steal.</p>
 
 		</section>
 		
@@ -723,7 +723,7 @@ defauls of:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.ext","src":"steal/docs/system-ext.md","description":"Configures plugin loading by module extension.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"Specifies a plugin to add when an extension is matched in a module name. `steal.js` includes\ndefauls of:\n\n    System.ext //-> {\"css\": \"$css\", \"less\": \"$less\"}"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.ext","src":"steal/docs/system-ext.md","description":"Configures plugin loading by module extension.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"Specifies a plugin to add when an extension is matched in a module name. `steal.js` includes\ndefaults of:\n\n    System.ext //-> {\"css\": \"$css\", \"less\": \"$less\"}"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

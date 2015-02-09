@@ -753,7 +753,7 @@ following properties have special behavior:</p>
   }
 }
 </code></pre>
-<p>When <code>&quot;my-module&quot;</code> is imported, <code>my-module@1.2.3#my-main</code> will be the actual module name being
+<p>When <code>my-module</code> is imported, <code>my-module@1.2.3#my-main</code> will be the actual module name being
 imported.  This path that <code>my-main</code> will be found depends on the <code>directories.lib</code> setting.</p>
 <h3>package.system.map</h3>
 <p>The map config works similar to the base <a href="System.map.html">System.map</a> behavior.  However, both the keys and values
@@ -790,7 +790,7 @@ are converted to NPM module names.  The keys and values must:</p>
 </code></pre>
 <h3>package.system.npmIgnore</h3>
 <p>Use npmIgnore to prevent package information from being loaded for specified dependencies
-or the <code>peerDependencies</code>, <code>devDependencies</code>, or <code>dependencies</code>.  The following
+in the <code>peerDependencies</code>, <code>devDependencies</code> or <code>dependencies</code>.  The following
 ignores a package.json's <code>devDependencies</code> and <code>cssify</code>.  But all other
 dependencies will be loaded:</p>
 <pre><code class="language-js">{
@@ -813,7 +813,7 @@ dependencies will be loaded:</p>
 <li>&quot;grunt&quot;, &quot;grunt-cli&quot;</li>
 </ul>
 <h3>system.npm.ignoreBrowser</h3>
-<p>Set to true to ignore browserfy's <code>&quot;browser&quot;</code> and <code>&quot;browserify&quot;</code> configurations.</p>
+<p>Set to true to ignore browserfy's <code>browser</code> and <code>browserify</code> configurations.</p>
 <pre><code class="language-js">{
   &quot;system&quot;: {
     &quot;ignoreBrowser&quot;: true
@@ -823,7 +823,7 @@ dependencies will be loaded:</p>
 <h3>system.npm.directories</h3>
 <p>Set a folder to look for module's within your project.  Only the <code>lib</code>
 directory can be specified.</p>
-<p>In the following setup, <code>&quot;my-project/my-utils&quot;</code> will be looked for in
+<p>In the following setup, <code>my-project/my-utils</code> will be looked for in
 <code>my-project/src/my-utils.js</code>:</p>
 <pre><code class="language-js">{
   &quot;name&quot;: &quot;my-project&quot;
@@ -859,7 +859,7 @@ directory can be specified.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"module","name":"npm","src":"steal/docs/module-npm.md","description":"","title":"","types":[{"type":"*"}],"parent":"StealJS.modules","signatures":[{"code":"moduleName!npm","description":"","params":[{"types":[{"type":"moduleName"}],"name":"moduleName","description":"The moduleName of the file you want \nto process. This will normally be a package.json of your base application."}]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"module","name":"npm","src":"steal/docs/module-npm.md","description":"","title":"","types":[{"type":"*"}],"parent":"StealJS.modules","signatures":[{"code":"moduleName!npm","description":"","params":[{"types":[{"type":"moduleName"}],"name":"moduleName","description":"The moduleName of the file you want \nto process. This will normally be a package.json of your base application."}]}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

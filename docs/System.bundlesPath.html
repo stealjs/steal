@@ -684,8 +684,8 @@ bundles folder is located.</p>
 		<section class="comment">
 			<h2>Use</h2>
 <p>In <a href="System.env.html">production</a>, the <a href="System.main.html">System.main</a> module will be assumed to be within a
-<em>&quot;bundles/[MAIN_MODULE_NAME]&quot;</em> module. For example, if the main module is <code>&quot;myapp&quot;</code>,
-a <code>&quot;bundles/myapp&quot;</code> module is automatically configured to contain it:</p>
+<em>&quot;bundles/[MAIN_MODULE_NAME]&quot;</em> module. For example, if the main module is <code>myapp</code>,
+a <code>bundles/myapp</code> module is automatically configured to contain it:</p>
 <pre><code>&lt;script src=&quot;steal/steal.js&quot;
         config=&quot;./config.js&quot;
         main=&quot;myapp&quot;
@@ -696,7 +696,7 @@ a <code>&quot;bundles/myapp&quot;</code> module is automatically configured to c
 &lt;/script&gt;
 </code></pre>
 <p><code>System.bundlesPath</code> tells the client where all bundles can be found by configuring
-<a href="System.paths.html">System.paths</a>. For example, if bundlesPath is set to &quot;packages&quot;:</p>
+<a href="System.paths.html">System.paths</a>. For example, if bundlesPath is set to <code>packages</code>:</p>
 <pre><code>&lt;script src=&quot;steal/steal.js&quot;
         config=&quot;./config.js&quot;
         main=&quot;myapp&quot;
@@ -724,7 +724,7 @@ a <code>&quot;bundles/myapp&quot;</code> module is automatically configured to c
 &lt;/script&gt;
 </code></pre>
 <p>If a path rule for <code>System.paths[&quot;bundles/*&quot;]</code> or <code>System.paths[&quot;bundles/*.css&quot;]</code>
-exist, <code>buildsPath</code> will not overwrite them.</p>
+exist, <code>bundlesPath</code> will not overwrite them.</p>
 
 		</section>
 		
@@ -750,7 +750,7 @@ exist, <code>buildsPath</code> will not overwrite them.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.bundlesPath","src":"steal/docs/system-bundlesPath.md","description":"A convience configuration property for setting the path of where the [System.env production] \nbundles folder is located.","types":[{"type":"String","description":"A folder name that specifies the path to the production bundles.  By default,\n`System.bundlesPath` is `\"dist/bundles\"`."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.bundlesPath","src":"steal/docs/system-bundlesPath.md","description":"A convience configuration property for setting the path of where the [System.env production] \nbundles folder is located.","types":[{"type":"String","description":"A folder name that specifies the path to the production bundles.  By default,\n`System.bundlesPath` is `\"dist/bundles\"`."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

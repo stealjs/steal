@@ -662,7 +662,7 @@
 <p>If a <a href="moduleName.html">moduleName</a> matches one of the keys of the <code>paths</code> config, it is located
 with at the value of the key.</p>
 <p>If paths for <a href="@config.html">@config</a>, <a href="@dev.html">@dev</a>, <a href="@traceur.html">@traceur</a>,
-<a href="$css.html">$css</a>, <a href="$less.html">$less</a>, &quot;bundles/<em>&quot;, and &quot;bundles/</em>.css&quot; are not set, <code>steal.js</code>
+<a href="$css.html">$css</a>, <a href="$less.html">$less</a>, &quot;bundles/*&quot; and &quot;bundles/*.css&quot; are not set, <code>steal.js</code>
 will provide <a href="#section_Defaultpathsconfiguredbysteal">default paths</a>.</p>
 
 
@@ -700,8 +700,10 @@ module.</p>
 <pre><code>System.paths[&quot;lodash/*&quot;] = &quot;/js/lodash/*.js&quot;
 System.paths[&quot;theme/*&quot;] = &quot;jquery-ui/themes/base/jquery.ui.*css&quot;
 </code></pre>
-<p>This would allow you to do: <code>import throttle from &quot;lodash/functions/throttle&quot;</code> to
-load only the throttle function.</p>
+<p>This would allow you to do:</p>
+<pre><code>import throttle from &quot;lodash/functions/throttle&quot;
+</code></pre>
+<p>to load only the throttle function.</p>
 <p>See <a href="https://github.com/systemjs/systemjs/issues/113">this issue</a> on why <code>css</code> and other extensions have
 strange rules.</p>
 <h2>Default paths configured by steal</h2>
@@ -715,8 +717,8 @@ to the following rules:</p>
 <li><a href="@traceur.html">@traceur</a> - defaults to <em>STEAL_BASE/traceur/traceur.js</em></li>
 <li><a href="$css.html">$css</a> - defaults to <em>STEAL_BASE/steal/css.js</em></li>
 <li><a href="$less.html">$less</a> - defaults to <em>STEAL_BASE/steal/less.js</em></li>
-<li><code>&quot;bundles/*&quot;</code> - defaults to _&quot;dist/bundles/*.js&quot;_</li>
-<li><code>&quot;bundles/*.css&quot;</code> - defaults to _&quot;dist/bundles/*css&quot;_</li>
+<li><code>&quot;bundles/*&quot;</code> - defaults to <em>&quot;dist/bundles/*.js&quot;</em></li>
+<li><code>&quot;bundles/*.css&quot;</code> - defaults to <em>&quot;dist/bundles/*css&quot;</em></li>
 </ul>
 <p><em>Note: <code>STEAL_BASE</code> is the parent folder of the steal folder.</em></p>
 <h2>Implementation</h2>
@@ -746,7 +748,7 @@ to the following rules:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.paths","src":"steal/docs/system-paths.md","description":"Configure the location of a module or modules.","types":[{"type":"Object","template":[{"types":[{"type":"glob"}]},{"types":[{"type":"glob"}]}],"description":"If a [moduleName] matches one of the keys of the `paths` config, it is located \nwith at the value of the key. \n\nIf paths for [@config], [@dev], [@traceur],\n[$css], [$less], \"bundles/*\", and \"bundles/*.css\" are not set, `steal.js` \nwill provide [default paths](#section_Defaultpathsconfiguredbysteal)."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.paths","src":"steal/docs/system-paths.md","description":"Configure the location of a module or modules.","types":[{"type":"Object","template":[{"types":[{"type":"glob"}]},{"types":[{"type":"glob"}]}],"description":"If a [moduleName] matches one of the keys of the `paths` config, it is located \nwith at the value of the key. \n\nIf paths for [@config], [@dev], [@traceur],\n[$css], [$less], \"bundles/\\*\" and \"bundles/\\*.css\" are not set, `steal.js` \nwill provide [default paths](#section_Defaultpathsconfiguredbysteal)."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

@@ -463,7 +463,7 @@
 			<code>{<a href="steal-tools.SystemConfig.html" >SystemConfig</a>}</code></h4>
 		<div class="description">
 			<p>Specifies the <a href="System.config.html">System.config</a> values used
-to load modules.  At a minimum some set of <a href="System.main.html">main</a>, <a href="System.baseURL.html">baseURL</a>
+to load modules.  At a minimum, some set of <a href="System.main.html">main</a>, <a href="System.baseURL.html">baseURL</a>,
 or <a href="System.configPath.html">configPath</a> must be specified.</p>
 <pre><code>system: {
   main: ['mymodule'],
@@ -520,13 +520,13 @@ or <a href="System.configPath.html">configPath</a> must be specified.</p>
 			<h2>Use</h2>
 <p>Each ExportObject task is configured by three values:</p>
 <ul>
-<li>system - describes the <a href="System.config.html">System.config</a> values used to load modules, this is passed to <a href="steal-tools.transformImport.html">transformImport</a>.</li>
-<li>options - configures special behavior of the loader such as logging.</li>
-<li>outputs - configures the modules that should be written out, how they
+<li>system - Describes the <a href="System.config.html">System.config</a> values used to load modules; this is passed to <a href="steal-tools.transformImport.html">transformImport</a>.</li>
+<li>options - Configures special behavior of the loader such as logging.</li>
+<li>outputs - Configures the modules that should be written out, how they
 should be written out, and where they should be written.</li>
 </ul>
 <h2>system</h2>
-<p>A <a href="steal-tools.SystemConfig.html">SystemConfig</a> object that is used to load modules. Typically you will want to specify at least the <code>config</code> and <code>main</code> options like so:</p>
+<p>A <a href="steal-tools.SystemConfig.html">SystemConfig</a> object that is used to load modules. Typically, you will want to specify at least the <code>config</code> and <code>main</code> options, like so:</p>
 <pre><code>system: {
   config: __dirname + &quot;/config.js&quot;,
   main: [&quot;math/add&quot;, &quot;math/subtract&quot;]
@@ -561,7 +561,7 @@ supports the following options:</p>
 <li>ignoreAllDependencies <i>{Boolean}</i></li>
 <li>includeTraceurRuntime <i>{includeTraceurRuntime}</i></li>
 </ul>
-<p>Only one of <code>modules</code>, <code>eachModule</code> or <code>graphs</code> should be specified.</p>
+<p>Only one of <code>modules</code>, <code>eachModule</code>, or <code>graphs</code> should be specified.</p>
 <p>Example:</p>
 <pre><code>outputs: {
   &quot;global first and second together without jQuery&quot;: {
@@ -581,8 +581,8 @@ supports the following options:</p>
 }
 </code></pre>
 <h3>output names</h3>
-<p>An output name can mixin default output options of an <strong>Export Helper</strong> like <a href="steal-tools|lib|build|helpers|cjs.html">cjs</a>
-by including a &quot;+&quot; followed by the name of the export helper.  For example:</p>
+<p>An output name can mixin default output options of an <strong>Export Helper</strong>, like <a href="steal-tools|lib|build|helpers|cjs.html">cjs</a>,
+by including a &quot;+&quot;, followed by the name of the export helper.  For example:</p>
 <pre><code>outputs: {
   &quot;+amd&quot;: {},
   &quot;+cjs&quot;: {dist: __dirname+&quot;cjs&quot;},
@@ -617,7 +617,7 @@ by including a &quot;+&quot; followed by the name of the export helper.  For exa
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.export.object","src":"steal-tools/doc/types/export-object.md","description":"An object that specifies the modules to load and their outputs. This is used by\n[steal-tools.export] and [steal-tools.grunt.export].","title":"ExportObject","types":[{"type":"Object","options":[{"name":"system","description":"Specifies the [System.config] values used \nto load modules.  At a minimum some set of [System.main main], [System.baseURL baseURL]\nor [System.configPath configPath] must be specified.\n\n```\nsystem: {\n  main: ['mymodule'],\n  config: __dirname+\"/config.js\"\n}\n```","types":[{"type":"steal-tools.SystemConfig"}]},{"name":"options","description":"Options that configure the following:","types":[{"type":"Object","options":[{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}]},{"name":"outputs","description":"Configures output files to be written.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"steal-tools.export.output"}]}]}]}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.export.object","src":"steal-tools/doc/types/export-object.md","description":"An object that specifies the modules to load and their outputs. This is used by\n[steal-tools.export] and [steal-tools.grunt.export].","title":"ExportObject","types":[{"type":"Object","options":[{"name":"system","description":"Specifies the [System.config] values used \nto load modules.  At a minimum, some set of [System.main main], [System.baseURL baseURL],\nor [System.configPath configPath] must be specified.\n\n```\nsystem: {\n  main: ['mymodule'],\n  config: __dirname+\"/config.js\"\n}\n```","types":[{"type":"steal-tools.SystemConfig"}]},{"name":"options","description":"Options that configure the following:","types":[{"type":"Object","options":[{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}]},{"name":"outputs","description":"Configures output files to be written.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"steal-tools.export.output"}]}]}]}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

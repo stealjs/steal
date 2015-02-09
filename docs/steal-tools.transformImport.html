@@ -432,8 +432,8 @@
 
 		
 		<section class="description">
-			<p>Load a module and its dependencies and provide a <a href="steal-tools.transform.html">transform</a>
-method so they can be written out in another form.</p>
+			<p>Loads a module, and its dependencies, and provides a <a href="steal-tools.transform.html">transform</a>
+method, so they can be written out in another form.</p>
 
 		</section>
 		
@@ -444,9 +444,9 @@ method so they can be written out in another form.</p>
 					<h2 id="sig_stealTools_transformImport_config_transformOptions_">stealTools.transformImport(config, transformOptions)
 </h2>
 <div class="signature-wrapper">
-<p>Loads a module and all of its dependencies and returns a function that
-can write out all or parts of the module and its dependency graph
-so that they dont depend on <code>steal.js</code>.</p>
+<p>Loads a module, and all of its dependencies, and returns a function that
+can write out all, or parts, of the module and its dependency graph,
+so that they don't depend on <code>steal.js</code>.</p>
 
 
 	<h3>Parameters</h3>
@@ -458,10 +458,10 @@ so that they dont depend on <code>steal.js</code>.</p>
 				<code>{<a href="steal-tools.SystemConfig.html" >SystemConfig</a>}</code></h4>
 			<div class="description">
 				<p>Specifies configuration values to set on
-a [System] loader. The <a href="System.main.html">main</a> option must be specified. Typically
-<a href="System.configPath.html">configPath</a> is also specified as that is used to set
+a System loader. The <a href="System.main.html">main</a> option must be specified. Typically,
+<a href="System.configPath.html">configPath</a> is also specified, as that is used to set
 <a href="System.baseURL.html">baseURL</a>.  Any System <a href="System.config.html">configuration</a> can be specified; however,
-most other <strong>build</strong> configuration values are specified in
+most other <strong>build</strong> configuration values are specified
 by <a href="System.buildConfig.html">System.buildConfig</a> in the config file.</p>
 
 			</div>
@@ -474,7 +474,7 @@ by <a href="System.buildConfig.html">System.buildConfig</a> in the config file.<
 						<code>{String}</code>
 					</h5>
 					<div class="description">
-						<p>The module whos dependencies should be built.</p>
+						<p>The module whose dependencies should be built.</p>
 
 					</div>
 				</li>
@@ -510,7 +510,7 @@ the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
 			<h4>transformOptions
 				<code>{Object}</code></h4>
 			<div class="description">
-				<p>Configures the behavior of loading the modules and acts as default values
+				<p>Configures the behavior of loading the modules, and acts as default values
 for the resulting <a href="steal-tools.transform.html">transform function's</a> options argument.</p>
 
 			</div>
@@ -550,8 +550,7 @@ for the resulting <a href="steal-tools.transform.html">transform function's</a> 
 	<div class="returns">
 		<h4><code>{Promise&lt;<a href="steal-tools.transform.html" >transform</a>(<a href="moduleName.html" >moduleName</a>, <a href="steal-tools.transform.options.html" >options</a>)&gt;}</code></h4>
 		<div class="description">
-			<p>A deferred that resolves to a function
-that can write out all or part of the loaded dependency tree.</p>
+			<p>A deferred, which resolves to a function that can write out all or part of the loaded dependency tree.</p>
 
 		</div>
 		
@@ -576,20 +575,20 @@ that can write out all or part of the loaded dependency tree.</p>
 		<section class="comment">
 			<h2>Use</h2>
 <p><code>stealTools.transformImport</code> lets you transform modules to a different
-format or form.  It's passed a <a href="steal-tools.SystemConfig.html">SystemConfig</a> which is used
-to load modules. Once all modules have been loaded it provides a
+format or form.  It's passed a <a href="steal-tools.SystemConfig.html">SystemConfig</a>, which is used
+to load modules. Once all modules have been loaded, it provides a
 <a href="steal-tools.transform.html">transform</a> method that can write out modules:</p>
 <ul>
 <li>in different formats (cjs, amd, global),</li>
 <li>minified, or</li>
 <li>with development code removed.</li>
 </ul>
-<p><code>transformImport</code> and <code>transform</code> are low level functionality. For most projects, <a href="steal-tools.export.html">export</a>
+<p><code>transformImport</code> and <code>transform</code> are low-level functionality. For the majority of projects, <a href="steal-tools.export.html">export</a>
 will be a better fit for the most common transformation behavior.</p>
 <p>Like <a href="steal-tools.build.html">build</a>, transformImport can be used from the command-line, from Grunt, or
-programmatically in Node.js. For this example we're going to use
-transformImport programmatically in order to showcase
-it's more advanced functionality:</p>
+programmatically in Node.js. For this example, we're going to use
+transformImport programmatically, in order to showcase
+its more advanced functionality:</p>
 <pre><code>var transformImport = require(&quot;steal-tools&quot;).transformImport;
 var fs = require(&quot;fs&quot;);
 
@@ -614,9 +613,9 @@ transformImport({
 </code></pre>
 <p>As you can see, transformImport takes an object containing the
 System configuration and returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>.
-The promise will return another function (named transform in this example) that can be used to generate
-a string containing a module and it's dependencies. By default the transform
-function will return the main module, but can be used to generate any dependency in the graph.</p>
+The promise will return another function (named &quot;transform&quot; in this example) that can be used to generate
+a string containing a module and its dependencies. By default, the transform
+function will return the main module; but it can be used to generate any dependency in the graph.</p>
 
 		</section>
 		
@@ -642,7 +641,7 @@ function will return the main module, but can be used to generate any dependency
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.transformImport","src":"steal-tools/doc/transformImport.md","description":"Load a module and its dependencies and provide a [steal-tools.transform] \nmethod so they can be written out in another form.","title":"transformImport","parent":"steal-tools.JS","signatures":[{"code":"stealTools.transformImport(config, transformOptions)","description":"Loads a module and all of its dependencies and returns a function that\ncan write out all or parts of the module and its dependency graph\nso that they dont depend on `steal.js`.","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"main","description":"The module whos dependencies should be built.","types":[{"type":"String"}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"Specifies configuration values to set on \na [System] loader. The [System.main main] option must be specified. Typically\n[System.configPath configPath] is also specified as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified in\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"verbose","description":"Set to true to get a lot of warning messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"Set to true to log nothing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"transformOptions","description":"Configures the behavior of loading the modules and acts as default values\nfor the resulting [steal-tools.transform transform function's] options argument."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.transform"}]}]}],"description":"A deferred that resolves to a function\nthat can write out all or part of the loaded dependency tree."}}],"types":[],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.transformImport","src":"steal-tools/doc/transformImport.md","description":"Loads a module, and its dependencies, and provides a [steal-tools.transform] \nmethod, so they can be written out in another form.","title":"transformImport","parent":"steal-tools.JS","signatures":[{"code":"stealTools.transformImport(config, transformOptions)","description":"Loads a module, and all of its dependencies, and returns a function that\ncan write out all, or parts, of the module and its dependency graph,\nso that they don't depend on `steal.js`.","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"main","description":"The module whose dependencies should be built.","types":[{"type":"String"}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"Specifies configuration values to set on \na System loader. The [System.main main] option must be specified. Typically,\n[System.configPath configPath] is also specified, as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"verbose","description":"Set to true to get a lot of warning messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"Set to true to log nothing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"transformOptions","description":"Configures the behavior of loading the modules, and acts as default values\nfor the resulting [steal-tools.transform transform function's] options argument."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.transform"}]}]}],"description":"A deferred, which resolves to a function that can write out all or part of the loaded dependency tree."}}],"types":[],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

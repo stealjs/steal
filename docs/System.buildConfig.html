@@ -680,8 +680,20 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<pre><code>System.buildConfig = {
-  map: {jquery :  &quot;domless-jquery&quot;}
+<p>In an application's build process, it may be necessary to overwrite existing configuration properties, such as paths or maps. For example, a jQuery based application may have a configuration such as:</p>
+<pre><code>System.config({
+  map: {
+    &quot;can/util/util&quot;: &quot;can/util/jquery/jquery&quot;
+  }
+});
+</code></pre>
+<p>However, during the build, DOM access may not be available. Altering the configuration as follows will be necessary:</p>
+<pre><code>System.config({
+  buildConfig: {
+    map: {
+      &quot;can/util/util&quot;: &quot;can/util/domless/domless&quot;
+    }
+  }
 };
 </code></pre>
 
@@ -709,7 +721,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.buildConfig","src":"steal/docs/system-buildConfig.md","description":"An object of [System.config] overwrites to use when loading plugins while building.","types":[{"type":"Object","options":[]}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.buildConfig","src":"steal/docs/system-buildConfig.md","description":"An object of [System.config] overwrites to use when loading plugins while building.","types":[{"type":"Object","options":[]}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

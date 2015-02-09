@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - module.exports</title>
+	<title>StealJS  - steal-tools/lib/build/helpers/global.dest</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -85,12 +85,34 @@
 			</a>
 		</li>
 		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
+				steal-tools
+			</a>
+		</li>
+		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="module.exports.html" data-search="module.exports">
-				module.exports
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+				global
 			</a>
 			
+	<ul>
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="steal-tools|lib|build|helpers|global.dest.html" data-search="steal-tools/lib/build/helpers/global.dest">
+						dest
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
 
 		</li>
 		
@@ -107,7 +129,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>module.exports</h1>
+<h1>dest</h1>
 	<ul class="tags">
 		<li>function</li>
 	</ul>
@@ -142,9 +164,8 @@
 
 		
 		<section class="description">
-			<p>Creating a mapping from pre-normalized dependency names to the normalized version.
-Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
-information.</p>
+			<p>By default, writes  out every module in <code>[baseURL]/dist/global</code>.  And adds a &quot;.js&quot; or &quot;.css&quot; to
+files not ending with &quot;.js&quot; or &quot;.css&quot;.</p>
 
 		</section>
 		
@@ -155,12 +176,11 @@ information.</p>
 		
 		
 			<section class="signature">
-				<h2 id="sig_">function(node)
+				<h2 id="sig_">global.dest(loc, path)
 </h2>
 <div class="signature-wrapper">
-<p>Creating a mapping from pre-normalized dependency names to the normalized version.
-Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
-information.</p>
+<p>By default, writes  out every module in <code>[baseURL]/dist/global</code>.  And adds a &quot;.js&quot; or &quot;.css&quot; to
+files not ending with &quot;.js&quot; or &quot;.css&quot;.</p>
 
 
 	<h3>Parameters</h3>
@@ -168,10 +188,22 @@ information.</p>
 	<ol class="parameters">
 		
 		<li class="parameter">
-			<h4>node
+			<h4>loc
 				<code>{*}</code></h4>
 			<div class="description">
 				
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>path
+				<code>{String}</code><span class="pull-right optional">Optional</span></h4>
+			<div class="description">
+				<p>If provided, changes the location where files are written out.</p>
+
 			</div>
 			
 			
@@ -218,7 +250,7 @@ information.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"module.exports","params":[{"name":"node","types":[{"type":"*"}]}],"parent":"steal-tools/lib/node/dependency_map.js","src":"steal-tools/lib/node/dependency_map.js","line":1,"codeLine":7,"description":"Creating a mapping from pre-normalized dependency names to the normalized version.\nSave the mapping as `dependencyMap` on the node itself. Transpile will use this\ninformation.","method":"stealTools.node.dependencyMap","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools/lib/build/helpers/global.dest","params":[{"name":"loc","types":[{"type":"*"}]},{"types":[{"type":"String"}],"optional":true,"name":"path","description":"If provided, changes the location where files are written out."}],"parent":"steal-tools/lib/build/helpers/global","src":"steal-tools/lib/build/helpers/global.js","line":48,"codeLine":56,"description":"By default, writes  out every module in `[baseURL]/dist/global`.  And adds a \".js\" or \".css\" to\nfiles not ending with \".js\" or \".css\".","title":"","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

@@ -153,6 +153,18 @@
 				
 				
 				<li class="search-container">
+					<a class="page" href="StealJS.quick-start.html" data-search="Quick Start">
+						Quick Start
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
 						Progressive Loading
 					</a>
@@ -298,128 +310,23 @@
 
 		
 		<section class="comment">
-			<p>StealJS is a module loader and builder that will
-help you create the next great app or open source project. Its designed to simplify
-dependency management while being extremely powerful and flexible.</p>
-<p>Its module loader, <a href="steal.html">steal</a>, supports
-the future - <a href="https://github.com/ModuleLoader/es6-module-loader">ES6 Module Loader</a> syntax -
+			<p>StealJS is a module loader and builder that will help you create the next great app. Its designed to simplify dependency management while being extremely powerful and flexible.</p>
+<p>StealJS is composed of two parts.</p>
+<ul>
+<li><a href="steal.html">steal</a> - the module loader</li>
+<li><a href="steal-tools.html">steal-tools</a> - the builder</li>
+</ul>
+<h3>The Module loader</h3>
+<p><a href="steal.html">Steal</a> supports the future - <a href="https://github.com/ModuleLoader/es6-module-loader">ES6 Module Loader</a> syntax -
 with everything <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">traceur supports</a>,
 while supporting <a href="syntax.amd.html">AMD </a>, and <a href="syntax.CommonJS.html">CommonJS </a>. It can load <a href="npm.html">npm</a> modules without configuration.</p>
-<p>Steal makes common use cases as simply as possible. Steal automatically
+<p>Steal makes your development workflow simple and easy. Steal automatically
 loads a <a href="@config.html">config</a> and <a href="@dev.html">development tools</a> module, supports css and less, and makes it easy to switch
 between development and production <a href="System.env.html">environments</a>.</p>
-<p>Its builder, <a href="steal-tools.html">steal-tools</a>,
-lets you build an application or export your project to AMD,
-CommonJS or standalone formats. But steal-tools'
-killer feature, is it can build progressively loaded apps that
-balance caching and the number of script requests, resulting
-in lightning-fast load times.</p>
-<h2>Quick Start</h2>
-<p>The following uses npm to install steal, steal-tools, grunt,
-and jQuery and creates a little app that writes <code>Hello World</code> to
-the page and build it. An application does not need to be setup this way
-to work.  Other common ways of setting up steal can be found <a href="steal.html">here</a>.</p>
-<h3>Install</h3>
-<p>Install <a href="http://nodejs.org/">Node.js</a> on your
-computer. Locate the folder that contains all your static content, scripts, and
-styles. This is your <a href="System.baseURL.html">BASE</a> folder.  Within that folder,
-create a <strong>package.json</strong>:</p>
-<pre><code>&gt; npm init
-</code></pre>
-<p>When it asks for the &quot;main&quot; entrypoint, write &quot;main.js&quot;.</p>
-<p>Also within that folder,
-use <a href="https://www.npmjs.org/">npm</a> to install steal, steal-tools, jquery, and
-<a href="http://gruntjs.com/">grunt</a>:</p>
-<pre><code>&gt; npm install steal --save-dev
-&gt; npm install steal-tools --save-dev
-&gt; npm install jquery --save-dev
-&gt; npm install grunt-cli --save-dev
-</code></pre>
-<p>Your <code>BASE</code> folder should contain all your static scripts and
-resources.  It should now look like this:</p>
-<pre><code>  BASE/
-    node_modules/
-      steal/
-      steal-tools/
-      grunt-cli/
-      jquery/
-    package.json
-</code></pre>
-<h3>Setup</h3>
-<p>Create <code>index.html</code> and <code>main.js</code>, files in your BASE folder so it looks like:</p>
-<pre><code>  BASE/
-    node_modules/
-    package.json
-    index.html
-    main.js
-</code></pre>
-<p><code>index.html</code> loads your app. Add the following code that loads <code>steal</code> and
-tells steal to load the <code>main</code> module.</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-  &lt;body&gt;
-    &lt;script src=&quot;./node_modules/steal/steal.js&quot;
-            data-main=&quot;main&quot;&gt;
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-<p>Steal uses <em>pacakge.json</em> to configure its behavior. Find the full details on
-the <a href="npm.html">npm extension page</a>. Most of the configuration happens within
-a special &quot;system&quot; property. Its worth creating it now in case you'll
-need it later.</p>
-<pre><code>// package.json
-{
-  ...
-  &quot;system&quot;: {},
-  ...
-}
-</code></pre>
-<p><code>main.js</code> is the entrypoint of the application. It should load import your
-apps other modules and kickoff the application. Write the following in <code>main.js</code>:</p>
-<pre><code>import $ from &quot;jquery&quot;;
-$(document.body).append(&quot;&lt;h1&gt;Hello World!&lt;/h1&gt;&quot;);
-</code></pre>
-<p>This imports jQuery with ES6 module syntax.</p>
-<h3>Run in the browser</h3>
-<p>Open <code>index.html</code> in the browser.  You should see a big &quot;Hello World&quot;.</p>
-<h3>Build</h3>
-<p>Create a <code>Gruntfile.js</code> in your BASE folder. Configure grunt to
-call <code>stealBuild</code></p>
-<pre><code>module.exports = function (grunt) {
-  grunt.initConfig({
-    &quot;steal-build&quot;: {
-      default: {
-        options: {
-          system: {
-            main: &quot;main&quot;,
-            config: __dirname+&quot;/stealconfig.js&quot;
-          }
-        }
-      }
-    }
-  });
-  grunt.loadNpmTasks(&quot;steal-tools&quot;);
-  grunt.registerTask(&quot;build&quot;,[&quot;steal-build&quot;]);
-};
-</code></pre>
-<p>After saving <code>Gruntfile.js</code> run:</p>
-<pre><code>&gt; grunt build
-</code></pre>
-<h3>Switch to production</h3>
-<p>Change <code>index.html</code> to look like:</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-  &lt;body&gt;
-    &lt;script src=&quot;./node_modules/steal/steal.production.js&quot;
-            data-main=&quot;main&quot;&gt;
-    &lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-<h3>Run in production</h3>
-<p>Open <code>index.html</code> in the browser. You should see a big &quot;Hello World&quot;. If you check
-the network tab, you should see only two scripts load.</p>
+<h3>The Builder</h3>
+<p><a href="steal-tools.html">Steal-tools</a> builds your application or exports your project to AMD, CommonJS or standalone formats.
+And <a href="steal-tools.html">steal-tools</a> can build progressively loaded apps that balance caching and script requests resulting in lightning-fast load times.</p>
+<p>For more information, checkout <a href="StealJS.why.html">Why StealJS</a>, or our step-by-step <a href="StealJS.quick-start.html">Quick Start</a> guide to help you get up and running.</p>
 
 		</section>
 		
@@ -445,7 +352,7 @@ the network tab, you should see only two scripts load.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS","src":"steal/docs/stealjs.md","description":"_Good artists copy; great artists steal._","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS","src":"steal/docs/stealjs.md","description":"_Good artists copy; great artists steal._","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

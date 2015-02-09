@@ -453,7 +453,7 @@
 			<h4>OPTION_NAME
 				<code>{String}</code></h4>
 			<div class="description">
-				<p>Any <code>config</code>, <code>pluginifierOptions</code> or <code>options</code> name in
+				<p>Any <code>config</code>, <code>pluginifierOptions</code>, or <code>options</code> name in
 <a href="steal-tools.transformImport.html">transformImport</a> or <a href="steal-tools.transform.html">transform</a>.</p>
 
 			</div>
@@ -506,11 +506,27 @@ will be converted to a regular expression.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>steal-tools must have been installed into the commandLine like:</p>
-<pre><code>npm install steal-tools -g
+<blockquote>
+<p>Note: The <code>steal-tools transform</code> command-line
+utility calls <a href="steal-tools.transform.html">steal-tools.transform</a> and
+<a href="steal-tools.transformImport.html">steal-tools.transformImport</a>
+internally. This page documents the specifics of the command-line utility. Read
+<a href="steal-tools.transform.html">steal-tools.transform's documentation</a> for how to use
+transform in various workflows and detailed information
+on the options available.</p>
+</blockquote>
+<p>Access <code>steal-tools</code> in <em>node_modules/.bin</em>, like:</p>
+<pre><code>&gt; ./node_modules/.bin/steal-tools transform \
+           --config app/config.js \
+           --main app \
+           --ignores foo/.+
+           &gt; app.js
 </code></pre>
-<p>Then you can run <code>steal-tools</code> like:</p>
-<pre><code>steal-tools transform \
+<p>Or, <code>steal-tools</code> can be installed into the command line, like:</p>
+<pre><code>&gt; npm install steal-tools -g
+</code></pre>
+<p>Then you can run <code>steal-tools transform</code>, like:</p>
+<pre><code>&gt; steal-tools transform \
            --config app/config.js \
            --main app \
            --ignores foo/.+
@@ -541,7 +557,7 @@ will be converted to a regular expression.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.cmd.transform","src":"steal-tools/doc/command-transform.md","description":"Transform a module from the command line.","title":"steal-tools transform","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools transform [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config`, `pluginifierOptions` or `options` name in \n[steal-tools.transformImport] or [steal-tools.transform transform]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`.  The `ignores` option\nwill be converted to a regular expression."}],"returns":{"types":[{"type":"String"}],"description":"Writes the output to the console."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.cmd.transform","src":"steal-tools/doc/command-transform.md","description":"Transform a module from the command line.","title":"steal-tools transform","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools transform [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config`, `pluginifierOptions`, or `options` name in \n[steal-tools.transformImport] or [steal-tools.transform transform]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`.  The `ignores` option\nwill be converted to a regular expression."}],"returns":{"types":[{"type":"String"}],"description":"Writes the output to the console."}}],"comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

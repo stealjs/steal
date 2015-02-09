@@ -647,10 +647,10 @@
 		
 		<section class="description">
 			<p><code>@loader</code> is primarily only needed to be used in your <a href="@config.html">@config</a> to ensure that you are configuring
-the correct loader. Since [System] represents the global System loader using it within your
+the correct loader. Since <a href="steal#section_LoaderandSystemnamespaces">System</a> represents the global System loader using it within your
 config doesn't guarantee that you are configuring the correct loader. In scenarios where
-you want to build multiple apps in parallel -- for example if you have several apps set
-up to build in a Grunt task -- using <code>loader</code> is necessarily so that your <a href="@config.html">@config</a> options
+you want to build multiple apps in parallel, for example if you have several apps set
+up to build in a Grunt task, using <code>loader</code> is necessarily so that your <a href="@config.html">@config</a> options
 are set on the proper loader.</p>
 
 		</section>
@@ -687,7 +687,7 @@ are set on the proper loader.</p>
 		<section class="comment">
 			<h2>Use</h2>
 <p>To use <code>@loader</code> simply import it into your config and use it in the same way you
-would use [System].</p>
+would use <a href="steal#section_LoaderandSystemnamespaces">System</a>.</p>
 <pre><code>import loader from &quot;@loader&quot;;
 
 loader.config({
@@ -722,7 +722,7 @@ loader.config({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"@loader","src":"steal/docs/module-loader.md","description":"`@loader` is primarily only needed to be used in your [@config] to ensure that you are configuring\nthe correct loader. Since [System] represents the global System loader using it within your\nconfig doesn't guarantee that you are configuring the correct loader. In scenarios where\nyou want to build multiple apps in parallel -- for example if you have several apps set\nup to build in a Grunt task -- using `loader` is necessarily so that your [@config] options\nare set on the proper loader.","title":"","types":[{"type":"*","description":"The `@loader` module is the `Loader` that is loading your code."}],"parent":"StealJS.modules","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"@loader","src":"steal/docs/module-loader.md","description":"`@loader` is primarily only needed to be used in your [@config] to ensure that you are configuring\nthe correct loader. Since [System](steal#section_LoaderandSystemnamespaces) represents the global System loader using it within your\nconfig doesn't guarantee that you are configuring the correct loader. In scenarios where\nyou want to build multiple apps in parallel, for example if you have several apps set\nup to build in a Grunt task, using `loader` is necessarily so that your [@config] options\nare set on the proper loader.","title":"","types":[{"type":"*","description":"The `@loader` module is the `Loader` that is loading your code."}],"parent":"StealJS.modules","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

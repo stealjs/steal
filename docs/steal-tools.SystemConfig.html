@@ -462,7 +462,7 @@ values are required:</p>
 		<h4>main
 			<code>{String | Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code></h4>
 		<div class="description">
-			<p>The module or modules who should be
+			<p>The module, or modules, that should be
 imported.  This sets <a href="System.main.html">System.main</a>.</p>
 
 		</div>
@@ -478,7 +478,7 @@ imported.  This sets <a href="System.main.html">System.main</a>.</p>
 			<code>{String}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
 			<p>The path to a configuration file. This
-will also specify <code>baseURL</code> and sometimes <code>main</code>. This set <a href="System.configPath.html">System.configPath</a>.</p>
+will also specify <code>baseURL</code>, and sometimes <code>main</code>. This sets <a href="System.configPath.html">System.configPath</a>.</p>
 
 		</div>
 		
@@ -517,7 +517,7 @@ the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
 		<section class="comment">
 			<h2>Use</h2>
 <p><a href="steal-tools.build.html">build</a>, <a href="steal-tools.export.html">export</a>, and <a href="steal-tools.transformImport.html">transformImport</a> all
-take a <code>SystemConfig</code> to configure the modules to load.</p>
+take a <code>SystemConfig</code>, which configures the modules to load.</p>
 <pre><code>stealTools.build(SystemConfig, ...)
 stealTools.pluginifier(SystemConfig, ...)
 stealTools[&quot;export&quot;]({system: SystemConfig, outputs: {...}});
@@ -549,7 +549,7 @@ stealTools.export({
   outputs: {...}
 });
 </code></pre>
-<p>If there is no <code>config</code>, you should specify the baseURL so StealJS knows where to find your modules.</p>
+<p>If there is no <code>config</code>, you should specify the baseURL, so StealJS knows where to find your modules.</p>
 
 		</section>
 		
@@ -575,7 +575,7 @@ stealTools.export({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.SystemConfig","src":"steal-tools/doc/types/system-config.md","description":"Configuration values needed for StealJS to load modules. Some set of the following\nvalues are required:","title":"SystemConfig","types":[{"type":"Object","options":[{"name":"main","description":"The module or modules who should be \nimported.  This sets [System.main].","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL` and sometimes `main`. This set [System.configPath].","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","watch":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.SystemConfig","src":"steal-tools/doc/types/system-config.md","description":"Configuration values needed for StealJS to load modules. Some set of the following\nvalues are required:","title":"SystemConfig","types":[{"type":"Object","options":[{"name":"main","description":"The module, or modules, that should be \nimported.  This sets [System.main].","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`, and sometimes `main`. This sets [System.configPath].","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","debug":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
