@@ -13,7 +13,7 @@ module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstru
 	           : typeof self   != 'undefined' ? (self.Promise   = PromiseConstructor)
 	           : PromiseConstructor;
 
-},{"../lib/Promise":2,"../lib/decorators/unhandledRejection":6}],2:[function(require,module,exports){
+},{"../lib/Promise":2,"../lib/decorators/unhandledRejection":4}],2:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -23,7 +23,7 @@ define(function (require) {
 
 	var makePromise = require('./makePromise');
 	var Scheduler = require('./Scheduler');
-	var async = require('./async');
+	var async = require('./env').asap;
 
 	return makePromise({
 		scheduler: new Scheduler(async)
@@ -32,87 +32,13 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./Scheduler":4,"./async":5,"./makePromise":7}],3:[function(require,module,exports){
+},{"./Scheduler":3,"./env":5,"./makePromise":7}],3:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
 
 (function(define) { 'use strict';
 define(function() {
-	/**
-	 * Circular queue
-	 * @param {number} capacityPow2 power of 2 to which this queue's capacity
-	 *  will be set initially. eg when capacityPow2 == 3, queue capacity
-	 *  will be 8.
-	 * @constructor
-	 */
-	function Queue(capacityPow2) {
-		this.head = this.tail = this.length = 0;
-		this.buffer = new Array(1 << capacityPow2);
-	}
-
-	Queue.prototype.push = function(x) {
-		if(this.length === this.buffer.length) {
-			this._ensureCapacity(this.length * 2);
-		}
-
-		this.buffer[this.tail] = x;
-		this.tail = (this.tail + 1) & (this.buffer.length - 1);
-		++this.length;
-		return this.length;
-	};
-
-	Queue.prototype.shift = function() {
-		var x = this.buffer[this.head];
-		this.buffer[this.head] = void 0;
-		this.head = (this.head + 1) & (this.buffer.length - 1);
-		--this.length;
-		return x;
-	};
-
-	Queue.prototype._ensureCapacity = function(capacity) {
-		var head = this.head;
-		var buffer = this.buffer;
-		var newBuffer = new Array(capacity);
-		var i = 0;
-		var len;
-
-		if(head === 0) {
-			len = this.length;
-			for(; i<len; ++i) {
-				newBuffer[i] = buffer[i];
-			}
-		} else {
-			capacity = buffer.length;
-			len = this.tail;
-			for(; head<capacity; ++i, ++head) {
-				newBuffer[i] = buffer[head];
-			}
-
-			for(head=0; head<len; ++i, ++head) {
-				newBuffer[i] = buffer[head];
-			}
-		}
-
-		this.buffer = newBuffer;
-		this.head = 0;
-		this.tail = this.length;
-	};
-
-	return Queue;
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],4:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var Queue = require('./Queue');
 
 	// Credit to Twisol (https://github.com/Twisol) for suggesting
 	// this type of extensible queue + trampoline approach for next-tick conflation.
@@ -124,9 +50,12 @@ define(function(require) {
 	 */
 	function Scheduler(async) {
 		this._async = async;
-		this._queue = new Queue(15);
-		this._afterQueue = new Queue(5);
 		this._running = false;
+
+		this._queue = new Array(1<<16);
+		this._queueLen = 0;
+		this._afterQueue = new Array(1<<4);
+		this._afterQueueLen = 0;
 
 		var self = this;
 		this.drain = function() {
@@ -139,7 +68,8 @@ define(function(require) {
 	 * @param {{ run:function }} task
 	 */
 	Scheduler.prototype.enqueue = function(task) {
-		this._add(this._queue, task);
+		this._queue[this._queueLen++] = task;
+		this.run();
 	};
 
 	/**
@@ -147,48 +77,44 @@ define(function(require) {
 	 * @param {{ run:function }} task
 	 */
 	Scheduler.prototype.afterQueue = function(task) {
-		this._add(this._afterQueue, task);
+		this._afterQueue[this._afterQueueLen++] = task;
+		this.run();
 	};
 
-	/**
-	 * Drain the handler queue entirely, and then the after queue
-	 */
-	Scheduler.prototype._drain = function() {
-		runQueue(this._queue);
-		this._running = false;
-		runQueue(this._afterQueue);
-	};
-
-	/**
-	 * Add a task to the q, and schedule drain if not already scheduled
-	 * @param {Queue} queue
-	 * @param {{run:function}} task
-	 * @private
-	 */
-	Scheduler.prototype._add = function(queue, task) {
-		queue.push(task);
-		if(!this._running) {
+	Scheduler.prototype.run = function() {
+		if (!this._running) {
 			this._running = true;
 			this._async(this.drain);
 		}
 	};
 
 	/**
-	 * Run all the tasks in the q
-	 * @param queue
+	 * Drain the handler queue entirely, and then the after queue
 	 */
-	function runQueue(queue) {
-		while(queue.length > 0) {
-			queue.shift().run();
+	Scheduler.prototype._drain = function() {
+		var i = 0;
+		for (; i < this._queueLen; ++i) {
+			this._queue[i].run();
+			this._queue[i] = void 0;
 		}
-	}
+
+		this._queueLen = 0;
+		this._running = false;
+
+		for (i = 0; i < this._afterQueueLen; ++i) {
+			this._afterQueue[i].run();
+			this._afterQueue[i] = void 0;
+		}
+
+		this._afterQueueLen = 0;
+	};
 
 	return Scheduler;
 
 });
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{"./Queue":3}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -196,83 +122,26 @@ define(function(require) {
 (function(define) { 'use strict';
 define(function(require) {
 
-	// Sniff "best" async scheduling option
-	// Prefer process.nextTick or MutationObserver, then check for
-	// vertx and finally fall back to setTimeout
-
-	/*jshint maxcomplexity:6*/
-	/*global process,document,setTimeout,MutationObserver,WebKitMutationObserver*/
-	var nextTick, MutationObs;
-
-	if (typeof process !== 'undefined' && process !== null &&
-		typeof process.nextTick === 'function') {
-		nextTick = function(f) {
-			process.nextTick(f);
-		};
-
-	} else if (MutationObs =
-		(typeof MutationObserver === 'function' && MutationObserver) ||
-		(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver)) {
-		nextTick = (function (document, MutationObserver) {
-			var scheduled;
-			var el = document.createElement('div');
-			var o = new MutationObserver(run);
-			o.observe(el, { attributes: true });
-
-			function run() {
-				var f = scheduled;
-				scheduled = void 0;
-				f();
-			}
-
-			return function (f) {
-				scheduled = f;
-				el.setAttribute('class', 'x');
-			};
-		}(document, MutationObs));
-
-	} else {
-		nextTick = (function(cjsRequire) {
-			try {
-				// vert.x 1.x || 2.x
-				return cjsRequire('vertx').runOnLoop || cjsRequire('vertx').runOnContext;
-			} catch (ignore) {}
-
-			// capture setTimeout to avoid being caught by fake timers
-			// used in time based tests
-			var capturedSetTimeout = setTimeout;
-			return function (t) {
-				capturedSetTimeout(t, 0);
-			};
-		}(require));
-	}
-
-	return nextTick;
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{}],6:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var timer = require('../timer');
+	var setTimer = require('../env').setTimer;
+	var format = require('../format');
 
 	return function unhandledRejection(Promise) {
 		var logError = noop;
 		var logInfo = noop;
+		var localConsole;
 
 		if(typeof console !== 'undefined') {
-			logError = typeof console.error !== 'undefined'
-				? function (e) { console.error(e); }
-				: function (e) { console.log(e); };
+			// Alias console to prevent things like uglify's drop_console option from
+			// removing console.log/error. Unhandled rejections fall into the same
+			// category as uncaught exceptions, and build tools shouldn't silence them.
+			localConsole = console;
+			logError = typeof localConsole.error !== 'undefined'
+				? function (e) { localConsole.error(e); }
+				: function (e) { localConsole.log(e); };
 
-			logInfo = typeof console.info !== 'undefined'
-				? function (e) { console.info(e); }
-				: function (e) { console.log(e); };
+			logInfo = typeof localConsole.info !== 'undefined'
+				? function (e) { localConsole.info(e); }
+				: function (e) { localConsole.log(e); };
 		}
 
 		Promise.onPotentiallyUnhandledRejection = function(rejection) {
@@ -289,12 +158,12 @@ define(function(require) {
 
 		var tasks = [];
 		var reported = [];
-		var running = false;
+		var running = null;
 
 		function report(r) {
 			if(!r.handled) {
 				reported.push(r);
-				logError('Potentially unhandled rejection [' + r.id + '] ' + formatError(r.value));
+				logError('Potentially unhandled rejection [' + r.id + '] ' + format.formatError(r.value));
 			}
 		}
 
@@ -302,20 +171,19 @@ define(function(require) {
 			var i = reported.indexOf(r);
 			if(i >= 0) {
 				reported.splice(i, 1);
-				logInfo('Handled previous rejection [' + r.id + '] ' + formatObject(r.value));
+				logInfo('Handled previous rejection [' + r.id + '] ' + format.formatObject(r.value));
 			}
 		}
 
 		function enqueue(f, x) {
 			tasks.push(f, x);
-			if(!running) {
-				running = true;
-				running = timer.set(flush, 0);
+			if(running === null) {
+				running = setTimer(flush, 0);
 			}
 		}
 
 		function flush() {
-			running = false;
+			running = null;
 			while(tasks.length > 0) {
 				tasks.shift()(tasks.shift());
 			}
@@ -323,28 +191,6 @@ define(function(require) {
 
 		return Promise;
 	};
-
-	function formatError(e) {
-		var s = typeof e === 'object' && e.stack ? e.stack : formatObject(e);
-		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
-	}
-
-	function formatObject(o) {
-		var s = String(o);
-		if(s === '[object Object]' && typeof JSON !== 'undefined') {
-			s = tryStringify(o, s);
-		}
-		return s;
-	}
-
-	function tryStringify(e, defaultValue) {
-		try {
-			return JSON.stringify(e);
-		} catch(e) {
-			// Ignore. Cannot JSON.stringify e, stick with String(e)
-			return defaultValue;
-		}
-	}
 
 	function throwit(e) {
 		throw e;
@@ -355,7 +201,140 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../timer":8}],7:[function(require,module,exports){
+},{"../env":5,"../format":6}],5:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+/*global process,document,setTimeout,clearTimeout,MutationObserver,WebKitMutationObserver*/
+(function(define) { 'use strict';
+define(function(require) {
+	/*jshint maxcomplexity:6*/
+
+	// Sniff "best" async scheduling option
+	// Prefer process.nextTick or MutationObserver, then check for
+	// setTimeout, and finally vertx, since its the only env that doesn't
+	// have setTimeout
+
+	var MutationObs;
+	var capturedSetTimeout = typeof setTimeout !== 'undefined' && setTimeout;
+
+	// Default env
+	var setTimer = function(f, ms) { return setTimeout(f, ms); };
+	var clearTimer = function(t) { return clearTimeout(t); };
+	var asap = function (f) { return capturedSetTimeout(f, 0); };
+
+	// Detect specific env
+	if (isNode()) { // Node
+		asap = function (f) { return process.nextTick(f); };
+
+	} else if (MutationObs = hasMutationObserver()) { // Modern browser
+		asap = initMutationObserver(MutationObs);
+
+	} else if (!capturedSetTimeout) { // vert.x
+		var vertxRequire = require;
+		var vertx = vertxRequire('vertx');
+		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
+		clearTimer = vertx.cancelTimer;
+		asap = vertx.runOnLoop || vertx.runOnContext;
+	}
+
+	return {
+		setTimer: setTimer,
+		clearTimer: clearTimer,
+		asap: asap
+	};
+
+	function isNode () {
+		return typeof process !== 'undefined' && process !== null &&
+			typeof process.nextTick === 'function';
+	}
+
+	function hasMutationObserver () {
+		return (typeof MutationObserver === 'function' && MutationObserver) ||
+			(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver);
+	}
+
+	function initMutationObserver(MutationObserver) {
+		var scheduled;
+		var node = document.createTextNode('');
+		var o = new MutationObserver(run);
+		o.observe(node, { characterData: true });
+
+		function run() {
+			var f = scheduled;
+			scheduled = void 0;
+			f();
+		}
+
+		var i = 0;
+		return function (f) {
+			scheduled = f;
+			node.data = (i ^= 1);
+		};
+	}
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{}],6:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+
+	return {
+		formatError: formatError,
+		formatObject: formatObject,
+		tryStringify: tryStringify
+	};
+
+	/**
+	 * Format an error into a string.  If e is an Error and has a stack property,
+	 * it's returned.  Otherwise, e is formatted using formatObject, with a
+	 * warning added about e not being a proper Error.
+	 * @param {*} e
+	 * @returns {String} formatted string, suitable for output to developers
+	 */
+	function formatError(e) {
+		var s = typeof e === 'object' && e !== null && e.stack ? e.stack : formatObject(e);
+		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
+	}
+
+	/**
+	 * Format an object, detecting "plain" objects and running them through
+	 * JSON.stringify if possible.
+	 * @param {Object} o
+	 * @returns {string}
+	 */
+	function formatObject(o) {
+		var s = String(o);
+		if(s === '[object Object]' && typeof JSON !== 'undefined') {
+			s = tryStringify(o, s);
+		}
+		return s;
+	}
+
+	/**
+	 * Try to return the result of JSON.stringify(x).  If that fails, return
+	 * defaultValue
+	 * @param {*} x
+	 * @param {*} defaultValue
+	 * @returns {String|*} JSON.stringify(x) or defaultValue
+	 */
+	function tryStringify(x, defaultValue) {
+		try {
+			return JSON.stringify(x);
+		} catch(e) {
+			return defaultValue;
+		}
+	}
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}],7:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -418,6 +397,7 @@ define(function() {
 			}
 
 			/**
+			 * @deprecated
 			 * Issue a progress event, notifying all progress listeners
 			 * @param {*} x progress event payload to pass to all listeners
 			 */
@@ -481,22 +461,23 @@ define(function() {
 		 * this promise's fulfillment.
 		 * @param {function=} onFulfilled fulfillment handler
 		 * @param {function=} onRejected rejection handler
-		 * @deprecated @param {function=} onProgress progress handler
+		 * @param {function=} onProgress @deprecated progress handler
 		 * @return {Promise} new promise
 		 */
-		Promise.prototype.then = function(onFulfilled, onRejected) {
+		Promise.prototype.then = function(onFulfilled, onRejected, onProgress) {
 			var parent = this._handler;
+			var state = parent.join().state();
 
-			if (typeof onFulfilled !== 'function' && parent.join().state() > 0) {
+			if ((typeof onFulfilled !== 'function' && state > 0) ||
+				(typeof onRejected !== 'function' && state < 0)) {
 				// Short circuit: value will not change, simply share handler
-				return new Promise(Handler, parent);
+				return new this.constructor(Handler, parent);
 			}
 
 			var p = this._beget();
 			var child = p._handler;
 
-			parent.chain(child, parent.receiver, onFulfilled, onRejected,
-					arguments.length > 2 ? arguments[2] : void 0);
+			parent.chain(child, parent.receiver, onFulfilled, onRejected, onProgress);
 
 			return p;
 		};
@@ -517,15 +498,19 @@ define(function() {
 		 * @returns {Promise}
 		 */
 		Promise.prototype._beget = function() {
-			var parent = this._handler;
-			var child = new Pending(parent.receiver, parent.join().context);
-			return new this.constructor(Handler, child);
+			return begetFrom(this._handler, this.constructor);
 		};
+
+		function begetFrom(parent, Promise) {
+			var child = new Pending(parent.receiver, parent.join().context);
+			return new Promise(Handler, child);
+		}
 
 		// Array combinators
 
 		Promise.all = all;
 		Promise.race = race;
+		Promise._traverse = traverse;
 
 		/**
 		 * Return a promise that will fulfill when all promises in the
@@ -535,13 +520,28 @@ define(function() {
 		 * @returns {Promise} promise for array of fulfillment values
 		 */
 		function all(promises) {
-			/*jshint maxcomplexity:8*/
+			return traverseWith(snd, null, promises);
+		}
+
+		/**
+		 * Array<Promise<X>> -> Promise<Array<f(X)>>
+		 * @private
+		 * @param {function} f function to apply to each promise's value
+		 * @param {Array} promises array of promises
+		 * @returns {Promise} promise for transformed values
+		 */
+		function traverse(f, promises) {
+			return traverseWith(tryCatch2, f, promises);
+		}
+
+		function traverseWith(tryMap, f, promises) {
+			var handler = typeof f === 'function' ? mapAt : settleAt;
+
 			var resolver = new Pending();
 			var pending = promises.length >>> 0;
 			var results = new Array(pending);
 
-			var i, h, x, s;
-			for (i = 0; i < promises.length; ++i) {
+			for (var i = 0, x; i < promises.length && !resolver.resolved; ++i) {
 				x = promises[i];
 
 				if (x === void 0 && !(i in promises)) {
@@ -549,26 +549,7 @@ define(function() {
 					continue;
 				}
 
-				if (maybeThenable(x)) {
-					h = isPromise(x)
-						? x._handler.join()
-						: getHandlerUntrusted(x);
-
-					s = h.state();
-					if (s === 0) {
-						h.fold(settleAt, i, results, resolver);
-					} else if (s > 0) {
-						results[i] = h.value;
-						--pending;
-					} else {
-						resolver.become(h);
-						break;
-					}
-
-				} else {
-					results[i] = x;
-					--pending;
-				}
+				traverseAt(promises, handler, i, x, resolver);
 			}
 
 			if(pending === 0) {
@@ -577,12 +558,55 @@ define(function() {
 
 			return new Promise(Handler, resolver);
 
-			function settleAt(i, x, resolver) {
-				/*jshint validthis:true*/
-				this[i] = x;
-				if(--pending === 0) {
-					resolver.become(new Fulfilled(this));
+			function mapAt(i, x, resolver) {
+				if(!resolver.resolved) {
+					traverseAt(promises, settleAt, i, tryMap(f, x, i), resolver);
 				}
+			}
+
+			function settleAt(i, x, resolver) {
+				results[i] = x;
+				if(--pending === 0) {
+					resolver.become(new Fulfilled(results));
+				}
+			}
+		}
+
+		function traverseAt(promises, handler, i, x, resolver) {
+			if (maybeThenable(x)) {
+				var h = getHandlerMaybeThenable(x);
+				var s = h.state();
+
+				if (s === 0) {
+					h.fold(handler, i, void 0, resolver);
+				} else if (s > 0) {
+					handler(i, h.value, resolver);
+				} else {
+					resolver.become(h);
+					visitRemaining(promises, i+1, h);
+				}
+			} else {
+				handler(i, x, resolver);
+			}
+		}
+
+		Promise._visitRemaining = visitRemaining;
+		function visitRemaining(promises, start, handler) {
+			for(var i=start; i<promises.length; ++i) {
+				markAsHandled(getHandler(promises[i]), handler);
+			}
+		}
+
+		function markAsHandled(h, handler) {
+			if(h === handler) {
+				return;
+			}
+
+			var s = h.state();
+			if(s === 0) {
+				h.visit(h, void 0, h._unreport);
+			} else if(s < 0) {
+				h._unreport();
 			}
 		}
 
@@ -601,21 +625,36 @@ define(function() {
 		 * is empty, returns a promise that will never settle.
 		 */
 		function race(promises) {
-			// Sigh, race([]) is untestable unless we return *something*
-			// that is recognizable without calling .then() on it.
-			if(Object(promises) === promises && promises.length === 0) {
-				return never();
+			if(typeof promises !== 'object' || promises === null) {
+				return reject(new TypeError('non-iterable passed to race()'));
 			}
 
-			var h = new Pending();
-			var i, x;
+			// Sigh, race([]) is untestable unless we return *something*
+			// that is recognizable without calling .then() on it.
+			return promises.length === 0 ? never()
+				 : promises.length === 1 ? resolve(promises[0])
+				 : runRace(promises);
+		}
+
+		function runRace(promises) {
+			var resolver = new Pending();
+			var i, x, h;
 			for(i=0; i<promises.length; ++i) {
 				x = promises[i];
-				if (x !== void 0 && i in promises) {
-					getHandler(x).visit(h, h.resolve, h.reject);
+				if (x === void 0 && !(i in promises)) {
+					continue;
+				}
+
+				h = getHandler(x);
+				if(h.state() !== 0) {
+					resolver.become(h);
+					visitRemaining(promises, i+1, h);
+					break;
+				} else {
+					h.visit(resolver, resolver.resolve, resolver.reject);
 				}
 			}
-			return new Promise(Handler, h);
+			return new Promise(Handler, resolver);
 		}
 
 		// Promise internals
@@ -631,6 +670,16 @@ define(function() {
 				return x._handler.join();
 			}
 			return maybeThenable(x) ? getHandlerUntrusted(x) : new Fulfilled(x);
+		}
+
+		/**
+		 * Get a handler for thenable x.
+		 * NOTE: You must only call this if maybeThenable(x) == true
+		 * @param {object|function|Promise} x
+		 * @returns {object} handler
+		 */
+		function getHandlerMaybeThenable(x) {
+			return isPromise(x) ? x._handler.join() : getHandlerUntrusted(x);
 		}
 
 		/**
@@ -657,7 +706,7 @@ define(function() {
 
 		Handler.prototype.when
 			= Handler.prototype.become
-			= Handler.prototype.notify
+			= Handler.prototype.notify // deprecated
 			= Handler.prototype.fail
 			= Handler.prototype._unreport
 			= Handler.prototype._report
@@ -697,9 +746,7 @@ define(function() {
 		};
 
 		Handler.prototype.fold = function(f, z, c, to) {
-			this.visit(to, function(x) {
-				f.call(c, z, x, this);
-			}, to.reject, to.notify);
+			this.when(new Fold(f, z, c, to));
 		};
 
 		/**
@@ -800,6 +847,9 @@ define(function() {
 			}
 		};
 
+		/**
+		 * @deprecated
+		 */
 		Pending.prototype.notify = function(x) {
 			if(!this.resolved) {
 				tasks.enqueue(new ProgressTask(x, this));
@@ -915,6 +965,9 @@ define(function() {
 		};
 
 		Rejected.prototype._unreport = function() {
+			if(this.handled) {
+				return;
+			}
 			this.handled = true;
 			tasks.afterQueue(new UnreportTask(this));
 		};
@@ -1032,6 +1085,28 @@ define(function() {
 			}
 		}
 
+		/**
+		 * Fold a handler value with z
+		 * @constructor
+		 */
+		function Fold(f, z, c, to) {
+			this.f = f; this.z = z; this.c = c; this.to = to;
+			this.resolver = failIfRejected;
+			this.receiver = this;
+		}
+
+		Fold.prototype.fulfilled = function(x) {
+			this.f.call(this.c, this.z, x, this.to);
+		};
+
+		Fold.prototype.rejected = function(x) {
+			this.to.reject(x);
+		};
+
+		Fold.prototype.progress = function(x) {
+			this.to.notify(x);
+		};
+
 		// Other helpers
 
 		/**
@@ -1072,6 +1147,9 @@ define(function() {
 			Promise.exitContext();
 		}
 
+		/**
+		 * @deprecated
+		 */
 		function runNotify(f, x, h, receiver, next) {
 			if(typeof f !== 'function') {
 				return next.notify(x);
@@ -1080,6 +1158,14 @@ define(function() {
 			Promise.enterContext(h);
 			tryCatchReturn(f, x, receiver, next);
 			Promise.exitContext();
+		}
+
+		function tryCatch2(f, a, b) {
+			try {
+				return f(a, b);
+			} catch(e) {
+				return reject(e);
+			}
 		}
 
 		/**
@@ -1106,6 +1192,7 @@ define(function() {
 		}
 
 		/**
+		 * @deprecated
 		 * Return f.call(thisArg, x), or if it throws, *return* the exception
 		 */
 		function tryCatchReturn(f, x, thisArg, next) {
@@ -1121,41 +1208,16 @@ define(function() {
 			Child.prototype.constructor = Child;
 		}
 
+		function snd(x, y) {
+			return y;
+		}
+
 		function noop() {}
 
 		return Promise;
 	};
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],8:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-	/*global setTimeout,clearTimeout*/
-	var cjsRequire, vertx, setTimer, clearTimer;
-
-	cjsRequire = require;
-
-	try {
-		vertx = cjsRequire('vertx');
-		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
-		clearTimer = vertx.cancelTimer;
-	} catch (e) {
-		setTimer = function(f, ms) { return setTimeout(f, ms); };
-		clearTimer = function(t) { return clearTimeout(t); };
-	}
-
-	return {
-		set: setTimer,
-		clear: clearTimer
-	};
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
 },{}]},{},[1])
 (1)
@@ -1200,9 +1262,10 @@ $__Object$create = Object.create || function(o, props) {
 /*
 *********************************************************************************************
 
-  Loader Polyfill
+  Dynamic Module Loader Polyfill
 
-    - Implemented exactly to the 2014-07-18 Specification Draft.
+    - Implemented exactly to the former 2014-08-24 ES6 Specification Draft Rev 27, Section 15
+      http://wiki.ecmascript.org/doku.php?id=harmony:specification_drafts#august_24_2014_draft_rev_27
 
     - Functions are commented with their spec numbers, with spec differences commented.
 
@@ -1212,8 +1275,6 @@ $__Object$create = Object.create || function(o, props) {
       commented.
 
     - Realm implementation is entirely omitted.
-
-    - Loader module table iteration currently not yet implemented.
 
 *********************************************************************************************
 */
@@ -1304,7 +1365,8 @@ function logloads(loads) {
 
 (function() {
   var Promise = __global.Promise || require('when/es6-shim/Promise');
-  console.assert = console.assert || function() {};
+  if (__global.console)
+    console.assert = console.assert || function() {};
 
   // IE8 support
   var indexOf = Array.prototype.indexOf || function(item) {
@@ -1372,7 +1434,7 @@ function logloads(loads) {
         load = createLoad(name);
         load.status = 'linked';
         // https://bugs.ecmascript.org/show_bug.cgi?id=2795
-        // load.module = loader.modules[name];
+        load.module = loader.modules[name];
         return load;
       }
 
@@ -1446,9 +1508,9 @@ function logloads(loads) {
         return;
 
       if (instantiateResult === undefined) {
-        load.address = load.address || 'anon' + ++anonCnt;
+        load.address = load.address || '<Anonymous Module ' + ++anonCnt + '>';
 
-        // NB instead of load.kind, use load.isDeclarative
+        // instead of load.kind, use load.isDeclarative
         load.isDeclarative = true;
         // parse sets load.declare, load.depsList
         loader.loaderObj.parse(load);
@@ -1520,8 +1582,9 @@ function logloads(loads) {
       load.exception = exc;
 
       var linkSets = load.linkSets.concat([]);
-      for (var i = 0, l = linkSets.length; i < l; i++)
-        linkSetFailed(linkSets[i], exc);
+      for (var i = 0, l = linkSets.length; i < l; i++) {
+        linkSetFailed(linkSets[i], load, exc);
+      }
 
       console.assert(load.linkSets.length == 0, 'linkSets not removed');
     });
@@ -1539,12 +1602,16 @@ function logloads(loads) {
       if (loader.modules[name])
         throw new TypeError('"' + name + '" already exists in the module table');
 
-      // NB this still seems wrong for LoadModule as we may load a dependency
-      // of another module directly before it has finished loading.
-      // see https://bugs.ecmascript.org/show_bug.cgi?id=2994
-      for (var i = 0, l = loader.loads.length; i < l; i++)
-        if (loader.loads[i].name == name)
-          throw new TypeError('"' + name + '" already loading');
+      // adjusted to pick up existing loads
+      var existingLoad;
+      for (var i = 0, l = loader.loads.length; i < l; i++) {
+        if (loader.loads[i].name == name) {
+          existingLoad = loader.loads[i];
+          return existingLoad.linkSets[0].done.then(function() {
+            resolve(existingLoad);
+          });
+        }
+      }
 
       var load = createLoad(name);
 
@@ -1626,14 +1693,21 @@ function logloads(loads) {
     // snapshot(linkSet.loader);
   }
 
+  // linking errors can be generic or load-specific
+  // this is necessary for debugging info
   function doLink(linkSet) {
+    var error = false;
     try {
-      link(linkSet);
+      link(linkSet, function(load, exc) {
+        linkSetFailed(linkSet, load, exc);
+        error = true;
+      });
     }
-    catch(exc) {
-      linkSetFailed(linkSet, exc);
-      return true;
+    catch(e) {
+      linkSetFailed(linkSet, null, e);
+      error = true;
     }
+    return error;
   }
 
   // 15.2.5.2.3
@@ -1683,8 +1757,14 @@ function logloads(loads) {
   }
 
   // 15.2.5.2.4
-  function linkSetFailed(linkSet, exc) {
+  function linkSetFailed(linkSet, load, exc) {
     var loader = linkSet.loader;
+
+    if (linkSet.loads[0].name != load.name)
+      exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
+
+    exc = addToError(exc, 'Error loading "' + load.name + '" at ' + (load.address || '<unknown>') + '\n');
+
     var loads = linkSet.loads.concat([]);
     for (var i = 0, l = loads.length; i < l; i++) {
       var load = loads[i];
@@ -1794,8 +1874,22 @@ function logloads(loads) {
     }
   }
 
+  function doDynamicExecute(linkSet, load, linkError) {
+    try {
+      var module = load.execute();
+    }
+    catch(e) {
+      linkError(load, e);
+      return;
+    }
+    if (!module || !(module instanceof Module))
+      linkError(load, new TypeError('Execution must define a Module instance'));
+    else
+      return module;
+  }
+
   // 15.2.5.4
-  function link(linkSet) {
+  function link(linkSet, linkError) {
 
     var loader = linkSet.loader;
 
@@ -1830,9 +1924,9 @@ function logloads(loads) {
         }
         // 15.2.5.6 LinkDynamicModules adjusted
         else {
-          var module = load.execute();
-          if (!module || !(module instanceof Module))
-            throw new TypeError('Execution must define a Module instance');
+          var module = doDynamicExecute(linkSet, load, linkError);
+          if (!module)
+            return;
           load.module = {
             name: load.name,
             module: module
@@ -1995,8 +2089,10 @@ function logloads(loads) {
       if (indexOf.call(seen, dep) == -1) {
         err = ensureEvaluated(dep, seen, loader);
         // stop on error, see https://bugs.ecmascript.org/show_bug.cgi?id=2996
-        if (err)
-          return err + '\n  in module ' + dep.name;
+        if (err) {
+          err = addToError(err, 'Error evaluating ' + dep.name + '\n');
+          return err;
+        }
       }
     }
 
@@ -2010,7 +2106,8 @@ function logloads(loads) {
     err = doExecute(module);
     if (err) {
       module.failed = true;
-    } else if (Object.preventExtensions) {
+    }
+    else if (Object.preventExtensions) {
       // spec variation
       // we don't create a new module here because it was created and ammended
       // we just disable further extensions instead
@@ -2018,6 +2115,14 @@ function logloads(loads) {
     }
 
     module.execute = undefined;
+    return err;
+  }
+
+  function addToError(err, msg) {
+    if (err instanceof Error)
+      err.message = msg + err.message;
+    else
+      err = msg + err;
     return err;
   }
 
@@ -2055,6 +2160,7 @@ function logloads(loads) {
     });
 
     // 26.3.3.13 realm not implemented
+    this.traceurOptions = {};
   }
 
   function Module() {}
@@ -2062,14 +2168,13 @@ function logloads(loads) {
   // importPromises adds ability to import a module twice without error - https://bugs.ecmascript.org/show_bug.cgi?id=2601
   function createImportPromise(loader, name, promise) {
     var importPromises = loader._loader.importPromises;
-    importPromises[name] = promise;
-    promise.then(function() {
+    return importPromises[name] = promise.then(function(m) {
       importPromises[name] = undefined;
-    });
-    promise['catch'](function() {
+      return m;
+    }, function(e) {
       importPromises[name] = undefined;
+      throw e;
     });
-    return promise;
   }
 
   Loader.prototype = {
@@ -2219,17 +2324,19 @@ function logloads(loads) {
    * Traceur-specific Parsing Code for Loader
    */
   (function() {
-    function checkForErrors(output, load) {
-      if (output.errors.length) {
-        for (var i = 0, l = output.errors.length; i < l; i++)
-          console.error(output.errors[i]);
-        throw new Error('Parse of ' + load.name + ', ' + load.address + ' failed, ' + output.errors.length);
-      }
-    }
-
     // parse function is used to parse a load record
     // Returns an array of ModuleSpecifiers
     var traceur;
+
+    function doCompile(source, compiler, filename) {
+      try {
+        return compiler.compile(source, filename);
+      }
+      catch(e) {
+        // traceur throws an error array
+        throw e[0];
+      }
+    }
     Loader.prototype.parse = function(load) {
       if (!traceur) {
         if (typeof window == 'undefined' &&
@@ -2243,29 +2350,30 @@ function logloads(loads) {
 
       console.assert(load.source, 'Non-empty source');
 
-      var depsList;
-
       load.isDeclarative = true;
 
-      var compiler = new traceur.Compiler();
-      var options = System.traceurOptions || {};
+      var options = this.traceurOptions || {};
       options.modules = 'instantiate';
-      options.sourceMaps = true;
+      options.script = false;
+      options.sourceMaps = 'inline';
       options.filename = load.address;
-      var output = compiler.stringToTree({content: load.source, options: options});
-      checkForErrors(output);
 
-      output = compiler.treeToTree(output);
-      checkForErrors(output);
+      var compiler = new traceur.Compiler(options);
 
-      output = compiler.treeToString(output);
-      checkForErrors(output);
+      var source = doCompile(load.source, compiler, options.filename);
 
-      var source = output.js;
-      var sourceMap = output.generatedSourceMap;
+      if (!source)
+        throw new Error('Error evaluating module ' + load.address);
 
-      if (__global.btoa && sourceMap)
-        source += '\n//# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(sourceMap))) + '\n';
+      var sourceMap = compiler.getSourceMap();
+
+      if (__global.btoa && sourceMap) {
+        // add "!eval" to end of Traceur sourceURL
+        // I believe this does something?
+        source += '!eval';
+      }
+
+      source = 'var __moduleAddress = "' + load.address + '";' + source;
 
       __eval(source, __global, load);
     }
@@ -2298,12 +2406,13 @@ function logloads(loads) {
 (function() {
   var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
   var isBrowser = typeof window != 'undefined' && !isWorker;
+  var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
   var Promise = __global.Promise || require('when/es6-shim/Promise');
 
   // Helpers
   // Absolute URL parsing, from https://gist.github.com/Yaffle/1088850
   function parseURI(url) {
-    var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@]*(?::[^:@]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+    var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/?#]*(?::[^:@\/?#]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
     // authority = '//' + user + ':' + pass '@' + hostname + ':' port
     return (m ? {
       href     : m[0] || '',
@@ -2346,10 +2455,11 @@ function logloads(loads) {
 
   var fetchTextFromURL;
 
-  if (isBrowser || isWorker) {
+  if (typeof XMLHttpRequest != 'undefined') {
     fetchTextFromURL = function(url, fulfill, reject) {
       var xhr = new XMLHttpRequest();
       var sameDomain = true;
+      var doTimeout = false;
       if (!('withCredentials' in xhr)) {
         // check if same domain
         var domainCheck = /^(\w+:)?\/\/([^\/]+)/.exec(url);
@@ -2359,11 +2469,14 @@ function logloads(loads) {
             sameDomain &= domainCheck[1] === window.location.protocol;
         }
       }
-      if (!sameDomain) {
+      if (!sameDomain && typeof XDomainRequest != 'undefined') {
         xhr = new XDomainRequest();
         xhr.onload = load;
         xhr.onerror = error;
         xhr.ontimeout = error;
+        xhr.onprogress = function() {};
+        xhr.timeout = 0;
+        doTimeout = true;
       }
       function load() {
         fulfill(xhr.responseText);
@@ -2382,13 +2495,24 @@ function logloads(loads) {
         }
       };
       xhr.open("GET", url, true);
+
+      if (doTimeout)
+        setTimeout(function() {
+          xhr.send();
+        }, 0);
+
       xhr.send(null);
     }
   }
-  else {
+  else if (typeof require != 'undefined') {
     var fs;
     fetchTextFromURL = function(url, fulfill, reject) {
+      if (url.substr(0, 5) != 'file:')
+        throw 'Only file URLs of the form file: allowed running in Node.';
       fs = fs || require('fs');
+      url = url.substr(5);
+      if (isWindows)
+        url = url.replace(/\//g, '\\');
       return fs.readFile(url, function(err, data) {
         if (err)
           return reject(err);
@@ -2397,18 +2521,26 @@ function logloads(loads) {
       });
     }
   }
+  else {
+    throw new TypeError('No environment fetch API available.');
+  }
 
   var SystemLoader = function($__super) {
     function SystemLoader(options) {
-      $__Object$getPrototypeOf(SystemLoader.prototype).constructor.call(this, options || {});
+      $__super.call(this, options || {});
 
       // Set default baseURL and paths
-      if (isBrowser || isWorker) {
+      if (typeof location != 'undefined' && location.href) {
         var href = __global.location.href.split('#')[0].split('?')[0];
         this.baseURL = href.substring(0, href.lastIndexOf('/') + 1);
       }
+      else if (typeof process != 'undefined' && process.cwd) {
+        this.baseURL = 'file:' + process.cwd() + '/';
+        if (isWindows)
+          this.baseURL = this.baseURL.replace(/\\/g, '/');
+      }
       else {
-        this.baseURL = process.cwd() + '/';
+        throw new TypeError('No environment baseURL');
       }
       this.paths = { '*': '*.js' };
     }
@@ -2567,7 +2699,7 @@ function logloads(loads) {
 
   // <script type="module"> support
   // allow a data-init function callback once loaded
-  if (isBrowser) {
+  if (isBrowser && typeof document.getElementsByTagName != 'undefined') {
     var curScript = document.getElementsByTagName('script');
     curScript = curScript[curScript.length - 1];
 
@@ -2579,12 +2711,14 @@ function logloads(loads) {
 
     function ready() {
       var scripts = document.getElementsByTagName('script');
-
       for (var i = 0; i < scripts.length; i++) {
         var script = scripts[i];
         if (script.type == 'module') {
-          var source = script.innerHTML;
-          System.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+          var source = script.innerHTML.substr(1);
+          // It is important to reference the global System, rather than the one
+          // in our closure. We want to ensure that downstream users/libraries
+          // can override System w/ custom behavior.
+          __global.System.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
         }
       }
     }
@@ -2603,6 +2737,7 @@ function logloads(loads) {
       window[curScript.getAttribute('data-init')]();
   }
 })();
+
 
 // Define our eval outside of the scope of any other reference defined in this
 // file to avoid adding those references to the evaluation scope.
@@ -2635,7 +2770,7 @@ function __eval(__source, __global, load) {
                                            self : global));
 
 /*
- * SystemJS v0.8.2
+ * SystemJS v0.11.1
  */
 
 (function($__global) {
@@ -2653,7 +2788,7 @@ $__global.upgradeSystemLoader = function() {
 
   // Absolute URL parsing, from https://gist.github.com/Yaffle/1088850
   function parseURI(url) {
-    var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@]*(?::[^:@]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+    var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/?#]*(?::[^:@\/?#]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
     // authority = '//' + user + ':' + pass '@' + hostname + ':' port
     return (m ? {
       href     : m[0] || '',
@@ -2729,7 +2864,7 @@ $__global.upgradeSystemLoader = function() {
  *   console.log('this is my/module');
  *
  * The benefit of inline meta is that coniguration doesn't need
- * to be known in advanced, which is useful for modularising
+ * to be known in advance, which is useful for modularising
  * configuration and avoiding the need for configuration injection.
  *
  *
@@ -2801,7 +2936,8 @@ function meta(loader) {
     
     return loaderTranslate.call(this, load);
   }
-}/*
+}
+/*
  * Instantiate registry extension
  *
  * Supports Traceur System.register 'instantiate' output for loading ES6 as ES5.
@@ -2900,8 +3036,6 @@ function register(loader) {
     }
     else {
       // ES6 declarative
-      if (deps.length > 0 && declare.length != 1)
-        throw 'Invalid System.register form for ' + name + '. Declare function must take one argument.';
       register = {
         declarative: true,
         deps: deps,
@@ -2919,7 +3053,7 @@ function register(loader) {
     // anonymous register
     else if (register.declarative) {
       if (anonRegister)
-        throw 'Multiple anonymous System.register calls in the same module file.';
+        throw new TypeError('Multiple anonymous System.register calls in the same module file.');
       anonRegister = register;
     }
   }
@@ -2971,10 +3105,10 @@ function register(loader) {
       if (anonRegister)
         load.metadata.entry = anonRegister;
       
-      if (anonRegister || calledRegister)
+      if (calledRegister) {
         load.metadata.format = load.metadata.format || 'register';
-      if (calledRegister)
         load.metadata.registered = true;
+      }
     }
   }
 
@@ -3082,7 +3216,7 @@ function register(loader) {
     module.execute = declaration.execute;
 
     if (!module.setters || !module.execute) {
-      throw "Invalid System.register form for " + entry.name;
+      throw new TypeError('Invalid System.register form for ' + entry.name);
     }
 
     // now link all the module dependencies
@@ -3135,9 +3269,7 @@ function register(loader) {
     if (!entry) {
       exports = loader.get(name);
       if (!exports)
-        throw "System Register: The module requested " + name + " but this was not declared as a dependency";
-      if (exports.__useDefault)
-        exports = exports['default'];
+        throw new Error('Unable to load dependency ' + name + '.');
     }
 
     else {
@@ -3150,6 +3282,9 @@ function register(loader) {
       exports = entry.module.exports;
     }
 
+    if ((!entry || entry.declarative) && exports && exports.__useDefault)
+      return exports['default'];
+    
     return exports;
   }
 
@@ -3179,7 +3314,7 @@ function register(loader) {
           continue;
         return getModule(entry.normalizedDeps[i], loader);
       }
-
+      throw new TypeError('Module ' + name + ' not declared as a dependency.');
     }, exports, module);
     
     if (output)
@@ -3276,8 +3411,10 @@ function register(loader) {
     var entry;
 
     // first we check if this module has already been defined in the registry
-    if (loader.defined[load.name])
+    if (loader.defined[load.name]) {
       entry = loader.defined[load.name];
+      entry.deps = entry.deps.concat(load.metadata.deps);
+    }
 
     // picked up already by a script injection
     else if (load.metadata.entry)
@@ -3310,8 +3447,11 @@ function register(loader) {
       if (anonRegister)
         entry = anonRegister;
 
+      if (!entry && System.defined[load.name])
+        entry = System.defined[load.name];
+
       if (!calledRegister && !load.metadata.registered)
-        throw load.name + " detected as System.register but didn't execute.";
+        throw new TypeError(load.name + ' detected as System.register but didn\'t execute.');
     }
 
     // named bundles are just an empty module
@@ -3357,7 +3497,6 @@ function register(loader) {
           loader.defined[load.name] = undefined;
 
           var module = loader.newModule(entry.declarative ? entry.module.exports : { 'default': entry.module.exports, '__useDefault': true });
-          entry.module.module = module;
 
           // return the defined module object
           return module;
@@ -3397,6 +3536,10 @@ function core(loader) {
   // support the empty module, as a concept
   loader.set('@empty', loader.newModule({}));
 
+  // include the node require since we're overriding it
+  if (typeof require != 'undefined')
+    loader._nodeRequire = require;
+
   /*
     Config
     Extends config merging one deep only
@@ -3433,7 +3576,7 @@ function core(loader) {
   var baseURI;
   if (typeof window == 'undefined' &&
       typeof WorkerGlobalScope == 'undefined') {
-    baseURI = process.cwd() + '/';
+    baseURI = 'file:' + process.cwd() + '/';
   }
   // Inside of a Web Worker
   else if(typeof window == 'undefined') {
@@ -3461,24 +3604,18 @@ function core(loader) {
     return Promise.resolve(loaderLocate.call(this, load));
   };
 
-
   // Traceur conveniences
-  var aliasRegEx = /^\s*export\s*\*\s*from\s*(?:'([^']+)'|"([^"]+)")/;
-  var es6RegEx = /(?:^\s*|[}{\(\);,\n]\s*)(import\s+['"]|(import|module)\s+[^"'\(\)\n;]+\s+from\s+['"]|export\s+(\*|\{|default|function|var|const|let|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*))/;
+  // good enough ES6 detection regex - format detections not designed to be accurate, but to handle the 99% use case
+  var es6RegEx = /(^\s*|[}\);\n]\s*)(import\s+(['"]|(\*\s+as\s+)?[^"'\(\)\n;]+\s+from\s+['"]|\{)|export\s+\*\s+from\s+["']|export\s+(\{|default|function|class|var|const|let|async\s+function))/;
+
+  var traceurRuntimeRegEx = /\$traceurRuntime/;
 
   var loaderTranslate = loader.translate;
   loader.translate = function(load) {
     var loader = this;
 
-    if (load.name == '@traceur')
+    if (load.name == '@traceur' || load.name == '@traceur-runtime')
       return loaderTranslate.call(loader, load);
-
-    // support ES6 alias modules ("export * from 'module';") without needing Traceur
-    var match;
-    if ((load.metadata.format == 'es6' || !load.metadata.format) && (match = load.source.match(aliasRegEx))) {
-      load.metadata.format = 'cjs';
-      load.source = 'module.exports = require("' + (match[1] || match[2]) + '");\n';
-    }
 
     // detect ES6
     else if (load.metadata.format == 'es6' || !load.metadata.format && load.source.match(es6RegEx)) {
@@ -3492,6 +3629,16 @@ function core(loader) {
       }
     }
 
+    // dynamicallly load Traceur runtime if necessary
+    if (!loader.global.$traceurRuntime && load.source.match(traceurRuntimeRegEx)) {
+      var System = $__global.System;
+      return loader['import']('@traceur-runtime').then(function() {
+        // traceur runtme annihilates System global
+        $__global.System = System;
+        return loaderTranslate.call(loader, load);
+      });
+    }
+
     return loaderTranslate.call(loader, load);
   };
 
@@ -3499,7 +3646,7 @@ function core(loader) {
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
     var loader = this;
-    if (load.name == '@traceur') {
+    if (load.name == '@traceur' || load.name == '@traceur-runtime') {
       loader.__exec(load);
       return {
         deps: [],
@@ -3523,6 +3670,14 @@ function core(loader) {
   See the SystemJS readme global support section for further information.
 */
 function global(loader) {
+
+  function readGlobalProperty(p, value) {
+    var pParts = p.split('.');
+    while (pParts.length)
+      value = value[pParts.shift()];
+    return value;
+  }
+
   function createHelpers(loader) {
     if (loader.has('@@global-helpers'))
       return;
@@ -3546,7 +3701,10 @@ function global(loader) {
         // now store a complete copy of the global object
         // in order to detect changes
         curGlobalObj = {};
-        ignoredGlobalProps = ['indexedDB', 'sessionStorage', 'localStorage', 'clipboardData', 'frames', 'webkitStorageInfo'];
+        ignoredGlobalProps = ['indexedDB', 'sessionStorage', 'localStorage',
+          'clipboardData', 'frames', 'webkitStorageInfo', 'toolbar', 'statusbar',
+          'scrollbars', 'personalbar', 'menubar', 'locationbar', 'webkitIndexedDB'
+        ];
         for (var g in loader.global) {
           if (indexOf.call(ignoredGlobalProps, g) != -1) { continue; }
           if (!hasOwnProperty || loader.global.hasOwnProperty(g)) {
@@ -3576,7 +3734,7 @@ function global(loader) {
         // if one global, then that is the module directly
         else if (exportName) {
           var firstPart = exportName.split('.')[0];
-          singleGlobal = eval.call(loader.global, exportName);
+          singleGlobal = readGlobalProperty(exportName, loader.global);
           exports[firstPart] = loader.global[firstPart];
         }
 
@@ -3651,23 +3809,24 @@ function cjs(loader) {
 
   // CJS Module Format
   // require('...') || exports[''] = ... || exports.asd = ... || module.exports = ...
-  var cjsExportsRegEx = /(?:^\s*|[}{\(\);,\n=:\?\&]\s*|module\.)(exports\s*\[\s*('[^']+'|"[^"]+")\s*\]|\exports\s*\.\s*[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*|exports\s*\=)/;
-  var cjsRequireRegEx = /(?:^\s*|[}{\(\);,\n=:\?\&]\s*)require\s*\(\s*("([^"]+)"|'([^']+)')\s*\)/g;
+  var cjsExportsRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.]|module\.)(exports\s*\[['"]|\exports\s*\.)|(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])module\.exports\s*\=/;
+  // RegEx adjusted from https://github.com/jbrantly/yabble/blob/master/lib/yabble.js#L339
+  var cjsRequireRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF."'])require\s*\(\s*("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')\s*\)/g;
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
   function getCJSDeps(source) {
-    cjsExportsRegEx.lastIndex = 0;
     cjsRequireRegEx.lastIndex = 0;
 
     var deps = [];
 
-    // remove comments from the source first
-    var source = source.replace(commentRegEx, '');
+    // remove comments from the source first, if not minified
+    if (source.length / source.split('\n').length < 200)
+      source = source.replace(commentRegEx, '');
 
     var match;
 
     while (match = cjsRequireRegEx.exec(source))
-      deps.push(match[2] || match[3]);
+      deps.push(match[1].substr(1, match[1].length - 2));
 
     return deps;
   }
@@ -3692,12 +3851,16 @@ function cjs(loader) {
         dirname.pop();
         dirname = dirname.join('/');
 
+        // if on the server, remove the "file:" part from the dirname
+        if (System._nodeRequire)
+          dirname = dirname.substr(5);
+
         var globals = loader.global._g = {
           global: loader.global,
           exports: exports,
           module: module,
           require: require,
-          __filename: load.address,
+          __filename: System._nodeRequire ? load.address.substr(5) : load.address,
           __dirname: dirname
         };
 
@@ -3735,10 +3898,10 @@ function amd(loader) {
   // AMD Module Format Detection RegEx
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
-  var amdRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
+  var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
-  var cjsRequirePre = "(?:^\\s*|[}{\\(\\);,\\n=:\\?\\&]\\s*)";
+  var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
 
   var fnBracketRegEx = /\(([^\)]*)\)/;
@@ -3787,7 +3950,9 @@ function amd(loader) {
       Promise.all(names.map(function(name) {
         return loader['import'](name, referer);
       })).then(function(modules) {
-        callback.apply(null, modules);
+        if(callback) {
+          callback.apply(null, modules);
+        }
       }, errback);
 
     // commonjs require
@@ -3797,7 +3962,7 @@ function amd(loader) {
     }
 
     else
-      throw 'Invalid require';
+      throw new TypeError('Invalid require');
   };
   loader.amdRequire = require;
 
@@ -3815,8 +3980,10 @@ function amd(loader) {
     var onScriptLoad = loader.onScriptLoad;
     loader.onScriptLoad = function(load) {
       onScriptLoad(load);
-      if (anonDefine || defineBundle)
+      if (anonDefine || defineBundle) {
         load.metadata.format = 'defined';
+        load.metadata.registered = true;
+      }
 
       if (anonDefine) {
         load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
@@ -3899,7 +4066,7 @@ function amd(loader) {
       if (!name) {
         // already defined anonymously -> throw
         if (anonDefine)
-          throw "Multiple defines for anonymous module";
+          throw new TypeError('Multiple defines for anonymous module');
         anonDefine = define;
       }
       // named define
@@ -3983,33 +4150,16 @@ function amd(loader) {
     if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
       load.metadata.format = 'amd';
 
-      createDefine(loader);
+      if (loader.execute !== false) {
+        createDefine(loader);
 
-      try {
         loader.__exec(load);
-      }
-      catch(e) {
-        if (loader.execute === false && isNode) {
-          // use a regular expression to pull out deps
-          var match = load.source.match(amdRegEx);
-          if (match) {
-            // named or anonymous
-            if (match[1] && match[1][0] == '[')
-              define(match[1].substr(match[1].length - 2), eval(match[2]), function() {});
-            else if (match[2] && match[2][0] == '[')
-              define(eval(match[2]), function() {});
-            else
-              define(function() {});
-          }
-        }
-        else
-          throw e;
-      }
 
-      removeDefine(loader);
+        removeDefine(loader);
 
-      if (!anonDefine && !defineBundle && !isNode)
-        throw "AMD module " + load.name + " did not define";
+        if (!anonDefine && !defineBundle && !isNode)
+          throw new TypeError('AMD module ' + load.name + ' did not define');
+      }
 
       if (anonDefine) {
         load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
@@ -4227,6 +4377,10 @@ function plugins(loader) {
 
     var name = load.name;
 
+    // only fetch the plugin itself if this name isn't defined
+    if (this.defined && this.defined[name])
+      return loaderLocate.call(this, load);
+
     // plugin
     var pluginIndex = name.lastIndexOf('!');
     if (pluginIndex != -1) {
@@ -4380,246 +4534,6 @@ function bundles(loader) {
     return loaderFetch.call(this, load);
   };
 }/*
-  SystemJS Semver Version Addon
-  
-  1. Uses Semver convention for major and minor forms
-
-  Supports requesting a module from a package that contains a version suffix
-  with the following semver ranges:
-    module       - any version
-    module@1     - major version 1, any minor (not prerelease)
-    module@1.2   - minor version 1.2, any patch (not prerelease)
-    module@1.2.3 - exact version
-
-  It is assumed that these modules are provided by the server / file system.
-
-  First checks the already-requested packages to see if there are any packages 
-  that would match the same package and version range.
-
-  This provides a greedy algorithm as a simple fix for sharing version-managed
-  dependencies as much as possible, which can later be optimized through version
-  hint configuration created out of deeper version tree analysis.
-  
-  2. Semver-compatibility syntax (caret operator - ^)
-
-  Compatible version request support is then also provided for:
-
-    module@^1.2.3        - module@1, >=1.2.3
-    module@^1.2          - module@1, >=1.2.0
-    module@^1            - module@1
-    module@^0.5.3        - module@0.5, >= 0.5.3
-    module@^0.0.1        - module@0.0.1
-
-  The ^ symbol is always normalized out to a normal version request.
-
-  This provides comprehensive semver compatibility.
-  
-  3. System.versions version hints and version report
-
-  Note this addon should be provided after all other normalize overrides.
-
-  The full list of versions can be found at System.versions providing an insight
-  into any possible version forks.
-
-  It is also possible to create version solution hints on the System global:
-
-  System.versions = {
-    jquery: ['1.9.2', '2.0.3'],
-    bootstrap: '3.0.1'
-  };
-
-  Versions can be an array or string for a single version.
-
-  When a matching semver request is made (jquery@1.9, jquery@1, bootstrap@3)
-  they will be converted to the latest version match contained here, if present.
-
-  Prereleases in this versions list are also allowed to satisfy ranges when present.
-*/
-
-function versions(loader) {
-  if (typeof indexOf == 'undefined')
-    indexOf = Array.prototype.indexOf;
-
-  // match x, x.y, x.y.z, x.y.z-prerelease.1
-  var semverRegEx = /^(\d+)(?:\.(\d+)(?:\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?)?)?$/;
-
-  var semverCompare = function(v1, v2) {
-    var v1Parts = v1.split('.');
-    var v2Parts = v2.split('.');
-    var prereleaseIndex;
-    if (v1Parts[2] && (prereleaseIndex = indexOf.call(v1Parts[2], '-')) != -1)
-      v1Parts.splice(2, 1, v1Parts[2].substr(0, prereleaseIndex), v1Parts[2].substr(prereleaseIndex + 1));
-    if (v2Parts[2] && (prereleaseIndex = indexOf.call(v2Parts[2], '-')) != -1)
-      v2Parts.splice(2, 1, v2Parts[2].substr(0, prereleaseIndex), v2Parts[2].substr(prereleaseIndex + 1));
-    for (var i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-      if (!v1Parts[i])
-        return 1;
-      else if (!v2Parts[i])
-        return -1;
-      if (v1Parts[i] != v2Parts[i])
-        return parseInt(v1Parts[i]) > parseInt(v2Parts[i]) ? 1 : -1;
-    }
-    return 0;
-  }  
-  
-
-  loader.versions = loader.versions || {};
-
-  var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
-    if (!loader.versions)
-      loader.versions = {};
-    var packageVersions = this.versions;
-
-    // strip the version before applying map config
-    var stripVersion, stripSubPathLength;
-    if (name.indexOf('@') > 0) {
-      var versionIndex = name.lastIndexOf('@');
-      var parts = name.substr(versionIndex + 1, name.length - versionIndex - 1).split('/');
-      stripVersion = parts[0];
-      stripSubPathLength = parts.length;
-      name = name.substr(0, versionIndex) + name.substr(versionIndex + stripVersion.length + 1, name.length - versionIndex - stripVersion.length - 1);
-    }
-
-    // run all other normalizers first
-    return Promise.resolve(loaderNormalize.call(this, name, parentName, parentAddress)).then(function(normalized) {
-      
-      var version, semverMatch, nextChar, versions;
-      var index = normalized.indexOf('@');
-
-      // if we stripped a version, and it still has no version, add it back
-      if (stripVersion && (index == -1 || index == 0)) {
-        var parts = normalized.split('/');
-        parts[parts.length - stripSubPathLength] += '@' + stripVersion;
-        normalized = parts.join('/');
-        index = normalized.indexOf('@');
-      }
-
-      // see if this module corresponds to a package already in our versioned packages list
-      
-      // no version specified - check against the list (given we don't know the package name)
-      if (index == -1 || index == 0) {
-        for (var p in packageVersions) {
-          versions = packageVersions[p];
-          if (normalized.substr(0, p.length) != p)
-            continue;
-
-          nextChar = normalized.substr(p.length, 1);
-
-          if (nextChar && nextChar != '/')
-            continue;
-
-          // match -> take latest version
-          return p + '@' + (typeof versions == 'string' ? versions : versions[versions.length - 1]) + normalized.substr(p.length);
-        }
-        return normalized;
-      }
-
-      // get the version info
-      version = normalized.substr(index + 1).split('/')[0];
-      var versionLength = version.length;
-
-      var minVersion;
-      if (version.substr(0, 1) == '^') {
-        version = version.substr(1);
-        minVersion = true;
-      }
-
-      semverMatch = version.match(semverRegEx);
-
-      // if not a semver, we cant help
-      if (!semverMatch)
-        return normalized;
-
-      // translate '^' in range to simpler range form
-      if (minVersion) {
-        // ^0 -> 0
-        // ^1 -> 1
-        if (!semverMatch[2])
-          minVersion = false;
-        
-        if (!semverMatch[3]) {
-          
-          // ^1.1 -> ^1.1.0
-          if (semverMatch[2] > 0)
-            semverMatch[3] = '0';
-
-          // ^0.1 -> 0.1
-          // ^0.0 -> 0.0
-          else
-            minVersion = false;
-        }
-      }
-
-      if (minVersion) {
-        // >= 1.0.0
-        if (semverMatch[1] > 0) {
-          if (!semverMatch[2])
-            version = semverMatch[1] + '.0.0';
-          if (!semverMatch[3])
-            version = semverMatch[1] + '.0';
-          minVersion = version;
-          semverMatch = [semverMatch[1]];
-        }
-        // >= 0.1.0
-        else if (semverMatch[2] > 0) {
-          minVersion = version;
-          semverMatch = [0, semverMatch[2]];
-        }
-        // >= 0.0.0
-        else {
-          // NB compatible with prerelease is just prelease itself?
-          minVersion = false;
-          semverMatch = [0, 0, semverMatch[3]];
-        }
-        version = semverMatch.join('.');
-      }
-
-      var packageName = normalized.substr(0, index);
-
-      versions = packageVersions[packageName] || [];
-
-      if (typeof versions == 'string')
-        versions = [versions];
-
-      // look for a version match
-      // if an exact semver, theres nothing to match, just record it
-      if (!semverMatch[3] || minVersion)
-        for (var i = versions.length - 1; i >= 0; i--) {
-          var curVersion = versions[i];
-          // if I have requested x.y, find an x.y.z-b
-          // if I have requested x, find any x.y / x.y.z-b
-          if (curVersion.substr(0, version.length) == version && curVersion.substr(version.length, 1).match(/^[\.\-]?$/)) {
-            // if a minimum version, then check too
-            if (!minVersion || minVersion && semverCompare(curVersion, minVersion) != -1)
-              return packageName + '@' + curVersion + normalized.substr(packageName.length + versionLength + 1);
-          }
-        }
-
-      // no match
-      // record the package and semver for reuse since we're now asking the server
-      // x.y and x versions will now be latest by default, so they are useful in the version list
-      if (indexOf.call(versions, version) == -1) {
-        versions.push(version);
-        versions.sort(semverCompare);
-
-        normalized = packageName + '@' + version + normalized.substr(packageName.length + versionLength + 1);
-
-        // if this is an x.y.z, remove any x.y, x
-        // if this is an x.y, remove any x
-        if (semverMatch[3] && (index = indexOf.call(versions, semverMatch[1] + '.' + semverMatch[2])) != -1)
-          versions.splice(index, 1);
-        if (semverMatch[2] && (index = indexOf.call(versions, semverMatch[1])) != -1)
-          versions.splice(index, 1);
-
-        packageVersions[packageName] = versions.length == 1 ? versions[0] : versions;
-      }
-
-      return normalized;
-    });
-  }
-}
-/*
  * Dependency Tree Cache
  * 
  * Allows a build to pre-populate a dependency trace tree on the loader of 
@@ -4660,17 +4574,16 @@ function depCache(loader) {
   }
 }
   
-  meta(System);
-  register(System);
-  core(System);
-  global(System);
-  cjs(System);
-  amd(System);
-  map(System);
-  plugins(System);
-  bundles(System);
-  versions(System);
-  depCache(System);
+meta(System);
+register(System);
+core(System);
+global(System);
+cjs(System);
+amd(System);
+map(System);
+plugins(System);
+bundles(System);
+depCache(System);
   if (!System.paths['@traceur'])
     System.paths['@traceur'] = $__curScript && $__curScript.getAttribute('data-traceur-src')
       || ($__curScript && $__curScript.src 
@@ -4678,7 +4591,10 @@ function depCache(loader) {
         : System.baseURL + (System.baseURL.lastIndexOf('/') == System.baseURL.length - 1 ? '' : '/')
         ) + 'traceur.js';
 
-  return System;
+  if (!System.paths['@traceur-runtime'])
+    System.paths['@traceur-runtime'] = $__curScript && $__curScript.getAttribute('data-traceur-runtime-src') || System.paths['@traceur'].replace(/\.js$/, '-runtime.js');
+
+   return System;
 };
 
 var $__curScript, __eval;
@@ -4694,7 +4610,12 @@ var $__curScript, __eval;
       doEval(source);
     }
     catch(e) {
-      throw 'Error evaluating ' + address;
+      var msg = 'Error evaluating ' + address + '\n';
+      if (e instanceof Error)
+        e.message = msg + e.message;
+      else
+        e = msg + e;
+      throw e;
     }
   };
 
@@ -4766,7 +4687,7 @@ var $__curScript, __eval;
     if (!$__global.System || !$__global.LoaderPolyfill) {
       var basePath = '';
       try {
-        throw new Error('Getting the path');
+        throw new TypeError('Unable to get Worker base path.');
       } catch(err) {
         var idx = err.stack.indexOf('at ') + 3;
         var withSystem = err.stack.substr(idx, err.stack.substr(idx).indexOf('\n'));
@@ -4863,7 +4784,6 @@ var $__curScript, __eval;
 				hash     : m[8] || ''
 			} : null);
 		},
-		  
 		joinURIs = function(base, href) {
 			function removeDotSegments(input) {
 				var output = [];
@@ -4889,11 +4809,9 @@ var $__curScript, __eval;
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		};
-
-
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/"),
-			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.]+/);
+			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
 	
@@ -4946,7 +4864,6 @@ var $__curScript, __eval;
 	};
 
 var makeSteal = function(System){
-	
 	
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 		
@@ -5038,6 +4955,51 @@ var makeSteal = function(System){
 		addForwardSlash(System);
 	}
 
+/*
+  SystemJS JSON Format
+  Provides the JSON module format definition.
+*/
+function _SYSTEM_addJSON(loader) {
+
+  // if someone has a moduleName that is .json, make sure it loads a json file
+  // no matter what paths might do
+  //var loaderLocate = loader.locate;
+  //loader.locate = function(load){
+  //  return loaderLocate.apply(this, arguments).then(function(address){
+  //    return address;
+  //  });
+  //};
+  var jsonTest = /^[\s\n\r]*[\{\[]/;
+  var loaderInstantiate = loader.instantiate;
+  loader.instantiate = function(load) {
+    var loader = this,
+        parsed;
+
+    if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
+      
+      try{
+        parsed = JSON.parse(load.source);
+      } catch(e) {}
+      if(parsed) {
+        load.metadata.format = 'json';
+
+	      load.metadata.execute = function(){
+	        return parsed;
+	      };
+      }
+      
+
+    }
+    return loaderInstantiate.call(loader, load);
+  };
+
+  return loader;
+}
+
+if (typeof System !== "undefined") {
+  _SYSTEM_addJSON(System);
+}
+
 	// Overwrites System.config with setter hooks
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
@@ -5063,6 +5025,7 @@ var makeSteal = function(System){
 			oldConfig.call(this, data);
 		};
 	};
+	
 	var setIfNotPresent = function(obj, prop, value){
 		if(!obj[prop]) {
 			obj[prop] = value;	
@@ -5070,23 +5033,26 @@ var makeSteal = function(System){
 	};
 	
 	// steal.js's default configuration values
-	System.paths["@config"] = "stealconfig.js";
+	System.configMain = "@config";
+	System.paths[System.configMain] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
 		css: '$css',
 		less: '$less'
 	};
+	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 	
-	
 	var configSetter = {
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			this.paths["@config"] = name;
+			System.configMain = name;
+			System.paths[name] = name;
+			addProductionBundles.call(this);
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},
@@ -5109,9 +5075,12 @@ var makeSteal = function(System){
 		};
 	};
 	
-
-	
-
+	var pluginPart = function(name) {
+		var bang = name.lastIndexOf("!");
+		if(bang !== -1) {
+			return name.substr(bang+1);
+		}
+	};
 	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
@@ -5119,10 +5088,16 @@ var makeSteal = function(System){
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+filename(main);
 				
-	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main]);
-
+			
+			// If the configMain has a plugin like package.json!npm,
+			// plugin has to be defined prior to importing.
+			var plugin = pluginPart(System.configMain);
+			var bundle = [main, System.configMain];
+			if(plugin){
+				System.set(plugin, System.newModule({}));
+			}
+			this.bundles[mainBundleName] = bundle;
 		}
 	};
 	
@@ -5151,10 +5126,18 @@ var makeSteal = function(System){
 			set: function(dirname, cfg) {
 				var parts = dirname.split("/");
 
-				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
-				setIfNotPresent(this.paths,"$css", dirname+"/css.js");
-				setIfNotPresent(this.paths,"$less", dirname+"/less.js");
-				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
+				// steal keeps this around to make things easy no matter how you are using it.
+				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
+				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
+				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
+				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
+				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
+				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
+				this.paths["@traceur"] = dirname+"/ext/traceur.js";
+				this.paths["@traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				
 				if(isNode) {
 					System.register("less",[], false, function(){
@@ -5162,13 +5145,20 @@ var makeSteal = function(System){
 						return r('less');
 					});
 				} else {
-					setIfNotPresent(this.paths,"less",  dirname+"/"+LESS_ENGINE+".js");
+					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
 					
 					// make sure we don't set baseURL if something else is going to set it
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
+								System.configMain = "bower.json!bower";
+								addProductionBundles.call(this);
+								parts.pop();
+							}
+							if (last(parts) === "node_modules") {
+								System.configMain = "package.json!npm";
+								addProductionBundles.call(this);
 								parts.pop();
 							}
 						}
@@ -5210,8 +5200,6 @@ var makeSteal = function(System){
 		
 	};
 	
-
-
 	var getScriptOptions = function () {
 
 		var options = {},
@@ -5253,7 +5241,7 @@ var makeSteal = function(System){
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
-				options[optionName] = attr.value;
+				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
 		}
@@ -5287,39 +5275,19 @@ var makeSteal = function(System){
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
-			
-			// Override instantiate temporarily to ensure @config is loaded
-			// before System.main
-			var baseInstantiate = System.instantiate;
-			var configDeps = [];
-			System.instantiate = function(load) {
-				var loader = this;
-				if(loader.defined["@config"] && load.name !== "@config" &&
-				   configDeps.indexOf(load.name) === -1) {
-					return loader.import("@config").then(function() {
-						System.instantiate = baseInstantiate;
-						return baseInstantiate.call(loader, load);
-					});
-				}
+		if ( System.env == "production" ) {
 
-				if(load.name === "@config") {
-					return baseInstantiate.call(this, load).then(function(instantiateResult) {
-						configDeps = instantiateResult.deps.slice();
-						return instantiateResult;
-					});
-				}
-				
-				return baseInstantiate.call(this, load);
-			};
+			configDeferred = System["import"](System.configMain);
 
-			return appDeferred = System.import(System.main)["catch"](function(e){
+			return appDeferred = configDeferred.then(function(cfg){
+				return System.main ? System["import"](System.main) : cfg;
+			})["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(System.env == "development"){
+		} else if(System.env == "development" || System.env == "build"){
 
-			configDeferred = System.import("@config");
+			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -5329,16 +5297,16 @@ var makeSteal = function(System){
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				if(!System.main) {
+				if(!System.main || System.env === "build") {
 					return configDeferred;
 				}
 				var main = System.main;
@@ -5346,7 +5314,7 @@ var makeSteal = function(System){
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main)
 				}) );
 			}).then(function(){
 				if(steal.dev) {
@@ -5463,7 +5431,9 @@ if (typeof System !== "undefined") {
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addSteal = addSteal;
-		global.define = System.amdDefine;
+		
+		// I think production needs this
+		// global.define = System.amdDefine;
 		
 	} else {
     	
@@ -5471,7 +5441,7 @@ if (typeof System !== "undefined") {
 			
 		global.steal = makeSteal(System);
 		global.steal.System = System;
-		global.steal.dev = require("./dev.js");
+		global.steal.dev = require("./ext/dev.js");
 		steal.clone = makeSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;

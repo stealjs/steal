@@ -18,8 +18,10 @@ Specifying [System.config] will set `baseURL` to the config's parent directory.
 When a module is imported, the `baseURL` will be the prepended to the module location by 
 default. For example:
 
-    System.baseURL = "../libs";
-    System.import("mylib")      // looks in ../libs/mylib
+```
+System.baseURL = "../libs";
+System.import("mylib")      // looks in ../libs/mylib
+```
 
 This behavior can futher be modified by [System.paths]
 

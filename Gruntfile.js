@@ -1,5 +1,8 @@
 'use strict';
 module.exports = function (grunt) {
+	
+  var core = ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'];
+  
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     meta: {
@@ -13,13 +16,14 @@ module.exports = function (grunt) {
     concat: {
       dist: {
         src: [
-          'bower_components/es6-module-loader/dist/es6-module-loader.js',
-          'bower_components/systemjs/dist/system.js',
+          'bower_components/es6-module-loader/dist/es6-module-loader.src.js',
+          'bower_components/systemjs/dist/system.src.js',
           'src/start.js',
           'src/normalize.js',
           'src/core.js',     	// starts makeSteal
           'src/system-extension-ext.js',
           'src/system-extension-forward-slash.js',
+          'node_modules/system-json/json.js',
           'src/config.js',
           'src/startup.js',
           'src/make-steal-end.js', // ends makeSteal
@@ -69,14 +73,35 @@ module.exports = function (grunt) {
       }
     },
     copy: {
+    	// copy plugins that steal should contain
+      extensions: {
+        files: [
+          {src:["node_modules/system-npm/npm.js"], dest: "ext/npm.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: 'isFile'},
+          {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: 'isFile'},
+          {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: 'isFile'},
+          {src:["bower_components/traceur-runtime/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: 'isFile'},
+          {src:["bower_components/system-bower/bower.js"], dest: "ext/bower.js", filter: 'isFile'}
+        ]
+      },
       toTest: {
         files: [
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/steal/', filter: 'isFile'},
-          {expand: true, src: ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'dev.js'], dest: 'test/bower_components/steal/', filter: 'isFile'},
-          {expand: true, cwd: 'bower_components/traceur/', src: ['*'], dest: 'test/bower_components/traceur/', filter: 'isFile'}
+          {expand: true, src: core, dest: 'test/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/steal/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/bower_components/steal/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/npm/node_modules/steal/', filter: 'isFile'},
+          {expand: true, src: core, dest: 'test/bower/bower_components/steal/', filter: 'isFile'},
+          
+          {expand: true, src: ['node_modules/jquery/**'], dest: 'test/npm/', filter: 'isFile'},
+		  {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/with_paths/bower_components/system-bower/', filter: 'isFile'},
+          {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/as_config/vendor/system-bower/', filter: 'isFile'}
         ]
-      }
+      },
+      
     },
     watch: {
       files: [ "src/*.js", "bower_components/systemjs/dist/**"],
@@ -95,7 +120,12 @@ module.exports = function (grunt) {
         },
         src: ['test/test.html']
       }
-    }
+    },
+    simplemocha: {
+		builders: {
+			src: ["test/node_test.js"]
+		}
+	}
   });
 
   grunt.loadNpmTasks("grunt-contrib-watch");
@@ -103,10 +133,11 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('testee');
   
-  grunt.registerTask('test', [ 'build', 'testee' ]);
-  grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:toTest' ]);
+  grunt.registerTask('test', [ 'build', 'testee', 'simplemocha' ]);
+  grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:extensions','copy:toTest' ]);
   grunt.registerTask('default', [ 'build' ]);
 };

@@ -16,30 +16,39 @@ in a bundle.
 
 For example:
 
-    System.config({
-      main: "myapp",
-      env: "production"
-    });
+```
+System.config({
+  main: "myapp",
+  env: "production"
+});
+```
 
 Sets:
 
-    System.bundles["bundles/myapp"] //-> ["myapp"]
-    System.meta["bundles/myapp"]    //-> {format: "amd"}
-    System.paths["bundles/*"]       //-> "dist/bundles/*.js"
-    System.paths["bundles/*.css"]   //-> "dist/bundles/*.css"
+```
+System.bundles["bundles/myapp"] //-> ["myapp"]
+System.meta["bundles/myapp"]    //-> {format: "amd"}
+System.paths["bundles/*"]       //-> "dist/bundles/*.js"
+System.paths["bundles/*.css"]   //-> "dist/bundles/*.css"
+```
 
-Setting `System.env` to "production" must happen prior to loading `steal.js`.  So it should
+Setting `System.env` to `"production"` must happen prior to loading `steal.js`.  So it should
 be [System.config configured] via the `steal.js` script tag like:
 
-    <script src="../path/to/steal/steal.js"
-            data-env="production"
-            data-main="myapp"></script>
-            
+```
+<script src="../path/to/steal/steal.js"
+        data-env="production"
+        data-main="myapp">
+</script>
+```
+
 Or specified prior to steal loading like:
 
-    <script>
-      steal = {env: "production"}
-    </script>
-    <script src="../path/to/steal/steal.js"
-            data-env="production"></script>
-
+```
+<script>
+  steal = {env: "production"}
+</script>
+<script src="../path/to/steal/steal.js"
+        data-env="production">
+</script>
+```

@@ -15,15 +15,17 @@ if( steal.config('env') === 'production' ) {
 	exports.instantiate = function(load) {
 		load.metadata.deps = [];
 		load.metadata.execute = function(){
-			if(load.source) {
+			var source = load.source+"/*# sourceURL="+load.address+" */";
+			source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
+				return "url(" + steal.joinURIs( load.address, part) + ")";
+			});
+				
+			if(load.source && typeof document !== "undefined") {
 				var head = document.head || document.getElementsByTagName('head')[0],
-					style = document.createElement('style'),
-					source = load.source+"/*# sourceURL="+load.address+" */";
+					style = document.createElement('style');
 
 				// make source load relative to the current page
-				source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
-					return "url(" + steal.joinURIs( load.address, part) + ")";
-				});
+				
 				style.type = 'text/css';
 
 				if (style.styleSheet){
@@ -34,7 +36,7 @@ if( steal.config('env') === 'production' ) {
 				head.appendChild(style);
 			}
 
-			return System.newModule({});
+			return System.newModule({source: source});
 		};
 		load.metadata.format = "css";
 	};

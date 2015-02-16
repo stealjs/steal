@@ -39,7 +39,7 @@ To __test__, open `test/test.html`, and make sure everything passes.
 
 `steal.js` packages two other projects:
 
- - [ES6ModuleLoader](https://github.com/ModuleLoader/es6-module-loader) - Provides the [Loader] and [System] Polyfill.
+ - [ES6ModuleLoader](https://github.com/ModuleLoader/es6-module-loader) - Provides the [Loader](steal#section_LoaderandSystemnamespaces) and [System](steal#section_LoaderandSystemnamespaces) Polyfill.
  - [SystemJS](https://github.com/systemjs/systemjs) - Provides most System extensions 
    like [System.paths], [System.map] and the [syntax.amd AMD] and [syntax.CommonJS CommonJS] syntaxes.
 

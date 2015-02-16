@@ -3,8 +3,15 @@ var lessEngine = require("less");
 
 exports.instantiate = css.instantiate;
 
+var options = steal.config('lessOptions') || {};
+
+// default optimization value.
+options.optimization |= lessEngine.optimization;
+
 exports.translate = function(load) {
-	var pathParts = (load.address+'').split('/');
+	var address = load.address.replace(/^file\:/,"");
+	
+	var pathParts = (address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
 	var paths = [];
@@ -14,15 +21,15 @@ exports.translate = function(load) {
 		paths = [pathParts.join('/')];
 	}
 	return new Promise(function(resolve, reject){
-		new (lessEngine.Parser)({
-			optimization: lessEngine.optimization,
-			paths: [pathParts.join('/')],
-			filename: load.address
-		}).parse(load.source, function (e, root) {
+		options.filename = address;
+		options.paths = [pathParts.join('/')];
+
+		var Parser = lessEngine.Parser;
+		new Parser(options).parse(load.source, function (e, root) {
 			if(e){
 				reject(e);
 			} else {
-				resolve(root.toCSS());
+				resolve(root.toCSS(options));
 			}
 		});
 	});

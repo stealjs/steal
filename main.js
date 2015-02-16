@@ -66,7 +66,6 @@
 				hash     : m[8] || ''
 			} : null);
 		},
-		  
 		joinURIs = function(base, href) {
 			function removeDotSegments(input) {
 				var output = [];
@@ -92,11 +91,9 @@
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		};
-
-
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/"),
-			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.]+/);
+			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
 	
@@ -149,7 +146,6 @@
 	};
 
 var makeSteal = function(System){
-	
 	
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 		
@@ -266,6 +262,7 @@ var makeSteal = function(System){
 			oldConfig.call(this, data);
 		};
 	};
+	
 	var setIfNotPresent = function(obj, prop, value){
 		if(!obj[prop]) {
 			obj[prop] = value;	
@@ -273,23 +270,26 @@ var makeSteal = function(System){
 	};
 	
 	// steal.js's default configuration values
-	System.paths["@config"] = "stealconfig.js";
+	System.configMain = "@config";
+	System.paths[System.configMain] = "stealconfig.js";
 	System.env = "development";
 	System.ext = {
 		css: '$css',
 		less: '$less'
 	};
+	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 	
-	
 	var configSetter = {
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-			this.paths["@config"] = name;
+			System.configMain = name;
+			System.paths[name] = name;
+			addProductionBundles.call(this);
 			this.baseURL =  (root === val ? "." : root)  +"/";
 		}
 	},
@@ -312,9 +312,12 @@ var makeSteal = function(System){
 		};
 	};
 	
-
-	
-
+	var pluginPart = function(name) {
+		var bang = name.lastIndexOf("!");
+		if(bang !== -1) {
+			return name.substr(bang+1);
+		}
+	};
 	
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
@@ -322,10 +325,16 @@ var makeSteal = function(System){
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+filename(main);
 				
-	
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			setIfNotPresent(this.bundles, mainBundleName, [main]);
-
+			
+			// If the configMain has a plugin like package.json!npm,
+			// plugin has to be defined prior to importing.
+			var plugin = pluginPart(System.configMain);
+			var bundle = [main, System.configMain];
+			if(plugin){
+				System.set(plugin, System.newModule({}));
+			}
+			this.bundles[mainBundleName] = bundle;
 		}
 	};
 	
@@ -354,10 +363,18 @@ var makeSteal = function(System){
 			set: function(dirname, cfg) {
 				var parts = dirname.split("/");
 
-				setIfNotPresent(this.paths,"@dev", dirname+"/dev.js");
-				setIfNotPresent(this.paths,"$css", dirname+"/css.js");
-				setIfNotPresent(this.paths,"$less", dirname+"/less.js");
-				this.paths["@traceur"] = parts.slice(0,-1).join("/")+"/traceur/traceur.js";
+				// steal keeps this around to make things easy no matter how you are using it.
+				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
+				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
+				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
+				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
+				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
+				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
+				this.paths["@traceur"] = dirname+"/ext/traceur.js";
+				this.paths["@traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				
 				if(isNode) {
 					System.register("less",[], false, function(){
@@ -365,13 +382,20 @@ var makeSteal = function(System){
 						return r('less');
 					});
 				} else {
-					setIfNotPresent(this.paths,"less",  dirname+"/"+LESS_ENGINE+".js");
+					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
 					
 					// make sure we don't set baseURL if something else is going to set it
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
+								System.configMain = "bower.json!bower";
+								addProductionBundles.call(this);
+								parts.pop();
+							}
+							if (last(parts) === "node_modules") {
+								System.configMain = "package.json!npm";
+								addProductionBundles.call(this);
 								parts.pop();
 							}
 						}
@@ -413,8 +437,6 @@ var makeSteal = function(System){
 		
 	};
 	
-
-
 	var getScriptOptions = function () {
 
 		var options = {},
@@ -456,7 +478,7 @@ var makeSteal = function(System){
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
-				options[optionName] = attr.value;
+				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
 		}
@@ -490,39 +512,19 @@ var makeSteal = function(System){
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
-			
-			// Override instantiate temporarily to ensure @config is loaded
-			// before System.main
-			var baseInstantiate = System.instantiate;
-			var configDeps = [];
-			System.instantiate = function(load) {
-				var loader = this;
-				if(loader.defined["@config"] && load.name !== "@config" &&
-				   configDeps.indexOf(load.name) === -1) {
-					return loader.import("@config").then(function() {
-						System.instantiate = baseInstantiate;
-						return baseInstantiate.call(loader, load);
-					});
-				}
+		if ( System.env == "production" ) {
 
-				if(load.name === "@config") {
-					return baseInstantiate.call(this, load).then(function(instantiateResult) {
-						configDeps = instantiateResult.deps.slice();
-						return instantiateResult;
-					});
-				}
-				
-				return baseInstantiate.call(this, load);
-			};
+			configDeferred = System["import"](System.configMain);
 
-			return appDeferred = System.import(System.main)["catch"](function(e){
+			return appDeferred = configDeferred.then(function(cfg){
+				return System.main ? System["import"](System.main) : cfg;
+			})["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(System.env == "development"){
+		} else if(System.env == "development" || System.env == "build"){
 
-			configDeferred = System.import("@config");
+			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -532,16 +534,16 @@ var makeSteal = function(System){
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				if(!System.main) {
+				if(!System.main || System.env === "build") {
 					return configDeferred;
 				}
 				var main = System.main;
@@ -549,7 +551,7 @@ var makeSteal = function(System){
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main)
 				}) );
 			}).then(function(){
 				if(steal.dev) {
@@ -666,7 +668,9 @@ if (typeof System !== "undefined") {
 		window.steal = makeSteal(System);
 		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
 		window.steal.addSteal = addSteal;
-		global.define = System.amdDefine;
+		
+		// I think production needs this
+		// global.define = System.amdDefine;
 		
 	} else {
     	
@@ -674,7 +678,7 @@ if (typeof System !== "undefined") {
 			
 		global.steal = makeSteal(System);
 		global.steal.System = System;
-		global.steal.dev = require("./dev.js");
+		global.steal.dev = require("./ext/dev.js");
 		steal.clone = makeSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;

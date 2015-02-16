@@ -39,7 +39,7 @@
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
-				options[optionName] = attr.value;
+				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
 		}
@@ -73,39 +73,19 @@
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
-			
-			// Override instantiate temporarily to ensure @config is loaded
-			// before System.main
-			var baseInstantiate = System.instantiate;
-			var configDeps = [];
-			System.instantiate = function(load) {
-				var loader = this;
-				if(loader.defined["@config"] && load.name !== "@config" &&
-				   configDeps.indexOf(load.name) === -1) {
-					return loader.import("@config").then(function() {
-						System.instantiate = baseInstantiate;
-						return baseInstantiate.call(loader, load);
-					});
-				}
+		if ( System.env == "production" ) {
 
-				if(load.name === "@config") {
-					return baseInstantiate.call(this, load).then(function(instantiateResult) {
-						configDeps = instantiateResult.deps.slice();
-						return instantiateResult;
-					});
-				}
-				
-				return baseInstantiate.call(this, load);
-			};
+			configDeferred = System["import"](System.configMain);
 
-			return appDeferred = System.import(System.main)["catch"](function(e){
+			return appDeferred = configDeferred.then(function(cfg){
+				return System.main ? System["import"](System.main) : cfg;
+			})["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(System.env == "development"){
+		} else if(System.env == "development" || System.env == "build"){
 
-			configDeferred = System.import("@config");
+			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
 				// If a configuration was passed to startup we'll use that to overwrite
@@ -115,16 +95,16 @@
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				if(!System.main) {
+				if(!System.main || System.env === "build") {
 					return configDeferred;
 				}
 				var main = System.main;
@@ -132,7 +112,7 @@
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main)
 				}) );
 			}).then(function(){
 				if(steal.dev) {

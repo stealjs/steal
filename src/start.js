@@ -66,7 +66,6 @@
 				hash     : m[8] || ''
 			} : null);
 		},
-		  
 		joinURIs = function(base, href) {
 			function removeDotSegments(input) {
 				var output = [];
@@ -92,4 +91,3 @@
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		};
-

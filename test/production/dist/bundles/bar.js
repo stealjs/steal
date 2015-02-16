@@ -1,7 +1,9 @@
 /*bundlesConfig*/
 System.bundles = {"bundles/bar":["bar"],"bundles/bar.css!":["bar.css!$css"]};
 /*@config*/
-System.define("@config","System.config({});",{address:"@config",metadata:{deps:[],format:"global"}});
+define("@config", [], function(){
+	System.config({});
+});
 
 define("$css",[], function(){
 	return {
