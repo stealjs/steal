@@ -52,9 +52,9 @@ define(function() {
 		this._async = async;
 		this._running = false;
 
-		this._queue = new Array(1<<16);
+		this._queue = this;
 		this._queueLen = 0;
-		this._afterQueue = new Array(1<<4);
+		this._afterQueue = {};
 		this._afterQueueLen = 0;
 
 		var self = this;
@@ -126,6 +126,7 @@ define(function(require) {
 	var format = require('../format');
 
 	return function unhandledRejection(Promise) {
+
 		var logError = noop;
 		var logInfo = noop;
 		var localConsole;
@@ -345,6 +346,7 @@ define(function() {
 	return function makePromise(environment) {
 
 		var tasks = environment.scheduler;
+		var emitRejection = initEmitRejection();
 
 		var objectCreate = Object.create ||
 			function(proto) {
@@ -811,7 +813,8 @@ define(function() {
 
 		Pending.prototype.run = function() {
 			var q = this.consumers;
-			var handler = this.join();
+			var handler = this.handler;
+			this.handler = this.handler.join();
 			this.consumers = void 0;
 
 			for (var i = 0; i < q.length; ++i) {
@@ -973,6 +976,8 @@ define(function() {
 		};
 
 		Rejected.prototype.fail = function(context) {
+			this.reported = true;
+			emitRejection('unhandledRejection', this);
 			Promise.onFatalRejection(this, context === void 0 ? this.context : context);
 		};
 
@@ -982,9 +987,10 @@ define(function() {
 		}
 
 		ReportTask.prototype.run = function() {
-			if(!this.rejection.handled) {
+			if(!this.rejection.handled && !this.rejection.reported) {
 				this.rejection.reported = true;
-				Promise.onPotentiallyUnhandledRejection(this.rejection, this.context);
+				emitRejection('unhandledRejection', this.rejection) ||
+					Promise.onPotentiallyUnhandledRejection(this.rejection, this.context);
 			}
 		};
 
@@ -994,14 +1000,14 @@ define(function() {
 
 		UnreportTask.prototype.run = function() {
 			if(this.rejection.reported) {
-				Promise.onPotentiallyUnhandledRejectionHandled(this.rejection);
+				emitRejection('rejectionHandled', this.rejection) ||
+					Promise.onPotentiallyUnhandledRejectionHandled(this.rejection);
 			}
 		};
 
 		// Unhandled rejection hooks
 		// By default, everything is a noop
 
-		// TODO: Better names: "annotate"?
 		Promise.createContext
 			= Promise.enterContext
 			= Promise.exitContext
@@ -1213,6 +1219,45 @@ define(function() {
 		}
 
 		function noop() {}
+
+		function initEmitRejection() {
+			/*global process, self, CustomEvent*/
+			if(typeof process !== 'undefined' && process !== null
+				&& typeof process.emit === 'function') {
+				// Returning falsy here means to call the default
+				// onPotentiallyUnhandledRejection API.  This is safe even in
+				// browserify since process.emit always returns falsy in browserify:
+				// https://github.com/defunctzombie/node-process/blob/master/browser.js#L40-L46
+				return function(type, rejection) {
+					return type === 'unhandledRejection'
+						? process.emit(type, rejection.value, rejection)
+						: process.emit(type, rejection);
+				};
+			} else if(typeof self !== 'undefined' && typeof CustomEvent === 'function') {
+				return (function(noop, self, CustomEvent) {
+					var hasCustomEvent = false;
+					try {
+						var ev = new CustomEvent('unhandledRejection');
+						hasCustomEvent = ev instanceof CustomEvent;
+					} catch (e) {}
+
+					return !hasCustomEvent ? noop : function(type, rejection) {
+						var ev = new CustomEvent(type, {
+							detail: {
+								reason: rejection.value,
+								key: rejection
+							},
+							bubbles: false,
+							cancelable: true
+						});
+
+						return !self.dispatchEvent(ev);
+					};
+				}(noop, self, CustomEvent));
+			}
+
+			return noop;
+		}
 
 		return Promise;
 	};
@@ -1512,8 +1557,7 @@ function logloads(loads) {
 
         // instead of load.kind, use load.isDeclarative
         load.isDeclarative = true;
-        // parse sets load.declare, load.depsList
-        loader.loaderObj.parse(load);
+        __eval(loader.loaderObj.transpile(load), __global, load);
       }
       else if (typeof instantiateResult == 'object') {
         load.depsList = instantiateResult.deps || [];
@@ -1592,12 +1636,27 @@ function logloads(loads) {
 
   // 15.2.4.7 PromiseOfStartLoadPartwayThrough absorbed into calling functions
 
+  function proceedToStepState(loader, load, stepState) {
+    var step = stepState.step;
+
+    if (step == 'locate')
+      proceedToLocate(loader, load);
+
+    else if (step == 'fetch')
+      proceedToFetch(loader, load, Promise.resolve(stepState.moduleAddress));
+
+    else {
+      console.assert(step == 'translate', 'translate step');
+      load.address = stepState.moduleAddress;
+      proceedToTranslate(loader, load, Promise.resolve(stepState.moduleSource));
+    }
+  }
+
   // 15.2.4.7.1
   function asyncStartLoadPartwayThrough(stepState) {
     return function(resolve, reject) {
       var loader = stepState.loader;
       var name = stepState.moduleName;
-      var step = stepState.step;
 
       if (loader.modules[name])
         throw new TypeError('"' + name + '" already exists in the module table');
@@ -1607,6 +1666,10 @@ function logloads(loads) {
       for (var i = 0, l = loader.loads.length; i < l; i++) {
         if (loader.loads[i].name == name) {
           existingLoad = loader.loads[i];
+
+          if(stepState.step == 'translate' && !existingLoad.source)
+            proceedToStepState(loader, existingLoad, stepState);
+
           return existingLoad.linkSets[0].done.then(function() {
             resolve(existingLoad);
           });
@@ -1623,17 +1686,7 @@ function logloads(loads) {
 
       resolve(linkSet.done);
 
-      if (step == 'locate')
-        proceedToLocate(loader, load);
-
-      else if (step == 'fetch')
-        proceedToFetch(loader, load, Promise.resolve(stepState.moduleAddress));
-
-      else {
-        console.assert(step == 'translate', 'translate step');
-        load.address = stepState.moduleAddress;
-        proceedToTranslate(loader, load, Promise.resolve(stepState.moduleSource));
-      }
+      proceedToStepState(loader, load, stepState);
     }
   }
 
@@ -1829,7 +1882,7 @@ function logloads(loads) {
   // 1. groups is an already-interleaved array of group kinds
   // 2. load.groupIndex is set when this function runs
   // 3. load.groupIndex is the interleaved index ie 0 declarative, 1 dynamic, 2 declarative, ... (or starting with dynamic)
-  function buildLinkageGroups(load, loads, groups, loader) {
+  function buildLinkageGroups(load, loads, groups) {
     groups[load.groupIndex] = groups[load.groupIndex] || [];
 
     // if the load already has a group index and its in its group, its already been done
@@ -1857,7 +1910,7 @@ function logloads(loads) {
           if (loadDep.groupIndex === undefined || loadDep.groupIndex < loadDepGroupIndex) {
 
             // if already in a group, remove from the old group
-            if (loadDep.groupIndex) {
+            if (loadDep.groupIndex !== undefined) {
               groups[loadDep.groupIndex].splice(indexOf.call(groups[loadDep.groupIndex], loadDep), 1);
 
               // if the old group is empty, then we have a mixed depndency cycle
@@ -1868,7 +1921,7 @@ function logloads(loads) {
             loadDep.groupIndex = loadDepGroupIndex;
           }
 
-          buildLinkageGroups(loadDep, loads, groups, loader);
+          buildLinkageGroups(loadDep, loads, groups);
         }
       }
     }
@@ -1907,7 +1960,7 @@ function logloads(loads) {
     var groups = [];
     var startingLoad = linkSet.loads[0];
     startingLoad.groupIndex = 0;
-    buildLinkageGroups(startingLoad, linkSet.loads, groups, loader);
+    buildLinkageGroups(startingLoad, linkSet.loads, groups);
 
     // determine the kind of the bottom group
     var curGroupDeclarative = startingLoad.isDeclarative == groups.length % 2;
@@ -2160,7 +2213,6 @@ function logloads(loads) {
     });
 
     // 26.3.3.13 realm not implemented
-    this.traceurOptions = {};
   }
 
   function Module() {}
@@ -2309,75 +2361,12 @@ function logloads(loads) {
     translate: function(load) {
       return load.source;
     },
-    parse: function(load) {
-      throw new TypeError('Loader.parse is not implemented');
-    },
     // 26.3.3.18.5
     instantiate: function(load) {
     }
   };
 
   var _newModule = Loader.prototype.newModule;
-
-
-  /*
-   * Traceur-specific Parsing Code for Loader
-   */
-  (function() {
-    // parse function is used to parse a load record
-    // Returns an array of ModuleSpecifiers
-    var traceur;
-
-    function doCompile(source, compiler, filename) {
-      try {
-        return compiler.compile(source, filename);
-      }
-      catch(e) {
-        // traceur throws an error array
-        throw e[0];
-      }
-    }
-    Loader.prototype.parse = function(load) {
-      if (!traceur) {
-        if (typeof window == 'undefined' &&
-           typeof WorkerGlobalScope == 'undefined')
-          traceur = require('traceur');
-        else if (__global.traceur)
-          traceur = __global.traceur;
-        else
-          throw new TypeError('Include Traceur for module syntax support');
-      }
-
-      console.assert(load.source, 'Non-empty source');
-
-      load.isDeclarative = true;
-
-      var options = this.traceurOptions || {};
-      options.modules = 'instantiate';
-      options.script = false;
-      options.sourceMaps = 'inline';
-      options.filename = load.address;
-
-      var compiler = new traceur.Compiler(options);
-
-      var source = doCompile(load.source, compiler, options.filename);
-
-      if (!source)
-        throw new Error('Error evaluating module ' + load.address);
-
-      var sourceMap = compiler.getSourceMap();
-
-      if (__global.btoa && sourceMap) {
-        // add "!eval" to end of Traceur sourceURL
-        // I believe this does something?
-        source += '!eval';
-      }
-
-      source = 'var __moduleAddress = "' + load.address + '";' + source;
-
-      __eval(source, __global, load);
-    }
-  })();
 
   if (typeof exports === 'object')
     module.exports = Loader;
@@ -2390,6 +2379,77 @@ function logloads(loads) {
 })();
 
 /*
+ * Traceur and 6to5 transpile hook for Loader
+ */
+(function(Loader) {
+  // Returns an array of ModuleSpecifiers
+  var transpiler, transpilerModule;
+  var isNode = typeof window == 'undefined' && typeof WorkerGlobalScope == 'undefined';
+
+  // use Traceur by default
+  Loader.prototype.transpiler = 'traceur';
+
+  Loader.prototype.transpile = function(load) {
+    if (!transpiler) {
+      if (this.transpiler == '6to5') {
+        transpiler = to5Transpile;
+        transpilerModule = isNode ? require('6to5-core') : __global.to5;
+      }
+      else {
+        transpiler = traceurTranspile;
+        transpilerModule = isNode ? require('traceur') : __global.traceur;
+      }
+      
+      if (!transpilerModule)
+        throw new TypeError('Include Traceur or 6to5 for module syntax support.');
+    }
+
+    return 'var __moduleAddress = "' + load.address + '";' + transpiler.call(this, load);
+  }
+
+  function traceurTranspile(load) {
+    var options = this.traceurOptions || {};
+    options.modules = 'instantiate';
+    options.script = false;
+    options.sourceMaps = 'inline';
+    options.filename = load.address;
+
+    var compiler = new transpilerModule.Compiler(options);
+    var source = doTraceurCompile(load.source, compiler, options.filename);
+
+    // add "!eval" to end of Traceur sourceURL
+    // I believe this does something?
+    source += '!eval';
+
+    return source;
+  }
+  function doTraceurCompile(source, compiler, filename) {
+    try {
+      return compiler.compile(source, filename);
+    }
+    catch(e) {
+      // traceur throws an error array
+      throw e[0];
+    }
+  }
+
+  function to5Transpile(load) {
+    var options = this.to5Options || {};
+    options.modules = 'system';
+    options.sourceMap = 'inline';
+    options.filename = load.address;
+    options.code = true;
+    options.ast = false;
+
+    var source = transpilerModule.transform(load.source, options).code;
+
+    // add "!eval" to end of 6to5 sourceURL
+    // I believe this does something?
+    return source + '\n//# sourceURL=' + load.address + '!eval';
+  }
+
+
+})(__global.LoaderPolyfill);/*
 *********************************************************************************************
 
   System Loader Implementation
