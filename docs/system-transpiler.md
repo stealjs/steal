@@ -1,0 +1,13 @@
+@property {String} System.transpiler
+@parent StealJS.config
+
+Specifies which transpiler to use for ES6 modules. Traceur has been around for a longer time, but 6to5 provides advantages such as a smaller overhead.
+
+@option {String=traceur} Which ES6 compiler to user to generate ES5 code. Possible values:
+
+* `traceur`: The default, uses [traceur-compiler](https://github.com/google/traceur-compiler).
+* `6to5`: Uses [Babel](https://babeljs.io/).
+
+## Implementation
+
+Provided by [ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader).
