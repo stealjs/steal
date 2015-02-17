@@ -1,10 +1,20 @@
-@property {Array.<moduleName>} System.bundle
+@property {(Array.<moduleName>|Glob)} System.bundle
 @parent StealJS.config
 
 Specifies which modules will be progressively loaded.  This is 
 used by the build.
 
 @option {Array.<moduleName>}
+
+Array of module names.
+
+@option {Glob}
+
+A glob pattern used to match module names. For example:
+
+    System.bundle = "components/*/*";
+
+Would match `components/home/home` and `components/admin/admin` but not `utils/collections/find`.
 
 @body
 
