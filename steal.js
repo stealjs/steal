@@ -5068,21 +5068,6 @@ var $__curScript, __eval;
     }
   };
 
-  // BITOVI hack to make cloning work.  
-  // original upgradeSystemLoader upgrades the global System.
-  var __upgradeSystemLoader = $__global.upgradeSystemLoader;
-  $__global.upgradeSystemLoader = function() {
-    var originalSystem = $__global.System;
-    __upgradeSystemLoader.call($__global);
-    $__global.System.clone = function() {
-    	  var currentSystem = $__global.System;
-    	  $__global.System = originalSystem;
-      var SystemClone = __upgradeSystemLoader.call($__global);
-      $__global.System = currentSystem;
-      return SystemClone;
-    };
-  };
-
   var isWorker = typeof WorkerGlobalScope !== 'undefined' &&
     self instanceof WorkerGlobalScope;
   var isBrowser = typeof window != 'undefined';
