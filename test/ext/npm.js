@@ -95,6 +95,10 @@ function convertPropertyNames (context, pkg, map , root) {
 	var clone = {};
 	for( property in map ) {
 		clone[convertName(context, pkg, map, root, property)] = map[property];
+		// do root paths b/c we don't know if they are going to be included with the package name or not.
+		if(root) {
+			clone[convertName(context, pkg, map, false, property)] = map[property];
+		}
 	}
 	return clone;
 }
@@ -240,9 +244,7 @@ var translateConfig = function(loader, packages){
 	loader.npmPaths.__default = packages[0];
 	var lib = packages[0].system && packages[0].system.directories && packages[0].system.directories.lib;
 	
-	if(lib) {
-		loader.paths["*"] = lib+"/"+"*.js";
-	}
+	
 	var setGlobalBrowser = function(globals, pkg){
 		for(var name in globals) {
 			loader.globalBrowser[name] = {
