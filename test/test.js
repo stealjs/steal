@@ -250,6 +250,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("allow truthy script options (#298)", function(){
 		makeIframe("basics/truthy_script_options.html");
 	});
+
+	asyncTest("using 6to5 as transpiler works", function(){
+		makeIFrame("6to5/site.html");
+	});
 	
 	module("json extension");
 	
