@@ -250,6 +250,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("allow truthy script options (#298)", function(){
 		makeIframe("basics/truthy_script_options.html");
 	});
+
+	asyncTest("using babel as transpiler works", function(){
+		makeIframe("babel/site.html");
+	});
 	
 	module("json extension");
 	
