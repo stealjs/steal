@@ -83,7 +83,8 @@ exports.addExtension = function(System){
 					
 					
 					if(parsedModuleName.modulePath) {
-						return utils.path.joinURIs( utils.path.addEndingSlash(root), utils.path.addJS(parsedModuleName.modulePath));
+						return utils.path.joinURIs( utils.path.addEndingSlash(root),  
+							parsedModuleName.plugin ? parsedModuleName.modulePath : utils.path.addJS(parsedModuleName.modulePath) );
 					} 
 					
 					return address;
