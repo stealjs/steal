@@ -5752,11 +5752,7 @@ if (typeof System !== "undefined") {
 				return Promise.all( map(main,function(main){
 					return System["import"](main)
 				}) );
-			}).then(function(){
-				if(steal.dev) {
-					steal.dev.log("app loaded successfully")
-				}
-			}, function(error){
+			}).then(null, function(error){
 				console.log("error",error,  error.stack);
 			});
 			return appDeferred;
