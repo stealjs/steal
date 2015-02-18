@@ -375,6 +375,8 @@ var makeSteal = function(System){
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				this.paths["@traceur"] = dirname+"/ext/traceur.js";
 				this.paths["@traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
+				this.paths["@babel"] = dirname+"/ext/babel.js";
+				this.paths["@babel-runtime"] = dirname+"/ext/babel-runtime.js";
 				
 				if(isNode) {
 					System.register("less",[], false, function(){
@@ -437,6 +439,7 @@ var makeSteal = function(System){
 		
 	};
 	
+
 	var getScriptOptions = function () {
 
 		var options = {},

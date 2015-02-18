@@ -83,7 +83,10 @@ module.exports = function (grunt) {
           {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: 'isFile'},
           {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: 'isFile'},
           {src:["bower_components/traceur-runtime/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: 'isFile'},
-          {src:["bower_components/system-bower/bower.js"], dest: "ext/bower.js", filter: 'isFile'}
+          {src:["bower_components/system-bower/bower.js"], dest: "ext/bower.js", filter: 'isFile'},
+          {src:["node_modules/babel-core/browser.js"], dest: "ext/babel.js", filter: "isFile"},
+          {src:["node_modules/babel-core/external-helpers.js"], dest: "ext/babel-runtime.js", filter: "isFile"},
+          {src:["node_modules/babel-core/browser-polyfill.js"], dest: "ext/babel-polyfill.js", filter: "isFile"},
         ]
       },
       toTest: {

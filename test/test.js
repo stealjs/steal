@@ -251,8 +251,8 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("basics/truthy_script_options.html");
 	});
 
-	asyncTest("using 6to5 as transpiler works", function(){
-		makeIFrame("6to5/site.html");
+	asyncTest("using babel as transpiler works", function(){
+		makeIframe("babel/site.html");
 	});
 	
 	module("json extension");
