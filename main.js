@@ -42,6 +42,8 @@
 		},
 		dir = function(uri){
 			var lastSlash = uri.lastIndexOf("/");
+			if(lastSlash === -1)
+				lastSlash = uri.lastIndexOf("\\");
 			if(lastSlash !== -1) {
 				return uri.substr(0, lastSlash);
 			} else {
@@ -92,8 +94,10 @@
 					href.hash;
 		};
 	var filename = function(uri){
-		var lastSlash = uri.lastIndexOf("/"),
-			matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
+		var lastSlash = uri.lastIndexOf("/");
+		if(lastSlash === -1)
+			lastSlash = uri.lastIndexOf("\\");
+		var matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
 	
@@ -290,7 +294,7 @@ var makeSteal = function(System){
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
-			this.baseURL =  (root === val ? "." : root)  +"/";
+			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
 		mainSetter = {
@@ -299,6 +303,24 @@ var makeSteal = function(System){
 				addProductionBundles.call(this);
 			}
 		};
+
+	// checks if we're running in node, then prepends the "file:" protocol if we are
+	var envPath = function(val) {
+		//next line is var we can use to check if it's running on windows. May use if specifying the "file:" protocol causes issues on *nix machines.
+		//var isInWindows = (typeof process !== "undefined" && typeof process.platform !== "undefined" && /^win/.test(process.platform));
+		if(typeof window === "undefined" && !/^file:/.test(val)) {
+			return "file:" + val;
+		}
+		return val;
+	};
+
+	var fileSetter = function(prop) {
+		return {
+			set: function(val) {
+				this[prop] = envPath(val);
+			}
+		};
+	};
 		
 	var setToSystem = function(prop){
 		return {
@@ -348,8 +370,9 @@ var makeSteal = function(System){
 				addProductionBundles.call(this);
 			}
 		},
-		baseUrl: setToSystem("baseURL"),
-		root: setToSystem("baseURL"),
+		baseUrl: fileSetter("baseURL"),
+		baseURL: fileSetter("baseURL"),
+		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
 		configPath: configSetter,
 		startId: {
@@ -361,6 +384,7 @@ var makeSteal = function(System){
 		// this gets called with the __dirname steal is in
 		stealPath: {
 			set: function(dirname, cfg) {
+				dirname = envPath(dirname);
 				var parts = dirname.split("/");
 
 				// steal keeps this around to make things easy no matter how you are using it.
@@ -401,7 +425,7 @@ var makeSteal = function(System){
 								parts.pop();
 							}
 						}
-						this.baseURL =  parts.join("/")+"/";
+						this.config({ baseURL: parts.join("/")+"/"});
 					}
 				}
 			}
@@ -436,7 +460,6 @@ var makeSteal = function(System){
 		} else {
 			System.config(cfg);
 		}
-		
 	};
 	
 

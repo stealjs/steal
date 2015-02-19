@@ -42,6 +42,8 @@
 		},
 		dir = function(uri){
 			var lastSlash = uri.lastIndexOf("/");
+			if(lastSlash === -1)
+				lastSlash = uri.lastIndexOf("\\");
 			if(lastSlash !== -1) {
 				return uri.substr(0, lastSlash);
 			} else {
