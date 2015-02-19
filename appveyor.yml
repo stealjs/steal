@@ -12,10 +12,11 @@ environment:
 install:
   - ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version)
   - npm install
+  - bower install
 
 build: off
   
 test_script:
   - node --version
   - npm --version
-  - cmd: npm test
+  - cmd: npm test-windows

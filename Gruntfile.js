@@ -117,6 +117,12 @@ module.exports = function (grunt) {
       lib: ['src/**/*.js']
     },
     testee: {
+      windows: {
+        options: {
+          browsers: ['ie']
+        },
+        src: ['test/test.html']
+      },
       tests: {
         options: {
           browsers: ['firefox']
@@ -141,6 +147,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('testee');
   
   grunt.registerTask('test', [ 'build', 'testee', 'simplemocha' ]);
+  grunt.registerTask('test-windows', [ 'build', 'testee:windows', 'simplemocha' ]);
   grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:extensions','copy:toTest' ]);
   grunt.registerTask('default', [ 'build' ]);
 };
