@@ -146,8 +146,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('testee');
   
-  grunt.registerTask('test', [ 'build', 'testee', 'simplemocha' ]);
-  grunt.registerTask('test-windows', [ 'build', 'testee:windows', 'simplemocha' ]);
+  grunt.registerTask('test', [ 'build', 'testee:tests', 'simplemocha' ]);
+  grunt.registerTask('test-windows', [ 'build', /*'testee:windows',*/ 'simplemocha' ]);
   grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:extensions','copy:toTest' ]);
   grunt.registerTask('default', [ 'build' ]);
 };
