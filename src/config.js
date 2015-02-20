@@ -63,8 +63,6 @@
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
 	var envPath = function(val) {
-		//next line is var we can use to check if it's running on windows. May use if specifying the "file:" protocol causes issues on *nix machines.
-		//var isInWindows = (typeof process !== "undefined" && typeof process.platform !== "undefined" && /^win/.test(process.platform));
 		if(typeof window === "undefined" && !/^file:/.test(val)) {
 			return "file:" + val;
 		}

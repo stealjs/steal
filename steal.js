@@ -5193,6 +5193,7 @@ var $__curScript, __eval;
 		},
 		dir = function(uri){
 			var lastSlash = uri.lastIndexOf("/");
+			//if no / slashes, check for \ slashes since it might be a windows path
 			if(lastSlash === -1)
 				lastSlash = uri.lastIndexOf("\\");
 			if(lastSlash !== -1) {
@@ -5246,6 +5247,7 @@ var $__curScript, __eval;
 		};
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
+		//if no / slashes, check for \ slashes since it might be a windows path
 		if(lastSlash === -1)
 			lastSlash = uri.lastIndexOf("\\");
 		var matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
@@ -5502,8 +5504,6 @@ if (typeof System !== "undefined") {
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
 	var envPath = function(val) {
-		//next line is var we can use to check if it's running on windows. May use if specifying the "file:" protocol causes issues on *nix machines.
-		//var isInWindows = (typeof process !== "undefined" && typeof process.platform !== "undefined" && /^win/.test(process.platform));
 		if(typeof window === "undefined" && !/^file:/.test(val)) {
 			return "file:" + val;
 		}
