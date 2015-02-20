@@ -69,6 +69,12 @@ var setPaths = function(config, bowerPath, name, main) {
 	}
 };
 
+var setMain = function(bower) {
+	if(!this._bowerMainLoaded && !this.main && bower.main) {
+		this.main = bower.main;
+	}
+};
+
 /**
  * @function fetch
  * @description Implement fetch so that we can warn the user in case of a 404.
@@ -128,8 +134,14 @@ exports.translate = function(load){
 								? bower.main : bower.main[0]);
 	// Don't set any paths for the main bower.json
 	setPaths.call(loader, config, bowerPath, name, main);
+	setMain.call(loader, bower);
 	loader._bowerMainLoaded = true;
+
+	if(config.configDependencies) {
+		amdDeps = amdDeps.concat(config.configDependencies);
+	}
 
 	return "define(" + JSON.stringify(amdDeps) + ", function(loader){\n" +
 		"loader.config(" +JSON.stringify(config, null, " ") + ");" + "\n});";
 };
+

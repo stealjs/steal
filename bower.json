@@ -7,7 +7,7 @@
     "qunit": "~1.12.0",
     "systemjs" : "bitovi/systemjs#0.14.0-bitovi.0",
     "traceur": "0.0.82",
-    "system-bower": "~0.0.1",
+    "system-bower": "~0.1.0",
 	"es6-module-loader": "~0.14.0"
   }
 }
