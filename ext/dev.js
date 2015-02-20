@@ -117,10 +117,14 @@
 			}
 		},
 		_logger:function(type, arr){
-			if(console.log.apply){
-				console[type].apply(console, arr);
-			} else {
+			if (typeof console.log == "object") {
 				console[type](arr);
+			} else {
+				if(console.log.apply){
+					console[type].apply(console, arr);
+				} else {
+					console[type](arr);
+				}
 			}
 		}
 	};
