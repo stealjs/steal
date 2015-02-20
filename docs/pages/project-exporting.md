@@ -11,7 +11,7 @@ which can be used to create distributables that can be used in almost any situat
 
 This guide uses the [steal-tools.grunt.export] task to call [steal-tools.export] which loads the module source and transpiles it to _AMD_, _CommonJS_ and _global_ compatible distributables. This guide uses the [bit-tabs](https://github.com/bitovi-components/bit-tabs) component built with CanJS, but the same techniques can be used to create and export projects that use any other framework or library.
 
-## Project Structure
+## Project Structure 
 
 The Steal export process reads the contents of the project's source directory to generate the distributables. Our `bit-tabs` example component uses the _src/_ directory.
 
@@ -31,7 +31,7 @@ bit-tabs/
 The project's `package.json` is used to configure how Browserify or Steal loads your
 project. The following walks through the important parts:
 
-### "system" property
+### "system"
 
 The `system` property specifies SystemJS and StealJS overwrites. Set the [System.main] property as follows to tell SystemJS to use `src/bit-tabs.js` as the starting point of the application. The "npmIgnore" property tells StealJS to ignore processing the package.json files of certain dependencies.
 
@@ -46,7 +46,7 @@ The `system` property specifies SystemJS and StealJS overwrites. Set the [System
 ```
 
 
-### "main" property
+### "main"
 
 CJS/Browserify and StealJS will read the `main` property when requiring your package. Set the `main` property to the CommonJS output of the export process.
 
@@ -54,7 +54,7 @@ CJS/Browserify and StealJS will read the `main` property when requiring your pac
   "main": "dist/cjs/lib/bit-tabs",
 ```
 
-### "dependencies" property
+### "dependencies"
 
 Use npm to install your project's dependencies.  If your project includes css or LESS files,
 include `cssify`.  Browserify will use it to bundle css files.
@@ -79,7 +79,7 @@ Add `steal`, `steal-tools`, `grunt`, and `grunt-cli` to your project's devDepend
   },
 ```
 
-### "browser" and "browserify" properties
+### "browser" and "browserify"
 
 Because our project will export CSS, we need to tell Browserify to 
 run "cssify" on css files with a `transform`.  To make this work
@@ -97,7 +97,7 @@ with new and old versions of Browserify you must specify both the
   },
 ```
 
-### "scripts" property
+### "scripts"
 
 Prior to publishing to `npm`, we need to build the distributables. We will create
 a grunt build job that builds our project. For now, we will create a npm script command that points to a `grunt build` task which we will create in the next step:
