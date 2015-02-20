@@ -117,13 +117,17 @@
 			}
 		},
 		_logger:function(type, arr){
-			if (typeof console.log == "object") {
-				console[type](arr);
-			} else {
-				if(console.log.apply){
-					console[type].apply(console, arr);
-				} else {
+			// test for console support
+			if (typeof console == "object") {
+				// test for console.log.apply support in IE8
+				if (typeof console.log == "object") {
 					console[type](arr);
+				} else {
+					if(console.log.apply){
+						console[type].apply(console, arr);
+					} else {
+						console[type](arr);
+					}
 				}
 			}
 		}
