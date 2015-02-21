@@ -99,8 +99,8 @@
 		}
 	};
 	
-	var isNode = typeof module != 'undefined' && module.exports;
-	var LESS_ENGINE = "less-1.7.0";
+	var isNode = typeof module !== 'undefined' && module.exports;
+	var LESS_ENGINE = "less-2.4.0";
 	
 	setterConfig(System,{
 		env: {

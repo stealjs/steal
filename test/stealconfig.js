@@ -4,7 +4,7 @@ if(typeof window === "undefined" || window.noConfig !== true)  {
 		paths: {
 			"steal/*" : "../*.js",
 			"@traceur": "../bower_components/traceur/traceur.js",
-			"less": "../less-1.7.0.js",
+			"less": "../less-1.7.1.js",
 			"pathed/pathed": "basics/pathed.js"
 		},
 		map: {
