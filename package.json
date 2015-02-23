@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "systemjs": "bitovi/systemjs#0.14.0-bitovi.0",
-    "less": "^1.7.0"
+    "less": "^2.4.0"
   },
   "devDependencies": {
     "system-npm": "bitovi/system-npm#v0.1.0",

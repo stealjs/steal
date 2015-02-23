@@ -10,7 +10,7 @@ options.optimization |= lessEngine.optimization;
 
 exports.translate = function(load) {
 	var address = load.address.replace(/^file\:/,"");
-	
+
 	var pathParts = (address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
@@ -20,18 +20,20 @@ exports.translate = function(load) {
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 		paths = [pathParts.join('/')];
 	}
+
 	return new Promise(function(resolve, reject){
 		options.filename = address;
 		options.paths = [pathParts.join('/')];
 
-		var Parser = lessEngine.Parser;
-		new Parser(options).parse(load.source, function (e, root) {
-			if(e){
-				reject(e);
-			} else {
-				resolve(root.toCSS(options));
-			}
-		});
+		var done = function(output) {
+			resolve(output.css);
+		};
+
+		var fail = function(error) {
+			reject(error);
+		};
+
+		lessEngine.render(load.source, options).then(done, fail);
 	});
 };
 
