@@ -204,3 +204,22 @@ In the following setup, `my-project/my-utils` will be looked for in
   }
 }
 ```
+
+### system.npm.configDependencies
+
+Defines dependencies of your npm package. This is useful for loading modules,
+like extensions, that need to be initialized before the rest of your application
+is imported. For example you can use both npm and [bower] dependencies by setting
+your `bower.json` as a configDependency:
+
+```js
+
+{
+  "name": "my-project",
+  "system": {
+    "configDependencies": [
+      "bower.json!bower"
+    ]
+  }
+}
+```
