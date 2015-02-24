@@ -1,165 +1,129 @@
 @page StealJS.project-exporting Project Exporting
 @parent StealJS.guides 2
 
-Learn how to use StealJS to export your project into commonly used
-formats and platforms.
+StealJS can export your project into commonly used formats and platforms
+which can be used to create distributables that can be used in almost any situation:
 
-Steal and steal-tools can be used to create a distributable that can
-be used in almost any situation:
-
- - [syntax.global global format] and `<script>` tags
- - [syntax.CommonJS] and NPM for [Browserify](http://browserify.org/)
  - [syntax.amd] and Bower
+ - [syntax.CommonJS] and NPM for [Browserify](http://browserify.org/)
  - [syntax.es6 ES Syntax] and StealJS, SystemJS, or JSPM
+ - [syntax.global global format] and `<script>` tags
 
-This guide creates a `can-tabs` plugin with [CanJS](http://canjs.com) that can 
-be found at [https://github.com/bitovi-components/can-tabs](https://github.com/bitovi-components/can-tabs).
+This guide uses the [steal-tools.grunt.export] task to call [steal-tools.export] which loads the module source and transpiles it to _AMD_, _CommonJS_ and _global_ compatible distributables. This guide uses the [bit-tabs](https://github.com/bitovi-components/bit-tabs) component built with CanJS, but the same techniques can be used to create and export projects that use any other framework or library.
 
-Although the example uses CanJS, the same techniques can be used to create and export projects that use any other
-framework or library.
+## Project Structure 
 
+The Steal export process reads the contents of the project's source directory to generate the distributables. Our `bit-tabs` example component uses the _src/_ directory.
 
-## Project Structure
-
-Our project will have the following folders:
-
+> Create `src/` and create the main entry-point in `src/bit-tabs.js`. The `dist/` and the subdirectories will be created by export process
 ```
-can-tabs/
-  /dist       - non CJS/Browserify builds 
+bit-tabs/
+  /dist
   	/amd      - AMD build
+  	/cjs	  - CJS/Browserify builds
   	/global   - Global / <script> build
-	
-  /lib        - The CJS/Browserify build 
-
   /src        - Source files
-    /lib      - Source files needed to be distributed 
-	/test     - Test source files
+  /test       - Test source files
 ```
-
-The contents of _src/lib_ will be read and used to build out the _dist/amd_, _dist/global_ and _lib_ folders.
-
-This structure allows a single package to be used in all the situations above. When 
-[Browserify adds more powerful mapping behavior](https://github.com/substack/node-resolve/issues/62), the 
-CJS distributable will be able to be placed anywhere, enabling more flexibility.
-
-> Create `src/lib` and `src/test`.
-
-For our example, the "main" entrypoint of this package will be _src/lib/can-tabs.js_.  
-
-> Create the main entrypoint of the application in _src/lib_.
-
 
 ## package.json
 
-Your project's `package.json` is used to conigure how Browserify or Steal loads your 
+The project's `package.json` is used to configure how Browserify or Steal loads your
 project. The following walks through the important parts:
 
-### system
+### "system"
 
-The "system" property specifies SystemJS and StealJS overwrites. By
-setting the "directories.lib" property, we tell SystemJS
-to look in the _can-tabs/src_ for any modules.  This means that `import "can-tabs/lib/can-tabs"`
-will look in _can-tabs/src/lib/can-tabs_.
+The `system` property specifies SystemJS and StealJS overwrites. Set the [System.main] property as follows to tell SystemJS to use `src/bit-tabs.js` as the starting point of the application. The "npmIgnore" property tells StealJS to ignore processing the package.json files of certain dependencies.
 
-The "npmIgnore" property tells SystemJS to ignore processing certain dependencies's
-package.jsons.
+> In the system property, create a "main" property that points to the main entry-point. And,
+> set "npmIgnore" to ignore dependencies that aren't needed by the browser.
 
 ```
   "system": {
-    "directories" : {
-      "lib": "src"
-    },
-    "npmIgnore": ["cssify","devDependencies"]
+    "main": "src/bit-tabs",
+    "npmIgnore": ["devDependencies"]
   },
 ```
 
-> Create a "system" property that points "directories.lib" to where SystemJS should find code. And,
-> set "npmIgnore" to ignore dependencies that aren't needed by the browser.
 
-### main
+### "main"
 
-CJS/Browserify and StealJS will read the `main` property when someone require's your package.
+CJS/Browserify and StealJS will read the `main` property when requiring your package. Set the `main` property to the CommonJS output of the export process.
 
 ```
-  "main": "lib/can-tabs",
+  "main": "dist/cjs/lib/bit-tabs",
 ```
 
-Because of the "system.directories.lib" setting, StealJS will look in _can-tabs/src/lib/can-tabs.js_, while
-Browserify will look in _can-tabs/lib/can-tabs.js_
-
-> Point "main" at the entrypoint of your package.
-
-
-### dependencies
+### "dependencies"
 
 Use npm to install your project's dependencies.  If your project includes css or LESS files,
 include `cssify`.  Browserify will use it to bundle css files.
 
 ```
   "dependencies": {
-    "canjs": "2.2.0-alpha.8",
-    "jquery": ">1.9.0",
+    "can": "2.2.0-alpha.10",
     "cssify": "^0.6.0"
-  }
+  },
 ```
 
 Add `steal`, `steal-tools`, `grunt`, and `grunt-cli` to your project's devDependencies:
+
+> Add your project's dependencies to _package.json_.
 
 ```
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
-    "steal": "0.5.0-pre.3",
-    "steal-tools": "0.5.0-pre.8"
+    "steal": "0.6.0-pre.0",
+    "steal-tools": "0.6.0-pre.2"
   },
 ```
 
-> Add your project's dependencies to _package.json_.
-
-### browser and browserify
+### "browser" and "browserify"
 
 Because our project will export CSS, we need to tell Browserify to 
 run "cssify" on css files with a `transform`.  To make this work
 with new and old versions of Browserify you must specify both the 
 "browser" and "browserify" properties.
 
+> Specify Browserify transforms.
+
 ```
   "browser": {
-    "transform": [ "cssify" ]
+    "transform": ["cssify"]
   },
   "browserify": {
     "transform": ["cssify"]
   },
 ```
 
-> Specify Browserify transforms.
+### "scripts"
 
-### scripts
+Prior to publishing to `npm`, we need to build the distributables. We will create
+a grunt build job that builds our project. For now, we will create a npm script command that points to a `grunt build` task which we will create in the next step:
 
-Finally, prior to publishing to `npm`, we will want to make sure
-our project is built. In the next step, we will create
-a grunt build step that builds our project. For now,
-we point at a grunt task that doesn't exist: 
+> Create "prepublish" script command which points to `grunt build`.
 
 ```
   "scripts": {
+    "test": "grunt test --stack",
     "prepublish": "./node_modules/.bin/grunt build"
-  }
+  },
 ```
 
-> Set "prepublish" to build the distributables.
+
 
 ## Gruntfile.js
 
-We use [Grunt](http://gruntjs.com/) for task automation. If Grunt isn't
-your thing, you can use [steal-tools.export steal-tool's export] method
-programatically. Create a _Gruntfile.js_ that looks like the following:
+Finally, we use [Grunt](http://gruntjs.com/) for task automation. If Grunt isn't your thing, you can use [steal-tools.export steal-tool's export] method.
+
+> Create a _Gruntfile.js_ that looks like the following code block.
 
 ```
 module.exports = function (grunt) {
 
 	grunt.loadNpmTasks('steal-tools');
-	
+
 	grunt.initConfig({
 		"steal-export": {
 			dist: {
@@ -167,7 +131,7 @@ module.exports = function (grunt) {
 					config: "package.json!npm"
 				},
 				outputs: {
-					"+cjs": {dest: __dirname},
+					"+cjs": {},
 					"+amd": {},
 					"+global-js": {},
 					"+global-css": {}
@@ -179,10 +143,8 @@ module.exports = function (grunt) {
 };
 ```
 
-This uses the [steal-tools.grunt.export] task to export your project's main module
-and its dependencies to CommonJS, AMD, and a global export that works with plain `<script>` tags.
+The [steal-tools.grunt.export] grunt task above loads modules and transpiles them to CommonJS, AMD, and a global distributables. The [steal-tools.grunt.export] task requires a [steal-tools.SystemConfig]. In this example, `system.config` points to the `package.json` file which will hold the export configuration.
 
-> Create a _Gruntfile.js_ that looks like the previous code block.
 
 ## Publishing
 
@@ -192,13 +154,18 @@ To generate your project, run:
 > npm run pre-publish
 ```
 
-This should create the `dist/amd`, `dist/global`, and `lib` folders
-with the files needed to use your project with AMD, `<script>` tags, and
-CommonJS respectively. 
+If you have `grunt-cli` installed you can alternatively call grunt directly.
+
+
+```
+> grunt build
+```
+
+This should create the `dist/amd`, `dist/cjs` and `dist/global` directories
+with the files needed to use your project AMD, CommonJS and  `<script>` tags respectively.
 
 For now, you should inspect these files and make sure they work. Eventually,
-we might release helpers that make it easy to test your 
-distributables.
+we may release helpers that make it easy to test your distributables.
 
 ### To NPM
 
@@ -210,48 +177,42 @@ Run:
 
 ### To Bower
 
-The first time you publish, you must regsiter your project and
-create a bower.json.
+The first time you publish, you must regisiter your project and create a bower.json.
 
 Register your project's name:
 
 ```
-> bower register can-tabs git://github.com/bitovi-components/can-tabs
+> bower register bit-tabs git://github.com/bitovi-components/bit-tabs
 ```
 
 Create a [bower.json](https://github.com/bower/bower.json-spec#name). The
-easist thing to do is copy your `package.json` and remove any node 
+easiest thing to do is copy your `package.json` and remove any node
 specific values. 
 
 ```
 {
-  "name": "can-tabs",
-  "version": "0.0.1-alpha.9",
+  "name": "bit-tabs",
+  "version": "0.0.1",
   "description": "",
-  "main": "lib/can-tabs",
+  "main": "dist/cjs/lib/bit-tabs",
   "dependencies": {
-    "canjs": "2.2.0-alpha.8",
-    "jquery": ">1.9.0",
+      "can": "2.2.0-alpha.10",
+      "cssify": "^0.6.0"
   },
   "system": {
-    "directories" : {
-      "lib": "src"
-    },
-    "main": "lib/can-tabs"
-  }
+      "main": "src/bit-tabs",
+      "npmIgnore": ["testee","cssify"]
+  },
 }
 ```
 
 Once bower is setup, publishing to bower just means pushing a 
-[semver](http://semver.org/) tag to github that matches
-your project's version.
+[semver](http://semver.org/) tag to github that matches your project's version.
 
 ```
-> git tag v0.0.1-alpha.9
-> git push origin tag v0.0.1-alpha.9
+> git tag v0.0.1
+> git push origin tag v0.0.1
 ```
-
-
 
 ## Importing the Export
 
@@ -263,9 +224,9 @@ depending on how they are using your project.
 Simply import, require, or use define to load your project.
 
 ```
-import "can-tabs";
-require("can-tabs");
-define(["can-tabs"], function(){});
+import "bit-tabs";
+require("bit-tabs");
+define(["bit-tabs"], function(){});
 ```
 
 
@@ -274,7 +235,7 @@ define(["can-tabs"], function(){});
 Simply require your project.
 
 ```
-require("can-tabs")
+require("bit-tabs")
 ```
 
 ### AMD
@@ -284,9 +245,9 @@ They must configure your project as a package:
 ```
 require.config({
 	    packages: [{
-		    	name: 'can-tabs',
-		    	location: 'path/to/can-tabs/dist/amd',
-		    	main: 'lib/can-tabs'
+		    	name: 'bit-tabs',
+		    	location: 'path/to/bit-tabs/dist/amd',
+		    	main: 'dist/amd/src/bit-tabs'
 	    }]
 });
 ```
@@ -294,7 +255,7 @@ require.config({
 And then they can use it as a dependency:
 
 ```
-define(["can-tabs"], function(){
+define(["bit-tabs"], function(){
 
 });
 ```
@@ -305,11 +266,33 @@ They should add script tags for the dependencies and your project and a link
 tag for your project's css:
 
 ```
-<link rel="stylesheet" type="text/css" 
-      href="./node_modules/can-tabs/dist/global/can-tabs.css">
-      
-<script src='./node_modules/jquery/dist/jquery.js'></script>
-<script src='./node_modules/canjs/dist/can.jquery.js'></script>
-<script src='./node_modules/canjs/dist/can.stache.js'></script>
-<script src='./node_modules/can-tabs/dist/global/can-tabs.js'></script>
+	<head lang="en">
+		<link rel="stylesheet" type="text/css" href="dist/global/bit-tabs.css">
+
+		<script src='./node_modules/jquery/dist/jquery.js'></script>
+		<script src='./node_modules/can/dist/can.jquery.js'></script>
+		<script src='./node_modules/can/dist/can.stache.js'></script>
+		<script src='dist/global/bit-tabs.js'></script>
+		<script>
+			$(function(){
+				var frag = can.view("app-template", {});
+				$("#my-app").html(frag);
+			})
+		</script>
+	</head>
+	<body>
+
+	<script type='text/stache' id="app-template">
+	  <can-import from="bit-tabs"/>
+	  <bit-tabs>
+		<can-panel title="CanJS">
+		  CanJS provides the MV*
+		</can-panel>
+		<can-panel title="StealJS">
+		  StealJS provides the infrastructure.
+		</can-panel>
+	  </bit-tabs>
+	</script>
+
+	<div id="my-app"></div>
 ```
