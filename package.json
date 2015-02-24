@@ -8,7 +8,8 @@
     "web": "http://bitovi.com/"
   },
   "scripts": {
-    "test": "grunt test --stack"
+    "test": "grunt test --stack",
+	"test-windows": "grunt test-windows --stack"
   },
   "dependencies": {
     "systemjs": "bitovi/systemjs#0.14.0-bitovi.0",
@@ -29,7 +30,7 @@
     "grunt-simple-mocha": "^0.4.0",
     "testee": "0.1.1",
     "jquery": ">2.0",
-	"babel-core": "~4.1.1"
+    "babel-core": "~4.1.1"
   },
   "system": {
     "npmIgnore": ["less"]

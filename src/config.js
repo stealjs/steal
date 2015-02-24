@@ -51,7 +51,7 @@
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
-			this.baseURL =  (root === val ? "." : root)  +"/";
+			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
 		mainSetter = {
@@ -60,6 +60,22 @@
 				addProductionBundles.call(this);
 			}
 		};
+
+	// checks if we're running in node, then prepends the "file:" protocol if we are
+	var envPath = function(val) {
+		if(typeof window === "undefined" && !/^file:/.test(val)) {
+			return "file:" + val;
+		}
+		return val;
+	};
+
+	var fileSetter = function(prop) {
+		return {
+			set: function(val) {
+				this[prop] = envPath(val);
+			}
+		};
+	};
 		
 	var setToSystem = function(prop){
 		return {
@@ -109,8 +125,9 @@
 				addProductionBundles.call(this);
 			}
 		},
-		baseUrl: setToSystem("baseURL"),
-		root: setToSystem("baseURL"),
+		baseUrl: fileSetter("baseURL"),
+		baseURL: fileSetter("baseURL"),
+		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
 		configPath: configSetter,
 		startId: {
@@ -122,6 +139,7 @@
 		// this gets called with the __dirname steal is in
 		stealPath: {
 			set: function(dirname, cfg) {
+				dirname = envPath(dirname);
 				var parts = dirname.split("/");
 
 				// steal keeps this around to make things easy no matter how you are using it.
@@ -162,7 +180,7 @@
 								parts.pop();
 							}
 						}
-						this.baseURL =  parts.join("/")+"/";
+						this.config({ baseURL: parts.join("/")+"/"});
 					}
 				}
 			}
@@ -197,6 +215,5 @@
 		} else {
 			System.config(cfg);
 		}
-		
 	};
 	
