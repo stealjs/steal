@@ -5519,7 +5519,7 @@ if (typeof System !== "undefined") {
 		if(this.env === "production" && this.main) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
-				mainBundleName = bundlesDir+filename(main);
+				mainBundleName = bundlesDir+main;
 				
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
 			
