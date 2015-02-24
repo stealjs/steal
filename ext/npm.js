@@ -60,7 +60,9 @@ exports.translate = function(load){
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
 		});
-		return "define(['@loader','npm-extension'], function(loader, npmExtension){\n" +
+		var configDependencies = ['@loader','npm-extension'].concat(packageDependencies(pkg));
+
+		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension){\n" +
 			"npmExtension.addExtension(loader);\n"+
 		    (pkg.main ? "if(!System.main){ System.main = "+JSON.stringify(utils.pkg.main(pkg))+"; }\n" : "") + 
 			"("+translateConfig.toString()+")(loader, "+JSON.stringify(packages, null, " ")+");\n" +
@@ -221,6 +223,13 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
 }
 
+// Dependencies from a package.json file specified in `system.configDependencies`
+function packageDependencies(pkg) {
+	if(pkg.system && pkg.system.configDependencies) {
+		return pkg.system.configDependencies;
+	}
+	return [];
+}
 
 
 var translateConfig = function(loader, packages){

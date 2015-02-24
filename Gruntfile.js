@@ -95,8 +95,9 @@ module.exports = function (grunt) {
           {expand: true, src: core, dest: 'test/steal/', filter: 'isFile'},
           {expand: true, src: core, dest: 'test/bower_components/steal/', filter: 'isFile'},
           {expand: true, src: core, dest: 'test/npm/node_modules/steal/', filter: 'isFile'},
+		  {expand: true, src: core, dest: 'test/npm/bower/node_modules/steal/', filter: 'isFile'},
           {expand: true, src: core, dest: 'test/bower/bower_components/steal/', filter: 'isFile'},
-          
+          {expand: true, src: core, dest: 'test/bower/npm/bower_components/steal/', filter: 'isFile'},
           {expand: true, src: ['node_modules/jquery/**'], dest: 'test/npm/', filter: 'isFile'},
 		  {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower_components/system-bower/', filter: 'isFile'},
           {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/bower_components/system-bower/', filter: 'isFile'},

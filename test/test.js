@@ -275,10 +275,9 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("npm/prod.html");
 	});
 
-	
-
-
-
+	asyncTest("with bower", function(){
+		makeIframe("npm/bower/index.html");
+	});
 
 	module("Bower extension");
 
@@ -295,6 +294,9 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Loads config automatically", function(){
 		makeIframe("bower/default-config.html");
 	});
-	
+
+	asyncTest("with npm", function(){
+		makeIframe("bower/npm/index.html");
+	});
 
 })();
