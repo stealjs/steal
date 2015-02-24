@@ -18,7 +18,7 @@ exports.addExtension = function(System){
 	 */
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
-		
+
 		// Get the current package
 		var refPkg = utils.pkg.findByModuleNameOrAddress(this, parentName, parentAddress);
 		
@@ -46,7 +46,7 @@ exports.addExtension = function(System){
 			}
 		}
 		
-		if( depPkg && depPkg !== this.npmPaths.__default ) {
+		if( depPkg ) {
 			parsedModuleName.version = depPkg.version;
 			// add the main path
 			if(!parsedModuleName.modulePath) {
@@ -70,9 +70,9 @@ exports.addExtension = function(System){
 	
 	var oldLocate = System.locate;
 	System.locate = function(load){
+		
 		var parsedModuleName = utils.moduleName.parse(load.name),
 			loader = this;
-		
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm) {
 			var pkg = this.npm[parsedModuleName.packageName];
@@ -83,7 +83,8 @@ exports.addExtension = function(System){
 					
 					
 					if(parsedModuleName.modulePath) {
-						return utils.path.joinURIs( utils.path.addEndingSlash(root), utils.path.addJS(parsedModuleName.modulePath));
+						return utils.path.joinURIs( utils.path.addEndingSlash(root),  
+							parsedModuleName.plugin ? parsedModuleName.modulePath : utils.path.addJS(parsedModuleName.modulePath) );
 					} 
 					
 					return address;
