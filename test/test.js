@@ -127,7 +127,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("basics", function(){
 		makeIframe("basics/basics.html");
 	});
-	
+
 	asyncTest("basics with steal.config backwards compatability", function(){
 		makeIframe("basics/basics-steal-config.html");
 	});
@@ -195,6 +195,7 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("dep_plugins/site.html");
 	});
 
+
 	asyncTest("Using path's * qualifier", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
@@ -242,11 +243,11 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("set options to less plugin", function(){
 		makeIframe("less_options/site.html");
 	});
-	
+
 	asyncTest("Loads traceur-runtime automatically", function(){
 		makeIframe("traceur_runtime/dev.html");
 	});
-	
+
 	asyncTest("allow truthy script options (#298)", function(){
 		makeIframe("basics/truthy_script_options.html");
 	});
@@ -254,23 +255,23 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("using babel as transpiler works", function(){
 		makeIframe("babel/site.html");
 	});
-	
+
 	module("json extension");
-	
+
 	asyncTest("json extension", function(){
 		makeIframe("json/dev.html");
 	});
-	
+
 	module("npm");
-	
+
 	asyncTest("defaut-main", function(){
 		makeIframe("npm/default-main.html");
 	});
-	
+
 	asyncTest("alt-main", function(){
 		makeIframe("npm/alt-main.html");
 	});
-	
+
 	asyncTest("production", function(){
 		makeIframe("npm/prod.html");
 	});
@@ -278,6 +279,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("with bower", function(){
 		makeIframe("npm/bower/index.html");
 	});
+
+
+
+
 
 	module("Bower extension");
 
@@ -290,7 +295,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Works in place of @config", function(){
 		makeIframe("bower/as_config/site.html");
 	});
-	
+
 	asyncTest("Loads config automatically", function(){
 		makeIframe("bower/default-config.html");
 	});
