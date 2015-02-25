@@ -225,6 +225,10 @@ var utils = {
 			if(loader.npm && !utils.path.startsWithDotSlash(name)) {
 				return loader.npm[name];
 			}
+		},
+		hasDirectoriesLib: function(pkg) {
+			var system = pkg.system;
+			return system && system.directories && !!system.directories.lib;
 		}
 	},
 	path: {

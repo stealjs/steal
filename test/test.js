@@ -264,7 +264,7 @@ QUnit.config.testTimeout = 30000;
 
 	module("npm");
 
-	asyncTest("defaut-main", function(){
+	asyncTest("default-main", function(){
 		makeIframe("npm/default-main.html");
 	});
 
