@@ -61,10 +61,13 @@ exports.translate = function(load){
 			}
 		});
 		var configDependencies = ['@loader','npm-extension'].concat(packageDependencies(pkg));
+		var pkgMain = utils.pkg.hasDirectoriesLib(pkg) ?
+			convertName(context, pkg, false, true, pkg.name+"/"+utils.pkg.main(pkg)) :
+			utils.pkg.main(pkg);
 
 		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension){\n" +
 			"npmExtension.addExtension(loader);\n"+
-		    (pkg.main ? "if(!System.main){ System.main = "+JSON.stringify(utils.pkg.main(pkg))+"; }\n" : "") + 
+		    (pkg.main ? "if(!loader.main){ loader.main = "+JSON.stringify(pkgMain)+"; }\n" : "") + 
 			"("+translateConfig.toString()+")(loader, "+JSON.stringify(packages, null, " ")+");\n" +
 		"});";
 	});
@@ -95,7 +98,7 @@ function convertPropertyNames (context, pkg, map , root) {
 		return map;
 	}
 	var clone = {};
-	for( property in map ) {
+	for(var property in map ) {
 		clone[convertName(context, pkg, map, root, property)] = map[property];
 		// do root paths b/c we don't know if they are going to be included with the package name or not.
 		if(root) {
@@ -111,7 +114,7 @@ function convertPropertyNamesAndValues (context, pkg, map , root) {
 		return map;
 	}
 	var clone = {};
-	for( property in map ) {
+	for(var property in map ) {
 		clone[convertName(context, pkg, map, root, property)] = convertName(context, pkg, map, root, map[property]);
 	}
 	return clone;
@@ -132,12 +135,11 @@ function convertName (context, pkg, map, root, name) {
 		return utils.moduleName.create(parsed);
 		
 	} else {
-		
-		if(root && property.substr(0,2) === "./" ) {
-			return property.substr(2);
+		if(root && name.substr(0,2) === "./" ) {
+			return name.substr(2);
 		} else {
 			// this is for a module within the package
-			if (property.substr(0,2) === "./" ) {
+			if (name.substr(0,2) === "./" ) {
 				return utils.moduleName.create({
 					packageName: pkg.name,
 					modulePath: name,
@@ -294,5 +296,3 @@ var translateConfig = function(loader, packages){
 		loader.npmPaths[pkgAddress] = pkg;
 	});
 };
-
-

@@ -45,7 +45,14 @@ exports.addExtension = function(System){
 				depPkg = utils.pkg.findByName(this, parsedModuleName.packageName);
 			}
 		}
-		
+		// It could be the root main.
+		if(!depPkg && refPkg === this.npmPaths.__default && name === refPkg.main &&
+		  utils.pkg.hasDirectoriesLib(refPkg)) {
+			parsedModuleName.version = refPkg.version;
+			parsedModuleName.packageName = refPkg.name;
+			parsedModuleName.modulePath = utils.pkg.main(refPkg);
+			return oldNormalize.call(this, utils.moduleName.create(parsedModuleName), parentName, parentAddress);
+		}
 		if( depPkg ) {
 			parsedModuleName.version = depPkg.version;
 			// add the main path
