@@ -23,7 +23,7 @@ Within the BASE folder, use [npm](https://www.npmjs.org/) to install steal, stea
 	> npm install steal steal-tools  --save-dev
     > npm install grunt jquery --save-dev
 
-If you already have a webserver running locally, you can skip this step. If you don't have a web server, install this simple zero-configuration command-line [http-server](simple zero-configuration command-line http server) to help you get started.
+If you already have a webserver running locally, you can skip this step. If you don't have a web server, install this simple zero-configuration command-line [http-server](https://www.npmjs.com/package/http-server) to help you get started.
 
     > npm install http-server -g
 
@@ -93,7 +93,7 @@ Starting up http-server, serving ./ on: http://0.0.0.0:8080
 Hit CTRL-C to stop the server
 ```
 
-Open `http://localhost:8080/index.html` in the browser. You should see a big "Hello World". Open the Network tab in developer tools and you'll see several files including `main.js` were loaded.
+Open [http://localhost:8080/index.html](http://localhost:8080/index.html) in the browser. You should see a big "Hello World". Open the Network tab in developer tools and you'll see several files including `main.js` were loaded.
 
 ### Build Process
 
@@ -135,5 +135,5 @@ Change `index.html` to look like:
 
 ### Run in production
 
-Open `http://localhost:8080/index.html` in the browser. You should see a big "Hello World". Check
+Open [http://localhost:8080/index.html](http://localhost:8080/index.html) in the browser. You should see a big "Hello World". Check
 the network tab again, you will see only two scripts load. The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into `main.js`. 
