@@ -163,6 +163,19 @@ To __test__, run:
 
         > mocha test/test.js
 
+### Windows
+
+Note that if you are using Windows you first need to install a couple of things before
+you `npm install`.
+
+1. Install [Python 2.7](https://www.python.org/download/releases/2.7/). You'll want
+to add the directory to your PATHS (likely `C:\Python27`).
+
+2. Install [Microsoft Build Tools](http://www.microsoft.com/en-us/download/details.aspx?id=40760)
+or [Visual Studio Express 2013](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-desktop)
+depending on which version of Windows you are using. Try the Build Tools but
+VSE might be needed.
+
 ## Understanding steal-tools code
 
 On a high level, [steal-tools steal-tools] uses `lib/trace.js` to 
@@ -265,7 +278,7 @@ website.  To edit the docs:
   
 6. Regenerate site and check changes
 
-        > node build.js
+        > ./node_modules/.bin/documentjs
 
 7. Checkin and push markdown changes to steal or steal-tools.
 8. Checkin and push gh-pages branch changes.  
