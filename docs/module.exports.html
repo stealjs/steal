@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,20 +51,18 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
-		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog">Blog</a></li>
-						<li><a href="http://bitovi.com/development">Development</a></li>
-						<li><a href="http://bitovi.com/design">Design</a></li>
-						<li><a href="http://bitovi.com/training">Training</a></li>
-						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
-						<li><a href="http://bitovi.com/about">About</a></li>
-						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -110,7 +108,7 @@
 			<div class="heading">
 <h1>module.exports</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>constructor</li>
 	</ul>
 	
 	
@@ -156,7 +154,7 @@ information.</p>
 		
 		
 			<section class="signature">
-				<h2 id="sig_">function(node)
+				<h2 id="sig_">new StealJS.exports(graph)
 </h2>
 <div class="signature-wrapper">
 <p>Creating a mapping from pre-normalized dependency names to the normalized version.
@@ -169,8 +167,8 @@ information.</p>
 	<ol class="parameters">
 		
 		<li class="parameter">
-			<h4>node
-				<code>{*}</code></h4>
+			<h4>graph
+				<code>{Object}</code></h4>
 			<div class="description">
 				
 			</div>
@@ -192,10 +190,6 @@ information.</p>
 		
 		
 
-		
-		<section class="comment">
-			
-		</section>
 		
 		
 
@@ -219,23 +213,23 @@ information.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"module.exports","params":[{"name":"node","types":[{"type":"*"}]}],"parent":"steal-tools/lib/node/dependency_map.js","src":"steal-tools/lib/node/dependency_map.js","line":1,"codeLine":7,"description":"Creating a mapping from pre-normalized dependency names to the normalized version.\nSave the mapping as `dependencyMap` on the node itself. Transpile will use this\ninformation.","method":"stealTools.node.dependencyMap","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+
 	</script>
+	<script type='text/javascript' 
+			data-main="static"
 	
+		src="./static/steal.production.js"
 	
-		<script>
-		  steal = {
-		    instantiated: {
-		      "bundles/static.css!$css" : null
-		    }
-		  }
-		</script>
-		<script type='text/javascript' 
-				data-main="static"
-				data-config="./static/config.js"
-				src="./static/steal.production.js"
-		    		bundles-path="bundles"></script>
-	
+	    bundles-path="bundles"
+		></script>
 </body>
 
 </html>

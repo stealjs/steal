@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,20 +51,18 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
-		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog">Blog</a></li>
-						<li><a href="http://bitovi.com/development">Development</a></li>
-						<li><a href="http://bitovi.com/design">Design</a></li>
-						<li><a href="http://bitovi.com/training">Training</a></li>
-						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
-						<li><a href="http://bitovi.com/about">About</a></li>
-						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -457,6 +455,17 @@ sure you have NodeJS installed. Then:</p>
 <p>To <strong>test</strong>, run:</p>
 <pre><code>    &gt; mocha test/test.js
 </code></pre>
+<h3>Windows</h3>
+<p>Note that if you are using Windows you first need to install a couple of things before
+you <code>npm install</code>.</p>
+<ol>
+<li><p>Install <a href="https://www.python.org/download/releases/2.7/">Python 2.7</a>. You'll want
+to add the directory to your PATHS (likely <code>C:\Python27</code>).</p></li>
+<li><p>Install <a href="http://www.microsoft.com/en-us/download/details.aspx?id=40760">Microsoft Build Tools</a>
+or <a href="http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-desktop">Visual Studio Express 2013</a>
+depending on which version of Windows you are using. Try the Build Tools but
+VSE might be needed.</p></li>
+</ol>
 <h2>Understanding steal-tools code</h2>
 <p>On a high level, <a href="steal-tools.html">steal-tools</a> uses <code>lib/trace.js</code> to
 figure out all of the
@@ -546,7 +555,7 @@ website.  To edit the docs:</p>
 </code></pre></li>
 <li><p>Edit markdown files in <code>steal/docs</code> or <code>steal-tools/doc</code></p></li>
 <li><p>Regenerate site and check changes</p>
-<pre><code> &gt; node build.js
+<pre><code> &gt; ./node_modules/.bin/documentjs
 </code></pre></li>
 <li><p>Checkin and push markdown changes to steal or steal-tools.</p></li>
 <li><p>Checkin and push gh-pages branch changes.</p></li>
@@ -576,23 +585,23 @@ website.  To edit the docs:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"guides.Contributing","src":"steal/docs/pages/contributing.md","description":"Thank you for contributing!","title":"Contributing","parent":"StealJS.guides","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+
 	</script>
+	<script type='text/javascript' 
+			data-main="static"
 	
+		src="./static/steal.production.js"
 	
-		<script>
-		  steal = {
-		    instantiated: {
-		      "bundles/static.css!$css" : null
-		    }
-		  }
-		</script>
-		<script type='text/javascript' 
-				data-main="static"
-				data-config="./static/config.js"
-				src="./static/steal.production.js"
-		    		bundles-path="bundles"></script>
-	
+	    bundles-path="bundles"
+		></script>
 </body>
 
 </html>

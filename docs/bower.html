@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - $css</title>
+	<title>StealJS  - bower</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -367,7 +367,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="$css.html" data-search="$css">
 						$css
 					</a>
@@ -439,7 +439,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="module" href="bower.html" data-search="bower">
 						bower
 					</a>
@@ -608,9 +608,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>$css</h1>
+<h1>bower</h1>
 	<ul class="tags">
-		<li>typedef</li>
+		<li>module</li>
 	</ul>
 	
 	
@@ -619,7 +619,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Object}</code></h2>
+	<h2><code>{*}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -647,44 +647,39 @@
 
 		
 			
-			<section class='primary-options'>
-				
-
-  <h2 id="sig_">Object
+				<section class="signature">
+					<h2 id="sig_moduleName_bower">moduleName!bower
 </h2>
 <div class="signature-wrapper">
 
 
+	<h3>Parameters</h3>
 
-
-
-
-  <h3>Properties</h3>
-  
-  <ol class="parameters">
-	
-	<li class="parameter">
-		<h4>
-			<code>{Object}</code></h4>
-		<div class="description">
-			<p>The <code>$css</code> module is configured to process CSS modules.  By default,
-extensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>
-module is <code>steal/css.js</code>.</p>
-
-		</div>
+	<ol class="parameters">
 		
+		<li class="parameter">
+			<h4>moduleName
+				<code>{<a href="moduleName.html" >moduleName</a>}</code></h4>
+			<div class="description">
+				<p>The moduleName of the bower configuration file to
+process, usually <code>bower.json</code>.</p>
+
+			</div>
+			
+			
+			
+		</li>
 		
-		
-	</li>
-	
-</ol>
+	</ol>
+
+
+
+
 
 
 </div>
 
-  
-
-			</section>
+				</section>
 			
 		
 		
@@ -694,8 +689,53 @@ module is <code>steal/css.js</code>.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>Specify a CSS dependency like:</p>
-<pre><code>require(&quot;my.css!&quot;);
+<p>The <code>bower</code> plugin makes it easy to work in projects that use a lot of Bower dependencies.
+Instead of configuring each package individually you can use your <code>bower.json</code>
+file in place of the <a href="System.configMain.html">System.configMain</a> and all of your dependencies will be
+pre-configured for you.</p>
+<p>By default, if <a href="System.stealPath.html">System.stealPath</a> points to steal.js within bower_components like:</p>
+<pre><code>&lt;script src=&quot;bower_components/steal/steal.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p><a href="System.configMain.html">System.configMain</a> will point to <code>&quot;bower.json!bower&quot;</code>. The <code>bower</code> plugin reads your
+bower.json file and configure each dependency so they can be automatically loaded.</p>
+<h2>Options</h2>
+<h3>System.bowerPath</h3>
+<p>Specifies the path to the folder where Bower dependencies can be found.</p>
+<p>When using the <a href="https://github.com/bitovi/system-bower">Bower plugin</a> by default it will assume dependencies are located at <code>System.baseURL</code> + <code>/bower_components</code>, which is the default location that Bower installs dependencies. Since this is configurable by Bower itself, <code>bowerPath</code> provices a way to point to the directory where you install Bower dependencies.  Using in the script tag is the best option:</p>
+<pre><code class="language-html">&lt;script src=&quot;vendor/steal/steal.js&quot;
+    data-bower-path=&quot;vendor&quot;
+    data-main=&quot;main&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>Would load the Bower configuration file for, for example, <code>lodash</code> in <code>vendor/lodash/bower.json</code>.</p>
+<h3>System.bowerDev</h3>
+<p>Specifies whether <code>devDependencies</code> included in your bower.json will be included in configuration.</p>
+<p>By default, the <a href="https://github.com/bitovi/system-bower">Bower plugin</a> will only load configurations for deps listed in <code>dependencies</code>. In some cases you might want to also load the <code>devDependencies</code>, for example when running unit tests. To do so just include <code>bowerDev</code> in the script tag when loading Steal:</p>
+<pre><code class="language-html">&lt;script src=&quot;bower_components/steal/steal.js&quot;
+    data-bower-dev=&quot;true&quot;
+    data-main=&quot;tests&quot;&gt;&lt;/script&gt;
+</code></pre>
+<h2>Configuration</h2>
+<p><code>bower.json</code> configures the behavior of a package and all dependent packages. This section
+contains a list of properties that are used by the Bower plugin to configure the loader.</p>
+<h3>package.main</h3>
+<p>Specifies the <a href="System.main.html">System.main</a> property unless already defined (such as setting the main
+in your <code>&lt;script&gt;</code> tag).</p>
+<h3>package.system</h3>
+<p>By default, any property on the package.system object is passed to <a href="System.config.html">System.config</a>. A few properties have special behavior, however:</p>
+<h3>package.system.configDependencies</h3>
+<p>Defines dependencies of your bower package. This is useful for loading modules,
+like extensions, that need to be initialized before the rest of your application
+is imported. For example you can use both bower and <a href="npm.html">npm</a> dependencies by setting
+your <code>package.json</code> as a configDependency:</p>
+<pre><code class="language-js">
+{
+  &quot;name&quot;: &quot;my-project&quot;,
+  &quot;system&quot;: {
+    &quot;configDependencies&quot;: [
+      &quot;package.json!npm&quot;
+    ]
+  }
+}
 </code></pre>
 
 		</section>

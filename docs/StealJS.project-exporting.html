@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,20 +51,18 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
-		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog">Blog</a></li>
-						<li><a href="http://bitovi.com/development">Development</a></li>
-						<li><a href="http://bitovi.com/design">Design</a></li>
-						<li><a href="http://bitovi.com/training">Training</a></li>
-						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
-						<li><a href="http://bitovi.com/about">About</a></li>
-						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -301,8 +299,8 @@
 
 		
 		<section class="description">
-			<p>Learn how to use StealJS to export your project into commonly used
-formats and platforms.</p>
+			<p>StealJS can export your project into commonly used formats and platforms
+which can be used to create distributables that can be used in almost any situation:</p>
 
 		</section>
 		
@@ -316,127 +314,98 @@ formats and platforms.</p>
 
 		
 		<section class="comment">
-			<p>Steal and steal-tools can be used to create a distributable that can
-be used in almost any situation:</p>
-<ul>
-<li><a href="syntax.global.html">global format</a> and <code>&lt;script&gt;</code> tags</li>
-<li><a href="syntax.CommonJS.html">CommonJS </a> and NPM for <a href="http://browserify.org/">Browserify</a></li>
+			<ul>
 <li><a href="syntax.amd.html">AMD </a> and Bower</li>
+<li><a href="syntax.CommonJS.html">CommonJS </a> and NPM for <a href="http://browserify.org/">Browserify</a></li>
 <li><a href="syntax.es6.html">ES Syntax</a> and StealJS, SystemJS, or JSPM</li>
+<li><a href="syntax.global.html">global format</a> and <code>&lt;script&gt;</code> tags</li>
 </ul>
-<p>This guide creates a <code>can-tabs</code> plugin with <a href="http://canjs.com">CanJS</a> that can
-be found at <a href="https://github.com/bitovi-components/can-tabs">https://github.com/bitovi-components/can-tabs</a>.</p>
-<p>Although the example uses CanJS, the same techniques can be used to create and export projects that use any other
-framework or library.</p>
+<p>This guide uses the <a href="steal-tools.grunt.export.html">steal-export</a> task to call <a href="steal-tools.export.html">export</a> which loads the module source and transpiles it to <em>AMD</em>, <em>CommonJS</em> and <em>global</em> compatible distributables. This guide uses the <a href="https://github.com/bitovi-components/bit-tabs">bit-tabs</a> component built with CanJS, but the same techniques can be used to create and export projects that use any other framework or library.</p>
 <h2>Project Structure</h2>
-<p>Our project will have the following folders:</p>
-<pre><code>can-tabs/
-  /dist       - non CJS/Browserify builds 
+<p>The Steal export process reads the contents of the project's source directory to generate the distributables. Our <code>bit-tabs</code> example component uses the <em>src/</em> directory.</p>
+<blockquote>
+<p>Create <code>src/</code> and create the main entry-point in <code>src/bit-tabs.js</code>. The <code>dist/</code> and the subdirectories will be created by export process</p>
+</blockquote>
+<pre><code>bit-tabs/
+  /dist
     /amd      - AMD build
+    /cjs      - CJS/Browserify builds
     /global   - Global / &lt;script&gt; build
-    
-  /lib        - The CJS/Browserify build 
-
   /src        - Source files
-    /lib      - Source files needed to be distributed 
-    /test     - Test source files
+  /test       - Test source files
 </code></pre>
-<p>The contents of <em>src/lib</em> will be read and used to build out the <em>dist/amd</em>, <em>dist/global</em> and <em>lib</em> folders.</p>
-<p>This structure allows a single package to be used in all the situations above. When
-<a href="https://github.com/substack/node-resolve/issues/62">Browserify adds more powerful mapping behavior</a>, the
-CJS distributable will be able to be placed anywhere, enabling more flexibility.</p>
-<blockquote>
-<p>Create <code>src/lib</code> and <code>src/test</code>.</p>
-</blockquote>
-<p>For our example, the &quot;main&quot; entrypoint of this package will be <em>src/lib/can-tabs.js</em>.</p>
-<blockquote>
-<p>Create the main entrypoint of the application in <em>src/lib</em>.</p>
-</blockquote>
 <h2>package.json</h2>
-<p>Your project's <code>package.json</code> is used to conigure how Browserify or Steal loads your
+<p>The project's <code>package.json</code> is used to configure how Browserify or Steal loads your
 project. The following walks through the important parts:</p>
-<h3>system</h3>
-<p>The &quot;system&quot; property specifies SystemJS and StealJS overwrites. By
-setting the &quot;directories.lib&quot; property, we tell SystemJS
-to look in the <em>can-tabs/src</em> for any modules.  This means that <code>import &quot;can-tabs/lib/can-tabs&quot;</code>
-will look in <em>can-tabs/src/lib/can-tabs</em>.</p>
-<p>The &quot;npmIgnore&quot; property tells SystemJS to ignore processing certain dependencies's
-package.jsons.</p>
-<pre><code>  &quot;system&quot;: {
-    &quot;directories&quot; : {
-      &quot;lib&quot;: &quot;src&quot;
-    },
-    &quot;npmIgnore&quot;: [&quot;cssify&quot;,&quot;devDependencies&quot;]
-  },
-</code></pre>
+<h3>&quot;system&quot;</h3>
+<p>The <code>system</code> property specifies SystemJS and StealJS overwrites. Set the <a href="System.main.html">System.main</a> property as follows to tell SystemJS to use <code>src/bit-tabs.js</code> as the starting point of the application. The &quot;npmIgnore&quot; property tells StealJS to ignore processing the package.json files of certain dependencies.</p>
 <blockquote>
-<p>Create a &quot;system&quot; property that points &quot;directories.lib&quot; to where SystemJS should find code. And,
+<p>In the system property, create a &quot;main&quot; property that points to the main entry-point. And,
 set &quot;npmIgnore&quot; to ignore dependencies that aren't needed by the browser.</p>
 </blockquote>
-<h3>main</h3>
-<p>CJS/Browserify and StealJS will read the <code>main</code> property when someone require's your package.</p>
-<pre><code>  &quot;main&quot;: &quot;lib/can-tabs&quot;,
+<pre><code>  &quot;system&quot;: {
+    &quot;main&quot;: &quot;src/bit-tabs&quot;,
+    &quot;npmIgnore&quot;: [&quot;devDependencies&quot;]
+  },
 </code></pre>
-<p>Because of the &quot;system.directories.lib&quot; setting, StealJS will look in <em>can-tabs/src/lib/can-tabs.js</em>, while
-Browserify will look in <em>can-tabs/lib/can-tabs.js</em></p>
-<blockquote>
-<p>Point &quot;main&quot; at the entrypoint of your package.</p>
-</blockquote>
-<h3>dependencies</h3>
+<h3>&quot;main&quot;</h3>
+<p>CJS/Browserify and StealJS will read the <code>main</code> property when requiring your package. Set the <code>main</code> property to the CommonJS output of the export process.</p>
+<pre><code>  &quot;main&quot;: &quot;dist/cjs/lib/bit-tabs&quot;,
+</code></pre>
+<h3>&quot;dependencies&quot;</h3>
 <p>Use npm to install your project's dependencies.  If your project includes css or LESS files,
 include <code>cssify</code>.  Browserify will use it to bundle css files.</p>
 <pre><code>  &quot;dependencies&quot;: {
-    &quot;canjs&quot;: &quot;2.2.0-alpha.8&quot;,
-    &quot;jquery&quot;: &quot;&gt;1.9.0&quot;,
+    &quot;can&quot;: &quot;2.2.0-alpha.10&quot;,
     &quot;cssify&quot;: &quot;^0.6.0&quot;
-  }
-</code></pre>
-<p>Add <code>steal</code>, <code>steal-tools</code>, <code>grunt</code>, and <code>grunt-cli</code> to your project's devDependencies:</p>
-<pre><code>  &quot;devDependencies&quot;: {
-    &quot;grunt&quot;: &quot;~0.4.1&quot;,
-    &quot;grunt-cli&quot;: &quot;^0.1.13&quot;,
-    &quot;steal&quot;: &quot;0.5.0-pre.3&quot;,
-    &quot;steal-tools&quot;: &quot;0.5.0-pre.8&quot;
   },
 </code></pre>
+<p>Add <code>steal</code>, <code>steal-tools</code>, <code>grunt</code>, and <code>grunt-cli</code> to your project's devDependencies:</p>
 <blockquote>
 <p>Add your project's dependencies to <em>package.json</em>.</p>
 </blockquote>
-<h3>browser and browserify</h3>
+<pre><code>  &quot;devDependencies&quot;: {
+    &quot;grunt&quot;: &quot;~0.4.1&quot;,
+    &quot;grunt-cli&quot;: &quot;^0.1.13&quot;,
+    &quot;steal&quot;: &quot;0.6.0-pre.0&quot;,
+    &quot;steal-tools&quot;: &quot;0.6.0-pre.2&quot;
+  },
+</code></pre>
+<h3>&quot;browser&quot; and &quot;browserify&quot;</h3>
 <p>Because our project will export CSS, we need to tell Browserify to
 run &quot;cssify&quot; on css files with a <code>transform</code>.  To make this work
 with new and old versions of Browserify you must specify both the
 &quot;browser&quot; and &quot;browserify&quot; properties.</p>
+<blockquote>
+<p>Specify Browserify transforms.</p>
+</blockquote>
 <pre><code>  &quot;browser&quot;: {
-    &quot;transform&quot;: [ &quot;cssify&quot; ]
+    &quot;transform&quot;: [&quot;cssify&quot;]
   },
   &quot;browserify&quot;: {
     &quot;transform&quot;: [&quot;cssify&quot;]
   },
 </code></pre>
+<h3>&quot;scripts&quot;</h3>
+<p>Prior to publishing to <code>npm</code>, we need to build the distributables. We will create
+a grunt build job that builds our project. For now, we will create a npm script command that points to a <code>grunt build</code> task which we will create in the next step:</p>
 <blockquote>
-<p>Specify Browserify transforms.</p>
+<p>Create &quot;prepublish&quot; script command which points to <code>grunt build</code>.</p>
 </blockquote>
-<h3>scripts</h3>
-<p>Finally, prior to publishing to <code>npm</code>, we will want to make sure
-our project is built. In the next step, we will create
-a grunt build step that builds our project. For now,
-we point at a grunt task that doesn't exist:</p>
 <pre><code>  &quot;scripts&quot;: {
+    &quot;test&quot;: &quot;grunt test --stack&quot;,
     &quot;prepublish&quot;: &quot;./node_modules/.bin/grunt build&quot;
-  }
+  },
 </code></pre>
-<blockquote>
-<p>Set &quot;prepublish&quot; to build the distributables.</p>
-</blockquote>
 <h2>Gruntfile.js</h2>
-<p>We use <a href="http://gruntjs.com/">Grunt</a> for task automation. If Grunt isn't
-your thing, you can use <a href="steal-tools.export.html">steal-tool's export</a> method
-programatically. Create a <em>Gruntfile.js</em> that looks like the following:</p>
+<p>Finally, we use <a href="http://gruntjs.com/">Grunt</a> for task automation. If Grunt isn't your thing, you can use <a href="steal-tools.export.html">steal-tool's export</a> method.</p>
+<blockquote>
+<p>Create a <em>Gruntfile.js</em> that looks like the following code block.</p>
+</blockquote>
 <pre><code>module.exports = function (grunt) {
 
     grunt.loadNpmTasks('steal-tools');
-    
+
     grunt.initConfig({
         &quot;steal-export&quot;: {
             dist: {
@@ -444,7 +413,7 @@ programatically. Create a <em>Gruntfile.js</em> that looks like the following:</
                     config: &quot;package.json!npm&quot;
                 },
                 outputs: {
-                    &quot;+cjs&quot;: {dest: __dirname},
+                    &quot;+cjs&quot;: {},
                     &quot;+amd&quot;: {},
                     &quot;+global-js&quot;: {},
                     &quot;+global-css&quot;: {}
@@ -455,95 +424,110 @@ programatically. Create a <em>Gruntfile.js</em> that looks like the following:</
     grunt.registerTask('build',['steal-export']);
 };
 </code></pre>
-<p>This uses the <a href="steal-tools.grunt.export.html">steal-export</a> task to export your project's main module
-and its dependencies to CommonJS, AMD, and a global export that works with plain <code>&lt;script&gt;</code> tags.</p>
-<blockquote>
-<p>Create a <em>Gruntfile.js</em> that looks like the previous code block.</p>
-</blockquote>
+<p>The <a href="steal-tools.grunt.export.html">steal-export</a> grunt task above loads modules and transpiles them to CommonJS, AMD, and a global distributables. The <a href="steal-tools.grunt.export.html">steal-export</a> task requires a <a href="steal-tools.SystemConfig.html">SystemConfig</a>. In this example, <code>system.config</code> points to the <code>package.json</code> file which will hold the export configuration.</p>
 <h2>Publishing</h2>
 <p>To generate your project, run:</p>
 <pre><code>&gt; npm run pre-publish
 </code></pre>
-<p>This should create the <code>dist/amd</code>, <code>dist/global</code>, and <code>lib</code> folders
-with the files needed to use your project with AMD, <code>&lt;script&gt;</code> tags, and
-CommonJS respectively.</p>
+<p>If you have <code>grunt-cli</code> installed you can alternatively call grunt directly.</p>
+<pre><code>&gt; grunt build
+</code></pre>
+<p>This should create the <code>dist/amd</code>, <code>dist/cjs</code> and <code>dist/global</code> directories
+with the files needed to use your project AMD, CommonJS and  <code>&lt;script&gt;</code> tags respectively.</p>
 <p>For now, you should inspect these files and make sure they work. Eventually,
-we might release helpers that make it easy to test your
-distributables.</p>
+we may release helpers that make it easy to test your distributables.</p>
 <h3>To NPM</h3>
 <p>Run:</p>
 <pre><code>&gt; npm publish
 </code></pre>
 <h3>To Bower</h3>
-<p>The first time you publish, you must regsiter your project and
-create a bower.json.</p>
+<p>The first time you publish, you must regisiter your project and create a bower.json.</p>
 <p>Register your project's name:</p>
-<pre><code>&gt; bower register can-tabs git://github.com/bitovi-components/can-tabs
+<pre><code>&gt; bower register bit-tabs git://github.com/bitovi-components/bit-tabs
 </code></pre>
 <p>Create a <a href="https://github.com/bower/bower.json-spec#name">bower.json</a>. The
-easist thing to do is copy your <code>package.json</code> and remove any node
+easiest thing to do is copy your <code>package.json</code> and remove any node
 specific values.</p>
 <pre><code>{
-  &quot;name&quot;: &quot;can-tabs&quot;,
-  &quot;version&quot;: &quot;0.0.1-alpha.9&quot;,
+  &quot;name&quot;: &quot;bit-tabs&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
   &quot;description&quot;: &quot;&quot;,
-  &quot;main&quot;: &quot;lib/can-tabs&quot;,
+  &quot;main&quot;: &quot;dist/cjs/lib/bit-tabs&quot;,
   &quot;dependencies&quot;: {
-    &quot;canjs&quot;: &quot;2.2.0-alpha.8&quot;,
-    &quot;jquery&quot;: &quot;&gt;1.9.0&quot;,
+      &quot;can&quot;: &quot;2.2.0-alpha.10&quot;,
+      &quot;cssify&quot;: &quot;^0.6.0&quot;
   },
   &quot;system&quot;: {
-    &quot;directories&quot; : {
-      &quot;lib&quot;: &quot;src&quot;
-    },
-    &quot;main&quot;: &quot;lib/can-tabs&quot;
-  }
+      &quot;main&quot;: &quot;src/bit-tabs&quot;,
+      &quot;npmIgnore&quot;: [&quot;testee&quot;,&quot;cssify&quot;]
+  },
 }
 </code></pre>
 <p>Once bower is setup, publishing to bower just means pushing a
-<a href="http://semver.org/">semver</a> tag to github that matches
-your project's version.</p>
-<pre><code>&gt; git tag v0.0.1-alpha.9
-&gt; git push origin tag v0.0.1-alpha.9
+<a href="http://semver.org/">semver</a> tag to github that matches your project's version.</p>
+<pre><code>&gt; git tag v0.0.1
+&gt; git push origin tag v0.0.1
 </code></pre>
 <h2>Importing the Export</h2>
 <p>Developers need to know how to use your project. The following demonstrates what you need to tell them
 depending on how they are using your project.</p>
 <h3>NPM and StealJS</h3>
 <p>Simply import, require, or use define to load your project.</p>
-<pre><code>import &quot;can-tabs&quot;;
-require(&quot;can-tabs&quot;);
-define([&quot;can-tabs&quot;], function(){});
+<pre><code>import &quot;bit-tabs&quot;;
+require(&quot;bit-tabs&quot;);
+define([&quot;bit-tabs&quot;], function(){});
 </code></pre>
 <h3>NPM and CJS</h3>
 <p>Simply require your project.</p>
-<pre><code>require(&quot;can-tabs&quot;)
+<pre><code>require(&quot;bit-tabs&quot;)
 </code></pre>
 <h3>AMD</h3>
 <p>They must configure your project as a package:</p>
 <pre><code>require.config({
         packages: [{
-                name: 'can-tabs',
-                location: 'path/to/can-tabs/dist/amd',
-                main: 'lib/can-tabs'
+                name: 'bit-tabs',
+                location: 'path/to/bit-tabs/dist/amd',
+                main: 'dist/amd/src/bit-tabs'
         }]
 });
 </code></pre>
 <p>And then they can use it as a dependency:</p>
-<pre><code>define([&quot;can-tabs&quot;], function(){
+<pre><code>define([&quot;bit-tabs&quot;], function(){
 
 });
 </code></pre>
 <h3>Global / Standalone</h3>
 <p>They should add script tags for the dependencies and your project and a link
 tag for your project's css:</p>
-<pre><code>&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; 
-      href=&quot;./node_modules/can-tabs/dist/global/can-tabs.css&quot;&gt;
-      
-&lt;script src='./node_modules/jquery/dist/jquery.js'&gt;&lt;/script&gt;
-&lt;script src='./node_modules/canjs/dist/can.jquery.js'&gt;&lt;/script&gt;
-&lt;script src='./node_modules/canjs/dist/can.stache.js'&gt;&lt;/script&gt;
-&lt;script src='./node_modules/can-tabs/dist/global/can-tabs.js'&gt;&lt;/script&gt;
+<pre><code>    &lt;head lang=&quot;en&quot;&gt;
+        &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;dist/global/bit-tabs.css&quot;&gt;
+
+        &lt;script src='./node_modules/jquery/dist/jquery.js'&gt;&lt;/script&gt;
+        &lt;script src='./node_modules/can/dist/can.jquery.js'&gt;&lt;/script&gt;
+        &lt;script src='./node_modules/can/dist/can.stache.js'&gt;&lt;/script&gt;
+        &lt;script src='dist/global/bit-tabs.js'&gt;&lt;/script&gt;
+        &lt;script&gt;
+            $(function(){
+                var frag = can.view(&quot;app-template&quot;, {});
+                $(&quot;#my-app&quot;).html(frag);
+            })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+
+    &lt;script type='text/stache' id=&quot;app-template&quot;&gt;
+      &lt;can-import from=&quot;bit-tabs&quot;/&gt;
+      &lt;bit-tabs&gt;
+        &lt;can-panel title=&quot;CanJS&quot;&gt;
+          CanJS provides the MV*
+        &lt;/can-panel&gt;
+        &lt;can-panel title=&quot;StealJS&quot;&gt;
+          StealJS provides the infrastructure.
+        &lt;/can-panel&gt;
+      &lt;/bit-tabs&gt;
+    &lt;/script&gt;
+
+    &lt;div id=&quot;my-app&quot;&gt;&lt;/div&gt;
 </code></pre>
 
 		</section>
@@ -570,23 +554,23 @@ tag for your project's css:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.project-exporting","src":"steal/docs/pages/project-exporting.md","description":"Learn how to use StealJS to export your project into commonly used\nformats and platforms.","title":"Project Exporting","parent":"StealJS.guides","order":2,"templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+
 	</script>
+	<script type='text/javascript' 
+			data-main="static"
 	
+		src="./static/steal.production.js"
 	
-		<script>
-		  steal = {
-		    instantiated: {
-		      "bundles/static.css!$css" : null
-		    }
-		  }
-		</script>
-		<script type='text/javascript' 
-				data-main="static"
-				data-config="./static/config.js"
-				src="./static/steal.production.js"
-		    		bundles-path="bundles"></script>
-	
+	    bundles-path="bundles"
+		></script>
 </body>
 
 </html>

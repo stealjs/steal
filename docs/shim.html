@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - amd </title>
+	<title>StealJS  - shim</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -84,46 +84,12 @@
 			</a>
 		</li>
 		
-		<li class="search-container active parent">
-			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
-				steal-tools
-			</a>
-		</li>
-		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
-				amd
+			<a class="sidebar-title" href="shim.html" data-search="shim">
+				shim
 			</a>
 			
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools|lib|build|helpers|amd.format.html" data-search="steal-tools/lib/build/helpers/amd.format">
-						format
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools|lib|build|helpers|amd.normalize.html" data-search="steal-tools/lib/build/helpers/amd.normalize">
-						normalize
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -140,9 +106,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>amd</h1>
+<h1>shim</h1>
 	<ul class="tags">
-		<li>module</li>
+		<li>constructor</li>
 	</ul>
 	
 	
@@ -150,12 +116,6 @@
 
 <div class="sub-heading">
 	
-	
-		<span class="module">steal-tools/lib/build/helpers/amd</span>
-	
-	
-	
-	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -180,24 +140,13 @@
 		
 
 		
+		<section class="description">
+			<p>var exportsForDependencies = function(bundle, allExports){</p>
+
+		</section>
+		
 
 		
-			
-				<section class="signature">
-					<h2 id="sig___34__amd__34______OVERWRITES____">&#34;+amd&#34;: { ... OVERWRITES ... }
-</h2>
-<div class="signature-wrapper">
-<p>Adds <a href="steal-tools.export.output.html">ExportOutput</a> values that write a project out to an AMD format.</p>
-
-
-
-
-
-
-
-</div>
-
-				</section>
 			
 		
 		
@@ -206,31 +155,21 @@
 
 		
 		<section class="comment">
-			<p>Helpers that make exporting to AMD projects easier.</p>
-<h2>Use</h2>
-<p>Add <code>+amd</code> in an output name.</p>
-<pre><code>stealTools.export({
-  system: {
-    main: &quot;my-module&quot;,
-    config: __dirname+&quot;/package.json!npm&quot;
-  },
-  outputs: {
-    &quot;+amd&quot;: {
-      normalize: { &quot;lodash&quot;: &quot;underscore&quot; }  
+			<pre><code>var exports = {};
+
+bundle.forEach(function(node){
+    if(allExports[node.load.name]){
+        exports[node.load.name] = allExports[node.load.name];
     }
-  }
+    node.dependencies.forEach(function(dep){
+        if(allExports[dep]){
+            exports[dep] = allExports[dep];
+        }
+    });
 });
+return exports;
 </code></pre>
-<p><code>+amd</code> mixes in the following default values:</p>
-<ul>
-<li><a href="steal-tools|lib|build|helpers|cjs.graphs.html">graphs</a> - Writes out System.main and all of its dependencies.</li>
-<li><a href="steal-tools|lib|build|helpers|amd.format.html">format</a> - Writes out all modules as CJS.</li>
-<li><a href="steal-tools|lib|build|helpers|amd.normalize.html">normalize</a> - Leaves moduleName references that reference modules in node_modules alone; makes
-all other moduleName references relative.</li>
-<li>[steal-tools/lib/build/helpers/amd.dest dest] - Writes out each module in <code>[baseURL]/dist/amd</code>.</li>
-<li><a href="steal-tools|lib|build|helpers|cjs.ignore.html">ignore</a> - Ignores everything in node_modules.</li>
-</ul>
-<p>Some of the behavior is inherit from the <a href="steal-tools|lib|build|helpers|cjs.html">cjs</a> export helper.</p>
+<p>};</p>
 
 		</section>
 		

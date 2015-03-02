@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - amd </title>
+	<title>StealJS  - winston</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -84,46 +84,12 @@
 			</a>
 		</li>
 		
-		<li class="search-container active parent">
-			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
-				steal-tools
-			</a>
-		</li>
-		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
-				amd
+			<a class="sidebar-title" href="winston.html" data-search="winston">
+				winston
 			</a>
 			
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools|lib|build|helpers|amd.format.html" data-search="steal-tools/lib/build/helpers/amd.format">
-						format
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools|lib|build|helpers|amd.normalize.html" data-search="steal-tools/lib/build/helpers/amd.normalize">
-						normalize
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -140,9 +106,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>amd</h1>
+<h1>winston</h1>
 	<ul class="tags">
-		<li>module</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -150,12 +116,6 @@
 
 <div class="sub-heading">
 	
-	
-		<span class="module">steal-tools/lib/build/helpers/amd</span>
-	
-	
-	
-	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -180,24 +140,13 @@
 		
 
 		
+		<section class="description">
+			<h1>lib/build/multi.js</h1>
+
+		</section>
+		
 
 		
-			
-				<section class="signature">
-					<h2 id="sig___34__amd__34______OVERWRITES____">&#34;+amd&#34;: { ... OVERWRITES ... }
-</h2>
-<div class="signature-wrapper">
-<p>Adds <a href="steal-tools.export.output.html">ExportOutput</a> values that write a project out to an AMD format.</p>
-
-
-
-
-
-
-
-</div>
-
-				</section>
 			
 		
 		
@@ -206,31 +155,51 @@
 
 		
 		<section class="comment">
-			<p>Helpers that make exporting to AMD projects easier.</p>
-<h2>Use</h2>
-<p>Add <code>+amd</code> in an output name.</p>
-<pre><code>stealTools.export({
-  system: {
-    main: &quot;my-module&quot;,
-    config: __dirname+&quot;/package.json!npm&quot;
-  },
-  outputs: {
-    &quot;+amd&quot;: {
-      normalize: { &quot;lodash&quot;: &quot;underscore&quot; }  
-    }
-  }
-});
+			<p>The bundled build works by loading the <em>main</em> module and all of its
+dependencies and then all of the <code>System.bundle</code> modules
+and their dependencies. It makes a dependency graph that looks like:</p>
+<pre><code class="language-js">{
+  moduleName: Node({
+    load: Load({
+      name: moduleName,
+      source: SOURCE
+    }),
+    dependencies: <a href="moduleName.html">moduleName</a>,
+    bundles: [bundleName],
+  })
+}
 </code></pre>
-<p><code>+amd</code> mixes in the following default values:</p>
-<ul>
-<li><a href="steal-tools|lib|build|helpers|cjs.graphs.html">graphs</a> - Writes out System.main and all of its dependencies.</li>
-<li><a href="steal-tools|lib|build|helpers|amd.format.html">format</a> - Writes out all modules as CJS.</li>
-<li><a href="steal-tools|lib|build|helpers|amd.normalize.html">normalize</a> - Leaves moduleName references that reference modules in node_modules alone; makes
-all other moduleName references relative.</li>
-<li>[steal-tools/lib/build/helpers/amd.dest dest] - Writes out each module in <code>[baseURL]/dist/amd</code>.</li>
-<li><a href="steal-tools|lib|build|helpers|cjs.ignore.html">ignore</a> - Ignores everything in node_modules.</li>
-</ul>
-<p>Some of the behavior is inherit from the <a href="steal-tools|lib|build|helpers|cjs.html">cjs</a> export helper.</p>
+<p>Here's an example:</p>
+<pre><code class="language-js">{
+  &quot;jquery&quot;: {
+    load: {
+      name: &quot;jquery&quot;,
+      source: &quot;jQuery = function(){ ... }&quot;
+    },
+    dependencies: [],
+    bundles: [&quot;profile&quot;,&quot;settings&quot;,&quot;login&quot;, ...]
+  },
+  &quot;can/util&quot;: {
+    load: {
+      name: &quot;can/util&quot;,
+      source: &quot;define(['jquery'], function($){ ... })&quot; 
+    },
+    dependencies: [&quot;jquery&quot;],
+    bundles: [&quot;profile&quot;,&quot;login&quot;]
+  }
+}
+</code></pre>
+<p>A <code>Load</code> is a ES6 load record.</p>
+<p>A <code>Node</code> is an object that contains the load and other
+useful information. The build tools only write to <code>Node</code> to keep <code>Load</code> from being changed.</p>
+<p>It manipulates this graph and eventually creates &quot;bundle&quot; graphs.  Bundle graphs look like:</p>
+<pre><code> {
+   size: 231231,
+   nodes: [node1, node2, ...],
+   bundles: [bundleName1, bundleName2]  
+ }
+</code></pre>
+<p>The nodes in those bundles are written to the filesystem.</p>
 
 		</section>
 		

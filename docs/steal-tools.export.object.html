@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,20 +51,18 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
-		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog">Blog</a></li>
-						<li><a href="http://bitovi.com/development">Development</a></li>
-						<li><a href="http://bitovi.com/design">Design</a></li>
-						<li><a href="http://bitovi.com/training">Training</a></li>
-						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
-						<li><a href="http://bitovi.com/about">About</a></li>
-						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -491,6 +489,30 @@ or <a href="System.configPath.html">configPath</a> must be specified.</p>
 	</li>
 	
 	<li class="parameter">
+		<h4>debug<code>=false</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p><code>true</code> turns on debug messages. Defaults to <code>false</code>.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>quiet<code>=false</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>No logging.  Defaults to <code>false</code>.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
 		<h4>outputs
 			<code>{Object&lt;String,<a href="steal-tools.export.output.html" >ExportOutput</a>&gt;}</code></h4>
 		<div class="description">
@@ -544,23 +566,14 @@ should be written out, and where they should be written.</li>
 <p><code>outputs</code> specifies different ways the modules loaded by <code>system</code> are written out. It's
 an object of <a href="steal-tools.export.output.html">ExportOutput</a> objects.  Each <a href="steal-tools.export.output.html">ExportOutput</a>
 supports the following options:</p>
+<p>{{#each <a href="steal-tools.export.output.html">ExportOutput</a>.types.0.options}}</p>
 <ul>
-<li>modules <i>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</i></li>
-<li>eachModule <i>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</i></li>
-<li>graphs <i>{Array&lt;<a href="moduleName.html" >moduleName</a> | comparitor&gt;}</i></li>
-<li>dest <i>{String | function(moduleName, moduleData, load, System)}</i></li>
+<li>{{name}} <i>{{{makeTypesString types}}}</i>{{/each}}</li>
 </ul>
 <p>And the options available to <a href="steal-tools.transform.options.html">TransformOptions</a>.</p>
+<p>{{#each <a href="steal-tools.transform.options.html">TransformOptions</a>.types.0.options}}</p>
 <ul>
-<li>ignore <i>{Array&lt;RegExp | String | function(String, Load)&gt;}</i></li>
-<li>removeDevelopmentCode <i>{Boolean}</i></li>
-<li>format <i>{String}</i></li>
-<li>export <i>{Object&lt;<a href="moduleName.html" >moduleName</a>,String&gt;}</i></li>
-<li>useNormalizedDependencies <i>{Boolean}</i></li>
-<li>normalize <i>{function(depName, depLoad, curName, curLoad)}</i></li>
-<li>minify <i>{Boolean}</i></li>
-<li>ignoreAllDependencies <i>{Boolean}</i></li>
-<li>includeTraceurRuntime <i>{includeTraceurRuntime}</i></li>
+<li>{{name}} <i>{{{makeTypesString types}}}</i>{{/each}}</li>
 </ul>
 <p>Only one of <code>modules</code>, <code>eachModule</code>, or <code>graphs</code> should be specified.</p>
 <p>Example:</p>
@@ -618,23 +631,23 @@ by including a &quot;+&quot;, followed by the name of the export helper.  For ex
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.export.object","src":"steal-tools/doc/types/export-object.md","description":"An object that specifies the modules to load and their outputs. This is used by\n[steal-tools.export] and [steal-tools.grunt.export].","title":"ExportObject","types":[{"type":"Object","options":[{"name":"system","description":"Specifies the [System.config] values used \nto load modules.  At a minimum, some set of [System.main main], [System.baseURL baseURL],\nor [System.configPath configPath] must be specified.\n\n```\nsystem: {\n  main: ['mymodule'],\n  config: __dirname+\"/config.js\"\n}\n```","types":[{"type":"steal-tools.SystemConfig"}]},{"name":"options","description":"Options that configure the following:","types":[{"type":"Object","options":[{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}]},{"name":"outputs","description":"Configures output files to be written.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"steal-tools.export.output"}]}]}]}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+
 	</script>
+	<script type='text/javascript' 
+			data-main="static"
 	
+		src="./static/steal.production.js"
 	
-		<script>
-		  steal = {
-		    instantiated: {
-		      "bundles/static.css!$css" : null
-		    }
-		  }
-		</script>
-		<script type='text/javascript' 
-				data-main="static"
-				data-config="./static/config.js"
-				src="./static/steal.production.js"
-		    		bundles-path="bundles"></script>
-	
+	    bundles-path="bundles"
+		></script>
 </body>
 
 </html>

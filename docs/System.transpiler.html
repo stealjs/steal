@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - $css</title>
+	<title>StealJS  - System.transpiler</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -307,7 +307,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="System.transpiler.html" data-search="System.transpiler">
 						System.transpiler
 					</a>
@@ -367,7 +367,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="$css.html" data-search="$css">
 						$css
 					</a>
@@ -608,9 +608,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>$css</h1>
+<h1>System.transpiler</h1>
 	<ul class="tags">
-		<li>typedef</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -619,7 +619,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Object}</code></h2>
+	<h2><code>{String}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -644,40 +644,30 @@
 		
 
 		
+		<section class="description">
+			<p>Specifies which transpiler to use for ES6 modules. Traceur has been around for a longer time, but Babel provides advantages such as a smaller overhead.</p>
+
+		</section>
+		
 
 		
 			
 			<section class='primary-options'>
 				
 
-  <h2 id="sig_">Object
+  <h2 id="sig_">String
 </h2>
 <div class="signature-wrapper">
+<p>Which ES6 compiler to user to generate ES5 code. Possible values:</p>
+<ul>
+<li><code>traceur</code>: The default, uses <a href="https://github.com/google/traceur-compiler">traceur-compiler</a>.</li>
+<li><code>babel</code>: Uses <a href="https://babeljs.io/">Babel</a>.</li>
+</ul>
 
 
 
 
 
-
-  <h3>Properties</h3>
-  
-  <ol class="parameters">
-	
-	<li class="parameter">
-		<h4>
-			<code>{Object}</code></h4>
-		<div class="description">
-			<p>The <code>$css</code> module is configured to process CSS modules.  By default,
-extensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>
-module is <code>steal/css.js</code>.</p>
-
-		</div>
-		
-		
-		
-	</li>
-	
-</ol>
 
 
 </div>
@@ -694,9 +684,13 @@ module is <code>steal/css.js</code>.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>Specify a CSS dependency like:</p>
-<pre><code>require(&quot;my.css!&quot;);
+<p>If you'd like to control which ES6 transpiler is used simply set in your config:</p>
+<pre><code>System.config({
+  transpiler: &quot;babel&quot;
+});
 </code></pre>
+<h2>Implementation</h2>
+<p>Provided by <a href="https://github.com/ModuleLoader/es6-module-loader">ES6 Module Loader</a>.</p>
 
 		</section>
 		

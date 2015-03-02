@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,20 +51,18 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
-		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog">Blog</a></li>
-						<li><a href="http://bitovi.com/development">Development</a></li>
-						<li><a href="http://bitovi.com/design">Design</a></li>
-						<li><a href="http://bitovi.com/training">Training</a></li>
-						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
-						<li><a href="http://bitovi.com/about">About</a></li>
-						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog/">Blog</a></li>
+						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
+						<li><a href="http://bitovi.com/training/">Training</a></li>
+						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
+						<li><a href="http://bitovi.com/people/">People</a></li>
+						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -500,7 +498,7 @@ built individually.</p>
 	
 	<li class="parameter">
 		<h4>dest
-			<code>{String | function(moduleName, moduleData, load, System)}</code></h4>
+			<code>{String | function()}</code></h4>
 		<div class="description">
 			<p>Specifies where the
 output should be written.  Dest can be provided as a string or a function that returns the
@@ -510,52 +508,6 @@ location.</p>
 		
 		
 		
-		
-		<ul class="options">
-			
-			<li class="option">
-				<h5>moduleName 
-					<code>{String | Array&lt;String&gt;}</code>
-				</h5>
-				<div class="description">
-					<p>The module name or module names being written
-out by this output.</p>
-
-				</div>
-			</li>
-			
-			<li class="option">
-				<h5>moduleData 
-					<code>{Object | Array&lt;Object&gt;}</code>
-				</h5>
-				<div class="description">
-					<p>Deprecated.</p>
-
-				</div>
-			</li>
-			
-			<li class="option">
-				<h5>load 
-					<code>{Load | Array&lt;Load&gt;}</code>
-				</h5>
-				<div class="description">
-					<p>The module load record, or module load records, being written by this output.</p>
-
-				</div>
-			</li>
-			
-			<li class="option">
-				<h5>System 
-					<code>{Loader}</code>
-				</h5>
-				<div class="description">
-					<p>The System loader used by Steal to load all of these modules.  All configuration
-should be available on it.</p>
-
-				</div>
-			</li>
-			
-		</ul>
 		
 		
 	</li>
@@ -571,6 +523,85 @@ should be available on it.</p>
 			
 		
 		
+		
+			<section class="signature">
+				<h2 id="sig_">types.output(moduleName, moduleData, load, System)
+</h2>
+<div class="signature-wrapper">
+<p>Specifies the behavior for an output in an <a href="steal-tools.export.object.html">ExportObject</a> &quot;outputs&quot; property. These properties are in
+addition to <a href="steal-tools.transform.options.html">TransformOptions</a>.</p>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>moduleName
+				<code>{String | Array&lt;String&gt;}</code></h4>
+			<div class="description">
+				<p>The module name or module names being written
+out by this output.</p>
+
+			</div>
+			
+			
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>moduleData
+				<code>{Object | Array&lt;Object&gt;}</code></h4>
+			<div class="description">
+				<p>Deprecated.</p>
+
+			</div>
+			
+			
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>load
+				<code>{Load | Array&lt;Load&gt;}</code></h4>
+			<div class="description">
+				<p>The module load record, or module load records, being written by this output.</p>
+
+			</div>
+			
+			
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>System
+				<code>{Loader}</code></h4>
+			<div class="description">
+				<p>The System loader used by Steal to load all of these modules.  All configuration
+should be available on it.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+			</section>
 		
 		
 
@@ -648,23 +679,23 @@ will be written to its own file one time.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.export.output","src":"steal-tools/doc/types/export-output.md","description":"Specifies the behavior for an output in an [steal-tools.export.object] \"outputs\" property. These properties are in\naddition to [steal-tools.transform.options].","title":"ExportOutput","types":[{"type":"Object","options":[{"name":"modules","description":"Builds all the modules in `modules` together \nwith their dependencies.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"},{"type":"comparitor"}]}]}],"optional":true},{"name":"eachModule","description":"Builds each module in the list \nwith its dependendencies individually.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"},{"type":"comparitor"}]}]}],"optional":true},{"name":"graphs","description":"Builds each item in the graph on its own. Each dependency is \nbuilt individually.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"},{"type":"comparitor"}]}]}],"optional":true},{"name":"dest","description":"Specifies where the \noutput should be written.  Dest can be provided as a string or a function that returns the\nlocation.","types":[{"type":"String"},{"type":"function","returns":{"types":[{"type":"String"}]},"params":[{"types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"String"}]}]}],"name":"moduleName","description":"The module name or module names being written\nout by this output."},{"types":[{"type":"Object"},{"type":"Array","template":[{"types":[{"type":"Object","options":[]}]}]}],"name":"moduleData","description":"Deprecated."},{"types":[{"type":"Load"},{"type":"Array","template":[{"types":[{"type":"Load"}]}]}],"name":"load","description":"The module load record, or module load records, being written by this output."},{"types":[{"type":"Loader"}],"name":"System","description":"The System loader used by Steal to load all of these modules.  All configuration\nshould be available on it."}]}]}]}],"inherits":"steal","parent":"steal-tools.types","comment":" ","templates":"/Users/justin/dev/steal.com/theme/templates","static":"/Users/justin/dev/steal.com/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/justin/dev/steal.com"},"dest":"/Users/justin/dev/steal.com/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		window.Bitovi = {
+			URL: {
+				BUILDER: '',
+				BUILDER_DATA: '',
+				BITHUB: '',
+				CDN: ''
+			}
+		};
+
 	</script>
+	<script type='text/javascript' 
+			data-main="static"
 	
+		src="./static/steal.production.js"
 	
-		<script>
-		  steal = {
-		    instantiated: {
-		      "bundles/static.css!$css" : null
-		    }
-		  }
-		</script>
-		<script type='text/javascript' 
-				data-main="static"
-				data-config="./static/config.js"
-				src="./static/steal.production.js"
-		    		bundles-path="bundles"></script>
-	
+	    bundles-path="bundles"
+		></script>
 </body>
 
 </html>

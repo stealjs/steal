@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - amd </title>
+	<title>StealJS  - dest</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -92,8 +92,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
-				amd
+			<a class="sidebar-title" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+				global
 			</a>
 			
 	<ul>
@@ -101,21 +101,9 @@
 			
 				
 				
-				<li class="search-container">
-					<a class="function" href="steal-tools|lib|build|helpers|amd.format.html" data-search="steal-tools/lib/build/helpers/amd.format">
-						format
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="function" href="steal-tools|lib|build|helpers|amd.normalize.html" data-search="steal-tools/lib/build/helpers/amd.normalize">
-						normalize
+				<li class="search-container active">
+					<a class="function" href="dest.html" data-search="dest">
+						dest
 					</a>
 				</li>
 				
@@ -140,9 +128,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>amd</h1>
+<h1>dest</h1>
 	<ul class="tags">
-		<li>module</li>
+		<li>function</li>
 	</ul>
 	
 	
@@ -150,12 +138,6 @@
 
 <div class="sub-heading">
 	
-	
-		<span class="module">steal-tools/lib/build/helpers/amd</span>
-	
-	
-	
-	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -180,15 +162,54 @@
 		
 
 		
+		<section class="description">
+			<p>By default, writes  out every module in <code>[baseURL]/dist/global</code>.  And adds a &quot;.js&quot; or &quot;.css&quot; to
+files not ending with &quot;.js&quot; or &quot;.css&quot;.</p>
+
+		</section>
+		
 
 		
 			
-				<section class="signature">
-					<h2 id="sig___34__amd__34______OVERWRITES____">&#34;+amd&#34;: { ... OVERWRITES ... }
+		
+		
+		
+			<section class="signature">
+				<h2 id="sig_">global.dest(loc, path)
 </h2>
 <div class="signature-wrapper">
-<p>Adds <a href="steal-tools.export.output.html">ExportOutput</a> values that write a project out to an AMD format.</p>
+<p>By default, writes  out every module in <code>[baseURL]/dist/global</code>.  And adds a &quot;.js&quot; or &quot;.css&quot; to
+files not ending with &quot;.js&quot; or &quot;.css&quot;.</p>
 
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>loc
+				<code>{*}</code></h4>
+			<div class="description">
+				
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>path
+				<code>{String}</code><span class="pull-right optional">Optional</span></h4>
+			<div class="description">
+				<p>If provided, changes the location where files are written out.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
 
 
 
@@ -197,42 +218,10 @@
 
 </div>
 
-				</section>
-			
-		
-		
+			</section>
 		
 		
 
-		
-		<section class="comment">
-			<p>Helpers that make exporting to AMD projects easier.</p>
-<h2>Use</h2>
-<p>Add <code>+amd</code> in an output name.</p>
-<pre><code>stealTools.export({
-  system: {
-    main: &quot;my-module&quot;,
-    config: __dirname+&quot;/package.json!npm&quot;
-  },
-  outputs: {
-    &quot;+amd&quot;: {
-      normalize: { &quot;lodash&quot;: &quot;underscore&quot; }  
-    }
-  }
-});
-</code></pre>
-<p><code>+amd</code> mixes in the following default values:</p>
-<ul>
-<li><a href="steal-tools|lib|build|helpers|cjs.graphs.html">graphs</a> - Writes out System.main and all of its dependencies.</li>
-<li><a href="steal-tools|lib|build|helpers|amd.format.html">format</a> - Writes out all modules as CJS.</li>
-<li><a href="steal-tools|lib|build|helpers|amd.normalize.html">normalize</a> - Leaves moduleName references that reference modules in node_modules alone; makes
-all other moduleName references relative.</li>
-<li>[steal-tools/lib/build/helpers/amd.dest dest] - Writes out each module in <code>[baseURL]/dist/amd</code>.</li>
-<li><a href="steal-tools|lib|build|helpers|cjs.ignore.html">ignore</a> - Ignores everything in node_modules.</li>
-</ul>
-<p>Some of the behavior is inherit from the <a href="steal-tools|lib|build|helpers|cjs.html">cjs</a> export helper.</p>
-
-		</section>
 		
 		
 
