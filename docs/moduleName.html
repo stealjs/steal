@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
+		          <li><a href="http://documentjs.com">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,18 +51,20 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog/">Blog</a></li>
-						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
-						<li><a href="http://bitovi.com/training/">Training</a></li>
-						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
-						<li><a href="http://bitovi.com/people/">People</a></li>
-						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog">Blog</a></li>
+						<li><a href="http://bitovi.com/development">Development</a></li>
+						<li><a href="http://bitovi.com/design">Design</a></li>
+						<li><a href="http://bitovi.com/training">Training</a></li>
+						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
+						<li><a href="http://bitovi.com/about">About</a></li>
+						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -695,23 +697,23 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"moduleName","src":"steal/docs/type-moduleName.md","description":"","title":"","types":[{"type":"String","description":"A Loader-unique string that represents a module."}],"parent":"StealJS.types","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

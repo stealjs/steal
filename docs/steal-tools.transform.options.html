@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
+		          <li><a href="http://documentjs.com">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,18 +51,20 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog/">Blog</a></li>
-						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
-						<li><a href="http://bitovi.com/training/">Training</a></li>
-						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
-						<li><a href="http://bitovi.com/people/">People</a></li>
-						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog">Blog</a></li>
+						<li><a href="http://bitovi.com/development">Development</a></li>
+						<li><a href="http://bitovi.com/design">Design</a></li>
+						<li><a href="http://bitovi.com/training">Training</a></li>
+						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
+						<li><a href="http://bitovi.com/about">About</a></li>
+						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -560,7 +562,8 @@ behavior.</p>
 					<code>{String}</code>
 				</h5>
 				<div class="description">
-					
+					<p>The dependency name to normalize.</p>
+
 				</div>
 			</li>
 			
@@ -569,7 +572,8 @@ behavior.</p>
 					<code>{Load}</code>
 				</h5>
 				<div class="description">
-					
+					<p>The load object for the dependency to normalize.</p>
+
 				</div>
 			</li>
 			
@@ -578,7 +582,8 @@ behavior.</p>
 					<code>{String}</code>
 				</h5>
 				<div class="description">
-					
+					<p>The moduleName of the module whose dependencies are being normalized.</p>
+
 				</div>
 			</li>
 			
@@ -587,7 +592,8 @@ behavior.</p>
 					<code>{Load}</code>
 				</h5>
 				<div class="description">
-					
+					<p>The load object of the module whose dependencies are being normalized.</p>
+
 				</div>
 			</li>
 			
@@ -650,90 +656,12 @@ prevents that behavior.</p>
 		
 		
 		
-			<section class="signature">
-				<h2 id="sig_">types.options(depName, depLoad, curName, curLoad)
-</h2>
-<div class="signature-wrapper">
-<p>Specify the behavior of a transform.</p>
-
-
-	<h3>Parameters</h3>
-
-	<ol class="parameters">
-		
-		<li class="parameter">
-			<h4>depName
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>The dependency name to normalize.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>depLoad
-				<code>{Load}</code></h4>
-			<div class="description">
-				<p>The load object for the dependency to normalize.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>curName
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>The moduleName of the module whose dependencies are being normalized.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>curLoad
-				<code>{Load}</code></h4>
-			<div class="description">
-				<p>The load object of the module whose dependencies are being normalized.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-	</ol>
-
-
-	<h3>Returns</h3>
-	<div class="returns">
-		<h4><code>{String}</code></h4>
-		<div class="description">
-			<p>The dependency name to write in. By default, <code>depName</code> is used.</p>
-
-		</div>
-		
-		
-	</div>
-	
-
-
-
-
-
-</div>
-
-			</section>
-		
 		
 
+		
+		<section class="comment">
+			
+		</section>
 		
 		
 
@@ -757,23 +685,23 @@ prevents that behavior.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"typedef","name":"steal-tools.transform.options","src":"steal-tools/doc/types/transform-options.md","description":"Specify the behavior of a transform.","title":"TransformOptions","types":[{"type":"Object","options":[{"name":"ignore","description":"An Array of regular expressions, or strings that \nspecify [moduleName]s that should not be included in the output. \n\nModule names that match the regular expressions are not included. The following\nignores everything in _can/util/_.\n\n    transform(\"can/construct\",{ignore: [/^can\\/util\\/]});\n\n\nModule names and their dependencies that match the \nstrings in the array are not included. The following will not include\n\"can/construct\", and all of its dependencies:\n\n    transform(\"can/component\",{ignore: [\"can/construct\"]});","types":[{"type":"Array","template":[{"types":[{"type":"RegExp"},{"type":"String"},{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"String"}]},{"types":[{"type":"Load"}]}]}]}]}],"optional":true},{"name":"removeDevelopmentCode","description":"By default, removes code in between comments, like:\n\n    //!steal-remove-start\n    REMOVE.THIS;\n    //!steal-remove-end\n\nIf removeDevelopmentCode is `false`, this code is not removed.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"format","description":"What format the output will be transpiled to.  By default\nthe format is `\"global\"`.  `\"global\"` means the code will be transpiled to work\nstandalone.  Module dependencies that are not included should be mapped to their\nname on the global object in exports.\n\nThe other possible format values are \"steal\",\"amd\", and \"cjs\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'global'"},{"name":"export","description":"A mapping of module names to their name on the\nglobal object.  For example, if an output depends on jQuery, but does not include it, you\nshould include:\n\n    transform(\"mywidget\",{exports: {\"jquery\": \"jQuery\"}})\n\n__note__ - In future releases, \nthese values will be taken directly from [System.shim] configuration values.","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"String"}]}]}]},{"name":"useNormalizedDependencies","description":"Use normalized dependency names instead of\nrelative module names.  For example \"foo/bar\" will be used instead of \"./bar\".","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"normalize","description":"An\noptional function that will normalize all module names written out. Use this for custom normalization\nbehavior.","types":[{"type":"function","returns":{"types":[{"type":"String"}],"description":"The dependency name to write in. By default, `depName` is used."},"params":[{"types":[{"type":"String"}],"name":"depName","description":"The dependency name to normalize."},{"types":[{"type":"Load"}],"name":"depLoad","description":"The load object for the dependency to normalize."},{"types":[{"type":"String"}],"name":"curName","description":"The moduleName of the module whose dependencies are being normalized."},{"types":[{"type":"Load"}],"name":"curLoad","description":"The load object of the module whose dependencies are being normalized."}]}],"optional":true},{"name":"minify","description":"By default, the output is not minified.\nSet to `true` to minify the result.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"ignoreAllDependencies","description":"By default, the dependencies of\nthe module specified are included, unless they are explicitly ignored.  Setting\n_ignoreAllDependencies_ to `true` only results in returning that individual module\nas the output.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"includeTraceurRuntime","description":"By default, if an ES6 module\nis found, the [@traceur] runtime is packaged with the output.  Setting this to `false`\nprevents that behavior.","types":[{"type":"includeTraceurRuntime"}],"optional":true,"defaultValue":"true"}]}],"parent":"steal-tools.types","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>

@@ -41,7 +41,7 @@
 		          <li><a href="http://jquerypp.com">jQuery++</a></li>
 		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
 		          <li><a href="http://funcunit.com">FuncUnit</a></li>
-		          <li><a href="http://javascriptmvc.com/docs.html#!DocumentJS">DocumentJS</a></li>
+		          <li><a href="http://documentjs.com">DocumentJS</a></li>
 		        </ul>
 			</div>
 			<ul class="nav">
@@ -51,18 +51,20 @@
         
 	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
 		      <li class=""><a href="https://github.com/bitovi/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/bitovi/steal">Chat</a></li>
 	        </ul>
 			<div class="pull-right">
 				<div class="bitovi-menu">
 					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
 					<ul class="dropdown-menu">
 						<li><a href="http://bitovi.com">Bitovi.com</a></li>
-						<li><a href="http://bitovi.com/blog/">Blog</a></li>
-						<li><a href="http://bitovi.com/consulting/">Consulting</a></li>
-						<li><a href="http://bitovi.com/training/">Training</a></li>
-						<li><a href="http://bitovi.com/open-source/">Open Source</a></li>
-						<li><a href="http://bitovi.com/people/">People</a></li>
-						<li><a href="http://bitovi.com/contact/">Contact Us</a></li>
+						<li><a href="http://bitovi.com/blog">Blog</a></li>
+						<li><a href="http://bitovi.com/development">Development</a></li>
+						<li><a href="http://bitovi.com/design">Design</a></li>
+						<li><a href="http://bitovi.com/training">Training</a></li>
+						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
+						<li><a href="http://bitovi.com/about">About</a></li>
+						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
 					</ul>
 				</div>
 			</div>
@@ -466,6 +468,42 @@ by <a href="System.buildConfig.html">System.buildConfig</a> in the config file.<
 			</div>
 			
 			
+			<ul class="options">
+				
+				<li class="option">
+					<h5>main 
+						<code>{String}</code>
+					</h5>
+					<div class="description">
+						<p>The module whose dependencies should be built.</p>
+
+					</div>
+				</li>
+				
+				<li class="option">
+					<h5>config 
+						<code>{String}</code>
+					</h5>
+					<div class="description">
+						<p>The path to a configuration file. This
+will also specify <code>baseURL</code>.</p>
+
+					</div>
+				</li>
+				
+				<li class="option">
+					<h5>baseURL 
+						<code>{String}</code>
+					</h5>
+					<div class="description">
+						<p>If a configuration file is not used,
+the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
+
+					</div>
+				</li>
+				
+			</ul>
+			
 			
 		</li>
 		
@@ -536,9 +574,7 @@ for the resulting <a href="steal-tools.transform.html">transform function's</a> 
 
 		
 		<section class="comment">
-			<p>will also specify <code>baseURL</code>.
-the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
-<h2>Use</h2>
+			<h2>Use</h2>
 <p><code>stealTools.transformImport</code> lets you transform modules to a different
 format or form.  It's passed a <a href="steal-tools.SystemConfig.html">SystemConfig</a>, which is used
 to load modules. Once all modules have been loaded, it provides a
@@ -606,23 +642,23 @@ function will return the main module; but it can be used to generate any depende
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		window.Bitovi = {
-			URL: {
-				BUILDER: '',
-				BUILDER_DATA: '',
-				BITHUB: '',
-				CDN: ''
-			}
-		};
-
+		var docObject = {"type":"function","name":"steal-tools.transformImport","src":"steal-tools/doc/transformImport.md","description":"Loads a module, and its dependencies, and provides a [steal-tools.transform] \nmethod, so they can be written out in another form.","title":"transformImport","parent":"steal-tools.JS","signatures":[{"code":"stealTools.transformImport(config, transformOptions)","description":"Loads a module, and all of its dependencies, and returns a function that\ncan write out all, or parts, of the module and its dependency graph,\nso that they don't depend on `steal.js`.","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"main","description":"The module whose dependencies should be built.","types":[{"type":"String"}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`.","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"name":"config","description":"Specifies configuration values to set on \na System loader. The [System.main main] option must be specified. Typically,\n[System.configPath configPath] is also specified, as that is used to set \n[System.baseURL baseURL].  Any System [System.config configuration] can be specified; however,\nmost other __build__ configuration values are specified\nby [System.buildConfig] in the config file."},{"types":[{"type":"Object","options":[{"name":"verbose","description":"Set to true to get a lot of warning messages.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"Set to true to log nothing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"name":"transformOptions","description":"Configures the behavior of loading the modules, and acts as default values\nfor the resulting [steal-tools.transform transform function's] options argument."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.transform"}]}]}],"description":"A deferred, which resolves to a function that can write out all or part of the loaded dependency tree."}}],"types":[],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
-	<script type='text/javascript' 
-			data-main="static"
 	
-		src="./static/steal.production.js"
 	
-	    bundles-path="bundles"
-		></script>
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+	
 </body>
 
 </html>
