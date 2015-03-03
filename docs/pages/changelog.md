@@ -1,6 +1,30 @@
 @page StealJS.changelog Changelog
 @parent StealJS.guides
 
+@body
+
+## 0.7.0
+
+### steal
+
+- [npm] and [bower] plugins can be used with each other using [configDependencies](http://stealjs.com/docs/npm.html)
+(and [here](http://stealjs.com/docs/bower.html)).
+- Updated SystemJS and ESML.
+- Choice of ES6 compiler can be controlled through the [System.transpiler transpiler] config.
+- [System.bundle] can now take a glob.
+- Loading in Node on Windows no longer requires setting paths with `file:` prefix.
+- Less plugin upgraded to use Less 2.4.0.
+
+### steal-tools
+
+- Bundles now get written to subdirectories of [System.bundlesPath bundlesPath] to ensure unique. [#52](https://github.com/bitovi/steal-tools/pull/54)
+- All tests passing on Windows.
+- `main` and `bundle` names can be the unnormalized. [#89](https://github.com/bitovi/steal-tools/issues/89).
+
+      stealTools.build({
+        main: "foo/bar/"
+      });
+
 ## 0.6.0
 
 ### steal
