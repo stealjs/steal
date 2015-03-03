@@ -300,11 +300,6 @@
 		
 
 		
-		<section class="description">
-			<h2>0.6.0</h2>
-
-		</section>
-		
 
 		
 			
@@ -315,7 +310,29 @@
 
 		
 		<section class="comment">
-			<h3>steal</h3>
+			<h2>0.7.0</h2>
+<h3>steal</h3>
+<ul>
+<li><a href="npm.html">npm</a> and <a href="bower.html">bower</a> plugins can be used with each other using <a href="http://stealjs.com/docs/npm.html">configDependencies</a>
+(and <a href="http://stealjs.com/docs/bower.html">here</a>).</li>
+<li>Updated SystemJS and ESML.</li>
+<li>Choice of ES6 compiler can be controlled through the <a href="System.transpiler.html">transpiler</a> config.</li>
+<li><a href="System.bundle.html">System.bundle</a> can now take a glob.</li>
+<li>Loading in Node on Windows no longer requires setting paths with <code>file:</code> prefix.</li>
+<li>Less plugin upgraded to use Less 2.4.0.</li>
+</ul>
+<h3>steal-tools</h3>
+<ul>
+<li><p>Bundles now get written to subdirectories of <a href="System.bundlesPath.html">bundlesPath</a> to ensure unique. <a href="https://github.com/bitovi/steal-tools/pull/54">#52</a></p></li>
+<li><p>All tests passing on Windows.</p></li>
+<li><p><code>main</code> and <code>bundle</code> names can be the unnormalized. <a href="https://github.com/bitovi/steal-tools/issues/89">#89</a>.</p>
+<pre><code>stealTools.build({
+  main: &quot;foo/bar/&quot;
+});
+</code></pre></li>
+</ul>
+<h2>0.6.0</h2>
+<h3>steal</h3>
 <ul>
 <li><p>Added the <a href="npm.html">npm</a> extension.</p></li>
 <li><p>Add the <a href="bower.html">bower</a> extension.</p></li>
@@ -368,7 +385,7 @@ now returns a deferred and the defaults and modules arguments have been switched
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.changelog","src":"steal/docs/pages/changelog.md","description":"## 0.6.0","title":"Changelog","parent":"StealJS.guides","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS.changelog","src":"steal/docs/pages/changelog.md","description":"","title":"Changelog","parent":"StealJS.guides","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
