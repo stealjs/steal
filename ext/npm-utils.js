@@ -13,6 +13,29 @@ var utils = {
 		}
 		return d;
 	},
+	map: function(arr, fn){
+		var i = 0, len = arr.length, out = [];
+		for(; i < len; i++) {
+			out.push(fn.call(arr, arr[i]));
+		}
+		return out;
+	},
+	filter: function(arr, fn){
+		var i = 0, len = arr.length, out = [], res;
+		for(; i < len; i++) {
+			res = fn.call(arr, arr[i]);
+			if(res) {
+				out.push(res);
+			}
+		}
+		return out;
+	},
+	forEach: function(arr, fn) {
+		var i = 0, len = arr.length;
+		for(; i < len; i++) {
+			fn.call(arr, arr[i]);
+		}
+	},
 	moduleName: {
 		/**
 		 * @function moduleName.create

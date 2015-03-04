@@ -28,7 +28,8 @@ var crawl = {
 	deps: function(context, pkg, isRoot) {
 	
 		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
-		return Promise.all(deps.map(function(childPkg){
+
+		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
 			// if a peer dependency, and not isRoot
 			if(childPkg._isPeerDependency && !isRoot ) {
 				// check one node_module level higher
@@ -53,14 +54,14 @@ var crawl = {
 				} // else if there's no source, it's likely because this dependency has been found elsewhere
 			});
 			
-		}).filter(truthy)).then(function(packages){
+		}), truthy)).then(function(packages){
 			// at this point all dependencies of pkg have been loaded, it's ok to get their children
 	
-			return Promise.all(packages.map(function(childPkg){
+			return Promise.all(utils.filter(utils.map(packages, function(childPkg){
 				if(childPkg) {
 					return crawl.deps(context, childPkg);
 				} 
-			}).filter(truthy));
+			}), truthy));
 		});
 	},
 	/**

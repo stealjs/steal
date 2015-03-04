@@ -43,7 +43,7 @@ exports.translate = function(load){
 		// clean up packages so everything is unique
 		var names = {};
 		var packages = [];
-		context.packages.forEach(function(pkg, index){
+		utils.forEach(context.packages, function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){ 
 					delete pkg.browser.transform;
@@ -270,7 +270,13 @@ var translateConfig = function(loader, packages){
 		}
 		loader.npm[name+"@"+pkg.version] = pkg;
 	};
-	packages.forEach(function(pkg){
+	var forEach = function(arr, fn){
+		var i = 0, len = arr.length;
+		for(; i < len; i++) {
+			fn.call(arr, arr[i]);
+		}
+	};
+	forEach(packages, function(pkg){
 		if(pkg.system) {
 			// don't set system.main
 			var main = pkg.system.main;

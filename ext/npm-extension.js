@@ -18,7 +18,6 @@ exports.addExtension = function(System){
 	 */
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
-
 		// Get the current package
 		var refPkg = utils.pkg.findByModuleNameOrAddress(this, parentName, parentAddress);
 		
