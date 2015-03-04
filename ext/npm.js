@@ -121,15 +121,16 @@ function convertPropertyNamesAndValues (context, pkg, map , root) {
 }
 
 function convertName (context, pkg, map, root, name) {
-	var parsed = utils.moduleName.parse(name, pkg.name);
+	var parsed = utils.moduleName.parse(name, pkg.name),
+		depPkg, requestedVersion;
 	if( name.indexOf("#") >= 0 ) {
 		
 		if(parsed.packageName === pkg.name) {
 			parsed.version = pkg.version;
 		} else {
 			// Get the requested version's actual version.
-			var requestedVersion = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName].version;
-			var depPkg = context.versions[parsed.packageName][requestedVersion];
+			requestedVersion = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName].version;
+			depPkg = context.versions[parsed.packageName][requestedVersion];
 			parsed.version = depPkg.version;
 		}
 		return utils.moduleName.create(parsed);
@@ -148,7 +149,6 @@ function convertName (context, pkg, map, root, name) {
 				});
 			} else {
 				// TODO: share code better!
-				var depPkg;
 				// SYSTEM.NAME
 				if(  pkg.name === parsed.packageName || ( (pkg.system && pkg.system.name) === parsed.packageName) ) {
 					depPkg = pkg;
@@ -158,8 +158,8 @@ function convertName (context, pkg, map, root, name) {
 						console.warn("WARN: Could not find ", name , "in node_modules. Ignoring.");
 						return name;
 					}
-					var requestedVersion = requestedProject.version;
-					var depPkg = context.versions[parsed.packageName][requestedVersion];
+					requestedVersion = requestedProject.version;
+					depPkg = crawl.matchedVersion(context, parsed.packageName, requestedVersion);
 				}
 				// SYSTEM.NAME
 				if(depPkg.system && depPkg.system.name) {

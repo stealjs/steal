@@ -154,6 +154,15 @@ var crawl = {
 			}
 			parentAddress = utils.path.parentNodeModuleAddress(packageAddress);
 		}
+	},
+	matchedVersion: function(context, packageName, requestedVersion){
+		var versions = context.versions[packageName], pkg;
+		for(v in versions) {
+			pkg = versions[v];
+			if(SemVer.satisfies(pkg.version, requestedVersion)) {
+				return pkg;
+			}
+		}
 	}
 };
 

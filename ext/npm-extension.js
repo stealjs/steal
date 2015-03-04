@@ -18,6 +18,13 @@ exports.addExtension = function(System){
 	 */
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress){
+		// If this is a relative module name and the parent is not an npm module
+		// we can skip all of this logic.
+		if(parentName && utils.path.isRelative(name) && 
+		  !utils.moduleName.isNpm(parentName)) {
+			return oldNormalize.call(this, name, parentName, parentAddress);
+		}
+
 		// Get the current package
 		var refPkg = utils.pkg.findByModuleNameOrAddress(this, parentName, parentAddress);
 		
