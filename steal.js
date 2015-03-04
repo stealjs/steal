@@ -1579,10 +1579,6 @@ function logloads(loads) {
           // 15.2.4.6.1 AddDependencyLoad (load is parentLoad)
           .then(function(depLoad) {
 
-            /*console.assert(!load.dependencies.some(function(dep) {
-              return dep.key == request;
-            }), 'not already a dependency');*/
-
             // adjusted from spec to maintain dependency order
             // this is due to the System.register internal implementation needs
             load.dependencies[index] = {
@@ -2245,7 +2241,10 @@ function logloads(loads) {
     },
     // 26.3.3.3
     'delete': function(name) {
-      return this._loader.modules[name] ? delete this._loader.modules[name] : false;
+      var loader = this._loader;
+      delete loader.importPromises[name];
+      delete loader.moduleRecords[name];
+      return loader.modules[name] ? delete loader.modules[name] : false;
     },
     // 26.3.3.4 entries not implemented
     // 26.3.3.5
@@ -2410,6 +2409,7 @@ function logloads(loads) {
     options.script = false;
     options.sourceMaps = 'inline';
     options.filename = load.address;
+    options.inputSourceMap = load.metadata.sourceMap;
 
     var compiler = new transpilerModule.Compiler(options);
     var source = doTraceurCompile(load.source, compiler, options.filename);

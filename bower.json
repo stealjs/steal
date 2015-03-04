@@ -8,6 +8,6 @@
     "systemjs" : "bitovi/systemjs#0.14.0-bitovi.2",
     "traceur": "0.0.82",
     "system-bower": "~0.1.0",
-	"es6-module-loader": "~0.14.0"
+    "es6-module-loader": "bitovi/es6-module-loader#0.15.0-bitovi.0"
   }
 }
