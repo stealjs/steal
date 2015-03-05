@@ -16,7 +16,7 @@
     "less": "^2.4.0"
   },
   "devDependencies": {
-    "system-npm": "git://github.com/bitovi/system-npm#b39ec4e1c03a730ebc1b76feb695697eef67b6d8",
+    "system-npm": "~0.1.2",
     "system-json": "0.0.2",
     "bower": "1.3.8",
     "grunt": "~0.4.1",
