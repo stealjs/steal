@@ -64,6 +64,13 @@
 	// checks if we're running in node, then prepends the "file:" protocol if we are
 	var envPath = function(val) {
 		if(typeof window === "undefined" && !/^file:/.test(val)) {
+			// If relative join with the current working directory
+			if(val[0] === "." && (val[1] === "/" ||
+								 (val[1] === "." && val[2] === "/"))) {
+				val = require("path").join(process.cwd(), val);
+			}
+			if(!val) return val;
+
 			return "file:" + val;
 		}
 		return val;
