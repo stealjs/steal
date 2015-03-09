@@ -23,6 +23,8 @@ if(!System.has("@loader")) {
  * @return {Promise} a promise to resolve with the load's new source.
  */
 exports.translate = function(load){
+	var loader = this;
+
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
