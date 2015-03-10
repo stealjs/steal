@@ -116,6 +116,7 @@
 				}) );
 			}).then(null, function(error){
 				console.log("error",error,  error.stack);
+				throw error;
 			});
 			return appDeferred;
 		}
