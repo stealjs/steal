@@ -55,6 +55,13 @@ QUnit.config.testTimeout = 30000;
 		});
 	});
 
+	asyncTest("Errors return back", function(){
+		System["import"]("tests/module-err").then(function(){
+		}, function(err){
+			throw err;
+		});
+	});
+
 	asyncTest("steal's normalize", function(){
 		System['import']('tests/mod/mod').then(function(m){
 			equal(m.name,"mod", "mod returned" );
