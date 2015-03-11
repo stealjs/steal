@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/bitovi/steal.git"
+    "url": "git://github.com/stealjs/steal.git"
   },
   "licenses": [
     {
