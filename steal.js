@@ -5383,7 +5383,11 @@ if (typeof System !== "undefined") {
 						attr.nodeName );
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
-
+			
+			var source = script.innerHTML.substr(1);
+			if(/\S/.test(source)){
+				options.mainSource = source;
+			}
 		}
 
 		return options;
@@ -5419,7 +5423,7 @@ if (typeof System !== "undefined") {
 
 			configDeferred = System["import"](System.configMain);
 
-			return appDeferred = configDeferred.then(function(cfg){
+			appDeferred = configDeferred.then(function(cfg){
 				return System.main ? System["import"](System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
@@ -5454,14 +5458,21 @@ if (typeof System !== "undefined") {
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System["import"](main)
+					return System["import"](main);
 				}) );
 			}).then(null, function(error){
 				console.log("error",error,  error.stack);
 				throw error;
 			});
-			return appDeferred;
+			
 		}
+		
+		if(System.mainSource) {
+			appDeferred = appDeferred.then(function(){
+				System.module(System.mainSource);
+			});
+		}
+		return appDeferred;
 	};
 	steal.done = function(){
 		return appDeferred;
