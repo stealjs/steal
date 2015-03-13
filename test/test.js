@@ -255,6 +255,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("using babel as transpiler works", function(){
 		makeIframe("babel/site.html");
 	});
+	
+	asyncTest("inline code", function(){
+		makeIframe("basics/inline_code.html");
+	});
 
 	module("json extension");
 
