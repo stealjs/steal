@@ -151,7 +151,7 @@ var utils = {
 			
 			// The refPkg might have a browser [https://github.com/substack/node-browserify#browser-field] mapping.
 			// Perform that mapping here.
-			if(refPkg.browser && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
+			if(refPkg.browser && (typeof refPkg.browser !== "string") && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
 				mappedName = refPkg.browser[mapName] === false ? "@empty" : refPkg.browser[mapName];
 			}
 			// globalBrowser looks like: {moduleName: aliasName, pgk: aliasingPkg}

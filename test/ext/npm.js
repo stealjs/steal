@@ -87,6 +87,9 @@ function convertSystem(context, pkg, system, root) {
 	if(system.map) {
 		system.map = convertPropertyNamesAndValues(context, pkg, system.map, root);
 	}
+	if(system.paths) {
+		system.paths = convertPropertyNames(context, pkg, system.paths, root);
+	}
 	// needed for builds
 	if(system.buildConfig) {
 		system.buildConfig = convertSystem(context, pkg, system.buildConfig, root);
@@ -245,7 +248,10 @@ var translateConfig = function(loader, packages){
 	}
 	if(!g.process) {
 		g.process = {
-			cwd: function(){}
+			cwd: function(){},
+			env: {
+				NODE_ENV: loader.env
+			}
 		};
 	}
 	
