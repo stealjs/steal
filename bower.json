@@ -1,13 +1,19 @@
 {
   "name": "steal",
   "main": "steal.js",
-  "ignore": ["test","src","core","docs"],
+  "ignore": [
+    "test",
+    "src",
+    "core",
+    "docs"
+  ],
   "version": "0.7.0",
   "devDependencies": {
     "qunit": "~1.12.0",
-    "systemjs" : "bitovi/systemjs#0.14.0-bitovi.2",
-    "traceur": "0.0.82",
+    "systemjs": "bitovi/systemjs#0.14.0-bitovi.2",
+    "traceur": "0.0.83",
     "system-bower": "~0.1.0",
-    "es6-module-loader": "bitovi/es6-module-loader#0.15.0-bitovi.0"
+    "es6-module-loader": "bitovi/es6-module-loader#0.15.0-bitovi.0",
+    "traceur-runtime": "~0.0.87"
   }
 }
