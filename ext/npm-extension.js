@@ -75,6 +75,9 @@ exports.addExtension = function(System){
 					utils.pkg.main(depPkg);
 				return oldNormalize.call(this, localName, parentName, parentAddress);
 			}
+			if(refPkg.browser && refPkg.browser[name]) {
+				return oldNormalize.call(this, refPkg.browser[name], parentName, parentAddress);
+			}
 			return oldNormalize.call(this, name, parentName, parentAddress);
 		}
 		
