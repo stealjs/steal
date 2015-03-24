@@ -50,6 +50,9 @@ var utils = {
 			if(standard) {
 				return descriptor.moduleName;
 			} else {
+				if(descriptor === "@empty") {
+					return descriptor;
+				}
 				var modulePath;
 				if(descriptor.modulePath) {
 					modulePath = descriptor.modulePath.substr(0,2) === "./" ? descriptor.modulePath.substr(2) : descriptor.modulePath;
@@ -82,7 +85,7 @@ var utils = {
 			var versionParts = modulePathParts[0].split("@");
 			// it could be something like `@empty`
 			if(!modulePathParts[1] && !versionParts[0]) {
-				versionParts = ["@"+versionParts[0]];
+				versionParts = ["@"+versionParts[1]];
 			}
 			var packageName, 
 				modulePath;
