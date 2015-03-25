@@ -11,7 +11,7 @@ and [jquery](http://jquery.com/) to build a `Hello World` app. This guide is a s
 Install [Node.js](http://nodejs.org/) on your computer and that [grunt-cli](http://gruntjs.com/getting-started) is installed globally.
 
 Create a directory for all your static content, scripts, and styles.
-This is your [System.baseURL BASE] folder. Within that folder run `npm init` to, create a `package.json`:
+This is your [System.baseURL baseURL] folder. Within that folder run `npm init` to, create a `package.json`:
 
 Note: when it asks for the "entrypoint", write "main.js".
 
