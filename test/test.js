@@ -244,9 +244,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("less_options/site.html");
 	});
 
+	/*
 	asyncTest("Loads traceur-runtime automatically", function(){
 		makeIframe("traceur_runtime/dev.html");
 	});
+	*/
 
 	asyncTest("allow truthy script options (#298)", function(){
 		makeIframe("basics/truthy_script_options.html");
