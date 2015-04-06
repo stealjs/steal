@@ -3,14 +3,15 @@
 
 Here's what we've got planned:
 
-## Soure Maps
-
-We want source map support for everything.
-
 ## Watch Builds
 
 Automatically build when a file changes. We should be able to make
 this extremely high performance if the dependency graph is not changing.
+
+## Live Reloading
+
+Would make development extremely convenient as modules would automatically
+reload as you change them without needing to reload the browser.
 
 ## Remove Traceur Runtime and IE8 ES6 module support
 
