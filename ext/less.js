@@ -14,16 +14,17 @@ exports.translate = function(load) {
 	var pathParts = (address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 
-	var paths = [];
 	if (typeof window !== 'undefined') {
 		pathParts = (load.address+'').split('/');
 		pathParts[pathParts.length - 1] = ''; // Remove filename
-		paths = [pathParts.join('/')];
 	}
 
 	return new Promise(function(resolve, reject){
-		options.filename = address;
-		options.paths = [pathParts.join('/')];
+		var renderOptions = {filename: address};
+		for (var prop in options){
+		   	renderOptions[prop] = options[prop]
+		}
+		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'))
 
 		var done = function(output) {
 			resolve(output.css);
@@ -33,7 +34,7 @@ exports.translate = function(load) {
 			reject(error);
 		};
 
-		lessEngine.render(load.source, options).then(done, fail);
+		lessEngine.render(load.source, renderOptions).then(done, fail);
 	});
 };
 
