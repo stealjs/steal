@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - SystemConfig </title>
+	<title>StealJS - SourceObject </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -321,7 +321,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
 						SystemConfig
 					</a>
@@ -357,7 +357,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="typedef" href="steal-tools.source.object.html" data-search="SourceObject">
 						SourceObject
 					</a>
@@ -406,7 +406,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>SystemConfig</h1>
+<h1>SourceObject</h1>
 	<ul class="tags">
 		<li>typedef</li>
 	</ul>
@@ -417,7 +417,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">steal-tools.SystemConfig</span>
+		<span class="module">steal-tools.source.object</span>
 	
 	
 	
@@ -447,8 +447,7 @@
 
 		
 		<section class="description">
-			<p>Configuration values needed for StealJS to load modules. Some set of the following
-values are required:</p>
+			<p>An object representing a source. This object is used internally and returned by <a href="steal-tools.transform.html">transform</a>.</p>
 
 		</section>
 		
@@ -472,26 +471,10 @@ values are required:</p>
   <ol class="parameters">
 	
 	<li class="parameter">
-		<h4>main
-			<code>{String | Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code></h4>
+		<h4>code
+			<code>{String}</code></h4>
 		<div class="description">
-			<p>The module, or modules, that should be
-imported.  This sets <a href="System.main.html">System.main</a>.</p>
-
-		</div>
-		
-		
-		
-		
-		
-	</li>
-	
-	<li class="parameter">
-		<h4>config
-			<code>{String}</code><span class="pull-right optional">Optional</span></h4>
-		<div class="description">
-			<p>The path to a configuration file. This
-will also specify <code>baseURL</code>, and sometimes <code>main</code>. This sets <a href="System.configPath.html">System.configPath</a>.</p>
+			<p>A string containing the source code.</p>
 
 		</div>
 		
@@ -500,11 +483,10 @@ will also specify <code>baseURL</code>, and sometimes <code>main</code>. This se
 	</li>
 	
 	<li class="parameter">
-		<h4>baseURL
-			<code>{String}</code><span class="pull-right optional">Optional</span></h4>
+		<h4>map
+			<code>{SourceMapConsumer}</code></h4>
 		<div class="description">
-			<p>If a configuration file is not used,
-the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
+			<p>A source map generated for the source code. To get the JSON representation of the source map call <code>.toString()</code> on the map.</p>
 
 		</div>
 		
@@ -528,42 +510,7 @@ the <a href="System.baseURL.html">baseURL</a> value must be set.</p>
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p><a href="steal-tools.build.html">build</a>, <a href="steal-tools.export.html">export</a>, and <a href="steal-tools.transformImport.html">transformImport</a> all
-take a <code>SystemConfig</code>, which configures the modules to load.</p>
-<pre><code>stealTools.build(SystemConfig, ...)
-stealTools.pluginifier(SystemConfig, ...)
-stealTools[&quot;export&quot;]({system: SystemConfig, outputs: {...}});
-</code></pre>
-<p>If your <code>config</code> file specifies <code>main</code>, all that is needed is the <code>config</code> location:</p>
-<pre><code>stealTools.build({config: __dirname+&quot;/package.json!npm&quot;}, ...)
-stealTools.pluginifier({config: __dirname+&quot;/package.json!npm&quot;}, ...)
-stealTools.export({
-  system: {config: __dirname+&quot;/package.json!npm&quot;}, 
-  outputs: {...}
-});
-</code></pre>
-<p>Otherwise, <code>main</code> and <code>config</code> are probably needed:</p>
-<pre><code>stealTools.build({
-  config: __dirname+&quot;/config.js&quot;,
-  main: &quot;myproject&quot;
-}, ...);
-
-stealTools.pluginifier({
-  config: __dirname+&quot;/config.js&quot;,
-  main: &quot;myproject&quot;
-}, ...);
-
-stealTools.export({
-  system: {
-    config: __dirname+&quot;/config.js&quot;,
-    main: &quot;myproject&quot;
-  }, 
-  outputs: {...}
-});
-</code></pre>
-<p>If there is no <code>config</code>, you should specify the baseURL, so StealJS knows where to find your modules.</p>
-
+			
 		</section>
 		
 		
@@ -588,7 +535,7 @@ stealTools.export({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.SystemConfig","src":"steal-tools/doc/types/system-config.md","description":"Configuration values needed for StealJS to load modules. Some set of the following\nvalues are required:","title":"SystemConfig","types":[{"type":"Object","options":[{"name":"main","description":"The module, or modules, that should be \nimported.  This sets [System.main].","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`, and sometimes `main`. This sets [System.configPath].","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.source.object","src":"steal-tools/doc/types/source-object.md","description":"An object representing a source. This object is used internally and returned by [steal-tools.transform].","title":"SourceObject","types":[{"type":"Object","options":[{"name":"code","description":"A string containing the source code.","types":[{"type":"String"}]},{"name":"map","description":"A source map generated for the source code. To get the JSON representation of the source map call `.toString()` on the map.","types":[{"type":"SourceMapConsumer"}]}]}],"parent":"steal-tools.types","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
