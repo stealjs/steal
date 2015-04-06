@@ -26,6 +26,8 @@ exports.translate = function(load) {
 		options.paths = [pathParts.join('/')];
 
 		var done = function(output) {
+			// Put the source map on metadata if one was created.
+			load.metadata.map = output.map;
 			resolve(output.css);
 		};
 
