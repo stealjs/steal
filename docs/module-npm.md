@@ -117,7 +117,7 @@ are converted to NPM module names.  The keys and values must:
 ```js
 {
   "system": {
-    "meta": {
+    "map": {
       "./util/util": "./util/jquery/jquery",
       "jquery" : "lodash"
     }
