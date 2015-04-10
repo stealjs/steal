@@ -17,6 +17,7 @@
 		steal.clone = makeSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
+		require("system-json");
 	}
     
 })(typeof window == "undefined" ? global : window);

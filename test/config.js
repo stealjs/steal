@@ -1,7 +1,6 @@
 System.config({
 	paths: {
 		// "steal/dev/*" : "../dev/*.js",
-		'json/my.json': 'json/my.json'
 	},
 	bundle: ["foo"],
 	ext : {
