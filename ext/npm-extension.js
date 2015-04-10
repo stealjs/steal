@@ -65,7 +65,12 @@ exports.addExtension = function(System){
 			if(!parsedModuleName.modulePath) {
 				parsedModuleName.modulePath = utils.pkg.main(depPkg);
 			}
-			return oldNormalize.call(this, utils.moduleName.create(parsedModuleName), parentName, parentAddress);
+			var moduleName = utils.moduleName.create(parsedModuleName);
+			// Apply mappings, if they exist in the refPkg
+			if(refPkg.system && refPkg.system.map && refPkg.system.map[moduleName]) {
+				moduleName = refPkg.system.map[moduleName];
+			}
+			return oldNormalize.call(this, moduleName, parentName, parentAddress);
 		} else {
 			if(depPkg === this.npmPaths.__default) {
 				// if the current package, we can't? have the
