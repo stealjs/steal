@@ -165,6 +165,11 @@ function convertName (context, pkg, map, root, name) {
 					}
 					requestedVersion = requestedProject.version;
 					depPkg = crawl.matchedVersion(context, parsed.packageName, requestedVersion);
+					// If we still didn't find one just use the first available version.
+					if(!depPkg) {
+						var versions = context.versions[parsed.packageName];
+						depPkg = versions && versions[requestedVersion];
+					}
 				}
 				// SYSTEM.NAME
 				if(depPkg.system && depPkg.system.name) {
