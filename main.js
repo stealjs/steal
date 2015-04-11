@@ -93,7 +93,10 @@
 				removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : (href.pathname ? ((base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname) : base.pathname)) +
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
-		};
+		},
+		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
+		isBrowserWithWindow = typeof window === "undefined",
+		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
 		//if no / slashes, check for \ slashes since it might be a windows path
@@ -247,6 +250,8 @@ var makeSteal = function(System){
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
 		
+		var tval = loader.paths["@traceur"];
+
 		loader.config =  function(cfg){
 			
 			var data = extend({},cfg);
@@ -293,6 +298,8 @@ var makeSteal = function(System){
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
+				
+			System.configPath = joinURIs( location.href, val);
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
@@ -308,7 +315,7 @@ var makeSteal = function(System){
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
 	var envPath = function(val) {
-		if(typeof window === "undefined" && !/^file:/.test(val)) {
+		if(isNode && !/^file:/.test(val)) {
 			// If relative join with the current working directory
 			if(val[0] === "." && (val[1] === "/" ||
 								 (val[1] === "." && val[2] === "/"))) {
@@ -369,8 +376,8 @@ var makeSteal = function(System){
 	
 	var isNode = typeof module !== 'undefined' && module.exports;
 	var LESS_ENGINE = "less-2.4.0";
-	
-	setterConfig(System,{
+	var specialConfig;
+	setterConfig(System, specialConfig = {
 		env: {
 			set: function(val){
 				System.env =  val;
@@ -388,6 +395,54 @@ var makeSteal = function(System){
 			}
 		},
 		main: mainSetter,
+		stealURL: {
+			// http://domain.com/steal/steal.js?moduleName,env&
+			set: function(url, cfg)	{
+				System.stealURL = url;
+				var urlParts = url.split("?");
+				
+				var path = urlParts.shift(),
+					search = urlParts.join("?"),
+					searchParts = search.split("&"),
+					paths = path.split("/"),
+					lastPart = paths.pop(),
+					stealPath = paths.join("/");
+				
+				specialConfig.stealPath.set.call(this,stealPath, cfg);
+				
+				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+					System.env = "production";
+				}
+				
+				if(searchParts.length && searchParts[0].length) {
+					var searchConfig = {},
+						searchPart;
+					for(var i =0; i < searchParts.length; i++) {
+						searchPart = searchParts[i];
+						var paramParts = searchPart.split("=");
+						if(paramParts.length > 1) {
+							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
+						} else {
+							console.warn("please use search params like ?main=main&env=production");
+							var oldParamParts = searchPart.split(",");
+							if (oldParamParts[0]) {
+								searchConfig.startId = oldParamParts[0];
+							}
+							if (oldParamParts[1]) {
+								searchConfig.env = oldParamParts[1];
+							}
+						}
+					}
+					this.config(searchConfig);
+				}	
+				
+				// Split on / to get rootUrl
+		
+				
+				
+				
+			}
+		},
 		// this gets called with the __dirname steal is in
 		stealPath: {
 			set: function(dirname, cfg) {
@@ -418,7 +473,7 @@ var makeSteal = function(System){
 					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
 					
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -435,6 +490,7 @@ var makeSteal = function(System){
 						this.config({ baseURL: parts.join("/")+"/"});
 					}
 				}
+				System.stealPath = dirname;
 			}
 		},
 		// System.config does not like being passed arrays.
@@ -479,32 +535,8 @@ var makeSteal = function(System){
 		var script = scripts[scripts.length - 1];
 
 		if (script) {
-
+			options.stealURL = script.src;
 			// Split on question mark to get query
-			parts = script.src.split("?");
-			src = parts.shift();
-			query = parts.join("?");
-
-			// Split on comma to get startFile and env
-			parts = query.split(",");
-
-			if (src.indexOf("steal.production") > -1) {
-				options.env = "production";
-			}
-
-			if (parts[0]) {
-				options.startId = parts[0];
-			}
-			// Grab env
-			if (parts[1]) {
-				options.env = parts[1];
-			}
-
-			// Split on / to get rootUrl
-			parts = src.split("/");
-			var lastPart = parts.pop();
-			
-			options.stealPath = parts.join("/");
 
 			each(script.attributes, function(attr){
 				var optionName = 
@@ -526,7 +558,11 @@ var makeSteal = function(System){
 	steal.startup = function(config){
 
 		// Get options from the script tag
-		if(global.document) {
+		if (isWebWorker) {
+			var urlOptions = {
+				stealURL: location.href	
+			};
+		} else if(global.document) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -550,7 +586,7 @@ var makeSteal = function(System){
 
 		// we only load things with force = true
 		if ( System.env == "production" ) {
-
+			
 			configDeferred = System["import"](System.configMain);
 
 			appDeferred = configDeferred.then(function(cfg){
@@ -560,7 +596,6 @@ var makeSteal = function(System){
 			});
 
 		} else if(System.env == "development" || System.env == "build"){
-
 			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
@@ -704,17 +739,7 @@ if (typeof System !== "undefined") {
   addSteal(System);
 }
 
-	if (typeof window != 'undefined') {
-		var oldSteal = window.steal;
-		window.steal = makeSteal(System);
-		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
-		window.steal.addSteal = addSteal;
-		
-		// I think production needs this
-		// global.define = System.amdDefine;
-		
-	} else {
-    	
+	if( isNode ) {
 		require('systemjs');
 			
 		global.steal = makeSteal(System);
@@ -724,6 +749,16 @@ if (typeof System !== "undefined") {
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
-	}
+		
+	} else {
+		var oldSteal = global.steal;
+		global.steal = makeSteal(System);
+		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
+		global.steal.addSteal = addSteal;
+		
+		// I think production needs this
+		// global.define = System.amdDefine;
+		
+	} 
     
-})(typeof window == "undefined" ? global : window);
+})(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);

@@ -7,32 +7,8 @@
 		var script = scripts[scripts.length - 1];
 
 		if (script) {
-
+			options.stealURL = script.src;
 			// Split on question mark to get query
-			parts = script.src.split("?");
-			src = parts.shift();
-			query = parts.join("?");
-
-			// Split on comma to get startFile and env
-			parts = query.split(",");
-
-			if (src.indexOf("steal.production") > -1) {
-				options.env = "production";
-			}
-
-			if (parts[0]) {
-				options.startId = parts[0];
-			}
-			// Grab env
-			if (parts[1]) {
-				options.env = parts[1];
-			}
-
-			// Split on / to get rootUrl
-			parts = src.split("/");
-			var lastPart = parts.pop();
-			
-			options.stealPath = parts.join("/");
 
 			each(script.attributes, function(attr){
 				var optionName = 
@@ -54,7 +30,11 @@
 	steal.startup = function(config){
 
 		// Get options from the script tag
-		if(global.document) {
+		if (isWebWorker) {
+			var urlOptions = {
+				stealURL: location.href	
+			};
+		} else if(global.document) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -78,7 +58,7 @@
 
 		// we only load things with force = true
 		if ( System.env == "production" ) {
-
+			
 			configDeferred = System["import"](System.configMain);
 
 			appDeferred = configDeferred.then(function(cfg){
@@ -88,7 +68,6 @@
 			});
 
 		} else if(System.env == "development" || System.env == "build"){
-
 			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){

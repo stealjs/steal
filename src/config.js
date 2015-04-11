@@ -2,6 +2,8 @@
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
 		
+		var tval = loader.paths["@traceur"];
+
 		loader.config =  function(cfg){
 			
 			var data = extend({},cfg);
@@ -48,6 +50,8 @@
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
+				
+			System.configPath = joinURIs( location.href, val);
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
@@ -63,7 +67,7 @@
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
 	var envPath = function(val) {
-		if(typeof window === "undefined" && !/^file:/.test(val)) {
+		if(isNode && !/^file:/.test(val)) {
 			// If relative join with the current working directory
 			if(val[0] === "." && (val[1] === "/" ||
 								 (val[1] === "." && val[2] === "/"))) {
@@ -124,8 +128,8 @@
 	
 	var isNode = typeof module !== 'undefined' && module.exports;
 	var LESS_ENGINE = "less-2.4.0";
-	
-	setterConfig(System,{
+	var specialConfig;
+	setterConfig(System, specialConfig = {
 		env: {
 			set: function(val){
 				System.env =  val;
@@ -143,6 +147,54 @@
 			}
 		},
 		main: mainSetter,
+		stealURL: {
+			// http://domain.com/steal/steal.js?moduleName,env&
+			set: function(url, cfg)	{
+				System.stealURL = url;
+				var urlParts = url.split("?");
+				
+				var path = urlParts.shift(),
+					search = urlParts.join("?"),
+					searchParts = search.split("&"),
+					paths = path.split("/"),
+					lastPart = paths.pop(),
+					stealPath = paths.join("/");
+				
+				specialConfig.stealPath.set.call(this,stealPath, cfg);
+				
+				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+					System.env = "production";
+				}
+				
+				if(searchParts.length && searchParts[0].length) {
+					var searchConfig = {},
+						searchPart;
+					for(var i =0; i < searchParts.length; i++) {
+						searchPart = searchParts[i];
+						var paramParts = searchPart.split("=");
+						if(paramParts.length > 1) {
+							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
+						} else {
+							console.warn("please use search params like ?main=main&env=production");
+							var oldParamParts = searchPart.split(",");
+							if (oldParamParts[0]) {
+								searchConfig.startId = oldParamParts[0];
+							}
+							if (oldParamParts[1]) {
+								searchConfig.env = oldParamParts[1];
+							}
+						}
+					}
+					this.config(searchConfig);
+				}	
+				
+				// Split on / to get rootUrl
+		
+				
+				
+				
+			}
+		},
 		// this gets called with the __dirname steal is in
 		stealPath: {
 			set: function(dirname, cfg) {
@@ -173,7 +225,7 @@
 					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
 					
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -190,6 +242,7 @@
 						this.config({ baseURL: parts.join("/")+"/"});
 					}
 				}
+				System.stealPath = dirname;
 			}
 		},
 		// System.config does not like being passed arrays.

@@ -50,9 +50,6 @@ var utils = {
 			if(standard) {
 				return descriptor.moduleName;
 			} else {
-				if(descriptor === "@empty") {
-					return descriptor;
-				}
 				var modulePath;
 				if(descriptor.modulePath) {
 					modulePath = descriptor.modulePath.substr(0,2) === "./" ? descriptor.modulePath.substr(2) : descriptor.modulePath;
@@ -85,7 +82,7 @@ var utils = {
 			var versionParts = modulePathParts[0].split("@");
 			// it could be something like `@empty`
 			if(!modulePathParts[1] && !versionParts[0]) {
-				versionParts = ["@"+versionParts[1]];
+				versionParts = ["@"+versionParts[0]];
 			}
 			var packageName, 
 				modulePath;
@@ -154,7 +151,7 @@ var utils = {
 			
 			// The refPkg might have a browser [https://github.com/substack/node-browserify#browser-field] mapping.
 			// Perform that mapping here.
-			if(refPkg.browser && (typeof refPkg.browser !== "string") && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
+			if(refPkg.browser && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
 				mappedName = refPkg.browser[mapName] === false ? "@empty" : refPkg.browser[mapName];
 			}
 			// globalBrowser looks like: {moduleName: aliasName, pgk: aliasingPkg}

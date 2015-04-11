@@ -62,7 +62,7 @@ exports.translate = function(load){
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
 		});
-		var configDependencies = ['@loader','npm-extension'].concat(configDeps.call(loader, pkg));
+		var configDependencies = ['@loader','npm-extension'].concat(packageDependencies(pkg));
 		var pkgMain = utils.pkg.hasDirectoriesLib(pkg) ?
 			convertName(context, pkg, false, true, pkg.name+"/"+utils.pkg.main(pkg)) :
 			utils.pkg.main(pkg);
@@ -86,9 +86,6 @@ function convertSystem(context, pkg, system, root) {
 	}
 	if(system.map) {
 		system.map = convertPropertyNamesAndValues(context, pkg, system.map, root);
-	}
-	if(system.paths) {
-		system.paths = convertPropertyNames(context, pkg, system.paths, root);
 	}
 	// needed for builds
 	if(system.buildConfig) {
@@ -160,16 +157,11 @@ function convertName (context, pkg, map, root, name) {
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						warn(name);
+						console.warn("WARN: Could not find ", name , "in node_modules. Ignoring.");
 						return name;
 					}
 					requestedVersion = requestedProject.version;
 					depPkg = crawl.matchedVersion(context, parsed.packageName, requestedVersion);
-					// If we still didn't find one just use the first available version.
-					if(!depPkg) {
-						var versions = context.versions[parsed.packageName];
-						depPkg = versions && versions[requestedVersion];
-					}
 				}
 				// SYSTEM.NAME
 				if(depPkg.system && depPkg.system.name) {
@@ -236,15 +228,11 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 }
 
 // Dependencies from a package.json file specified in `system.configDependencies`
-function configDeps(pkg) {
-	var deps = [];
+function packageDependencies(pkg) {
 	if(pkg.system && pkg.system.configDependencies) {
-		deps = deps.concat(pkg.system.configDependencies);
+		return pkg.system.configDependencies;
 	}
-	if(this.configDependencies) {
-		deps = deps.concat(this.configDependencies);
-	}
-	return deps;
+	return [];
 }
 
 
@@ -257,10 +245,7 @@ var translateConfig = function(loader, packages){
 	}
 	if(!g.process) {
 		g.process = {
-			cwd: function(){},
-			env: {
-				NODE_ENV: loader.env
-			}
+			cwd: function(){}
 		};
 	}
 	
@@ -319,15 +304,3 @@ var translateConfig = function(loader, packages){
 		loader.npmPaths[pkgAddress] = pkg;
 	});
 };
-
-var warn = (function(){
-	var warned = {};
-	return function(name){
-		if(!warned[name]) {
-			warned[name] = true;
-			var warning = "WARN: Could not find " + name + " in node_modules. Ignoring.";
-			if(console.warn) console.warn(warning);
-			else console.log(warning);
-		}
-	};
-})();

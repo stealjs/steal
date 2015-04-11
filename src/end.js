@@ -1,14 +1,4 @@
-	if (typeof window != 'undefined') {
-		var oldSteal = window.steal;
-		window.steal = makeSteal(System);
-		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
-		window.steal.addSteal = addSteal;
-		
-		// I think production needs this
-		// global.define = System.amdDefine;
-		
-	} else {
-    	
+	if( isNode ) {
 		require('systemjs');
 			
 		global.steal = makeSteal(System);
@@ -18,6 +8,16 @@
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
-	}
+		
+	} else {
+		var oldSteal = global.steal;
+		global.steal = makeSteal(System);
+		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
+		global.steal.addSteal = addSteal;
+		
+		// I think production needs this
+		// global.define = System.amdDefine;
+		
+	} 
     
-})(typeof window == "undefined" ? global : window);
+})(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);
