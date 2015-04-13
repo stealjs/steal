@@ -118,9 +118,12 @@ function convertPropertyNamesAndValues (context, pkg, map , root) {
 	if(!map) {
 		return map;
 	}
-	var clone = {};
+	var clone = {}, val;
 	for(var property in map ) {
-		clone[convertName(context, pkg, map, root, property)] = convertName(context, pkg, map, root, map[property]);
+		val = map[property];
+		clone[convertName(context, pkg, map, root, property)] = typeof val === "object"
+			? convertPropertyNamesAndValues(context, pkg, val, root)
+			: convertName(context, pkg, map, root, val);
 	}
 	return clone;
 }

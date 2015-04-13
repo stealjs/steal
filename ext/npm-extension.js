@@ -67,7 +67,8 @@ exports.addExtension = function(System){
 			}
 			var moduleName = utils.moduleName.create(parsedModuleName);
 			// Apply mappings, if they exist in the refPkg
-			if(refPkg.system && refPkg.system.map && refPkg.system.map[moduleName]) {
+			if(refPkg.system && refPkg.system.map &&
+			   typeof refPkg.system.map[moduleName] === "string") {
 				moduleName = refPkg.system.map[moduleName];
 			}
 			return oldNormalize.call(this, moduleName, parentName, parentAddress);
@@ -132,9 +133,12 @@ exports.addExtension = function(System){
 
 	var configSpecial = {
 		map: function(map){
-			var newMap = {};
+			var newMap = {}, val;
 			for(var name in map) {
-				newMap[convertName(this, name)] = convertName(this, map[name]);
+				val = map[name];
+				newMap[convertName(this, name)] = typeof val === "object"
+					? configSpecial.map(val)
+					: convertName(this, val);
 			}
 			return newMap;
 		},
