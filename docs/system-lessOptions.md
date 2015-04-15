@@ -42,7 +42,7 @@ will be compiled to:
 }
 ```
 
-Use can also provide `lessOptions.paths` (array) option which will be used to resolve imports (see less/css docs).
+You can also provide `lessOptions.paths` (array) option which will be used to resolve imports (see less/css docs).
 
 `lessOptions.filename` are used internally by StealJS and any value
 provided will be ignored.
