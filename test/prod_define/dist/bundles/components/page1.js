@@ -12,5 +12,6 @@ define('components/page1', [
     var jqwerty = _interopRequire(_jqwerty);
     var jqwertyui = _interopRequire(_jqwertyui);
     console.log('page1.js loaded.');
+	window.jqwerty = jqwerty;
     module.exports = {};
 });

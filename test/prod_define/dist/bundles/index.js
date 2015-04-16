@@ -69,12 +69,15 @@ System.import('components/page1')
     .then(function() {
 		if(typeof window !== "undefined" && window.QUnit) {
 			QUnit.ok(true, "Loaded page 1");
+			QUnit.equal(window.jqwerty.modName, "jqwerty", "jqwerty loaded");
+			QUnit.equal(typeof window.jqwerty.ui, "function", "jqwertyui loaded");
 			
 			QUnit.start();
 			removeMyself();
 			return {};
 		} else {
 			console.log("Loaded page 1");
+			console.assert(window.jqwerty.modName == "jqwerty");
 		}
     })
     .catch(function(ex) {
