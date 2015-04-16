@@ -64,6 +64,23 @@ in your `<script>` tag).
 
 By default, any property on the package.system object is passed to [System.config]. A few properties have special behavior, however:
 
+### package.system.main
+
+The moduleName of the initial module that shoudl be loaded when the package is imported. This overrides the `package.main` value. Useful when you need to have a `main` that is available for all bower users (like a global script) and a main available for users of the bower plugin (perhaps the CommonJS source):
+
+```json
+{
+  "name": "my-module",
+  "version": "1.0.0",
+  "main": "dist/global.js",
+  "system": {
+    "main": "my-main"
+  }
+}
+```
+
+This will load `my-main` as the main module instead of `dist/global.js`.
+
 ### package.system.bowerIgnore
 
 Use bowerIgnore to specify dependencies to prevent package information from being loaded. The following example ignores the bower package `jquery-cookie`:
