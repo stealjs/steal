@@ -262,6 +262,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("basics/inline_code.html");
 	});
 
+	asyncTest("can load a bundle with an amd module depending on a global", function(){
+		makeIframe("prod_define/prod.html");
+	});
+
 	module("json extension");
 
 	asyncTest("json extension", function(){
