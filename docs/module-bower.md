@@ -64,6 +64,24 @@ in your `<script>` tag).
 
 By default, any property on the package.system object is passed to [System.config]. A few properties have special behavior, however:
 
+### package.system.bowerIgnore
+
+Use bowerIgnore to specify dependencies to prevent package information from being loaded. The following example ignores the bower package `jquery-cookie`:
+
+```js
+{
+  "dependencies": {
+    "can": "2.2.4",
+    "jquery-cookie": "1.0.0"
+  },
+  "system": {
+    "bowerIgnore": [ "jquery-cookie" ]
+  }
+}
+```
+
+This will load `can` but ignore `jquery-cookie`.
+
 ### package.system.configDependencies
 
 Defines dependencies of your bower package. This is useful for loading modules,
