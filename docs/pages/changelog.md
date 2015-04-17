@@ -3,6 +3,20 @@
 
 @body
 
+## 0.9.0
+
+### steal
+
+- The npm plugin added a `configDependencies` option. [#55](https://github.com/stealjs/system-npm/pull/55).
+- Steal can be launched within a web worker. [#386](https://github.com/stealjs/steal/issues/386).
+- The bower plugin can take a `system.main` that mirrors npm's behavior. [#16](https://github.com/stealjs/system-bower/pull/16).
+- The bower plugin supports `system.bowerIgnore` for ignoring modules. [#17](https://github.com/stealjs/system-bower/pull/17).
+- You can now pass your own paths to `lessOptions`. [#378](https://github.com/stealjs/steal/pull/378).
+
+### steal-tools
+
+- Added a Watch Mode [#226](https://github.com/stealjs/steal-tools/pull/226) for multi-builds. See the [guide](http://stealjs.com/docs/steal-tools.guides.watch_mode.html) for usage.
+
 ## 0.8.0
 
 - StealTools now produces source maps for both multi-build and export. [#210](https://github.com/stealjs/steal-tools/pull/210). Check out the [build docs](http://stealjs.com/docs/steal-tools.build.html) for example usage.
