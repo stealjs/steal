@@ -174,6 +174,42 @@ The following packages are ignored by default:
  - "bower"
  - "grunt", "grunt-cli"
 
+### system.npm.npmDependencies
+
+Like `npmIgnore` but affirmative. If used alone will only include the dependencies listed. If used in conjunction with `npmIgnore` acts as an override. For example the following config:
+
+```js
+{
+  "dependencies": {
+    "one": "1.0.0",
+	"two": "1.0.0"
+  },
+  "system": {
+    "npmDependencies": [ "one" ]
+  }
+}
+```
+
+Will load `one` but ignore `two`.
+
+When used in conjuction with `npmIgnore`:
+
+```js
+{
+  "devDependencies": {
+	"one": "1.0.0",
+	"two": "1.0.0",
+	"three": "1.0.0"
+  },
+  "system": {
+	"npmIgnore": [ "devDependencies" ],
+	"npmDependencies": [ "one" ]
+  }
+}
+```
+
+Even though `npmIgnore` is set to ignore all `devDependencies` the use of `npmDependencies` acts as an override. The package `one` will be loaded, but not `two` or `three`.
+
 ### system.npm.ignoreBrowser
 
 Set to true to ignore browserfy's `browser` and `browserify` configurations.
