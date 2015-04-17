@@ -156,7 +156,7 @@ dependencies will be loaded:
 ```js
 {
   "dependencies": {
-    "canjs": "2.1.0",
+    "can": "2.2.4",
     "cssify": "^0.6.0"
   },
   "devDependencies": {
