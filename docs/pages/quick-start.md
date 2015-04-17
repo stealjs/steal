@@ -8,7 +8,7 @@ and [jquery](http://jquery.com/) to build a `Hello World` app. This guide is a s
 
 ### Install
 
-Install [Node.js](http://nodejs.org/) on your computer and that [grunt-cli](http://gruntjs.com/getting-started) is installed globally.
+Install [Node.js](http://nodejs.org/) on your computer and then NPM install [grunt-cli](http://gruntjs.com/getting-started) globally.
 
 Create a directory for all your static content, scripts, and styles.
 This is your [System.baseURL baseURL] folder. Within that folder run `npm init` to, create a `package.json`:
@@ -75,7 +75,7 @@ need it later.
 
 
 `main.js` is the entrypoint of the application. It should load import your
-apps other modules and kickoff the application. Write the following in `main.js`:
+app's other modules and kickoff the application. Write the following in `main.js`:
 
     import $ from "jquery";
     $(document.body).append("<h1>Hello World!</h1>");
@@ -93,7 +93,7 @@ Starting up http-server, serving ./ on: http://0.0.0.0:8080
 Hit CTRL-C to stop the server
 ```
 
-Open [http://localhost:8080/index.html](http://localhost:8080/index.html) in the browser. You should see a big "Hello World". Open the Network tab in developer tools and you'll see several files including `main.js` were loaded.
+Open `http://localhost:8080/index.html` in the browser. You should see a big "Hello World". Open the Network tab in developer tools and you'll see several files including `main.js` were loaded.
 
 ### Build Process
 
@@ -135,5 +135,5 @@ Change `index.html` to look like:
 
 ### Run in production
 
-Open [http://localhost:8080/index.html](http://localhost:8080/index.html) in the browser. You should see a big "Hello World". Check
-the network tab again, you will see only two scripts load. The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into `main.js`. 
+Reload `http://localhost:8080/index.html` and check the network tab again, you will see only two scripts load. 
+The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into `main.js`. 

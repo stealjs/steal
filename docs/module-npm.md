@@ -18,7 +18,7 @@ By default, if [System.stealPath] points to steal.js within node_modules like:
     <script src="../node_modules/steal/steal.js"></script>
     
 [System.configMain] will point to `"package.json!npm"`. The `npm` plugin
-reads pacakge.json and sets a normalize and locate hook.  
+reads `package.json` and sets a normalize and locate hook.  
 
 
 ## NPM Module names
@@ -156,7 +156,7 @@ dependencies will be loaded:
 ```js
 {
   "dependencies": {
-    "canjs": "2.1.0",
+    "can": "2.2.4",
     "cssify": "^0.6.0"
   },
   "devDependencies": {

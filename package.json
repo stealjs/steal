@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "0.8.2",
+  "version": "0.8.4",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -12,7 +12,7 @@
 	"test-windows": "grunt test-windows --stack"
   },
   "dependencies": {
-    "systemjs": "git://github.com/bitovi/systemjs#0.16.6-bitovi.2",
+    "systemjs": "git://github.com/bitovi/systemjs#0.16.6-bitovi.3",
     "less": "^2.4.0",
     "system-json": "^0.0.3"
   },

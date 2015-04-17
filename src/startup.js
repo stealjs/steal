@@ -97,9 +97,6 @@
 				return Promise.all( map(main,function(main){
 					return System["import"](main);
 				}) );
-			}).then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
 			});
 			
 		}

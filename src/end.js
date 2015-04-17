@@ -10,14 +10,14 @@
 		require("system-json");
 		
 	} else {
-		var oldSteal = global.steal;
-		global.steal = makeSteal(System);
-		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
-		global.steal.addSteal = addSteal;
-		
-		// I think production needs this
-		// global.define = System.amdDefine;
-		
+		var oldSteal = window.steal;
+		window.steal = makeSteal(System);
+		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
+			.then(null, function(error){
+				console.log("error",error,  error.stack);
+				throw error;
+			});
+		window.steal.addSteal = addSteal;
 	} 
     
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);
