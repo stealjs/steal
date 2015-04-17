@@ -89,28 +89,38 @@ var crawl = {
 	 * @return {Object<String,Range>} A map of dependency names and requested version ranges.
 	 */
 	getDependencyMap: function(loader, packageJSON, isRoot){
+		var system = packageJSON.system;
 		// convert npmIgnore
-		var npmIgnore = packageJSON.system && packageJSON.system.npmIgnore;
-		if(npmIgnore && typeof npmIgnore.length === 'number') {
+		var npmIgnore = system && system.npmIgnore;
+		function convertToMap(arr) {
 			var npmMap = {};
-			for(var i = 0; i < npmIgnore.length; i++) {
-				npmMap[npmIgnore[i]] = true;
+			for(var i = 0; i < arr.length; i++) {
+				npmMap[arr[i]] = true;
 			}
-			npmIgnore = packageJSON.system.npmIgnore = npmMap;
+			return npmMap;
+		}
+		if(npmIgnore && typeof npmIgnore.length === 'number') {
+			npmIgnore = packageJSON.system.npmIgnore = convertToMap(npmIgnore);
+		}
+		// convert npmDependencies
+		var npmDependencies = system && system.npmDependencies;
+		if(npmDependencies && typeof npmDependencies.length === "number") {
+			packageJSON.system.npmDependencies = convertToMap(npmDependencies);
 		}
 		npmIgnore = npmIgnore || {};
 		
 		var deps = {};
-		
-		if(!npmIgnore.peerDependencies) {
-			addDeps(packageJSON, packageJSON.peerDependencies || {}, deps, {_isPeerDependency: true});
+
+		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
+				"peerDependencies", {_isPeerDependency: true});
+
+		addDeps(packageJSON, packageJSON.dependencies || {}, deps, "dependencies");
+
+		if(isRoot) {
+			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+				   "devDependencies");
 		}
-		if(!npmIgnore.dependencies) {
-			addDeps(packageJSON, packageJSON.dependencies || {}, deps);
-		}
-		if( isRoot && !npmIgnore.devDependencies) {
-			addDeps(packageJSON, packageJSON.devDependencies || {}, deps);
-		}
+
 		return deps;
 	},
 	isSameRequestedVersionFound: function(context, childPkg) {
@@ -183,12 +193,30 @@ function truthy(x) {
 
 var alwaysIgnore = {"steal": 1,"steal-tools":1,"bower":1,"grunt":1, "grunt-cli": 1};
 
-function addDeps(packageJSON, dependencies, deps, defaultProps){
+function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 	// convert an array to a map
 	var npmIgnore = packageJSON.system && packageJSON.system.npmIgnore;
+	var npmDependencies = packageJSON.system && packageJSON.system.npmDependencies;
+	var ignoreType = npmIgnore && npmIgnore[type];
+
+	function includeDep(name) {
+		if(alwaysIgnore[name]) return false;
+
+		if(!npmIgnore && npmDependencies) {
+			return !!npmDependencies[name];
+		}
+
+		if(npmIgnore && npmDependencies) {
+			return ignoreType ? !!npmDependencies[name] : !npmIgnore[name];
+		}
+
+		if(ignoreType) return false;
+
+		return !!(!npmIgnore || !npmIgnore[name]);
+	}
 	
 	for(var name in dependencies) {
-		if(!alwaysIgnore[name] &&  (!npmIgnore || !npmIgnore[name])  ) {
+		if(includeDep(name)) {
 			deps[name] = utils.extend(defaultProps || {}, {name: name, version: dependencies[name]});
 		}
 	}
