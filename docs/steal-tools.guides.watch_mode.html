@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Roadmap </title>
+	<title>StealJS - Continuous Builds </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -189,7 +189,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="page" href="steal-tools.guides.watch_mode.html" data-search="Continuous Builds">
 						Continuous Builds
 					</a>
@@ -225,7 +225,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="page" href="StealJS.roadmap.html" data-search="Roadmap">
 						Roadmap
 					</a>
@@ -274,7 +274,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>Roadmap</h1>
+<h1>Continuous Builds</h1>
 	<ul class="tags">
 		<li>page</li>
 	</ul>
@@ -285,7 +285,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.roadmap</span>
+		<span class="module">steal-tools.guides.watch_mode</span>
 	
 	
 	
@@ -313,7 +313,7 @@
 
 		
 		<section class="description">
-			<p>Here's what we've got planned:</p>
+			<p>In 0.9.0 StealTools added a new <strong>watch</strong> mode to its multi-build. This enables you to continuously rebuild your application as you work. This is useful if you prefer a workflow where you are debugging your application as it will appear in production. In this guide we'll go through the process of setting up a CanJS project using the watch mode.</p>
 
 		</section>
 		
@@ -327,18 +327,79 @@
 
 		
 		<section class="comment">
-			<h2>Watch Builds</h2>
-<p>Automatically build when a file changes. We should be able to make
-this extremely high performance if the dependency graph is not changing.</p>
-<h2>Live Reloading</h2>
-<p>Would make development extremely convenient as modules would automatically
-reload as you change them without needing to reload the browser.</p>
-<h2>Remove Traceur Runtime and IE8 ES6 module support</h2>
-<p><a href="https://groups.google.com/forum/#!topic/systemjs/yECCl6I9SDw">Read here</a></p>
-<h2>Development Packages</h2>
-<p>Build a package that will be loaded in development. For example, instead of
-loading each CanJS module individually, you could easily build them
-into a package that would be loaded in development as a single file.</p>
+			<h2>Setup</h2>
+<p>The guide assumes some basic knowledge of <a href="http://nodejs.org">Node.js</a>. If you haven't used Node before, please go learn more about how it works on their website.</p>
+<p>To get started we want to create a new Node.js application and install the packages we'll need.</p>
+<pre><code class="language-shell">&gt; npm init
+&gt; npm install steal-tools -g
+&gt; npm install steal --save
+&gt; npm install can --save
+</code></pre>
+<p>Running <code>npm init</code> will ask you a series of questions. The answers aren't important and can be changed later by editing the produced <code>package.json</code> file.</p>
+<p>Before we can start using the <strong>watch</strong> mode we'll need to create our main file. This is the entry point to your application and was specified in the <code>npm init</code> process. Assuming we called it <code>main.js</code> let's open up that file and get an initial build started.</p>
+<h3>main.js</h3>
+<pre><code class="language-js">var can = require(&quot;can&quot;);
+</code></pre>
+<h2>Enable watch mode</h2>
+<p>Now that we have our skeleton ready we can turn on watch mode.</p>
+<pre><code class="language-shell">steal-tools --watch
+</code></pre>
+<p>This will take a second or so and then you'll get an output:</p>
+<pre><code class="language-shell">[9:09:19 AM]
+Watch mode ready.
+</code></pre>
+<p>This tells us that the initial build has been complete and watch mode is ready to rebuild our application as we develop.</p>
+<h2>Develop your application</h2>
+<p>From here you can begin developing your application any way you like. Let's create a simple <code>hello-world</code> component to show how the output updates every time you modify your application. Back in <code>main.js</code> add this:</p>
+<pre><code class="language-js">var can = require(&quot;can&quot;);
+require(&quot;can/view/stache/&quot;);
+require(&quot;./components/hello/&quot;);
+</code></pre>
+<p>You'll get a message indicating that StealTools cannot find the hello component:</p>
+<pre><code class="language-shell">File not found: /path/to/can-proj/components/hello/hello.js
+</code></pre>
+<p>So let's go create it.</p>
+<h3>components/hello/hello.js</h3>
+<pre><code class="language-js">require(&quot;can/view/stache/&quot;);
+var template = require(&quot;./hello.stache&quot;);
+var can = require(&quot;can&quot;);
+
+can.Component.extend({
+    tag: &quot;hello-world&quot;,
+    viewModel: {
+        name: &quot;world&quot;
+    },
+    template: template
+});
+</code></pre>
+<h3>components/hello/hello.stache</h3>
+<pre><code class="language-html">&lt;div&gt;
+Hellos {{name}}!
+&lt;/div&gt;
+</code></pre>
+<h3>main.js</h3>
+<p>Now back in your main add the component to your page:</p>
+<pre><code class="language-js">var can = require(&quot;can&quot;);
+require(&quot;can/view/stache/&quot;);
+require(&quot;./components/hello/&quot;);
+
+var template = can.stache(&quot;&lt;hello-world&gt;&lt;/hello-world&gt;&quot;);
+can.$(&quot;body&quot;).append(template());
+</code></pre>
+<p>Each time you save you will get new output; it will either be a timestamp by itself (when creating new modules) or a timestamp with the module name (when modifying an existing module). The output will be like:</p>
+<pre><code class="language-shell">[9:20:16 AM]
+[9:20:22 AM]: components/hello/hello
+[9:21:49 AM]: main
+</code></pre>
+<h2>Debug your application</h2>
+<p>Now that we've got a basic application written let's check out the debugging experience. First let's create a simple page:</p>
+<h3>index.html</h3>
+<pre><code class="language-html">&lt;script src=&quot;node_modules/steal/steal.js&quot;
+    env=&quot;production&quot;
+    main=&quot;main&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>Open the page in a browser and open your debug tools. With the watch mode source maps are enabled by default. You can see and debug your original code from your browser's debugging tools.</p>
+<p>That's it! As you develop and save your code StealTools will continuously rebuild your application.</p>
 
 		</section>
 		
@@ -364,7 +425,7 @@ into a package that would be loaded in development as a single file.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.roadmap","src":"steal/docs/pages/roadmap.md","description":"Here's what we've got planned:","title":"Roadmap","parent":"StealJS.guides","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"steal-tools.guides.watch_mode","src":"steal-tools/doc/guides/watch_mode.md","description":"In 0.9.0 StealTools added a new **watch** mode to its multi-build. This enables you to continuously rebuild your application as you work. This is useful if you prefer a workflow where you are debugging your application as it will appear in production. In this guide we'll go through the process of setting up a CanJS project using the watch mode.","title":"Continuous Builds","parent":"StealJS.guides","order":2,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

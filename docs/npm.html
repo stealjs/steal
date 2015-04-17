@@ -697,7 +697,7 @@ at a <code>package.json</code>, you will be able to import npm packages as modul
 <pre><code>&lt;script src=&quot;../node_modules/steal/steal.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 <p><a href="System.configMain.html">System.configMain</a> will point to <code>&quot;package.json!npm&quot;</code>. The <code>npm</code> plugin
-reads pacakge.json and sets a normalize and locate hook.</p>
+reads <code>package.json</code> and sets a normalize and locate hook.</p>
 <h2>NPM Module names</h2>
 <p>Package dependency module names are converted to look like:</p>
 <blockquote>
@@ -796,7 +796,7 @@ ignores a package.json's <code>devDependencies</code> and <code>cssify</code>.  
 dependencies will be loaded:</p>
 <pre><code class="language-js">{
   &quot;dependencies&quot;: {
-    &quot;canjs&quot;: &quot;2.1.0&quot;,
+    &quot;can&quot;: &quot;2.2.4&quot;,
     &quot;cssify&quot;: &quot;^0.6.0&quot;
   },
   &quot;devDependencies&quot;: {
@@ -813,6 +813,33 @@ dependencies will be loaded:</p>
 <li>&quot;bower&quot;</li>
 <li>&quot;grunt&quot;, &quot;grunt-cli&quot;</li>
 </ul>
+<h3>system.npm.npmDependencies</h3>
+<p>Like <code>npmIgnore</code> but affirmative. If used alone will only include the dependencies listed. If used in conjunction with <code>npmIgnore</code> acts as an override. For example the following config:</p>
+<pre><code class="language-js">{
+  &quot;dependencies&quot;: {
+    &quot;one&quot;: &quot;1.0.0&quot;,
+    &quot;two&quot;: &quot;1.0.0&quot;
+  },
+  &quot;system&quot;: {
+    &quot;npmDependencies&quot;: [ &quot;one&quot; ]
+  }
+}
+</code></pre>
+<p>Will load <code>one</code> but ignore <code>two</code>.</p>
+<p>When used in conjuction with <code>npmIgnore</code>:</p>
+<pre><code class="language-js">{
+  &quot;devDependencies&quot;: {
+    &quot;one&quot;: &quot;1.0.0&quot;,
+    &quot;two&quot;: &quot;1.0.0&quot;,
+    &quot;three&quot;: &quot;1.0.0&quot;
+  },
+  &quot;system&quot;: {
+    &quot;npmIgnore&quot;: [ &quot;devDependencies&quot; ],
+    &quot;npmDependencies&quot;: [ &quot;one&quot; ]
+  }
+}
+</code></pre>
+<p>Even though <code>npmIgnore</code> is set to ignore all <code>devDependencies</code> the use of <code>npmDependencies</code> acts as an override. The package <code>one</code> will be loaded, but not <code>two</code> or <code>three</code>.</p>
 <h3>system.npm.ignoreBrowser</h3>
 <p>Set to true to ignore browserfy's <code>browser</code> and <code>browserify</code> configurations.</p>
 <pre><code class="language-js">{

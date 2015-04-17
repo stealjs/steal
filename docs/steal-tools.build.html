@@ -334,6 +334,18 @@
 				
 				
 				<li class="search-container">
+					<a class="typedef" href="steal-tools.BuildResult.html" data-search="BuildResult">
+						BuildResult
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
 						SystemConfig
 					</a>
@@ -646,6 +658,16 @@ The option <code>fromString</code> is used internally and will always be <code>t
 					</div>
 				</li>
 				
+				<li class="option">
+					<h5>watch 
+						<code>{Boolean}</code>
+					</h5>
+					<div class="description">
+						<p>Actives watch mode which will continuously build as you develop your application.</p>
+
+					</div>
+				</li>
+				
 			</ul>
 			
 			
@@ -656,56 +678,12 @@ The option <code>fromString</code> is used internally and will always be <code>t
 
 	<h3>Returns</h3>
 	<div class="returns">
-		<h4><code>{Promise&lt;Object&gt;}</code></h4>
+		<h4><code>{Promise&lt;<a href="steal-tools.BuildResult.html" >BuildResult</a>&gt; | Stream&lt;<a href="steal-tools.BuildResult.html" >BuildResult</a>&gt;}</code></h4>
 		<div class="description">
-			<p>A promise that resolves, if successful to an object with the following data:</p>
+			<p>Either a Promise that resolves when the build is complete or a Stream that will send <code>data</code> events every time a rebuild is complete. By default a Promise is returned, unless the <code>watch</code> option is enabled.</p>
 
 		</div>
 		
-		
-		<ul class="options">
-			
-			<li class="option">
-				<h5>graph 
-					<code>{buildGraph}</code>
-				</h5>
-				<div class="description">
-					<p>A map of moduleNames to node.</p>
-
-				</div>
-			</li>
-			
-			<li class="option">
-				<h5>steal 
-					<code>{<a href="steal.html" >steal</a>}</code>
-				</h5>
-				<div class="description">
-					<p>The steal function used to load the main module.</p>
-
-				</div>
-			</li>
-			
-			<li class="option">
-				<h5>loader 
-					<code>{Loader}</code>
-				</h5>
-				<div class="description">
-					<p>The loader used to load the main module.</p>
-
-				</div>
-			</li>
-			
-			<li class="option">
-				<h5>bundles 
-					<code>{Array}</code>
-				</h5>
-				<div class="description">
-					<p>The builds written out.</p>
-
-				</div>
-			</li>
-			
-		</ul>
 		
 	</div>
 	
@@ -877,7 +855,7 @@ stealTools.build({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.build","src":"steal-tools/doc/build.md","description":"Build a module and all of its dependencies and, optionally, other bundles to progressively load.","title":"build","parent":"steal-tools.JS","signatures":[{"code":"stealTools.build(config, options)","description":"","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"bundlesPath","description":"Specifies the path where the production bundles should be \nplaced. Often, this is the same value as [System.bundlesPath]. By default, the location is `\"dist/bundles\"`.\n\nThe path can be specified in three ways:\n\n - Absolute path - bundlesPath starts with `/`, or matches _/^\\w+:[\\/\\\\]/_, like:`__dirname+\"/place\"`, or `\"c:\\my\\bundles\"`.\n - Relative to `process.cwd()` - bundlesPath starts with `./`, like `\"./place\"`.\n - Relative to [System.baseURL baseURL] - bundlesPath looks like: \"packages\", \"foo/bar\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'dist/bundle'"}]}],"name":"config","description":"Specifies configuration values to set on the System loader.  In addition to the `main`, `config`, and `baseUrl` values \nspecified in [steal-tools.SystemConfig], an additional `bundlesPath` is sometimes provided."},{"types":[{"type":"Object","options":[{"name":"minify","description":"Minifies the built packages.  Defaults to `true`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundleSteal","description":"Set to true to include steal in the main bundle.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundle","description":"An array of module names that should be\nprogressively loaded.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"bundleDepth","description":"The maximum number of bundles that need to be loaded\nfor any `bundle` module. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"mainDepth","description":"The maximum number of bundles that will be loaded for any `main`\nmodule. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"removeDevelopmentCode","description":"Remove any development code from the bundle specified \nusing `//!steal-remove-start`, and `//!steal-remove-end` comments.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"cleanCSSOptions","description":"A hash of options to customize the minification of css files. \nAll available options are listed in the [clean-css documentation](https://github.com/jakubpawlowicz/clean-css#how-to-use-clean-css-programmatically).","types":[{"type":"Object","options":[]}],"optional":true},{"name":"uglifyOptions","description":"A hash of options to customize the minification of JavaScript files. StealTools uses the \ntop-level `minify` function of uglify-js, and the available options are listed [here](https://github.com/mishoo/UglifyJS2#the-simple-way).\nThe option `fromString` is used internally and will always be `true`; any other value will be ignored.","types":[{"type":"Object","options":[]}],"optional":true},{"name":"sourceMaps","description":"Generate source maps alongside your bundles.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"sourceMapsContent","description":"Include the original source contents in the generated source maps. Use this option if your production environment doesn't have access to the source files. Will result in a larger source maps size but will cause fewer requests.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"optional":true,"name":"options","description":"Specifies the behavior of the build."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"Object","options":[]}]}],"options":[{"name":"graph","description":"A map of moduleNames to node.","types":[{"type":"buildGraph"}]},{"name":"steal","description":"The steal function used to load the main module.","types":[{"type":"steal"}]},{"name":"loader","description":"The loader used to load the main module.","types":[{"type":"Loader"}]},{"name":"bundles","description":"The builds written out.","types":[{"type":"Array","options":[]}]}]}],"description":"A promise that resolves, if successful to an object with the following data:"}}],"types":[],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.build","src":"steal-tools/doc/build.md","description":"Build a module and all of its dependencies and, optionally, other bundles to progressively load.","title":"build","parent":"steal-tools.JS","signatures":[{"code":"stealTools.build(config, options)","description":"","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"bundlesPath","description":"Specifies the path where the production bundles should be \nplaced. Often, this is the same value as [System.bundlesPath]. By default, the location is `\"dist/bundles\"`.\n\nThe path can be specified in three ways:\n\n - Absolute path - bundlesPath starts with `/`, or matches _/^\\w+:[\\/\\\\]/_, like:`__dirname+\"/place\"`, or `\"c:\\my\\bundles\"`.\n - Relative to `process.cwd()` - bundlesPath starts with `./`, like `\"./place\"`.\n - Relative to [System.baseURL baseURL] - bundlesPath looks like: \"packages\", \"foo/bar\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'dist/bundle'"}]}],"name":"config","description":"Specifies configuration values to set on the System loader.  In addition to the `main`, `config`, and `baseUrl` values \nspecified in [steal-tools.SystemConfig], an additional `bundlesPath` is sometimes provided."},{"types":[{"type":"Object","options":[{"name":"minify","description":"Minifies the built packages.  Defaults to `true`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundleSteal","description":"Set to true to include steal in the main bundle.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundle","description":"An array of module names that should be\nprogressively loaded.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"bundleDepth","description":"The maximum number of bundles that need to be loaded\nfor any `bundle` module. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"mainDepth","description":"The maximum number of bundles that will be loaded for any `main`\nmodule. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"removeDevelopmentCode","description":"Remove any development code from the bundle specified \nusing `//!steal-remove-start`, and `//!steal-remove-end` comments.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"cleanCSSOptions","description":"A hash of options to customize the minification of css files. \nAll available options are listed in the [clean-css documentation](https://github.com/jakubpawlowicz/clean-css#how-to-use-clean-css-programmatically).","types":[{"type":"Object","options":[]}],"optional":true},{"name":"uglifyOptions","description":"A hash of options to customize the minification of JavaScript files. StealTools uses the \ntop-level `minify` function of uglify-js, and the available options are listed [here](https://github.com/mishoo/UglifyJS2#the-simple-way).\nThe option `fromString` is used internally and will always be `true`; any other value will be ignored.","types":[{"type":"Object","options":[]}],"optional":true},{"name":"sourceMaps","description":"Generate source maps alongside your bundles.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"sourceMapsContent","description":"Include the original source contents in the generated source maps. Use this option if your production environment doesn't have access to the source files. Will result in a larger source maps size but will cause fewer requests.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"watch","description":"Actives watch mode which will continuously build as you develop your application.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"optional":true,"name":"options","description":"Specifies the behavior of the build."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]},{"type":"Stream","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]}],"description":"Either a Promise that resolves when the build is complete or a Stream that will send `data` events every time a rebuild is complete. By default a Promise is returned, unless the `watch` option is enabled."}}],"types":[],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

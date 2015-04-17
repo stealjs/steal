@@ -189,6 +189,18 @@
 			
 				
 				
+				<li class="search-container">
+					<a class="page" href="steal-tools.guides.watch_mode.html" data-search="Continuous Builds">
+						Continuous Builds
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
 				<li class="search-container active">
 					<a class="page" href="StealJS.changelog.html" data-search="Changelog">
 						Changelog
@@ -310,7 +322,20 @@
 
 		
 		<section class="comment">
-			<h2>0.8.0</h2>
+			<h2>0.9.0</h2>
+<h3>steal</h3>
+<ul>
+<li>The npm plugin added a <code>configDependencies</code> option. <a href="https://github.com/stealjs/system-npm/pull/55">#55</a>.</li>
+<li>Steal can be launched within a web worker. <a href="https://github.com/stealjs/steal/issues/386">#386</a>.</li>
+<li>The bower plugin can take a <code>system.main</code> that mirrors npm's behavior. <a href="https://github.com/stealjs/system-bower/pull/16">#16</a>.</li>
+<li>The bower plugin supports <code>system.bowerIgnore</code> for ignoring modules. <a href="https://github.com/stealjs/system-bower/pull/17">#17</a>.</li>
+<li>You can now pass your own paths to <code>lessOptions</code>. <a href="https://github.com/stealjs/steal/pull/378">#378</a>.</li>
+</ul>
+<h3>steal-tools</h3>
+<ul>
+<li>Added a Watch Mode <a href="https://github.com/stealjs/steal-tools/pull/226">#226</a> for multi-builds. See the <a href="http://stealjs.com/docs/steal-tools.guides.watch_mode.html">guide</a> for usage.</li>
+</ul>
+<h2>0.8.0</h2>
 <ul>
 <li>StealTools now produces source maps for both multi-build and export. <a href="https://github.com/stealjs/steal-tools/pull/210">#210</a>. Check out the <a href="http://stealjs.com/docs/steal-tools.build.html">build docs</a> for example usage.</li>
 <li>The cli is now easier to use. The <code>package.json</code> is now the default config, so no <code>--config</code> or <code>--main</code> option is needed if using the npm plugin. <a href="https://github.com/stealjs/steal-tools/pull/212">#212</a></li>

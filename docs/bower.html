@@ -724,6 +724,31 @@ contains a list of properties that are used by the Bower plugin to configure the
 in your <code>&lt;script&gt;</code> tag).</p>
 <h3>package.system</h3>
 <p>By default, any property on the package.system object is passed to <a href="System.config.html">System.config</a>. A few properties have special behavior, however:</p>
+<h3>package.system.main</h3>
+<p>The moduleName of the initial module that shoudl be loaded when the package is imported. This overrides the <code>package.main</code> value. Useful when you need to have a <code>main</code> that is available for all bower users (like a global script) and a main available for users of the bower plugin (perhaps the CommonJS source):</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;my-module&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;main&quot;: &quot;dist/global.js&quot;,
+  &quot;system&quot;: {
+    &quot;main&quot;: &quot;my-main&quot;
+  }
+}
+</code></pre>
+<p>This will load <code>my-main</code> as the main module instead of <code>dist/global.js</code>.</p>
+<h3>package.system.bowerIgnore</h3>
+<p>Use bowerIgnore to specify dependencies to prevent package information from being loaded. The following example ignores the bower package <code>jquery-cookie</code>:</p>
+<pre><code class="language-js">{
+  &quot;dependencies&quot;: {
+    &quot;can&quot;: &quot;2.2.4&quot;,
+    &quot;jquery-cookie&quot;: &quot;1.0.0&quot;
+  },
+  &quot;system&quot;: {
+    &quot;bowerIgnore&quot;: [ &quot;jquery-cookie&quot; ]
+  }
+}
+</code></pre>
+<p>This will load <code>can</code> but ignore <code>jquery-cookie</code>.</p>
 <h3>package.system.configDependencies</h3>
 <p>Defines dependencies of your bower package. This is useful for loading modules,
 like extensions, that need to be initialized before the rest of your application

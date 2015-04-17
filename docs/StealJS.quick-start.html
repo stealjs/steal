@@ -190,6 +190,18 @@
 				
 				
 				<li class="search-container">
+					<a class="page" href="steal-tools.guides.watch_mode.html" data-search="Continuous Builds">
+						Continuous Builds
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="page" href="StealJS.changelog.html" data-search="Changelog">
 						Changelog
 					</a>
@@ -318,7 +330,7 @@
 			<p>The Quick Start is a simple demo that uses <a href="https://www.npmjs.org/">npm</a> to install steal, steal-tools, <a href="http://gruntjs.com/">grunt</a>,
 and <a href="http://jquery.com/">jquery</a> to build a <code>Hello World</code> app. This guide is a step-by-step guide to create the app from scratch, or you can clone the source from the <a href="https://github.com/stealjs/quick-start">GitHub Quick Start repo</a>.</p>
 <h3>Install</h3>
-<p>Install <a href="http://nodejs.org/">Node.js</a> on your computer and that <a href="http://gruntjs.com/getting-started">grunt-cli</a> is installed globally.</p>
+<p>Install <a href="http://nodejs.org/">Node.js</a> on your computer and then NPM install <a href="http://gruntjs.com/getting-started">grunt-cli</a> globally.</p>
 <p>Create a directory for all your static content, scripts, and styles.
 This is your <a href="System.baseURL.html">baseURL</a> folder. Within that folder run <code>npm init</code> to, create a <code>package.json</code>:</p>
 <p>Note: when it asks for the &quot;entrypoint&quot;, write &quot;main.js&quot;.</p>
@@ -372,7 +384,7 @@ need it later.</p>
 }
 </code></pre>
 <p><code>main.js</code> is the entrypoint of the application. It should load import your
-apps other modules and kickoff the application. Write the following in <code>main.js</code>:</p>
+app's other modules and kickoff the application. Write the following in <code>main.js</code>:</p>
 <pre><code>import $ from &quot;jquery&quot;;
 $(document.body).append(&quot;&lt;h1&gt;Hello World!&lt;/h1&gt;&quot;);
 </code></pre>
@@ -384,7 +396,7 @@ $(document.body).append(&quot;&lt;h1&gt;Hello World!&lt;/h1&gt;&quot;);
 Starting up http-server, serving ./ on: http://0.0.0.0:8080
 Hit CTRL-C to stop the server
 </code></pre>
-<p>Open <a href="http://localhost:8080/index.html">http://localhost:8080/index.html</a> in the browser. You should see a big &quot;Hello World&quot;. Open the Network tab in developer tools and you'll see several files including <code>main.js</code> were loaded.</p>
+<p>Open <code>http://localhost:8080/index.html</code> in the browser. You should see a big &quot;Hello World&quot;. Open the Network tab in developer tools and you'll see several files including <code>main.js</code> were loaded.</p>
 <h3>Build Process</h3>
 <p>Create a <code>Gruntfile.js</code> in your BASE folder. Configure grunt to
 call <code>stealBuild</code></p>
@@ -419,8 +431,8 @@ call <code>stealBuild</code></p>
 &lt;/html&gt;
 </code></pre>
 <h3>Run in production</h3>
-<p>Open <a href="http://localhost:8080/index.html">http://localhost:8080/index.html</a> in the browser. You should see a big &quot;Hello World&quot;. Check
-the network tab again, you will see only two scripts load. The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into <code>main.js</code>.</p>
+<p>Reload <code>http://localhost:8080/index.html</code> and check the network tab again, you will see only two scripts load.
+The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into <code>main.js</code>.</p>
 
 		</section>
 		

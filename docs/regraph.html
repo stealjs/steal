@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Roadmap </title>
+	<title>StealJS  - regraph</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -80,184 +80,18 @@
 		<ul class="api cascading primary-grouping"> 
 	
 		
-		
-			<li class="search-container active">
+		<li class="search-container active parent">
 			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
-			
-	<ul>
+		</li>
 		
-			
-				
-					
-					<li class="heading search-container">
-						<span>apis</span>
-						
-	<ul>
 		
+			<li class="search-container active">
+			<a class="sidebar-title" href="regraph.html" data-search="regraph">
+				regraph
+			</a>
 			
-				
-				
-				<li class="search-container">
-					<a class="page" href="steal.html" data-search="steal">
-						steal
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="steal-tools.html" data-search="steal-tools">
-						steal-tools
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-			
-				
-					
-					<li class="heading search-container">
-						<span>guides</span>
-						
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="StealJS.why.html" data-search="Why StealJS">
-						Why StealJS
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="StealJS.quick-start.html" data-search="Quick Start">
-						Quick Start
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="steal-tools.guides.progressive_loading.html" data-search="Progressive Loading">
-						Progressive Loading
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="StealJS.project-exporting.html" data-search="Project Exporting">
-						Project Exporting
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="steal-tools.guides.watch_mode.html" data-search="Continuous Builds">
-						Continuous Builds
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="StealJS.changelog.html" data-search="Changelog">
-						Changelog
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
-						Migrating
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container active">
-					<a class="page" href="StealJS.roadmap.html" data-search="Roadmap">
-						Roadmap
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="page" href="guides.Contributing.html" data-search="Contributing">
-						Contributing
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
-
-					</li>
-					
-				
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -274,19 +108,15 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>Roadmap</h1>
+<h1>regraph</h1>
 	<ul class="tags">
-		<li>page</li>
+		<li>module</li>
 	</ul>
 	
 	
 </div>
 
 <div class="sub-heading">
-	
-	
-		<span class="module">StealJS.roadmap</span>
-	
 	
 	
 	<span class="inherits">&nbsp;</span>
@@ -313,7 +143,7 @@
 
 		
 		<section class="description">
-			<p>Here's what we've got planned:</p>
+			<p>Consumes a Dependency Graph and can regenerate another when modules change.</p>
 
 		</section>
 		
@@ -323,24 +153,41 @@
 		
 		
 		
+			<section class="signature">
+				<h2 id="sig_">function(config)
+</h2>
+<div class="signature-wrapper">
+<p>Consumes a Dependency Graph and can regenerate another when modules change.</p>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>config
+				<code>{*}</code></h4>
+			<div class="description">
+				
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+			</section>
+		
 		
 
-		
-		<section class="comment">
-			<h2>Watch Builds</h2>
-<p>Automatically build when a file changes. We should be able to make
-this extremely high performance if the dependency graph is not changing.</p>
-<h2>Live Reloading</h2>
-<p>Would make development extremely convenient as modules would automatically
-reload as you change them without needing to reload the browser.</p>
-<h2>Remove Traceur Runtime and IE8 ES6 module support</h2>
-<p><a href="https://groups.google.com/forum/#!topic/systemjs/yECCl6I9SDw">Read here</a></p>
-<h2>Development Packages</h2>
-<p>Build a package that will be loaded in development. For example, instead of
-loading each CanJS module individually, you could easily build them
-into a package that would be loaded in development as a single file.</p>
-
-		</section>
 		
 		
 
@@ -364,7 +211,7 @@ into a package that would be loaded in development as a single file.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.roadmap","src":"steal/docs/pages/roadmap.md","description":"Here's what we've got planned:","title":"Roadmap","parent":"StealJS.guides","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"module","name":"regraph","params":[{"name":"config","types":[{"type":"*"}]}],"parent":"steal-tools/lib/graph/regraph.js","src":"steal-tools/lib/graph/regraph.js","line":7,"codeLine":12,"description":"Consumes a Dependency Graph and can regenerate another when modules change.","title":"","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
