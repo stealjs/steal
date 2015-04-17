@@ -62,7 +62,7 @@ exports.translate = function(load){
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
 		});
-		var configDependencies = ['@loader','npm-extension'].concat(packageDependencies(pkg));
+		var configDependencies = ['@loader','npm-extension'].concat(configDeps.call(loader, pkg));
 		var pkgMain = utils.pkg.hasDirectoriesLib(pkg) ?
 			convertName(context, pkg, false, true, pkg.name+"/"+utils.pkg.main(pkg)) :
 			utils.pkg.main(pkg);
@@ -118,9 +118,12 @@ function convertPropertyNamesAndValues (context, pkg, map , root) {
 	if(!map) {
 		return map;
 	}
-	var clone = {};
+	var clone = {}, val;
 	for(var property in map ) {
-		clone[convertName(context, pkg, map, root, property)] = convertName(context, pkg, map, root, map[property]);
+		val = map[property];
+		clone[convertName(context, pkg, map, root, property)] = typeof val === "object"
+			? convertPropertyNamesAndValues(context, pkg, val, root)
+			: convertName(context, pkg, map, root, val);
 	}
 	return clone;
 }
@@ -160,11 +163,16 @@ function convertName (context, pkg, map, root, name) {
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						console.warn("WARN: Could not find ", name , "in node_modules. Ignoring.");
+						warn(name);
 						return name;
 					}
 					requestedVersion = requestedProject.version;
 					depPkg = crawl.matchedVersion(context, parsed.packageName, requestedVersion);
+					// If we still didn't find one just use the first available version.
+					if(!depPkg) {
+						var versions = context.versions[parsed.packageName];
+						depPkg = versions && versions[requestedVersion];
+					}
 				}
 				// SYSTEM.NAME
 				if(depPkg.system && depPkg.system.name) {
@@ -231,11 +239,15 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 }
 
 // Dependencies from a package.json file specified in `system.configDependencies`
-function packageDependencies(pkg) {
+function configDeps(pkg) {
+	var deps = [];
 	if(pkg.system && pkg.system.configDependencies) {
-		return pkg.system.configDependencies;
+		deps = deps.concat(pkg.system.configDependencies);
 	}
-	return [];
+	if(this.configDependencies) {
+		deps = deps.concat(this.configDependencies);
+	}
+	return deps;
 }
 
 
@@ -310,3 +322,15 @@ var translateConfig = function(loader, packages){
 		loader.npmPaths[pkgAddress] = pkg;
 	});
 };
+
+var warn = (function(){
+	var warned = {};
+	return function(name){
+		if(!warned[name]) {
+			warned[name] = true;
+			var warning = "WARN: Could not find " + name + " in node_modules. Ignoring.";
+			if(console.warn) console.warn(warning);
+			else console.log(warning);
+		}
+	};
+})();

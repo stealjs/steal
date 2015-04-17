@@ -3,6 +3,12 @@
 
 @body
 
+## 0.8.0
+
+- StealTools now produces source maps for both multi-build and export. [#210](https://github.com/stealjs/steal-tools/pull/210). Check out the [build docs](http://stealjs.com/docs/steal-tools.build.html) for example usage.
+- The cli is now easier to use. The `package.json` is now the default config, so no `--config` or `--main` option is needed if using the npm plugin. [#212](https://github.com/stealjs/steal-tools/pull/212)
+- Upgraded SystemJS to `0.16.6`, ES6 Module Loader to `0.16.3` and Traceur to `0.0.87`.
+
 ## 0.7.0
 
 ### steal

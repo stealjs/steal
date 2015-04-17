@@ -65,7 +65,13 @@ exports.addExtension = function(System){
 			if(!parsedModuleName.modulePath) {
 				parsedModuleName.modulePath = utils.pkg.main(depPkg);
 			}
-			return oldNormalize.call(this, utils.moduleName.create(parsedModuleName), parentName, parentAddress);
+			var moduleName = utils.moduleName.create(parsedModuleName);
+			// Apply mappings, if they exist in the refPkg
+			if(refPkg.system && refPkg.system.map &&
+			   typeof refPkg.system.map[moduleName] === "string") {
+				moduleName = refPkg.system.map[moduleName];
+			}
+			return oldNormalize.call(this, moduleName, parentName, parentAddress);
 		} else {
 			if(depPkg === this.npmPaths.__default) {
 				// if the current package, we can't? have the
@@ -127,9 +133,12 @@ exports.addExtension = function(System){
 
 	var configSpecial = {
 		map: function(map){
-			var newMap = {};
+			var newMap = {}, val;
 			for(var name in map) {
-				newMap[convertName(this, name)] = convertName(this, map[name]);
+				val = map[name];
+				newMap[convertName(this, name)] = typeof val === "object"
+					? configSpecial.map(val)
+					: convertName(this, val);
 			}
 			return newMap;
 		},

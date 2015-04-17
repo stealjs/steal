@@ -17,7 +17,7 @@ prevents the production bundle from loading:
 <script>
   steal = {
     instantiated: {
-      "bundles/myapp.css!" : null
+      "bundles/myapp.css!$css" : null
     }
   }
 </script>
