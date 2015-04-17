@@ -95,5 +95,5 @@
 					href.hash;
 		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window === "undefined",
+		isBrowserWithWindow = typeof window !== "undefined",
 		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';

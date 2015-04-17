@@ -95,8 +95,9 @@
 					href.hash;
 		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window === "undefined",
+		isBrowserWithWindow = typeof window !== "undefined",
 		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
 		//if no / slashes, check for \ slashes since it might be a windows path
@@ -250,8 +251,6 @@ var makeSteal = function(System){
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
 		
-		var tval = loader.paths["@traceur"];
-
 		loader.config =  function(cfg){
 			
 			var data = extend({},cfg);
@@ -299,7 +298,9 @@ var makeSteal = function(System){
 			var name = filename(val),
 				root = dir(val);
 				
-			System.configPath = joinURIs( location.href, val);
+			if(!isNode) {
+				System.configPath = joinURIs( location.href, val);
+			}
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
@@ -374,7 +375,6 @@ var makeSteal = function(System){
 		}
 	};
 	
-	var isNode = typeof module !== 'undefined' && module.exports;
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {
@@ -748,14 +748,14 @@ if (typeof System !== "undefined") {
 		require("system-json");
 		
 	} else {
-		var oldSteal = window.steal;
-		window.steal = makeSteal(System);
-		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
+		var oldSteal = global.steal;
+		global.steal = makeSteal(System);
+		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
 				console.log("error",error,  error.stack);
 				throw error;
 			});
-		window.steal.addSteal = addSteal;
+		global.steal.addSteal = addSteal;
 	} 
     
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);

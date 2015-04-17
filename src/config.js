@@ -2,8 +2,6 @@
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
 		
-		var tval = loader.paths["@traceur"];
-
 		loader.config =  function(cfg){
 			
 			var data = extend({},cfg);
@@ -51,7 +49,9 @@
 			var name = filename(val),
 				root = dir(val);
 				
-			System.configPath = joinURIs( location.href, val);
+			if(!isNode) {
+				System.configPath = joinURIs( location.href, val);
+			}
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
@@ -126,7 +126,6 @@
 		}
 	};
 	
-	var isNode = typeof module !== 'undefined' && module.exports;
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {

@@ -4970,8 +4970,9 @@ var $__curScript, __eval;
 					href.hash;
 		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window === "undefined",
+		isBrowserWithWindow = typeof window !== "undefined",
 		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
 		//if no / slashes, check for \ slashes since it might be a windows path
@@ -5202,8 +5203,6 @@ if (typeof System !== "undefined") {
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
 		
-		var tval = loader.paths["@traceur"];
-
 		loader.config =  function(cfg){
 			
 			var data = extend({},cfg);
@@ -5251,7 +5250,9 @@ if (typeof System !== "undefined") {
 			var name = filename(val),
 				root = dir(val);
 				
-			System.configPath = joinURIs( location.href, val);
+			if(!isNode) {
+				System.configPath = joinURIs( location.href, val);
+			}
 			System.configMain = name;
 			System.paths[name] = name;
 			addProductionBundles.call(this);
@@ -5326,7 +5327,6 @@ if (typeof System !== "undefined") {
 		}
 	};
 	
-	var isNode = typeof module !== 'undefined' && module.exports;
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {
@@ -5577,9 +5577,6 @@ if (typeof System !== "undefined") {
 				return Promise.all( map(main,function(main){
 					return System["import"](main);
 				}) );
-			}).then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
 			});
 			
 		}
@@ -5705,12 +5702,12 @@ if (typeof System !== "undefined") {
 	} else {
 		var oldSteal = global.steal;
 		global.steal = makeSteal(System);
-		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
+		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
+			.then(null, function(error){
+				console.log("error",error,  error.stack);
+				throw error;
+			});
 		global.steal.addSteal = addSteal;
-		
-		// I think production needs this
-		// global.define = System.amdDefine;
-		
 	} 
     
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);
