@@ -1,7 +1,11 @@
 	if (typeof window != 'undefined') {
 		var oldSteal = window.steal;
 		window.steal = makeSteal(System);
-		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
+		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
+			.then(null, function(error){
+				console.log("error",error,  error.stack);
+				throw error;
+			});
 		window.steal.addSteal = addSteal;
 		
 		// I think production needs this
