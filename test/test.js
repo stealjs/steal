@@ -313,5 +313,12 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("with npm", function(){
 		makeIframe("bower/npm/index.html");
 	});
+	
+	if(window.Worker) {
+		asyncTest("webworkers", function(){
+			makeIframe("webworkers/dev.html");
+		});
+	}
+	
 
 })();
