@@ -12,6 +12,25 @@ var excludedDeps = {
 	"system-bower": true
 };
 
+var utils = {
+	pkg: {
+		main: function(pkg){
+			if(pkg.system && pkg.system.main) {
+				return pkg.system.main;
+			}
+
+			var main = pkg.main;
+			if(typeof main === "undefined") {
+				return false;
+			}
+			if(typeof main === "string") {
+				return main;
+			}
+			return main[0];
+		}
+	}
+};
+
 // Combines together dependencies and devDependencies (if bowerDev option is enabled)
 var getDeps = function(loader, bower){
 	var deps = {};
@@ -64,6 +83,11 @@ var setPaths = function(config, bowerPath, name, main) {
 
 	// Set the path to the `main` and the path to the wildcard.
 	if(this._bowerMainLoaded) {
+		// Add a .js if there is no extension
+		if(main.indexOf(".") === -1) {
+			main = main + ".js";
+		}
+
 		config.paths[name] = [bowerPath, name, main].join('/');
 		config.paths[name + "/*"] = mainDir + "/*.js";
 	}
@@ -113,12 +137,25 @@ exports.translate = function(load){
 	var bower = JSON.parse(load.source);
 	var deps = getDeps(loader, bower);
 
+	// Convert bowerIgnore
+	var bowerIgnore = bower.system && bower.system.bowerIgnore;
+	if(bowerIgnore && typeof bowerIgnore.length === "number") {
+		var bowerMap = {};
+		for(var i = 0, len = bowerIgnore.length; i < len; i++) {
+			bowerMap[bowerIgnore[i]] = true;
+		}
+		bowerIgnore = bowerMap;
+	}
+
 	// Get the AMD dependencies
 	var amdDeps = [];
 	for(var dep in deps) {
-		amdDeps.push(
-			bowerPath + "/" + dep + "/bower.json!bower"
-		);
+		// add a check of bower.system.bowerIgnore before pushing dep
+		if(!bowerIgnore || !bowerIgnore[dep]) {
+			amdDeps.push(
+				bowerPath + "/" + dep + "/bower.json!bower"
+			);
+		}
 	}
 	// Add in the loader so these will be buildable in parallel.
 	amdDeps.unshift("@loader");
@@ -130,10 +167,9 @@ exports.translate = function(load){
 	config.paths = config.paths || {};
 
 	// Set the paths to the wildcard and main modules.
-	var main = bower.main && ((typeof bower.main === "string")
-								? bower.main : bower.main[0]);
+
 	// Don't set any paths for the main bower.json
-	setPaths.call(loader, config, bowerPath, name, main);
+	setPaths.call(loader, config, bowerPath, name, utils.pkg.main(bower));
 	setMain.call(loader, bower);
 	loader._bowerMainLoaded = true;
 
