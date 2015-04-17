@@ -174,7 +174,9 @@
 						if(paramParts.length > 1) {
 							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
 						} else {
-							console.warn("please use search params like ?main=main&env=production");
+							if(steal.dev) {
+								steal.dev.warn("Please use search params like ?main=main&env=production");
+							}
 							var oldParamParts = searchPart.split(",");
 							if (oldParamParts[0]) {
 								searchConfig.startId = oldParamParts[0];
