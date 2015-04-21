@@ -290,9 +290,9 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("npm/bower/index.html");
 	});
 
-
-
-
+	asyncTest("forward slash with npm", function(){
+		makeIframe("npm-deep/dev.html");
+	});
 
 	module("Bower extension");
 

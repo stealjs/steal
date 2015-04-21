@@ -7,3 +7,4 @@ test/steal/
 bower_components/
 test/ext/
 test/bower/as_config/vendor/system-bower/
+test/npm-deep/node_modules/steal/
