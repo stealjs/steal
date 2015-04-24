@@ -74,7 +74,7 @@ function teardown(moduleName, needsImport, listeners) {
 		}
 		
 		// If there's an interested listener add it to the needsImport.
-		if(listeners.reloads[moduleName]) {
+		if(listeners.reloads[moduleName] || listeners.reloads["*"]) {
 			needsImport[moduleName] = true;
 		}
 

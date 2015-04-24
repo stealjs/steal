@@ -1,17 +1,64 @@
-@module {*} live-reload
+@module {function()} steal.live-reload live-reload
 @parent StealJS.modules
-
+@description
 Live-reload is a module that enables a speedier development workflow. Paired with a WebSocket server such as StealTools, `live-reload` will reload modules as you change them in your browser.
 
-@option {Number} liveReloadPort
+See [steal.live-reload.options] for a full set of configuration options that can be provided.
 
-Specifies a port to use to establish the WebSocket connection. By default `8012` will be used. This can be specified in the script tag or in your config:
+@signature `reload(callback)`
 
-```html
-<script src="node_modules/steal/steal.js"
-	live-reload-port="9999"></script>
+This signature is useful to reload your application, if necessary, after a full reload cycle is complete.
+
+```
+import reload from "live-reload";
+
+// Re-render your application after each reload.
+reload(function(){
+	render();
+});
 ```
 
+@param {Function} callback A function to be called after a reload cycle is complete.
+
+@signature `reload(moduleName, callback)`
+
+This signature is used to observe reloading a specific module. Use this if the module creates side effects that need to be re-inited.
+
+```
+import reload from "live-reload";
+
+// Re-initialize the router.
+reload("app/router", function(router){
+	window.router = router;
+	router.start();
+});
+```
+
+@param {String} moduleName the name of the module observing.
+@param {function(value)} callback A function to be called when a specific module reloads. Is called with the new value.
+
+@signature `reload("*", callback)`
+
+Observe every module as they are reloaded.
+
+@param {String} star The string `"*"` denotes that all module names will be observed.
+@param {function(moduleName, moduleValue)} callback A function that will be called for each module as it is reloaded, with the `moduleName` and new `moduleValue` provided.
+
+@signature `reload.dispose(callback)`
+
+Observe the disposal of the current module. This is useful if the module has side-effects such as setting properties on the `window` that need to be removed before the module is reloaded.
+
+```
+import reload from "live-reload";
+
+window.App = {};
+
+reload.dispose(function(){
+	delete window.App;
+});
+```
+
+@param {function()} callback Function called before the module is deleted from the registry.
 
 @body
 
@@ -29,27 +76,31 @@ Use live-reload by including it as a configDependency in your `package.json`:
 }
 ```
 
-## Hooks
+Use [steal-tools] to start a live-reload WebSocket server.
 
-**live-reload** includes 2 hooks that you can use in your code that are called during the livecycle of a reload.
-
-### beforeDestroy
-
-If you include a `beforeDestroy` function in your module's code, the function will be called before that module is unloaded. Use this if you need to do some cleanup because the module has side effects (such as setting a property on the `window`).
-
-```js
-export function beforeDestroy(){
-	delete window.App; // Remove a property added to the window.
-};
+```
+steal-tools live-reload
 ```
 
-### afterReload
+Then launch your browser. **live-reload** will connect with the server and modules you change in your text editor will automatically be re-loaded. See the signatures above to understand how to use live-reload to observe reloads and act accordingly.
 
-If you include an `afterReload` function in your module, that function will be called after every reload. This is the place to do re-initialization, if you need it, such as rerendering:
+Most types of applications will need to re-render after a reload cycle. The following example shows this:
 
 ```js
-export function afterReload(){
+import reload from "live-reload";
+import template from "./template.stache!";
+
+function render() {
+	$("#app").html(template());
+}
+
+// Do the initial render.
+render();
+
+// Assign a callback that will be called whenever a reload cycle is complete.
+// Call `render` again so that any code that changed code can take effect.
+reload(function(){
 	render();
-};
-```
+});
 
+```
