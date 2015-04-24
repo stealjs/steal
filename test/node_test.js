@@ -3,7 +3,7 @@ var assert = require("assert");
 
 
 var makeSteal = function(config){
-	var localSteal =  steal.clone( steal.addSteal( steal.System.clone() ) );
+	var localSteal =  steal.clone();
 	localSteal.System.config(config || {});
 	return localSteal;
 };

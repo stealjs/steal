@@ -1,3 +1,8 @@
+var cloneSteal = function(System){
+	var loader = System || this.System;
+	return makeSteal(this.addSteal(loader.clone()));
+};
+
 var makeSteal = function(System){
 	
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));

@@ -155,6 +155,11 @@
 		}
 	};
 
+var cloneSteal = function(System){
+	var loader = System || this.System;
+	return makeSteal(this.addSteal(loader.clone()));
+};
+
 var makeSteal = function(System){
 	
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
@@ -750,19 +755,20 @@ if (typeof System !== "undefined") {
 		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./ext/dev.js");
-		steal.clone = makeSteal;
+		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
 		
 	} else {
 		var oldSteal = global.steal;
-		global.steal = makeSteal(System);
+		global.steal = cloneSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
 				console.log("error",error,  error.stack);
 				throw error;
 			});
+		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;
 	} 
     
