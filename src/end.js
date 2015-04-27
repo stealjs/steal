@@ -4,7 +4,7 @@
 		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./ext/dev.js");
-		steal.clone = makeSteal;
+		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
@@ -17,6 +17,7 @@
 				console.log("error",error,  error.stack);
 				throw error;
 			});
+		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;
 	} 
     
