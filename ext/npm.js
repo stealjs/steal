@@ -336,7 +336,7 @@ var warn = (function(){
 		if(!warned[name]) {
 			warned[name] = true;
 			var warning = "WARN: Could not find " + name + " in node_modules. Ignoring.";
-			if(typeof steal !== "undefined" && steal.dev) steal.dev.warn(warning)
+			if(typeof steal !== "undefined" && steal.dev && steal.dev.warn) steal.dev.warn(warning)
 			else if(console.warn) console.warn(warning);
 			else console.log(warning);
 		}
