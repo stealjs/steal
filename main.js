@@ -762,7 +762,7 @@ if (typeof System !== "undefined") {
 		
 	} else {
 		var oldSteal = global.steal;
-		global.steal = cloneSteal(System);
+		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
 				console.log("error",error,  error.stack);
