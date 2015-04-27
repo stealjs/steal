@@ -14,6 +14,6 @@
     "traceur": "0.0.87",
     "system-bower": "^0.2.1",
     "es6-module-loader": "bitovi/es6-module-loader#v0.16.3-bitovi.5",
-    "traceur-runtime": "~0.0.87"
+    "traceur-runtime": "0.0.87"
   }
 }
