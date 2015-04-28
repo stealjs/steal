@@ -482,6 +482,16 @@ var makeSteal = function(System){
 						var r = require;
 						return r('less');
 					});
+
+					if(this.configMain === "@config" && last(parts) === "steal") {
+						parts.pop();
+						if(last(parts) === "node_modules") {
+							this.configMain = "package.json!npm";
+							addProductionBundles.call(this);
+							parts.pop();
+						}
+					}
+
 				} else {
 					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
 					
