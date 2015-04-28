@@ -111,5 +111,3 @@
 	steal.done = function(){
 		return appDeferred;
 	};
-	return steal;
-
