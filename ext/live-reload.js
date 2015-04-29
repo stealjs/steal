@@ -3,11 +3,11 @@ var loader = require("@loader");
 /**
  * A map of modules names to parents like:
  * {
- *   "child": {
- *     "parentA": true,
- *     "parentB": true
- *   },
- *   "parentA": false
+ *	 "child": {
+ *	   "parentA": true,
+ *	   "parentB": true
+ *	 },
+ *	 "parentA": false
  * }
  *
  * This is used to recursively delete parent modules
@@ -18,6 +18,76 @@ loader._liveMap = {};
 // This is a map of listeners, those who have registered reload callbacks.
 loader._liveListeners = {};
 
+// A simple emitter
+function E () {
+	// Keep this empty so it's easier to inherit from
+  // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)
+}
+
+E.prototype = {
+	on: function (name, callback, ctx) {
+		var e = this.e || (this.e = {});
+		
+		(e[name] || (e[name] = [])).push({
+			fn: callback,
+			ctx: ctx
+		});
+		
+		return this;
+	},
+
+	once: function (name, callback, ctx) {
+		var self = this;
+		var fn = function () {
+			self.off(name, fn);
+			callback.apply(ctx, arguments);
+		};
+		
+		return this.on(name, fn, ctx);
+	},
+
+	each: function(cb){
+		var e = this.e || (this.e = {});
+		for(var name in e) {
+			cb(e[name], name);
+		}
+	},
+
+	emit: function (name) {
+		var data = [].slice.call(arguments, 1);
+		var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
+		var i = 0;
+		var len = evtArr.length;
+		
+		for (i; i < len; i++) {
+			evtArr[i].fn.apply(evtArr[i].ctx, data);
+		}
+		
+		return this;
+	},
+
+	off: function (name, callback) {
+		var e = this.e || (this.e = {});
+		var evts = e[name];
+		var liveEvents = [];
+	
+		if (evts && callback) {
+			for (var i = 0, len = evts.length; i < len; i++) {
+				if (evts[i].fn !== callback) liveEvents.push(evts[i]);
+			}
+		}
+
+		(liveEvents.length) 
+			? e[name] = liveEvents
+			: delete e[name];
+	
+		return this;
+	}
+};
+
+// Our instance
+loader._liveEmitter = new E();
+
 // Put a hook on `normalize` so we can keep a reverse map of modules to parents.
 // We'll use this to recursively reload modules.
 var normalize = loader.normalize;
@@ -26,10 +96,12 @@ loader.normalize = function(name, parentName){
 
 	if(name === "live-reload") {
 		name = "live-reload/" + parentName;
-		loader.set(name, loader.newModule({
-			default: makeReload(parentName),
-			__useDefault: true
-		}));
+		if(!loader.has(name)) {
+			loader.set(name, loader.newModule({
+				default: makeReload(parentName),
+				__useDefault: true
+			}));
+		}
 		return name;
 	}
 
@@ -58,145 +130,100 @@ loader.normalize = function(name, parentName){
 };
 
 // Teardown a module name by deleting it and all of its parent modules.
-function teardown(moduleName, needsImport, listeners) {
+function teardown(moduleName, e, moduleNames) {
+	var moduleNames = moduleNames || {};
+
 	var mod = loader.get(moduleName);
 	if(mod) {
-		var promise;
-		var dispose = listeners.disposers[moduleName];
-		// If this module has a `modLiveReloadTeardown` function call it.
-		if(dispose) {
-			dispose();
-		}
+		moduleNames[moduleName] = true;
+		e.emit("!dispose/" + moduleName);
 		loader.delete(moduleName);
 		if(loader._liveListeners[moduleName]) {
 			loader.delete("live-reload/" + moduleName);
 			delete loader._liveListeners[moduleName];
 		}
-		
-		// If there's an interested listener add it to the needsImport.
-		if(listeners.reloads[moduleName] || listeners.reloads["*"]) {
-			needsImport[moduleName] = true;
-		}
 
 		// Delete the module and call teardown on its parents as well.
 		var parents = loader._liveMap[moduleName];
-		if(!parents) {
-			needsImport[moduleName] = true;
-			return;
-		}
 
 		for(var parentName in parents) {
-			teardown(parentName, needsImport, listeners);
+			teardown(parentName, e, moduleNames);
 		}
 	}
+	return moduleNames;
 }
 
 function makeReload(moduleName, listeners){
 	loader._liveListeners[moduleName] = true;
+	var e = loader._liveEmitter;
 
 	function reload(moduleName, callback){
 		// 3 forms
 		// reload(callback); -> after full cycle
 		// reload("foo", callback); -> after "foo" is imported.
 		// reload("*", callback); -> after each module imports.
-		var callbacks;
 		if(arguments.length === 2) {
-			var reloads = reload.reload;
-			if(!reloads) reloads = reload.reload = {};
-			callbacks = reloads[moduleName] =
-				reloads[moduleName] || [];
-			callbacks.push(callback);
+			reload.on(moduleName, callback);
+			setupUnbind(moduleName, callback);
 			return;
 		}
-		if(!reload.cycleComplete) reload.cycleComplete = [];
-		reload.cycleComplete.push(moduleName); // Actually the callback
+		reload.on("!cycleComplete", moduleName);
+		setupUnbind("!cycleComplete", moduleName);
 	}
 
+	reload.on = bind(e.on, e);
+	reload.off = bind(e.off, e);
+	reload.once = bind(e.once, e);
+
 	// This allows modules to dispose themselves
-	reload.dispose = function(callback){
-		reload.onDispose = callback;
+	reload.dispose = function(name, callback){
+		if(!callback) {
+			callback = name;
+			name = moduleName;
+		}
+		var event = "!dispose/" + name;
+		reload.on(event, callback);
+		setupUnbind(event, callback);
 	};
+
+	function setupUnbind(event, callback){
+		e.once("!dispose/" + moduleName, function(){
+			e.off(event, callback);
+		});
+	}
 	
 	return reload;
 }
 
-function mergeCallbacks(reloads, reload){
-	var callbacks;
-	for(moduleName in reload) {
-		callbacks = reloads[moduleName];
-		if(!callbacks) callbacks = reloads[moduleName] = [];
-		callbacks.push.apply(callbacks, reload[moduleName]);
-	}
-}
-
-function startCycle(){
-	var reloads = {};
-	var cycleComplete = [];
-	var disposers = {};
-
-	var mod;
-	for(var moduleName in loader._liveListeners) {
-		mod = loader.get("live-reload/" + moduleName);
-		if(mod) {
-			mod = mod["default"];
-			if(mod.reload) {
-				mergeCallbacks(reloads, mod.reload);
-			}
-			if(mod.cycleComplete) {
-				cycleComplete.push.apply(cycleComplete, mod.cycleComplete);
-			}
-			if(mod.onDispose) {
-				disposers[moduleName] = mod.onDispose;
-			}
-		}
-	}
-
-	return {
-		reloads: reloads,
-		cycleComplete: cycleComplete,
-		disposers: disposers
+function bind(fn, ctx){
+	return fn.bind ? fn.bind(ctx) : function(){
+		return fn.apply(ctx, arguments);
 	};
 }
 
 function reload(moduleName) {
-	var listeners = startCycle();
+	//var e = startCycle();
+	var e = loader._liveEmitter;
 
 	// Call teardown to recursively delete all parents, then call `import` on the
 	// top-level parents.
-	var parents = {};
-	teardown(moduleName, parents, listeners);
+	var moduleNames = teardown(moduleName, e);
 
 	var imports = [];
-	var importPromise, callbacks;
-	var eachCallbacks = listeners.reloads["*"] || [];
-	for(var parentName in parents) {
-		importPromise = loader["import"](parentName);
-		
-		informListeners(importPromise, parentName, eachCallbacks, 
-						listeners.reloads[parentName]);
+	function importModule(moduleName){
+		return loader["import"](moduleName).then(function(val){
+			e.emit(moduleName, val);
+			e.emit("*", moduleName, val);
+		});
+	}
 
-		imports.push(importPromise);
+	for(var moduleName in moduleNames) {
+		imports.push(importModule(moduleName));
 	}
 	// Once everything is imported call the global listener callback functions.
 	Promise.all(imports).then(function(){
-		listeners.cycleComplete.forEach(function(callback){
-			callback();
-		});
+		e.emit("!cycleComplete");
 	});
-}
-
-function informListeners(promise, moduleName, eachCallbacks, callbacks){
-	if((callbacks && callbacks.length) || eachCallbacks.length) {
-		if(!callbacks) callbacks = [];
-		promise.then(function(moduleValue){
-			callbacks.forEach(function(cb){
-				cb(moduleValue);
-			});
-			eachCallbacks.forEach(function(cb){
-				cb(moduleName, moduleValue);
-			});
-		});
-	}
 }
 
 function setup(){
@@ -214,6 +241,7 @@ function setup(){
 		reload(moduleName);
 	};
 }
+
 
 var isBrowser = typeof window !== "undefined";
 
