@@ -3,6 +3,17 @@
 
 @body
 
+## 0.10.0
+
+### steal
+
+- New [live-reload](http://stealjs.com/docs/steal.live-reload.html) extension.
+- Added a [steal.import](http://stealjs.com/docs/steal.import.html) to make it easier to work in Node. [#407](https://github.com/stealjs/steal/issues/407).
+
+### steal-tools
+
+- Added a [new command](http://stealjs.com/docs/steal-tools.cmd.live-reload.html) for the cli, `steal-tools live-reload` which starts a server for use with the live-reload workflow. [#223](https://github.com/stealjs/steal-tools/pull/233).
+
 ## 0.9.0
 
 ### steal
