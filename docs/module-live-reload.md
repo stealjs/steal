@@ -7,7 +7,7 @@ See [steal.live-reload.options] for a full set of configuration options that can
 
 @signature `reload(callback)`
 
-This signature is useful to reload your application, if necessary, after a full reload cycle is complete.
+Reloads your application after a full reload cycle is complete.
 
 ```
 import reload from "live-reload";
@@ -22,7 +22,7 @@ reload(function(){
 
 @signature `reload(moduleName, callback)`
 
-This signature is used to observe reloading a specific module. Use this if the module creates side effects that need to be re-inited.
+Observe reloading a specific module. Use this if the module creates side effects that need to be re-inited.
 
 ```
 import reload from "live-reload";
@@ -46,7 +46,7 @@ Observe every module as they are reloaded.
 
 @signature `reload.dispose(callback)`
 
-Observe the disposal of the current module. This is useful if the module has side-effects such as setting properties on the `window` that need to be removed before the module is reloaded.
+Observe the disposal of the current module. Used when the module has side-effects such as setting properties on the `window` that need to be removed before the module is reloaded.
 
 ```
 import reload from "live-reload";
