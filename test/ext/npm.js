@@ -38,16 +38,16 @@ exports.translate = function(load){
 		versions: {}
 	};
 	var pkg = {origFileUrl: load.address, fileUrl: load.address};
-	
+
 	crawl.processPkgSource(context, pkg, load.source);
-	
+
 	return crawl.deps(context, pkg, true).then(function(){
 		// clean up packages so everything is unique
 		var names = {};
 		var packages = [];
 		utils.forEach(context.packages, function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
-				if(pkg.browser){ 
+				if(pkg.browser){
 					delete pkg.browser.transform;
 				}
 				packages.push({
@@ -133,7 +133,7 @@ function convertName (context, pkg, map, root, name) {
 	var parsed = utils.moduleName.parse(name, pkg.name),
 		depPkg, requestedVersion;
 	if( name.indexOf("#") >= 0 ) {
-		
+
 		if(parsed.packageName === pkg.name) {
 			parsed.version = pkg.version;
 		} else {
@@ -143,7 +143,7 @@ function convertName (context, pkg, map, root, name) {
 			parsed.version = depPkg.version;
 		}
 		return utils.moduleName.create(parsed);
-		
+
 	} else {
 		if(root && name.substr(0,2) === "./" ) {
 			return name.substr(2);
@@ -179,25 +179,25 @@ function convertName (context, pkg, map, root, name) {
 				if(depPkg.system && depPkg.system.name) {
 					parsed.packageName = depPkg.system.name;
 				}
-				
+
 				parsed.version = depPkg.version;
 				if(!parsed.modulePath) {
 					parsed.modulePath = utils.pkg.main(depPkg);
 				}
 				return utils.moduleName.create(parsed);
 			}
-			
+
 		}
-		
+
 	}
 }
 
 
 /**
  * Converts browser names into actual module names.
- * 
+ *
  * Example:
- * 
+ *
  * ```
  * {
  * 	 "foo": "browser-foo"
@@ -205,9 +205,9 @@ function convertName (context, pkg, map, root, name) {
  *   "./foo" : "./foo-browser"
  * }
  * ```
- * 
+ *
  * converted to:
- * 
+ *
  * ```
  * {
  * 	 // any foo ... regardless of where
@@ -232,10 +232,10 @@ function convertBrowser(pkg, browser) {
 
 function convertBrowserProperty(map, pkg, fromName, toName) {
 	var packageName = pkg.name;
-	
+
 	var fromParsed = utils.moduleName.parse(fromName, packageName),
 		  toParsed = toName  ? utils.moduleName.parse(toName, packageName): "@empty";
-	
+
 	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
 }
 
@@ -253,12 +253,7 @@ function configDeps(pkg) {
 
 
 var translateConfig = function(loader, packages){
-	var g;
-	if(typeof window !== "undefined") {
-		g = window;
-	} else {
-		g = global;
-	}
+	var g = loader.global;
 	if(!g.process) {
 		g.process = {
 			cwd: function(){},
@@ -267,7 +262,7 @@ var translateConfig = function(loader, packages){
 			}
 		};
 	}
-	
+
 	if(!loader.npm) {
 		loader.npm = {};
 		loader.npmPaths = {};
@@ -275,8 +270,8 @@ var translateConfig = function(loader, packages){
 	}
 	loader.npmPaths.__default = packages[0];
 	var lib = packages[0].system && packages[0].system.directories && packages[0].system.directories.lib;
-	
-	
+
+
 	var setGlobalBrowser = function(globals, pkg){
 		for(var name in globals) {
 			loader.globalBrowser[name] = {
@@ -304,7 +299,7 @@ var translateConfig = function(loader, packages){
 			delete pkg.system.main;
 			loader.config(pkg.system);
 			pkg.system.main = main;
-			
+
 		}
 		if(pkg.globalBrowser) {
 			setGlobalBrowser(pkg.globalBrowser, pkg);
