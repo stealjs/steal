@@ -13,6 +13,8 @@ if( steal.config('env') === 'production' ) {
 	};
 } else {
 	exports.instantiate = function(load) {
+		var loader = this;
+
 		load.metadata.deps = [];
 		load.metadata.execute = function(){
 			var source = load.source+"/*# sourceURL="+load.address+" */";
