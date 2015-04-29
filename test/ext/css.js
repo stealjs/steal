@@ -13,6 +13,8 @@ if( steal.config('env') === 'production' ) {
 	};
 } else {
 	exports.instantiate = function(load) {
+		var loader = this;
+
 		load.metadata.deps = [];
 		load.metadata.execute = function(){
 			var source = load.source+"/*# sourceURL="+load.address+" */";
@@ -34,6 +36,17 @@ if( steal.config('env') === 'production' ) {
 					style.appendChild(document.createTextNode(source));
 				}
 				head.appendChild(style);
+
+				if(loader.has("live-reload")) {
+					var cssReload = loader.import("live-reload", { name: "$css" });
+					Promise.resolve(cssReload).then(function(reload){
+						loader.import(load.name).then(function(){
+							reload.once(load.name, function(){
+								head.removeChild(style);
+							});
+						});
+					});
+				}
 			}
 
 			return System.newModule({source: source});
