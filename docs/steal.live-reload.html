@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>StealJS - live-reload </title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs ">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="../index.html">StealJS</a>
+				<ul class="dropdown-menu">
+		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
+		          <li><a href="http://canjs.com">CanJS</a></li>
+		          <li><a href="http://jquerypp.com">jQuery++</a></li>
+		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
+		          <li><a href="http://funcunit.com">FuncUnit</a></li>
+		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		        </ul>
+			</div>
+			<ul class="nav">
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
+	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
+		      <li class=""><a href="https://github.com/stealjs/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/stealjs/steal">Chat</a></li>
+	        </ul>
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog">Blog</a></li>
+						<li><a href="http://bitovi.com/development">Development</a></li>
+						<li><a href="http://bitovi.com/design">Design</a></li>
+						<li><a href="http://bitovi.com/training">Training</a></li>
+						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
+						<li><a href="http://bitovi.com/about">About</a></li>
+						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	
+<div class="container api">
+
+	
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+		</li>
+		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="steal.html" data-search="steal">
+				steal
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a class="sidebar-title" href="steal.live-reload.html" data-search="live-reload">
+				live-reload
+			</a>
+			
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal.live-reload.options.html" data-search="LiveReloadOptions">
+						LiveReloadOptions
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	
+	
+	
+	<article class="content docs">
+	
+	
+		
+		<section class="title">
+			<div class="heading">
+<h1>live-reload</h1>
+	<ul class="tags">
+		<li>module</li>
+	</ul>
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	
+		<span class="module">steal.live-reload</span>
+	
+	
+	
+	<h2><code>{function()}</code></h2>
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+    
+	
+		<li><a href="">source</a></li>
+	
+	
+	
+</ul>
+<br />
+		</section>
+		
+		
+		
+		<section class="contents">
+		</section>
+		
+		
+		
+
+		
+		<section class="description">
+			<p>Live-reload is a module that enables a speedier development workflow. Paired with a WebSocket server such as StealTools, <code>live-reload</code> will reload modules as you change them in your browser.</p>
+<p>See <a href="steal.live-reload.options.html">LiveReloadOptions</a> for a full set of configuration options that can be provided.</p>
+
+		</section>
+		
+
+		
+			
+				<section class="signature">
+					<h2 id="sig_reload_callback_">reload(callback)
+</h2>
+<div class="signature-wrapper">
+<p>This signature is useful to reload your application, if necessary, after a full reload cycle is complete.</p>
+<pre><code>import reload from &quot;live-reload&quot;;
+
+// Re-render your application after each reload.
+reload(function(){
+    render();
+});
+</code></pre>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>callback
+				<code>{function()}</code></h4>
+			<div class="description">
+				<p>A function to be called after a reload cycle is complete.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+				</section>
+			
+				<section class="signature">
+					<h2 id="sig_reload_moduleName_callback_">reload(moduleName, callback)
+</h2>
+<div class="signature-wrapper">
+<p>This signature is used to observe reloading a specific module. Use this if the module creates side effects that need to be re-inited.</p>
+<pre><code>import reload from &quot;live-reload&quot;;
+
+// Re-initialize the router.
+reload(&quot;app/router&quot;, function(router){
+    window.router = router;
+    router.start();
+});
+</code></pre>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>moduleName
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>the name of the module observing.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>callback
+				<code>{function(value)}</code></h4>
+			<div class="description">
+				<p>A function to be called when a specific module reloads. Is called with the new value.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+				</section>
+			
+				<section class="signature">
+					<h2 id="sig_reload___34____34__callback_">reload(&#34;*&#34;, callback)
+</h2>
+<div class="signature-wrapper">
+<p>Observe every module as they are reloaded.</p>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>star
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>The string <code>&quot;*&quot;</code> denotes that all module names will be observed.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>callback
+				<code>{function(<a href="moduleName.html" >moduleName</a>, moduleValue)}</code></h4>
+			<div class="description">
+				<p>A function that will be called for each module as it is reloaded, with the <code>moduleName</code> and new <code>moduleValue</code> provided.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+				</section>
+			
+				<section class="signature">
+					<h2 id="sig_reload_dispose_callback_">reload.dispose(callback)
+</h2>
+<div class="signature-wrapper">
+<p>Observe the disposal of the current module. This is useful if the module has side-effects such as setting properties on the <code>window</code> that need to be removed before the module is reloaded.</p>
+<pre><code>import reload from &quot;live-reload&quot;;
+
+window.App = {};
+
+reload.dispose(function(){
+    delete window.App;
+});
+</code></pre>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>callback
+				<code>{function()}</code></h4>
+			<div class="description">
+				<p>Function called before the module is deleted from the registry.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+				</section>
+			
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h2>Use</h2>
+<p>Use live-reload by including it as a configDependency in your <code>package.json</code>:</p>
+<pre><code class="language-json">{
+  &quot;system&quot;: {
+    &quot;configDependencies&quot;: [
+      &quot;live-reload&quot;
+    ]
+  }
+}
+</code></pre>
+<p>Use <a href="steal-tools.html">steal-tools</a> to start a live-reload WebSocket server.</p>
+<pre><code>steal-tools live-reload
+</code></pre>
+<p>Then launch your browser. <strong>live-reload</strong> will connect with the server and modules you change in your text editor will automatically be re-loaded. See the signatures above to understand how to use live-reload to observe reloads and act accordingly.</p>
+<p>Most types of applications will need to re-render after a reload cycle. The following example shows this:</p>
+<pre><code class="language-js">import reload from &quot;live-reload&quot;;
+import template from &quot;./template.stache!&quot;;
+
+function render() {
+    $(&quot;#app&quot;).html(template());
+}
+
+// Do the initial render.
+render();
+
+// Assign a callback that will be called whenever a reload cycle is complete.
+// Call `render` again so that any code that changed code can take effect.
+reload(function(){
+    render();
+});
+
+</code></pre>
+
+		</section>
+		
+		
+
+		
+	
+	
+	</article>
+	
+	
+
+</div>
+
+
+
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		var docObject = {"type":"module","name":"steal.live-reload","src":"steal/docs/module-live-reload.md","description":"Live-reload is a module that enables a speedier development workflow. Paired with a WebSocket server such as StealTools, `live-reload` will reload modules as you change them in your browser.\n\nSee [steal.live-reload.options] for a full set of configuration options that can be provided.","title":"live-reload","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"parent":"StealJS.modules","signatures":[{"code":"reload(callback)","description":"This signature is useful to reload your application, if necessary, after a full reload cycle is complete.\n\n```\nimport reload from \"live-reload\";\n\n// Re-render your application after each reload.\nreload(function(){\n\trender();\n});\n```","params":[{"types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"name":"callback","description":"A function to be called after a reload cycle is complete."}]},{"code":"reload(moduleName, callback)","description":"This signature is used to observe reloading a specific module. Use this if the module creates side effects that need to be re-inited.\n\n```\nimport reload from \"live-reload\";\n\n// Re-initialize the router.\nreload(\"app/router\", function(router){\n\twindow.router = router;\n\trouter.start();\n});\n```","params":[{"types":[{"type":"String"}],"name":"moduleName","description":"the name of the module observing."},{"types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"value"}]}]}],"name":"callback","description":"A function to be called when a specific module reloads. Is called with the new value."}]},{"code":"reload(\"*\", callback)","description":"Observe every module as they are reloaded.","params":[{"types":[{"type":"String"}],"name":"star","description":"The string `\"*\"` denotes that all module names will be observed."},{"types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"moduleValue"}]}]}],"name":"callback","description":"A function that will be called for each module as it is reloaded, with the `moduleName` and new `moduleValue` provided."}]},{"code":"reload.dispose(callback)","description":"Observe the disposal of the current module. This is useful if the module has side-effects such as setting properties on the `window` that need to be removed before the module is reloaded.\n\n```\nimport reload from \"live-reload\";\n\nwindow.App = {};\n\nreload.dispose(function(){\n\tdelete window.App;\n});\n```","params":[{"types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"name":"callback","description":"Function called before the module is deleted from the registry."}]}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+	</script>
+	
+	
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-2302003-20', 'auto');
+		ga('send', 'pageview');
+		</script>
+	
+</body>
+
+</html>

@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - moduleName</title>
+	<title>StealJS  - steal.import</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -351,7 +351,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="steal.import.html" data-search="steal.import">
 						steal.import
 					</a>
@@ -597,7 +597,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="moduleName.html" data-search="moduleName">
 						moduleName
 					</a>
@@ -634,9 +634,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>moduleName</h1>
+<h1>steal.import</h1>
 	<ul class="tags">
-		<li>typedef</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -645,7 +645,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{String}</code></h2>
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -670,18 +670,50 @@
 		
 
 		
+		<section class="description">
+			<p>Dynamically imports modules after initial configuration has loaded. Otherwise works very similar to <a href="System.import.html">System.import</a>.</p>
+
+		</section>
+		
 
 		
 			
-			<section class='primary-options'>
-				
-
-  <h2 id="sig_">String
+				<section class="signature">
+					<h2 id="sig_steal_import____moduleName_">steal.import(...moduleName)
 </h2>
 <div class="signature-wrapper">
-<p>A Loader-unique string that represents a module.</p>
 
 
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>moduleName
+				<code>{<a href="moduleName.html" >moduleName</a>}</code></h4>
+			<div class="description">
+				<p>Names of modules wanting to import.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Promise}</code></h4>
+		<div class="description">
+			<p>A promise that will resolve with the values of the imported modules.</p>
+
+		</div>
+		
+		
+	</div>
+	
 
 
 
@@ -689,9 +721,7 @@
 
 </div>
 
-  
-
-			</section>
+				</section>
 			
 		
 		
@@ -700,18 +730,26 @@
 
 		
 		<section class="comment">
-			<p>It's important to understand the difference between a moduleName and module identifier. For example:</p>
-<table>
-<thead>
-<tr>
-    <th>Module identifier</th><th>Module name</th>
-</tr>
-</thead>
-<tbody>
-<tr><td>./dep</td><td>app/util/dep</td></tr>
-<tr><td>styles.css!</td><td>styles.css!$css</td></tr>
-</tbody>
-</table>
+			<h2>Use</h2>
+<p><code>steal.import</code> is useful for dynamically importing modules. It is like <a href="System.import.html">System.import</a> but with 2 advantages:</p>
+<ol>
+<li>It waits for the <a href="System.configMain.html">System.configMain</a> to be loaded before importing <code>moduleName</code>, so if configuration is needed it will work.</li>
+<li>It allows you to pass multiple moduleNames as arguments to prevent verbose code.</li>
+</ol>
+<h3>Browser</h3>
+<pre><code class="language-js">&lt;script src=&quot;node_modules/steal/steal.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    steal.import(&quot;my/main&quot;).then(function(mainValue){
+        
+    });
+&lt;/script&gt;
+</code></pre>
+<h3>Node</h3>
+<p><code>steal.import</code> is useful in Node for the same reason, as it prevents having to call <code>steal.startup</code> prior to importing the modules you care about.</p>
+<pre><code class="language-js">var steal = require(&quot;steal&quot;).clone();
+
+steal.import(&quot;server/main&quot;);
+</code></pre>
 
 		</section>
 		
@@ -737,7 +775,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"moduleName","src":"steal/docs/type-moduleName.md","description":"","title":"","types":[{"type":"String","description":"A Loader-unique string that represents a module."}],"parent":"StealJS.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"steal.import","src":"steal/docs/steal-import.md","description":"Dynamically imports modules after initial configuration has loaded. Otherwise works very similar to [System.import].","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"title":"","parent":"StealJS.functions","signatures":[{"code":"steal.import(...moduleName)","description":"","params":[{"types":[{"type":"moduleName"}],"name":"moduleName","description":"Names of modules wanting to import."}],"returns":{"types":[{"type":"Promise"}],"description":"A promise that will resolve with the values of the imported modules."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - functions </title>
+	<title>StealJS - LiveReloadOptions </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -94,8 +94,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.functions.html" data-search="functions">
-				functions
+			<a class="sidebar-title" href="steal.live-reload.html" data-search="live-reload">
+				live-reload
 			</a>
 			
 	<ul>
@@ -103,21 +103,9 @@
 			
 				
 				
-				<li class="search-container">
-					<a class="property" href="System.import.html" data-search="System.import">
-						System.import
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="property" href="steal.import.html" data-search="steal.import">
-						steal.import
+				<li class="search-container active">
+					<a class="typedef" href="steal.live-reload.options.html" data-search="LiveReloadOptions">
+						LiveReloadOptions
 					</a>
 				</li>
 				
@@ -142,9 +130,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>functions</h1>
+<h1>LiveReloadOptions</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -153,15 +141,19 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.functions</span>
+		<span class="module">steal.live-reload.options</span>
 	
 	
+	
+	<h2><code>{Object}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
 
 <ul class="links">
     
+	
+		<li><a href="">source</a></li>
 	
 	
 	
@@ -178,14 +170,73 @@
 		
 
 		
+		<section class="description">
+			<p>The following options can be specified to configure <a href="steal.live-reload.html">live-reload</a>'s behavior, using any method specified in <a href="System.config.html">System.config</a>.</p>
+
+		</section>
+		
 
 		
+			
+			<section class='primary-options'>
+				
+
+  <h2 id="sig_">Object
+</h2>
+<div class="signature-wrapper">
+
+
+
+
+
+
+  <h3>Properties</h3>
+  
+  <ol class="parameters">
+	
+	<li class="parameter">
+		<h4>liveReloadPort<code>=8012</code>
+			<code>{Number}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Specifies a port to use to establish the WebSocket connection. By default <code>8012</code> will be used. This can be specified in the script tag or in your config.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>liveReload<code>=true</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Specifies whether to try and connect with a WebSocket server. If provided as the string <code>false</code> (such as through the script tag), this is also honored.</p>
+<p>This is only useful to temporarily disable live-reload while you have the server off.</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+</ol>
+
+
+</div>
+
+  
+
+			</section>
 			
 		
 		
 		
 		
 
+		
+		<section class="comment">
+			
+		</section>
 		
 		
 
@@ -209,7 +260,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"StealJS.functions","title":"functions","type":"group","parent":"steal","description":"","order":0,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal.live-reload.options","src":"steal/docs/module-live-reload.options.md","description":"The following options can be specified to configure [steal.live-reload]'s behavior, using any method specified in [System.config].","title":"LiveReloadOptions","types":[{"type":"Object","options":[{"name":"liveReloadPort","description":"Specifies a port to use to establish the WebSocket connection. By default `8012` will be used. This can be specified in the script tag or in your config.","types":[{"type":"Number"}],"optional":true,"defaultValue":"8012"},{"name":"liveReload","description":"Specifies whether to try and connect with a WebSocket server. If provided as the string `false` (such as through the script tag), this is also honored.\n\nThis is only useful to temporarily disable live-reload while you have the server off.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"}]}],"parent":"steal.live-reload","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
