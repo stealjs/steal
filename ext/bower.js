@@ -84,11 +84,13 @@ var setPaths = function(config, bowerPath, name, main) {
 	// Set the path to the `main` and the path to the wildcard.
 	if(this._bowerMainLoaded) {
 		// Add a .js if there is no extension
-		if(main.indexOf(".") === -1) {
+		if(main && main.indexOf(".") === -1) {
 			main = main + ".js";
 		}
 
-		config.paths[name] = [bowerPath, name, main].join('/');
+		if(main) {
+			config.paths[name] = [bowerPath, name, main].join('/');
+		}
 		config.paths[name + "/*"] = mainDir + "/*.js";
 	}
 };
