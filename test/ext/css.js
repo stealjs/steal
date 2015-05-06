@@ -21,13 +21,22 @@ if( steal.config('env') === 'production' ) {
 			source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
 				return "url(" + steal.joinURIs( load.address, part) + ")";
 			});
-				
+
 			if(load.source && typeof document !== "undefined") {
-				var head = document.head || document.getElementsByTagName('head')[0],
+				var doc = document.head ? document : document.getElementsByTagName ?
+					document : document.documentElement;
+
+				var head = doc.head || doc.getElementsByTagName('head')[0],
 					style = document.createElement('style');
 
+				if(!head) {
+					head = document.createElement("head");
+					doc.insertBefore(head, doc.firstChild);
+				}
+
+
 				// make source load relative to the current page
-				
+
 				style.type = 'text/css';
 
 				if (style.styleSheet){
@@ -53,7 +62,7 @@ if( steal.config('env') === 'production' ) {
 		};
 		load.metadata.format = "css";
 	};
-	
+
 }
 
 exports.buildType = "css";
