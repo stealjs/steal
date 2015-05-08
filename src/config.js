@@ -1,9 +1,9 @@
 	// Overwrites System.config with setter hooks
 	var setterConfig = function(loader, configSpecial){
 		var oldConfig = loader.config;
-		
+
 		loader.config =  function(cfg){
-			
+
 			var data = extend({},cfg);
 			// check each special
 			each(configSpecial, function(special, name){
@@ -15,7 +15,7 @@
 					if(res !== undefined) {
 						// set that on the loader
 						loader[name] = res;
-					} 
+					}
 					// delete the property b/c setting is done
 					delete data[name];
 				}
@@ -23,13 +23,13 @@
 			oldConfig.call(this, data);
 		};
 	};
-	
+
 	var setIfNotPresent = function(obj, prop, value){
 		if(!obj[prop]) {
-			obj[prop] = value;	
+			obj[prop] = value;
 		}
 	};
-	
+
 	// steal.js's default configuration values
 	System.configMain = "@config";
 	System.paths[System.configMain] = "stealconfig.js";
@@ -43,12 +43,12 @@
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
-	
+
 	var configSetter = {
 		set: function(val){
 			var name = filename(val),
 				root = dir(val);
-				
+
 			if(!isNode) {
 				System.configPath = joinURIs( location.href, val);
 			}
@@ -87,7 +87,7 @@
 			}
 		};
 	};
-		
+
 	var setToSystem = function(prop){
 		return {
 			set: function(val){
@@ -99,22 +99,28 @@
 			}
 		};
 	};
-	
+
 	var pluginPart = function(name) {
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
 			return name.substr(bang+1);
 		}
 	};
-	
+	var pluginResource = function(name){
+		var bang = name.lastIndexOf("!");
+		if(bang !== -1) {
+			return name.substr(0, bang);
+		}
+	};
+
 	var addProductionBundles = function(){
 		if(this.env === "production" && this.main) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+main;
-				
+
 			setIfNotPresent(this.meta, mainBundleName, {format:"amd"});
-			
+
 			// If the configMain has a plugin like package.json!npm,
 			// plugin has to be defined prior to importing.
 			var plugin = pluginPart(System.configMain);
@@ -122,10 +128,19 @@
 			if(plugin){
 				System.set(plugin, System.newModule({}));
 			}
+			plugin = pluginPart(main);
+			if(plugin) {
+				var resource = pluginResource(main);
+				bundle.push(plugin);
+				bundle.push(resource);
+
+				mainBundleName = bundlesDir+resource.substr(0, resource.indexOf("."));
+			}
+
 			this.bundles[mainBundleName] = bundle;
 		}
 	};
-	
+
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {
@@ -151,20 +166,20 @@
 			set: function(url, cfg)	{
 				System.stealURL = url;
 				var urlParts = url.split("?");
-				
+
 				var path = urlParts.shift(),
 					search = urlParts.join("?"),
 					searchParts = search.split("&"),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
 					stealPath = paths.join("/");
-				
+
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
-				
+
 				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
 					System.env = "production";
 				}
-				
+
 				if(searchParts.length && searchParts[0].length) {
 					var searchConfig = {},
 						searchPart;
@@ -187,13 +202,13 @@
 						}
 					}
 					this.config(searchConfig);
-				}	
-				
+				}
+
 				// Split on / to get rootUrl
-		
-				
-				
-				
+
+
+
+
 			}
 		},
 		// this gets called with the __dirname steal is in
@@ -217,7 +232,7 @@
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
-				
+
 				if(isNode) {
 					System.register("less",[], false, function(){
 						var r = require;
@@ -235,7 +250,7 @@
 
 				} else {
 					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
-					
+
 					// make sure we don't set baseURL if something else is going to set it
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
 						if ( last(parts) === "steal" ) {
@@ -273,14 +288,14 @@
 		instantiated: {
 			set: function(val){
 				var loader = this;
-				
+
 				each(val || {}, function(value, name){
 					loader.set(name,  loader.newModule(value));
 				});
 			}
 		}
 	});
-	
+
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
 			return System[cfg];
@@ -288,4 +303,4 @@
 			System.config(cfg);
 		}
 	};
-	
+
