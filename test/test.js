@@ -175,12 +175,16 @@ QUnit.config.testTimeout = 30000;
 			'src="../../steal.js?configed" data-config="../config.js"'));
 	});
 
-	asyncTest("compat - product bundle works", function(){
+	asyncTest("compat - production bundle works", function(){
 		makeIframe("production/prod.html");
 	});
 
-	asyncTest("product bundle specifying main works", function(){
+	asyncTest("production bundle specifying main works", function(){
 		makeIframe("production/prod-main.html");
+	});
+
+	asyncTest("steal.production.js doesn't require setting env", function(){
+		makeIframe("production/prod-env.html");
 	});
 
 	asyncTest("automatic loading of css plugin", function(){
@@ -257,7 +261,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("using babel as transpiler works", function(){
 		makeIframe("babel/site.html");
 	});
-	
+
 	asyncTest("inline code", function(){
 		makeIframe("basics/inline_code.html");
 	});
@@ -313,12 +317,12 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("with npm", function(){
 		makeIframe("bower/npm/index.html");
 	});
-	
+
 	if(window.Worker) {
 		asyncTest("webworkers", function(){
 			makeIframe("webworkers/dev.html");
 		});
 	}
-	
+
 
 })();

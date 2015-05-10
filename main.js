@@ -438,6 +438,7 @@ var makeSteal = function(System){
 
 				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
 					System.env = "production";
+					addProductionBundles.call(this);
 				}
 
 				if(searchParts.length && searchParts[0].length) {
