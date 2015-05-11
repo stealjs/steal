@@ -71,7 +71,7 @@ behaves like Browserify's [browser field](https://github.com/substack/node-brows
 ### package.globalBrowser
 
 Global browser specific overwrites for module file resolution.  These mapping take effect
-for all projects.  Use sparingly. Add [system-npm-browser-shims](https://github.com/bitovi/system-npm-browser-shims)
+for all projects.  Use sparingly. Add [steal-builtins](https://www.npmjs.com/package/steal-builtins)
 as a dependency for a nearly comprehensive list.
 
 ```
