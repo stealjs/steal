@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - AMD  </title>
+	<title>StealJS  - System.babelOptions</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -105,7 +105,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="System.babelOptions.html" data-search="System.babelOptions">
 						System.babelOptions
 					</a>
@@ -531,7 +531,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="function" href="syntax.amd.html" data-search="AMD ">
 						AMD 
 					</a>
@@ -646,9 +646,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>AMD </h1>
+<h1>System.babelOptions</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -657,9 +657,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">syntax.amd</span>
-	
-	
+	<h2><code>{Object}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -684,8 +682,32 @@
 		
 
 		
+		<section class="description">
+			<p>Options that will be passed into Babel when compiling ES6 code. The options are the same described <a href="https://babeljs.io/docs/usage/options/">here</a>.</p>
+
+		</section>
+		
 
 		
+			
+			<section class='primary-options'>
+				
+
+  <h2 id="sig_">Object
+</h2>
+<div class="signature-wrapper">
+
+
+
+
+
+
+
+</div>
+
+  
+
+			</section>
 			
 		
 		
@@ -694,27 +716,12 @@
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p>AMD is similar to <a href="syntax.steal.html">steal</a> in that you define a module using a wrapper function.
-Unlike steal, modules are defined as an array, like so:</p>
-<pre><code>define([
-    &quot;can/can&quot;, 
-    &quot;underscore/underscore&quot;, 
-    &quot;some_module/some_module&quot;], 
-  function(can, _, myModule){
-    return can.Component.extend({
-
-    });
-});
-</code></pre>
-<p>Also like Steal, with AMD you define the module's definition by returning a value from the function body. AMD differs in that the module ids you pass in the dependency array must point to a single file, not a folder.</p>
-<p>AMD also provides a conventient syntax that can be used rather than providing a dependency array that mimics CommonJS:</p>
-<pre><code>define(function(require, exports, module){
-  var can = require(&quot;can/can&quot;);
-  var _ = require(&quot;underscore/underscore&quot;);
-  var myModule = require(&quot;my_module/my_module&quot;);
-
-  return ...
+			<h2>JSX</h2>
+<p>Babel comes with support for transpiling JSX but it is not enabled by default in Steal. To enable the JSX support you can simply pass an empty array for the blacklist like so:</p>
+<pre><code class="language-js">System.config({
+  &quot;babelOptions&quot;: {
+    &quot;blacklist&quot;: []
+  }
 });
 </code></pre>
 
@@ -742,7 +749,7 @@ Unlike steal, modules are defined as an array, like so:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"syntax.amd","src":"steal/docs/syntax-amd.md","description":"","title":"AMD ","parent":"StealJS.syntaxes","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.babelOptions","src":"steal/docs/system-babelOptions.md","description":"Options that will be passed into Babel when compiling ES6 code. The options are the same described [here](https://babeljs.io/docs/usage/options/).","types":[{"type":"Object","options":[]}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

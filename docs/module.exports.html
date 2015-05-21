@@ -142,6 +142,13 @@
 		
 
 		
+		<section class="description">
+			<p>Creating a mapping from pre-normalized dependency names to the normalized version.
+Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
+information.</p>
+
+		</section>
+		
 
 		
 			
@@ -149,9 +156,12 @@
 		
 		
 			<section class="signature">
-				<h2 id="sig_">function(graph, name, callback)
+				<h2 id="sig_">function(node)
 </h2>
 <div class="signature-wrapper">
+<p>Creating a mapping from pre-normalized dependency names to the normalized version.
+Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
+information.</p>
 
 
 	<h3>Parameters</h3>
@@ -159,29 +169,7 @@
 	<ol class="parameters">
 		
 		<li class="parameter">
-			<h4>graph
-				<code>{*}</code></h4>
-			<div class="description">
-				
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>name
-				<code>{*}</code></h4>
-			<div class="description">
-				
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>callback
+			<h4>node
 				<code>{*}</code></h4>
 			<div class="description">
 				
@@ -231,7 +219,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"module.exports","params":[{"name":"graph","types":[{"type":"*"}]},{"name":"name","types":[{"type":"*"}]},{"name":"callback","types":[{"type":"*"}]}],"parent":"steal-tools/lib/graph/map_dependencies.js","src":"steal-tools/lib/graph/map_dependencies.js","line":1,"codeLine":4,"description":"","method":"graph.map","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"module.exports","params":[{"name":"node","types":[{"type":"*"}]}],"parent":"steal-tools/lib/node/dependency_map.js","src":"steal-tools/lib/node/dependency_map.js","line":1,"codeLine":7,"description":"Creating a mapping from pre-normalized dependency names to the normalized version.\nSave the mapping as `dependencyMap` on the node itself. Transpile will use this\ninformation.","method":"stealTools.node.dependencyMap","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
