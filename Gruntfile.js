@@ -1,8 +1,8 @@
 'use strict';
 module.exports = function (grunt) {
-	
+
   var core = ['<%= pkg.name %>.js', '<%= pkg.name %>.production.js', 'ext/**'];
-  
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     meta: {
@@ -78,6 +78,7 @@ module.exports = function (grunt) {
     	// copy plugins that steal should contain
       extensions: {
         files: [
+          {src:["node_modules/steal-css/css.js"], dest: "ext/css.js", filter: 'isFile'},
           {src:["node_modules/system-npm/npm.js"], dest: "ext/npm.js", filter: 'isFile'},
           {src:["node_modules/system-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: 'isFile'},
           {src:["node_modules/system-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: 'isFile'},
@@ -109,7 +110,7 @@ module.exports = function (grunt) {
           {expand: true, cwd: 'bower_components/system-bower/', src: ['*'], dest: 'test/bower/as_config/vendor/system-bower/', filter: 'isFile'}
         ]
       },
-      
+
     },
     watch: {
       files: [ "src/*.js", "bower_components/systemjs/dist/**"],
@@ -150,7 +151,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('testee');
-  
+
   grunt.registerTask('test', [ 'build', 'testee:tests', 'simplemocha' ]);
   grunt.registerTask('test-windows', [ 'build', /*'testee:windows',*/ 'simplemocha' ]);
   grunt.registerTask('build', [ /*'jshint', */'concat', 'uglify', 'copy:extensions','copy:toTest' ]);

@@ -1,4 +1,10 @@
-if( steal.config('env') === 'production' ) {
+var loader = require("@loader");
+
+// Register for server-side rendering.
+var register = loader.has("asset-register") ?
+  loader.get("asset-register")["default"] : function(){};
+
+if(loader.env === 'production') {
 	exports.fetch = function(load) {
 		// return a thenable for fetching (as per specification)
 		// alternatively return new Promise(function(resolve, reject) { ... })
@@ -13,12 +19,12 @@ if( steal.config('env') === 'production' ) {
 	};
 } else {
 	exports.instantiate = function(load) {
-		var loader = this;
+		var loader = this, assetRegister;
 
 		load.metadata.deps = [];
 		load.metadata.execute = function(){
 			var source = load.source+"/*# sourceURL="+load.address+" */";
-			source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
+			source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function(whole, part) {
 				return "url(" + steal.joinURIs( load.address, part) + ")";
 			});
 
@@ -56,6 +62,11 @@ if( steal.config('env') === 'production' ) {
 						});
 					});
 				}
+
+				// For server-side rendering, register this module.
+				register(load.name, "css", function(){
+					return style.cloneNode(true);
+				});
 			}
 
 			return System.newModule({source: source});
