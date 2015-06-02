@@ -1,5 +1,4 @@
-import 'css_paths/folder/main.less!';
-import 'css_paths/folder/main.css!';
+import 'less_paths/folder/main.less!';
 
 if(typeof window !== "undefined" && window.QUnit) {
 	var image = new Image();
@@ -13,7 +12,7 @@ if(typeof window !== "undefined" && window.QUnit) {
 		QUnit.start();
 		removeMyself();
 	};
-	image.src = $("#test-element1").css("background-image").replace(/url\("?/,"").replace(/"?\)/,"");
+	image.src = $("#test-element").css("background-image").replace(/url\("?/,"").replace(/"?\)/,"");
 } else {
-	console.log("background-image", $("#test-element1").css("background-image"));
+	console.log("background-image", $("#test-element").css("background-image"));
 }

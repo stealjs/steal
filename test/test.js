@@ -206,8 +206,8 @@ QUnit.config.testTimeout = 30000;
 			'src="../steal.js?../paths" data-config="../paths/config.js"'));
 	});
 
-	asyncTest("url paths in css work", function(){
-		makeIframe("css_paths/site.html");
+	asyncTest("url paths in less work", function(){
+		makeIframe("less_paths/site.html");
 	});
 
 	asyncTest("ext extension", function(){
