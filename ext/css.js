@@ -1,9 +1,5 @@
 var loader = require("@loader");
 
-// Register for server-side rendering.
-var register = loader.has("asset-register") ?
-  loader.get("asset-register")["default"] : function(){};
-
 if(loader.env === 'production') {
 	exports.fetch = function(load) {
 		// return a thenable for fetching (as per specification)
@@ -19,7 +15,7 @@ if(loader.env === 'production') {
 	};
 } else {
 	exports.instantiate = function(load) {
-		var loader = this, assetRegister;
+		var loader = this;
 
 		load.metadata.deps = [];
 		load.metadata.execute = function(){
@@ -40,9 +36,7 @@ if(loader.env === 'production') {
 					doc.insertBefore(head, doc.firstChild);
 				}
 
-
 				// make source load relative to the current page
-
 				style.type = 'text/css';
 
 				if (style.styleSheet){
@@ -62,11 +56,6 @@ if(loader.env === 'production') {
 						});
 					});
 				}
-
-				// For server-side rendering, register this module.
-				register(load.name, "css", function(){
-					return style.cloneNode(true);
-				});
 			}
 
 			return System.newModule({source: source});

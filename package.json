@@ -17,7 +17,7 @@
     "system-json": "^0.0.3"
   },
   "devDependencies": {
-    "steal-css": "^0.0.2",
+    "steal-css": "^0.0.3",
     "system-npm": "^0.2.0",
     "system-live-reload": "~0.0.2",
     "bower": "1.3.8",
