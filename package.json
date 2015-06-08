@@ -10,7 +10,7 @@
     }
   ],
   "dependencies": {
-    "documentjs": "0.3.0-pre.0"
+    "documentjs": "0.3.0-pre.4"
   },
   "homepage": "http://stealjs.com",
   "repository": {
