@@ -10,7 +10,7 @@
     }
   ],
   "dependencies": {
-    "documentjs": "0.3.0-pre.0"
+    "documentjs": "git://github.com/bitovi/documentjs#42c4473a76a4e03ef8e8a3742250bc34028394e0"
   },
   "homepage": "http://stealjs.com",
   "repository": {
