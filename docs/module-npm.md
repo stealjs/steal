@@ -72,7 +72,7 @@ behaves like Browserify's [browser field](https://github.com/substack/node-brows
 
 Global browser specific overwrites for module file resolution.  These mapping take effect
 for all projects.  Use sparingly. Add [steal-builtins](https://www.npmjs.com/package/steal-builtins)
-as a dependency for a nearly comprehensive list.
+as a dependency for a nearly comprehensive list. See the [example app](https://github.com/stealjs/steal-builtins-example) which uses the `events` builtin.
 
 ```
 {
