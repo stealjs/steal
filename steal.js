@@ -5046,7 +5046,12 @@ var cloneSteal = function(System){
 var makeSteal = function(System){
 
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
-	System.config({ map: { "@loader/@loader": "@loader" } });
+	System.config({
+		map: {
+			"@loader/@loader": "@loader",
+			"@steal/@steal": "@steal"
+		}
+	});
 
 	var configDeferred,
 		devDeferred,
@@ -5082,6 +5087,8 @@ var makeSteal = function(System){
 		}
 
 	};
+
+	System.set("@steal", System.newModule({"default":steal, __useDefault:true}));
 
 	steal.System = System;
 	steal.parseURI = parseURI;

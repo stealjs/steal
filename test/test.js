@@ -247,6 +247,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("@loader is current loader with steal syntax", function(){
 		makeIframe("current-loader/dev-steal.html");
 	});
+	asyncTest("@steal is the current steal", function(){
+		makeIframe("current-steal/dev.html");
+	});
+
 	asyncTest("less loads in the right spot", function(){
 		makeIframe("less-imports/dev.html");
 	});
