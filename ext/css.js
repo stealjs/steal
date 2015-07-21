@@ -32,8 +32,9 @@ if(loader.env === 'production') {
 					style = document.createElement('style');
 
 				if(!head) {
+					var docEl = doc.documentElement || doc;
 					head = document.createElement("head");
-					doc.insertBefore(head, doc.firstChild);
+					docEl.insertBefore(head, docEl.firstChild);
 				}
 
 				// make source load relative to the current page
