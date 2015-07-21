@@ -1,4 +1,6 @@
-if( steal.config('env') === 'production' ) {
+var loader = require("@loader");
+
+if(loader.env === 'production') {
 	exports.fetch = function(load) {
 		// return a thenable for fetching (as per specification)
 		// alternatively return new Promise(function(resolve, reject) { ... })
@@ -18,7 +20,7 @@ if( steal.config('env') === 'production' ) {
 		load.metadata.deps = [];
 		load.metadata.execute = function(){
 			var source = load.source+"/*# sourceURL="+load.address+" */";
-			source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function( whole, part ) {
+			source = source.replace(/url\(['"]?([^'"\)]*)['"]?\)/g, function(whole, part) {
 				return "url(" + steal.joinURIs( load.address, part) + ")";
 			});
 
@@ -34,9 +36,7 @@ if( steal.config('env') === 'production' ) {
 					doc.insertBefore(head, doc.firstChild);
 				}
 
-
 				// make source load relative to the current page
-
 				style.type = 'text/css';
 
 				if (style.styleSheet){
