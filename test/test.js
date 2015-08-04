@@ -270,6 +270,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("prod_define/prod.html");
 	});
 
+	asyncTest("envs config works", function(){
+		makeIframe("envs/envs.html");
+	});
+
 	module("json extension");
 
 	asyncTest("json extension", function(){

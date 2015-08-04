@@ -114,7 +114,7 @@
 	};
 
 	var addProductionBundles = function(){
-		if(this.env === "production" && this.main) {
+		if(this.loadBundles && this.main) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+main;
@@ -141,12 +141,51 @@
 		}
 	};
 
+	var setEnvsConfig = function(){
+		var loader = this;
+
+		if(loader.envs && loader.envMap) {
+			// To support comma seperated list of configs turn the object
+			// { 'production,server': { map: {} } }
+			// into { 'production': [{ map: {} }], 'server': [{ map: {} }] }
+			var envs = loader.envs;
+			var envConfigs = {};
+			each(envs, function(val, env){
+				each(env.split(","), function(name){
+					var arr = envConfigs[name] = envConfigs[name] || [];
+					arr.push(val);
+				});
+			});
+
+			each(loader.envMap, function(val, env){
+				var configs = envConfigs[env];
+				if(configs) {
+					each(configs, function(config){
+						loader.config(config);
+					});
+				}
+			});
+		}
+	};
+
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {
 		env: {
 			set: function(val){
-				System.env =  val;
+				this.env = val;
+
+				// Set up the envMap
+				var envMap = this.envMap = {};
+				var vals = val.split(",");
+				each(vals, function(env){
+					envMap[env] = true;
+				});
+
+				if(this.envMap.production) {
+					this.loadBundles = true;
+				}
+
 				addProductionBundles.call(this);
 			}
 		},
@@ -177,7 +216,7 @@
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					System.env = "production";
+					this.config({ env: "production" });
 					addProductionBundles.call(this);
 				}
 
