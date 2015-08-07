@@ -141,7 +141,6 @@
 		}
 	};
 
-	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {
 		env: {
@@ -250,7 +249,7 @@
 					}
 
 				} else {
-					setIfNotPresent(this.paths,"less",  dirname+"/ext/"+LESS_ENGINE+".js");
+					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {

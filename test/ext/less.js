@@ -1,9 +1,10 @@
 var css = require("$css");
+var loader = require("@loader");
 var lessEngine = require("less");
 
 exports.instantiate = css.instantiate;
 
-var options = steal.config('lessOptions') || {};
+var options = loader.lessOptions || {};
 
 // default optimization value.
 options.optimization |= lessEngine.optimization;
@@ -22,9 +23,9 @@ exports.translate = function(load) {
 	return new Promise(function(resolve, reject){
 		var renderOptions = {filename: address};
 		for (var prop in options){
-		   	renderOptions[prop] = options[prop]
+		   	renderOptions[prop] = options[prop];
 		}
-		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'))
+		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
 
 		var done = function(output) {
 			// Put the source map on metadata if one was created.

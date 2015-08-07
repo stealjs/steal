@@ -5,10 +5,6 @@ System.config({
 	bundle: ["foo"],
 	ext : {
 		crazy : "extensions/text"
-	},
-	lessOptions: {
-		dumpLineNumbers: "comments", // default false
-		strictMath: true, // default false
 	}
 });
 
