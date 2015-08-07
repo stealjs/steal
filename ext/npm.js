@@ -63,9 +63,16 @@ exports.translate = function(load){
 			}
 		});
 		var configDependencies = ['@loader','npm-extension'].concat(configDeps.call(loader, pkg));
-		var pkgMain = utils.pkg.hasDirectoriesLib(pkg) ?
-			convertName(context, pkg, false, true, pkg.name+"/"+utils.pkg.main(pkg)) :
-			utils.pkg.main(pkg);
+		var pkgMain = utils.pkg.main(pkg);
+		// Convert the main if using directories.lib
+		if(utils.pkg.hasDirectoriesLib(pkg)) {
+			var mainHasPkg = pkgMain.indexOf(pkg.name) === 0;
+			if(mainHasPkg) {
+				pkgMain = convertName(context, pkg, false, true, pkgMain);
+			} else {
+				pkgMain = convertName(context, pkg, false, true, pkg.name+"/"+pkgMain);
+			}
+		}
 
 		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension){\n" +
 			"npmExtension.addExtension(loader);\n"+
@@ -164,7 +171,7 @@ function convertName (context, pkg, map, root, name) {
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						warn(name);
+						if(root) warn(name);
 						return name;
 					}
 					requestedVersion = requestedProject.version;
