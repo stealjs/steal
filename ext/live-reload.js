@@ -27,12 +27,12 @@ function E () {
 E.prototype = {
 	on: function (name, callback, ctx) {
 		var e = this.e || (this.e = {});
-		
+
 		(e[name] || (e[name] = [])).push({
 			fn: callback,
 			ctx: ctx
 		});
-		
+
 		return this;
 	},
 
@@ -42,7 +42,7 @@ E.prototype = {
 			self.off(name, fn);
 			callback.apply(ctx, arguments);
 		};
-		
+
 		return this.on(name, fn, ctx);
 	},
 
@@ -58,11 +58,11 @@ E.prototype = {
 		var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
 		var i = 0;
 		var len = evtArr.length;
-		
+
 		for (i; i < len; i++) {
 			evtArr[i].fn.apply(evtArr[i].ctx, data);
 		}
-		
+
 		return this;
 	},
 
@@ -70,17 +70,17 @@ E.prototype = {
 		var e = this.e || (this.e = {});
 		var evts = e[name];
 		var liveEvents = [];
-	
+
 		if (evts && callback) {
 			for (var i = 0, len = evts.length; i < len; i++) {
 				if (evts[i].fn !== callback) liveEvents.push(evts[i]);
 			}
 		}
 
-		(liveEvents.length) 
+		(liveEvents.length)
 			? e[name] = liveEvents
 			: delete e[name];
-	
+
 		return this;
 	}
 };
@@ -106,7 +106,7 @@ loader.normalize = function(name, parentName){
 	}
 
 	var done = Promise.resolve(normalize.apply(this, arguments));
-	
+
 	if(!parentName) {
 		return done.then(function(name){
 			// We need to keep modules without parents to so we can know
@@ -115,7 +115,7 @@ loader.normalize = function(name, parentName){
 			return name;
 		});
 	}
-	
+
 	// Once we have the fully normalized module name mark who its parent is.
 	return done.then(function(name){
 		var parents = loader._liveMap[name];
@@ -191,7 +191,7 @@ function makeReload(moduleName, listeners){
 			e.off(event, callback);
 		});
 	}
-	
+
 	return reload;
 }
 
@@ -232,9 +232,14 @@ function setup(){
 	}
 
 	var port = loader.liveReloadPort || 8012;
-	
+
 	var host = window.document.location.host.replace(/:.*/, '');
 	var ws = new WebSocket("ws://" + host + ":" + port);
+
+	// Let the server know about the main module
+	ws.onopen = function(){
+		ws.send(loader.main);
+	};
 
 	ws.onmessage = function(ev){
 		var moduleName = ev.data;

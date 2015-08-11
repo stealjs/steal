@@ -146,7 +146,7 @@ function convertName (context, pkg, map, root, name) {
 		} else {
 			// Get the requested version's actual version.
 			requestedVersion = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName].version;
-			depPkg = context.versions[parsed.packageName][requestedVersion];
+			depPkg = crawl.matchedVersion(context, parsed.packageName, requestedVersion);
 			parsed.version = depPkg.version;
 		}
 		return utils.moduleName.create(parsed);
