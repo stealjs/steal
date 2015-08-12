@@ -62,7 +62,7 @@ exports.translate = function(load){
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
 		});
-		var configDependencies = ['@loader','npm-extension'].concat(configDeps.call(loader, pkg));
+		var configDependencies = ['@loader','npm-extension','module'].concat(configDeps.call(loader, pkg));
 		var pkgMain = utils.pkg.main(pkg);
 		// Convert the main if using directories.lib
 		if(utils.pkg.hasDirectoriesLib(pkg)) {
@@ -74,7 +74,7 @@ exports.translate = function(load){
 			}
 		}
 
-		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension){\n" +
+		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension, module){\n" +
 			"npmExtension.addExtension(loader);\n"+
 		    (pkg.main ? "if(!loader.main){ loader.main = "+JSON.stringify(pkgMain)+"; }\n" : "") +
 			"loader._npmExtensions = [].slice.call(arguments, 2);\n" +
@@ -299,11 +299,24 @@ var translateConfig = function(loader, packages){
 			fn.call(arr, arr[i]);
 		}
 	};
+	var setupLiveReload = function(){
+		var hasLiveReload = !!loader._liveMap;
+		if(hasLiveReload) {
+			loader.import("live-reload", { name: module.id }).then(function(reload){
+				reload.dispose(function(){
+					// Remove state created by the config.
+					delete loader.npm;
+					delete loader.npmPaths;
+				});
+			});
+		}
+	};
 	forEach(packages, function(pkg){
 		if(pkg.system) {
 			// don't set system.main
 			var main = pkg.system.main;
 			delete pkg.system.main;
+			delete pkg.system.configDependencies;
 			loader.config(pkg.system);
 			pkg.system.main = main;
 
@@ -330,6 +343,7 @@ var translateConfig = function(loader, packages){
 			loader.config(ext.systemConfig);
 		}
 	});
+	setupLiveReload();
 };
 
 var warn = (function(){
