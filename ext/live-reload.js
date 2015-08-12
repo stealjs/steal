@@ -223,6 +223,12 @@ function reload(moduleName) {
 	// Once everything is imported call the global listener callback functions.
 	Promise.all(imports).then(function(){
 		e.emit("!cycleComplete");
+	}, function(){
+		// There was an error re-importing modules
+		// Workers don't have a location and no way to refresh the page.
+		if(loader.global.location && loader.global.location.reload) {
+			loader.global.location.reload();
+		}
 	});
 }
 
