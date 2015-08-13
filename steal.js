@@ -5410,6 +5410,18 @@ if (typeof System !== "undefined") {
 				addProductionBundles.call(this);
 			}
 		},
+		envs: {
+			set: function(val){
+				// envs should be set, deep
+				var envs = this.envs;
+				if(!envs) envs = this.envs = {};
+				each(val, function(cfg, name){
+					var env = envs[name];
+					if(!env) env = envs[name] = {};
+					extend(env, cfg);
+				});
+			}
+		},
 		baseUrl: fileSetter("baseURL"),
 		baseURL: fileSetter("baseURL"),
 		root: fileSetter("baseURL"),  //backwards comp
