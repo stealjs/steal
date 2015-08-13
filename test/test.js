@@ -187,6 +187,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("production/prod-env.html");
 	});
 
+	asyncTest("loadBundles true with a different env loads the bundles", function(){
+		makeIframe("load-bundles/prod.html");
+	});
+
 	asyncTest("automatic loading of css plugin", function(){
 		makeIframe("plugins/site.html");
 	});
