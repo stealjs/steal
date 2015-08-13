@@ -206,6 +206,12 @@
 		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
 		configPath: configSetter,
+		loadBundles: {
+			set: function(val){
+				this.loadBundles = val;
+				addProductionBundles.call(this);
+			}
+		},
 		startId: {
 			set: function(val){
 				mainSetter.set.call(this, normalize(val) );
