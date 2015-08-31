@@ -176,6 +176,8 @@ or [Visual Studio Express 2013](http://www.visualstudio.com/downloads/download-v
 depending on which version of Windows you are using. Try the Build Tools but
 VSE might be needed.
 
+See the [guides.ContributingWindows] guide for full instructions.
+
 ## Understanding steal-tools code
 
 On a high level, [steal-tools steal-tools] uses `lib/trace.js` to 
