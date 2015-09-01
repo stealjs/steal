@@ -281,6 +281,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("envs/envs.html");
 	});
 
+	asyncTest("envs config works with steal.production", function(){
+		makeIframe("envs/prod/prod.html");
+	});
+
 	module("json extension");
 
 	asyncTest("json extension", function(){
@@ -329,9 +333,15 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("bower/npm/index.html");
 	});
 
+	module("Web Workers");
+
 	if(window.Worker) {
-		asyncTest("webworkers", function(){
+		asyncTest("basics works", function(){
 			makeIframe("webworkers/dev.html");
+		});
+
+		asyncTest("env is properly set", function(){
+			makeIframe("envs/worker/dev.html");
 		});
 	}
 
