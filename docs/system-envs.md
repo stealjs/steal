@@ -12,7 +12,7 @@ Add `envs` configuration if you need it to be applied only when in a certain env
 ```js
 System.config({
 	envs: {
-		production: {
+		"window-production": {
 			baseURL: "https://somecdn.com/my-app/"
 		}
 	}

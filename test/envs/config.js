@@ -1,7 +1,7 @@
 define(["config-dep"], function(){
 	System.config({
 		envs: {
-			staging: {
+			"window-staging": {
 				map: {
 					mod: "other"
 				}

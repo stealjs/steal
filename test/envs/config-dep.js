@@ -1,6 +1,6 @@
 System.config({
 	envs: {
-		staging: {
+		"window-staging": {
 			FOO: "bar",
 			map: {
 				mod: "other"

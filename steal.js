@@ -5074,7 +5074,7 @@ var makeSteal = function(System){
 				return modules;
 			}
 		};
-		if(System.env === "production") {
+		if(System.isEnv("production")) {
 			return afterConfig();
 		} else {
 			// wait until the config has loaded
@@ -5245,6 +5245,26 @@ if (typeof System !== "undefined") {
 		};
 	};
 
+	var setupEnvs = function(loader){
+		loader.getEnv = function(){
+			var envParts = (this.env || "").split("-");
+			// Fallback to this.env for legacy
+			return envParts[1] || this.env;
+		};
+		loader.getPlatform = function(){
+			var envParts = (this.env || "").split("-");
+			return envParts.length === 2 ? envParts[0] : undefined;
+		};
+
+		loader.isEnv = function(name){
+			return this.getEnv() === name;
+		};
+
+		loader.isPlatform = function(name){
+			return this.getPlatform() === name;
+		};
+	};
+
 	var setIfNotPresent = function(obj, prop, value){
 		if(!obj[prop]) {
 			obj[prop] = value;
@@ -5254,7 +5274,7 @@ if (typeof System !== "undefined") {
 	// steal.js's default configuration values
 	System.configMain = "@config";
 	System.paths[System.configMain] = "stealconfig.js";
-	System.env = "development";
+	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = {
 		css: '$css',
 		less: '$less'
@@ -5363,29 +5383,11 @@ if (typeof System !== "undefined") {
 	};
 
 	var setEnvsConfig = function(){
-		var loader = this;
-
-		if(loader.envs && loader.envMap) {
-			// To support comma seperated list of configs turn the object
-			// { 'production,server': { map: {} } }
-			// into { 'production': [{ map: {} }], 'server': [{ map: {} }] }
-			var envs = loader.envs;
-			var envConfigs = {};
-			each(envs, function(val, env){
-				each(env.split(","), function(name){
-					var arr = envConfigs[name] = envConfigs[name] || [];
-					arr.push(val);
-				});
-			});
-
-			each(loader.envMap, function(val, env){
-				var configs = envConfigs[env];
-				if(configs) {
-					each(configs, function(config){
-						loader.config(config);
-					});
-				}
-			});
+		if(this.envs) {
+			var envConfig = this.envs[this.env];
+			if(envConfig) {
+				this.config(envConfig);
+			}
 		}
 	};
 
@@ -5396,14 +5398,7 @@ if (typeof System !== "undefined") {
 			set: function(val){
 				this.env = val;
 
-				// Set up the envMap
-				var envMap = this.envMap = {};
-				var vals = val.split(",");
-				each(vals, function(env){
-					envMap[env] = true;
-				});
-
-				if(this.envMap.production) {
+				if(this.isEnv("production")) {
 					this.loadBundles = true;
 				}
 
@@ -5455,7 +5450,8 @@ if (typeof System !== "undefined") {
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					this.config({ env: "production" });
+					var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+					this.config({ env: platform+"-production" });
 					addProductionBundles.call(this);
 				}
 
@@ -5574,6 +5570,7 @@ if (typeof System !== "undefined") {
 			}
 		}
 	});
+	setupEnvs(System);
 
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
