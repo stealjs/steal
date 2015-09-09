@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "grunt test --stack",
-	"test-windows": "grunt test-windows --stack"
+    "test-windows": "grunt test-windows --stack"
   },
   "dependencies": {
     "systemjs": "git://github.com/bitovi/systemjs#0.16.6-bitovi.5",
@@ -20,6 +20,7 @@
     "steal-css": "^0.0.4",
     "system-npm": "^0.3.1",
     "system-live-reload": "~0.1.0",
+    "steal-less": "^0.0.1",
     "bower": "1.3.8",
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
@@ -32,7 +33,7 @@
     "grunt-simple-mocha": "^0.4.0",
     "testee": "0.1.1",
     "jquery": ">2.0",
-    "babel-core": "~4.1.1"
+    "babel-core": "5.8.14"
   },
   "system": {
     "npmIgnore": ["less"]
