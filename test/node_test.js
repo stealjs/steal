@@ -9,18 +9,19 @@ var makeSteal = function(config){
 };
 
 describe("plugins", function(){
-	
+	this.timeout(5000);
+
 	it("are able to convert less", function(done){
 		var steal = makeSteal({
 			config: __dirname+"/config.js",
 			main: "dep_plugins/main"
 		});
 		steal.startup().then(function(){
-			
+
 			assert.ok( /width: 200px/.test( steal.System._loader.modules["dep_plugins/main.less!$less"].module.default.source ) );
 			done();
 		},done);
-		
+
 	});
 
 	it("able to load a config without an absolute path", function(done){
@@ -40,5 +41,5 @@ describe("plugins", function(){
 			assert(!(e instanceof Error), "Did not receive an error");
 		}
 	});
-	
+
 });

@@ -62,12 +62,19 @@ exports.translate = function(load){
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
 		});
-		var configDependencies = ['@loader','npm-extension'].concat(configDeps.call(loader, pkg));
-		var pkgMain = utils.pkg.hasDirectoriesLib(pkg) ?
-			convertName(context, pkg, false, true, pkg.name+"/"+utils.pkg.main(pkg)) :
-			utils.pkg.main(pkg);
+		var configDependencies = ['@loader','npm-extension','module'].concat(configDeps.call(loader, pkg));
+		var pkgMain = utils.pkg.main(pkg);
+		// Convert the main if using directories.lib
+		if(utils.pkg.hasDirectoriesLib(pkg)) {
+			var mainHasPkg = pkgMain.indexOf(pkg.name) === 0;
+			if(mainHasPkg) {
+				pkgMain = convertName(context, pkg, false, true, pkgMain);
+			} else {
+				pkgMain = convertName(context, pkg, false, true, pkg.name+"/"+pkgMain);
+			}
+		}
 
-		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension){\n" +
+		return "define("+JSON.stringify(configDependencies)+", function(loader, npmExtension, module){\n" +
 			"npmExtension.addExtension(loader);\n"+
 		    (pkg.main ? "if(!loader.main){ loader.main = "+JSON.stringify(pkgMain)+"; }\n" : "") +
 			"loader._npmExtensions = [].slice.call(arguments, 2);\n" +
@@ -139,7 +146,7 @@ function convertName (context, pkg, map, root, name) {
 		} else {
 			// Get the requested version's actual version.
 			requestedVersion = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName].version;
-			depPkg = context.versions[parsed.packageName][requestedVersion];
+			depPkg = crawl.matchedVersion(context, parsed.packageName, requestedVersion);
 			parsed.version = depPkg.version;
 		}
 		return utils.moduleName.create(parsed);
@@ -164,7 +171,7 @@ function convertName (context, pkg, map, root, name) {
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						warn(name);
+						if(root) warn(name);
 						return name;
 					}
 					requestedVersion = requestedProject.version;
@@ -292,11 +299,24 @@ var translateConfig = function(loader, packages){
 			fn.call(arr, arr[i]);
 		}
 	};
+	var setupLiveReload = function(){
+		var hasLiveReload = !!loader._liveMap;
+		if(hasLiveReload) {
+			loader.import("live-reload", { name: module.id }).then(function(reload){
+				reload.dispose(function(){
+					// Remove state created by the config.
+					delete loader.npm;
+					delete loader.npmPaths;
+				});
+			});
+		}
+	};
 	forEach(packages, function(pkg){
 		if(pkg.system) {
 			// don't set system.main
 			var main = pkg.system.main;
 			delete pkg.system.main;
+			delete pkg.system.configDependencies;
 			loader.config(pkg.system);
 			pkg.system.main = main;
 
@@ -323,6 +343,7 @@ var translateConfig = function(loader, packages){
 			loader.config(ext.systemConfig);
 		}
 	});
+	setupLiveReload();
 };
 
 var warn = (function(){
