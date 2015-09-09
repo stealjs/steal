@@ -23,7 +23,7 @@ exports.translate = function(load) {
 	return new Promise(function(resolve, reject){
 		var renderOptions = {filename: address};
 		for (var prop in options){
-			renderOptions[prop] = options[prop];
+		   	renderOptions[prop] = options[prop];
 		}
 		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
 
