@@ -24,6 +24,26 @@
 		};
 	};
 
+	var setupEnvs = function(loader){
+		loader.getEnv = function(){
+			var envParts = (this.env || "").split("-");
+			// Fallback to this.env for legacy
+			return envParts[1] || this.env;
+		};
+		loader.getPlatform = function(){
+			var envParts = (this.env || "").split("-");
+			return envParts.length === 2 ? envParts[0] : undefined;
+		};
+
+		loader.isEnv = function(name){
+			return this.getEnv() === name;
+		};
+
+		loader.isPlatform = function(name){
+			return this.getPlatform() === name;
+		};
+	};
+
 	var setIfNotPresent = function(obj, prop, value){
 		if(!obj[prop]) {
 			obj[prop] = value;
@@ -33,7 +53,7 @@
 	// steal.js's default configuration values
 	System.configMain = "@config";
 	System.paths[System.configMain] = "stealconfig.js";
-	System.env = "development";
+	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = {
 		css: '$css',
 		less: '$less'
@@ -114,7 +134,7 @@
 	};
 
 	var addProductionBundles = function(){
-		if(this.env === "production" && this.main) {
+		if(this.loadBundles && this.main) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+main;
@@ -141,12 +161,39 @@
 		}
 	};
 
+	var setEnvsConfig = function(){
+		if(this.envs) {
+			var envConfig = this.envs[this.env];
+			if(envConfig) {
+				this.config(envConfig);
+			}
+		}
+	};
+
+	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	setterConfig(System, specialConfig = {
 		env: {
 			set: function(val){
-				System.env =  val;
+				this.env = val;
+
+				if(this.isEnv("production")) {
+					this.loadBundles = true;
+				}
+
 				addProductionBundles.call(this);
+			}
+		},
+		envs: {
+			set: function(val){
+				// envs should be set, deep
+				var envs = this.envs;
+				if(!envs) envs = this.envs = {};
+				each(val, function(cfg, name){
+					var env = envs[name];
+					if(!env) env = envs[name] = {};
+					extend(env, cfg);
+				});
 			}
 		},
 		baseUrl: fileSetter("baseURL"),
@@ -154,6 +201,12 @@
 		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
 		configPath: configSetter,
+		loadBundles: {
+			set: function(val){
+				this.loadBundles = val;
+				addProductionBundles.call(this);
+			}
+		},
 		startId: {
 			set: function(val){
 				mainSetter.set.call(this, normalize(val) );
@@ -176,7 +229,8 @@
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					System.env = "production";
+					var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+					this.config({ env: platform+"-production" });
 					addProductionBundles.call(this);
 				}
 
@@ -295,6 +349,7 @@
 			}
 		}
 	});
+	setupEnvs(System);
 
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {

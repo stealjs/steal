@@ -82,23 +82,15 @@ var setPaths = function(config, bowerPath, name, main) {
 	}
 
 	// Set the path to the `main` and the path to the wildcard.
-	if(this._bowerMainLoaded) {
 		// Add a .js if there is no extension
-		if(main && main.indexOf(".") === -1) {
-			main = main + ".js";
-		}
-
-		if(main) {
-			config.paths[name] = [bowerPath, name, main].join('/');
-		}
-		config.paths[name + "/*"] = mainDir + "/*.js";
+	if(main && main.indexOf(".") === -1) {
+		main = main + ".js";
 	}
-};
 
-var setMain = function(bower) {
-	if(!this._bowerMainLoaded && !this.main && bower.main) {
-		this.main = bower.main;
+	if(main) {
+		config.paths[name] = [bowerPath, name, main].join('/');
 	}
+	config.paths[name + "/*"] = mainDir + "/*.js";
 };
 
 /**
@@ -169,10 +161,15 @@ exports.translate = function(load){
 	config.paths = config.paths || {};
 
 	// Set the paths to the wildcard and main modules.
-
 	// Don't set any paths for the main bower.json
+	if(loader._bowerMainLoaded) {
+		delete config.main;
+	}
+	else if(!loader.main) {
+		config.main = config.main || bower.main;
+	}
+
 	setPaths.call(loader, config, bowerPath, name, utils.pkg.main(bower));
-	setMain.call(loader, bower);
 	loader._bowerMainLoaded = true;
 
 	if(config.configDependencies) {
