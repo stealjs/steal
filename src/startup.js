@@ -11,13 +11,13 @@
 			// Split on question mark to get query
 
 			each(script.attributes, function(attr){
-				var optionName = 
+				var optionName =
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
-			
+
 			var source = script.innerHTML.substr(1);
 			if(/\S/.test(source)){
 				options.mainSource = source;
@@ -32,7 +32,7 @@
 		// Get options from the script tag
 		if (isWebWorker) {
 			var urlOptions = {
-				stealURL: location.href	
+				stealURL: location.href
 			};
 		} else if(global.document) {
 			var urlOptions = getScriptOptions();
@@ -46,10 +46,12 @@
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
-		
+
 		if(config){
 			System.config(config);
 		}
+
+		setEnvsConfig.call(this.System);
 
 		// Read the env now because we can't overwrite everything yet
 
@@ -57,20 +59,23 @@
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" ) {
-			
+		if ( System.loadBundles ) {
+
 			configDeferred = System["import"](System.configMain);
 
 			appDeferred = configDeferred.then(function(cfg){
+				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(System.env == "development" || System.env == "build"){
+		} else {
 			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
+				setEnvsConfig.call(System);
+
 				// If a configuration was passed to startup we'll use that to overwrite
 				// what was loaded in stealconfig.js
 				// This means we call it twice, but that's ok
@@ -98,9 +103,9 @@
 					return System["import"](main);
 				}) );
 			});
-			
+
 		}
-		
+
 		if(System.mainSource) {
 			appDeferred = appDeferred.then(function(){
 				System.module(System.mainSource);

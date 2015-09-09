@@ -187,6 +187,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("production/prod-env.html");
 	});
 
+	asyncTest("loadBundles true with a different env loads the bundles", function(){
+		makeIframe("load-bundles/prod.html");
+	});
+
 	asyncTest("automatic loading of css plugin", function(){
 		makeIframe("plugins/site.html");
 	});
@@ -241,6 +245,12 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("@loader is current loader with es6", function(){
 		makeIframe("current-loader/dev-es6.html");
 	});
+	asyncTest("@loader is current loader with steal syntax", function(){
+		makeIframe("current-loader/dev-steal.html");
+	});
+	asyncTest("@steal is the current steal", function(){
+		makeIframe("current-steal/dev.html");
+	});
 
 	/*
 	asyncTest("Loads traceur-runtime automatically", function(){
@@ -262,6 +272,14 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("can load a bundle with an amd module depending on a global", function(){
 		makeIframe("prod_define/prod.html");
+	});
+
+	asyncTest("envs config works", function(){
+		makeIframe("envs/envs.html");
+	});
+
+	asyncTest("envs config works with steal.production", function(){
+		makeIframe("envs/prod/prod.html");
 	});
 
 	module("json extension");
@@ -312,9 +330,15 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("bower/npm/index.html");
 	});
 
+	module("Web Workers");
+
 	if(window.Worker) {
-		asyncTest("webworkers", function(){
+		asyncTest("basics works", function(){
 			makeIframe("webworkers/dev.html");
+		});
+
+		asyncTest("env is properly set", function(){
+			makeIframe("envs/worker/dev.html");
 		});
 	}
 
