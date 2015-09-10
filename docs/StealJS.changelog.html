@@ -320,7 +320,25 @@
 
 		
 		<section class="comment">
-			<h2>0.10.0</h2>
+			<h2>0.11.0</h2>
+<h3>steal</h3>
+<ul>
+<li>css and less extensions moved to their own projects <a href="https://github.com/stealjs/steal-css">steal-css</a> and <a href="https://github.com/stealjs/steal-less">steal-less</a>.</li>
+<li>Babel and Traceur updated to the latest versions.</li>
+<li><a href="https://github.com/stealjs/steal/issues/454">envs configuration</a>.</li>
+<li>The <a href="https://github.com/stealjs/steal/pull/460">@loader</a> module not works with the Steal syntax.</li>
+<li>Whether bundles are loaded is not configured by <a href="System.loadBundles.html">System.loadBundles</a>, not the <code>env</code> flag, but env=production still works for backworks compatibility.</li>
+<li>The <a href="@steal.html">@steal</a> module was created to serve a similar purpose as <a href="@loader.html">@loader</a>.</li>
+</ul>
+<h3>steal-tools</h3>
+<ul>
+<li><code>sideBundle: true</code> metadata property can be set to make a bundle be set as a &quot;sideBundle&quot;. A sideBundle is not considered in the progressive loading algorithm so it is perfect for bundles that are rarely used.</li>
+<li>Globals are no longer transpiled to a <code>System.define</code> form, but instead to an AMD module.</li>
+<li>Virtual modules (modules created dynamically with <code>System.define</code> can now be <a href="https://github.com/stealjs/steal-tools/pull/276">bundles</a> themselves.</li>
+<li><a href="steal-tools.BundleAssetsOptions.html">bundleAssets</a> is a new option that allows you to bundle all of your assets along with your JavaScript and CSS bundles, to put everything into a common <code>dist</code> folder.</li>
+<li>StealTools is now tested in CI on Node 0.10, 0.12, and IO.js, on both Linux and Windows.</li>
+</ul>
+<h2>0.10.0</h2>
 <h3>steal</h3>
 <ul>
 <li>New <a href="http://stealjs.com/docs/steal.live-reload.html">live-reload</a> extension.</li>

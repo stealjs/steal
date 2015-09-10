@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - module.exports</title>
+	<title>StealJS - Contributing on Windows </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -88,10 +88,26 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="module.exports.html" data-search="module.exports">
-				module.exports
+			<a class="sidebar-title" href="guides.Contributing.html" data-search="Contributing">
+				Contributing
 			</a>
 			
+	<ul>
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="page" href="guides.ContributingWindows.html" data-search="Contributing on Windows">
+						Contributing on Windows
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
 
 		</li>
 		
@@ -108,15 +124,19 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>module.exports</h1>
+<h1>Contributing on Windows</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>page</li>
 	</ul>
 	
 	
 </div>
 
 <div class="sub-heading">
+	
+	
+		<span class="module">guides.ContributingWindows</span>
+	
 	
 	
 	<span class="inherits">&nbsp;</span>
@@ -141,9 +161,7 @@
 
 		
 		<section class="description">
-			<p>Creating a mapping from pre-normalized dependency names to the normalized version.
-Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
-information.</p>
+			<p>This guide will help you get set up with Steal Tools on Windows. To develop Steal Tools you need a C++ compiler (for native dependencies).</p>
 
 		</section>
 		
@@ -153,46 +171,26 @@ information.</p>
 		
 		
 		
-			<section class="signature">
-				<h2 id="sig_">function(node)
-</h2>
-<div class="signature-wrapper">
-<p>Creating a mapping from pre-normalized dependency names to the normalized version.
-Save the mapping as <code>dependencyMap</code> on the node itself. Transpile will use this
-information.</p>
-
-
-	<h3>Parameters</h3>
-
-	<ol class="parameters">
-		
-		<li class="parameter">
-			<h4>node
-				<code>{*}</code></h4>
-			<div class="description">
-				
-			</div>
-			
-			
-			
-		</li>
-		
-	</ol>
-
-
-
-
-
-
-</div>
-
-			</section>
-		
 		
 
 		
 		<section class="comment">
-			
+			<h2>Package Management</h2>
+<p>In this guide we'll use <a href="https://chocolatey.org/">chocolatey</a> to install packages needed to develop Steal Tools. You don't have to use chocolatey if you don't want, and can instead search for the dependencies and install them with a Windows installer, but we'll use chocolately because it makes things a bit easier.</p>
+<p>After you've installed chocolatey by following the instructions <a href="https://chocolatey.org/">on the homepage</a> <strong>open an administrative console</strong> and proceed to the next step.</p>
+<h2>Python 2.x</h2>
+<p>Native dependencies in Node.js are installed with <a href="https://github.com/nodejs/node-gyp">node-gyp</a> which uses Python as a build tool. It expects Python 2.x:</p>
+<pre><code class="language-shell">choco install python2 -y
+</code></pre>
+<h2>Windows SDK</h2>
+<p>Next we need the Windows SDK. We're going to assume Windows 7, but adjust this command to the version of Windows you use:</p>
+<pre><code class="language-shell">choco install windows-sdk-7.1 -y
+</code></pre>
+<h2>Visual Studio Express</h2>
+<p>Installing Visual Studio Express gives us the C++ compiler we need:</p>
+<pre><code class="language-shell">choco install visualstudioexpress2013windowsdesktop -y
+</code></pre>
+
 		</section>
 		
 		
@@ -217,7 +215,7 @@ information.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"module.exports","params":[{"name":"node","types":[{"type":"*"}]}],"parent":"steal-tools/lib/node/dependency_map.js","src":"steal-tools/lib/node/dependency_map.js","line":2,"codeLine":7,"description":"Creating a mapping from pre-normalized dependency names to the normalized version.\nSave the mapping as `dependencyMap` on the node itself. Transpile will use this\ninformation.","method":"stealTools.node.dependencyMap","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"guides.ContributingWindows","src":"steal/docs/pages/contributing-windows.md","description":"This guide will help you get set up with Steal Tools on Windows. To develop Steal Tools you need a C++ compiler (for native dependencies).","title":"Contributing on Windows","parent":"guides.Contributing","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

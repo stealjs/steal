@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - System.ext</title>
+	<title>StealJS  - System.isEnv</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -237,7 +237,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="property" href="System.ext.html" data-search="System.ext">
 						System.ext
 					</a>
@@ -387,7 +387,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="System.isEnv.html" data-search="System.isEnv">
 						System.isEnv
 					</a>
@@ -706,7 +706,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>System.ext</h1>
+<h1>System.isEnv</h1>
 	<ul class="tags">
 		<li>property</li>
 	</ul>
@@ -717,7 +717,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Object&lt;String,<a href="moduleName.html" >moduleName</a>&gt;}</code></h2>
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -741,25 +741,49 @@
 
 		
 		<section class="description">
-			<p>Configures plugin loading by module extension.</p>
+			<p>Determines the environment Steal is running in, as specified by <a href="System.env.html">System.env</a>.</p>
 
 		</section>
 		
 
 		
 			
-			<section class='primary-options'>
-				
-
-  <h2 id="sig_">Object&lt;String,<a href="moduleName.html" >moduleName</a>&gt;
+				<section class="signature">
+					<h2 id="sig_System_isEnv_envName_">System.isEnv(envName)
 </h2>
 <div class="signature-wrapper">
-<p>Specifies a plugin to add when an extension is matched in a module name. <code>steal.js</code> includes
-defaults of:</p>
-<pre><code>System.ext //-&gt; {&quot;css&quot;: &quot;$css&quot;, &quot;less&quot;: &quot;$less&quot;}
-</code></pre>
 
 
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>envName
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>The name of the environment to test.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Boolean}</code></h4>
+		<div class="description">
+			<p>Whether this is the environment Steal is running in.</p>
+
+		</div>
+		
+		
+	</div>
+	
 
 
 
@@ -767,9 +791,7 @@ defaults of:</p>
 
 </div>
 
-  
-
-			</section>
+				</section>
 			
 		
 		
@@ -778,22 +800,7 @@ defaults of:</p>
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p>The following:</p>
-<pre><code>System.config({
-    ext: {
-        stache: 'can/view/stache/system'
-    }
-})
-</code></pre>
-<p>allows:</p>
-<pre><code>System.import(&quot;foo.stache!&quot;)
-</code></pre>
-<p>Without having to write:</p>
-<pre><code>System.import(&quot;foo.stache!can/view/system/stache&quot;);
-</code></pre>
-<p>By default, <code>steal.js</code> configures <code>css</code> to point to &quot;$css&quot; and <code>less</code> to point to &quot;$less&quot;.</p>
-
+			
 		</section>
 		
 		
@@ -818,7 +825,7 @@ defaults of:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.ext","src":"steal/docs/system-ext.md","description":"Configures plugin loading by module extension.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"Specifies a plugin to add when an extension is matched in a module name. `steal.js` includes\ndefaults of:\n\n    System.ext //-> {\"css\": \"$css\", \"less\": \"$less\"}"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.isEnv","src":"steal/docs/system-isEnv.md","description":"Determines the environment Steal is running in, as specified by [System.env].","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"title":"","parent":"StealJS.functions","signatures":[{"code":"System.isEnv(envName)","description":"","params":[{"types":[{"type":"String"}],"name":"envName","description":"The name of the environment to test."}],"returns":{"types":[{"type":"Boolean"}],"description":"Whether this is the environment Steal is running in."}}],"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

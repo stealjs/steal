@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - System.ext</title>
+	<title>StealJS  - System.loadBundles</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -237,7 +237,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="property" href="System.ext.html" data-search="System.ext">
 						System.ext
 					</a>
@@ -273,7 +273,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="System.loadBundles.html" data-search="System.loadBundles">
 						System.loadBundles
 					</a>
@@ -706,7 +706,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>System.ext</h1>
+<h1>System.loadBundles</h1>
 	<ul class="tags">
 		<li>property</li>
 	</ul>
@@ -717,7 +717,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Object&lt;String,<a href="moduleName.html" >moduleName</a>&gt;}</code></h2>
+	<h2><code>{Boolean}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -741,7 +741,7 @@
 
 		
 		<section class="description">
-			<p>Configures plugin loading by module extension.</p>
+			<p>Specifies whether bundles should be loaded, used primarily for production.</p>
 
 		</section>
 		
@@ -751,13 +751,10 @@
 			<section class='primary-options'>
 				
 
-  <h2 id="sig_">Object&lt;String,<a href="moduleName.html" >moduleName</a>&gt;
+  <h2 id="sig_">Boolean
 </h2>
 <div class="signature-wrapper">
-<p>Specifies a plugin to add when an extension is matched in a module name. <code>steal.js</code> includes
-defaults of:</p>
-<pre><code>System.ext //-&gt; {&quot;css&quot;: &quot;$css&quot;, &quot;less&quot;: &quot;$less&quot;}
-</code></pre>
+<p>True if bundles are to be loaded.</p>
 
 
 
@@ -779,20 +776,36 @@ defaults of:</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>The following:</p>
+<p>Setting <code>loadBundles</code> to <strong>true</strong> is a short cut to prevent steal from loading the
+<a href="@config.html">@config</a> and <a href="@dev.html">@dev</a> modules and make steal load the <a href="System.main.html">System.main</a> module
+in a bundle.</p>
+<p>For example:</p>
 <pre><code>System.config({
-    ext: {
-        stache: 'can/view/stache/system'
-    }
-})
+  main: &quot;myapp&quot;,
+  loadBundles: true
+});
 </code></pre>
-<p>allows:</p>
-<pre><code>System.import(&quot;foo.stache!&quot;)
+<p>Sets:</p>
+<pre><code>System.bundles[&quot;bundles/myapp&quot;] //-&gt; [&quot;myapp&quot;]
+System.meta[&quot;bundles/myapp&quot;]    //-&gt; {format: &quot;amd&quot;}
+System.paths[&quot;bundles/*&quot;]       //-&gt; &quot;dist/bundles/*.js&quot;
+System.paths[&quot;bundles/*.css&quot;]   //-&gt; &quot;dist/bundles/*.css&quot;
 </code></pre>
-<p>Without having to write:</p>
-<pre><code>System.import(&quot;foo.stache!can/view/system/stache&quot;);
+<p>Setting <code>System.loadBundles</code> to <code>true</code> must happen prior to loading <code>steal.js</code>.  So it should
+be <a href="System.config.html">configured</a> via the <code>steal.js</code> script tag like:</p>
+<pre><code>&lt;script src=&quot;../path/to/steal/steal.js&quot;
+        data-load-bundles
+        data-main=&quot;myapp&quot;&gt;
+&lt;/script&gt;
 </code></pre>
-<p>By default, <code>steal.js</code> configures <code>css</code> to point to &quot;$css&quot; and <code>less</code> to point to &quot;$less&quot;.</p>
+<p>Or specified prior to steal loading like:</p>
+<pre><code>&lt;script&gt;
+  steal = { loadBundles: true };
+&lt;/script&gt;
+&lt;script src=&quot;../path/to/steal/steal.js&quot;
+        data-env=&quot;production&quot;&gt;
+&lt;/script&gt;
+</code></pre>
 
 		</section>
 		
@@ -818,7 +831,7 @@ defaults of:</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.ext","src":"steal/docs/system-ext.md","description":"Configures plugin loading by module extension.","types":[{"type":"Object","template":[{"types":[{"type":"String"}]},{"types":[{"type":"moduleName"}]}],"description":"Specifies a plugin to add when an extension is matched in a module name. `steal.js` includes\ndefaults of:\n\n    System.ext //-> {\"css\": \"$css\", \"less\": \"$less\"}"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.loadBundles","src":"steal/docs/system-loadBundles.md","description":"Specifies whether bundles should be loaded, used primarily for production.","types":[{"type":"Boolean","description":"True if bundles are to be loaded."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
