@@ -3,6 +3,25 @@
 
 @body
 
+## 0.11.0
+
+### steal
+
+- css and less extensions moved to their own projects [steal-css](https://github.com/stealjs/steal-css) and [steal-less](https://github.com/stealjs/steal-less).
+- Babel and Traceur updated to the latest versions.
+- [envs configuration](https://github.com/stealjs/steal/issues/454).
+- The [@loader](https://github.com/stealjs/steal/pull/460) module not works with the Steal syntax.
+- Whether bundles are loaded is not configured by [System.loadBundles], not the `env` flag, but env=production still works for backworks compatibility.
+- The [@steal] module was created to serve a similar purpose as [@loader].
+
+### steal-tools
+
+- `sideBundle: true` metadata property can be set to make a bundle be set as a "sideBundle". A sideBundle is not considered in the progressive loading algorithm so it is perfect for bundles that are rarely used.
+- Globals are no longer transpiled to a `System.define` form, but instead to an AMD module.
+- Virtual modules (modules created dynamically with `System.define` can now be [bundles](https://github.com/stealjs/steal-tools/pull/276) themselves.
+- [steal-tools.BundleAssetsOptions bundleAssets] is a new option that allows you to bundle all of your assets along with your JavaScript and CSS bundles, to put everything into a common `dist` folder.
+- StealTools is now tested in CI on Node 0.10, 0.12, and IO.js, on both Linux and Windows.
+
 ## 0.10.0
 
 ### steal
