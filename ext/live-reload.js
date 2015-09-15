@@ -1,20 +1,5 @@
 var loader = require("@loader");
 
-/**
- * A map of modules names to parents like:
- * {
- *	 "child": {
- *	   "parentA": true,
- *	   "parentB": true
- *	 },
- *	 "parentA": false
- * }
- *
- * This is used to recursively delete parent modules
- *
- */
-loader._liveMap = {};
-
 // This is a map of listeners, those who have registered reload callbacks.
 loader._liveListeners = {};
 
@@ -105,51 +90,39 @@ loader.normalize = function(name, parentName){
 		return name;
 	}
 
-	var done = Promise.resolve(normalize.apply(this, arguments));
-
-	if(!parentName) {
-		return done.then(function(name){
-			// We need to keep modules without parents to so we can know
-			// if they need to have their `onLiveReload` callbacks called.
-			loader._liveMap[name] = false;
-			return name;
-		});
-	}
-
-	// Once we have the fully normalized module name mark who its parent is.
-	return done.then(function(name){
-		var parents = loader._liveMap[name];
-		if(!parents) {
-			parents = loader._liveMap[name] = {};
-		}
-
-		parents[parentName] = true;
-
-		return name;
-	});
+	return normalize.apply(this, arguments);
 };
 
-// Teardown a module name by deleting it and all of its parent modules.
-function teardown(moduleName, e, moduleNames) {
-	var moduleNames = moduleNames || {};
+function disposeModule(moduleName, emitter, moduleList){
+	moduleList = moduleList || {};
 
 	var mod = loader.get(moduleName);
 	if(mod) {
-		moduleNames[moduleName] = true;
-		e.emit("!dispose/" + moduleName);
+		moduleList[moduleName] = true;
+		emitter.emit("!dispose/" + moduleName);
 		loader.delete(moduleName);
 		if(loader._liveListeners[moduleName]) {
 			loader.delete("live-reload/" + moduleName);
 			delete loader._liveListeners[moduleName];
 		}
+		return true;
+	}
+	return false;
+}
 
+// Teardown a module name by deleting it and all of its parent modules.
+function teardown(moduleName, e, moduleNames) {
+	var moduleNames = moduleNames || {};
+
+	if(disposeModule(moduleName, e, moduleNames)) {
 		// Delete the module and call teardown on its parents as well.
-		var parents = loader._liveMap[moduleName];
+		var parents = loader.getDependants(moduleName);
 
-		for(var parentName in parents) {
-			teardown(parentName, e, moduleNames);
+		for(var i = 0, len = parents.length; i < len; i++) {
+			teardown(parents[i], e, moduleNames);
 		}
 	}
+
 	return moduleNames;
 }
 
@@ -202,8 +175,8 @@ function bind(fn, ctx){
 }
 
 function reload(moduleName) {
-	//var e = startCycle();
 	var e = loader._liveEmitter;
+	var currentDeps = loader.getDependencies(moduleName);
 
 	// Call teardown to recursively delete all parents, then call `import` on the
 	// top-level parents.
@@ -222,6 +195,8 @@ function reload(moduleName) {
 	}
 	// Once everything is imported call the global listener callback functions.
 	Promise.all(imports).then(function(){
+		// Remove any newly orphaned modules before declaring the cycle complete.
+		removeOrphans(moduleName, currentDeps);
 		e.emit("!cycleComplete");
 	}, function(){
 		// There was an error re-importing modules
@@ -230,6 +205,18 @@ function reload(moduleName) {
 			loader.global.location.reload();
 		}
 	});
+}
+
+function removeOrphans(moduleName, oldDeps){
+	var deps = loader.getDependencies(moduleName);
+
+	var depName;
+	for(var i = 0, len = oldDeps.length; i < len; i++) {
+		depName = oldDeps[i];
+		if(!~deps.indexOf(depName)) {
+			disposeModule(depName, loader._liveEmitter);
+		}
+	}
 }
 
 function setup(){
