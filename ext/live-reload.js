@@ -221,7 +221,7 @@ function removeOrphans(moduleName, oldDeps){
 }
 
 function setup(){
-	if(loader.liveReload === "false") {
+	if(loader.liveReload === "false" || loader.liveReload === false) {
 		return;
 	}
 
