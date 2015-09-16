@@ -1,4 +1,5 @@
 var loader = require("@loader");
+var steal = require("@steal");
 
 // This is a map of listeners, those who have registered reload callbacks.
 loader._liveListeners = {};
@@ -226,7 +227,7 @@ function setup(){
 
 	var port = loader.liveReloadPort || 8012;
 
-	var host = window.document.location.host.replace(/:.*/, '');
+	var host = loader.liveReloadHost || window.document.location.host.replace(/:.*/, '');
 	var ws = new WebSocket("ws://" + host + ":" + port);
 
 	// Let the server know about the main module
@@ -241,9 +242,11 @@ function setup(){
 }
 
 
-var isBrowser = typeof window !== "undefined";
+var isBuildEnvironment = loader.isPlatform ?
+	(loader.isPlatform("build") || loader.isEnv("build")) :
+	(typeof window === "undefined");
 
-if(isBrowser) {
+if(!isBuildEnvironment) {
 	if(typeof steal !== "undefined") {
 		steal.done().then(setup);
 	} else {
