@@ -3,7 +3,7 @@ System.config({
 		"window-staging": {
 			FOO: "bar",
 			map: {
-				mod: "other"
+				something: "else"
 			}
 		}
 	}
