@@ -3,6 +3,7 @@ var steal = require("@steal");
 
 // This is a map of listeners, those who have registered reload callbacks.
 loader._liveListeners = {};
+loader.liveReloadInstalled = true;
 
 // A simple emitter
 function E () {
