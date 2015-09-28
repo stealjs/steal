@@ -229,19 +229,34 @@ function setup(){
 	var port = loader.liveReloadPort || 8012;
 
 	var host = loader.liveReloadHost || window.document.location.host.replace(/:.*/, '');
-	var ws = new WebSocket("ws://" + host + ":" + port);
+	var url = "ws://" + host + ":" + port;
+	var ws = new WebSocket(url);
 
 	// Let the server know about the main module
-	ws.onopen = function(){
+	var onopen = ws.onopen = function(){
 		ws.send(loader.main);
 	};
 
-	ws.onmessage = function(ev){
+	var onmessage = ws.onmessage = function(ev){
 		var moduleName = ev.data;
 		reload(moduleName);
 	};
-}
 
+	var attempts = typeof loader.liveReloadAttempts !== "undefined" ?
+		loader.liveReloadAttempts - 1 : 0;
+	var onclose = ws.onclose = function(ev){
+		// 1006 means it was unable to connect to a server.
+		if(ev.code === 1006 && attempts > 0) {
+			attempts--;
+			setTimeout(function(){
+				ws = new WebSocket(url);
+				ws.open = onopen;
+				ws.onmessage = onmessage;
+				ws.onclose = onclose;
+			}, loader.liveReloadRetryTimeout || 500);
+		}
+	};
+}
 
 var isBuildEnvironment = loader.isPlatform ?
 	(loader.isPlatform("build") || loader.isEnv("build")) :
