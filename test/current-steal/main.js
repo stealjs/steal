@@ -1,4 +1,4 @@
-import mySteal from '@steal';
+var mySteal = require('@steal');
 
 if(typeof window !== "undefined" && window.QUnit) {
 

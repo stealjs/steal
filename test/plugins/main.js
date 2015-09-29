@@ -1,5 +1,5 @@
-import 'plugins/main.css!';
-import './steal-module';
+require('plugins/main.css!');
+require('./steal-module');
 
 if(typeof window !== "undefined" && window.QUnit) {
 	QUnit.equal(document.getElementById("test-element").clientWidth, 200, "element width set by css");

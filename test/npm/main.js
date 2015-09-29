@@ -1,4 +1,4 @@
-import $ from "jquery";
+var $ = require("jquery");
 
 if (typeof window !== "undefined" && window.QUnit) {
 	QUnit.equal(typeof $,"function", "got jQuery" );

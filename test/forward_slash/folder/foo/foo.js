@@ -1,1 +1,1 @@
-export var bar = "baz";
+exports.bar = "baz";

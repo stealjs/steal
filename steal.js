@@ -5707,14 +5707,14 @@ if (typeof System !== "undefined") {
 		return appDeferred;
 	};
 
-	steal.import = function(){
+	steal["import"] = function(){
 		var names = arguments;
 		var loader = this.System;
 
 		function afterConfig(){
 			var imports = [];
 			each(names, function(name){
-				imports.push(loader.import(name));
+				imports.push(loader["import"](name));
 			});
 			if(imports.length > 1) {
 				return Promise.all(imports);
@@ -5726,7 +5726,7 @@ if (typeof System !== "undefined") {
 		if(!configDeferred) {
 			steal.startup();
 		}
-		
+
 		return configDeferred.then(afterConfig);
 	};
 	return steal;

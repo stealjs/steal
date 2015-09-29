@@ -300,9 +300,9 @@ var translateConfig = function(loader, packages){
 		}
 	};
 	var setupLiveReload = function(){
-		var hasLiveReload = !!loader._liveMap;
+		var hasLiveReload = !!(loader.liveReloadInstalled || loader._liveMap);
 		if(hasLiveReload) {
-			loader.import("live-reload", { name: module.id }).then(function(reload){
+			loader["import"]("live-reload", { name: module.id }).then(function(reload){
 				reload.dispose(function(){
 					// Remove state created by the config.
 					delete loader.npm;

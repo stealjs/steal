@@ -11,7 +11,7 @@ loader.config({
 	}
 });
 });
-System.define("jquerty","var jQuerty = {name: 'jQuerty'}")
+System.define("jquerty","window.jQuerty = {name: 'jQuerty'}")
 define("bar", ["jquerty"],function(jquerty){
 	return {
 		name: "bar",

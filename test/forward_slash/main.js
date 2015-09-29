@@ -1,6 +1,6 @@
-import { foo } from "forward_slash/folder/";
-import { bar } from "forward_slash/folder/foo/"
-import { baz } from "forward_slash/folder/foo/bar/"
+var foo = require("forward_slash/folder/").foo;
+var bar = require("forward_slash/folder/foo/").bar;
+var baz = require("forward_slash/folder/foo/bar/").baz;
 
 if (typeof window !== "undefined" && window.QUnit) {
 	QUnit.equal(foo, "bar", "value set in folder module");

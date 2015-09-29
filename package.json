@@ -17,7 +17,7 @@
     "system-json": "^0.0.3"
   },
   "devDependencies": {
-    "steal-css": "^0.0.4",
+    "steal-css": "^0.0.5",
     "steal-less": "^0.0.1",
     "system-npm": "^0.3.2",
     "system-live-reload": "^0.1.1",
@@ -32,7 +32,7 @@
     "grunt-release": "^0.7.0",
     "grunt-simple-mocha": "^0.4.0",
     "testee": "0.1.1",
-    "jquery": ">2.0",
+    "jquery": "^1.11.0",
     "babel-core": "5.8.14"
   },
   "system": {
