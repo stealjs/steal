@@ -1,4 +1,4 @@
-import name from "some/mod/";
+var name = require("some/mod/");
 
 if (typeof window !== "undefined" && window.QUnit) {
 	QUnit.equal(name, "mod", "got a npm module using the forward slash extension" );

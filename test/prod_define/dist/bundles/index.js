@@ -65,13 +65,13 @@ define('stealconfig.js', function(require, exports, module) {
 define('index', function(require, exports, module) {
 "format cjs";
 
-System.import('components/page1')
+System["import"]('components/page1')
     .then(function() {
 		if(typeof window !== "undefined" && window.QUnit) {
 			QUnit.ok(true, "Loaded page 1");
 			QUnit.equal(window.jqwerty.modName, "jqwerty", "jqwerty loaded");
 			QUnit.equal(typeof window.jqwerty.ui, "function", "jqwertyui loaded");
-			
+
 			QUnit.start();
 			removeMyself();
 			return {};
@@ -80,7 +80,7 @@ System.import('components/page1')
 			console.assert(window.jqwerty.modName == "jqwerty");
 		}
     })
-    .catch(function(ex) {
+    ["catch"](function(ex) {
 		if(typeof window !== "undefined" && window.QUnit) {
 			QUnit.ok(false, "Unable to load page 1");
 

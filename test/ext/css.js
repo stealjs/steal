@@ -48,9 +48,9 @@ if(loader.env === 'production') {
 				head.appendChild(style);
 
 				if(loader.has("live-reload")) {
-					var cssReload = loader.import("live-reload", { name: "$css" });
+					var cssReload = loader["import"]("live-reload", { name: "$css" });
 					Promise.resolve(cssReload).then(function(reload){
-						loader.import(load.name).then(function(){
+						loader["import"](load.name).then(function(){
 							reload.once(load.name, function(){
 								head.removeChild(style);
 							});

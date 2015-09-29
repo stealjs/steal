@@ -7,7 +7,7 @@ loader.config({
 	}
 });
 });
-System.define("jquerty","var jQuerty = {name: 'jQuerty'}")
+System.define("jquerty","window.jQuerty = {name: 'jQuerty'}")
 define("bar", ["jquerty"],function(jquerty){
 	return {
 		name: "bar",
@@ -18,10 +18,10 @@ define("foo",["bar"], function(bar){
 	if(typeof window !== "undefined" && window.QUnit) {
 		QUnit.ok(bar, "got basics/module");
 		QUnit.equal(bar.name, "bar", "module name is right");
-		
+
 		QUnit.equal(bar.jquerty.name, "jQuerty", "got global");
-		
-		
+
+
 		QUnit.start();
 		removeMyself();
 		return {};

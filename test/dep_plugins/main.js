@@ -1,4 +1,4 @@
-import 'dep_plugins/main.less!';
+require('dep_plugins/main.less!');
 
 if(typeof window !== "undefined" && window.QUnit) {
 	QUnit.equal(document.getElementById("test-element").clientWidth, 200, "element width set by css");

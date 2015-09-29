@@ -1,1 +1,1 @@
-export var baz = "end";
+exports.baz = "end";

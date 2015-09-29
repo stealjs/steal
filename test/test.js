@@ -4,10 +4,25 @@ QUnit.config.testTimeout = 30000;
 
 (function(){
 
+	// Legacy IE doesn't support reserved keywords and Traceur uses them
+	// so using this as an easy way to feature-detect browser support for
+	// ES6 transpilers.
+	var supportsES = (function(){
+		try {
+			eval("var foo = { typeof: 'typeof' };");
+			return true;
+		} catch(e) {
+			return false;
+		}
+	})();
+
 	var writeIframe = function(html){
 		var iframe = document.createElement('iframe');
 		window.removeMyself = function(){
-			delete window.removeMyself;
+			window.removeMyself = undefined;
+			try {
+				delete window.removeMyself;
+			} catch(e) {}
 			document.body.removeChild(iframe);
 		};
 		document.body.appendChild(iframe);
@@ -37,7 +52,10 @@ QUnit.config.testTimeout = 30000;
 	var makeIframe = function(src){
 		var iframe = document.createElement('iframe');
 		window.removeMyself = function(){
-			delete window.removeMyself;
+			window.removeMyself = undefined;
+			try {
+				delete window.removeMyself;
+			} catch(e) {}
 			document.body.removeChild(iframe);
 		};
 		document.body.appendChild(iframe);
@@ -124,56 +142,62 @@ QUnit.config.testTimeout = 30000;
 
 	module("steal via html");
 
-	asyncTest("basics", function(){
-		makeIframe("basics/basics.html");
-	});
+	if(supportsES) {
+		asyncTest("basics", function(){
+			makeIframe("basics/basics.html");
+		});
 
-	asyncTest("basics with steal.config backwards compatability", function(){
-		makeIframe("basics/basics-steal-config.html");
-	});
+		asyncTest("basics with steal.config backwards compatability", function(){
+			makeIframe("basics/basics-steal-config.html");
+		});
 
 
-	asyncTest("basics with generated html", function(){
-		writeIframe(makeStealHTML(
-			"basics/basics.html",
-			'src="../../steal.js?basics" data-config="../config.js"'));
-	});
+		asyncTest("basics with generated html", function(){
+			writeIframe(makeStealHTML(
+				"basics/basics.html",
+				'src="../../steal.js?basics" data-config="../config.js"'));
+		});
 
-	asyncTest("default config path", function(){
-		writeIframe(makeStealHTML(
-			"basics/basics.html",
-			'src="../steal.js?basics"'));
-	});
+		asyncTest("default config path", function(){
+			writeIframe(makeStealHTML(
+				"basics/basics.html",
+				'src="../steal.js?basics"'));
+		});
 
-	asyncTest("default config path", function(){
-		writeIframe(makeStealHTML(
-			"basics/basics.html",
-			'src="../steal/steal.js?basics"'));
-	});
+		asyncTest("default config path", function(){
+			writeIframe(makeStealHTML(
+				"basics/basics.html",
+				'src="../steal/steal.js?basics"'));
+		});
+	}
 
 	asyncTest("inline", function(){
 		makeIframe("basics/inline_basics.html");
 	});
 
-	asyncTest("default bower_components config path", function(){
-		writeIframe(makeStealHTML(
-			"basics/basics.html",
-			'src="../bower_components/steal/steal.js?basics"'));
-	});
+	if(supportsES) {
+		asyncTest("default bower_components config path", function(){
+			writeIframe(makeStealHTML(
+				"basics/basics.html",
+				'src="../bower_components/steal/steal.js?basics"'));
+		});
 
-	asyncTest("default bower_components without config still works", function(){
-		makeIframe("basics/noconfig.html");
-	});
+		asyncTest("default bower_components without config still works", function(){
+			makeIframe("basics/noconfig.html");
+		});
+	}
 
 	asyncTest("map works", function(){
 		makeIframe("map/map.html");
 	});
 
-	asyncTest("read config", function(){
-		writeIframe(makeStealHTML(
-			"basics/basics.html",
-			'src="../../steal.js?configed" data-config="../config.js"'));
-	});
+	if(supportsES) {
+		asyncTest("read config", function(){
+			writeIframe(makeStealHTML(
+				"basics/basics.html",
+				'src="../../steal.js?configed" data-config="../config.js"'));
+		});
+	}
 
 	asyncTest("compat - production bundle works", function(){
 		makeIframe("production/prod.html");
@@ -199,24 +223,26 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("production/prod-bar.html");
 	});
 
-	asyncTest("automatic loading of less plugin", function(){
-		makeIframe("dep_plugins/site.html");
-	});
-
-
 	asyncTest("Using path's * qualifier", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
 			'src="../steal.js?../paths" data-config="../paths/config.js"'));
 	});
 
-	asyncTest("url paths in less work", function(){
-		makeIframe("less_paths/site.html");
-	});
+	// Less doesn't work in ie8
+	if(supportsES) {
+		asyncTest("automatic loading of less plugin", function(){
+			makeIframe("dep_plugins/site.html");
+		});
 
-	asyncTest("ext extension", function(){
-		makeIframe("extensions/site.html");
-	});
+		asyncTest("url paths in less work", function(){
+			makeIframe("less_paths/site.html");
+		});
+
+		asyncTest("ext extension", function(){
+			makeIframe("extensions/site.html");
+		});
+	}
 
 	asyncTest("forward slash extension", function(){
 		makeIframe("forward_slash/site.html");
@@ -226,7 +252,7 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("configed/steal_object.html");
 	});
 
-	asyncTest("compat - product bundle works", function(){
+	asyncTest("compat - production bundle works", function(){
 		makeIframe("prod-bundlesPath/prod.html");
 	});
 
@@ -242,9 +268,12 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("current-loader/dev.html");
 	});
 
-	asyncTest("@loader is current loader with es6", function(){
-		makeIframe("current-loader/dev-es6.html");
-	});
+	if(supportsES) {
+		asyncTest("@loader is current loader with es6", function(){
+			makeIframe("current-loader/dev-es6.html");
+		});
+	}
+
 	asyncTest("@loader is current loader with steal syntax", function(){
 		makeIframe("current-loader/dev-steal.html");
 	});
@@ -262,13 +291,15 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("basics/truthy_script_options.html");
 	});
 
-	asyncTest("using babel as transpiler works", function(){
-		makeIframe("babel/site.html");
-	});
+	if(supportsES) {
+		asyncTest("using babel as transpiler works", function(){
+			makeIframe("babel/site.html");
+		});
 
-	asyncTest("inline code", function(){
-		makeIframe("basics/inline_code.html");
-	});
+		asyncTest("inline code", function(){
+			makeIframe("basics/inline_code.html");
+		});
+	}
 
 	asyncTest("can load a bundle with an amd module depending on a global", function(){
 		makeIframe("prod_define/prod.html");
@@ -298,9 +329,12 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("npm/alt-main.html");
 	});
 
-	asyncTest("production", function(){
-		makeIframe("npm/prod.html");
-	});
+	// This test uses jQuery 2.x
+	if(supportsES) {
+		asyncTest("production", function(){
+			makeIframe("npm/prod.html");
+		});
+	}
 
 	asyncTest("with bower", function(){
 		makeIframe("npm/bower/index.html");
