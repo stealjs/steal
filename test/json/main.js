@@ -1,4 +1,4 @@
-import my from "json/my.json";
+var my = require("json/my.json");
 
 if (typeof window !== "undefined" && window.QUnit) {
 	QUnit.equal(my.foo,"bar", "module returned" );
