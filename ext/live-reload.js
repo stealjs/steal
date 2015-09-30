@@ -178,7 +178,7 @@ function bind(fn, ctx){
 
 function reload(moduleName) {
 	var e = loader._liveEmitter;
-	var currentDeps = loader.getDependencies(moduleName);
+	var currentDeps = loader.getDependencies(moduleName) || [];
 
 	// Call teardown to recursively delete all parents, then call `import` on the
 	// top-level parents.
@@ -210,13 +210,17 @@ function reload(moduleName) {
 }
 
 function removeOrphans(moduleName, oldDeps){
-	var deps = loader.getDependencies(moduleName);
+	var deps = loader.getDependencies(moduleName) || [];
 
 	var depName;
 	for(var i = 0, len = oldDeps.length; i < len; i++) {
 		depName = oldDeps[i];
 		if(!~deps.indexOf(depName)) {
-			disposeModule(depName, loader._liveEmitter);
+			var dependants = loader.getDependants(depName);
+			// Only teardown if this is the only dependant module.
+			if(dependants.length === 1) {
+				disposeModule(depName, loader._liveEmitter);
+			}
 		}
 	}
 }
