@@ -277,7 +277,8 @@ function applyTraceExtension(loader){
 	};
 
 	loader.getDependencies = function(moduleName){
-		return this.getModuleLoad(moduleName).metadata.dependencies;
+		var load = this.getModuleLoad(moduleName);
+		return load ? load.metadata.dependencies : undefined;
 	};
 	loader.getDependants = function(moduleName){
 		var deps = [];
