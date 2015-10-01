@@ -7,6 +7,9 @@ define(['@loader','mod'], function(loader,module){
 		QUnit.equal(loader.isEnv("staging"), true, "isEnv works");
 		QUnit.equal(loader.isPlatform("window"), true, "Is a browser window");
 
+		QUnit.equal(loader.map.mod, "other", "main config's map is applied");
+		QUnit.equal(loader.map.something, "else", "dep config's map is applied");
+
 		QUnit.start();
 		removeMyself();
 	} else {

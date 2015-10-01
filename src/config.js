@@ -172,6 +172,7 @@
 
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
+	var envsSpecial = { map: true, paths: true, meta: true };
 	setterConfig(System, specialConfig = {
 		env: {
 			set: function(val){
@@ -192,7 +193,16 @@
 				each(val, function(cfg, name){
 					var env = envs[name];
 					if(!env) env = envs[name] = {};
-					extend(env, cfg);
+
+					each(cfg, function(val, name){
+						if(envsSpecial[name] && env[name]) {
+							extend(env[name], val);
+						} else {
+							env[name] = val;
+						}
+					});
+
+					//extend(env, cfg);
 				});
 			}
 		},
