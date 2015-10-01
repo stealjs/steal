@@ -3866,8 +3866,16 @@ function global(loader) {
     var curGlobalObj;
     var ignoredGlobalProps;
 
+    function makeLookupObject(arr) {
+      var out = {};
+      for(var i = 0, len = arr.length; i < len; i++) {
+        out[arr[i]] = true;
+      }
+      return out;
+    }
+
     loader.set('@@global-helpers', loader.newModule({
-      prepareGlobal: function(moduleName, deps) {
+      prepareGlobal: function(moduleName, deps, exportName) {
         // first, we add all the dependency modules to the global
         for (var i = 0; i < deps.length; i++) {
           var moduleGlobal = moduleGlobals[deps[i]];
@@ -3876,21 +3884,27 @@ function global(loader) {
               loader.global[m] = moduleGlobal[m];
         }
 
+        // If an exportName is defined there is no need to perform the next
+        // expensive operation.
+        if(exportName) {
+          return;
+        }
+
         // now store a complete copy of the global object
         // in order to detect changes
         curGlobalObj = {};
-        ignoredGlobalProps = ['indexedDB', 'sessionStorage', 'localStorage',
+        ignoredGlobalProps = makeLookupObject(['indexedDB', 'sessionStorage', 'localStorage',
           'clipboardData', 'frames', 'webkitStorageInfo', 'toolbar', 'statusbar',
           'scrollbars', 'personalbar', 'menubar', 'locationbar', 'webkitIndexedDB',
           'screenTop', 'screenLeft'
-        ];
+        ]);
         for (var g in loader.global) {
-          if (indexOf.call(ignoredGlobalProps, g) != -1) { continue; }
+          if (ignoredGlobalProps[g]) { continue; }
           if (!hasOwnProperty || loader.global.hasOwnProperty(g)) {
             try {
               curGlobalObj[g] = loader.global[g];
             } catch (e) {
-              ignoredGlobalProps.push(g);
+              ignoredGlobalProps[g] = true;
             }
           }
         }
@@ -3915,7 +3929,7 @@ function global(loader) {
 
         else {
           for (var g in loader.global) {
-            if (indexOf.call(ignoredGlobalProps, g) != -1)
+            if (ignoredGlobalProps[g])
               continue;
             if ((!hasOwnProperty || loader.global.hasOwnProperty(g)) && g != loader.global && curGlobalObj[g] != loader.global[g]) {
               exports[g] = loader.global[g];
@@ -3954,7 +3968,7 @@ function global(loader) {
     if (load.metadata.format == 'global') {
       load.metadata.execute = function(require, exports, module) {
 
-        loader.get('@@global-helpers').prepareGlobal(module.id, load.metadata.deps);
+        loader.get('@@global-helpers').prepareGlobal(module.id, load.metadata.deps, exportName);
 
         if (exportName)
           load.source += '\nthis["' + exportName + '"] = ' + exportName + ';';
@@ -3962,7 +3976,7 @@ function global(loader) {
         // disable module detection
         var define = loader.global.define;
         var require = loader.global.require;
-        
+
         loader.global.define = undefined;
         loader.global.module = undefined;
         loader.global.exports = undefined;
