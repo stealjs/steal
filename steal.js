@@ -3886,7 +3886,7 @@ function global(loader) {
 
         // If an exportName is defined there is no need to perform the next
         // expensive operation.
-        if(exportName) {
+        if(exportName || exportName === false || loader.inferGlobals === false) {
           return;
         }
 
@@ -3927,7 +3927,7 @@ function global(loader) {
           exports[firstPart] = loader.global[firstPart];
         }
 
-        else {
+        else if(exportName !== false && loader.inferGlobals !== false) {
           for (var g in loader.global) {
             if (ignoredGlobalProps[g])
               continue;
