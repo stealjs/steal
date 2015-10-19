@@ -1,22 +1,9 @@
 var loader = require("@loader");
-
-/**
- * A map of modules names to parents like:
- * {
- *	 "child": {
- *	   "parentA": true,
- *	   "parentB": true
- *	 },
- *	 "parentA": false
- * }
- *
- * This is used to recursively delete parent modules
- *
- */
-loader._liveMap = {};
+var steal = require("@steal");
 
 // This is a map of listeners, those who have registered reload callbacks.
 loader._liveListeners = {};
+loader.liveReloadInstalled = true;
 
 // A simple emitter
 function E () {
@@ -105,51 +92,39 @@ loader.normalize = function(name, parentName){
 		return name;
 	}
 
-	var done = Promise.resolve(normalize.apply(this, arguments));
-
-	if(!parentName) {
-		return done.then(function(name){
-			// We need to keep modules without parents to so we can know
-			// if they need to have their `onLiveReload` callbacks called.
-			loader._liveMap[name] = false;
-			return name;
-		});
-	}
-
-	// Once we have the fully normalized module name mark who its parent is.
-	return done.then(function(name){
-		var parents = loader._liveMap[name];
-		if(!parents) {
-			parents = loader._liveMap[name] = {};
-		}
-
-		parents[parentName] = true;
-
-		return name;
-	});
+	return normalize.apply(this, arguments);
 };
 
-// Teardown a module name by deleting it and all of its parent modules.
-function teardown(moduleName, e, moduleNames) {
-	var moduleNames = moduleNames || {};
+function disposeModule(moduleName, emitter, moduleList){
+	moduleList = moduleList || {};
 
 	var mod = loader.get(moduleName);
 	if(mod) {
-		moduleNames[moduleName] = true;
-		e.emit("!dispose/" + moduleName);
+		moduleList[moduleName] = true;
+		emitter.emit("!dispose/" + moduleName);
 		loader.delete(moduleName);
 		if(loader._liveListeners[moduleName]) {
 			loader.delete("live-reload/" + moduleName);
 			delete loader._liveListeners[moduleName];
 		}
+		return true;
+	}
+	return false;
+}
 
+// Teardown a module name by deleting it and all of its parent modules.
+function teardown(moduleName, e, moduleNames) {
+	var moduleNames = moduleNames || {};
+
+	if(disposeModule(moduleName, e, moduleNames)) {
 		// Delete the module and call teardown on its parents as well.
-		var parents = loader._liveMap[moduleName];
+		var parents = loader.getDependants(moduleName);
 
-		for(var parentName in parents) {
-			teardown(parentName, e, moduleNames);
+		for(var i = 0, len = parents.length; i < len; i++) {
+			teardown(parents[i], e, moduleNames);
 		}
 	}
+
 	return moduleNames;
 }
 
@@ -186,6 +161,12 @@ function makeReload(moduleName, listeners){
 		setupUnbind(event, callback);
 	};
 
+	// This allows modules to dispose of other modules
+	// This might be needed for cleanup.
+	reload.disposeModule = function(name){
+		disposeModule(name, e);
+	};
+
 	function setupUnbind(event, callback){
 		e.once("!dispose/" + moduleName, function(){
 			e.off(event, callback);
@@ -202,8 +183,8 @@ function bind(fn, ctx){
 }
 
 function reload(moduleName) {
-	//var e = startCycle();
 	var e = loader._liveEmitter;
+	var currentDeps = loader.getDependencies(moduleName) || [];
 
 	// Call teardown to recursively delete all parents, then call `import` on the
 	// top-level parents.
@@ -217,11 +198,13 @@ function reload(moduleName) {
 		});
 	}
 
-	for(var moduleName in moduleNames) {
-		imports.push(importModule(moduleName));
+	for(var modName in moduleNames) {
+		imports.push(importModule(modName));
 	}
 	// Once everything is imported call the global listener callback functions.
 	Promise.all(imports).then(function(){
+		// Remove any newly orphaned modules before declaring the cycle complete.
+		removeOrphans(moduleName, currentDeps);
 		e.emit("!cycleComplete");
 	}, function(){
 		// There was an error re-importing modules
@@ -232,31 +215,64 @@ function reload(moduleName) {
 	});
 }
 
+function removeOrphans(moduleName, oldDeps){
+	var deps = loader.getDependencies(moduleName) || [];
+
+	var depName;
+	for(var i = 0, len = oldDeps.length; i < len; i++) {
+		depName = oldDeps[i];
+		if(!~deps.indexOf(depName)) {
+			var dependants = loader.getDependants(depName);
+			// Only teardown if this is the only dependant module.
+			if(dependants.length === 1) {
+				disposeModule(depName, loader._liveEmitter);
+			}
+		}
+	}
+}
+
 function setup(){
-	if(loader.liveReload === "false") {
+	if(loader.liveReload === "false" || loader.liveReload === false) {
 		return;
 	}
 
 	var port = loader.liveReloadPort || 8012;
 
-	var host = window.document.location.host.replace(/:.*/, '');
-	var ws = new WebSocket("ws://" + host + ":" + port);
+	var host = loader.liveReloadHost || window.document.location.host.replace(/:.*/, '');
+	var url = "ws://" + host + ":" + port;
+	var ws = new WebSocket(url);
 
 	// Let the server know about the main module
-	ws.onopen = function(){
+	var onopen = ws.onopen = function(){
 		ws.send(loader.main);
 	};
 
-	ws.onmessage = function(ev){
+	var onmessage = ws.onmessage = function(ev){
 		var moduleName = ev.data;
 		reload(moduleName);
 	};
+
+	var attempts = typeof loader.liveReloadAttempts !== "undefined" ?
+		loader.liveReloadAttempts - 1 : 0;
+	var onclose = ws.onclose = function(ev){
+		// 1006 means it was unable to connect to a server.
+		if(ev.code === 1006 && attempts > 0) {
+			attempts--;
+			setTimeout(function(){
+				ws = new WebSocket(url);
+				ws.open = onopen;
+				ws.onmessage = onmessage;
+				ws.onclose = onclose;
+			}, loader.liveReloadRetryTimeout || 500);
+		}
+	};
 }
 
+var isBuildEnvironment = loader.isPlatform ?
+	(loader.isPlatform("build") || loader.isEnv("build")) :
+	(typeof window === "undefined");
 
-var isBrowser = typeof window !== "undefined";
-
-if(isBrowser) {
+if(!isBuildEnvironment) {
 	if(typeof steal !== "undefined") {
 		steal.done().then(setup);
 	} else {
