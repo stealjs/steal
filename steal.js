@@ -4553,12 +4553,12 @@ function plugins(loader) {
 
         // normalize the plugin name relative to the same parent
         return new Promise(function(resolve) {
-          resolve(loader.normalize(pluginName, parentName, parentAddress)); 
+          resolve(loader.normalize(pluginName, parentName, parentAddress));
         })
         // normalize the plugin argument
         .then(function(_pluginName) {
           pluginName = _pluginName;
-          return loader.normalize(argumentName, parentName, parentAddress);
+          return loader.normalize(argumentName, parentName, parentAddress, true);
         })
         .then(function(argumentName) {
           return argumentName + '!' + pluginName;
@@ -5112,19 +5112,24 @@ var makeSteal = function(System){
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar
 	var addExt = function(loader) {
-		
+
 		loader.ext = {};
-		
+
 		var normalize = loader.normalize,
-			endingExtension = /\.(\w+)!$/;
-			
-		loader.normalize = function(name, parentName, parentAddress){
+			endingExtension = /\.(\w+)!?$/;
+
+		loader.normalize = function(name, parentName, parentAddress, pluginNormalize){
+			if(pluginNormalize) {
+				return normalize.apply(this, arguments);
+			}
+
 			var matches = name.match(endingExtension),
 				ext,
 				newName = name;
-			
+
 			if(matches && loader.ext[ext = matches[1]]) {
-				newName = name + loader.ext[ext];
+				var hasBang = name[name.length - 1] === "!";
+				newName = name + (hasBang ? "" : "!") + loader.ext[ext];
 			}
 			return normalize.call(this, newName, parentName, parentAddress);
 		};
@@ -5133,7 +5138,8 @@ var makeSteal = function(System){
 	if(typeof System){
 		addExt(System);
 	}
-	
+
+
 
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
@@ -5141,7 +5147,7 @@ var makeSteal = function(System){
 
 		var npmLike = /@.+#.+/;
 
-		loader.normalize = function(name, parentName, parentAddress) {
+		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
 			var lastPos = name.length - 1,
 				secondToLast,
 				folderName;
@@ -5155,7 +5161,7 @@ var makeSteal = function(System){
 
 				name += folderName;
 			}
-			return normalize.call(this, name, parentName, parentAddress);
+			return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
 		};
 	};
 

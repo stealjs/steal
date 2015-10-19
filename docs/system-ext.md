@@ -26,7 +26,7 @@ System.config({
 
 allows:
 
-    System.import("foo.stache!")
+    System.import("foo.stache")
 
 Without having to write:
 

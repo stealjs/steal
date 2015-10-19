@@ -12,7 +12,7 @@
     "test-windows": "grunt test-windows --stack"
   },
   "dependencies": {
-    "systemjs": "git://github.com/bitovi/systemjs#0.16.6-bitovi.7",
+    "systemjs": "git://github.com/bitovi/systemjs#0.16.6-bitovi.8",
     "less": "^2.4.0",
     "system-json": "^0.0.3"
   },
