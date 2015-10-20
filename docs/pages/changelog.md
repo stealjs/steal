@@ -3,6 +3,22 @@
 
 @body
 
+## 0.12.0
+
+### steal
+
+- New [system-trace](https://github.com/stealjs/system-trace) extension comes with Steal. Provides useful APIs for module metadata.
+- The ext extension no longer requires [the bang](https://github.com/stealjs/steal/issues/503).
+- Upgrades to the npm and live-reload plugins.
+
+### steal-tools
+
+- [babelOptions](https://github.com/stealjs/steal-tools/pull/320) are now passed into transpile.
+- `inferGlobals: false` will speed up production when you have a lot of globals and don't need the default behavior of inferring a global's export value.
+- Various live-reload bug fixes.
+
+### steal-tools
+
 ## 0.11.0
 
 ### steal
