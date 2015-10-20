@@ -9,7 +9,7 @@ var makeSteal = function(config){
 };
 
 describe("plugins", function(){
-	this.timeout(5000);
+	this.timeout(20000);
 
 	it("are able to convert less", function(done){
 		var steal = makeSteal({
