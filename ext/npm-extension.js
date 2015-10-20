@@ -17,12 +17,12 @@ exports.addExtension = function(System){
 	 *   "can-slider" //-> "can-slider#path/to/main"
 	 */
 	var oldNormalize = System.normalize;
-	System.normalize = function(name, parentName, parentAddress){
+	System.normalize = function(name, parentName, parentAddress, pluginNormalize){
 		// If this is a relative module name and the parent is not an npm module
 		// we can skip all of this logic.
 		if(parentName && utils.path.isRelative(name) &&
 		  !utils.moduleName.isNpm(parentName)) {
-			return oldNormalize.call(this, name, parentName, parentAddress);
+			return oldNormalize.call(this, name, parentName, parentAddress, pluginNormalize);
 		}
 
 		// Get the current package
@@ -30,7 +30,7 @@ exports.addExtension = function(System){
 
 		// this isn't in a package, so ignore
 		if(!refPkg) {
-			return oldNormalize.call(this, name, parentName, parentAddress);
+			return oldNormalize.call(this, name, parentName, parentAddress, pluginNormalize);
 		}
 
 		// Using the current package, get info about what it is probably asking for
@@ -57,7 +57,8 @@ exports.addExtension = function(System){
 			parsedModuleName.version = refPkg.version;
 			parsedModuleName.packageName = refPkg.name;
 			parsedModuleName.modulePath = utils.pkg.main(refPkg);
-			return oldNormalize.call(this, utils.moduleName.create(parsedModuleName), parentName, parentAddress);
+			return oldNormalize.call(this, utils.moduleName.create(parsedModuleName),
+									 parentName, parentAddress, pluginNormalize);
 		}
 		if( depPkg ) {
 			parsedModuleName.version = depPkg.version;
@@ -71,7 +72,8 @@ exports.addExtension = function(System){
 			   typeof refPkg.system.map[moduleName] === "string") {
 				moduleName = refPkg.system.map[moduleName];
 			}
-			return oldNormalize.call(this, moduleName, parentName, parentAddress);
+			return oldNormalize.call(this, moduleName, parentName,
+									 parentAddress, pluginNormalize);
 		} else {
 			if(depPkg === this.npmPaths.__default) {
 				// if the current package, we can't? have the
@@ -79,12 +81,15 @@ exports.addExtension = function(System){
 				var localName = parsedModuleName.modulePath ?
 					parsedModuleName.modulePath+(parsedModuleName.plugin? parsedModuleName.plugin: "") :
 					utils.pkg.main(depPkg);
-				return oldNormalize.call(this, localName, parentName, parentAddress);
+				return oldNormalize.call(this, localName, parentName,
+										 parentAddress, pluginNormalize);
 			}
 			if(refPkg.browser && refPkg.browser[name]) {
-				return oldNormalize.call(this, refPkg.browser[name], parentName, parentAddress);
+				return oldNormalize.call(this, refPkg.browser[name], parentName,
+										 parentAddress, pluginNormalize);
 			}
-			return oldNormalize.call(this, name, parentName, parentAddress);
+			return oldNormalize.call(this, name, parentName, parentAddress,
+									 pluginNormalize);
 		}
 
 	};
