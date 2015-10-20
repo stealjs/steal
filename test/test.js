@@ -242,6 +242,10 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("ext extension", function(){
 			makeIframe("extensions/site.html");
 		});
+
+		asyncTest("ext extension works without the bang", function(){
+			makeIframe("extensions/site_no_bang.html");
+		});
 	}
 
 	asyncTest("forward slash extension", function(){

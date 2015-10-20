@@ -5,7 +5,7 @@
 
 		var npmLike = /@.+#.+/;
 
-		loader.normalize = function(name, parentName, parentAddress) {
+		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
 			var lastPos = name.length - 1,
 				secondToLast,
 				folderName;
@@ -19,7 +19,7 @@
 
 				name += folderName;
 			}
-			return normalize.call(this, name, parentName, parentAddress);
+			return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
 		};
 	};
 
