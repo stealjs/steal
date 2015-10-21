@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - ES6  </title>
+	<title>StealJS  - steal.done</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -411,7 +411,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="steal.done.html" data-search="steal.done">
 						steal.done
 					</a>
@@ -615,7 +615,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="function" href="syntax.es6.html" data-search="ES6 ">
 						ES6 
 					</a>
@@ -718,9 +718,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>ES6 </h1>
+<h1>steal.done</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -729,9 +729,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">syntax.es6</span>
-	
-	
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -754,8 +752,40 @@
 		
 
 		
+		<section class="description">
+			<p>A promise for when the application has loaded. Useful if you want to automatically run some code (like tests) after everything has loaded.</p>
+
+		</section>
+		
 
 		
+			
+				<section class="signature">
+					<h2 id="sig_steal_done__">steal.done()
+</h2>
+<div class="signature-wrapper">
+
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Promise}</code></h4>
+		<div class="description">
+			<p>A promise that will resolve when the <a href="System.configMain.html">System.configMain</a> and <a href="System.main.html">System.main</a> have loaded.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+				</section>
 			
 		
 		
@@ -765,37 +795,15 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>The ES6 syntax in the module syntax that will be part of the EMCAScript 6 standard currently in development.
-Because ES6 syntax is not valid in ES5 it requires compilation to use.
-Steal brings along <a href="@traceur.html">Traceur</a> to act as the ES6 compiler, which it does on the
-fly. When developing you won't even notice that it is loaded, and when
-built your modules are compiled down to ES5.</p>
-<p>ES6 uses the keywords <code>import</code> and <code>export</code> for importing and exporting respectively. For example:</p>
-<pre><code>import can from &quot;can&quot;;
-</code></pre>
-<p>This will import <code>can</code> from the can module, assuming it is the default exported value. If a module exports several values you can specify which to import using curly braces. Take an example of a <code>Math</code> module that exports several functions to do operations; it might be defined like so:</p>
-<pre><code>export function add(a, b) {
-  return a + b;
-}
+<p>Calling <strong>steal.done</strong> is useful in scenarios where you need to start some process after the dependency graph of your application has been fully imported. For example (used with <a href="@steal.html">@steal</a>):</p>
+<pre><code>var steal = require(&quot;@steal&quot;);
+var QUnit = require(&quot;qunit&quot;);
 
-export function subtract(a, b) {
-  return a - b;
-}
+steal.done().then(function(){
+  QUnit.load();
+});
 </code></pre>
-<p>To import one or more of these exported values use curly braces in your module like so:</p>
-<pre><code>import { add, subtract } from &quot;math&quot;;
-</code></pre>
-<p>You can export any type of value, like a normal var:</p>
-<pre><code>export var foo = &quot;bar&quot;;
-</code></pre>
-<p>If you want to export a single value you can do so using the <code>default</code> keyword like so:</p>
-<pre><code>export default function add(a, b){
-  return a + b;
-}
-</code></pre>
-<p>Because Traceur is a full ES6 to ES5 compiler you can use many ES6 features beyond just module loading. Listing these is beyond the scope of this document, but you can check out many of the language features Traceur supports <a href="https://github.com/google/traceur-compiler/wiki/LanguageFeatures">here</a>.</p>
-<h2>Browser Support</h2>
-<p>The ES6 syntax is only available in IE9+. The <a href="@traceur.html">Tracer Runtime</a> requires <code>Object.defineProperty</code>. PhantomJS 1.x is also not supported due to limited support for getters and setters.</p>
+<p>This will start running QUnit tests after all modules have loaded.</p>
 
 		</section>
 		
@@ -821,7 +829,7 @@ export function subtract(a, b) {
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"syntax.es6","src":"steal/docs/syntax-es6.md","description":"","title":"ES6 ","parent":"StealJS.syntaxes","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"steal.done","src":"steal/docs/steal-done.md","description":"A promise for when the application has loaded. Useful if you want to automatically run some code (like tests) after everything has loaded.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"title":"","parent":"StealJS.functions","signatures":[{"code":"steal.done()","description":"","params":[],"returns":{"types":[{"type":"Promise"}],"description":"A promise that will resolve when the [System.configMain] and [System.main] have loaded."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

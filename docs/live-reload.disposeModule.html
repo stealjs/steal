@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - functions </title>
+	<title>StealJS - disposeModule </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -94,8 +94,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.functions.html" data-search="functions">
-				functions
+			<a class="sidebar-title" href="steal.live-reload.html" data-search="live-reload">
+				live-reload
 			</a>
 			
 	<ul>
@@ -103,9 +103,9 @@
 			
 				
 				
-				<li class="search-container">
-					<a class="property" href="System.import.html" data-search="System.import">
-						System.import
+				<li class="search-container active">
+					<a class="function" href="live-reload.disposeModule.html" data-search="disposeModule">
+						disposeModule
 					</a>
 				</li>
 				
@@ -116,44 +116,8 @@
 				
 				
 				<li class="search-container">
-					<a class="property" href="System.isEnv.html" data-search="System.isEnv">
-						System.isEnv
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="property" href="System.isPlatform.html" data-search="System.isPlatform">
-						System.isPlatform
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="property" href="steal.done.html" data-search="steal.done">
-						steal.done
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="property" href="steal.import.html" data-search="steal.import">
-						steal.import
+					<a class="typedef" href="steal.live-reload.options.html" data-search="LiveReloadOptions">
+						LiveReloadOptions
 					</a>
 				</li>
 				
@@ -178,9 +142,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>functions</h1>
+<h1>disposeModule</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>function</li>
 	</ul>
 	
 	
@@ -189,7 +153,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.functions</span>
+		<span class="module">live-reload.disposeModule</span>
 	
 	
 	
@@ -214,14 +178,75 @@
 		
 
 		
+		<section class="description">
+			<p>Dispose of a module, removing it from the Loader registry.</p>
+
+		</section>
+		
 
 		
+			
+				<section class="signature">
+					<h2 id="sig_reload_disposeModule_moduleName_">reload.disposeModule(moduleName)
+</h2>
+<div class="signature-wrapper">
+<p>Remove a module from the Loader registry and call any dispose callbacks registered for the module.</p>
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>moduleName
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>the name of the module to be disposed</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+
+
+
+
+</div>
+
+				</section>
 			
 		
 		
 		
 		
 
+		
+		<section class="comment">
+			<h2>Use</h2>
+<p>Advanced plugins might want to dispose of modules at arbitrary times and disposeModule allows for that. One example would be if a plugin creates virtual modules and needs to remove them when the parent module is disposed.</p>
+<pre><code class="language-js">var reload = require(&quot;live-reload&quot;);
+var loader = require(&quot;@loader&quot;);
+
+loader.set(&quot;virtual-module&quot;, loader.newModule({}));
+
+// Called when this module is disposed during a live-reload cycle.
+reload.dispose(function(){
+
+    // Remove virtual-module since it will be recreated when 
+    // this module reloads.
+    reload.disposeModule(&quot;virtual-module&quot;);
+
+});
+</code></pre>
+<h2>Implementation</h2>
+<p>Implemented by <a href="https://github.com/stealjs/live-reload">live-reload</a>.</p>
+
+		</section>
 		
 		
 
@@ -245,7 +270,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"StealJS.functions","title":"functions","type":"group","parent":"steal","description":"","order":0,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"live-reload.disposeModule","src":"steal/docs/live-reload-disposeModule.md","description":"Dispose of a module, removing it from the Loader registry.","title":"disposeModule","parent":"steal.live-reload","signatures":[{"code":"reload.disposeModule(moduleName)","description":"Remove a module from the Loader registry and call any dispose callbacks registered for the module.","params":[{"types":[{"type":"String"}],"name":"moduleName","description":"the name of the module to be disposed"}]}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
