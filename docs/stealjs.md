@@ -4,7 +4,7 @@
 
 _Good artists copy; great artists steal._
 
-StealJS is a module loader and builder that will help you create the next great app. Its designed to simplify dependency management while being extremely powerful and flexible.
+StealJS is a module loader and builder that will help you create the next great app. It's designed to simplify dependency management while being extremely powerful and flexible.
 
 StealJS is composed of two parts.
 - [steal] - the module loader
