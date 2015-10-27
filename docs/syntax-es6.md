@@ -1,14 +1,14 @@
-@function syntax.es6 ES6 
+@function syntax.es6 ES6
 @parent StealJS.syntaxes
 
 @body
 
 ## Use
 
-The ES6 syntax in the module syntax that will be part of the EMCAScript 6 standard currently in development. 
-Because ES6 syntax is not valid in ES5 it requires compilation to use. 
-Steal brings along [@traceur Traceur] to act as the ES6 compiler, which it does on the 
-fly. When developing you won't even notice that it is loaded, and when 
+The ES6 syntax is the module syntax that will be part of the EMCAScript 6 standard currently in development.
+Because ES6 syntax is not valid in ES5 it requires compilation to use.
+Steal brings along [@traceur Traceur] to act as the ES6 compiler, which it does on the
+fly. When developing you won't even notice that it is loaded, and when
 built your modules are compiled down to ES5.
 
 ES6 uses the keywords `import` and `export` for importing and exporting respectively. For example:
