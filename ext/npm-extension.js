@@ -3,6 +3,11 @@
 var utils = require("./npm-utils");
 exports.includeInBuild = true;
 
+var isNode = typeof process === "object" && {}.toString.call(process) ===
+	"[object process]";
+var isWorker = typeof WorkerGlobalScope !== "undefined" && (self instanceof WorkerGlobalScope);
+var isBrowser = typeof window !== "undefined" && !isNode && !isWorker;
+
 exports.addExtension = function(System){
 	/**
 	 * Normalize has to deal with a "tricky" situation.  There are module names like
@@ -107,7 +112,10 @@ exports.addExtension = function(System){
 				return oldLocate.call(this, load).then(function(address){
 					var expectedAddress = utils.path.joinURIs(
 						System.baseURL, load.name
-					).replace(/#/g, "%23");
+					);
+					if(isBrowser) {
+						expectedAddress = expectedAddress.replace(/#/g, "%23");
+					}
 
 					// If locate didn't do the expected thing then we're going
 					// to guess that we shouldn't perform NPM lookup on this
