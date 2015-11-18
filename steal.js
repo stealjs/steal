@@ -4847,7 +4847,7 @@ var $__curScript, __eval;
       var curPath = $__curScript.src;
       var basePath = curPath.substr(0, curPath.lastIndexOf('/') + 1);
       document.write(
-        '<' + 'script type="text/javascript" src="' + basePath + 'es6-module-loader.js" data-init="upgradeSystemLoader">' + '<' + '/script>'
+        '<' + 'script type="text/javascript" src="' + basePath + 'steal-es6-module-loader.js" data-init="upgradeSystemLoader">' + '<' + '/script>'
       );
     }
     else {
@@ -4872,14 +4872,14 @@ var $__curScript, __eval;
           basePath = url.replace(/\/[^\/]*$/, '/');
         });
       }
-      importScripts(basePath + 'es6-module-loader.js');
+      importScripts(basePath + 'steal-es6-module-loader.js');
       $__global.upgradeSystemLoader();
     } else {
       $__global.upgradeSystemLoader();
     }
   }
   else {
-    var es6ModuleLoader = require('es6-module-loader');
+    var es6ModuleLoader = require('steal-es6-module-loader');
     $__global.System = es6ModuleLoader.System;
     $__global.Loader = es6ModuleLoader.Loader;
     $__global.upgradeSystemLoader();
@@ -6018,8 +6018,8 @@ if (typeof System !== "undefined") {
 }
 
 	if( isNode ) {
-		require('systemjs');
-			
+		require('steal-systemjs');
+
 		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./ext/dev.js");
@@ -6027,7 +6027,7 @@ if (typeof System !== "undefined") {
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
-		
+
 	} else {
 		var oldSteal = global.steal;
 		global.steal = makeSteal(System);
@@ -6038,6 +6038,6 @@ if (typeof System !== "undefined") {
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;
-	} 
-    
+	}
+
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);
