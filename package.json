@@ -12,8 +12,8 @@
     "test-windows": "grunt test-windows --stack"
   },
   "dependencies": {
-    "systemjs": "git://github.com/stealjs/systemjs#0.16.6-bitovi.9",
     "less": "^2.4.0",
+    "steal-systemjs": "^0.16.6-bitovi.13",
     "system-json": "^0.0.3"
   },
   "devDependencies": {

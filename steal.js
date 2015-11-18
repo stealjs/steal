@@ -6018,8 +6018,8 @@ if (typeof System !== "undefined") {
 }
 
 	if( isNode ) {
-		require('systemjs');
-			
+		require('steal-systemjs');
+
 		global.steal = makeSteal(System);
 		global.steal.System = System;
 		global.steal.dev = require("./ext/dev.js");
@@ -6027,7 +6027,7 @@ if (typeof System !== "undefined") {
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
-		
+
 	} else {
 		var oldSteal = global.steal;
 		global.steal = makeSteal(System);
@@ -6038,6 +6038,6 @@ if (typeof System !== "undefined") {
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;
-	} 
-    
+	}
+
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);

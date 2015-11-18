@@ -105,6 +105,18 @@ exports.addExtension = function(System){
 			var pkg = this.npm[parsedModuleName.packageName];
 			if(pkg) {
 				return oldLocate.call(this, load).then(function(address){
+					var expectedAddress = utils.path.joinURIs(
+						System.baseURL, load.name
+					).replace(/#/g, "%23");
+
+					// If locate didn't do the expected thing then we're going
+					// to guess that we shouldn't perform NPM lookup on this
+					// module as there might be a wildcard path.
+					if(address !== expectedAddress + ".js" &&
+					  address !== expectedAddress) {
+						return address;
+					}
+
 
 					var root = utils.pkg.rootDir(pkg, pkg === loader.npmPaths.__default);
 
