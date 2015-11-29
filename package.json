@@ -51,5 +51,13 @@
       "url": "http://opensource.org/licenses/mit-license.php"
     }
   ],
-  "main": "main"
+  "main": "main",
+  "keywords": [
+    "stealjs",
+    "donejs",
+    "systemjs",
+    "modules",
+    "es6",
+    "bundling"
+  ]
 }
