@@ -373,11 +373,13 @@ This is your <a href="System.baseURL.html">baseURL</a> folder. Within that folde
 <p>Steal uses <code>package.json</code> to configure its behavior. Find the full details on
 the <a href="npm.html">npm extension page</a>. Most of the configuration happens within
 a special &quot;system&quot; property. Its worth creating it now in case you'll
-need it later.</p>
+need it later. If you are using NPM 3 also set the npmAlgorithm option within the system property, otherwise leave it out.</p>
 <pre><code>// package.json
 {
   ...
-  &quot;system&quot;: {},
+  &quot;system&quot;: {
+    &quot;npmAlgorithm&quot;: &quot;flat&quot;
+  },
   ...
 }
 </code></pre>
