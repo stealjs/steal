@@ -27,6 +27,7 @@ var crawl = {
 	 */
 	deps: function(context, pkg, isRoot) {
 	
+		var isFlatFileStructure = context.isFlatFileStructure;
 		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
 
 		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
@@ -34,7 +35,24 @@ var crawl = {
 			if(childPkg._isPeerDependency && !isRoot ) {
 				// check one node_module level higher
 				childPkg.origFileUrl = nodeModuleAddress(pkg.fileUrl)+"/"+childPkg.name+"/package.json";
+			} else if(isRoot) {
+				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
 			} else {
+				if(isFlatFileStructure) {
+					// npm 3
+					childPkg.origFileUrl = utils.path.peerPackage(pkg.fileUrl,
+																  childPkg.name);
+				} else {
+					// npm 2
+					childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl,
+															 childPkg.name);
+				}
+			}
+
+			// Check if childPkg matches a parent package, but doesn't have a version
+			// that satisfies. This means go a level up.
+			if(isFlatFileStructure && crawl.hasNonMatchingVersionFound(context,
+																	   childPkg)) {
 				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
 			}
 			
@@ -164,6 +182,19 @@ var crawl = {
 			}
 			parentAddress = utils.path.parentNodeModuleAddress(packageAddress);
 		}
+	},
+	hasNonMatchingVersionFound: function(context, childPkg){
+		if(!context.versions[childPkg.name]) {
+			context.versions[childPkg.name] = {};
+		}
+		var versions = context.versions[childPkg.name];
+		for(v in versions) {
+			pkg = versions[v];
+			if(!SemVer.satisfies(pkg.version, childPkg.version)) {
+				return true;
+			}
+		}
+		return false;
 	},
 	matchedVersion: function(context, packageName, requestedVersion){
 		var versions = context.versions[packageName], pkg;

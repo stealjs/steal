@@ -1,8 +1,8 @@
 /**
  * @module system-npm/utils
- * 
+ *
  * Helpers that are used by npm-extension and the npm plugin.
- * This should be kept small and not have helpers exclusive to npm. 
+ * This should be kept small and not have helpers exclusive to npm.
  * However, it can have all npm-extension helpers.
  */
 
@@ -43,7 +43,7 @@ var utils = {
 		/**
 		 * @function moduleName.create
 		 * Converts a parsed module name to a string
-		 * 
+		 *
 		 * @param {system-npm/parsed_npm} descriptor
 		 */
 		create: function (descriptor, standard) {
@@ -72,11 +72,19 @@ var utils = {
 			return npmModuleRegEx.test(moduleName);
 		},
 		/**
+		 * @function moduleName.isScoped
+		 * Determines whether a moduleName is from a scoped package.
+		 * @return {Boolean}
+		 */
+		isScoped: function(moduleName){
+			return moduleName[0] === "@";
+		},
+		/**
 		 * @function moduleName.parse
 		 * Breaks a string moduleName into parts.
 		 * packageName@version!plugin#modulePath
 		 * "./lib/bfs"
-		 * 
+		 *
 		 * @return {system-npm/parsed_npm}
 		 */
 		parse: function (moduleName, currentPackageName) {
@@ -87,27 +95,37 @@ var utils = {
 			if(!modulePathParts[1] && !versionParts[0]) {
 				versionParts = ["@"+versionParts[1]];
 			}
-			var packageName, 
+			// it could be a scope package
+			if(versionParts.length === 3 && utils.moduleName.isScoped(moduleName)) {
+				versionParts.splice(0, 1);
+				versionParts[0] = "@"+versionParts[0];
+			}
+			var packageName,
 				modulePath;
-			
+
 			// if relative, use currentPackageName
 			if( currentPackageName && utils.path.isRelative(moduleName) ) {
 				packageName= currentPackageName;
 				modulePath = versionParts[0];
 			} else {
-				
+
 				if(modulePathParts[1]) { // foo@1.2#./path
 					packageName = versionParts[0];
 					modulePath = modulePathParts[1];
 				} else {
 					// test/abc
 					var folderParts = versionParts[0].split("/");
-					packageName = folderParts.shift();
+					// Detect scoped packages
+					if(folderParts.length && folderParts[0][0] === "@") {
+						packageName = folderParts.splice(0, 2).join("/");
+					} else {
+						packageName = folderParts.shift();
+					}
 					modulePath = folderParts.join("/");
 				}
-				
+
 			}
-			
+
 			return {
 				plugin: pluginParts.length === 2 ? "!"+pluginParts[1] : undefined,
 				version: versionParts[1],
@@ -118,23 +136,23 @@ var utils = {
 		},
 		/**
 		 * @function moduleName.parseFromPackage
-		 * 
+		 *
 		 * Given the package that loads the dependency, the dependency name,
-		 * and the moduleName of what loaded the package, return 
+		 * and the moduleName of what loaded the package, return
 		 * a [system-npm/parsed_npm].
-		 * 
+		 *
 		 * @param {Loader} loader
 		 * @param {NpmPackage} refPkg The package `name` is a dependency of.
 		 * @param {moduleName} name
 		 * @param {moduleName} parentName
 		 * @return {system-npm/parsed_npm}
-		 * 
+		 *
 		 */
 		parseFromPackage: function(loader, refPkg, name, parentName) {
-			// Get the name of the 
+			// Get the name of the
 			var packageName = utils.pkg.name(refPkg),
 			    parsedModuleName = utils.moduleName.parse(name, packageName);
-			
+
 			// If the module needs to be loaded relative.
 			if( utils.path.isRelative( parsedModuleName.modulePath ) ) {
 				// get the location of the parent
@@ -142,16 +160,16 @@ var utils = {
 				// If the parentModule and the currentModule are from the same parent
 				if( parentParsed.packageName === parsedModuleName.packageName && parentParsed.modulePath ) {
 					// Make the path relative to the parentName's path.
-					parsedModuleName.modulePath = utils.path.makeRelative( 
+					parsedModuleName.modulePath = utils.path.makeRelative(
 						utils.path.joinURIs(parentParsed.modulePath, parsedModuleName.modulePath) );
 				}
 			}
-			
+
 			// we have the moduleName without the version
 			// we check this against various configs
 			var mapName = utils.moduleName.create(parsedModuleName),
 			    mappedName;
-			
+
 			// The refPkg might have a browser [https://github.com/substack/node-browserify#browser-field] mapping.
 			// Perform that mapping here.
 			if(refPkg.browser && (typeof refPkg.browser !== "string") && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
@@ -162,12 +180,15 @@ var utils = {
 			if(global) {
 				mappedName = global.moduleName === false ? "@empty" : global.moduleName;
 			}
-			
+
 			if(mappedName) {
 				return utils.moduleName.parse(mappedName, packageName);
 			} else {
 				return parsedModuleName;
 			}
+		},
+		nameAndVersion: function(parsedModuleName){
+			return parsedModuleName.packageName + "@" + parsedModuleName.version;
 		}
 	},
 	pkg: {
@@ -186,7 +207,7 @@ var utils = {
 			var root = isRoot ?
 				utils.path.removePackage( pkg.fileUrl ) :
 				utils.path.pkgDir(pkg.fileUrl);
-				
+
 			var lib = pkg.system && pkg.system.directories && pkg.system.directories.lib;
 			if(lib) {
 				root = utils.path.joinURIs(utils.path.addEndingSlash(root), lib);
@@ -195,14 +216,14 @@ var utils = {
 		},
 		/**
 		 * Returns packageData given a module's name or module's address.
-		 * 
+		 *
 		 * Given a moduleName, it tries to return the package it belongs to.
 		 * If a moduleName isn't provided, but a moduleA
-		 * 
+		 *
 		 * @param {Loader} loader
 		 * @param {String} [moduleName]
 		 * @param {String} [moduleAddress]
-		 * @return {NpmPackage|undefined} 
+		 * @return {NpmPackage|undefined}
 		 */
 		findByModuleNameOrAddress: function(loader, moduleName, moduleAddress) {
 			if(loader.npm) {
@@ -234,11 +255,11 @@ var utils = {
 		/**
 		 * Walks up npmPaths looking for a [name]/package.json.  Returns
 		 * the package data it finds.
-		 * 
+		 *
 		 * @param {Loader} loader
 		 * @param {NpmPackage} refPackage
 		 * @param {packgeName} name the package name we are looking for.
-		 * 
+		 *
 		 * @return {undefined|NpmPackage}
 		 */
 		findDep: function (loader, refPackage, name) {
@@ -308,10 +329,10 @@ var utils = {
 					});
 				return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
 			}
-		
+
 			href = parseURI(href || '');
 			base = parseURI(base || '');
-		
+
 			return !href || !base ? null : (href.protocol || base.protocol) +
 				(href.protocol || href.authority ? href.authority : base.authority) +
 				removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : (href.pathname ? ((base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname) : base.pathname)) +
@@ -327,11 +348,16 @@ var utils = {
 		addEndingSlash: function(path){
 			return utils.path.endsWithSlash(path) ? path : path+"/";
 		},
-		// Returns a package.json path one node_modules folder deeper than the 
+		// Returns a package.json path one node_modules folder deeper than the
 		// parentPackageAddress
 		depPackage: function (parentPackageAddress, childName){
 			var packageFolderName = parentPackageAddress.replace(/\/package\.json.*/,"");
 			return (packageFolderName ? packageFolderName+"/" : "")+"node_modules/" + childName + "/package.json";
+		},
+		peerPackage: function(parentPackageAddress, childName){
+			var packageFolderName = parentPackageAddress.replace(/\/package\.json.*/,"");
+			return packageFolderName.substr(0, packageFolderName.lastIndexOf("/"))
+				+ "/" + childName + "/package.json";
 		},
 		// returns the package directory one level deeper.
 		depPackageDir: function(parentPackageAddress, childName){
@@ -350,6 +376,10 @@ var utils = {
 			var nodeModules = "/node_modules/",
 				nodeModulesIndex = address.lastIndexOf(nodeModules),
 				nextSlash = address.indexOf("/", nodeModulesIndex+nodeModules.length);
+			// Scoped packages
+			if(address[nodeModulesIndex+nodeModules.length] === "@") {
+				nextSlash = address.indexOf("/", nextSlash+1);
+			}
 			if(nodeModulesIndex >= 0) {
 				return nextSlash>=0 ? address.substr(0, nextSlash) : address;
 			}

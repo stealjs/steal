@@ -107,7 +107,7 @@ exports.addExtension = function(System){
 			loader = this;
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
-			var pkg = this.npm[parsedModuleName.packageName];
+			var pkg = this.npm[utils.moduleName.nameAndVersion(parsedModuleName)];
 			if(pkg) {
 				return oldLocate.call(this, load).then(function(address){
 					var expectedAddress = utils.path.joinURIs(

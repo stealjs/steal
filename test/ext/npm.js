@@ -4,14 +4,10 @@
 var utils = require('./npm-utils');
 var crawl = require('./npm-crawl');
 
-
 // Add @loader, for SystemJS
 if(!System.has("@loader")) {
 	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 }
-
-
-
 
 // SYSTEMJS PLUGIN EXPORTS =================
 
@@ -38,8 +34,10 @@ exports.translate = function(load){
 		versions: {}
 	};
 	var pkg = {origFileUrl: load.address, fileUrl: load.address};
-
 	crawl.processPkgSource(context, pkg, load.source);
+	if(pkg.system && pkg.system.npmAlgorithm === "flat") {
+		context.isFlatFileStructure = true;
+	}
 
 	return crawl.deps(context, pkg, true).then(function(){
 		// clean up packages so everything is unique

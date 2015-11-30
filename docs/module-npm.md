@@ -18,7 +18,9 @@ By default, if [System.stealPath] points to steal.js within node_modules like:
     <script src="../node_modules/steal/steal.js"></script>
     
 [System.configMain] will point to `"package.json!npm"`. The `npm` plugin
-reads `package.json` and sets a normalize and locate hook.  
+reads `package.json` and sets a normalize and locate hook.
+
+**Note**: if you are using NPM 3 see the *npmAlgorithm* option below.
 
 
 ## NPM Module names
@@ -33,9 +35,7 @@ For example, code that import's jQuery like:
 
 might actually import:
 
-    jquery@2.1.3#./dist/jquery.js
-
-
+    jquery@2.1.3#dist/jquery.js
 
 ## Configuration
 
@@ -174,7 +174,7 @@ The following packages are ignored by default:
  - "bower"
  - "grunt", "grunt-cli"
 
-### system.npm.npmDependencies
+### package.system.npmDependencies
 
 Like `npmIgnore` but affirmative. If used alone will only include the dependencies listed. If used in conjunction with `npmIgnore` acts as an override. For example the following config:
 
@@ -210,7 +210,19 @@ When used in conjuction with `npmIgnore`:
 
 Even though `npmIgnore` is set to ignore all `devDependencies` the use of `npmDependencies` acts as an override. The package `one` will be loaded, but not `two` or `three`.
 
-### system.npm.ignoreBrowser
+### package.system.npmAlgorithm
+
+Used to determine which algorithm is used to look up packages. [NPM 3](http://blog.npmjs.org/post/122450408965/npm-weekly-20-npm-3-is-here-ish) introduced a new flat file structure inside node_modules. If you are using NPM 3 set this option:
+
+```js
+{
+  "system": {
+    "npmAlgorithm": "flat"
+  }
+}
+```
+
+### package.system.ignoreBrowser
 
 Set to true to ignore browserfy's `browser` and `browserify` configurations.
 
@@ -222,7 +234,7 @@ Set to true to ignore browserfy's `browser` and `browserify` configurations.
 }
 ```
 
-### system.npm.directories
+### package.system.directories
 
 Set a folder to look for module's within your project.  Only the `lib` 
 directory can be specified.
@@ -241,7 +253,7 @@ In the following setup, `my-project/my-utils` will be looked for in
 }
 ```
 
-### system.npm.configDependencies
+### package.system.configDependencies
 
 Defines dependencies of your npm package. This is useful for loading modules,
 like extensions, that need to be initialized before the rest of your application
