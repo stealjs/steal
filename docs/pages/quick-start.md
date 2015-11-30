@@ -62,13 +62,15 @@ The `index.html` loads your app. The following `script src` loads `steal.js` and
 Steal uses `package.json` to configure its behavior. Find the full details on
 the [npm npm extension page]. Most of the configuration happens within
 a special "system" property. Its worth creating it now in case you'll
-need it later.
+need it later. If you are using NPM 3 also set the npmAlgorithm option within the system property, otherwise leave it out.
 
 ```
 // package.json
 {
   ...
-  "system": {},
+  "system": {
+	"npmAlgorithm": "flat"
+  },
   ...
 }
 ```
