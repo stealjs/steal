@@ -38,25 +38,19 @@ var crawl = {
 			} else if(isRoot) {
 				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
 			} else {
+				// npm 2
+				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl,
+															 childPkg.name);
+
 				if(isFlatFileStructure) {
 					// npm 3
-					childPkg.origFileUrl = utils.path.peerPackage(pkg.fileUrl,
-																  childPkg.name);
-				} else {
-					// npm 2
-					childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl,
-															 childPkg.name);
+					childPkg.origFileUrl = crawl.parentMostAddress(context,
+																   childPkg);
 				}
 			}
-
-			// Check if childPkg matches a parent package, but doesn't have a version
-			// that satisfies. This means go a level up.
-			if(isFlatFileStructure && crawl.hasNonMatchingVersionFound(context,
-																	   childPkg)) {
-				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
-			}
 			
-			// check if childPkg matches a parent's version ... if it does ... do nothing
+			// check if childPkg matches a parent's version ... if it 
+			// does ... do nothing
 			if(crawl.hasParentPackageThatMatches(context, childPkg)) {
 				return;
 			}
@@ -183,19 +177,6 @@ var crawl = {
 			parentAddress = utils.path.parentNodeModuleAddress(packageAddress);
 		}
 	},
-	hasNonMatchingVersionFound: function(context, childPkg){
-		if(!context.versions[childPkg.name]) {
-			context.versions[childPkg.name] = {};
-		}
-		var versions = context.versions[childPkg.name];
-		for(v in versions) {
-			pkg = versions[v];
-			if(!SemVer.satisfies(pkg.version, childPkg.version)) {
-				return true;
-			}
-		}
-		return false;
-	},
 	matchedVersion: function(context, packageName, requestedVersion){
 		var versions = context.versions[packageName], pkg;
 		for(v in versions) {
@@ -204,6 +185,28 @@ var crawl = {
 				return pkg;
 			}
 		}
+	},
+	/**
+	 * Walk up the parent addresses until you run into the root or a conflicting
+	 * package and return that as the address.
+	 */
+	parentMostAddress: function(context, childPkg){
+		var curAddress = childPkg.origFileUrl;
+		var parentAddress = utils.path.parentNodeModuleAddress(childPkg.origFileUrl);
+		while(parentAddress) {
+			var packageAddress = parentAddress+"/"+childPkg.name+"/package.json";
+			var parentPkg =	context.paths[packageAddress];
+			if(parentPkg && SemVer.valid(parentPkg.version)) {
+				if(SemVer.satisfies(parentPkg.version, childPkg.version)) {
+					return parentPkg.fileUrl;
+				} else {
+					return curAddress;
+				}
+			}
+			parentAddress = utils.path.parentNodeModuleAddress(packageAddress);
+			curAddress = packageAddress;
+		}
+		return curAddress;
 	}
 };
 
@@ -258,15 +261,14 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 // so it won't be loaded twice.
 function npmLoad(context, pkg, fileUrl){
 	fileUrl = fileUrl || pkg.origFileUrl;
+	context.paths[fileUrl] = pkg;
+	pkg.fileUrl = fileUrl;
+
 	return System.fetch({
 		address: fileUrl,
 		name: fileUrl,
 		metadata: {}
-	}).then(function(source){
-		context.paths[fileUrl || pkg.origFileUrl] = pkg;
-		pkg.fileUrl = fileUrl;
-		return source;
-	},function(ex){
+	}).then(null,function(ex){
 		return npmTraverseUp(context, pkg, fileUrl);
 	});
 };
