@@ -48,7 +48,7 @@ var crawl = {
 																   childPkg);
 				}
 			}
-			
+
 			// check if childPkg matches a parent's version ... if it 
 			// does ... do nothing
 			if(crawl.hasParentPackageThatMatches(context, childPkg)) {
@@ -170,7 +170,8 @@ var crawl = {
 			var packageAddress = parentAddress+"/"+childPkg.name+"/package.json";
 			var parentPkg = context.paths[packageAddress];
 			if(parentPkg) {
-				if(SemVer.satisfies(parentPkg.version, childPkg.version)) {
+				if(SemVer.valid(parentPkg.version) && 
+				   SemVer.satisfies(parentPkg.version, childPkg.version)) {
 					return parentPkg;
 				}
 			}
@@ -181,7 +182,8 @@ var crawl = {
 		var versions = context.versions[packageName], pkg;
 		for(v in versions) {
 			pkg = versions[v];
-			if(SemVer.satisfies(pkg.version, requestedVersion)) {
+			if(SemVer.valid(pkg.version) &&
+			   SemVer.satisfies(pkg.version, requestedVersion)) {
 				return pkg;
 			}
 		}
