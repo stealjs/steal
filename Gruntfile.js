@@ -26,6 +26,7 @@ module.exports = function (grunt) {
 			"node_modules/system-trace/trace.js",
 			"node_modules/system-json/json.js",
 			"src/config.js",
+			"node_modules/steal-env/env.js",
 			"src/startup.js",
 			"src/import.js",
 			"src/make-steal-end.js", // ends makeSteal
@@ -52,6 +53,7 @@ module.exports = function (grunt) {
 		  "src/system-extension-forward-slash.js",
 		  "node_modules/system-trace/trace.js",
 		  "src/config.js",
+		  "node_modules/steal-env/env.js",
 		  "src/startup.js",
 		  "src/import.js",
 		  "src/make-steal-end.js", // ends makeSteal
