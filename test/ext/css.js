@@ -1,6 +1,6 @@
 var loader = require("@loader");
 
-if(loader.env === 'production') {
+if(loader.isEnv("production")) {
 	exports.fetch = function(load) {
 		// return a thenable for fetching (as per specification)
 		// alternatively return new Promise(function(resolve, reject) { ... })
