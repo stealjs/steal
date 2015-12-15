@@ -1,6 +1,6 @@
 var loader = require("@loader");
 
-if(loader.isEnv("production")) {
+if(isProduction()) {
 	exports.fetch = function(load) {
 		// return a thenable for fetching (as per specification)
 		// alternatively return new Promise(function(resolve, reject) { ... })
@@ -64,6 +64,11 @@ if(loader.isEnv("production")) {
 		load.metadata.format = "css";
 	};
 
+}
+
+function isProduction(){
+	return (loader.isEnv && loader.isEnv("production")) ||
+		loader.env === "production";
 }
 
 exports.buildType = "css";
