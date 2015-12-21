@@ -39,8 +39,8 @@ var crawl = {
 				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
 			} else {
 				// npm 2
-				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl,
-															 childPkg.name);
+				childPkg.origFileUrl = childPkg.nestedFileUrl = 
+					utils.path.depPackage(pkg.fileUrl, childPkg.name);
 
 				if(isFlatFileStructure) {
 					// npm 3
@@ -58,13 +58,37 @@ var crawl = {
 			if(crawl.isSameRequestedVersionFound(context, childPkg)) {
 				return;
 			}
+
+			var childVersion = childPkg.version;
+
+			return finishLoad();
 			
 			// otherwise go get child ... but don't process dependencies until all of these dependencies have finished
-			return npmLoad(context, childPkg).then(function(source){
-				if(source) {
-					return crawl.processPkgSource(context, childPkg, source);
-				} // else if there's no source, it's likely because this dependency has been found elsewhere
-			});
+			function finishLoad() {
+				return npmLoad(context, childPkg)
+				.then(function(source){
+					if(source) {
+						return crawl.processPkgSource(context, childPkg, source);
+					} // else if there's no source, it's likely because this dependency has been found elsewhere
+				})
+				.then(function(lpkg){
+					if(!lpkg) {
+						return lpkg;
+					}
+
+					// npm3 -> if we found an incorrect version, start back in the
+					// most nested position possible and crawl up from there.
+					if(SemVer.validRange(childVersion) &&
+					   SemVer.valid(lpkg.version) && 
+					   !SemVer.satisfies(lpkg.version, childVersion) &&
+						!!childPkg.nestedFileUrl && 
+						childPkg.origFileUrl !== childPkg.nestedFileUrl) {
+						childPkg.origFileUrl = childPkg.nestedFileUrl;
+						return finishLoad();
+					}
+					return lpkg;
+				});
+			}
 			
 		}), truthy)).then(function(packages){
 			// at this point all dependencies of pkg have been loaded, it's ok to get their children
@@ -271,6 +295,11 @@ function npmLoad(context, pkg, fileUrl){
 		name: fileUrl,
 		metadata: {}
 	}).then(null,function(ex){
+		if(pkg.nestedFileUrl && !pkg.__crawledNestedPosition) {
+			pkg.__crawledNestedPosition = true;
+			fileUrl = pkg.nestedFileUrl || fileUrl;
+		}
+
 		return npmTraverseUp(context, pkg, fileUrl);
 	});
 };
