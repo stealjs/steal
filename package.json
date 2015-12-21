@@ -19,7 +19,7 @@
   "devDependencies": {
     "steal-css": "0.1.1",
     "steal-less": "^0.0.1",
-    "system-npm": "0.4.2",
+    "system-npm": "0.4.3",
     "system-live-reload": "1.4.0",
     "system-trace": "0.1.7",
     "steal-env": "^1.0.0",
