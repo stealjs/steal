@@ -286,11 +286,12 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 // if it finds one, it sets that package in paths
 // so it won't be loaded twice.
 function npmLoad(context, pkg, fileUrl){
+	var loader = context.loader;
 	fileUrl = fileUrl || pkg.origFileUrl;
 	context.paths[fileUrl] = pkg;
 	pkg.fileUrl = fileUrl;
 
-	return System.fetch({
+	return loader.fetch({
 		address: fileUrl,
 		name: fileUrl,
 		metadata: {}
