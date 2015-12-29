@@ -886,6 +886,12 @@ function addEnv(loader){
 		// we only load things with force = true
 		if ( System.loadBundles ) {
 
+			if(!System.main && System.isEnv("production")) {
+				// prevent this warning from being removed by Uglify
+				var warn = console && console.warn || function() {};
+				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+			}
+
 			configDeferred = System["import"](System.configMain);
 
 			appDeferred = configDeferred.then(function(cfg){
