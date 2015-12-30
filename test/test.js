@@ -305,6 +305,10 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
+	asyncTest("warn in production when main is not set (#537)", function(){
+		makeIframe("basics/no_main_warning.html");
+	});
+
 	asyncTest("can load a bundle with an amd module depending on a global", function(){
 		makeIframe("prod_define/prod.html");
 	});
