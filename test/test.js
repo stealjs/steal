@@ -317,6 +317,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("envs/prod/prod.html");
 	});
 
+	asyncTest("envs config is applied after a live-reload", function(){
+		makeIframe("envs/envs-live.html");
+	});
+
 	module("json extension");
 
 	asyncTest("json extension", function(){

@@ -586,6 +586,17 @@ if(typeof System !== "undefined") {
 		}
 	};
 
+	var setupLiveReload = function(){
+		if(this.liveReloadInstalled) {
+			var loader = this;
+			this.import("live-reload", { name: "@@steal" }).then(function(reload){
+				reload(loader.configMain, function(){
+					setEnvsConfig.call(loader);
+				});
+			});
+		}
+	};
+
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	var envsSpecial = { map: true, paths: true, meta: true };
@@ -889,6 +900,7 @@ function addEnv(loader){
 
 			devDeferred = configDeferred.then(function(){
 				setEnvsConfig.call(System);
+				setupLiveReload.call(System);
 
 				// If a configuration was passed to startup we'll use that to overwrite
 				// what was loaded in stealconfig.js

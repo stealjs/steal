@@ -150,6 +150,17 @@
 		}
 	};
 
+	var setupLiveReload = function(){
+		if(this.liveReloadInstalled) {
+			var loader = this;
+			this.import("live-reload", { name: "@@steal" }).then(function(reload){
+				reload(loader.configMain, function(){
+					setEnvsConfig.call(loader);
+				});
+			});
+		}
+	};
+
 	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	var envsSpecial = { map: true, paths: true, meta: true };

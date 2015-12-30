@@ -75,6 +75,7 @@
 
 			devDeferred = configDeferred.then(function(){
 				setEnvsConfig.call(System);
+				setupLiveReload.call(System);
 
 				// If a configuration was passed to startup we'll use that to overwrite
 				// what was loaded in stealconfig.js
