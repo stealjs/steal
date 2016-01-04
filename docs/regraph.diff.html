@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - regraph</title>
+	<title>StealJS  - regraph.diff</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -97,7 +97,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="function" href="regraph.diff.html" data-search="regraph.diff">
 						diff
 					</a>
@@ -124,9 +124,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>regraph</h1>
+<h1>diff</h1>
 	<ul class="tags">
-		<li>module</li>
+		<li>function</li>
 	</ul>
 	
 	
@@ -157,7 +157,9 @@
 
 		
 		<section class="description">
-			<p>Consumes a Dependency Graph and can regenerate another when modules change.</p>
+			<p>Check to see if the node has changed. Do this by looking at the source
+and running it through System.instantiate to see if new deps were added.
+Recursively do the same for any System.defined modules.</p>
 
 		</section>
 		
@@ -168,10 +170,12 @@
 		
 		
 			<section class="signature">
-				<h2 id="sig_">function(config, options)
+				<h2 id="sig_">regraph.diff(node)
 </h2>
 <div class="signature-wrapper">
-<p>Consumes a Dependency Graph and can regenerate another when modules change.</p>
+<p>Check to see if the node has changed. Do this by looking at the source
+and running it through System.instantiate to see if new deps were added.
+Recursively do the same for any System.defined modules.</p>
 
 
 	<h3>Parameters</h3>
@@ -179,18 +183,7 @@
 	<ol class="parameters">
 		
 		<li class="parameter">
-			<h4>config
-				<code>{*}</code></h4>
-			<div class="description">
-				
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>options
+			<h4>node
 				<code>{*}</code></h4>
 			<div class="description">
 				
@@ -214,6 +207,10 @@
 		
 
 		
+		<section class="comment">
+			
+		</section>
+		
 		
 
 		
@@ -236,7 +233,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"module","name":"regraph","params":[{"name":"config","types":[{"type":"*"}]},{"name":"options","types":[{"type":"*"}]}],"parent":"steal-tools/lib/graph/recycle.js","src":"steal-tools/lib/graph/recycle.js","line":7,"codeLine":12,"description":"Consumes a Dependency Graph and can regenerate another when modules change.","title":"","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"regraph.diff","params":[{"name":"node","types":[{"type":"*"}]}],"parent":"regraph","src":"steal-tools/lib/graph/recycle.js","line":87,"codeLine":92,"description":"Check to see if the node has changed. Do this by looking at the source\nand running it through System.instantiate to see if new deps were added.\nRecursively do the same for any System.defined modules.","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
