@@ -19,7 +19,7 @@
   "devDependencies": {
     "steal-css": "0.1.1",
     "steal-less": "^0.0.1",
-    "system-npm": "0.4.4",
+    "system-npm": "0.4.5",
     "system-live-reload": "1.4.0",
     "system-trace": "0.1.7",
     "steal-env": "^1.0.0",
@@ -35,7 +35,7 @@
     "grunt-release": "^0.7.0",
     "grunt-simple-mocha": "^0.4.0",
     "jquery": "^1.11.0",
-    "testee": "0.1.1"
+    "testee": "^0.2.0"
   },
   "system": {
     "npmIgnore": [
