@@ -201,7 +201,12 @@ var utils = {
 			return (pkg.system && pkg.system.name) || pkg.name;
 		},
 		main: function(pkg) {
-			return  utils.path.removeJS( (pkg.system && pkg.system.main) || (typeof pkg.browser === "string" && pkg.browser) || pkg.main || 'index' ) ;
+			return  utils.path.removeJS( 
+				(pkg.system && pkg.system.main) 
+				|| (typeof pkg.browser === "string" && pkg.browser) 
+				|| (typeof pkg.jspm === "string" && pkg.jspm) 
+				|| (typeof pkg.jspm === "object" && pkg.jspm.main) 
+				|| pkg.main || 'index' ) ;
 		},
 		rootDir: function(pkg, isRoot) {
 			var root = isRoot ?

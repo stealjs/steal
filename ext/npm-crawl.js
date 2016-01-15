@@ -27,7 +27,6 @@ var crawl = {
 	 */
 	deps: function(context, pkg, isRoot) {
 	
-		var isFlatFileStructure = context.isFlatFileStructure;
 		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
 
 		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
@@ -42,7 +41,7 @@ var crawl = {
 				childPkg.origFileUrl = childPkg.nestedFileUrl = 
 					utils.path.depPackage(pkg.fileUrl, childPkg.name);
 
-				if(isFlatFileStructure) {
+				if(context.isFlatFileStructure) {
 					// npm 3
 					childPkg.origFileUrl = crawl.parentMostAddress(context,
 																   childPkg);
@@ -59,16 +58,16 @@ var crawl = {
 				return;
 			}
 
-			var childVersion = childPkg.version;
-
-			return finishLoad();
+			return finishLoad(childPkg);
 			
 			// otherwise go get child ... but don't process dependencies until all of these dependencies have finished
-			function finishLoad() {
+			function finishLoad(childPkg) {
+				var copy = utils.extend({}, childPkg);
+
 				return npmLoad(context, childPkg)
 				.then(function(source){
 					if(source) {
-						return crawl.processPkgSource(context, childPkg, source);
+						return crawl.processPkgSource(context, childPkg, source); 
 					} // else if there's no source, it's likely because this dependency has been found elsewhere
 				})
 				.then(function(lpkg){
@@ -78,13 +77,19 @@ var crawl = {
 
 					// npm3 -> if we found an incorrect version, start back in the
 					// most nested position possible and crawl up from there.
-					if(SemVer.validRange(childVersion) &&
+					if(SemVer.validRange(copy.version) &&
 					   SemVer.valid(lpkg.version) && 
-					   !SemVer.satisfies(lpkg.version, childVersion) &&
+					   !SemVer.satisfies(lpkg.version, copy.version) &&
 						!!childPkg.nestedFileUrl && 
 						childPkg.origFileUrl !== childPkg.nestedFileUrl) {
-						childPkg.origFileUrl = childPkg.nestedFileUrl;
-						return finishLoad();
+
+						var newCopy = utils.extend({}, copy);
+						newCopy.origFileUrl = crawl.parentMostAddress(context, {
+							name: newCopy.name,
+							version: newCopy.version,
+							origFileUrl: newCopy.nestedFileUrl
+						});
+						return finishLoad(newCopy);
 					}
 					return lpkg;
 				});
