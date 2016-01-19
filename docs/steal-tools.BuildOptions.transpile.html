@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - steal-tools </title>
+	<title>StealJS - Transpile </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -357,7 +357,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="function" href="steal-tools.BuildOptions.transpile.html" data-search="Transpile">
 						Transpile
 					</a>
@@ -478,9 +478,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>steal-tools</h1>
+<h1>Transpile</h1>
 	<ul class="tags">
-		<li>page</li>
+		<li>function</li>
 	</ul>
 	
 	
@@ -489,7 +489,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">steal-tools</span>
+		<span class="module">steal-tools.BuildOptions.transpile</span>
 	
 	
 	
@@ -515,14 +515,69 @@
 
 		
 		<section class="description">
-			<p><code>steal-tools</code> is a collection of JS, Grunt, and command-line utilities
-that make building, packaging, and sharing ES6, CommonJS, AMD, and <a href="https://github.com/bitovi/steal">Steal</a>
-applications easy.</p>
+			<p>Allows the ability to completely control the transpiling of ES2015 source down to another format for production bundling (usually to AMD).</p>
 
 		</section>
 		
 
 		
+			
+				<section class="signature">
+					<h2 id="sig_transpile_source_compileOptions_">transpile(source, compileOptions)
+</h2>
+<div class="signature-wrapper">
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>source
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>The ES2015 source code to be transpiled.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>compileOptions
+				<code>{<a href="steal-tools.BuildOptions.compileOptions.html" >TranspileCompileOptions</a>}</code></h4>
+			<div class="description">
+				<p>The options needed to be used to do the transpile, such as the format being transpiled to, and whether source maps are needed.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{<a href="steal-tools.source.object.html" >SourceObject</a>}</code></h4>
+		<div class="description">
+			<p>An object containing <code>code</code> and (optionally) <code>map</code> properties.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+				</section>
 			
 		
 		
@@ -531,17 +586,33 @@ applications easy.</p>
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p>There are three core pieces of functionality that steal-tools provides:</p>
-<ul>
-<li><a href="steal-tools.build.html">build</a> - An application packager that intelligently bundles progressively-loaded
-apps to improve application load times and caching.</li>
-<li><a href="steal-tools.transformImport.html">transformImport</a> and <a href="steal-tools.transform.html">transform</a> - A low-level utility that can convert modules from one form to another.</li>
-<li><a href="steal-tools.export.html">export</a> - A higher-level utility that can export projects into many formats.</li>
-</ul>
-<p>Currently, steal-tools depends
-on <a href="steal.html">steal</a>. Before doing a build, make
-sure <code>steal.js</code> loads your app successfully in the browser.</p>
+			<p>The <strong>transpile</strong> option gives you complete control over transpiling. After StealTools has created a graph of your project's dependencies it then goes through each and transpiles them into a common format, usually AMD for the multi-build.</p>
+<p>If you're using a specific version of Traceur, Babel, or a different transpiler altogether, you might want to use this so that you can do your own transpiling.</p>
+<p>Here's an example of usage:</p>
+<pre><code class="language-js">var Babel = require(&quot;babel-core&quot;);
+var stealTools = require(&quot;steal-tools&quot;);
+
+var mapFormat = {
+    'commonjs': 'common',
+    'amd': 'amd'
+};
+
+var transpile = function(source, compileOptions){
+    var babelOptions = {
+        modules: mapFormat[compileOptions.module],
+        sourceMap: compileOptions.sourceMaps || false
+    };
+
+    return babel.transform(source, opts);
+};
+
+
+stealTools.build({
+    config: __dirname + &quot;/package.json!npm&quot;
+}, {
+    transpile: transpile
+});
+</code></pre>
 
 		</section>
 		
@@ -567,7 +638,7 @@ sure <code>steal.js</code> loads your app successfully in the browser.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"steal-tools","src":"steal-tools/doc/steal-tools.md","description":"`steal-tools` is a collection of JS, Grunt, and command-line utilities\nthat make building, packaging, and sharing ES6, CommonJS, AMD, and [Steal](https://github.com/bitovi/steal)\napplications easy.","title":"steal-tools","parent":"StealJS.api","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.BuildOptions.transpile","src":"steal-tools/doc/types/transpiler.md","description":"Allows the ability to completely control the transpiling of ES2015 source down to another format for production bundling (usually to AMD).","title":"Transpile","parent":"steal-tools.types","signatures":[{"code":"transpile(source, compileOptions)","description":"","params":[{"types":[{"type":"String"}],"name":"source","description":"The ES2015 source code to be transpiled."},{"types":[{"type":"steal-tools.BuildOptions.compileOptions"}],"name":"compileOptions","description":"The options needed to be used to do the transpile, such as the format being transpiled to, and whether source maps are needed."}],"returns":{"types":[{"type":"steal-tools.source.object"}],"description":"An object containing `code` and (optionally) `map` properties."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
