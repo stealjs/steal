@@ -1269,8 +1269,8 @@ define(function() {
 });
 ;
 (function(__global) {
-  
-$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
+
+__global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
 
@@ -1290,7 +1290,7 @@ var $__Object$defineProperty;
   }
 }());
 
-$__Object$create = Object.create || function(o, props) {
+__global.$__Object$create = Object.create || function(o, props) {
   function F() {}
   F.prototype = o;
 
@@ -1572,7 +1572,7 @@ function logloads(loads) {
               // store the deps as load.deps
               load.declare = declare;
               load.depsList = deps;
-            }            
+            }
             __eval(transpiled, __global, load);
             curSystem.register = curRegister;
           });
@@ -2417,7 +2417,7 @@ function logloads(loads) {
   }
 
   // use Traceur by default
-  Loader.prototype.transpiler = 'traceur';
+  Loader.prototype.transpiler = 'babel';
 
   Loader.prototype.transpile = function(load) {
     var self = this;
@@ -2430,7 +2430,7 @@ function logloads(loads) {
         self.set('babel', getTranspilerModule(self, 'babel'));
       self.transpilerHasRun = true;
     }
-    
+
     return self['import'](self.transpiler).then(function(transpiler) {
       if (transpiler.__useDefault)
         transpiler = transpiler['default'];
@@ -2489,15 +2489,31 @@ function logloads(loads) {
   }
 
   function babelTranspile(load, babel) {
+    babel = babel.Babel || babel;
     var options = this.babelOptions || {};
-    options.modules = 'system';
     options.sourceMap = 'inline';
     options.filename = load.address;
     options.code = true;
     options.ast = false;
-    
-    if (!options.blacklist)
-      options.blacklist = ['react'];
+
+    var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+    if(!babelVersion) babelVersion = 6;
+
+    if(babelVersion >= 6) {
+      // If the user didn't provide presets/plugins, use the defaults
+      if(!options.presets && !options.plugins) {
+        options.presets = [
+          "es2015-no-commonjs", "react", "stage-0"
+        ];
+        options.plugins = [
+          "transform-es2015-modules-systemjs"
+        ];
+      }
+    } else {
+      options.modules = 'system';
+      if (!options.blacklist)
+        options.blacklist = ['react'];
+    }
 
     var source = babel.transform(load.source, options).code;
 
@@ -2782,7 +2798,7 @@ function logloads(loads) {
 
         // percent encode just '#' in module names
         // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
-        // we should encode everything, but it breaks for servers that don't expect it 
+        // we should encode everything, but it breaks for servers that don't expect it
         // like in (https://github.com/systemjs/systemjs/issues/168)
         if (isBrowser)
           outPath = outPath.replace(/#/g, '%23');
@@ -5325,7 +5341,7 @@ function applyTraceExtension(loader){
 	};
 }
 
-applyTraceExtension.name = "Trace";
+//applyTraceExtension.name = "Trace";
 
 if(typeof System !== "undefined") {
 	applyTraceExtension(System);
@@ -5697,6 +5713,7 @@ if (typeof System !== "undefined") {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
 				if(isNode) {
 					System.register("less",[], false, function(){

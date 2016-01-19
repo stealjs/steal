@@ -428,7 +428,7 @@ function applyTraceExtension(loader){
 	};
 }
 
-applyTraceExtension.name = "Trace";
+//applyTraceExtension.name = "Trace";
 
 if(typeof System !== "undefined") {
 	applyTraceExtension(System);
@@ -723,6 +723,7 @@ if(typeof System !== "undefined") {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
 				if(isNode) {
 					System.register("less",[], false, function(){
