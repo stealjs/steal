@@ -797,9 +797,16 @@ SystemJS recognize.</p>
 	
 	<li class="parameter">
 		<h4>deps
-			<code>{Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code></h4>
+			<code>{Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
-			<p>Dependencies.</p>
+			<p>Dependencies of this module. If the module is a global
+but implicitly depends on another, like jQuery, add that dependency here.</p>
+<pre><code>&quot;meta&quot;: {
+  &quot;jquery-cookie&quot;: {
+    &quot;deps&quot;: [&quot;jquery&quot;]
+  }
+}
+</code></pre>
 
 		</div>
 		
@@ -809,9 +816,9 @@ SystemJS recognize.</p>
 	
 	<li class="parameter">
 		<h4>exports
-			<code>{String}</code></h4>
+			<code>{String}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
-			<p>What should be exported.</p>
+			<p>The global property that is exported as this module's default export.</p>
 
 		</div>
 		
@@ -821,7 +828,7 @@ SystemJS recognize.</p>
 	
 	<li class="parameter">
 		<h4>init
-			<code>{function(Module...)}</code></h4>
+			<code>{function(Module...)}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
 			<p>Allows for calling noConflict and
 for other cleanup.  <code>this</code> will be the global object.</p>
@@ -841,6 +848,26 @@ for other cleanup.  <code>this</code> will be the global object.</p>
 			</li>
 			
 		</ul>
+		
+		
+	</li>
+	
+	<li class="parameter">
+		<h4>sideBundle<code>=false</code>
+			<code>{Boolean}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>Create a bundle for this module and exclude it from
+StealTool's bundle optimization algorithm. This is useful for modules that are infrequently
+used, like a page for your app that users rarely visit.</p>
+<pre><code>&quot;meta&quot;: {
+  &quot;moduleA&quot;: {
+    &quot;sideBundle&quot;: true
+  }
+}
+</code></pre>
+
+		</div>
+		
 		
 		
 	</li>
@@ -888,7 +915,7 @@ for other cleanup.  <code>this</code> will be the global object.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"load.metadata","src":"steal/docs/type-metadata.md","description":"An object that is passed between `Loader` hooks.  Any values can be set.  These are the ones that `steal.js` and\nSystemJS recognize.","title":"metadata","types":[{"type":"Object","options":[{"name":"format","description":"Specifies what type of Syntax is used.  This can be specified like:\n\n    \"format amd\";","types":[{"type":"String"}]},{"name":"deps","description":"Dependencies.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"exports","description":"What should be exported.","types":[{"type":"String"}]},{"name":"init","description":"Allows for calling noConflict and\nfor other cleanup.  `this` will be the global object.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Module"}],"variable":true}],"context":{"types":[{"type":"Global"}]}}]}]}],"parent":"StealJS.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"load.metadata","src":"steal/docs/type-metadata.md","description":"An object that is passed between `Loader` hooks.  Any values can be set.  These are the ones that `steal.js` and\nSystemJS recognize.","title":"metadata","types":[{"type":"Object","options":[{"name":"format","description":"Specifies what type of Syntax is used.  This can be specified like:\n\n    \"format amd\";","types":[{"type":"String"}]},{"name":"deps","description":"Dependencies of this module. If the module is a global\nbut implicitly depends on another, like jQuery, add that dependency here.\n\n```\n\"meta\": {\n  \"jquery-cookie\": {\n    \"deps\": [\"jquery\"]\n  }\n}\n```","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}],"optional":true},{"name":"exports","description":"The global property that is exported as this module's default export.","types":[{"type":"String"}],"optional":true},{"name":"init","description":"Allows for calling noConflict and\nfor other cleanup.  `this` will be the global object.","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Module"}],"variable":true}],"context":{"types":[{"type":"Global"}]}}],"optional":true},{"name":"sideBundle","description":"Create a bundle for this module and exclude it from\nStealTool's bundle optimization algorithm. This is useful for modules that are infrequently\nused, like a page for your app that users rarely visit.\n\n```\n\"meta\": {\n  \"moduleA\": {\n    \"sideBundle\": true\n  }\n}\n```","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"parent":"StealJS.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
