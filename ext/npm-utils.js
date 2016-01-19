@@ -368,6 +368,13 @@ var utils = {
 		depPackageDir: function(parentPackageAddress, childName){
 			return utils.path.depPackage(parentPackageAddress, childName).replace(/\/package\.json.*/,"");
 		},
+		peerNodeModuleAddress: function(address) {
+			var nodeModules = "/node_modules/",
+				nodeModulesIndex = address.lastIndexOf(nodeModules);
+			if(nodeModulesIndex >= 0) {
+				return address.substr(0, nodeModulesIndex+nodeModules.length - 1 );
+			}
+		},
 		// /node_modules/a/node_modules/b/node_modules/c -> /node_modules/a/node_modules/
 		parentNodeModuleAddress: function(address) {
 			var nodeModules = "/node_modules/",

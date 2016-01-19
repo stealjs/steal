@@ -194,7 +194,9 @@ var crawl = {
 	},
 	hasParentPackageThatMatches: function(context, childPkg){
 		// check paths
-		var parentAddress = utils.path.parentNodeModuleAddress(childPkg.origFileUrl);
+		var parentAddress = childPkg._isPeerDependency ? 
+			utils.path.peerNodeModuleAddress(childPkg.origFileUrl) :
+			utils.path.parentNodeModuleAddress(childPkg.origFileUrl);
 		while( parentAddress ) {
 			var packageAddress = parentAddress+"/"+childPkg.name+"/package.json";
 			var parentPkg = context.paths[packageAddress];
