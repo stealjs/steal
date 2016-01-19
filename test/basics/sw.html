@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<body>
+
+<script>
+	window.QUnit = window.parent.QUnit;
+	window.removeMyself = window.parent.removeMyself;
+</script>
+<script src="./client2.js"></script>
+<script>
+	steal = {
+		transpiler: "babel"
+	};
+</script>
+<script type="text/javascript" src='../../steal.js' main='@empty' data-config="../config.js"></script>
+<script>
+	console.time('babel-test');
+	steal.import("basics/basics").then(function(){
+		console.timeEnd('babel-test');
+	});
+</script>
+</body>
+</html>
