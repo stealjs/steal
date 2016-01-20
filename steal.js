@@ -2037,7 +2037,13 @@ function logloads(loads) {
       //    By disaling this module write-protection we gain performance.
       //    It could be useful to allow an option to enable or disable this.
       module.locked = true;
-      moduleObj[name] = value;
+      if(typeof name === 'object') {
+        for(var p in name) {
+          moduleObj[p] = name[p];
+        }
+      } else {
+        moduleObj[name] = value;
+      }
 
       for (var i = 0, l = module.importers.length; i < l; i++) {
         var importerModule = module.importers[i];
@@ -2798,7 +2804,7 @@ function logloads(loads) {
 
         // percent encode just '#' in module names
         // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
-        // we should encode everything, but it breaks for servers that don't expect it
+        // we should encode everything, but it breaks for servers that don't expect it 
         // like in (https://github.com/systemjs/systemjs/issues/168)
         if (isBrowser)
           outPath = outPath.replace(/#/g, '%23');
@@ -5340,8 +5346,6 @@ function applyTraceExtension(loader){
 		return transpile.apply(this, arguments);
 	};
 }
-
-//applyTraceExtension.name = "Trace";
 
 if(typeof System !== "undefined") {
 	applyTraceExtension(System);
