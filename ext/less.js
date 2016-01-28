@@ -21,7 +21,10 @@ exports.translate = function(load) {
 	}
 
 	return new Promise(function(resolve, reject){
-		var renderOptions = {filename: address};
+		var renderOptions = {
+			filename: address,
+			useFileCache: true
+		};
 		for (var prop in options){
 		   	renderOptions[prop] = options[prop];
 		}
@@ -40,5 +43,8 @@ exports.translate = function(load) {
 		lessEngine.render(load.source, renderOptions).then(done, fail);
 	});
 };
-
+exports.tildeModules = [
+	/@import ['"](~(.+))['"]/g,
+	/url\(['"](~(.+))['"]/g
+];
 exports.buildType = "css";

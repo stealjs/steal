@@ -37,7 +37,7 @@ var addTilde = function(loader){
 		var loader = this;
 		return Promise.resolve(loader.normalize(moduleName, parentName))
 			.then(function(name){
-				return loader.locate({name: name});
+				return loader.locate({name: name, metadata: {}});
 			}).then(function(address){
 				if(address.substr(address.length - 3) === ".js") {
 					address = address.substr(0, address.length - 3);

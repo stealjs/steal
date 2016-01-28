@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "0.14.0-pre.0",
+  "version": "0.14.0-pre.1",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -17,8 +17,8 @@
     "system-json": "^0.0.3"
   },
   "devDependencies": {
-    "steal-css": "0.1.1",
-    "steal-less": "^0.0.1",
+    "steal-css": "stealjs/steal-css#tilde",
+    "steal-less": "stealjs/steal-less#tilde",
     "system-npm": "0.4.6",
     "system-live-reload": "1.4.0",
     "system-trace": "0.1.7",

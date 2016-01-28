@@ -70,6 +70,6 @@ function isProduction(){
 	return (loader.isEnv && loader.isEnv("production")) ||
 		loader.env === "production";
 }
-
+exports.tildeModules = /url\(['"](~(.+))['"]/g;
 exports.buildType = "css";
 exports.includeInBuild = true;
