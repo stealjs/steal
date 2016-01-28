@@ -7,41 +7,21 @@
 		var script = scripts[scripts.length - 1];
 
 		if (script) {
-
+			options.stealURL = script.src;
 			// Split on question mark to get query
-			parts = script.src.split("?");
-			src = parts.shift();
-			query = parts.join("?");
-
-			// Split on comma to get startFile and env
-			parts = query.split(",");
-
-			if (src.indexOf("steal.production") > -1) {
-				options.env = "production";
-			}
-
-			if (parts[0]) {
-				options.startId = parts[0];
-			}
-			// Grab env
-			if (parts[1]) {
-				options.env = parts[1];
-			}
-
-			// Split on / to get rootUrl
-			parts = src.split("/");
-			var lastPart = parts.pop();
-			
-			options.stealPath = parts.join("/");
 
 			each(script.attributes, function(attr){
-				var optionName = 
+				var optionName =
 					camelize( attr.nodeName.indexOf("data-") === 0 ?
 						attr.nodeName.replace("data-","") :
 						attr.nodeName );
-				options[optionName] = attr.value;
+				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
+			var source = script.innerHTML.substr(1);
+			if(/\S/.test(source)){
+				options.mainSource = source;
+			}
 		}
 
 		return options;
@@ -50,7 +30,11 @@
 	steal.startup = function(config){
 
 		// Get options from the script tag
-		if(global.document) {
+		if (isWebWorker) {
+			var urlOptions = {
+				stealURL: location.href
+			};
+		} else if(global.document) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -62,10 +46,12 @@
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
-		
+
 		if(config){
 			System.config(config);
 		}
+
+		setEnvsConfig.call(this.System);
 
 		// Read the env now because we can't overwrite everything yet
 
@@ -73,26 +59,30 @@
 		var steals = [];
 
 		// we only load things with force = true
-		if ( System.env == "production" && System.main ) {
+		if ( System.loadBundles ) {
 
-			configDeferred = System.import("@config");
+			if(!System.main && System.isEnv("production")) {
+				// prevent this warning from being removed by Uglify
+				var warn = console && console.warn || function() {};
+				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+			}
 
-			return appDeferred = configDeferred.then(function(){
-				return System.import(System.main);
+			configDeferred = System["import"](System.configMain);
+
+			appDeferred = configDeferred.then(function(cfg){
+				setEnvsConfig.call(System);
+				return System.main ? System["import"](System.main) : cfg;
 			})["catch"](function(e){
 				console.log(e);
 			});
 
-		} else if(System.env == "development"){
-
-			if(/bower.json/.test(System.paths["@config"])) {
-				var configPath = System.paths["@config"];
-				System.define("@config", 'define(["' + configPath + '!bower"]);');
-			}
-
-			configDeferred = System.import("@config");
+		} else {
+			configDeferred = System["import"](System.configMain);
 
 			devDeferred = configDeferred.then(function(){
+				setEnvsConfig.call(System);
+				setupLiveReload.call(System);
+
 				// If a configuration was passed to startup we'll use that to overwrite
 				// what was loaded in stealconfig.js
 				// This means we call it twice, but that's ok
@@ -100,16 +90,16 @@
 					System.config(config);
 				}
 
-				return System.import("@dev");
+				return System["import"]("@dev");
 			},function(e){
 				console.log("steal - error loading @config.",e);
-				return steal.System.import("@dev");
+				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
-				if(!System.main) {
+				if(!System.main || System.env === "build") {
 					return configDeferred;
 				}
 				var main = System.main;
@@ -117,20 +107,19 @@
 					main = [main];
 				}
 				return Promise.all( map(main,function(main){
-					return System.import(main)
+					return System["import"](main);
 				}) );
-			}).then(function(){
-				if(steal.dev) {
-					steal.dev.log("app loaded successfully")
-				}
-			}, function(error){
-				console.log("error",error,  error.stack);
 			});
-			return appDeferred;
+
 		}
+
+		if(System.mainSource) {
+			appDeferred = appDeferred.then(function(){
+				System.module(System.mainSource);
+			});
+		}
+		return appDeferred;
 	};
 	steal.done = function(){
 		return appDeferred;
 	};
-	return steal;
-

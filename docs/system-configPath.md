@@ -20,25 +20,31 @@ If a path to [@config] is not specified, is default value is specified in
 
 This is commonly set as part of the steal `<script>` tag like:
 
-    <script src="../path/to/steal/steal.js"
-            config-path="../path/to/stealconfig.js"
-            main="app">
-    </script>
-    
+```
+<script src="../path/to/steal/steal.js"
+        config-path="../path/to/stealconfig.js"
+        main="app">
+</script>
+```
+
 or
 
-    <script src="../path/to/steal/steal.js"
-            config="../path/to/stealconfig.js"
-            main="app">
-    </script>
+```
+<script src="../path/to/steal/steal.js"
+        config="../path/to/stealconfig.js"
+        main="app">
+</script>
+```
 
 instead of having to specify it like:
 
-    <script src="../path/to/steal/steal.js"
-            paths.@config="../path/to/stealconfig.js"
-            main="app">
-    </script>
+```
+<script src="../path/to/steal/steal.js"
+        paths.@config="../path/to/stealconfig.js"
+        main="app">
+</script>
+```
 
 
 
-But it can be specified with any of the approaches in [System.config].
+It also can be specified with any of the approaches in [System.config].

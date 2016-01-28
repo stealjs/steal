@@ -8,15 +8,30 @@ SystemJS recognize.
 
     "format amd";
 
-@option {Array.<moduleName>} deps dependencies.
+@option {Array.<moduleName>} [deps] Dependencies of this module. If the module is a global
+but implicitly depends on another, like jQuery, add that dependency here.
 
-@option {String} exports What should be exported.
+```
+"meta": {
+  "jquery-cookie": {
+    "deps": ["jquery"]
+  }
+}
+```
 
-@option {function(this:Global,Module...)} init Allows for calling noConflict and
-for other cleanup.  `this` will be the global object.  
+@option {String} [exports] The global property that is exported as this module's default export.
 
-@body
+@option {function(this:Global,Module...)} [init] Allows for calling noConflict and
+for other cleanup.  `this` will be the global object.
 
-## Implementation
+@option {Boolean} [sideBundle=false] Create a bundle for this module and exclude it from
+StealTool's bundle optimization algorithm. This is useful for modules that are infrequently
+used, like a page for your app that users rarely visit.
 
-Implemented in SystemJS.
+```
+"meta": {
+  "moduleA": {
+    "sideBundle": true
+  }
+}
+```

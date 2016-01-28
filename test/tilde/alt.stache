@@ -1,0 +1,3 @@
+<img src="~bootstrap/hello-world.png"></img>
+
+{{> ~bootstrap/partial}}

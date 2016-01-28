@@ -1,4 +1,4 @@
-
+"format cjs";
 
 var escMap = {
 	'\n': "\\n",
@@ -20,9 +20,9 @@ var esc = function (string) {
 
 exports.tildeModules = [
 	// Images
-	/img src=["'](~\/.+)['"]/g,
+	/img src=["'](~(.+))['"]/g,
 	// Partials
-	/{{> (~\/.+)}}/g
+	/{{> (~(.+))}}/g
 ];
 
 exports.translate = function(load) {

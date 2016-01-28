@@ -13,14 +13,16 @@ module values.  All values will be converted into a module.
 This config should be set before `steal.js` is loaded.  The following
 prevents the production bundle from loading:
 
-    <script>
-      steal = {
-        instantiated: {
-          "bundles/myapp.css!$css" : null
-        }
-      }
-    </script>
-    <script src="../../steal/steal.js"
-            main="myapp"
-            env="production">
-    </script>
+```
+<script>
+  steal = {
+    instantiated: {
+      "bundles/myapp.css!$css" : null
+    }
+  }
+</script>
+<script src="../../steal/steal.js"
+        main="myapp"
+        env="production">
+</script>
+```

@@ -16,16 +16,16 @@ NodeJS environments.
 
 CommonJS is a popular format used in Node.js, but has also caught on in the browser. People 
 like CommonJS because it doesn't require a wrapper function. You might define a module like so:
+```
+var can = require("can");
+var _ = require("underscore");
+var myModule = require("some_module/some_module");
 
-    var can = require("can");
-    var _ = require("underscore");
-    var myModule = require("some_module/some_module");
+module.exports = can.Component.extend({
 
-    module.exports = can.Component.extend({
-
-    });
-
-With CommonJS a single file will always define a single module. In includes 3 key objects, `require`, `exports`, and `module`.
+});
+```
+With CommonJS a single file will always define a single module. In includes 3 key objects: `require`, `exports` and `module`.
 
 **require** is used to import modules as dependencies. In the above example, `can` is being imported using require.
 

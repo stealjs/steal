@@ -1,5 +1,7 @@
 System.baseURL = "../";
 
+System.paths["bootstrap/*"] = "libs/bootstrap/*";
+
 // Set a pathing for the "steallogo" module
 System.paths["~/steallogo"] = "tilde/steal.svg";
 

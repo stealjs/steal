@@ -1,20 +1,24 @@
-	if (typeof window != 'undefined') {
-		var oldSteal = window.steal;
-		window.steal = makeSteal(System);
-		window.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal  );
-		window.steal.addSteal = addSteal;
-		global.define = System.amdDefine;
-		
-	} else {
-    	
-		require('systemjs');
-			
+	if( isNode ) {
+		require('steal-systemjs');
+
 		global.steal = makeSteal(System);
 		global.steal.System = System;
-		global.steal.dev = require("./dev.js");
-		steal.clone = makeSteal;
+		global.steal.dev = require("./ext/dev.js");
+		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
+		require("system-json");
+
+	} else {
+		var oldSteal = global.steal;
+		global.steal = makeSteal(System);
+		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
+			.then(null, function(error){
+				console.log("error",error,  error.stack);
+				throw error;
+			});
+		global.steal.clone = cloneSteal;
+		global.steal.addSteal = addSteal;
 	}
-    
-})(typeof window == "undefined" ? global : window);
+
+})(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);

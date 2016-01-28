@@ -5,7 +5,7 @@
 in [System.env development] and assumed to be packaged in [System.bundlesPath bundle] in
 production.
 
-If System.paths["@config"] is not specified, its default path will obey the following rules:
+If `System.paths["@config"]` is not specified, its default path will obey the following rules:
 
  - If `steal.js` is in <i>ROOT/bower_components/steal/steal.js</i>, `@config` will be looked for in
    <i>ROOT/stealconfig.js</i>.

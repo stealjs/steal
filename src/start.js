@@ -42,6 +42,9 @@
 		},
 		dir = function(uri){
 			var lastSlash = uri.lastIndexOf("/");
+			//if no / slashes, check for \ slashes since it might be a windows path
+			if(lastSlash === -1)
+				lastSlash = uri.lastIndexOf("\\");
 			if(lastSlash !== -1) {
 				return uri.substr(0, lastSlash);
 			} else {
@@ -66,7 +69,6 @@
 				hash     : m[8] || ''
 			} : null);
 		},
-		  
 		joinURIs = function(base, href) {
 			function removeDotSegments(input) {
 				var output = [];
@@ -91,5 +93,7 @@
 				removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : (href.pathname ? ((base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname) : base.pathname)) +
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
-		};
-
+		},
+		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
+		isBrowserWithWindow = typeof window !== "undefined",
+		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';

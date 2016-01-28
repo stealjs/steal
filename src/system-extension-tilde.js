@@ -2,7 +2,6 @@
 
 var addTilde = function(loader){
 	// Define tilde, as a concept
-	loader.paths["~/*"] = "*.js";
 
 	/**
 	 * @function getMatches
@@ -17,10 +16,11 @@ var addTilde = function(loader){
 		var expr, match, matches = [];
 		for(var i = 0, len = exprs.length; i < len; i++) {
 			expr = exprs[i];
+			expr.lastIndex = 0;
 			do {
 				match = expr.exec(source);
 				if(match) {
-					matches.push(match[1]);
+					matches.push({name: match[2], replace: match[1]});
 				}
 			} while(match);
 		}
@@ -33,9 +33,9 @@ var addTilde = function(loader){
 	 * @param {String} moduleName The module to run through normalize and locate.
 	 * @return {Promise} A promise to resolve when the address is found.
 	 */
-	var normalizeAndLocate = function(moduleName){
+	var normalizeAndLocate = function(moduleName, parentName){
 		var loader = this;
-		return Promise.resolve(loader.normalize(moduleName))
+		return Promise.resolve(loader.normalize(moduleName, parentName))
 			.then(function(name){
 				return loader.locate({name: name});
 			}).then(function(address){
@@ -74,14 +74,14 @@ var addTilde = function(loader){
 		var promises = [];
 		for(var i = 0, len = tildeModules.length; i < len; i++) {
 			promises.push(
-				normalizeAndLocate.call(this, tildeModules[i])
+				normalizeAndLocate.call(this, tildeModules[i].name, load.name)
 			);
 		}
 		return Promise.all(promises).then(function(addresses){
 			for(var i = 0, len = tildeModules.length; i < len; i++) {
 				// Replace the tilde names with the fully located address
 				load.source = load.source.replace(
-					tildeModules[i], addresses[i]
+					tildeModules[i].replace, addresses[i]
 				);
 			}
 			return translate.call(loader, load);

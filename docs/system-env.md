@@ -3,45 +3,14 @@
 
 Specifies which environment the application is loading within. 
 
-@option {String} Possible values
-are `"development"` and `"production"`.  Defaults to `"development"`.
+@option {String} Any string value is possible.
 
 @body
 
 ## Use
 
-Setting `env` to production mode is a short cut to prevent steal from loading the
-[@config] and [@dev] modules and make steal load the [System.main] module
-in a bundle.
+Previously setting `env` was used to control when bundles were loaded, by setting `env` to **production**. This functionality has been superceded by [System.loadBundles].
 
-For example:
+`env` can be any string value and comma separated. This is useful to, for example, set the environment as being both **production** and **server** if doing server-side rendering.
 
-    System.config({
-      main: "myapp",
-      env: "production"
-    });
-
-Sets:
-
-    System.bundles["bundles/myapp"] //-> ["myapp"]
-    System.meta["bundles/myapp"]    //-> {format: "amd"}
-    System.paths["bundles/*"]       //-> "dist/bundles/*.js"
-    System.paths["bundles/*.css"]   //-> "dist/bundles/*.css"
-
-Setting `System.env` to "production" must happen prior to loading `steal.js`.  So it should
-be [System.config configured] via the `steal.js` script tag like:
-
-    <script src="../path/to/steal/steal.js"
-            data-env="production"
-            data-main="myapp">
-    </script>
-            
-Or specified prior to steal loading like:
-
-    <script>
-      steal = {env: "production"}
-    </script>
-    <script src="../path/to/steal/steal.js"
-            data-env="production">
-    </script>
-
+Rarely do you need to set `env` any more, more likely you want to use [System.loadBundles]. env is set by plugins in most cases.
