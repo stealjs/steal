@@ -18,12 +18,9 @@ var esc = function (string) {
 		});
 };
 
-exports.tildeModules = [
-	// Images
-	/img src=["'](~(.+))['"]/g,
-	// Partials
-	/{{> (~(.+))}}/g
-];
+
+exports.locateMacro = true;
+
 
 exports.translate = function(load) {
 	return "define([], function() {\n" +

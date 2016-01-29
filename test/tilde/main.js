@@ -11,7 +11,7 @@ define(["tilde/template.stache!","tilde/alt.stache!"], function(template, templa
 		QUnit.start();
 		removeMyself();
 	} else {
-		console.log("basics loaded", module);
+		console.log("basics loaded", template, template2);
 	}
 	
 });
