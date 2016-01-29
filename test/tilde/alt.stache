@@ -1,3 +1,2 @@
-<img src=LOCATE("bootstrap/hello-world.png")></img>
-
-{{> LOCATE(bootstrap/partial)}}
+LOCATE("bootstrap/hello-world.png")
+LOCATE(bootstrap/partial)

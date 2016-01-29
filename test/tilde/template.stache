@@ -1,3 +1,2 @@
-<img src="LOCATE(./hello-world.png)"></img>
-
-{{> LOCATE(partial/path.stache) }}
+LOCATE("./hello-world.png")
+LOCATE(partial/path.stache)

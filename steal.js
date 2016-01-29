@@ -5190,30 +5190,52 @@ var addTilde = function(loader){
 				return address;
 			});
 	};
+	var relative = function(base, path){
+		
+		var uriParts = path.split("/"),
+			baseParts = base.split("/"),
+			result = [];
+		while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+			uriParts.shift();
+			baseParts.shift();
+		}
+		for(var i = 0 ; i< baseParts.length-1; i++) {
+			result.push("../");
+		}
+		return result.join("") + uriParts.join("/");
+	};
 	
 	var quotes = /["']/;
-	var LOCATE_MACRO = function(source) {
-			var locations = [];
-			source.replace(/LOCATE\(([^\)]+)\)/g, function(whole, part, index){
-				// trim in IE8
-				var name = part.replace(/^\s+|\s+$/g, ''),
-					first = name.charAt(0),
-					quote;
-				if( quotes.test(first) ) {
-					quote = first;
-					name = name.substr(1, name.length -2); 
-				}
-				locations.push({
-					start: index,
-					end: index+whole.length,
-					name: name,
-					replace: function(address){
-						return quote ? quote + address + quote : address;
+	var LOCATE_MACRO = function(source, sourceAddress) {
+		if(/^file:/.test(sourceAddress)) {
+			sourceAddress = sourceAddress.substr(5);
+		}
+		var locations = [];
+		source.replace(/LOCATE\(([^\)]+)\)/g, function(whole, part, index){
+			// trim in IE8
+			var name = part.replace(/^\s+|\s+$/g, ''),
+				first = name.charAt(0),
+				quote;
+			if( quotes.test(first) ) {
+				quote = first;
+				name = name.substr(1, name.length -2); 
+			}
+			locations.push({
+				start: index,
+				end: index+whole.length,
+				name: name,
+				replace: function(address){
+					if(/^file:/.test(address)) {
+						address = address.substr(5);
 					}
-				});
+					var rel = relative(sourceAddress,address);
+					return quote ? quote + rel + quote : rel;
+				}
 			});
-			return locations;
-		}; 
+		});
+		return locations;
+	}; 
+ 
 
 	var translate = loader.translate;
 	loader.translate = function(load){
@@ -5235,7 +5257,7 @@ var addTilde = function(loader){
 		}
 
 		// Gets an array of moduleNames like ~/foo
-		var locations = locateMacro(load.source);
+		var locations = locateMacro(load.source, load.address);
 		
 		if(!locations.length) {
 			return translate.call(this, load);
