@@ -1269,8 +1269,8 @@ define(function() {
 });
 ;
 (function(__global) {
-  
-$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
+
+__global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
 
@@ -1290,7 +1290,7 @@ var $__Object$defineProperty;
   }
 }());
 
-$__Object$create = Object.create || function(o, props) {
+__global.$__Object$create = Object.create || function(o, props) {
   function F() {}
   F.prototype = o;
 
@@ -1572,7 +1572,7 @@ function logloads(loads) {
               // store the deps as load.deps
               load.declare = declare;
               load.depsList = deps;
-            }            
+            }
             __eval(transpiled, __global, load);
             curSystem.register = curRegister;
           });
@@ -2037,7 +2037,13 @@ function logloads(loads) {
       //    By disaling this module write-protection we gain performance.
       //    It could be useful to allow an option to enable or disable this.
       module.locked = true;
-      moduleObj[name] = value;
+      if(typeof name === 'object') {
+        for(var p in name) {
+          moduleObj[p] = name[p];
+        }
+      } else {
+        moduleObj[name] = value;
+      }
 
       for (var i = 0, l = module.importers.length; i < l; i++) {
         var importerModule = module.importers[i];
@@ -2417,7 +2423,7 @@ function logloads(loads) {
   }
 
   // use Traceur by default
-  Loader.prototype.transpiler = 'traceur';
+  Loader.prototype.transpiler = 'babel';
 
   Loader.prototype.transpile = function(load) {
     var self = this;
@@ -2430,7 +2436,7 @@ function logloads(loads) {
         self.set('babel', getTranspilerModule(self, 'babel'));
       self.transpilerHasRun = true;
     }
-    
+
     return self['import'](self.transpiler).then(function(transpiler) {
       if (transpiler.__useDefault)
         transpiler = transpiler['default'];
@@ -2489,15 +2495,31 @@ function logloads(loads) {
   }
 
   function babelTranspile(load, babel) {
+    babel = babel.Babel || babel.babel || babel;
     var options = this.babelOptions || {};
-    options.modules = 'system';
     options.sourceMap = 'inline';
     options.filename = load.address;
     options.code = true;
     options.ast = false;
-    
-    if (!options.blacklist)
-      options.blacklist = ['react'];
+
+    var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+    if(!babelVersion) babelVersion = 6;
+
+    if(babelVersion >= 6) {
+      // If the user didn't provide presets/plugins, use the defaults
+      if(!options.presets && !options.plugins) {
+        options.presets = [
+          "es2015-no-commonjs", "react", "stage-0"
+        ];
+        options.plugins = [
+          "transform-es2015-modules-systemjs"
+        ];
+      }
+    } else {
+      options.modules = 'system';
+      if (!options.blacklist)
+        options.blacklist = ['react'];
+    }
 
     var source = babel.transform(load.source, options).code;
 
@@ -5325,8 +5347,6 @@ function applyTraceExtension(loader){
 	};
 }
 
-applyTraceExtension.name = "Trace";
-
 if(typeof System !== "undefined") {
 	applyTraceExtension(System);
 }
@@ -5690,6 +5710,8 @@ if (typeof System !== "undefined") {
 				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
 				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
 				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
+				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
