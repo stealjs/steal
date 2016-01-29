@@ -43,7 +43,5 @@ exports.translate = function(load) {
 		lessEngine.render(load.source, renderOptions).then(done, fail);
 	});
 };
-exports.tildeModules = [
-	/['"](~(.+))['"]/g
-];
+exports.locateMacro = true;
 exports.buildType = "css";
