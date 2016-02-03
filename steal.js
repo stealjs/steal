@@ -5871,8 +5871,6 @@ function addEnv(loader){
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {
@@ -6057,8 +6055,12 @@ if (typeof System !== "undefined") {
 		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
+				if(typeof console !== "undefined") {
+					// Hide from uglify
+					var c = console;
+					var type = c.error ? "error" : "log";
+					c[type](error, error.stack);
+				}
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;
