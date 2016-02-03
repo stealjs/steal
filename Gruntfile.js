@@ -91,6 +91,8 @@ module.exports = function (grunt) {
 		  {src:["node_modules/system-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: "isFile"},
+          {src:["node_modules/system-npm/npm-convert.js"], dest: "ext/npm-convert.js", filter: "isFile"},
+          {src:["node_modules/system-npm/npm-load.js"], dest: "ext/npm-load.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: "isFile"},
 		  {src:["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
 		  {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
