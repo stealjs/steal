@@ -116,6 +116,8 @@ var translateConfig = function(loader, packages, options){
 		loader.npm = {};
 		loader.npmPaths = {};
 		loader.globalBrowser = {};
+	}
+	if(!loader.npmParentMap) {
 		loader.npmParentMap = options.npmParentMap || {};
 	}
 	loader.npmPaths.__default = packages[0];

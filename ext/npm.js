@@ -25,14 +25,14 @@ if(!System.has("@loader")) {
 exports.translate = function(load){
 	var loader = this;
 
-	var resavePackageInfo = isNode && loader.isEnv &&
-		!loader.isEnv("production");
-
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
 	}
 
+	var resavePackageInfo = isNode && loader.isEnv &&
+		!loader.isEnv("production");
+	var prevPackages = loader.npmContext && loader.npmContext.pkgInfo;
 	var context = {
 		packages: [],
 		loader: this,
@@ -55,7 +55,7 @@ exports.translate = function(load){
 	return crawl.deps(context, pkg, true).then(function(){
 		// clean up packages so everything is unique
 		var names = {};
-		var packages = context.pkgInfo = [];
+		var packages = context.pkgInfo = prevPackages || [];
 		utils.forEach(context.packages, function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){
