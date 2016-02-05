@@ -55,7 +55,7 @@ exports.translate = function(load){
 	return crawl.deps(context, pkg, true).then(function(){
 		// clean up packages so everything is unique
 		var names = {};
-		var packages = context.pkgInfo = prevPackages || [];
+		var packages = context.pkgInfo = [];
 		utils.forEach(context.packages, function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){
@@ -74,6 +74,10 @@ exports.translate = function(load){
 			}
 		});
 
-		return npmLoad.makeSource(context, pkg);
+		var source = npmLoad.makeSource(context, pkg);
+
+		npmLoad.addExistingPackages(context, prevPackages);
+
+		return source;
 	});
 };
