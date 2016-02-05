@@ -192,3 +192,20 @@ var translateConfig = function(loader, packages, options){
 	});
 	setupLiveReload();
 };
+
+/**
+ * @function addExistingPackages
+ * @param {Context} context
+ */
+exports.addExistingPackages = function(context, existingPackages){
+	if(existingPackages) {
+		var packages = context.pkgInfo;
+		utils.forEach(existingPackages, function(pkg){
+			var nameAndVersion = pkg.name + "@" + pkg.version;
+			if(!packages[nameAndVersion]) {
+				packages.push(pkg);
+				packages[nameAndVersion] = true;
+			}
+		});
+	}
+};
