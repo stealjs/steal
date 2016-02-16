@@ -208,11 +208,6 @@
 				addProductionBundles.call(this);
 			}
 		},
-		bundleSteal: {
-			set: function(val){
-				this.bundleSteal = val;
-			}
-		},
 		startId: {
 			set: function(val){
 				mainSetter.set.call(this, normalize(val) );
@@ -312,7 +307,7 @@
 					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath && !this.bundleSteal) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
