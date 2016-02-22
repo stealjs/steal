@@ -5616,6 +5616,7 @@ if (typeof System !== "undefined") {
 		less: '$less'
 	};
 	System.logLevel = 0;
+	System.transpiler = "traceur";
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
