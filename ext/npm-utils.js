@@ -62,10 +62,15 @@ var utils = {
 	isEnv: function(name) {
 		return this.isEnv ? this.isEnv(name) : this.env === name;
 	},
-	savePackageJsonLoad: function(loader){
-		debugger;
-		if(loader.getModuleLoad) {
-			var load = loader.getModuleLoad("package.json!npm");
+	warnOnce: function(msg){
+		var w = this._warnings = this._warnings || {};
+		if(w[msg]) return;
+		w[msg] = true;
+		if(typeof steal !== "undefined" && typeof console !== "undefined" &&
+		  console.warn) {
+			steal.done().then(function(){
+				console.warn(msg);
+			});
 		}
 	},
 	moduleName: {
@@ -459,6 +464,10 @@ var utils = {
 			if(nodeModulesIndex >= 0) {
 				return nextSlash>=0 ? address.substr(0, nextSlash) : address;
 			}
+		},
+		basename: function(address){
+			var parts = address.split("/");
+			return parts[parts.length - 1];
 		}
 	},
 	includeInBuild: true
