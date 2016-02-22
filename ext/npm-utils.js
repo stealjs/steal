@@ -73,6 +73,9 @@ var utils = {
 			});
 		}
 	},
+	relativeURI: function(baseURL, url) {
+		return typeof steal !== "undefined" ? steal.relativeURI(baseURL, url) : url;
+	},
 	moduleName: {
 		/**
 		 * @function moduleName.create

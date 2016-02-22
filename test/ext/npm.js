@@ -46,7 +46,7 @@ exports.translate = function(load){
 		resavePackageInfo: resavePackageInfo
 	};
 	this.npmContext = context;
-	var pkg = {origFileUrl: load.address, fileUrl: load.address};
+	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
 	crawl.processPkgSource(context, pkg, load.source);
 	if(pkg.system && pkg.system.npmAlgorithm === "flat") {
 		context.isFlatFileStructure = true;
@@ -64,7 +64,7 @@ exports.translate = function(load){
 				packages.push({
 					name: pkg.name,
 					version: pkg.version,
-					fileUrl: pkg.fileUrl,
+					fileUrl: utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
 					system: convert.system(context, pkg, pkg.system, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
