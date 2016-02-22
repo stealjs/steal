@@ -54,3 +54,4 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
+	steal.relativeURI = relativeURI;
