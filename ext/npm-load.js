@@ -120,7 +120,7 @@ var translateConfig = function(loader, packages, options){
 	if(!loader.npmParentMap) {
 		loader.npmParentMap = options.npmParentMap || {};
 	}
-	loader.npmPaths.__default = packages[0];
+	var rootPkg = loader.npmPaths.__default = packages[0];
 	var lib = packages[0].system && packages[0].system.directories && packages[0].system.directories.lib;
 
 
@@ -163,8 +163,12 @@ var translateConfig = function(loader, packages, options){
 			// don't set system.main
 			var main = pkg.system.main;
 			delete pkg.system.main;
+			var configDeps = pkg.system.configDependencies;
 			delete pkg.system.configDependencies;
 			loader.config(pkg.system);
+			if(pkg === rootPkg) {
+				pkg.system.configDependencies = configDeps;
+			}
 			pkg.system.main = main;
 
 		}
