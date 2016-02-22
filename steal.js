@@ -5886,7 +5886,7 @@ if (typeof System !== "undefined") {
 					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -6011,13 +6011,15 @@ function addEnv(loader){
 			};
 		}
 
+		// first set the config that is set with a steal object
+		if(config){
+			System.config(config);
+		}
+
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
 
-		if(config){
-			System.config(config);
-		}
 
 		setEnvsConfig.call(this.System);
 
@@ -6040,8 +6042,6 @@ function addEnv(loader){
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {
@@ -6226,8 +6226,12 @@ if (typeof System !== "undefined") {
 		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
+				if(typeof console !== "undefined") {
+					// Hide from uglify
+					var c = console;
+					var type = c.error ? "error" : "log";
+					c[type](error, error.stack);
+				}
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;
