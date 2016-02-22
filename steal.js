@@ -5040,6 +5040,19 @@ var $__curScript, __eval;
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		},
+		relativeURI = function(base, path) {
+			var uriParts = path.split("/"),
+				baseParts = base.split("/"),
+				result = [];
+			while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+				uriParts.shift();
+				baseParts.shift();
+			}
+			for(var i = 0 ; i< baseParts.length-1; i++) {
+				result.push("../");
+			}
+			return "./" + result.join("") + uriParts.join("/");
+		};
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isBrowserWithWindow = typeof window !== "undefined",
 		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
@@ -5157,6 +5170,7 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
+	steal.relativeURI = relativeURI;
 
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar
@@ -5336,6 +5350,51 @@ var addTilde = function(loader){
 
 if(typeof System !== "undefined") {
 	addTilde(System);
+}
+
+function addContextual(loader){
+  loader._contextualModules = {};
+
+  loader.setContextual = function(moduleName, definer){
+    this._contextualModules[moduleName] = definer;
+  };
+
+  var normalize = loader.normalize;
+  loader.normalize = function(name, parentName){
+    var loader = this;
+
+    if (parentName) {
+      var definer = this._contextualModules[name];
+
+      // See if `name` is a contextual module
+      if (definer) {
+        name = name + '/' + parentName;
+
+        if(!loader.has(name)) {
+          // `definer` could be a function or could be a moduleName
+          if (typeof definer === 'string') {
+            definer = loader['import'](definer);
+          }
+
+          return Promise.resolve(definer)
+          .then(function(definer) {
+            if (definer['default']) {
+              definer = definer['default'];
+            }
+            loader.set(name, loader.newModule(definer(parentName)));
+            return name;
+          });
+        }
+        return Promise.resolve(name);
+      }
+    }
+
+    return normalize.apply(this, arguments);
+  };
+}
+
+if(typeof System !== "undefined") {
+  addContextual(System);
 }
 
 function applyTraceExtension(loader){

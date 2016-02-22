@@ -402,4 +402,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("tilde/site.html");
 	});
 
+	module("Contextual extension");
+
+	asyncTest("Basics work", function(){
+		makeIframe("contextual/test.html");
+	});
+
 })();
