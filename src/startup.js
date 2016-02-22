@@ -72,8 +72,6 @@
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {
