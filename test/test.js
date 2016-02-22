@@ -329,6 +329,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("envs/envs-live.html");
 	});
 
+	asyncTest("script tag wins against global steal object", function(){
+		makeIframe("script-tag_wins/index.html");
+	});
+
 	module("json extension");
 
 	asyncTest("json extension", function(){
