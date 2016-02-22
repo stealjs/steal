@@ -5551,6 +5551,14 @@ function applyTraceExtension(loader){
 		}
 		return transpile.apply(this, arguments);
 	};
+
+	loader.eachModule = function(cb){
+		for (var moduleName in this._traceData.loads) {
+			if (this.has(moduleName)) {
+				cb.call(this, moduleName, this.get(moduleName));
+			}
+		}
+	};
 }
 
 if(typeof System !== "undefined") {
