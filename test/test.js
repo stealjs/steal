@@ -211,6 +211,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("production/prod-env.html");
 	});
 
+	asyncTest("steal.production.js logs errors", function(){
+		makeIframe("production_err/prod.html");
+	});
+
 	asyncTest("loadBundles true with a different env loads the bundles", function(){
 		makeIframe("load-bundles/prod.html");
 	});
@@ -323,6 +327,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("envs config is applied after a live-reload", function(){
 		makeIframe("envs/envs-live.html");
+	});
+
+	asyncTest("script tag wins against global steal object", function(){
+		makeIframe("script-tag_wins/index.html");
 	});
 
 	module("json extension");
