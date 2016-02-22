@@ -271,6 +271,18 @@ var utils = {
 			return root;
 		},
 		/**
+		 * @function pkg.isRoot
+		 * Determines whether a module is the loader's root module.
+		 * @return {Boolean}
+		 */
+		isRoot: function(loader, pkg) {
+			var root = utils.pkg.getDefault(loader);
+			return pkg.name === root.name && pkg.version === root.version;
+		},
+		getDefault: function(loader) {
+			return loader.npmPaths.__default;
+		},
+		/**
 		 * Returns packageData given a module's name or module's address.
 		 *
 		 * Given a moduleName, it tries to return the package it belongs to.
