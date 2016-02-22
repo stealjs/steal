@@ -5524,6 +5524,12 @@ function _SYSTEM_addJSON(loader) {
 	  });
 	};
 
+	var transform = function(loader, load, data){
+		var fn = loader.jsonOptions && loader.jsonOptions.transform;
+		if(!fn) return data;
+		return fn.call(loader, load, data);
+	};
+
 	// If we are in a build we should convert to CommonJS instead.
 	if(inNode) {
 		var loaderTranslate = loader.translate;
@@ -5531,8 +5537,9 @@ function _SYSTEM_addJSON(loader) {
 			if(jsonExt.test(load.name)) {
 				var parsed = parse(load);
 				if(parsed) {
+					parsed = transform(this, load, parsed);
 					return "def" + "ine([], function(){\n" +
-						"\treturn " + load.source + "\n});";
+						"\treturn " + JSON.stringify(parsed) + "\n});";
 				}
 			}
 
@@ -5548,6 +5555,7 @@ function _SYSTEM_addJSON(loader) {
 
 		parsed = parse(load);
 		if(parsed) {
+			parsed = transform(loader, load, parsed);
 			load.metadata.format = 'json';
 
 			load.metadata.execute = function(){

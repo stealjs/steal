@@ -14,7 +14,7 @@
   "dependencies": {
     "less": "^2.4.0",
     "steal-systemjs": "^0.17.3",
-    "system-json": "^0.0.3"
+    "system-json": "^0.1.0"
   },
   "devDependencies": {
     "steal-css": "stealjs/steal-css#tilde",
