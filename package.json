@@ -19,7 +19,7 @@
   "devDependencies": {
     "steal-css": "stealjs/steal-css#tilde",
     "steal-less": "stealjs/steal-less#tilde",
-    "system-npm": "0.5.3",
+    "system-npm": "0.5.4",
     "system-live-reload": "1.4.0",
     "system-trace": "0.1.8",
     "steal-env": "^1.0.0",
