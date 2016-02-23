@@ -7,7 +7,7 @@
 
 ### steal
 
-- package.jsons are not [progressively fetched](https://github.com/stealjs/system-npm/issues/41) as needed to configure.
+- package.jsons are now [progressively fetched](https://github.com/stealjs/system-npm/issues/41) as needed to configure.
 - Using npm you can [now load](https://github.com/stealjs/system-npm/issues/3) modules that use the `folder/index.js` convention.
 - When importing json files you can now make transformations with the new [jsonOptions](http://stealjs.com/docs/System.jsonOptions.html).
 - The [contextual module](https://github.com/stealjs/steal/issues/518) extension makes it easy to create modules that are aware of their parent.
