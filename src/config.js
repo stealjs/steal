@@ -162,7 +162,6 @@
 		}
 	};
 
-	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	var envsSpecial = { map: true, paths: true, meta: true };
 	setterConfig(System, specialConfig = {
@@ -277,6 +276,7 @@
 				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
 				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
@@ -292,7 +292,7 @@
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
 
 				if(isNode) {
-					System.register("less",[], false, function(){
+					System.register("@less-engine", [], false, function(){
 						var r = require;
 						return r('less');
 					});
@@ -307,7 +307,7 @@
 					}
 
 				} else {
-					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
+					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
