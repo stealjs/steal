@@ -250,7 +250,9 @@ exports.addExtension = function(System){
 								parsedModuleName.modulePath :
 								utils.path.addJS(parsedModuleName.modulePath)
 						);
-						return npmAddress;
+						address = typeof steal !== "undefined" ?
+							utils.path.joinURIs(loader.baseURL, npmAddress) :
+							npmAddress;
 					}
 
 					return address;
