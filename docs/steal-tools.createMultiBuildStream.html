@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>StealJS - createMultiBuildStream </title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs ">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="../index.html">StealJS</a>
+				<ul class="dropdown-menu">
+		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
+		          <li><a href="http://canjs.com">CanJS</a></li>
+		          <li><a href="http://jquerypp.com">jQuery++</a></li>
+		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
+		          <li><a href="http://funcunit.com">FuncUnit</a></li>
+		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		        </ul>
+			</div>
+			<ul class="nav">
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
+	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
+		      <li class=""><a href="https://github.com/stealjs/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/stealjs/steal">Chat</a></li>
+	        </ul>
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog">Blog</a></li>
+						<li><a href="http://bitovi.com/development">Development</a></li>
+						<li><a href="http://bitovi.com/design">Design</a></li>
+						<li><a href="http://bitovi.com/training">Training</a></li>
+						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
+						<li><a href="http://bitovi.com/about">About</a></li>
+						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	
+<div class="container api">
+
+	
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a class="sidebar-title" href="steal-tools.html" data-search="steal-tools">
+				steal-tools
+			</a>
+			
+	<ul>
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>JavaScript</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.build.html" data-search="build">
+						build
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.export.html" data-search="export">
+						export
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.transform.html" data-search="transform">
+						transform
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.transformImport.html" data-search="transformImport">
+						transformImport
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Command Line</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.cmd.build.html" data-search="steal-tools build">
+						steal-tools build
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.cmd.live-reload.html" data-search="steal-tools live-reload">
+						steal-tools live-reload
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.cmd.steal-tools.html" data-search="steal-tools">
+						steal-tools
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.cmd.transform.html" data-search="steal-tools transform">
+						steal-tools transform
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Grunt Tasks</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.grunt.build.html" data-search="steal-build">
+						steal-build
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.grunt.export.html" data-search="steal-export">
+						steal-export
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.grunt.live-reload.html" data-search="steal-live-reload">
+						steal-live-reload
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Export Helpers</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
+						amd
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
+						cjs
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="module" href="steal-tools|lib|build|helpers|global.html" data-search="global">
+						global
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Streams</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.createConcatStream.html" data-search="createConcatStream">
+						createConcatStream
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.createGraphStream.html" data-search="createGraphStream">
+						createGraphStream
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container active">
+					<a class="function" href="steal-tools.createMultiBuildStream.html" data-search="createMultiBuildStream">
+						createMultiBuildStream
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.createWriteStream.html" data-search="createWriteStream">
+						createWriteStream
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>Types</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.BuildOptions.html" data-search="BuildOptions">
+						BuildOptions
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.BuildOptions.transpile.html" data-search="Transpile">
+						Transpile
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.BuildResult.html" data-search="BuildResult">
+						BuildResult
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.BundleAssetsOptions.html" data-search="BundleAssetsOptions">
+						BundleAssetsOptions
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.SystemConfig.html" data-search="SystemConfig">
+						SystemConfig
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.object.html" data-search="ExportObject">
+						ExportObject
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.export.output.html" data-search="ExportOutput">
+						ExportOutput
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.source.object.html" data-search="SourceObject">
+						SourceObject
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="typedef" href="steal-tools.transform.options.html" data-search="TransformOptions">
+						TransformOptions
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+	</ul>
+
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	
+	
+	
+	<article class="content docs">
+	
+	
+		
+		<section class="title">
+			<div class="heading">
+<h1>createMultiBuildStream</h1>
+	<ul class="tags">
+		<li>function</li>
+	</ul>
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	
+		<span class="module">steal-tools.createMultiBuildStream</span>
+	
+	
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+	
+	
+	
+	
+</ul>
+<br />
+		</section>
+		
+		
+		
+		<section class="contents">
+		</section>
+		
+		
+		
+
+		
+		<section class="description">
+			<p>Create a <a href="https://nodejs.org/api/stream.html">stream</a> of <a href="steal-tools.BuildResult.html">BuildResult</a> objects.</p>
+
+		</section>
+		
+
+		
+			
+				<section class="signature">
+					<h2 id="sig_stealTools_createMultiBuildStream__">stealTools.createMultiBuildStream()
+</h2>
+<div class="signature-wrapper">
+
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Stream&lt;<a href="steal-tools.BuildResult.html" >BuildResult</a>&gt;}</code></h4>
+		<div class="description">
+			<p>A stream of objects that contains the dependency graph.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+				</section>
+			
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<h1>Use</h1>
+<p>The multi-build stream is used to perform building operations on a stream of graph objects. It will perform <strong>transpiling</strong>, <strong>minification</strong>, and <strong>splitting</strong> the graph into bundles based on the progressive loading algorithm.</p>
+<p>This API must be used in conjuction with <a href="steal-tools.createGraphStream.html">createGraphStream</a>.</p>
+<pre><code>var graphStream = stealTools.createGraphStream({
+    config: __dirname + &quot;/package.json!npm&quot;
+}, {
+    minify: false
+});
+
+var buildStream = graphStream.pipe(
+    stealTools.createMultiBuildStream()
+);
+
+buildStream.on(&quot;data&quot;, function(data){
+    var dependencyGraph = data.graph;
+});
+</code></pre>
+
+		</section>
+		
+		
+
+		
+	
+	
+	</article>
+	
+	
+
+</div>
+
+
+
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		var docObject = {"type":"function","name":"steal-tools.createMultiBuildStream","src":"steal-tools/doc/build-stream.md","description":"Create a [stream](https://nodejs.org/api/stream.html) of [steal-tools.BuildResult] objects.","title":"createMultiBuildStream","parent":"steal-tools.stream","signatures":[{"code":"stealTools.createMultiBuildStream()","description":"","params":[],"returns":{"types":[{"type":"Stream","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]}],"description":"A stream of objects that contains the dependency graph."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+	</script>
+	
+	
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-2302003-20', 'auto');
+		ga('send', 'pageview');
+		</script>
+	
+</body>
+
+</html>

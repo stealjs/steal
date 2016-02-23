@@ -320,7 +320,22 @@
 
 		
 		<section class="comment">
-			<h2>0.13.0</h2>
+			<h2>0.14.0</h2>
+<h3>steal</h3>
+<ul>
+<li>package.jsons are not <a href="https://github.com/stealjs/system-npm/issues/41">progressively fetched</a> as needed to configure.</li>
+<li>Using npm you can <a href="https://github.com/stealjs/system-npm/issues/3">now load</a> modules that use the <code>folder/index.js</code> convention.</li>
+<li>When importing json files you can now make transformations with the new <a href="http://stealjs.com/docs/System.jsonOptions.html">jsonOptions</a>.</li>
+<li>The <a href="https://github.com/stealjs/steal/issues/518">contextual module</a> extension makes it easy to create modules that are aware of their parent.</li>
+<li>Better <a href="https://github.com/stealjs/steal/pull/583">CommonJS detection</a>.</li>
+<li>Configuration added to the script tag now <a href="https://github.com/stealjs/steal/pull/579">beats out</a> global configuration.</li>
+</ul>
+<h3>steal-tools</h3>
+<ul>
+<li>It is now possible to perform custom <a href="https://github.com/stealjs/steal-tools/pull/355">ES6 transpiling</a>, for use if using a transpiler different that what Steal provides.</li>
+<li>Bug <a href="https://github.com/stealjs/steal-tools/pull/376">fixes</a> for multi-main builds.</li>
+</ul>
+<h2>0.13.0</h2>
 <h3>steal</h3>
 <ul>
 <li>Support added for <a href="https://github.com/stealjs/steal/pull/522">NPM 3</a>.</li>
@@ -462,7 +477,7 @@ now returns a deferred and the defaults and modules arguments have been switched
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.changelog","src":"steal/docs/pages/changelog.md","description":"","title":"Changelog","parent":"StealJS.guides","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","forceBuild":true,"generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS.changelog","src":"steal/docs/pages/changelog.md","description":"","title":"Changelog","parent":"StealJS.guides","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
