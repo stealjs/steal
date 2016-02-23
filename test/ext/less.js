@@ -1,6 +1,6 @@
 var css = require("$css");
 var loader = require("@loader");
-var lessEngine = require("less");
+var lessEngine = require("@less-engine");
 
 exports.instantiate = css.instantiate;
 
@@ -43,5 +43,5 @@ exports.translate = function(load) {
 		lessEngine.render(load.source, renderOptions).then(done, fail);
 	});
 };
-exports.locateMacro = true;
+
 exports.buildType = "css";

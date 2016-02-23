@@ -70,6 +70,6 @@ function isProduction(){
 	return (loader.isEnv && loader.isEnv("production")) ||
 		loader.env === "production";
 }
-exports.locateMacro = true;
+
 exports.buildType = "css";
 exports.includeInBuild = true;
