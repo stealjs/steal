@@ -61,6 +61,9 @@
   Provides the Steal module format definition.
 */
 function addSteal(loader) {
+	if (loader._extensions) {
+		loader._extensions.push(addSteal);
+	}
 
   // Steal Module Format Detection RegEx
   // steal(module, ...)

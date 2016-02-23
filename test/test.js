@@ -408,4 +408,38 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("contextual/test.html");
 	});
 
+	module("ext-steal-clone")
+
+	asyncTest("basics work", function() {
+		makeIframe("ext-steal-clone/basics/index.html");
+	});
+
+	asyncTest("does not share the module registry and extensions with cloned loader", function() {
+		makeIframe("ext-steal-clone/config-separation/index.html");
+	});
+
+	asyncTest("caches source of parent modules to avoid duplicate downloads", function() {
+		makeIframe("ext-steal-clone/fetch-cache/index.html");
+	});
+
+	asyncTest("works when overriding multiple modules", function() {
+		makeIframe("ext-steal-clone/multiple-overrides/index.html");
+	});
+
+	asyncTest("works when using the npm extensions", function() {
+		makeIframe("ext-steal-clone/npm-extension/index.html");
+	});
+
+	asyncTest("works when a parent of injected dependency has been imported", function() {
+		makeIframe("ext-steal-clone/prior-import/index.html");
+	});
+
+	asyncTest("works when using relative imports", function() {
+		makeIframe("ext-steal-clone/relative-import/index.html");
+	});
+
+	asyncTest("works when using relative overrides", function() {
+		makeIframe("ext-steal-clone/relative-override/index.html");
+	});
+
 })();

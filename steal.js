@@ -5206,8 +5206,11 @@ var makeSteal = function(System){
 
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
-		var normalize = loader.normalize;
+		if (loader._extensions) {
+			loader._extensions.push(addForwardSlash);
+		}
 
+		var normalize = loader.normalize;
 		var npmLike = /@.+#.+/;
 
 		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
@@ -5353,6 +5356,9 @@ if(typeof System !== "undefined") {
 }
 
 function addContextual(loader){
+  if (loader._extensions) {
+    loader._extensions.push(addContextual);
+  }
   loader._contextualModules = {};
 
   loader.setContextual = function(moduleName, definer){
@@ -5381,7 +5387,7 @@ function addContextual(loader){
             if (definer['default']) {
               definer = definer['default'];
             }
-            loader.set(name, loader.newModule(definer(parentName)));
+            loader.set(name, loader.newModule(definer.call(loader, parentName)));
             return name;
           });
         }
@@ -5938,10 +5944,14 @@ if (typeof System !== "undefined") {
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
 
 				if(isNode) {
 					System.register("@less-engine", [], false, function(){
@@ -6013,7 +6023,6 @@ if (typeof System !== "undefined") {
 			System.config(cfg);
 		}
 	};
-
 
 if(typeof System !== "undefined") {
 	addEnv(System);
@@ -6198,6 +6207,9 @@ function addEnv(loader){
   Provides the Steal module format definition.
 */
 function addSteal(loader) {
+	if (loader._extensions) {
+		loader._extensions.push(addSteal);
+	}
 
   // Steal Module Format Detection RegEx
   // steal(module, ...)
