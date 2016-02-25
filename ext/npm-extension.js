@@ -26,7 +26,7 @@ exports.addExtension = function(System){
 	 */
 	var oldNormalize = System.normalize;
 	System.normalize = function(name, parentName, parentAddress, pluginNormalize){
-		if(parentName && this.npmParentMap[parentName]) {
+		if(parentName && this.npmParentMap && this.npmParentMap[parentName]) {
 			parentName = this.npmParentMap[parentName];
 		}
 
