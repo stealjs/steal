@@ -430,6 +430,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/npm-extension/index.html");
 	});
 
+	asyncTest("supports loading css, less files", function() {
+		makeIframe("ext-steal-clone/other-extensions/index.html");
+	});
+
 	asyncTest("works when a parent of injected dependency has been imported", function() {
 		makeIframe("ext-steal-clone/prior-import/index.html");
 	});
