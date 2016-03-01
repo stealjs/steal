@@ -43,13 +43,15 @@
 			};
 		}
 
+		// first set the config that is set with a steal object
+		if(config){
+			System.config(config);
+		}
+
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
 
-		if(config){
-			System.config(config);
-		}
 
 		setEnvsConfig.call(this.System);
 
@@ -72,8 +74,6 @@
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {

@@ -14,8 +14,12 @@
 		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
+				if(typeof console !== "undefined") {
+					// Hide from uglify
+					var c = console;
+					var type = c.error ? "error" : "log";
+					c[type](error, error.stack);
+				}
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;

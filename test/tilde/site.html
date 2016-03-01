@@ -1,0 +1,19 @@
+<body>
+<div class="logo">
+
+</div>
+<script>
+	window.QUnit = window.parent.QUnit;
+	window.removeMyself = window.parent.removeMyself;
+	steal = {
+		paths: {
+			less: "../less-1.7.0.js",
+			"$less": "../less.js",
+			"$css": "../css.js",
+			"stache": "tilde/stache.js"
+		}
+	};
+</script>
+<script type="text/javascript" src='../bower_components/steal/steal.js'
+        main='tilde/main' data-config="config.js"></script>
+</body>

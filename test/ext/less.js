@@ -1,6 +1,6 @@
 var css = require("$css");
 var loader = require("@loader");
-var lessEngine = require("less");
+var lessEngine = require("@less-engine");
 
 exports.instantiate = css.instantiate;
 
@@ -21,7 +21,10 @@ exports.translate = function(load) {
 	}
 
 	return new Promise(function(resolve, reject){
-		var renderOptions = {filename: address};
+		var renderOptions = {
+			filename: address,
+			useFileCache: true
+		};
 		for (var prop in options){
 		   	renderOptions[prop] = options[prop];
 		}

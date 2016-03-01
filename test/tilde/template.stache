@@ -1,0 +1,2 @@
+LOCATE("./hello-world.png")
+LOCATE(partial/path.stache)

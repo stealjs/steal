@@ -1,0 +1,2 @@
+LOCATE("bootstrap/hello-world.png")
+LOCATE(bootstrap/partial)

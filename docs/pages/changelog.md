@@ -3,6 +3,22 @@
 
 @body
 
+## 0.14.0
+
+### steal
+
+- package.jsons are now [progressively fetched](https://github.com/stealjs/system-npm/issues/41) as needed to configure.
+- Using npm you can [now load](https://github.com/stealjs/system-npm/issues/3) modules that use the `folder/index.js` convention.
+- When importing json files you can now make transformations with the new [jsonOptions](http://stealjs.com/docs/System.jsonOptions.html).
+- The [contextual module](https://github.com/stealjs/steal/issues/518) extension makes it easy to create modules that are aware of their parent.
+- Better [CommonJS detection](https://github.com/stealjs/steal/pull/583).
+- Configuration added to the script tag now [beats out](https://github.com/stealjs/steal/pull/579) global configuration.
+
+### steal-tools
+
+- It is now possible to perform custom [ES6 transpiling](https://github.com/stealjs/steal-tools/pull/355), for use if using a transpiler different that what Steal provides.
+- Bug [fixes](https://github.com/stealjs/steal-tools/pull/376) for multi-main builds.
+
 ## 0.13.0
 
 ### steal

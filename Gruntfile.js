@@ -23,6 +23,8 @@ module.exports = function (grunt) {
 			"src/core.js",		// starts makeSteal
 			"src/system-extension-ext.js",
 			"src/system-extension-forward-slash.js",
+			"src/system-extension-tilde.js",
+			"src/system-extension-contextual.js",
 			"node_modules/system-trace/trace.js",
 			"node_modules/system-json/json.js",
 			"src/config.js",
@@ -51,6 +53,8 @@ module.exports = function (grunt) {
 		  "src/core.js",		// starts makeSteal
 		  "src/system-extension-ext.js",
 		  "src/system-extension-forward-slash.js",
+		  "src/system-extension-tilde.js",
+		  "src/system-extension-contextual.js",
 		  "node_modules/system-trace/trace.js",
 		  "src/config.js",
 		  "node_modules/steal-env/env.js",
@@ -89,6 +93,8 @@ module.exports = function (grunt) {
 		  {src:["node_modules/system-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: "isFile"},
+          {src:["node_modules/system-npm/npm-convert.js"], dest: "ext/npm-convert.js", filter: "isFile"},
+          {src:["node_modules/system-npm/npm-load.js"], dest: "ext/npm-load.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: "isFile"},
 		  {src:["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
 		  {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
