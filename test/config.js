@@ -3,7 +3,7 @@ System.config({
 		// "steal/dev/*" : "../dev/*.js",
 	},
 	map: {
-		"hello.js": "basics/commonjs/salute.js"
+		"hello.js": "basics/commonjs/salute"
 	},
 	bundle: ["foo"],
 	ext : {
