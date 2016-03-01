@@ -1,0 +1,6 @@
+locate://bootstrap/hello-world.png
+locate://steal.svg
+locate://./deep.less
+pkg://bootstrap/hello-world.png
+pkg://steal.svg
+pkg://./deep.less
