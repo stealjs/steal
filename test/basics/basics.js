@@ -1,4 +1,4 @@
-steal('basics/module/', function(module){
+steal('basics/module', function(module){
 	
 	if(typeof window !== "undefined" && window.QUnit) {
 		QUnit.ok(module, "got basics/module");
