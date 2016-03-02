@@ -1,41 +1,17 @@
-define(["root.stache!", "resources/shallow.stache!", "resources/deep/deep.stache!"], function(root, shallow, deep){
+define(["resources/template.stache!"], function(template){
 	
 	if(typeof window !== "undefined" && window.QUnit) {
-		root = root.split("\n");
-		shallow = shallow.split("\n");
-		deep = deep.split("\n");
+		template = template.split("\n");
 
-		QUnit.deepEqual(root, [
-			"node_modules/bootstrap/hello-world.png",
-			"steal.svg",
-			"resources/deep/deep.less",
-			"node_modules/bootstrap/hello-world.png",
-			"steal.svg",
-			"resources/deep/deep.less"
-		], 'locate:// & pkg:// work as expected from importing file in package root');
-
-		QUnit.deepEqual(shallow, [
+		QUnit.deepEqual(template, [
 			"../node_modules/bootstrap/hello-world.png",
 			"../steal.svg",
-			'deep/deep.less',
-			"node_modules/bootstrap/hello-world.png",
-			"steal.svg",
-			"resources/deep/deep.less"
-		], 'locate:// & pkg:// work as expected from importing file in a directory');
-
-		QUnit.deepEqual(deep, [
-			"../../node_modules/bootstrap/hello-world.png",
-			"../../steal.svg",
-			'deep.less',
-			"node_modules/bootstrap/hello-world.png",
-			"steal.svg",
-			"resources/deep/deep.less"
-		], 'locate:// & pkg:// work as expected from importing file in a nested directory');
+			'deep/deep.less'
+		], 'locate:// works as expected from importing file in a directory');
 
 		QUnit.start();
 		removeMyself();
 	} else {
-		console.log("basics loaded", template, template2);
+		console.log("basics loaded", template);
 	}
-
 });
