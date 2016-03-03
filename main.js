@@ -333,7 +333,7 @@ var addLocate = function(loader){
 		return result.join("") + uriParts.join("/");
 	};
 
-	var schemePattern = /(locate|pkg):\/\/([a-z0-9/._@-]*)/ig,
+	var schemePattern = /(locate):\/\/([a-z0-9/._@-]*)/ig,
 		parsePathSchemes = function(source, parent) {
 			var locations = [];
 			source.replace(schemePattern, function(whole, scheme, path, index){
@@ -341,9 +341,8 @@ var addLocate = function(loader){
 					start: index,
 					end: index+whole.length,
 					name: path,
-					replace: function(address){
-						// if path is relative to package root, don't make resolved address relative
-						return scheme == 'pkg' ? address.replace(loader.baseURL, '') : relative(parent, address);
+					postLocate: function(address){
+						return relative(parent, address);
 					}
 				});
 			});
@@ -382,9 +381,8 @@ var addLocate = function(loader){
 		}
 		return Promise.all(promises).then(function(addresses){
 			for(var i = locations.length - 1; i >= 0; i--) {
-				// Replace the scheme paths with the fully located address
 				load.source = load.source.substr(0, locations[i].start)
-					+ locations[i].replace(addresses[i])
+					+ locations[i].postLocate(addresses[i])
 					+ load.source.substr(locations[i].end, load.source.length);
 			}
 			return _translate.call(loader, load);
@@ -600,8 +598,10 @@ function applyTraceExtension(loader){
 	};
 
 	loader.eachModule = function(cb){
-		for (var moduleName in this._loader.modules) {
-			cb.call(this, moduleName, this.get(moduleName));
+		for (var moduleName in this._traceData.loads) {
+			if (this.has(moduleName)) {
+				cb.call(this, moduleName, this.get(moduleName));
+			}
 		}
 	};
 }

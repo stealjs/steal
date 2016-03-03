@@ -64,7 +64,7 @@ exports.addExtension = function(System){
 																 name, 
 																 parentName);
 
-		var isRoot = utils.pkg.isRoot(this, refPkg);
+		var isRoot = refPkg === this.npmPaths.__default;
 		var parsedPackageNameIsReferringPackage =
 			parsedModuleName.packageName === refPkg.name;
 
@@ -199,7 +199,7 @@ exports.addExtension = function(System){
 			return oldNormalize.call(this, moduleName, parentName,
 									 parentAddress, pluginNormalize);
 		} else {
-			if(utils.pkg.isRoot(this, depPkg)) {
+			if(depPkg === this.npmPaths.__default) {
 				// if the current package, we can't? have the
 				// module name look like foo@bar#./zed
 				var localName = parsedModuleName.modulePath ?

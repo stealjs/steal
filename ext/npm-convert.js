@@ -56,7 +56,6 @@ function convertSystem(context, pkg, system, root, ignoreWaiting) {
 	// Push the waiting conversions down.
 	if(ignoreWaiting !== true && waiting.length) {
 		convertLater(context, waiting, function(){
-			var context = this;
 			var local = utils.extend({}, copy, true);
 			var config = convertSystem(context, pkg, local, root, true);
 
@@ -322,7 +321,7 @@ function convertForPackage(context, pkg) {
 			if(depPkg) {
 				fns = pkgConv[range];
 				for(var i = 0, len = fns.length; i < len; i++) {
-					fns[i].call(context);
+					fns[i]();
 				}
 				delete pkgConv[range];
 			} else {
