@@ -1,4 +1,7 @@
 function addContextual(loader){
+  if (loader._extensions) {
+    loader._extensions.push(addContextual);
+  }
   loader._contextualModules = {};
 
   loader.setContextual = function(moduleName, definer){
@@ -27,7 +30,7 @@ function addContextual(loader){
             if (definer['default']) {
               definer = definer['default'];
             }
-            loader.set(name, loader.newModule(definer(parentName)));
+            loader.set(name, loader.newModule(definer.call(loader, parentName)));
             return name;
           });
         }

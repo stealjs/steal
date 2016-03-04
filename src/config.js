@@ -286,10 +286,14 @@
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
 
 				if(isNode) {
 					System.register("less",[], false, function(){
@@ -361,4 +365,3 @@
 			System.config(cfg);
 		}
 	};
-
