@@ -40,7 +40,7 @@ used, like a page for your app that users rarely visit.
 ```
 "meta": {
   "MODULENAME": {
-    "bundle": true
+    "bundle": false
   }
 }
 ```
