@@ -35,3 +35,38 @@ used, like a page for your app that users rarely visit.
   }
 }
 ```
+
+@option {Boolean} [bundle=false] Exclude that module from being bundled.
+```
+"meta": {
+  "MODULENAME": {
+    "bundle": true
+  }
+}
+```
+If you exclude a module from the bundled file, you have to make sure, that in the [production environment configuration](http://stealjs.com/docs/System.envs.html)
+the module is:
+
+* ... [mapped to the pseudo-module @empty](http://stealjs.com/docs/System.map.html)
+
+    ```
+    "envs": {
+        "window-production": {
+            "map": {
+                "MODULENAME': "@empty"
+            }
+        }
+    }
+    ```
+
+* ... [configured to location of the module e.g. a CDN](http://stealjs.com/docs/steal.html)
+
+    ```
+    "envs": {
+        "window-production": {
+            "paths": {
+                "jquery': "//code.jquery.com/jquery-2.2.1.min.js"
+            }
+        }
+    }
+    ```
