@@ -36,7 +36,7 @@ used, like a page for your app that users rarely visit.
 }
 ```
 
-@option {Boolean} [bundle=false] Exclude that module from being bundled.
+@option {Boolean} [bundle=false] Exclude a module from being bundled.
 ```
 "meta": {
   "MODULENAME": {
@@ -59,7 +59,7 @@ the module is:
     }
     ```
 
-* ... [configured to location of the module e.g. a CDN](http://stealjs.com/docs/steal.html)
+* ... [configured to the right location of the module e.g. a CDN](http://stealjs.com/docs/steal.html)
 
     ```
     "envs": {
