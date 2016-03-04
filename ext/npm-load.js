@@ -33,7 +33,7 @@ exports.saveLoadIfNeeded = function(context){
  * @return {String} The source representation of the `package.json!npm` module.
  */
 exports.makeSource = function(context, pkg){
-	pkg = pkg || context.loader.npmPaths.__default;
+	pkg = pkg || utils.pkg.getDefault(context.loader);
 	var configDependencies = ["@loader","npm-extension","module"].concat(
 		exports.configDeps(context, pkg)
 	);

@@ -616,10 +616,8 @@ function applyTraceExtension(loader){
 	};
 
 	loader.eachModule = function(cb){
-		for (var moduleName in this._traceData.loads) {
-			if (this.has(moduleName)) {
-				cb.call(this, moduleName, this.get(moduleName));
-			}
+		for (var moduleName in this._loader.modules) {
+			cb.call(this, moduleName, this.get(moduleName));
 		}
 	};
 }
