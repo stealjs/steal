@@ -1,8 +1,11 @@
 
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
-		var normalize = loader.normalize;
+		if (loader._extensions) {
+			loader._extensions.push(addForwardSlash);
+		}
 
+		var normalize = loader.normalize;
 		var npmLike = /@.+#.+/;
 
 		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
