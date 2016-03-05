@@ -10,7 +10,7 @@ Note: In LESS & Stache this syntax is available recursively, that is, it's avail
 sub-imports of those you include directly in your modules & pages. However this isn't available for CSS imports, as CSS
 imports are handled by the browser without the Steal CSS plugin having a chance to rewrite any 'locate://' paths.
 
-As an example in a LESS context, we could import bootstrap into our a stylesheet from the bootstrap npm module:
+As an example in a LESS context, we could import bootstrap into a stylesheet from the bootstrap npm module:
 
 /my-app/a/nested/stylesheet.less
 
