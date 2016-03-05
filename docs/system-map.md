@@ -40,7 +40,7 @@ because they are third party libraries. Consider a MVC library that has a depend
 on jQuery. If you wanted to use the smaller alternative Zepto you could simply
 map `jquery` to `zepto` and the MVC library would use that instead.
 
-### Ignoring optional dependencies
+### <a name="ignoring-optional-dependencies"></a>Ignoring optional dependencies
 
 Some modules might have dependencies on other modules that they only use as an option
 if you need them. Because there isn't a standard way to define conditional dependencies
