@@ -47,7 +47,7 @@ used, like a page for your app that users rarely visit.
 If you exclude a module from the bundled file, you have to make sure, that in the [production environment configuration](http://stealjs.com/docs/System.envs.html)
 the module is:
 
-* ... [mapped to the pseudo-module @empty](http://stealjs.com/docs/System.map.html)
+* ... [mapped to the pseudo-module @empty](http://stealjs.com/docs/System.map.html#ignoring-optional-dependencies)
 
     ```
     "envs": {
@@ -59,11 +59,11 @@ the module is:
     }
     ```
 
-* ... [configured to the right location of the module e.g. a CDN](http://stealjs.com/docs/steal.html)
+* ... [configured](http://stealjs.com/docs/steal.html#path-configure) to the [right location](http://stealjs.com/docs/System.paths.html) of the module e.g. a CDN
 
     ```
     "envs": {
-        "window-production": {
+        "production": {
             "paths": {
                 "jquery': "//code.jquery.com/jquery-2.2.1.min.js"
             }
