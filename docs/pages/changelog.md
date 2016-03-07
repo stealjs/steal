@@ -13,7 +13,7 @@
 ### steal-tools
 
 - Builds can be customized using the granular [streams](http://stealjs.com/docs/steal-tools.guides.streams.html) API.
-- Modules can now be ignored with the [ignore](http://stealjs.com/steal/docs/steal-tools.build.html#ignore) option, preventing them from being included in the build.
+- Modules can now be ignored with the [ignore](http://stealjs.com/docs/steal-tools.build.html#ignore) option, preventing them from being included in the build.
 
 ## 0.14.0
 
