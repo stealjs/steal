@@ -17,8 +17,8 @@
     "system-json": "^0.1.0"
   },
   "devDependencies": {
-    "steal-css": "stealjs/steal-css#locate",
-    "steal-less": "stealjs/steal-less#locate",
+    "steal-css": "0.4.0",
+    "steal-less": "0.2.0",
     "system-npm": "0.5.8",
     "system-npm": "0.5.9",
     "system-live-reload": "1.4.0",
