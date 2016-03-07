@@ -19,7 +19,7 @@ var esc = function (string) {
 };
 
 
-exports.locateMacro = true;
+exports.locateScheme = true;
 
 
 exports.translate = function(load) {

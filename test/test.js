@@ -396,10 +396,10 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
-	module("Tilde extension");
+	module("Locate/Pkg Path Scheme extension");
 
 	asyncTest("Basics work", function(){
-		makeIframe("tilde/site.html");
+		makeIframe("locate/site.html");
 	});
 
 	module("Contextual extension");

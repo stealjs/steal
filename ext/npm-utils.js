@@ -309,9 +309,9 @@ var utils = {
 				}
 				if(moduleAddress) {
 					var packageFolder = utils.pkg.folderAddress(moduleAddress);
-					return packageFolder ? loader.npmPaths[packageFolder] : utils.pkg.getDefault(loader);
+					return packageFolder ? loader.npmPaths[packageFolder] : loader.npmPaths.__default;
 				} else {
-					return utils.pkg.getDefault(loader);
+					return loader.npmPaths.__default;
 				}
 			}
 		},
