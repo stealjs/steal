@@ -3,6 +3,18 @@
 
 @body
 
+## 0.15.0
+
+### steal
+
+- [steal-clone](http://stealjs.com/docs/steal.steal-clone.html) is a new module that can be used for dependency injection, making it easy to replace modules for testing purposes.
+- A [new scheme](http://stealjs.com/docs/locate.html) was added for Less and CSS, allowing you to import styles with Steal's internal locating resolution.
+
+### steal-tools
+
+- Builds can be customized using the granular [streams](http://stealjs.com/docs/steal-tools.guides.streams.html) API.
+- Modules can now be ignored with the [ignore](http://stealjs.com/steal/docs/steal-tools.build.html#ignore) option, preventing them from being included in the build.
+
 ## 0.14.0
 
 ### steal
