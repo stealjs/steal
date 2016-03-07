@@ -338,6 +338,96 @@
 				
 					
 					<li class="heading search-container">
+						<span>Streams</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.bundle.html" data-search="bundle">
+						bundle
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.concat.html" data-search="concat">
+						concat
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.graph.html" data-search="graph">
+						graph
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.minify.html" data-search="minify">
+						minify
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.transpile.html" data-search="transpile">
+						transpile
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.write.html" data-search="write">
+						write
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>Types</span>
 						
 	<ul>
@@ -570,6 +660,18 @@ will also specify <code>baseURL</code>, and sometimes <code>main</code>. This se
 	</li>
 	
 	<li class="parameter">
+		<h4>meta
+			<code>{Object&lt;<a href="moduleName.html" >moduleName</a>,metadata&gt;}</code><span class="pull-right optional">Optional</span></h4>
+		<div class="description">
+			<p>A object of <moduleNames> that contain <a href="http://stealjs.com/docs/System.meta.html">metadata</a></p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
 		<h4>baseURL
 			<code>{String}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
@@ -658,7 +760,7 @@ stealTools.export({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.SystemConfig","src":"steal-tools/doc/types/system-config.md","description":"Configuration values needed for StealJS to load modules. Some set of the following\nvalues are required:","title":"SystemConfig","types":[{"type":"Object","options":[{"name":"main","description":"The module, or modules, that should be \nimported.  This sets [System.main].","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`, and sometimes `main`. This sets [System.configPath].","types":[{"type":"String"}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.SystemConfig","src":"steal-tools/doc/types/system-config.md","description":"Configuration values needed for StealJS to load modules. Some set of the following\nvalues are required:","title":"SystemConfig","types":[{"type":"Object","options":[{"name":"main","description":"The module, or modules, that should be \nimported.  This sets [System.main].","types":[{"type":"String"},{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"config","description":"The path to a configuration file. This\nwill also specify `baseURL`, and sometimes `main`. This sets [System.configPath].","types":[{"type":"String"}],"optional":true},{"name":"meta","description":"A object of <moduleNames> that contain [metadata](http://stealjs.com/docs/System.meta.html)","types":[{"type":"Object","template":[{"types":[{"type":"moduleName"}]},{"types":[{"type":"metadata"}]}]}],"optional":true},{"name":"baseURL","description":"If a configuration file is not used, \nthe [System.baseURL baseURL] value must be set.","types":[{"type":"String"}],"optional":true}]}],"parent":"steal-tools.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

@@ -338,6 +338,96 @@
 				
 					
 					<li class="heading search-container">
+						<span>Streams</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.bundle.html" data-search="bundle">
+						bundle
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.concat.html" data-search="concat">
+						concat
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.graph.html" data-search="graph">
+						graph
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.minify.html" data-search="minify">
+						minify
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.transpile.html" data-search="transpile">
+						transpile
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.write.html" data-search="write">
+						write
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>Types</span>
 						
 	<ul>
@@ -616,6 +706,19 @@ progressively loaded.</p>
 	</li>
 	
 	<li class="parameter">
+		<h4>ignore
+			<code>{Array&lt;<a href="moduleName.html" >moduleName</a>&gt;}</code></h4>
+		<div class="description">
+			<p>An array of module names that should be ignored and not included in the bundled file.
+For more information take a look at the <code>ignore</code> usage http://stealjs.com/docs/steal-tools.build.html#ignore</p>
+
+		</div>
+		
+		
+		
+	</li>
+	
+	<li class="parameter">
 		<h4>bundleDepth<code>=3</code>
 			<code>{Number}</code><span class="pull-right optional">Optional</span></h4>
 		<div class="description">
@@ -770,7 +873,7 @@ The option <code>fromString</code> is used internally and will always be <code>t
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"steal-tools.BuildOptions","src":"steal-tools/doc/types/build-options.md","description":"Options used to configure the build process.","title":"BuildOptions","types":[{"type":"Object","options":[{"name":"minify","description":"Sets whether the source code is minified prior to writing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"bundleSteal","description":"Sets whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundleAssets","description":"Set to true to have assets from your project bundled into your dist folder.","types":[{"type":"steal-tools.BundleAssetsOptions"},{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundle","description":"An array of module names that should be\nprogressively loaded.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"bundleDepth","description":"The maximum number of bundles that need to be loaded\nfor any `bundle` module. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"mainDepth","description":"The maximum number of bundles that will be loaded for any `main`\nmodule. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"removeDevelopmentCode","description":"Remove any development code from the bundle specified \nusing `//!steal-remove-start`, and `//!steal-remove-end` comments.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"cleanCSSOptions","description":"A hash of options to customize the minification of css files. \nAll available options are listed in the [clean-css documentation](https://github.com/jakubpawlowicz/clean-css#how-to-use-clean-css-programmatically).","types":[{"type":"Object","options":[]}],"optional":true},{"name":"uglifyOptions","description":"A hash of options to customize the minification of JavaScript files. StealTools uses the \ntop-level `minify` function of uglify-js, and the available options are listed [here](https://github.com/mishoo/UglifyJS2#the-simple-way).\nThe option `fromString` is used internally and will always be `true`; any other value will be ignored.","types":[{"type":"Object","options":[]}],"optional":true},{"name":"sourceMaps","description":"Generate source maps alongside your bundles.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"sourceMapsContent","description":"Include the original source contents in the generated source maps. Use this option if your production environment doesn't have access to the source files. Will result in a larger source maps size but will cause fewer requests.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"transpile","description":"A function that handles the transpiling of ES6 source to a format for production.","types":[{"type":"steal-tools.BuildOptions.transpile"}],"optional":true},{"name":"watch","description":"Actives watch mode which will continuously build as you develop your application.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"parent":"steal-tools.types","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.BuildOptions","src":"steal-tools/doc/types/build-options.md","description":"Options used to configure the build process.","title":"BuildOptions","types":[{"type":"Object","options":[{"name":"minify","description":"Sets whether the source code is minified prior to writing.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"bundleSteal","description":"Sets whether StealJS will be included in the built file. Enabling this option will allow you to limit the initial request to just one script.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"debug","description":"`true` turns on debug messages. Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"quiet","description":"No logging.  Defaults to `false`.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundleAssets","description":"Set to true to have assets from your project bundled into your dist folder.","types":[{"type":"steal-tools.BundleAssetsOptions"},{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"bundle","description":"An array of module names that should be\nprogressively loaded.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"ignore","description":"An array of module names that should be ignored and not included in the bundled file. \nFor more information take a look at the `ignore` usage http://stealjs.com/docs/steal-tools.build.html#ignore","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}]}]},{"name":"bundleDepth","description":"The maximum number of bundles that need to be loaded\nfor any `bundle` module. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"mainDepth","description":"The maximum number of bundles that will be loaded for any `main`\nmodule. Defaults to `3`.","types":[{"type":"Number"}],"optional":true,"defaultValue":"3"},{"name":"removeDevelopmentCode","description":"Remove any development code from the bundle specified \nusing `//!steal-remove-start`, and `//!steal-remove-end` comments.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"true"},{"name":"cleanCSSOptions","description":"A hash of options to customize the minification of css files. \nAll available options are listed in the [clean-css documentation](https://github.com/jakubpawlowicz/clean-css#how-to-use-clean-css-programmatically).","types":[{"type":"Object","options":[]}],"optional":true},{"name":"uglifyOptions","description":"A hash of options to customize the minification of JavaScript files. StealTools uses the \ntop-level `minify` function of uglify-js, and the available options are listed [here](https://github.com/mishoo/UglifyJS2#the-simple-way).\nThe option `fromString` is used internally and will always be `true`; any other value will be ignored.","types":[{"type":"Object","options":[]}],"optional":true},{"name":"sourceMaps","description":"Generate source maps alongside your bundles.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"sourceMapsContent","description":"Include the original source contents in the generated source maps. Use this option if your production environment doesn't have access to the source files. Will result in a larger source maps size but will cause fewer requests.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"},{"name":"transpile","description":"A function that handles the transpiling of ES6 source to a format for production.","types":[{"type":"steal-tools.BuildOptions.transpile"}],"optional":true},{"name":"watch","description":"Actives watch mode which will continuously build as you develop your application.","types":[{"type":"Boolean"}],"optional":true,"defaultValue":"false"}]}],"parent":"steal-tools.types","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

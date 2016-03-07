@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - $css</title>
+	<title>StealJS - steal-clone </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -477,7 +477,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="$css.html" data-search="$css">
 						$css
 					</a>
@@ -609,7 +609,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="module" href="steal.steal-clone.html" data-search="steal-clone">
 						steal-clone
 					</a>
@@ -796,9 +796,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>$css</h1>
+<h1>steal-clone</h1>
 	<ul class="tags">
-		<li>typedef</li>
+		<li>module</li>
 	</ul>
 	
 	
@@ -807,7 +807,11 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Object}</code></h2>
+		<span class="module">steal.steal-clone</span>
+	
+	
+	
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -830,47 +834,58 @@
 		
 
 		
+		<section class="description">
+			<p>Steal-clone is a module that allows you to clone Steal's loader and provide module definitions that will be used when doing dynamic imports.</p>
+
+		</section>
+		
 
 		
 			
-			<section class='primary-options'>
-				
-
-  <h2 id="sig_">Object
+				<section class="signature">
+					<h2 id="sig_clone_moduleOverrides_">clone(moduleOverrides)
 </h2>
 <div class="signature-wrapper">
 
 
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>moduleOverrides
+				<code>{Object}</code></h4>
+			<div class="description">
+				<p>Module names and definitions used to override modules of the same name. These definitions will be used when importing parent modules using the <code>import</code> function of the returned loader.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
 
 
-
-
-  <h3>Properties</h3>
-  
-  <ol class="parameters">
-	
-	<li class="parameter">
-		<h4>
-			<code>{Object}</code></h4>
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Object}</code></h4>
 		<div class="description">
-			<p>The <code>$css</code> module is configured to process CSS modules.  By default,
-extensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>
-module is <code>steal/css.js</code>.</p>
+			<p>The cloned loader.</p>
 
 		</div>
 		
 		
-		
-	</li>
+	</div>
 	
-</ol>
+
+
+
 
 
 </div>
 
-  
-
-			</section>
+				</section>
 			
 		
 		
@@ -880,9 +895,65 @@ module is <code>steal/css.js</code>.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>Specify a CSS dependency like:</p>
-<pre><code>require(&quot;my.css!&quot;);
+<p>If you have <code>moduleA</code> defined as:</p>
+<pre><code class="language-js">import moduleB from 'moduleB';
+
+export default function() {
+  return 'moduleA ' + moduleB();
+};
 </code></pre>
+<p>and <code>moduleB</code> defined as:</p>
+<pre><code class="language-js">export default function() {
+  return 'moduleB';
+};
+</code></pre>
+<p>You can use <code>clone</code> to override the definition of moduleB that will be used from within moduleA:</p>
+<pre><code class="language-js">import clone from 'steal-clone';
+
+clone({
+  'moduleB': {
+    default: function() {
+      return 'moduleBOverride';
+    }
+  }
+}).import('moduleA', function(moduleA) {
+  moduleA(); // moduleA moduleBOverride
+});
+</code></pre>
+<h3>Module Names</h3>
+<p>The keys passed in the <code>moduleOverrides</code> object (&quot;moduleB&quot; in the example above) can be any valid module name. All of the module syntaxes supported by Steal are supported by steal-clone. If you're using <a href="http://stealjs.com/docs/syntax.es6.html">ES6 modules</a>, you can use the same value used in your import statement. Similarly, if you're using <a href="http://stealjs.com/docs/syntax.CommonJS.html">CommonJS</a>, you can use the same value that you pass to 'require'.</p>
+<p>You can also use relative paths to override modules based on where you are using steal-clone:</p>
+<pre><code class="language-js">clone({
+    './moduleB': ...
+});
+</code></pre>
+<h3>Module Definitions</h3>
+<p>The values passed in the <code>moduleOverrides</code> object define the exports for that module. In the above example, <code>moduleB</code> has a single default export.</p>
+<p>If <code>moduleB</code> is defined like:</p>
+<pre><code class="language-js">const name = 'moduleB';
+
+export let getName = function() {
+  return name;
+};
+
+export let getExcitedName = function() {
+  return name + '!';
+};
+</code></pre>
+<p>You can override both of the module's exports like this:</p>
+<pre><code class="language-js">clone({
+  'moduleB': {
+    getName: function() {
+      return 'moduleBOverride';
+    },
+    getExcitedName: function() {
+      return 'moduleBOverride!';
+    }
+  }
+});
+</code></pre>
+<h3>Use with Bower or NPM</h3>
+<p>Steal-clone can be used to override dependencies from <a href="http://stealjs.com/docs/bower.html">Bower</a> or <a href="http://stealjs.com/docs/npm.html">NPM</a> in the same way as any other module.</p>
 
 		</section>
 		
@@ -908,7 +979,7 @@ module is <code>steal/css.js</code>.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"$css","src":"steal/docs/module-css.md","description":"","title":"","types":[{"type":"Object","options":[{"description":"The `$css` module is configured to process CSS modules.  By default, \nextensions that end with `.css!` will use the `$css` module.  The default path to `$css`\nmodule is `steal/css.js`.","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"module","name":"steal.steal-clone","src":"steal/docs/module-steal-clone.md","description":"Steal-clone is a module that allows you to clone Steal's loader and provide module definitions that will be used when doing dynamic imports.","title":"steal-clone","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"parent":"StealJS.modules","signatures":[{"code":"clone(moduleOverrides)","description":"","params":[{"types":[{"type":"Object","options":[]}],"name":"moduleOverrides","description":"Module names and definitions used to override modules of the same name. These definitions will be used when importing parent modules using the `import` function of the returned loader."}],"returns":{"types":[{"type":"Object","options":[]}],"description":"The cloned loader."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

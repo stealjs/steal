@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - $css</title>
+	<title>StealJS - locate:// </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -477,7 +477,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="typedef" href="$css.html" data-search="$css">
 						$css
 					</a>
@@ -639,7 +639,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="property" href="locate.html" data-search="locate://">
 						locate://
 					</a>
@@ -796,9 +796,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>$css</h1>
+<h1>locate://</h1>
 	<ul class="tags">
-		<li>typedef</li>
+		<li>property</li>
 	</ul>
 	
 	
@@ -807,7 +807,9 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Object}</code></h2>
+		<span class="module">locate</span>
+	
+	
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -830,47 +832,60 @@
 		
 
 		
+		<section class="description">
+			<p>A path scheme that rewrites the path via the steal path resolution system. This syntax is only available in a file
+loaded by a supported extension.</p>
+
+		</section>
+		
 
 		
 			
-			<section class='primary-options'>
-				
-
-  <h2 id="sig_">Object
+				<section class="signature">
+					<h2 id="sig_locate___resourcePath">locate://resourcePath
 </h2>
 <div class="signature-wrapper">
 
 
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>resourcePath
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>Path to a resource to resolve via Steal. May be relative to the file, the baseURL, a npm
+or bower module, or any stealable module.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
 
 
-
-
-  <h3>Properties</h3>
-  
-  <ol class="parameters">
-	
-	<li class="parameter">
-		<h4>
-			<code>{Object}</code></h4>
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{String}</code></h4>
 		<div class="description">
-			<p>The <code>$css</code> module is configured to process CSS modules.  By default,
-extensions that end with <code>.css!</code> will use the <code>$css</code> module.  The default path to <code>$css</code>
-module is <code>steal/css.js</code>.</p>
+			<p>A path to the located resource, relative to the importing file.</p>
 
 		</div>
 		
 		
-		
-	</li>
+	</div>
 	
-</ol>
+
+
+
 
 
 </div>
 
-  
-
-			</section>
+				</section>
 			
 		
 		
@@ -879,10 +894,15 @@ module is <code>steal/css.js</code>.</p>
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p>Specify a CSS dependency like:</p>
-<pre><code>require(&quot;my.css!&quot;);
-</code></pre>
+			<p>Currently this syntax is supported in the bundled CSS, LESS &amp; Stache extensions.</p>
+<p>Note: In LESS &amp; Stache this syntax is available recursively, that is, it's available in stache &amp; LESS files that are
+sub-imports of those you include directly in your modules &amp; pages. However this isn't available for CSS imports, as CSS
+imports are handled by the browser without the Steal CSS plugin having a chance to rewrite any 'locate://' paths.</p>
+<p>As an example in a LESS context, we could import bootstrap into a stylesheet from the bootstrap npm module:</p>
+<p>/my-app/a/nested/stylesheet.less</p>
+<p><code>@import 'locate://bootstrap/less/bootstrap.less';</code></p>
+<p>it would be rewritten (assuming the default location of node_modules) to:</p>
+<p><code>@import '../../node_modules/bootstrap/less/bootstrap.less'</code></p>
 
 		</section>
 		
@@ -908,7 +928,7 @@ module is <code>steal/css.js</code>.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"typedef","name":"$css","src":"steal/docs/module-css.md","description":"","title":"","types":[{"type":"Object","options":[{"description":"The `$css` module is configured to process CSS modules.  By default, \nextensions that end with `.css!` will use the `$css` module.  The default path to `$css`\nmodule is `steal/css.js`.","types":[{"type":"Object","options":[]}]}]}],"parent":"StealJS.modules","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"locate","src":"steal/docs/scheme-locate.md","description":"A path scheme that rewrites the path via the steal path resolution system. This syntax is only available in a file\nloaded by a supported extension.","title":"locate://","parent":"StealJS.schemes","signatures":[{"code":"locate://resourcePath","description":"","params":[{"types":[{"type":"String"}],"name":"resourcePath","description":"Path to a resource to resolve via Steal. May be relative to the file, the baseURL, a npm\nor bower module, or any stealable module."}],"returns":{"types":[{"type":"String"}],"description":"A path to the located resource, relative to the importing file."}}],"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

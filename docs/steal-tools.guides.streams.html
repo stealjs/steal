@@ -354,8 +354,8 @@ graphStream.pipe(through(function(data){
     // data contains a 'graph' property.
 }));
 </code></pre>
-<h2>transpileAndBundle</h2>
-<p>Given a graph stream, <strong>transpileAndBundle</strong> does data transformation on your dependency graph. This includes <strong>transpiling</strong> to AMD, <strong>minifying</strong> (if enabled in your options), and dividing into optimized <strong>bundles</strong>.</p>
+<h2>transpile</h2>
+<p>Given a graph stream, <strong>transpile</strong> will transpile each module in the graph to AMD so that it can be bundled for production.</p>
 <pre><code>var s = require(&quot;steal-tools&quot;).streams;
 var through = require(&quot;through2&quot;);
 
@@ -363,16 +363,38 @@ var system = {
     config: __dirname + &quot;/package.json!npm&quot;
 };
 
-var buildStream = s.graph(system)
-    .pipe(s.transpileAndBundle());
+var transpileStream = s.graph(system)
+    .pipe(s.transpile());
 
-buildStream.pipe(through(function(data){
+transpileStream.pipe(through(function(data){
     // data contains everything from the graphStream
-    // and also now a 'bundles' property.
+    // With the modules in data.dependencyGraph having
+    // been transpiled to AMD.
+}));
+</code></pre>
+<h2>minify</h2>
+<p>A <a href="steal-tools.streams.minify.html">minify</a> stream will minify the source of each module in your graph individually. You'll want to do this after transpiling.</p>
+<h2>bundle</h2>
+<p>The <a href="steal-tools.streams.bundle.html">bundle</a> stream will analyze your dependency graph and split it into optimized bundles.</p>
+<pre><code>var s = require(&quot;steal-tools&quot;).streams;
+var through = require(&quot;through2&quot;);
+
+var system = {
+    config: __dirname + &quot;/package.json!npm&quot;
+};
+
+var bundleStream = s.graph(system)
+    .pipe(s.transpile())
+    .pipe(s.minify())
+    .pipe(s.bundle());
+
+bundleStream.pipe(through(function(data){
+    // data contains everything from the graphStream
+    // and also contains a .bundles property
 }));
 </code></pre>
 <h2>concat</h2>
-<p>Once you've created the multi build stream that contains all of your application's bundles, you can pipe it into a concat stream. The concat stream will <strong>concatenate</strong> the source from all of the graph's dependencies into a single source code.</p>
+<p>Once you've created the stream that contains all of your application's bundles, you can pipe it into a concat stream. The concat stream will <strong>concatenate</strong> the source from all of the graph's dependencies into a single source code.</p>
 <p>The <a href="steal-tools.BuildResult.html">BuildResult</a> object is what is returned from this stream, and each of the <strong>bundles</strong> within will now contain a <code>source</code> property.</p>
 <h2>write</h2>
 <p>After concatentating the bundles you call <strong>write</strong> to write the source to the filesystem. If you where only interested in examining the bundles in-memory you could skip this step.</p>
@@ -386,11 +408,13 @@ var system = {
 };
 
 var stream = s.graph(system)
-    .pipe(s.transpileAndBundle())
+    .pipe(s.transpile())
+    .pipe(s.minify())
+    .pipe(s.bundle())
     .pipe(s.concat())
     .pipe(s.write());
 </code></pre>
-<p>Now let's say we wanted to rerun <a href="https://babeljs.io/">babel</a> to transpile non-es6 modules. We could do this by injecting a stream after <em>multiBuild</em> has completed:</p>
+<p>Now let's say we wanted to rerun <a href="https://babeljs.io/">babel</a> to transpile non-es6 modules. We could do this by injecting a stream after <em>graph</em> has completed. This allows us to use our own transpile stream in place of the one StealTools provides:</p>
 <pre><code>var s = require(&quot;steal-tools&quot;).streams;
 
 var babel = require(&quot;babel-core&quot;);
@@ -404,7 +428,7 @@ var transform = function(source){
     });
 };
 
-var transform = function(){
+var transpile = function(){
     return through.obj(function(data){
         data.bundles.forEach(function(bundle){
             bundle.nodes.forEach(function(node){
@@ -419,8 +443,9 @@ var system = {
 };
 
 var stream = s.graph(system)
-    .pipe(s.transpileAndBundle())
-    .pipe(transform())
+    .pipe(transpile())
+    .pipe(s.minify())
+    .pipe(s.bundle())
     .pipe(s.concat())
     .pipe(s.write());
 </code></pre>

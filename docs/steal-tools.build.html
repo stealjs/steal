@@ -338,6 +338,96 @@
 				
 					
 					<li class="heading search-container">
+						<span>Streams</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.bundle.html" data-search="bundle">
+						bundle
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.concat.html" data-search="concat">
+						concat
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.graph.html" data-search="graph">
+						graph
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.minify.html" data-search="minify">
+						minify
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.transpile.html" data-search="transpile">
+						transpile
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="function" href="steal-tools.streams.write.html" data-search="write">
+						write
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
 						<span>Types</span>
 						
 	<ul>
@@ -536,7 +626,7 @@
 			<h4>config
 				<code>{<a href="steal-tools.SystemConfig.html" >SystemConfig</a>}</code></h4>
 			<div class="description">
-				<p>Specifies configuration values to set on the System loader.  In addition to the <code>main</code>, <code>config</code>, and <code>baseUrl</code> values
+				<p>Specifies configuration values to set on the System loader.  In addition to the <code>main</code>, <code>config</code>, <code>baseUrl</code> and <code>meta</code> values
 specified in <a href="steal-tools.SystemConfig.html">SystemConfig</a>, an additional <code>bundlesPath</code> is sometimes provided.</p>
 
 			</div>
@@ -684,6 +774,32 @@ relative to <a href="System.baseURL.html">System.baseURL</a>.  It will also chan
 config file. Instead, it should be set when <code>.build</code> is called
 and as an attribute in the script that loads <em>steal.js</em>.</p>
 </blockquote>
+<h2><a name="ignore"></a>ignore</h2>
+<p>The <code>ignore</code> option specifies which modules exclude from being bundled.
+A typical scenario for using <code>ignore</code> is if you want a dependent module loaded from a CDN.
+The browser can load e.g. jQuery from the browsers cache. This saves traffic and also speed up your site.</p>
+<p>If you exclude a module from the bundled file, you have to make sure, that in the <a href="http://stealjs.com/docs/System.envs.html">production environment configuration</a>
+the module is:</p>
+<ul>
+<li><p>... <a href="http://stealjs.com/docs/System.map.html#ignoring-optional-dependencies">mapped to the pseudo-module @empty</a> if you don't need it in production environment</p>
+<pre><code>&quot;envs&quot;: {
+    &quot;window-production&quot;: {
+        &quot;map&quot;: {
+            &quot;MODULENAME': &quot;@empty&quot;
+        }
+    }
+}
+</code></pre></li>
+<li><p>... <a href="http://stealjs.com/docs/steal.html#path-configure">configured</a> to the <a href="http://stealjs.com/docs/System.paths.html">right location</a> of the module e.g. a CDN</p>
+<pre><code>&quot;envs&quot;: {
+    &quot;production&quot;: {
+        &quot;paths&quot;: {
+            &quot;jquery': &quot;//code.jquery.com/jquery-2.2.1.min.js&quot;
+        }
+    }
+}
+</code></pre></li>
+</ul>
 <h2>Multi-page use</h2>
 <p>The following uses steal-tool's <code>build</code> method to programatically build out the &quot;login&quot; and &quot;homepage&quot;
 modules as bundles.</p>
@@ -760,7 +876,7 @@ stealTools.build({
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.build","src":"steal-tools/doc/build.md","description":"Build a module and all of its dependencies and, optionally, other bundles to progressively load.","title":"build","parent":"steal-tools.JS","signatures":[{"code":"stealTools.build(config, options)","description":"","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"bundlesPath","description":"Specifies the path where the production bundles should be \nplaced. Often, this is the same value as [System.bundlesPath]. By default, the location is `\"dist/bundles\"`.\n\nThe path can be specified in three ways:\n\n - Absolute path - bundlesPath starts with `/`, or matches _/^\\w+:[\\/\\\\]/_, like:`__dirname+\"/place\"`, or `\"c:\\my\\bundles\"`.\n - Relative to `process.cwd()` - bundlesPath starts with `./`, like `\"./place\"`.\n - Relative to [System.baseURL baseURL] - bundlesPath looks like: \"packages\", \"foo/bar\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'dist/bundle'"}]}],"name":"config","description":"Specifies configuration values to set on the System loader.  In addition to the `main`, `config`, and `baseUrl` values \nspecified in [steal-tools.SystemConfig], an additional `bundlesPath` is sometimes provided."},{"types":[{"type":"steal-tools.BuildOptions"}],"optional":true,"name":"options","description":"Specifies the behavior of the build."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]},{"type":"Stream","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]}],"description":"Either a Promise that resolves when the build is complete or a Stream that will send `data` events every time a rebuild is complete. By default a Promise is returned, unless the `watch` option is enabled."}}],"types":[],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.build","src":"steal-tools/doc/build.md","description":"Build a module and all of its dependencies and, optionally, other bundles to progressively load.","title":"build","parent":"steal-tools.JS","signatures":[{"code":"stealTools.build(config, options)","description":"","params":[{"types":[{"type":"steal-tools.SystemConfig","options":[{"name":"bundlesPath","description":"Specifies the path where the production bundles should be \nplaced. Often, this is the same value as [System.bundlesPath]. By default, the location is `\"dist/bundles\"`.\n\nThe path can be specified in three ways:\n\n - Absolute path - bundlesPath starts with `/`, or matches _/^\\w+:[\\/\\\\]/_, like:`__dirname+\"/place\"`, or `\"c:\\my\\bundles\"`.\n - Relative to `process.cwd()` - bundlesPath starts with `./`, like `\"./place\"`.\n - Relative to [System.baseURL baseURL] - bundlesPath looks like: \"packages\", \"foo/bar\".","types":[{"type":"String"}],"optional":true,"defaultValue":"'dist/bundle'"}]}],"name":"config","description":"Specifies configuration values to set on the System loader.  In addition to the `main`, `config`, `baseUrl` and `meta` values \nspecified in [steal-tools.SystemConfig], an additional `bundlesPath` is sometimes provided."},{"types":[{"type":"steal-tools.BuildOptions"}],"optional":true,"name":"options","description":"Specifies the behavior of the build."}],"returns":{"types":[{"type":"Promise","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]},{"type":"Stream","template":[{"types":[{"type":"steal-tools.BuildResult"}]}]}],"description":"Either a Promise that resolves when the build is complete or a Stream that will send `data` events every time a rebuild is complete. By default a Promise is returned, unless the `watch` option is enabled."}}],"types":[],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
