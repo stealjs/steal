@@ -219,7 +219,7 @@ exports.addExtension = function(System){
 
 	var oldLocate = System.locate;
 	System.locate = function(load){
-		var parsedModuleName = utils.moduleName.parse(load.name),
+		var parsedModuleName = utils.moduleName.parse(this, load.name),
 			loader = this;
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
@@ -314,7 +314,7 @@ exports.addExtension = function(System){
 	var convertName = function(loader, name){
 		var pkg = utils.pkg.findByName(loader, name.split("/")[0]);
 		if(pkg) {
-			var parsed = utils.moduleName.parse(name, pkg.name);
+			var parsed = utils.moduleName.parse(loader, name, {name: pkg.name, version: pkg.version});
 			parsed.version = pkg.version;
 			if(!parsed.modulePath) {
 				parsed.modulePath = utils.pkg.main(pkg);

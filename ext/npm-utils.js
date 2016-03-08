@@ -134,48 +134,102 @@ var utils = {
 		 *
 		 * @return {system-npm/parsed_npm}
 		 */
-		parse: function (moduleName, currentPackageName, global) {
-			var pluginParts = moduleName.split('!');
-			var modulePathParts = pluginParts[0].split("#");
-			var versionParts = modulePathParts[0].split("@");
+		parse: function (loader, moduleName, pkg, global) {
+			//moduleName = "@gulp-steal@1.0.0#app_a";
+			//moduleName = "@empty";
+			//moduleName = "foo@1.2#./path";
+			//moduleName = "@1.2#./path";
+			//moduleName = "./path";
+			//moduleName = "app_a";
+
+			var pluginParts,
+				modulePathParts,
+				versionParts,
+				plugin,
+				modulePath,
+				version;
+
+
+			if (moduleName in loader.paths){
+				return {
+					plugin: '',
+					version: '',
+					modulePath: '',
+					packageName: moduleName,
+					moduleName: moduleName,
+					isGlobal: global
+				};
+			}
+
+			// set default
+			var packageName = (pkg && pkg.name) ? pkg.name : undefined;
+			var packageVersion = (pkg && pkg.version) ? pkg.version : undefined;
+
+			if(packageName && moduleName.indexOf(packageName+'/') === 0) {
+				moduleName = moduleName.substr((packageName+'/').length);
+			}
+
+			if (moduleName.indexOf('!') !== -1) {
+				pluginParts = moduleName.split('!');
+				plugin = pluginParts[1];
+			}
+
+			if(moduleName.indexOf('#') !== -1) {
+				try {
+					modulePathParts = pluginParts[0].split('#');
+				}catch (e){
+					modulePathParts = moduleName.split('#');
+				}
+				modulePath = modulePathParts[1];
+			}
+
+			if(moduleName.indexOf('@') !== -1) {
+				try {
+					versionParts = modulePathParts[0].split('@');
+				}catch (e){
+					versionParts = moduleName.split('@');
+				}
+				version = versionParts[1];
+			}
+
+
 			// it could be something like `@empty`
-			if(!modulePathParts[1] && !versionParts[0]) {
-				versionParts = ["@"+versionParts[1]];
+			if(!modulePath && versionParts && !versionParts[0]) {
+				version = undefined;
 			}
+
 			// it could be a scope package
-			if(versionParts.length === 3 && utils.moduleName.isScoped(moduleName)) {
+			if(versionParts && versionParts.length === 3 && utils.moduleName.isScoped(moduleName)) {
 				versionParts.splice(0, 1);
-				versionParts[0] = "@"+versionParts[0];
+				version = versionParts[1];
+				packageName = versionParts[0];
 			}
-			var packageName,
-				modulePath;
 
 			// if relative, use currentPackageName
-			if( currentPackageName && utils.path.isRelative(moduleName) ) {
-				packageName= currentPackageName;
-				modulePath = versionParts[0];
+			if( packageName && utils.path.isRelative(moduleName) ) {
+				modulePath = moduleName;
 			} else {
-
-				if(modulePathParts[1]) { // foo@1.2#./path
+				if(modulePath && version) { // foo@1.2#./path
 					packageName = versionParts[0];
-					modulePath = modulePathParts[1];
 				} else {
 					// test/abc
-					var folderParts = versionParts[0].split("/");
+					var folderParts = moduleName.split("/");
 					// Detect scoped packages
 					if(folderParts.length && folderParts[0][0] === "@") {
 						packageName = folderParts.splice(0, 2).join("/");
-					} else {
+					} else if(folderParts.length > 1) {
 						packageName = folderParts.shift();
 					}
 					modulePath = folderParts.join("/");
+					if(!version) {
+						version = packageVersion;
+					}
 				}
-
 			}
 
 			return {
-				plugin: pluginParts.length === 2 ? "!"+pluginParts[1] : undefined,
-				version: versionParts[1],
+				plugin: plugin,
+				version: version,
 				modulePath: modulePath,
 				packageName: packageName,
 				moduleName: moduleName,
@@ -199,7 +253,8 @@ var utils = {
 		parseFromPackage: function(loader, refPkg, name, parentName) {
 			// Get the name of the
 			var packageName = utils.pkg.name(refPkg),
-			    parsedModuleName = utils.moduleName.parse(name, packageName),
+					packageVersion = refPkg.version,
+			    parsedModuleName = utils.moduleName.parse(loader, name, {name: packageName, version: packageVersion}),
 				isRelative = utils.path.isRelative(parsedModuleName.modulePath);
 
 			if(isRelative && !parentName) {
@@ -210,7 +265,7 @@ var utils = {
 			// If the module needs to be loaded relative.
 			if(isRelative) {
 				// get the location of the parent
-				var parentParsed = utils.moduleName.parse( parentName, packageName );
+				var parentParsed = utils.moduleName.parse(loader, parentName, {name: packageName, version: packageVersion});
 				// If the parentModule and the currentModule are from the same parent
 				if( parentParsed.packageName === parsedModuleName.packageName && parentParsed.modulePath ) {
 					// Make the path relative to the parentName's path.
@@ -236,7 +291,7 @@ var utils = {
 			}
 
 			if(mappedName) {
-				return utils.moduleName.parse(mappedName, packageName, !!global);
+				return utils.moduleName.parse(loader, mappedName, {name: packageName, version: packageVersion}, !!global);
 			} else {
 				return parsedModuleName;
 			}
@@ -299,7 +354,7 @@ var utils = {
 		findByModuleNameOrAddress: function(loader, moduleName, moduleAddress) {
 			if(loader.npm) {
 				if(moduleName) {
-					var parsed = utils.moduleName.parse(moduleName);
+					var parsed = utils.moduleName.parse(loader, moduleName);
 					if(parsed.version && parsed.packageName) {
 						var name = parsed.packageName+"@"+parsed.version;
 						if(name in loader.npm) {
