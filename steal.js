@@ -4849,6 +4849,8 @@ var $__curScript, __eval;
 (function() {
 
   var doEval;
+  var isWorker = typeof window == 'undefined' && typeof self != 'undefined' && typeof importScripts != 'undefined';
+  var isBrowser = typeof window != 'undefined' && typeof document != 'undefined';
 
   __eval = function(source, address, sourceMap) {
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
@@ -4866,7 +4868,31 @@ var $__curScript, __eval;
     }
   };
 
-  if (typeof document != 'undefined') {
+  if (isWorker || isBrowser && window.chrome && window.chrome.extension) {
+    doEval = function(source) {
+      try {
+        eval(source);
+      } catch(e) {
+        throw e;
+      }
+    };
+
+    if (!$__global.System || !$__global.LoaderPolyfill) {
+      var basePath = '';
+      try {
+        throw new Error('Get worker base path via error stack');
+      } catch (e) {
+        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
+          basePath = url.replace(/\/[^\/]*$/, '/');
+        });
+      }
+      importScripts(basePath + 'steal-es6-module-loader.js');
+      $__global.upgradeSystemLoader();
+    } else {
+      $__global.upgradeSystemLoader();
+    }
+  }
+  else if (typeof document != 'undefined') {
     var head;
 
     var scripts = document.getElementsByTagName('script');
@@ -4900,30 +4926,6 @@ var $__curScript, __eval;
       );
     }
     else {
-      $__global.upgradeSystemLoader();
-    }
-  }
-  else if (typeof WorkerGlobalScope != 'undefined' && typeof importScripts != 'undefined') {
-    doEval = function(source) {
-      try {
-        eval(source);
-      } catch(e) {
-        throw e;
-      }
-    };
-
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      var basePath = '';
-      try {
-        throw new Error('Get worker base path via error stack');
-      } catch (e) {
-        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
-          basePath = url.replace(/\/[^\/]*$/, '/');
-        });
-      }
-      importScripts(basePath + 'steal-es6-module-loader.js');
-      $__global.upgradeSystemLoader();
-    } else {
       $__global.upgradeSystemLoader();
     }
   }
@@ -5175,6 +5177,9 @@ var makeSteal = function(System){
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar
 	var addExt = function(loader) {
+		if (loader._extensions) {
+			loader._extensions.push(addExt);
+		}
 
 		loader.ext = {};
 
@@ -5206,8 +5211,11 @@ var makeSteal = function(System){
 
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
-		var normalize = loader.normalize;
+		if (loader._extensions) {
+			loader._extensions.push(addForwardSlash);
+		}
 
+		var normalize = loader.normalize;
 		var npmLike = /@.+#.+/;
 
 		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
@@ -5232,12 +5240,14 @@ var makeSteal = function(System){
 		addForwardSlash(System);
 	}
 
-var addTilde = function(loader){
+// override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
+// in resources loaded by supporting plugins
 
+var addLocate = function(loader){
 	/**
 	 * @hide
 	 * @function normalizeAndLocate
-	 * @description Run a tilded moduleName through Normalize and Locate hooks.
+	 * @description Run a module identifier through Normalize and Locate hooks.
 	 * @param {String} moduleName The module to run through normalize and locate.
 	 * @return {Promise} A promise to resolve when the address is found.
 	 */
@@ -5253,82 +5263,64 @@ var addTilde = function(loader){
 				return address;
 			});
 	};
+
 	var relative = function(base, path){
-		
 		var uriParts = path.split("/"),
 			baseParts = base.split("/"),
 			result = [];
+
 		while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
 			uriParts.shift();
 			baseParts.shift();
 		}
+
 		for(var i = 0 ; i< baseParts.length-1; i++) {
 			result.push("../");
 		}
+
 		return result.join("") + uriParts.join("/");
 	};
-	
-	var quotes = /["']/;
-	var LOCATE_MACRO = function(source, sourceAddress) {
-		if(/^file:/.test(sourceAddress)) {
-			sourceAddress = sourceAddress.substr(5);
-		}
-		var locations = [];
-		source.replace(/LOCATE\(([^\)]+)\)/g, function(whole, part, index){
-			// trim in IE8
-			var name = part.replace(/^\s+|\s+$/g, ''),
-				first = name.charAt(0),
-				quote;
-			if( quotes.test(first) ) {
-				quote = first;
-				name = name.substr(1, name.length -2); 
-			}
-			locations.push({
-				start: index,
-				end: index+whole.length,
-				name: name,
-				replace: function(address){
-					if(/^file:/.test(address)) {
-						address = address.substr(5);
-					}
-					var rel = relative(sourceAddress,address);
-					return quote ? quote + rel + quote : rel;
-				}
-			});
-		});
-		return locations;
-	}; 
- 
 
-	var translate = loader.translate;
+	var schemePattern = /(locate):\/\/([a-z0-9/._@-]*)/ig,
+		parsePathSchemes = function(source, parent) {
+			var locations = [];
+			source.replace(schemePattern, function(whole, scheme, path, index){
+				locations.push({
+					start: index,
+					end: index+whole.length,
+					name: path,
+					postLocate: function(address){
+						return relative(parent, address);
+					}
+				});
+			});
+			return locations;
+		};
+
+	var _translate = loader.translate;
 	loader.translate = function(load){
 		var loader = this;
 
 		// This only applies to plugin resources.
 		if(!load.metadata.plugin) {
-			return translate.call(this, load);
+			return _translate.call(this, load);
 		}
 
-		// Get the translator RegExp if this is a supported type.
-		var locateMacro = load.metadata.plugin.locateMacro;
-
-		if(!locateMacro) {
-			return translate.call(this, load);
-		}
-		if(locateMacro === true) {
-			locateMacro = LOCATE_MACRO;
+		// Use the translator if this file path scheme is supported by the plugin
+		var locateSupport = load.metadata.plugin.locateScheme;
+		if(!locateSupport) {
+			return _translate.call(this, load);
 		}
 
-		// Gets an array of moduleNames like ~/foo
-		var locations = locateMacro(load.source, load.address);
-		
+		// Parse array of module names
+		var locations = parsePathSchemes(load.source, load.address);
+
+		// no locations found
 		if(!locations.length) {
-			return translate.call(this, load);
+			return _translate.call(this, load);
 		}
 
-		// This load is a supported type and there are ~/ being used, so get
-		// normalize and locate all of the modules found and then replace those
-		// instances in the source.
+		// normalize and locate all of the modules found and then replace those instances in the source.
 		var promises = [];
 		for(var i = 0, len = locations.length; i < len; i++) {
 			promises.push(
@@ -5337,22 +5329,23 @@ var addTilde = function(loader){
 		}
 		return Promise.all(promises).then(function(addresses){
 			for(var i = locations.length - 1; i >= 0; i--) {
-				// Replace the tilde names with the fully located address
-				load.source = load.source.substr(0, locations[i].start)+
-								locations[i].replace(addresses[i])+
-								load.source.substr(locations[i].end, load.source.length);
-
+				load.source = load.source.substr(0, locations[i].start)
+					+ locations[i].postLocate(addresses[i])
+					+ load.source.substr(locations[i].end, load.source.length);
 			}
-			return translate.call(loader, load);
+			return _translate.call(loader, load);
 		});
 	};
 };
 
 if(typeof System !== "undefined") {
-	addTilde(System);
+	addLocate(System);
 }
 
 function addContextual(loader){
+  if (loader._extensions) {
+    loader._extensions.push(addContextual);
+  }
   loader._contextualModules = {};
 
   loader.setContextual = function(moduleName, definer){
@@ -5381,7 +5374,7 @@ function addContextual(loader){
             if (definer['default']) {
               definer = definer['default'];
             }
-            loader.set(name, loader.newModule(definer(parentName)));
+            loader.set(name, loader.newModule(definer.call(loader, parentName)));
             return name;
           });
         }
@@ -5553,10 +5546,8 @@ function applyTraceExtension(loader){
 	};
 
 	loader.eachModule = function(cb){
-		for (var moduleName in this._traceData.loads) {
-			if (this.has(moduleName)) {
-				cb.call(this, moduleName, this.get(moduleName));
-			}
+		for (var moduleName in this._loader.modules) {
+			cb.call(this, moduleName, this.get(moduleName));
 		}
 	};
 }
@@ -5938,10 +5929,14 @@ if (typeof System !== "undefined") {
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
 
 				if(isNode) {
 					System.register("@less-engine", [], false, function(){
@@ -6013,7 +6008,6 @@ if (typeof System !== "undefined") {
 			System.config(cfg);
 		}
 	};
-
 
 if(typeof System !== "undefined") {
 	addEnv(System);
@@ -6198,6 +6192,9 @@ function addEnv(loader){
   Provides the Steal module format definition.
 */
 function addSteal(loader) {
+	if (loader._extensions) {
+		loader._extensions.push(addSteal);
+	}
 
   // Steal Module Format Detection RegEx
   // steal(module, ...)
