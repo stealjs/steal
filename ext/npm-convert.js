@@ -118,7 +118,7 @@ function convertPropertyNamesAndValues (context, pkg, map, root, waiting) {
 }
 
 function convertName (context, pkg, map, root, name, waiting) {
-	var parsed = utils.moduleName.parse(name, pkg.name),
+	var parsed = utils.moduleName.parse(context.loader, name, {name: pkg.name}),
 		depPkg, requestedVersion;
 	if( name.indexOf("#") >= 0 ) {
 		// If this is a fully converted name just return the name.
@@ -226,23 +226,23 @@ function convertName (context, pkg, map, root, name, waiting) {
  * }
  * ```
  */
-function convertBrowser(pkg, browser) {
+function convertBrowser(context, pkg, browser) {
 	if(typeof browser === "string") {
 		return browser;
 	}
 	var map = {};
 	for(var fromName in browser) {
-		convertBrowserProperty(map, pkg, fromName, browser[fromName]);
+		convertBrowserProperty(context, map, pkg, fromName, browser[fromName]);
 	}
 	return map;
 }
 
 
-function convertBrowserProperty(map, pkg, fromName, toName) {
+function convertBrowserProperty(context, map, pkg, fromName, toName) {
 	var packageName = pkg.name;
 
-	var fromParsed = utils.moduleName.parse(fromName, packageName),
-		  toParsed = toName  ? utils.moduleName.parse(toName, packageName): "@empty";
+	var fromParsed = utils.moduleName.parse(context.loader, fromName, {name: packageName}),
+		  toParsed = toName  ? utils.moduleName.parse(context.loader, toName, {name: packageName}): "@empty";
 
 	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
 }
@@ -262,8 +262,8 @@ function convertToPackage(context, pkg, index) {
 			fileUrl: utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 			main: pkg.main,
 			system: convertSystem(context, pkg, pkg.system, index === 0),
-			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
-			browser: convertBrowser(pkg, pkg.browser)
+			globalBrowser: convertBrowser(context, pkg, pkg.globalBrowser),
+			browser: convertBrowser(context, pkg, pkg.browser)
 		};
 		packages.push(localPkg);
 		packages[nameAndVersion] = true;
