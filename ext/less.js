@@ -81,8 +81,10 @@ if (lessEngine.FileManager) {
 		// collect locate promises
 		file.contents.replace(self.PATTERN, function (whole, path, index) {
 			promises.push(self.locate(path, file.filename.replace(loader.baseURL, '')).then(function(filename) {
+				filename = filename.replace(/^file\:/,"");
+
 				return {
-					str: filename.replace(file._directory, ''),
+					str: relative(file._directory, filename),
 					loc: index,
 					del: whole.length
 				}
@@ -132,3 +134,20 @@ if (lessEngine.FileManager) {
 		}
 	};
 }
+
+var relative = function(base, path){
+	var uriParts = path.split("/"),
+		baseParts = base.split("/"),
+		result = [];
+
+	while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+		uriParts.shift();
+		baseParts.shift();
+	}
+
+	for(var i = 0 ; i< baseParts.length-1; i++) {
+		result.push("../");
+	}
+
+	return result.join("") + uriParts.join("/");
+};

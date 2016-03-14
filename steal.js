@@ -4849,8 +4849,6 @@ var $__curScript, __eval;
 (function() {
 
   var doEval;
-  var isWorker = typeof window == 'undefined' && typeof self != 'undefined' && typeof importScripts != 'undefined';
-  var isBrowser = typeof window != 'undefined' && typeof document != 'undefined';
 
   __eval = function(source, address, sourceMap) {
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
@@ -4868,31 +4866,7 @@ var $__curScript, __eval;
     }
   };
 
-  if (isWorker || isBrowser && window.chrome && window.chrome.extension) {
-    doEval = function(source) {
-      try {
-        eval(source);
-      } catch(e) {
-        throw e;
-      }
-    };
-
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      var basePath = '';
-      try {
-        throw new Error('Get worker base path via error stack');
-      } catch (e) {
-        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
-          basePath = url.replace(/\/[^\/]*$/, '/');
-        });
-      }
-      importScripts(basePath + 'steal-es6-module-loader.js');
-      $__global.upgradeSystemLoader();
-    } else {
-      $__global.upgradeSystemLoader();
-    }
-  }
-  else if (typeof document != 'undefined') {
+  if (typeof document != 'undefined') {
     var head;
 
     var scripts = document.getElementsByTagName('script');
@@ -4926,6 +4900,30 @@ var $__curScript, __eval;
       );
     }
     else {
+      $__global.upgradeSystemLoader();
+    }
+  }
+  else if (typeof WorkerGlobalScope != 'undefined' && typeof importScripts != 'undefined') {
+    doEval = function(source) {
+      try {
+        eval(source);
+      } catch(e) {
+        throw e;
+      }
+    };
+
+    if (!$__global.System || !$__global.LoaderPolyfill) {
+      var basePath = '';
+      try {
+        throw new Error('Get worker base path via error stack');
+      } catch (e) {
+        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
+          basePath = url.replace(/\/[^\/]*$/, '/');
+        });
+      }
+      importScripts(basePath + 'steal-es6-module-loader.js');
+      $__global.upgradeSystemLoader();
+    } else {
       $__global.upgradeSystemLoader();
     }
   }
