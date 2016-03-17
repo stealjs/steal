@@ -320,7 +320,7 @@
 							if ( last(parts) === "bower_components" ) {
 								this.config({config: "bower.json!bower"});
 								addProductionBundles.call(this);
-								parts.length = 0;
+								parts.pop();
 							}
 							if (last(parts) === "node_modules") {
 								this.config({config: "package.json!npm"});
