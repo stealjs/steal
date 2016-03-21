@@ -225,14 +225,20 @@
 					searchParts = search.split("&"),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
-					stealPath = paths.join("/");
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+				// if steal is bundled we always are in production environment
+				if(this.stealBundled) {
 					this.config({ env: platform+"-production" });
-					addProductionBundles.call(this);
+
+				}else{
+					specialConfig.stealPath.set.call(this,stealPath, cfg);
+
+					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+						this.config({ env: platform+"-production" });
+						addProductionBundles.call(this);
+					}
 				}
 
 				if(searchParts.length && searchParts[0].length) {
@@ -260,9 +266,6 @@
 				}
 
 				// Split on / to get rootUrl
-
-
-
 
 			}
 		},
