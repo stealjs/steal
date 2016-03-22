@@ -5910,9 +5910,6 @@ if (typeof System !== "undefined") {
 
 				// Split on / to get rootUrl
 
-
-
-
 			}
 		},
 		// this gets called with the __dirname steal is in
