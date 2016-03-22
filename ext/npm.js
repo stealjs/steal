@@ -8,11 +8,6 @@ var npmLoad = require("./npm-load");
 var isNode = typeof process === "object" &&
 	{}.toString.call(process) === "[object process]";
 
-// Add @loader, for SystemJS
-if(!System.has("@loader")) {
-	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
-}
-
 // SYSTEMJS PLUGIN EXPORTS =================
 
 /**
