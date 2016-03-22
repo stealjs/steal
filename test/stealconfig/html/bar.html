@@ -1,0 +1,17 @@
+<body>
+
+
+<script>
+    window.QUnit = window.parent.QUnit;
+    window.removeMyself = window.parent.removeMyself;
+</script>
+
+<script>
+    var steal = {
+        "configPath":"http:\/\/localhost:8080\/tessst\/foo\/html\/ssd\/js\/stealconfig.js",
+        "main":"..\/main.js?swcv=ssd_\/*@echo RELEASE_TAG*\/",
+        "bundlesPath":".\/ssd\/js"
+    };
+</script>
+<script type="text/javascript" src='ssd/js/libs/steal/steal.js'></script>
+</body>
