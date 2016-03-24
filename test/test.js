@@ -151,7 +151,6 @@ QUnit.config.testTimeout = 30000;
 			makeIframe("basics/basics-steal-config.html");
 		});
 
-
 		asyncTest("basics with generated html", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
@@ -168,6 +167,10 @@ QUnit.config.testTimeout = 30000;
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
 				'src="../steal/steal.js?basics"'));
+		});
+
+		asyncTest("use steal object and configMain", function(){
+			makeIframe("stealconfig/dev.html");
 		});
 	}
 
