@@ -446,4 +446,8 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/relative-override/index.html");
 	});
 
+	asyncTest("what happens within a cloned loader should not leak", function(){
+		makeIframe("ext-steal-clone/leak/index.html");
+	});
+
 })();
