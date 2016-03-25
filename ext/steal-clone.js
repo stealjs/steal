@@ -1,22 +1,9 @@
-// Recursively delete a module's parent modules
-function deletedModulesParents(moduleName) {
-	var parentModules = this.getDependants(moduleName);
-
-	this['delete'](moduleName);
-
-	for (var i = 0; i < parentModules.length; i++) {
-		deletedModulesParents.call(this, parentModules[i]);
-	}
-}
-
 // Returns a Promise that will resolve once the module is set on the loader
 function setModule(moduleName, parentName, moduleOverrides) {
 	var newLoader = this;
 	return new Promise(function(resolve) {
 		newLoader.normalize(moduleName, parentName)
 		.then(function(normalizedModuleName) {
-			deletedModulesParents.call(newLoader, normalizedModuleName);
-
 			// set module overrides
 			newLoader.set(normalizedModuleName, newLoader.newModule(
 				moduleOverrides[moduleName]
@@ -26,7 +13,11 @@ function setModule(moduleName, parentName, moduleOverrides) {
 	});
 }
 
-var excludedConfigProps = [ '_extensions', '_loader' ];
+var excludedConfigProps = {
+	'_extensions': true,
+	'_loader': true,
+	'defined': true
+};
 // Recursively copy a config object
 function cloneConfig(obj, isTopLevel) {
 	var clone;
@@ -50,7 +41,8 @@ function cloneConfig(obj, isTopLevel) {
 			if (obj.hasOwnProperty(attr)) {
 				if (isTopLevel) {
 					// exclude specific props and functions from top-level of config
-					if (typeof obj[attr] !== 'function' && excludedConfigProps.indexOf(attr) < 0) {
+					if (typeof obj[attr] !== 'function' &&
+						!excludedConfigProps[attr]) {
 						clone[attr] = cloneConfig(obj[attr]);
 					}
 				} else {
@@ -70,6 +62,7 @@ module.exports = function(parentName) {
 	return {
 		'default': function clone(moduleOverrides) {
 			var newLoader = loader.clone();
+			newLoader.cloned = true;
 
 			// prevent import from being called before module overrides are complete
 			var _import = newLoader['import'];
@@ -105,9 +98,9 @@ module.exports = function(parentName) {
 			}
 
 			// copy module registry
-			loader.eachModule(function(moduleName, moduleData) {
-				newLoader.set(moduleName, moduleData);
-			});
+			newLoader.set('@loader', newLoader.newModule({
+				'default':newLoader, __useDefault: true
+			}));
 
 			// set module overrides
 			if (moduleOverrides) {
