@@ -63,7 +63,7 @@
 		// we only load things with force = true
 		if ( System.loadBundles ) {
 
-			if(!System.main && System.isEnv("production")) {
+			if(!System.main && System.isEnv("production") && !System.stealBundled) {
 				// prevent this warning from being removed by Uglify
 				var warn = console && console.warn || function() {};
 				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
