@@ -54,22 +54,30 @@ var crawl = {
 		}
 
 		var p = context.fetchCache[versionAndRange] =
-			crawl.fetchDep(context, pkg, childPkg, isRoot)
-			.then(function(){
-				// Save this pkgInfo into the context
-				var localPkg = convert.toPackage(context, childPkg);
+			crawl.fetchDep(context, pkg, childPkg, isRoot);
 
-				convert.forPackage(context, childPkg);
-				
+		p = Promise.resolve(p).then(function(result){
+			// Package already being fetched
+			if(result === undefined) {
+				var fetchedPkg = crawl.matchedVersion(context, childPkg.name,
+													  childPkg.version);
+				return fetchedPkg;
+			}
 
-				// Save package.json!npm load
-				npmModuleLoad.saveLoadIfNeeded(context);
+			// Save this pkgInfo into the context
+			var localPkg = convert.toPackage(context, childPkg);
 
-				// Setup any config that needs to be placed on the loader.
-				crawl.setConfigForPackage(context, localPkg);
+			convert.forPackage(context, childPkg);
+			
 
-				return localPkg;
-			});
+			// Save package.json!npm load
+			npmModuleLoad.saveLoadIfNeeded(context);
+
+			// Setup any config that needs to be placed on the loader.
+			crawl.setConfigForPackage(context, localPkg);
+
+			return localPkg;
+		});
 		return p;
 	},
 
@@ -373,9 +381,13 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 		return !!(!npmIgnore || !npmIgnore[name]);
 	}
 	
+	defaultProps = defaultProps || {};
+	var val;
 	for(var name in dependencies) {
 		if(includeDep(name)) {
-			deps[name] = utils.extend(defaultProps || {}, {name: name, version: dependencies[name]});
+			val = utils.extend({}, defaultProps);
+			utils.extend(val, {name: name, version: dependencies[name]});
+			deps[name] = val;
 		}
 	}
 }
