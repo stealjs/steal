@@ -358,6 +358,18 @@
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		meta: {
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						extend(value, cur);
+					}
+				});
+				extend(this.meta, cfg);
+			}
 		}
 	});
 
