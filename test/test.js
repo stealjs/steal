@@ -364,6 +364,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("npm-deep/dev.html");
 	});
 
+	asyncTest("meta config is deep", function(){
+		makeIframe("meta-deep/index.html");
+	});
+
 	module("Bower extension");
 
 	asyncTest("Basics work", function(){
