@@ -145,7 +145,7 @@ module.exports = function (grunt) {
 		options: {
 		  browsers: ["firefox"]
 		},
-		src: ["test/test.html"]
+		src: ["test/test.html", "test/unit_test.html"]
 	  }
 	},
 	simplemocha: {
