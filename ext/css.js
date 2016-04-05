@@ -24,6 +24,13 @@ if(isProduction()) {
 				return "url(" + steal.joinURIs( load.address, part) + ")";
 			});
 
+			// Replace @import's that don't start with a "u" or "U" and do start
+			// with a single or double quote with a path wrapped in "url()"
+			// relative to the page
+			source = source.replace(/@import [^uU]['"]?([^'"\)]*)['"]?/g, function(whole, part) {
+				return "@import url(" + steal.joinURIs( load.address, part) + ")";
+			});
+
 			if(load.source && typeof document !== "undefined") {
 				var doc = document.head ? document : document.getElementsByTagName ?
 					document : document.documentElement;
