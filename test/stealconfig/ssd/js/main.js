@@ -1,6 +1,6 @@
-steal(function(module){
+steal(function (module) {
 
-	if(typeof window !== "undefined" && window.QUnit) {
+	if (typeof window !== "undefined" && window.QUnit) {
 
 		QUnit.equal(window.System.map["mapd/mapd"], "map/mapped");
 

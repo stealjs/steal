@@ -151,6 +151,7 @@ QUnit.config.testTimeout = 30000;
 			makeIframe("basics/basics-steal-config.html");
 		});
 
+
 		asyncTest("basics with generated html", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
