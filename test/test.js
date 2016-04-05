@@ -151,7 +151,6 @@ QUnit.config.testTimeout = 30000;
 			makeIframe("basics/basics-steal-config.html");
 		});
 
-
 		asyncTest("basics with generated html", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
@@ -168,6 +167,10 @@ QUnit.config.testTimeout = 30000;
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
 				'src="../steal/steal.js?basics"'));
+		});
+
+		asyncTest("use steal object and configMain", function(){
+			makeIframe("stealconfig/dev.html");
 		});
 	}
 
@@ -364,6 +367,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("npm-deep/dev.html");
 	});
 
+	asyncTest("meta config is deep", function(){
+		makeIframe("meta-deep/index.html");
+	});
+
 	module("Bower extension");
 
 	asyncTest("Basics work", function(){
@@ -444,6 +451,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("works when using relative overrides", function() {
 		makeIframe("ext-steal-clone/relative-override/index.html");
+	});
+
+	asyncTest("what happens within a cloned loader should not leak", function(){
+		makeIframe("ext-steal-clone/leak/index.html");
 	});
 
 })();

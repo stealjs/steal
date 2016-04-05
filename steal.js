@@ -6001,6 +6001,26 @@ if (typeof System !== "undefined") {
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		meta: {
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					if(typeof value !== "object") {
+						return;
+					}
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						// Keep the deps, if we have any
+						var deps = value.deps;
+						extend(value, cur);
+						if(deps) {
+							value.deps = deps;
+						}
+					}
+				});
+				extend(this.meta, cfg);
+			}
 		}
 	});
 
@@ -6084,15 +6104,15 @@ function addEnv(loader){
 			};
 		}
 
-		// first set the config that is set with a steal object
-		if(config){
-			System.config(config);
+		if(typeof config === 'object'){
+			// the url options are the source of truth
+			config = extend(config, urlOptions);
+		}else{
+			config = urlOptions;
 		}
 
-		// B: DO THINGS WITH OPTIONS
-		// CALCULATE CURRENT LOCATION OF THINGS ...
-		System.config(urlOptions);
-
+		// set the config
+		System.config(config);
 
 		setEnvsConfig.call(this.System);
 
@@ -6104,7 +6124,7 @@ function addEnv(loader){
 		// we only load things with force = true
 		if ( System.loadBundles ) {
 
-			if(!System.main && System.isEnv("production")) {
+			if(!System.main && System.isEnv("production") && !System.stealBundled) {
 				// prevent this warning from being removed by Uglify
 				var warn = console && console.warn || function() {};
 				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");

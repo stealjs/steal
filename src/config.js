@@ -358,6 +358,26 @@
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		meta: {
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					if(typeof value !== "object") {
+						return;
+					}
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						// Keep the deps, if we have any
+						var deps = value.deps;
+						extend(value, cur);
+						if(deps) {
+							value.deps = deps;
+						}
+					}
+				});
+				extend(this.meta, cfg);
+			}
 		}
 	});
 

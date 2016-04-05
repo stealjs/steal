@@ -183,38 +183,6 @@ exports.addExtension = function(System){
 									 parentAddress, pluginNormalize);
 
 		}
-
-		if(depPkg) {
-			parsedModuleName.version = depPkg.version;
-			// add the main path
-			if(!parsedModuleName.modulePath) {
-				parsedModuleName.modulePath = utils.pkg.main(depPkg);
-			}
-			var moduleName = utils.moduleName.create(parsedModuleName);
-			// Apply mappings, if they exist in the refPkg
-			if(refPkg.system && refPkg.system.map &&
-			   typeof refPkg.system.map[moduleName] === "string") {
-				moduleName = refPkg.system.map[moduleName];
-			}
-			return oldNormalize.call(this, moduleName, parentName,
-									 parentAddress, pluginNormalize);
-		} else {
-			if(utils.pkg.isRoot(this, depPkg)) {
-				// if the current package, we can't? have the
-				// module name look like foo@bar#./zed
-				var localName = parsedModuleName.modulePath ?
-					parsedModuleName.modulePath+(parsedModuleName.plugin? parsedModuleName.plugin: "") :
-					utils.pkg.main(depPkg);
-				return oldNormalize.call(this, localName, parentName,
-										 parentAddress, pluginNormalize);
-			}
-			if(refPkg.browser && refPkg.browser[name]) {
-				return oldNormalize.call(this, refPkg.browser[name], parentName,
-										 parentAddress, pluginNormalize);
-			}
-			return oldNormalize.call(this, name, parentName, parentAddress,
-									 pluginNormalize);
-		}
 	};
 
 	var oldLocate = System.locate;
