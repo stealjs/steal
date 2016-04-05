@@ -204,7 +204,11 @@
 		configPath: configSetter,
 		loadBundles: {
 			set: function(val){
+				var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+
 				this.loadBundles = val;
+				this.env = platform+"-production";
+
 				addProductionBundles.call(this);
 			}
 		},
@@ -228,17 +232,15 @@
 					stealPath = paths.join("/"),
 					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				// if steal is bundled we always are in production environment
-				if(this.stealBundled && this.stealBundled === true) {
-					this.config({ env: platform+"-production" });
-
-				}else{
+				// we dont want to set all the development paths if loadBundles is true
+				if(!this.loadBundles) {
 					specialConfig.stealPath.set.call(this,stealPath, cfg);
+				}
 
-					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-						this.config({ env: platform+"-production" });
-						addProductionBundles.call(this);
-					}
+				// if steal.production is loaded, we always in production environment
+				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+					this.config({ env: platform+"-production" });
+					addProductionBundles.call(this);
 				}
 
 				if(searchParts.length && searchParts[0].length) {
