@@ -169,6 +169,10 @@ QUnit.config.testTimeout = 30000;
 				"basics/basics.html",
 				'src="../steal/steal.js?basics"'));
 		});
+
+		asyncTest("use steal object and configMain", function(){
+			makeIframe("stealconfig/dev.html");
+		});
 	}
 
 	asyncTest("inline", function(){
