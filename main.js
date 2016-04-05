@@ -1071,15 +1071,15 @@ function addEnv(loader){
 			};
 		}
 
-		// first set the config that is set with a steal object
-		if(config){
-			System.config(config);
+		if(typeof config === 'object'){
+			// the url options are the source of truth
+			config = extend(config, urlOptions);
+		}else{
+			config = urlOptions;
 		}
 
-		// B: DO THINGS WITH OPTIONS
-		// CALCULATE CURRENT LOCATION OF THINGS ...
-		System.config(urlOptions);
-
+		// set the config
+		System.config(config);
 
 		setEnvsConfig.call(this.System);
 
