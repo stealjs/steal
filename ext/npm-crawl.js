@@ -53,6 +53,8 @@ var crawl = {
 			return context.fetchCache[versionAndRange];
 		}
 
+		childPkg = utils.extend({}, childPkg);
+
 		var p = context.fetchCache[versionAndRange] =
 			crawl.fetchDep(context, pkg, childPkg, isRoot);
 
@@ -62,6 +64,8 @@ var crawl = {
 				var fetchedPkg = crawl.matchedVersion(context, childPkg.name,
 													  childPkg.version);
 				return fetchedPkg;
+			} else {
+				childPkg = result;
 			}
 
 			// Save this pkgInfo into the context
