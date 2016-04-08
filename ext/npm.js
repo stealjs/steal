@@ -63,7 +63,9 @@ exports.translate = function(load){
 					main: pkg.main,
 					system: convert.system(context, pkg, pkg.system, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
-					browser: convert.browser(pkg,  pkg.browser)
+					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
+					jspm: convert.jspm(pkg, pkg.jspm),
+					jam: convert.jspm(pkg, pkg.jam)
 				});
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
