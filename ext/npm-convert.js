@@ -9,6 +9,7 @@ exports.propertyNamesAndValues = convertPropertyNamesAndValues;
 exports.name = convertName;
 exports.browser = convertBrowser;
 exports.browserProperty = convertBrowserProperty;
+exports.jspm = convertJspm;
 exports.toPackage = convertToPackage;
 exports.forPackage = convertForPackage;
 
@@ -248,6 +249,16 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
 }
 
+function convertJspm(pkg, jspm){
+	var type = typeof jspm;
+	if(type === "undefined" || type === "string") {
+		return jspm;
+	}
+	return {
+		main: jspm.main
+	};
+}
+
 
 function convertToPackage(context, pkg, index) {
 	var packages = context.pkgInfo;
@@ -264,7 +275,9 @@ function convertToPackage(context, pkg, index) {
 			main: pkg.main,
 			system: convertSystem(context, pkg, pkg.system, index === 0),
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
-			browser: convertBrowser(pkg, pkg.browser)
+			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
+			jspm: convertJspm(pkg, pkg.jspm),
+			jam: convertJspm(pkg, pkg.jam)
 		};
 		packages.push(localPkg);
 		packages[nameAndVersion] = true;
