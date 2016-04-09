@@ -104,7 +104,9 @@ var translateConfig = function(loader, packages, options){
 	var g = loader.global;
 	if(!g.process) {
 		g.process = {
-			cwd: function(){},
+			cwd: function(){
+				return "/";
+			},
 			browser: true,
 			env: {
 				NODE_ENV: loader.env
