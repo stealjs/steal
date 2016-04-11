@@ -104,7 +104,10 @@ var translateConfig = function(loader, packages, options){
 	var g = loader.global;
 	if(!g.process) {
 		g.process = {
-			cwd: function(){},
+			cwd: function(){
+				var baseURL = loader.baseURL;
+				return baseURL;
+			},
 			browser: true,
 			env: {
 				NODE_ENV: loader.env
