@@ -41,6 +41,12 @@ exports.addExtension = function(System){
 									 pluginNormalize);
 		}
 
+		// don't normalize name module yet if it includes any conditionals
+		if (utils.moduleName.isConditional(name)) {
+			return oldNormalize.call(this, name, parentName, parentAddress,
+									 pluginNormalize);
+		}
+
 		// Check against contextual maps that would not be converted.
 		var hasContextualMap = typeof this.map[parentName] === "object" &&
 		  this.map[parentName][name];
@@ -61,7 +67,7 @@ exports.addExtension = function(System){
 
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
-																 name, 
+																 name,
 																 parentName);
 
 		var isRoot = utils.pkg.isRoot(this, refPkg);
@@ -89,7 +95,7 @@ exports.addExtension = function(System){
 		if(!depPkg) {
 			if(crawl && !isRoot) {
 				var parentPkg = nameIsRelative ? null :
-					crawl.matchedVersion(context, refPkg.name, 
+					crawl.matchedVersion(context, refPkg.name,
 										 refPkg.version);
 				if(parentPkg) {
 					wantedPkg = crawl.getDependencyMap(this, parentPkg, isRoot)[parsedModuleName.packageName];
@@ -261,7 +267,7 @@ exports.addExtension = function(System){
 						.then(function(source){
 							load.address = local.address;
 							loader.npmParentMap[load.name] = local.name;
-							var npmLoad = loader.npmContext && 
+							var npmLoad = loader.npmContext &&
 								loader.npmContext.npmLoad;
 							if(npmLoad) {
 								npmLoad.saveLoadIfNeeded(loader.npmContext);
