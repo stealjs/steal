@@ -105,10 +105,14 @@ if (lessEngine.FileManager) {
 		var self = this,
 			_callback = callback,
 			path = (currentDirectory + filename),
-			directory = path.substring(0, path.lastIndexOf('/')+1),
+			directory = normalizePath(path.substring(0, path.lastIndexOf('/')+1)),
 			promise;
 
 		callback = function(err, file) {
+			if (err) {
+				return _callback.call(self, err);
+			}
+
 			file._directory = directory;
 
 			self.parseFile(file).then(function(file) {
@@ -135,6 +139,24 @@ if (lessEngine.FileManager) {
 	};
 }
 
+var normalizePath = function(path) {
+	var parts = path.split('/'),
+		normalized = [];
+
+	for (var i = 0 ; i< parts.length; i++) {
+		var part = parts[i];
+		if (part != '.') { // ignore './'
+			if (part == '..') { // remove part preceding '../'
+				normalized.pop();
+			} else {
+				normalized.push(part);
+			}
+		}
+	}
+	return normalized.join('/');
+};
+
+
 var relative = function(base, path){
 	var uriParts = path.split("/"),
 		baseParts = base.split("/"),
@@ -145,7 +167,7 @@ var relative = function(base, path){
 		baseParts.shift();
 	}
 
-	for(var i = 0 ; i< baseParts.length-1; i++) {
+	for (var i = 0 ; i < baseParts.length-1; i++) {
 		result.push("../");
 	}
 
