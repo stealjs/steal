@@ -243,10 +243,18 @@ function convertBrowser(pkg, browser) {
 function convertBrowserProperty(map, pkg, fromName, toName) {
 	var packageName = pkg.name;
 
-	var fromParsed = utils.moduleName.parse(fromName, packageName),
-		  toParsed = toName  ? utils.moduleName.parse(toName, packageName): "@empty";
+	var fromParsed = utils.moduleName.parse(fromName, packageName);
+	var toResult = toName;
 
-	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
+	if(!toName || typeof toName === "string") {
+		var toParsed = toName ? utils.moduleName.parse(toName, packageName)
+			: "@empty";
+		toResult = utils.moduleName.create(toParsed);
+	} else if(utils.isArray(toName)) {
+		toResult = toName;
+	}
+	
+	map[utils.moduleName.create(fromParsed)] = toResult;
 }
 
 function convertJspm(pkg, jspm){

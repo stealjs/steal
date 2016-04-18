@@ -243,8 +243,10 @@ exports.addExtension = function(System){
 		}
 
 		var loader = this;
-		return Promise.resolve(oldFetch.apply(this, arguments))
-			.then(null, function(){
+		var fetchPromise = Promise.resolve(oldFetch.apply(this, arguments));
+
+		if(utils.moduleName.isNpm(load.name)) {
+			fetchPromise = fetchPromise.then(null, function(err){
 				return tryWith("/index").then(null, function(err){
 					if(utils.moduleName.isNpm(load.name) &&
 					   utils.path.basename(load.address) === "package.js") {
@@ -281,6 +283,9 @@ exports.addExtension = function(System){
 
 				}
 			});
+		}
+
+		return fetchPromise;
 	};
 
 	// Given a moduleName convert it into a npm-style moduleName if it belongs
