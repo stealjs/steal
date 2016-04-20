@@ -96,7 +96,11 @@
 				return steal.System["import"]("@dev");
 			});
 
-			appDeferred = devDeferred.then(function(){
+			extentionsDeferred = devDeferred.then(function(){
+				return System._installModules();
+			});
+
+			appDeferred = extentionsDeferred.then(function(){
 				// if there's a main, get it, otherwise, we are just loading
 				// the config.
 				if(!System.main || System.env === "build") {

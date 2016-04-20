@@ -15,7 +15,8 @@ var makeSteal = function(System){
 
 	var configDeferred,
 		devDeferred,
-		appDeferred;
+		appDeferred,
+		extentionsDeferred;
 
 	var steal = function(){
 		var args = arguments;
