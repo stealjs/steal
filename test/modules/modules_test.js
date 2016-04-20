@@ -5,12 +5,6 @@ define([
 ], function(System, stealTestHelpers, QUnit) {
 	var helpers = stealTestHelpers(System);
 
-	function toModule(fn){
-		var source = fn.toString()
-			.replace(/^function \(\).*{/, "");
-		return source.substr(0, source.length - 1).trim();
-	}
-
 	QUnit.module("extensions extension - normalize");
 
 	QUnit.test("Can import and use npm packages", function(assert){
@@ -46,8 +40,8 @@ define([
 					version: "1.0.0"
 				}
 			])
-			.withModule("helper@1.0.0#main", toModule(helper))
-			.withModule("app@1.0.0#plugin", toModule(plugin))
+			.withModule("helper@1.0.0#main", helpers.toModule(helper))
+			.withModule("app@1.0.0#plugin", helpers.toModule(plugin))
 			.loader;
 
 		loader.config({
@@ -55,8 +49,6 @@ define([
 				"app/plugin"
 			]
 		});
-
-		loader._installModules = System._installModules;
 
 		loader.normalize("foo")
 		.then(function(name){
@@ -87,7 +79,7 @@ define([
 				main: "main.js",
 				version: "1.0.0"
 			})
-			.withModule("app@1.0.0#plugin", toModule(plugin))
+			.withModule("app@1.0.0#plugin", helpers.toModule(plugin))
 			.loader;
 
 		loader.config({
@@ -95,8 +87,6 @@ define([
 				"app/plugin"
 			]
 		});
-
-		loader._installModules = System._installModules;
 
 		loader.normalize("foo")
 		.then(function(name){
@@ -124,7 +114,7 @@ define([
 				main: "main.js",
 				version: "1.0.0"
 			})
-			.withModule("app@1.0.0#plugin", toModule(plugin))
+			.withModule("app@1.0.0#plugin", helpers.toModule(plugin))
 			.loader;
 
 		loader.config({
@@ -132,8 +122,6 @@ define([
 				"app/plugin"
 			]
 		});
-
-		loader._installModules = System._installModules;
 
 		loader.normalize("bar").then(function(name){
 			return loader.locate({ name: name })
@@ -166,7 +154,7 @@ define([
 				main: "main.js",
 				version: "1.0.0"
 			})
-			.withModule("app@1.0.0#plugin", toModule(plugin))
+			.withModule("app@1.0.0#plugin", helpers.toModule(plugin))
 			.withModule("foo", fooModule)
 			.withModule("global", globalModule)
 			.loader;
@@ -176,8 +164,6 @@ define([
 				"app/plugin"
 			]
 		});
-
-		loader._installModules = System._installModules;
 
 		loader.import("foo")
 		.then(function(value){
