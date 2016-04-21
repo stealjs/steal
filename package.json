@@ -14,7 +14,8 @@
   "dependencies": {
     "less": "^2.4.0",
     "steal-systemjs": "^0.17.4",
-    "system-json": "^0.1.0"
+    "system-json": "^0.1.0",
+    "@stealjs/node-locate": "^0.1.1"
   },
   "devDependencies": {
     "babel-core": "5.8.14",
@@ -37,7 +38,6 @@
     "system-live-reload": "1.4.0",
     "system-npm": "0.6.7",
     "system-trace": "0.2.1",
-    "@stealjs/node-locate": "^0.1.1",
     "testee": "^0.2.0"
   },
   "system": {
