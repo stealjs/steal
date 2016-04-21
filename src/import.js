@@ -20,4 +20,3 @@
 
 		return configDeferred.then(afterConfig);
 	};
-	return steal;

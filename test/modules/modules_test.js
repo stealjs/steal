@@ -5,7 +5,7 @@ define([
 ], function(System, stealTestHelpers, QUnit) {
 	var helpers = stealTestHelpers(System);
 
-	QUnit.module("extensions extension - normalize");
+	QUnit.module("plugins extension - normalize");
 
 	QUnit.test("Can import and use npm packages", function(assert){
 		var done = assert.async();
@@ -45,9 +45,11 @@ define([
 			.loader;
 
 		loader.config({
-			extensions: [
-				"app/plugin"
-			]
+			plugins: {
+				"*": [
+					"app/plugin"
+				]
+			}
 		});
 
 		loader.normalize("foo")
@@ -83,9 +85,11 @@ define([
 			.loader;
 
 		loader.config({
-			extensions: [
-				"app/plugin"
-			]
+			plugins: {
+				"*": [
+					"app/plugin"
+				]
+			}
 		});
 
 		loader.normalize("foo")
@@ -95,6 +99,65 @@ define([
 			assert.ok(!err, err.message || err);
 		})
 		.then(done, done);
+	});
+
+	QUnit.test("works with multiple plugins", function(assert){
+		var done = assert.async();
+
+		var one = function(){
+			exports.normalize = function(normalize, name){
+				return name + "-two";
+			};
+		};
+
+		var two = function(){
+			exports.normalize = function(normalize, name){
+				return name + "-three";
+			};
+		};
+
+		var loader = helpers.clone()
+			.rootPackage({
+				name: "app",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					one: "1.0.0",
+					two: "1.0.0"
+				}
+			})
+			.withPackages([
+				{
+					name: "one",
+					main: "main.js",
+					version: "1.0.0"
+				},
+				{
+					name: "two",
+					main: "main.js",
+					version: "1.0.0"
+				}
+			])
+			.withModule("one@1.0.0#main", helpers.toModule(one))
+			.withModule("two@1.0.0#main", helpers.toModule(two))
+			.withConfig({
+				plugins: {
+					"*": [
+						"one",
+						"two"
+					]
+				}
+			})
+			.loader;
+
+		loader.normalize("zero")
+		.then(function(name){
+			assert.equal(name, "zero-two-three", "all plugins applied");
+		}, function(err){
+			assert.ok(!err, err.toString());
+		})
+		.then(done, done);
+
 	});
 
 	QUnit.module("extensions extension - locate");
@@ -118,9 +181,11 @@ define([
 			.loader;
 
 		loader.config({
-			extensions: [
-				"app/plugin"
-			]
+			plugins: {
+				"*": [
+					"app/plugin"
+				]
+			}
 		});
 
 		loader.normalize("bar").then(function(name){
@@ -133,6 +198,8 @@ define([
 		})
 		.then(done, done);
 	});
+
+	QUnit.module("extensions extension - translate");
 
 	QUnit.module("extensions extension - instantiate");
 
@@ -160,9 +227,11 @@ define([
 			.loader;
 
 		loader.config({
-			extensions: [
-				"app/plugin"
-			]
+			plugins: {
+				"*.js": [
+					"app/plugin"
+				]
+			}
 		});
 
 		loader.import("foo")

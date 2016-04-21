@@ -32,6 +32,7 @@ module.exports = function (grunt) {
 			"node_modules/steal-env/env.js",
 			"src/startup.js",
 			"src/import.js",
+			"src/matcher.js",
 			"src/make-steal-end.js", // ends makeSteal
 			"src/system-format-steal.js",
 			"src/end.js"
@@ -62,6 +63,7 @@ module.exports = function (grunt) {
 		  "node_modules/steal-env/env.js",
 		  "src/startup.js",
 		  "src/import.js",
+		  "src/matcher.js",
 		  "src/make-steal-end.js", // ends makeSteal
 		  "src/system-format-steal.js",
 		  "src/end.js"

@@ -5395,18 +5395,32 @@ if(typeof System !== "undefined") {
 function applyModules(loader) {
 	loader._extensions.push(applyModules);
 
-	loader.extensions = [];
-	loader._modulePlugins = [];
+	loader.plugins = {};
+	loader._pluginValues = {};
 
 	var slice = Array.prototype.slice;
 
 	loader._installModules = function(){
 		var loader = this;
-		var p = this.extensions.map(function(name){
-			return loader["import"](name);
+		var importPromises = [];
+
+		var names;
+
+		each(this.plugins, function(names, pattern){
+			loader._pluginValues[pattern] = [];
+			each(names, function(name){
+				importPlugin(name, pattern);
+			});
 		});
-		return Promise.all(p).then(function(values){
-			loader._modulePlugins = values;
+
+		function importPlugin(name, pattern) {
+			var p = loader["import"](name).then(function(value){
+				loader._pluginValues[pattern].push(value);
+			});
+			importPromises.push(p);
+		}
+
+		return Promise.all(importPromises).then(function(){
 			loader._modulesInstalled = true;
 		});
 	};
@@ -5419,23 +5433,27 @@ function applyModules(loader) {
 		instantiate: loader.instantiate
 	};
 
-	for(var hookName in hooks) {
-		addHook(hookName, hooks[hookName]);
-	}
+	each(hooks, function(parent, hookName){
+		addHook(hookName, parent);
+	});
 
 	function addHook(hookName, parent) {
-		loader[hookName] = ifInstalled(function(){
-			if(!this._modulePlugins.length) {
+		loader[hookName] = ifInstalled(function(loadOrName){
+			var plugins = collectPlugins.call(this, loadOrName);
+			if(!plugins.length) {
 				return parent.apply(this, arguments);
 			}
 
-			var plugins = slice.call(this._modulePlugins);
 			var args = slice.call(arguments);
 			var loader = this;
 
-			return callAll.call(this, plugins, function(plugin){
+			return callAll.call(this, plugins, function(plugin, lastValue){
 				var hook = plugin[hookName];
 				if(hook) {
+					if(hookName === "normalize" && lastValue) {
+						args.shift();
+						args.unshift(lastValue);
+					}
 					return hook.apply(loader, [parent].concat(args));
 				}
 			}).then(function(value){
@@ -5458,19 +5476,29 @@ function applyModules(loader) {
 		};
 	}
 
-	function callAll(plugins, callback){
+	function collectPlugins(loadOrName) {
+		var input = typeof loadOrName === "string" ? loadOrName : loadOrName.address;
+		var out = [];
+
+		each(this._pluginValues, function(plugins, pattern){
+			if(steal.isMatch(input, pattern)) {
+				out.push.apply(out, plugins);
+			}
+		});
+		return out;
+	}
+
+	function callAll(plugins, callback, lastValue){
 		if(!plugins.length) {
-			return Promise.resolve();
+			return Promise.resolve(lastValue);
 		}
 
 		var plugin = plugins.shift();
 
-		var value = callback(plugin);
-		if(value) {
-			return Promise.resolve(value);
-		} else {
-			return callAll(plugins, callback);
-		}
+		var value = callback(plugin, lastValue);
+		return Promise.resolve(value).then(function(value){
+			return callAll(plugins, callback, value || lastValue);
+		});
 	}
 }
 
@@ -6298,6 +6326,47 @@ function addEnv(loader){
 		}
 
 		return configDeferred.then(afterConfig);
+	};
+
+
+	var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
+	var reCache = {};
+
+	function escapeStringRegexp(str) {
+		return str.replace(matchOperatorsRe, '\\$&');
+	}
+
+	function makeRe(pattern, shouldNegate) {
+		var cacheKey = pattern + shouldNegate;
+
+		if (reCache[cacheKey]) {
+			return reCache[cacheKey];
+		}
+
+		var negated = false;
+
+		if (pattern[0] === '!') {
+			negated = true;
+			pattern = pattern.slice(1);
+		}
+
+		pattern = escapeStringRegexp(pattern).replace(/\\\*/g, '.*');
+
+		if (negated && shouldNegate) {
+			pattern = '(?!' + pattern + ')';
+		}
+
+		var re = new RegExp('^' + pattern + '$', 'i');
+
+		re.negated = negated;
+
+		reCache[cacheKey] = re;
+
+		return re;
+	}
+
+	steal.isMatch = function(input, pattern){
+		return makeRe(pattern, true).test(input);
 	};
 	return steal;
 
