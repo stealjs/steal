@@ -6477,6 +6477,8 @@ if (typeof System !== "undefined") {
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
 		require("system-json");
+		require("@stealjs/node-locate")(System);
+
 
 	} else {
 		var oldSteal = global.steal;
