@@ -454,6 +454,7 @@ function applyModules(loader) {
 
 	loader._installModules = function(){
 		var loader = this;
+		var pluginLoader = loader.pluginLoader || loader;
 		var importPromises = [];
 
 		var names;
@@ -466,7 +467,7 @@ function applyModules(loader) {
 		});
 
 		function importPlugin(name, pattern) {
-			var p = loader["import"](name).then(function(value){
+			var p = pluginLoader["import"](name).then(function(value){
 				loader._pluginValues[pattern].push(value);
 			});
 			importPromises.push(p);

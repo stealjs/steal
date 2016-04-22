@@ -101,6 +101,58 @@ define([
 		.then(done, done);
 	});
 
+	QUnit.test("Uses the pluginLoader", function(assert){
+		var done = assert.async();
+
+		var one = function(){
+			exports.normalize = function(normalize, name){
+				return name + "-one";
+			};
+		};
+
+		var two = function(){
+			exports.normalize = function(normalize, name){
+				return name + "-two";
+			};
+		};
+
+		var loader = helpers.clone()
+			.rootPackage({
+				name: "app",
+				main: "main.js",
+				version: "1.0.0"
+			})
+			.withModule("app@1.0.0#plugin", helpers.toModule(one))
+			.withConfig({
+				plugins: {
+					"*": [
+						"app/plugin"
+					]
+				}
+			})
+			.loader;
+
+		var pluginLoader = helpers.clone()
+			.rootPackage({
+				name: "app",
+				main: "main.js",
+				version: "1.0.0"
+			})
+			.withModule("app@1.0.0#plugin", helpers.toModule(two))
+			.loader;
+
+		loader.pluginLoader = pluginLoader;
+
+		loader.normalize("foo")
+		.then(function(name){
+			assert.equal(name, "foo-two", "pluginLoader was used");
+		}, function(err){
+			assert.ok(!err, err.message || err);
+		})
+		.then(done, done);
+	});
+
+
 	QUnit.test("works with multiple plugins", function(assert){
 		var done = assert.async();
 
