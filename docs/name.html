@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8 lt-ie7" lang="en">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js ie lt-ie9 lt-ie8" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js ie lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 9]>
+<html class="no-js ie ie9" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>StealJS  - name</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	
+		<link rel="stylesheet" type="text/css" href="./static/bundles/static.css">
+	
+	<!--[if lt IE 9]>
+   <script type="text/javascript" src="static/html5shiv.js"></script>
+    <!--<![endif]-->
+</head>
+
+<body class="docs ">
+	<header>
+		<nav class="container">
+
+			<div class="logo-menu">
+				<a class="brand" href="../index.html">StealJS</a>
+				<ul class="dropdown-menu">
+		          <li><a href="http://javascriptmvc.com">JavaScriptMVC</a></li>
+		          <li><a href="http://canjs.com">CanJS</a></li>
+		          <li><a href="http://jquerypp.com">jQuery++</a></li>
+		          <li class="active"><a href="http://stealjs.com">StealJS</a></li>
+		          <li><a href="http://funcunit.com">FuncUnit</a></li>
+		          <li><a href="http://documentjs.com">DocumentJS</a></li>
+		        </ul>
+			</div>
+			<ul class="nav">
+        <li ><a href="http://stealjs.com">Home</a></li>
+        
+          <li class="active"><a href="../docs/index.html">Api</a></li>
+        
+	          <li class=""><a href="https://twitter.com/stealjs">Twitter</a></li>
+		      <li class=""><a href="https://github.com/stealjs/steal">GitHub</a></li>
+		      <li class=""><a href="https://gitter.im/stealjs/steal">Chat</a></li>
+	        </ul>
+			<div class="pull-right">
+				<div class="bitovi-menu">
+					<a href="http://bitovi.com" class="bitovi icon-bits">Bitovi</a>
+					<ul class="dropdown-menu">
+						<li><a href="http://bitovi.com">Bitovi.com</a></li>
+						<li><a href="http://bitovi.com/blog">Blog</a></li>
+						<li><a href="http://bitovi.com/development">Development</a></li>
+						<li><a href="http://bitovi.com/design">Design</a></li>
+						<li><a href="http://bitovi.com/training">Training</a></li>
+						<li><a href="http://bitovi.com/open-source">Open Source</a></li>
+						<li><a href="http://bitovi.com/about">About</a></li>
+						<li><a href="http://bitovi.com/contact">Contact Us</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	
+<div class="container api">
+
+	
+	<nav class="sidebar">
+		
+		<ul class="api cascading primary-grouping"> 
+	
+		
+		<li class="search-container active parent">
+			<a class="sidebar-title" href="index.html" data-search="StealJS">
+				StealJS
+			</a>
+		</li>
+		
+		
+			<li class="search-container active">
+			<a class="sidebar-title" href="name.html" data-search="name">
+				name
+			</a>
+			
+
+		</li>
+		
+	
+</ul>
+
+	</nav>
+	
+	
+	
+	<article class="content docs">
+	
+	
+		
+		<section class="title">
+			<div class="heading">
+<h1>name</h1>
+	<ul class="tags">
+		<li>page</li>
+	</ul>
+	
+	
+</div>
+
+<div class="sub-heading">
+	
+	
+	<span class="inherits">&nbsp;</span>
+</div>
+
+<ul class="links">
+	
+	
+	
+	
+</ul>
+<br />
+		</section>
+		
+		
+		
+		<section class="contents">
+		</section>
+		
+		
+		
+
+		
+		<section class="description">
+			<h1>Naming Rules</h1>
+
+		</section>
+		
+
+		
+			
+		
+		
+		
+		
+
+		
+		<section class="comment">
+			<p><em>bundle-folder = &quot;/bundles&quot;</em>
+<em>[[HASH]] = a unique hash string build from the concatenated bundles string</em>
+<em>[[COUNTER]] = if the same file exists (in one build), increase the counter</em></p>
+<h2>without NPM</h2>
+<h3>main bundle only</h3>
+<p>| module                                                   | bundled path                                                           | note                   |
+|----------------------------------------------------------|------------------------------------------------------------------------|------------------------|
+| mymodule                                                 | <code>/bundles/mymodule.js</code>                                                 |                        |
+| mymodule.js                                              | <code>/bundles/mymodule.js</code>                                                 |                        |
+| mymodule                                                 | <code>/bundles/mymodule.js</code>                                                 |                        |
+| deep/folder/structure/with/very/very-very-very-long-name | <code>/bundles/deep/folder/structure/with/very/very-very-very-long-name.js</code> | main bundles arent cut |
+| index.stache!done-autorender                             | <code>/bundles/index.js</code>                                                    |                        |</p>
+<h3>with bundles</h3>
+<p>| module                                                                                                          | bundled path                                        | note                                                                                                                                 |
+|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+|                                                                                                                 |                                                     |                                                                                                                                      |
+| <code>[&quot;main/bar&quot;, &quot;bar/foo&quot;]</code>                                                                                       | <code>/bundles/bar-foo.js</code>                               |                                                                                                                                      |
+| <code>[&quot;main/my-very-long-name&quot;, &quot;bar/eman-gnol-yrev-ym&quot;]</code>                                                           | <code>/bundles/my-very-long-nam-[[HASH]].js</code>             | [[HASH]] = a unique hash string, concat bundle[0] + bundle[1],cut to 25 chars                                                        |
+| <code>[&quot;main/my-very-long-name&quot;, &quot;bar/eman-gnol-yrev-ym&quot;]</code>                                                           | <code>/bundles/my-very-long-nam-[[HASH]]-[[COUNTER]].js</code> | [[HASH]] = a unique hash string; concat bundle[0] + bundle[1],cut to 25 chars; if the same file exists, put a counter var at the end |
+| <code>[&quot;deep/folder/structure/with/very/very-very-very-long-name&quot;,&quot;deep/space/nine/is/a/great-series/from-the-90s&quot;]</code> | <code>/bundles/very-very-very-l-f802f7c2-[[HASH]].js</code>    | [[HASH]] = a unique hash string; concat bundle[0] + bundle[1],cut to 25 chars                                                        |
+| <code>[&quot;main/bar0815.com.js&quot;, &quot;bar/foo- bar&quot;]</code>                                                                       | <code>/bundles/bar0815-com-foo-bar.js</code>                   | for bundles, we only return filenames with chars, numbers, <code>-</code> and <code>_</code>                                                               |                                                                |</p>
+<h2>with NPM</h2>
+<h3>main bundle only</h3>
+<p>| module                                        | bundled path                      | note  |
+|---------------------------------------------- |---------------------------------- |------ |
+| myproject@1.0.0#bar                           | <code>/bundles/myproject/bar.js</code>       |       |
+| myproject@1.0.0#index.stache!done-autorender  | <code>/bundles/myproject/index.js</code>     |       |
+| myproject@1.0.0#main!my-plugin                | <code>/bundles/myproject/main.js</code>      |       |
+| myproject.com@1.0.0#main                      | <code>/bundles/myproject.com/main.js</code>  |       |</p>
+<h3>with bundles</h3>
+<p>| module                                                        | bundled path                          | note  |
+|------------------------------------------------------------   |-----------------------------------    |------ |
+| <code>[&quot;pkg@1.0.0#component/my-component&quot;, &quot;pkg@1.0.0#foobar&quot;]</code>    | <code>/bundles/my-component-foobar.js</code>     |       |
+| <code>[&quot;pkg@1.0.0#bar.js&quot;, &quot;pkg@1.0.0#foo.js&quot;]</code>                    | <code>/bundles/bar-foo.js</code>                 |       |
+| <code>[&quot;pkg@1.0.0#main&quot;, &quot;jquery@1.0.0#lib/index&quot;]</code>                | <code>/bundles/main-index.js</code>              |       |</p>
+<p>| prevent file collisions 1.                                | bundled path                          | note                          |
+| ----------------------------------------------------------    |-----------------------------------    |------------------------------ |
+| <code>[&quot;pkg@1.0.0#foo&quot;, &quot;pkg@1.0.0#bar&quot;]</code>                      | <code>/bundles/foo-bar.js</code>                 |                               |
+| <code>[&quot;pkg@1.0.0#component/foo&quot;, &quot;pkg@1.0.0#component/bar&quot;]</code>  | <code>/bundles/foo-bar-[[COUNTER]].js</code>     | put a counter var at the end  |</p>
+<p>| prevent file collisions 2.                            | bundled path                          | note                          |
+|-----------------------------------------------------  |-------------------------------------- |------------------------------ |
+| <code>[&quot;pkg@1.0.0#main&quot;, &quot;jquery@1.0.0#lib/index&quot;]</code>        | <code>/bundles/main-index.js</code>              |                               |
+| <code>[&quot;otherpkg@1.0.0#main&quot;, &quot;moment@1.0.0#lib/index&quot;]</code>   | <code>/bundles/main-index-[[COUNTER]].js</code>  | put a counter var at the end  |</p>
+
+		</section>
+		
+		
+
+		
+	
+	
+	</article>
+	
+	
+
+</div>
+
+
+
+
+
+
+	<footer>
+		<nav class="container">
+			<a class="brand javascriptmvc" href="index.html"></a>
+		</nav>
+	</footer>
+	<script type="text/javascript">
+		var docObject = {"type":"page","name":"name","src":"steal-tools/lib/bundle/name.md","description":"Naming Rules\n===","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+	</script>
+	
+	
+		<script>
+		  steal = {
+		    instantiated: {
+		      "bundles/static.css!$css" : null
+		    }
+		  }
+		</script>
+		<script type='text/javascript' 
+				data-main="static"
+				data-config="./static/config.js"
+				src="./static/steal.production.js"
+		    		bundles-path="bundles"></script>
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-2302003-20', 'auto');
+		ga('send', 'pageview');
+		</script>
+	
+</body>
+
+</html>

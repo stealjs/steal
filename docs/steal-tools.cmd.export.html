@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - steal-tools live-reload </title>
+	<title>StealJS - steal-tools export </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -183,7 +183,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="function" href="steal-tools.cmd.export.html" data-search="steal-tools export">
 						steal-tools export
 					</a>
@@ -195,7 +195,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="function" href="steal-tools.cmd.live-reload.html" data-search="steal-tools live-reload">
 						steal-tools live-reload
 					</a>
@@ -580,7 +580,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>steal-tools live-reload</h1>
+<h1>steal-tools export</h1>
 	<ul class="tags">
 		<li>function</li>
 	</ul>
@@ -591,7 +591,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">steal-tools.cmd.live-reload</span>
+		<span class="module">steal-tools.cmd.export</span>
 	
 	
 	
@@ -617,7 +617,7 @@
 
 		
 		<section class="description">
-			<p>Starts a live-reload Web Socket server. Used with <a href="steal.live-reload.html">live-reload</a>, allows you to develop without ever refreshing the browser.</p>
+			<p>Export a project's modules to other forms and formats from the command line.</p>
 
 		</section>
 		
@@ -625,7 +625,7 @@
 		
 			
 				<section class="signature">
-					<h2 id="sig_steal_toolslive_reload___OPTION_NAMEOPTION_VALUE____">steal-tools live-reload [--OPTION_NAME OPTION_VALUE]...
+					<h2 id="sig_steal_toolsexport___OPTION_NAMEOPTION_VALUE____">steal-tools export [--OPTION_NAME OPTION_VALUE]...
 </h2>
 <div class="signature-wrapper">
 
@@ -638,7 +638,8 @@
 			<h4>OPTION_NAME
 				<code>{String}</code></h4>
 			<div class="description">
-				<p>Any <code>config</code> or <code>options</code> name in <a href="steal-tools.build.html">build</a>.</p>
+				<p>Any <code>system</code>, <code>options</code>, or <code>outputs</code> name in
+<a href="steal-tools.export.object.html">ExportObject</a>.</p>
 
 			</div>
 			
@@ -650,7 +651,8 @@
 			<h4>OPTION_VALUE
 				<code>{String}</code></h4>
 			<div class="description">
-				<p>The value of <code>OPTION_NAME</code>.</p>
+				<p>The value of <code>OPTION_NAME</code>.  The <code>ignores</code> option
+will be converted to a regular expression.</p>
 
 			</div>
 			
@@ -661,38 +663,17 @@
 	</ol>
 
 
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{String}</code></h4>
+		<div class="description">
+			<p>Writes the output to the console.</p>
 
-
-
-
-</div>
-
-				</section>
-			
-				<section class="signature">
-					<h2 id="sig_steal_toolslive_reload__live_reload_portPORT">steal-tools live-reload --live-reload-port PORT
-</h2>
-<div class="signature-wrapper">
-
-
-	<h3>Parameters</h3>
-
-	<ol class="parameters">
+		</div>
 		
-		<li class="parameter">
-			<h4>--live-reload-port<code>=8012</code>
-				<code>{Number}</code><span class="pull-right optional">Optional</span></h4>
-			<div class="description">
-				<p>Web Socket port to use for connecting with browser clients.</p>
-
-			</div>
-			
-			
-			
-		</li>
 		
-	</ol>
-
+	</div>
+	
 
 
 
@@ -710,22 +691,30 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>If using <a href="npm.html">npm</a> simply type:</p>
-<pre><code>&gt; steal-tools live-reload
+<blockquote>
+<p>Note: The <code>steal-tools export</code> command-line
+utility calls <a href="steal-tools.export.html">steal-tools.export</a> internally.
+This page documents the specifics of the command-line utility, which is useful
+to export to default module outputs like <code>+amd</code>,<code>+cjs</code>, <code>+global-js</code> and
+<code>+global-css</code> (by passing --amd, --cjs, --global or --all). Read
+<a href="steal-tools.export.html">steal-tools.export's documentation</a> for how to use
+export in various workflows and detailed information on the options available.</p>
+</blockquote>
+<p>Access <code>steal-tools</code> in <em>node_modules/.bin</em>, like:</p>
+<pre><code>&gt; ./node_modules/.bin/steal-tools export \
+           --config app/config.js \
+           --main app \
+           --all
 </code></pre>
-<p>To start a Web Socket server. Then in your <code>package.json</code> add:</p>
-<pre><code>{
-  &quot;system&quot;: {
-    &quot;configDependencies&quot;: [
-      &quot;live-reload&quot;
-    ]
-  }
-}
+<p>Or, <code>steal-tools</code> can be installed into the command line, like:</p>
+<pre><code>&gt; npm install steal-tools -g
 </code></pre>
-<p>Create an html page:</p>
-<pre><code>&lt;script src=&quot;node_modules/steal/steal.js&quot;&gt;&lt;/script&gt;
+<p>Then you can run <code>steal-tools transform</code>, like:</p>
+<pre><code>&gt; steal-tools export \
+           --config app/config.js \
+           --main app \
+           --amd
 </code></pre>
-<p>And open it in your browser. See the <a href="steal.live-reload.html">live-reload</a> documentation to learn how to configure your application to respond to reload events (such as re-rendering when needed).</p>
 
 		</section>
 		
@@ -751,7 +740,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.cmd.live-reload","src":"steal-tools/doc/command-live-reload.md","description":"Starts a live-reload Web Socket server. Used with [steal.live-reload], allows you to develop without ever refreshing the browser.","title":"steal-tools live-reload","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools live-reload [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config` or `options` name in [steal-tools.build]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`."}]},{"code":"steal-tools live-reload --live-reload-port PORT","description":"","params":[{"types":[{"type":"Number"}],"optional":true,"name":"--live-reload-port","defaultValue":"8012","description":"Web Socket port to use for connecting with browser clients."}]}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal-tools.cmd.export","src":"steal-tools/doc/command-export.md","description":"Export a project's modules to other forms and formats from the command line.","title":"steal-tools export","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools export [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `system`, `options`, or `outputs` name in\n[steal-tools.export.object]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`.  The `ignores` option\nwill be converted to a regular expression."}],"returns":{"types":[{"type":"String"}],"description":"Writes the output to the console."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

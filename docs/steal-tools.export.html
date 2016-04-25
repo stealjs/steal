@@ -184,6 +184,18 @@
 				
 				
 				<li class="search-container">
+					<a class="function" href="steal-tools.cmd.export.html" data-search="steal-tools export">
+						steal-tools export
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
 					<a class="function" href="steal-tools.cmd.live-reload.html" data-search="steal-tools live-reload">
 						steal-tools live-reload
 					</a>
@@ -733,7 +745,7 @@ that take place on an application's modules to make it distributable.  The
 of your project in those formats.</p>
 <p>The basic use of <code>stealTools</code> export is to provide a &quot;system&quot; that is able to load your project's modules,
 and several &quot;outputs&quot; that write out those modules in a new form:</p>
-<pre><code>var stealTools = require(&quot;stealTools&quot;);
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
 stealTools.export({
   system: {
     main: &quot;myproject&quot;,
@@ -762,7 +774,7 @@ stealTools.export({
 <h2>defaults</h2>
 <p>As there are times when the same options may need to be set over and over again, the <code>defaults</code> option can
 contain default values each output can call:</p>
-<pre><code>var stealTools = require(&quot;stealTools&quot;);
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
 stealTools.export({
   system: {
     main: &quot;myproject&quot;,  config: __dirname+&quot;/config.js&quot;
@@ -787,7 +799,7 @@ stealTools.export({
 })
 </code></pre>
 <p>The <a href="steal-tools|lib|build|helpers|cjs.html">cjs</a> and other export helpers can also be mixed in output names by default:</p>
-<pre><code>var stealTools = require(&quot;stealTools&quot;);
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
 stealTools.export({
   system: {
     main: &quot;myproject&quot;,  config: __dirname+&quot;/config.js&quot;
