@@ -788,11 +788,11 @@
 
 	</nav>
 	
-	
+
 	
 	<article class="content docs">
 	
-	
+
 		
 		<section class="title">
 			<div class="heading">
@@ -821,12 +821,12 @@
 <br />
 		</section>
 		
-		
+
 		
 		<section class="contents">
 		</section>
 		
-		
+
 		
 
 		
@@ -856,6 +856,12 @@ set properties like <a href="System.configPath.html">System.configPath</a> and <
 				<code>{Object}</code></h4>
 			<div class="description">
 				<p>An object of configuration values.</p>
+<pre><code>System.config({
+  map: {
+    foo: 'bar'
+  }
+});
+</code></pre>
 
 			</div>
 			
@@ -888,14 +894,28 @@ set properties like <a href="System.configPath.html">System.configPath</a> and <
 			</section>
 			
 		
+
 		
-		
-		
+
 
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p><code>System.config</code> can be called in three ways.</p>
+<p><code>System.config</code> can be called in four ways.</p>
+<h3>package.json</h3>
+<p>If using the <a href="npm.html">npm</a> plugin you can add config to your package.json's <strong>config</strong> property:</p>
+<pre><code>{
+  &quot;system&quot;: {
+    &quot;meta&quot;: {
+      &quot;jquery-plugin&quot;: {
+        &quot;deps&quot;: [
+          &quot;jquery&quot;
+        ]
+      }
+    }
+  }
+}
+</code></pre>
 <h3>Programatically</h3>
 <p>Call <code>System.config</code> after <em>steal.js</em> has been loaded like:</p>
 <pre><code>System.config({
@@ -911,6 +931,12 @@ set properties like <a href="System.configPath.html">System.configPath</a> and <
         main=&quot;app&quot;&gt;
 &lt;/script&gt;
 </code></pre>
+<p>The above will be translated to a call like:</p>
+<pre><code>System.config({
+  configPath: &quot;../path/to/stealconfig.js&quot;,
+  main: &quot;app&quot;
+});
+</code></pre>
 <h3>steal object</h3>
 <p>A <code>steal</code> object loaded before <code>steal.js</code> will be used as a System.config argument.</p>
 <pre><code>&lt;script&gt;
@@ -921,23 +947,19 @@ set properties like <a href="System.configPath.html">System.configPath</a> and <
 &lt;/script&gt;
 &lt;script src=&quot;../path/to/steal/steal.js&quot;&gt;&lt;/script&gt;
 </code></pre>
-<h2>Implementation</h2>
-<p>Basic deep merging of configuration properties is done in <a href="https://github.com/bitovi/systemjs">SystemJS</a>.</p>
-<p>Side effect property setting is done by steal.</p>
 
 		</section>
 		
 		
 
 		
-	
+
 	
 	</article>
 	
-	
+
 
 </div>
-
 
 
 
@@ -949,7 +971,7 @@ set properties like <a href="System.configPath.html">System.configPath</a> and <
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.config","src":"steal/docs/system-config.md","description":"Specifies configuration values on System. This should be used to\nset properties like [System.configPath] and [System.env].","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Object","options":[]}],"name":"config","description":"An object of configuration values."}]}],"title":"","parent":"StealJS.config","alias":"steal.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.config","src":"steal/docs/system-config.md","description":"Specifies configuration values on System. This should be used to\nset properties like [System.configPath] and [System.env].","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[{"types":[{"type":"Object","options":[]}],"name":"config","description":"An object of configuration values.\n\n```\nSystem.config({\n  map: {\n    foo: 'bar'\n  }\n});\n```"}]}],"title":"","parent":"StealJS.config","alias":"steal.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

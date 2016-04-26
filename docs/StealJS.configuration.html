@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - guides </title>
+	<title>StealJS - Configuration </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -80,18 +80,62 @@
 		<ul class="api cascading primary-grouping"> 
 	
 		
-		<li class="search-container active parent">
+		
+			<li class="search-container active">
 			<a class="sidebar-title" href="index.html" data-search="StealJS">
 				StealJS
 			</a>
-		</li>
-		
-		
-			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.guides.html" data-search="guides">
-				guides
-			</a>
 			
+	<ul>
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>apis</span>
+						
+	<ul>
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="steal.html" data-search="steal">
+						steal
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
+				<li class="search-container">
+					<a class="page" href="steal-tools.html" data-search="steal-tools">
+						steal-tools
+					</a>
+				</li>
+				
+			
+			
+		
+	</ul>
+
+
+					</li>
+					
+				
+				
+			
+			
+		
+			
+				
+					
+					<li class="heading search-container">
+						<span>guides</span>
+						
 	<ul>
 		
 			
@@ -181,7 +225,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="page" href="StealJS.configuration.html" data-search="Configuration">
 						Configuration
 					</a>
@@ -229,6 +273,16 @@
 	</ul>
 
 
+					</li>
+					
+				
+				
+			
+			
+		
+	</ul>
+
+
 		</li>
 		
 	
@@ -244,9 +298,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>guides</h1>
+<h1>Configuration</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>page</li>
 	</ul>
 	
 	
@@ -255,7 +309,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.guides</span>
+		<span class="module">StealJS.configuration</span>
 	
 	
 	
@@ -289,6 +343,94 @@
 
 
 		
+		<section class="comment">
+			<p>Steal allows you to configure module loading through a <strong>system</strong> property in your package.json. If you're not using Steal through NPM (you should be) you can also configure using any of the options provided by <a href="System.config.html">System.config</a>.</p>
+<p>A basic configuration might look like this:</p>
+<pre><code>{
+  ...
+  &quot;system&quot;: {
+    &quot;meta&quot;: {
+      &quot;jquery-plugin&quot;: {
+        &quot;deps&quot;: [&quot;jquery&quot;]
+      }
+    },
+    &quot;paths&quot;: {
+      &quot;some-dep&quot;: &quot;lib/some/dep.js&quot;
+    }
+  }
+}
+</code></pre>
+<p>Here are some common uses of configuration:</p>
+<h2>Configuring globals</h2>
+<p>Many modules you find on the web only have a single global build and don't work with module loaders that support AMD or CommonJS. jQuery plugins often are built this way.</p>
+<p>To use these modules you need to configure them as globals. This is similar to <strong>shim</strong> config in RequireJS. Here's an example with each option explained:</p>
+<pre><code>{
+  &quot;dependencies&quot;: {
+    &quot;jquery&quot;: &quot;2.2.2&quot;,
+    &quot;jquery-plugin&quot;: &quot;0.2.0&quot;
+  },
+
+  ...
+
+  &quot;system&quot;: {
+    &quot;meta&quot;: {
+      &quot;jquery-plugin&quot;: {
+        &quot;deps&quot;: [&quot;jquery&quot;],
+        &quot;exports&quot;: &quot;jQuery&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h3>deps</h3>
+<p>The <a href="load.metadata.html">meta</a> <strong>deps</strong> property is an Array that specifies the module's dependencies. In this example we are saying that this module <code>jquery-plugin</code> depends on <code>jquery</code>.</p>
+<h3>exports</h3>
+<p>The <a href="load.metadata.html">meta</a> <strong>exports</strong> property specifies a global value that is the module's value. For example if we had a module that did:</p>
+<pre><code>window.FOO = { ... };
+</code></pre>
+<p>We would specify this config with: <code>&quot;exports&quot;: &quot;FOO&quot;</code>.  Then any other module that exports it like:</p>
+<pre><code>import foo from &quot;foo&quot;;
+</code></pre>
+<p>Will get the <code>FOO</code> global.</p>
+<h2>Progressively loaded bundles</h2>
+<p>In the <a href="steal-tools.guides.progressive_loading.html">progressive loading guide</a> we show how to progressively load different pages within your app. You import these modules using the <a href="System.import.html">System.import</a> function like so:</p>
+<pre><code>System.import(&quot;app/cart&quot;).then(function(cart){
+
+});
+</code></pre>
+<p>When using <a href="steal-tools.html">steal-tools</a> to do a production build it needs to know about these progressively loaded bundles in order to perform its code splitting algorithm.</p>
+<p>You can specify your bundles with the <strong>bundle</strong> property in config:</p>
+<pre><code>{
+  ...
+  &quot;system&quot;: {
+    &quot;bundle&quot;: [
+      &quot;app/cart&quot;
+    ]
+  }
+}
+</code></pre>
+<p>Then when you perform a build it will create a bundle in <code>dist/bundles/app/cart.js</code> by default (you can specify the path using <a href="System.bundlesPath.html">bundlesPath</a> configuration).</p>
+<h2>Specify your project's root folder</h2>
+<p>Often projects will store their code in a subfolder like <code>src/</code> or <code>public/</code> and do not want to include that when importing modules. Using <strong>directories.lib</strong> configuration you can specify your project's root folder:</p>
+<pre><code>{
+  &quot;name&quot;: &quot;app&quot;,
+
+  ...
+
+  &quot;system&quot;: {
+    &quot;directories&quot;: {
+      &quot;lib&quot;: &quot;src&quot;
+    }
+  }
+}
+</code></pre>
+<p>Then you can import modules from this folder by preceding imports with your package name like:</p>
+<pre><code>import util from &quot;app/util&quot;;
+</code></pre>
+<p><em>Note</em> that you cannot omit the package name when importing a module unless you use relative paths like <code>&quot;./util&quot;</code>.</p>
+
+		</section>
+		
 		
 
 		
@@ -310,7 +452,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"StealJS.guides","title":"guides","type":"group","parent":"StealJS","description":"","order":0,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS.configuration","src":"steal/docs/pages/configuration.md","description":"","title":"Configuration","parent":"StealJS.guides","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

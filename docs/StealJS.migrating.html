@@ -225,6 +225,18 @@
 			
 				
 				
+				<li class="search-container">
+					<a class="page" href="StealJS.configuration.html" data-search="Configuration">
+						Configuration
+					</a>
+				</li>
+				
+			
+			
+		
+			
+				
+				
 				<li class="search-container active">
 					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
 						Migrating
@@ -278,11 +290,11 @@
 
 	</nav>
 	
-	
+
 	
 	<article class="content docs">
 	
-	
+
 		
 		<section class="title">
 			<div class="heading">
@@ -313,12 +325,12 @@
 <br />
 		</section>
 		
-		
+
 		
 		<section class="contents">
 		</section>
 		
-		
+
 		
 
 		
@@ -326,13 +338,14 @@
 		
 			
 		
+
 		
-		
-		
+
 
 		
 		<section class="comment">
-			<h2>Migrating from old Steal</h2>
+			<h2>Migrating from Legacy Steal</h2>
+<p>If you were a user of <a href="https://github.com/bitovi/legacy-steal">legacy Steal</a> this guide is meant to help you upgrade to the modern version of Steal. If you've never heard of the legacy Steal, this page isn't for you.</p>
 <h3>Config changes</h3>
 <h4>Map</h4>
 <p>There is no longer a <code>&quot;*&quot;</code> mapping like before:</p>
@@ -372,7 +385,7 @@
 <p>The old Steal was chainable using <code>.then</code>, but this produced numerous problems that are better fixed inside the config. If you need a module to load before loading another, specify this with <code>deps</code> inside of the <code>meta</code> configuration for that module.</p>
 <h3>Build</h3>
 <p>The old Steal always produced a <code>production.js</code> file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in <code>dist/bundles</code> and it will be named after your main module.</p>
-<p>You will also need to add the following to your <code>stealconfig.js</code> file to be able to build the CanJS projects:</p>
+<p>You will also need to add the following to your <code>stealconfig.js</code> file to be able to build the CanJS projects (note if you are using NPM this isn't necessary):</p>
 <pre><code>System.buildConfig = {
   map: {
     &quot;can/util/util&quot; : &quot;can/util/domless/domless&quot;
@@ -396,14 +409,13 @@
 		
 
 		
-	
+
 	
 	</article>
 	
-	
+
 
 </div>
-
 
 
 
