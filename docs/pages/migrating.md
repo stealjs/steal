@@ -2,7 +2,9 @@
 @parent StealJS.guides
 
 
-## Migrating from old Steal
+## Migrating from Legacy Steal
+
+If you were a user of [legacy Steal](https://github.com/bitovi/legacy-steal) this guide is meant to help you upgrade to the modern version of Steal. If you've never heard of the legacy Steal, this page isn't for you.
 
 ### Config changes
 
@@ -56,7 +58,7 @@ The old Steal was chainable using `.then`, but this produced numerous problems t
 
 The old Steal always produced a `production.js` file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in `dist/bundles` and it will be named after your main module.
 
-You will also need to add the following to your `stealconfig.js` file to be able to build the CanJS projects:
+You will also need to add the following to your `stealconfig.js` file to be able to build the CanJS projects (note if you are using NPM this isn't necessary):
 
     System.buildConfig = {
       map: {
