@@ -1,13 +1,13 @@
 @property {String} System.bundlesPath
 @parent StealJS.config
 
-A convience configuration property for setting the path of where the [System.env production] 
+A configuration property for setting the path of where the [System.env production] 
 bundles folder is located.
 
 @option {String} 
 
 A folder name that specifies the path to the production bundles.  By default,
-`System.bundlesPath` is `"dist/bundles"`.  
+`System.bundlesPath` is `"dist/bundles"`. This path is relative to the page's [System.baseURL]. So, for example, if your script tag looks like:
 
 @body
 
@@ -18,13 +18,9 @@ _"bundles/[MAIN\_MODULE\_NAME]"_ module. For example, if the main module is `mya
 a `bundles/myapp` module is automatically configured to contain it:
 
 ```
-<script src="steal/steal.js"
-        config="./config.js"
-        main="myapp"
-        env="production">
-</script>
-<script>
-  System.bundles["bundles/myapp"] //-> ["myapp"]
+<script src="node_modules/steal/steal.production.js"
+		bundles-path="./out/bundles"
+        main="myapp">
 </script>
 ```
 
@@ -45,12 +41,10 @@ a `bundles/myapp` module is automatically configured to contain it:
 </script>
 ```
 
-Often, `bundlesPath` should be the same value as what's passed in [steal-tools.build]. If
-`bundlesPath` is not set, it will set the default bundles paths:
+Often, `bundlesPath` should be the same value as what's passed in [steal-tools.build]. If `bundlesPath` is not set, it will set the default bundles paths:
 
 ```
-<script src="steal/steal.js"
-        config="./config.js"
+<script src="node_modules/steal/steal.js"
         main="myapp"
         env="production"
         bundles-path="packages">
@@ -64,4 +58,3 @@ Often, `bundlesPath` should be the same value as what's passed in [steal-tools.b
 
 If a path rule for `System.paths["bundles/*"]` or `System.paths["bundles/*.css"]`
 exist, `bundlesPath` will not overwrite them.
-
