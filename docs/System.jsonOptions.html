@@ -916,7 +916,26 @@
 
 		
 		<section class="comment">
-			
+			<h2>Use</h2>
+<p><strong>jsonOptions</strong> is useful when your app (or one of your dependencies is importing a JSON file that isn't meant to be exposed in production. For example many packages do:</p>
+<pre><code>var pkg = require(&quot;./package.json&quot;);
+</code></pre>
+<p>Which will be imported by Steal. However the package.json contains metadata include paths on your filesystem that you likely don't want exposed by a web-server.</p>
+<p>Typically code only needs their version for a few properties, such as the <strong>version</strong>. Using the <em>transform</em> function we can remote all others:</p>
+<pre><code>System.config({
+  jsonOptions: {
+    transform: function(load, data) {
+      // Delete every prop by `version`
+      // Only allow the version prop to be exposed
+      return {
+        version: data.version
+      };
+    }
+  }
+});
+</code></pre>
+<p>When compiled every other property will be excluded from the build.</p>
+
 		</section>
 		
 		
@@ -940,7 +959,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.jsonOptions","src":"steal/docs/system-jsonOptions.md","description":"Provides options that can be applied to JSON loading. The JSON extension has the following options:","types":[{"type":"Object","options":[{"name":"transform","description":"A function that allows you to transform the JSON object that will be used as the module value.\n\n```js\nSystem.config({\n  jsonOptions: {\n    transform: function(load, data) {\n      // Delete secret data\n\t  delete data._secret;\n\t  return data;\n\t}\n  }\n});\n```","types":[{"type":"function","returns":{"types":[{"type":"Object","options":[]}],"description":"The object that will be used as the module's value."},"params":[{"types":[{"type":"Object","options":[]}],"name":"load","description":"The load object for this module. Use this if you need to know the module's name or other metadata to determine how to transform it."},{"types":[{"type":"Object","options":[]}],"name":"data","description":"The raw JSON data parsed by `JSON.parse`."}]}],"optional":true}]}],"title":"","parent":"StealJS.config","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.jsonOptions","src":"steal/docs/system-jsonOptions.md","description":"Provides options that can be applied to JSON loading. The JSON extension has the following options:","types":[{"type":"Object","options":[{"name":"transform","description":"A function that allows you to transform the JSON object that will be used as the module value.\n\n```js\nSystem.config({\n  jsonOptions: {\n    transform: function(load, data) {\n      // Delete secret data\n\t  delete data._secret;\n\t  return data;\n\t}\n  }\n});\n```","types":[{"type":"function","returns":{"types":[{"type":"Object","options":[]}],"description":"The object that will be used as the module's value."},"params":[{"types":[{"type":"Object","options":[]}],"name":"load","description":"The load object for this module. Use this if you need to know the module's name or other metadata to determine how to transform it."},{"types":[{"type":"Object","options":[]}],"name":"data","description":"The raw JSON data parsed by `JSON.parse`."}]}],"optional":true}]}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

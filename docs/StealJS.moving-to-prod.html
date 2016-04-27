@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Continuous Builds </title>
+	<title>StealJS - Moving to Production </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -189,7 +189,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="page" href="steal-tools.guides.watch_mode.html" data-search="Continuous Builds">
 						Continuous Builds
 					</a>
@@ -249,7 +249,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="page" href="StealJS.moving-to-prod.html" data-search="Moving to Production">
 						Moving to Production
 					</a>
@@ -310,7 +310,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>Continuous Builds</h1>
+<h1>Moving to Production</h1>
 	<ul class="tags">
 		<li>page</li>
 	</ul>
@@ -321,7 +321,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">steal-tools.guides.watch_mode</span>
+		<span class="module">StealJS.moving-to-prod</span>
 	
 	
 	
@@ -346,11 +346,6 @@
 		
 
 		
-		<section class="description">
-			<p>In 0.9.0 StealTools added a new <strong>watch</strong> mode to its multi-build. This enables you to continuously rebuild your application as you work. This is useful if you prefer a workflow where you are debugging your application as it will appear in production. In this guide we'll go through the process of setting up a CanJS project using the watch mode.</p>
-
-		</section>
-		
 
 		
 			
@@ -361,79 +356,55 @@
 
 		
 		<section class="comment">
-			<h2>Setup</h2>
-<p>The guide assumes some basic knowledge of <a href="http://nodejs.org">Node.js</a>. If you haven't used Node before, please go learn more about how it works on their website.</p>
-<p>To get started we want to create a new Node.js application and install the packages we'll need.</p>
-<pre><code class="language-shell">&gt; npm init
-&gt; npm install steal-tools -g
-&gt; npm install steal --save
-&gt; npm install can --save
+			<p>Once your application is in a place to deploy to production you'll need to take just a few steps to get that ready.</p>
+<h2>Create a build</h2>
+<p>Using <a href="steal-tools.html">steal-tools</a> we can create a build that concats and minifies our source code together. If you haven't already, install steal-tools now:</p>
+<pre><code>npm install steal-tools --save-dev
 </code></pre>
-<p>Running <code>npm init</code> will ask you a series of questions. The answers aren't important and can be changed later by editing the produced <code>package.json</code> file.</p>
-<p>Before we can start using the <strong>watch</strong> mode we'll need to create our main file. This is the entry point to your application and was specified in the <code>npm init</code> process. Assuming we called it <code>main.js</code> let's open up that file and get an initial build started.</p>
-<h3>main.js</h3>
-<pre><code class="language-js">var can = require(&quot;can&quot;);
-</code></pre>
-<h2>Enable watch mode</h2>
-<p>Now that we have our skeleton ready we can turn on watch mode.</p>
-<pre><code class="language-shell">steal-tools --watch
-</code></pre>
-<p>This will take a second or so and then you'll get an output:</p>
-<pre><code class="language-shell">[9:09:19 AM]
-Watch mode ready.
-</code></pre>
-<p>This tells us that the initial build has been complete and watch mode is ready to rebuild our application as we develop.</p>
-<h2>Develop your application</h2>
-<p>From here you can begin developing your application any way you like. Let's create a simple <code>hello-world</code> component to show how the output updates every time you modify your application. Back in <code>main.js</code> add this:</p>
-<pre><code class="language-js">var can = require(&quot;can&quot;);
-require(&quot;can/view/stache/&quot;);
-require(&quot;./components/hello/&quot;);
-</code></pre>
-<p>You'll get a message indicating that StealTools cannot find the hello component:</p>
-<pre><code class="language-shell">File not found: /path/to/can-proj/components/hello/hello.js
-</code></pre>
-<p>So let's go create it.</p>
-<h3>components/hello/hello.js</h3>
-<pre><code class="language-js">require(&quot;can/view/stache/&quot;);
-var template = require(&quot;./hello.stache&quot;);
-var can = require(&quot;can&quot;);
+<p>Then create a script in your project folder called <code>build.js</code>:</p>
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
 
-can.Component.extend({
-    tag: &quot;hello-world&quot;,
-    viewModel: {
-        name: &quot;world&quot;
-    },
-    template: template
+stealTools.build();
+</code></pre>
+<p>Run it with:</p>
+<pre><code>node build.js
+</code></pre>
+<p>This will create a bundles folder in <code>dist/bundles</code> that contain all of your JavaScript and CSS bundles.</p>
+<p>If you'd also like it to copy your fonts and images (from CSS) you can specify that in the build options:</p>
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
+
+stealTools.build({}, {
+  bundleAssets: true
 });
 </code></pre>
-<h3>components/hello/hello.stache</h3>
-<pre><code class="language-html">&lt;div&gt;
-Hellos {{name}}!
-&lt;/div&gt;
+<p>With everything packaged together you can move the <code>dist/</code> folder to where it is exposed on your webserver.</p>
+<h2>Create a production html file</h2>
+<p>In a lot of Steal apps you might have separate html files for development and production. Your development.html might look like:</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My App&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;script src=&quot;./node_modules/steal/steal.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 </code></pre>
-<h3>main.js</h3>
-<p>Now back in your main add the component to your page:</p>
-<pre><code class="language-js">var can = require(&quot;can&quot;);
-require(&quot;can/view/stache/&quot;);
-require(&quot;./components/hello/&quot;);
+<p>To use this in production you only need to change the script tag to:</p>
+<pre><code>&lt;script src=&quot;./node_modules/steal/steal.production.js&quot; main=&quot;app/app&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p><em>Note</em> that the <code>main</code> attribute must be provided for production to work. This is how Steal knows where to find your app's bundles.</p>
+<h3>bundleSteal</h3>
+<p>Alternatively you could use the <a href="steal-tools.BuildOptions.html">bundleSteal</a> option with steal-tools which will include Steal in your main bundle. To use this option update your build script to:</p>
+<pre><code>var stealTools = require(&quot;steal-tools&quot;);
 
-var template = can.stache(&quot;&lt;hello-world&gt;&lt;/hello-world&gt;&quot;);
-can.$(&quot;body&quot;).append(template());
+stealTools.build({}, {
+  bundleAssets: true,
+  bundleSteal: true
+});
 </code></pre>
-<p>Each time you save you will get new output; it will either be a timestamp by itself (when creating new modules) or a timestamp with the module name (when modifying an existing module). The output will be like:</p>
-<pre><code class="language-shell">[9:20:16 AM]
-[9:20:22 AM]: components/hello/hello
-[9:21:49 AM]: main
+<p>Then to use change your script tag to:</p>
+<pre><code>&lt;script src=&quot;./dist/bundles/app/app.js&quot;&gt;&lt;/script&gt;
 </code></pre>
-<h2>Debug your application</h2>
-<p>Now that we've got a basic application written let's check out the debugging experience. First let's create a simple page:</p>
-<h3>index.html</h3>
-<pre><code class="language-html">&lt;script src=&quot;node_modules/steal/steal.js&quot;
-    env=&quot;production&quot;
-    main=&quot;main&quot;&gt;&lt;/script&gt;
-</code></pre>
-<p>Open the page in a browser and open your debug tools. With the watch mode source maps are enabled by default. You can see and debug your original code from your browser's debugging tools.</p>
-<p>That's it! As you develop and save your code StealTools will continuously rebuild your application.</p>
 
 		</section>
 		
@@ -458,7 +429,7 @@ can.$(&quot;body&quot;).append(template());
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"steal-tools.guides.watch_mode","src":"steal-tools/doc/guides/watch_mode.md","description":"In 0.9.0 StealTools added a new **watch** mode to its multi-build. This enables you to continuously rebuild your application as you work. This is useful if you prefer a workflow where you are debugging your application as it will appear in production. In this guide we'll go through the process of setting up a CanJS project using the watch mode.","title":"Continuous Builds","parent":"StealJS.guides","order":2,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS.moving-to-prod","src":"steal/docs/pages/production.md","description":"","title":"Moving to Production","parent":"StealJS.guides","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

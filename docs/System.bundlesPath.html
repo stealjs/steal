@@ -831,7 +831,7 @@
 
 		
 		<section class="description">
-			<p>A convience configuration property for setting the path of where the <a href="System.env.html">production</a>
+			<p>A configuration property for setting the path of where the <a href="System.env.html">production</a>
 bundles folder is located.</p>
 
 		</section>
@@ -846,7 +846,7 @@ bundles folder is located.</p>
 </h2>
 <div class="signature-wrapper">
 <p>A folder name that specifies the path to the production bundles.  By default,
-<code>System.bundlesPath</code> is <code>&quot;dist/bundles&quot;</code>.</p>
+<code>System.bundlesPath</code> is <code>&quot;dist/bundles&quot;</code>. This path is relative to the page's <a href="System.baseURL.html">System.baseURL</a>. So, for example, if your script tag looks like:</p>
 
 
 
@@ -871,13 +871,9 @@ bundles folder is located.</p>
 <p>In <a href="System.env.html">production</a>, the <a href="System.main.html">System.main</a> module will be assumed to be within a
 <em>&quot;bundles/[MAIN_MODULE_NAME]&quot;</em> module. For example, if the main module is <code>myapp</code>,
 a <code>bundles/myapp</code> module is automatically configured to contain it:</p>
-<pre><code>&lt;script src=&quot;steal/steal.js&quot;
-        config=&quot;./config.js&quot;
-        main=&quot;myapp&quot;
-        env=&quot;production&quot;&gt;
-&lt;/script&gt;
-&lt;script&gt;
-  System.bundles[&quot;bundles/myapp&quot;] //-&gt; [&quot;myapp&quot;]
+<pre><code>&lt;script src=&quot;node_modules/steal/steal.production.js&quot;
+        bundles-path=&quot;./out/bundles&quot;
+        main=&quot;myapp&quot;&gt;
 &lt;/script&gt;
 </code></pre>
 <p><code>System.bundlesPath</code> tells the client where all bundles can be found by configuring
@@ -894,10 +890,8 @@ a <code>bundles/myapp</code> module is automatically configured to contain it:</
   System.paths[&quot;bundles/*.css&quot;] = &quot;packages/*.css&quot;;
 &lt;/script&gt;
 </code></pre>
-<p>Often, <code>bundlesPath</code> should be the same value as what's passed in <a href="steal-tools.build.html">build</a>. If
-<code>bundlesPath</code> is not set, it will set the default bundles paths:</p>
-<pre><code>&lt;script src=&quot;steal/steal.js&quot;
-        config=&quot;./config.js&quot;
+<p>Often, <code>bundlesPath</code> should be the same value as what's passed in <a href="steal-tools.build.html">build</a>. If <code>bundlesPath</code> is not set, it will set the default bundles paths:</p>
+<pre><code>&lt;script src=&quot;node_modules/steal/steal.js&quot;
         main=&quot;myapp&quot;
         env=&quot;production&quot;
         bundles-path=&quot;packages&quot;&gt;
@@ -934,7 +928,7 @@ exist, <code>bundlesPath</code> will not overwrite them.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.bundlesPath","src":"steal/docs/system-bundlesPath.md","description":"A convience configuration property for setting the path of where the [System.env production] \nbundles folder is located.","types":[{"type":"String","description":"A folder name that specifies the path to the production bundles.  By default,\n`System.bundlesPath` is `\"dist/bundles\"`."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"property","name":"System.bundlesPath","src":"steal/docs/system-bundlesPath.md","description":"A configuration property for setting the path of where the [System.env production] \nbundles folder is located.","types":[{"type":"String","description":"A folder name that specifies the path to the production bundles.  By default,\n`System.bundlesPath` is `\"dist/bundles\"`. This path is relative to the page's [System.baseURL]. So, for example, if your script tag looks like:"}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
