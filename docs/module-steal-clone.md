@@ -5,7 +5,7 @@ Steal-clone is a module that allows you to clone Steal's loader and provide modu
 
 @signature `clone(moduleOverrides)`
 
-@param {Object} moduleOverrides Module names and definitions used to override modules of the same name. These definitions will be used when importing parent modules using the `import` function of the returned loader.
+@param {Object} moduleOverrides Module identifiers and definitions used to override modules of the same name. These definitions will be used when importing parent modules using the `import` statement of the returned loader.
 
 @return {Object} The cloned loader.
 
@@ -47,9 +47,9 @@ clone({
 });
 ```
 
-### Module Names
+### Module Identifiers
 
-The keys passed in the `moduleOverrides` object ("moduleB" in the example above) can be any valid module name. All of the module syntaxes supported by Steal are supported by steal-clone. If you're using [ES6 modules](http://stealjs.com/docs/syntax.es6.html), you can use the same value used in your import statement. Similarly, if you're using [CommonJS](http://stealjs.com/docs/syntax.CommonJS.html), you can use the same value that you pass to 'require'.
+The keys passed in the `moduleOverrides` object ("moduleB" in the example above) can be any valid module identifier. All of the module syntaxes supported by Steal are supported by steal-clone. If you're using [ES6 modules](http://stealjs.com/docs/syntax.es6.html), you can use the same value used in your import statement. Similarly, if you're using [CommonJS](http://stealjs.com/docs/syntax.CommonJS.html), you can use the same value that you pass to 'require'.
 
 You can also use relative paths to override modules based on where you are using steal-clone:
 
@@ -91,6 +91,20 @@ clone({
   }
 });
 ```
+
+### Dynamically imported modules
+
+It's possible to provide overrides to modules that will be later dynamically imported. If you have a `moduleC` defined as:
+
+```js
+import loader from '@loader';
+
+loader.import('moduleB').then(function(){
+
+});
+```
+
+You will be able to override the value of `moduleB`. Note that for this to work you must import [@loader] to use for dynamic loading instead of using `System.import`. This is because `@loader` will refer to the cloned loader you created where as `System` always refers back to the global loader. Using [@loader] is always recommended anyways.
 
 ### Use with Bower or NPM
 

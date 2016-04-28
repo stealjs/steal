@@ -1,28 +1,29 @@
 @typedef {*} @loader
 @parent StealJS.modules
 
-`@loader` is primarily only needed to be used in your [@config] to ensure that you are configuring
-the correct loader. Since [System](steal#section_LoaderandSystemnamespaces) represents the global System loader using it within your
-config doesn't guarantee that you are configuring the correct loader. In scenarios where
-you want to build multiple apps in parallel, for example if you have several apps set
-up to build in a Grunt task, using `loader` is necessarily so that your [@config] options
-are set on the proper loader.
+**@loader** is a module that refers to the loader that is loading the module. Any time you need to configure the loader or dynamically import modules, it's best to use `@loader` rather than the global `System`.
 
-@option {*} The `@loader` module is the `Loader` that is loading your code.
+In most cases they are the same, but during the build there are multiple loaders; and if using [steal.steal-clone] to test injected modules.
+
+@option {*} The **@loader** module is the `Loader` that is loading your code.
 
 @body
 
 ## Use
 
-To use `@loader` simply import it into your config and use it in the same way you
+To use **@loader** simply import it and use it in the same way you
 would use [System](steal#section_LoaderandSystemnamespaces).
 
     import loader from "@loader";
 
-    loader.config({
-      map: {
-        "can/util/util": "can/util/jquery/jquery"
-      }
-    });
+	loader.config({
+		map: {
+			a: "b"
+		}
+	});
+
+	loader.import("someOtherModule").then(function(mod){
+
+	});
 
 This works with any syntax supported by StealJS.
