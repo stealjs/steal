@@ -170,6 +170,10 @@ QUnit.config.testTimeout = 30000;
 				'src="../steal/steal.js?basics"'));
 		});
 	}
+	
+	asyncTest("steal done promise is rejected without steal config", function() {
+		makeIframe("no-config-error/test.html");
+	});
 
 	asyncTest("inline", function(){
 		makeIframe("basics/inline_basics.html");
