@@ -1,0 +1,15 @@
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+	<script src="../../steal.js" config="./no-config-found.js"></script>	
+	<script>
+		steal.done().then(null, function() {
+			QUnit.ok(true);
+			QUnit.start();
+			
+			removeMyself();
+		});
+	</script>
+</body>

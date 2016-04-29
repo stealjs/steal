@@ -93,9 +93,6 @@
 				}
 
 				return System["import"]("@dev");
-			},function(e){
-				console.log("steal - error loading @config.",e);
-				return steal.System["import"]("@dev");
 			});
 
 			appDeferred = devDeferred.then(function(){
