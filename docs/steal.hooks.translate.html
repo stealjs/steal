@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - types </title>
+	<title>StealJS - translate </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -86,70 +86,12 @@
 			</a>
 		</li>
 		
-		<li class="search-container active parent">
-			<a class="sidebar-title" href="steal.html" data-search="steal">
-				steal
-			</a>
-		</li>
-		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.types.html" data-search="types">
-				types
+			<a class="sidebar-title" href="steal.hooks.translate.html" data-search="translate">
+				translate
 			</a>
 			
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="load.html" data-search="load">
-						load
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="load.metadata.html" data-search="metadata">
-						metadata
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="moduleIdentifier.html" data-search="moduleIdentifier">
-						moduleIdentifier
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="moduleName.html" data-search="moduleName">
-						moduleName
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -166,9 +108,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>types</h1>
+<h1>translate</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>page</li>
 	</ul>
 	
 	
@@ -177,7 +119,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.types</span>
+		<span class="module">steal.hooks.translate</span>
 	
 	
 	
@@ -202,14 +144,68 @@
 		
 
 		
+		<section class="description">
+			<p>A loader hook that converts a module's source, if needed. The most common usage of this hook is for transpiling a language down to JavaScript.</p>
+
+		</section>
+		
 
 		
+			
+				<section class="signature">
+					<h2 id="sig_translate_load_">translate(load)
+</h2>
+<div class="signature-wrapper">
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>load
+				<code>{<a href="load.html" >load</a>}</code></h4>
+			<div class="description">
+				<p>The load object associated with this module.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Promise | String}</code></h4>
+		<div class="description">
+			<p>The translated source or a Promise that will resolve with the translated source.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+				</section>
 			
 		
 
 		
 
 
+		
+		<section class="comment">
+			
+		</section>
 		
 		
 
@@ -232,7 +228,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"StealJS.types","title":"types","type":"group","parent":"steal","description":"","order":0,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"steal.hooks.translate","src":"steal/docs/hook-translate.md","description":"A loader hook that converts a module's source, if needed. The most common usage of this hook is for transpiling a language down to JavaScript.","title":"translate","parent":"StealJS.hooks","signatures":[{"code":"translate(load)","description":"","params":[{"types":[{"type":"load"}],"name":"load","description":"The load object associated with this module."}],"returns":{"types":[{"type":"Promise"},{"type":"String"}],"description":"The translated source or a Promise that will resolve with the translated source."}}],"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

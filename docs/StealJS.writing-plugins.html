@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Migrating </title>
+	<title>StealJS - Writing Plugins </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -237,7 +237,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="page" href="StealJS.migrating.html" data-search="Migrating">
 						Migrating
 					</a>
@@ -273,7 +273,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="page" href="StealJS.writing-plugins.html" data-search="Writing Plugins">
 						Writing Plugins
 					</a>
@@ -322,7 +322,7 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>Migrating</h1>
+<h1>Writing Plugins</h1>
 	<ul class="tags">
 		<li>page</li>
 	</ul>
@@ -333,7 +333,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.migrating</span>
+		<span class="module">StealJS.writing-plugins</span>
 	
 	
 	
@@ -368,64 +368,57 @@
 
 		
 		<section class="comment">
-			<h2>Migrating from Legacy Steal</h2>
-<p>If you were a user of <a href="https://github.com/bitovi/legacy-steal">legacy Steal</a> this guide is meant to help you upgrade to the modern version of Steal. If you've never heard of the legacy Steal, this page isn't for you.</p>
-<h3>Config changes</h3>
-<h4>Map</h4>
-<p>There is no longer a <code>&quot;*&quot;</code> mapping like before:</p>
-<pre><code>steal.config({
-  map: {
-    &quot;*&quot;: {
-      &quot;can/util&quot;: &quot;can/util/jquery&quot;
-    }
-  }
-});
-</code></pre>
-<p>Instead flatten these out:</p>
-<pre><code>steal.config({
-  map: {
-    &quot;can/util&quot;: &quot;can/util/jquery&quot;
-  }
-});
-</code></pre>
-<h4>Paths</h4>
-<p>When specifying that a folder's children should also be pathed, include an asterisks to denote:</p>
-<pre><code>steal.config({
-  paths: {
-    &quot;can/&quot;: &quot;lib/can/&quot;
-  }
-});
-</code></pre>
-<p>Add the asterisks and specify the file type:</p>
-<pre><code>steal.config({
-  paths: {
-    &quot;can/*&quot;: &quot;lib/can/*.js&quot;
-  }
-});
-</code></pre>
-<h4>Ext</h4>
-<p>CSS and Less plugins come by default, you no longer need to specify these in <code>steal.config</code>'s ext option. But do add mustache and stache if using those with CanJS.</p>
-<h4>Then</h4>
-<p>The old Steal was chainable using <code>.then</code>, but this produced numerous problems that are better fixed inside the config. If you need a module to load before loading another, specify this with <code>deps</code> inside of the <code>meta</code> configuration for that module.</p>
-<h3>Build</h3>
-<p>The old Steal always produced a <code>production.js</code> file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in <code>dist/bundles</code> and it will be named after your main module.</p>
-<p>You will also need to add the following to your <code>stealconfig.js</code> file to be able to build the CanJS projects (note if you are using NPM this isn't necessary):</p>
-<pre><code>System.buildConfig = {
-  map: {
-    &quot;can/util/util&quot; : &quot;can/util/domless/domless&quot;
-  }
+			<p>Steal's plugin API makes it easy to write plugins for module loading that does things like:</p>
+<ul>
+<li>Caches source in localStorage/IndexedDB so it doesn't need to be fetched from the server.</li>
+<li>Transpiling TypeScript to JavaScript.</li>
+<li>Preloading images so they are cached before use.</li>
+</ul>
+<h2>How to write a plugin</h2>
+<p>Writing a plugin is just a matter of creating a module that exports one or more of the Steal loader hooks. the loader hooks are:</p>
+<ul>
+<li><a href="steal.hooks.locate.html">locate</a> - Determine the URL for a module.</li>
+<li><a href="steal.hooks.fetch.html">fetch</a> - Fetch a module (like using XHR).</li>
+<li><a href="steal.hooks.translate.html">translate</a> - Run a transpiler like TypeScript against module source, converting it into JavaScript.</li>
+<li><a href="steal.hooks.instantiate.html">instantiate</a> - Override the loader's mechanisms for determining a module's dependencies and ultimate value.</li>
+</ul>
+<p>To override any of these hooks you only need to export the hook name in your module. For example to override the <strong>locate</strong> hook you do:</p>
+<pre><code>exports.locate = function(load){
+  // custom logic goes here
 };
 </code></pre>
-<h2>Paths in the less files</h2>
-<p>Steal compiles the <code>less</code> files in a slightly different way than the legacy version which affects <code>@import</code>-ing and image urls</p>
-<p>In the legacy Steal, you <code>@import</code>-ed stuff relative from the location of the <code>.less</code> file:</p>
-<p>In the new Steal <code>@import</code> path are relative to the steal root folder - folder that contains the <code>stealconfig.js</code> file:</p>
-<p>The opposite is the case for the image urls in your <code>.less</code> files:</p>
-<p>Legacy steal (relative to the steal root folder):</p>
-<pre><code>background-image: url(url/to/image.png);
+<h3>Simple example: image preloading</h3>
+<p>Let's build a simple example of a plugin, one preloads images so that they are ready before being inserted into the DOM.</p>
+<p>Let's start off by creating our plugin, create a file <strong>preload.js</strong> in your project:</p>
+<pre><code>exports.fetch = function(load) {
+
+};
 </code></pre>
-<p>New steal (relative to the .less file):</p>
-<pre><code>background-image: url(../url/to/image.png);
+<p>To implement this plugin we are overriding the <code>fetch</code> hook. The fetch hook receives the <a href="load.html">load</a> object which identifies the module we are attempting to load.</p>
+<p>What we want to do in this plugin is to load this image without displaying it to the user. This way when, later, our JavaScript inserts the image into the page it has already been loaded from the server and is in the browser cache.</p>
+<p>We can use the <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image">Image constructor</a> to load the image.  Each loader hook can return a Promise, which we can use to block module loading, but in this case we want the page to load as fast as possible, so we'll load the image in the background but allow module loading to continue.</p>
+<p>Here's how we can implement this plugin:</p>
+<pre><code>exports.fetch = function(load){
+  var img = new Image();
+  img.src = load.address;
+
+  return &quot;&quot;;
+};
+</code></pre>
+<p>Steal assumes that the modules it is loading are all JavaScript, and will try to execute their source as JavaScript. Since this is an image, we can return an empty string <code>&quot;&quot;</code> which becomes this module's &quot;source&quot;, acting as a noop of sorts.</p>
+<p>To now use this plugin, in another file use the bang syntax to load an image. I'll create a <strong>main.js</strong> for this purpose:</p>
+<pre><code>require(&quot;./cat.png!preload&quot;);
+</code></pre>
+<p>And now cat.png is preload it. If we were to insert it into the page later, such as after a user had clicked on a link, it would be fresh in the browser cache and would display nearly instantly.</p>
+<p>If you wanted to associate <em>all</em> .png files with this preload plugin, you could special it as the handler using <a href="System.ext.html">System.ext</a> configuration:</p>
+<pre><code>&quot;system&quot;: {
+  &quot;ext&quot;: {
+    &quot;png&quot;: &quot;preload&quot;
+  }
+}
+</code></pre>
+<p>Now with this config all you need to do is:</p>
+<pre><code>require(&quot;./cat.png&quot;);
 </code></pre>
 
 		</section>
@@ -451,7 +444,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"page","name":"StealJS.migrating","src":"steal/docs/pages/migrating.md","description":"","title":"Migrating","parent":"StealJS.guides","import":["\"../../../styles/variables.less\";","\"styles/variables.less\";"],"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"page","name":"StealJS.writing-plugins","src":"steal/docs/pages/writing-plugins.md","description":"","title":"Writing Plugins","parent":"StealJS.guides","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

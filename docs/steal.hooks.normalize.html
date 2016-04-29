@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - types </title>
+	<title>StealJS - normalize </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -86,70 +86,12 @@
 			</a>
 		</li>
 		
-		<li class="search-container active parent">
-			<a class="sidebar-title" href="steal.html" data-search="steal">
-				steal
-			</a>
-		</li>
-		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="StealJS.types.html" data-search="types">
-				types
+			<a class="sidebar-title" href="steal.hooks.normalize.html" data-search="normalize">
+				normalize
 			</a>
 			
-	<ul>
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="load.html" data-search="load">
-						load
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="load.metadata.html" data-search="metadata">
-						metadata
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="moduleIdentifier.html" data-search="moduleIdentifier">
-						moduleIdentifier
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="typedef" href="moduleName.html" data-search="moduleName">
-						moduleName
-					</a>
-				</li>
-				
-			
-			
-		
-	</ul>
-
 
 		</li>
 		
@@ -166,9 +108,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>types</h1>
+<h1>normalize</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>function</li>
 	</ul>
 	
 	
@@ -177,7 +119,7 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">StealJS.types</span>
+		<span class="module">steal.hooks.normalize</span>
 	
 	
 	
@@ -202,14 +144,93 @@
 		
 
 		
+		<section class="description">
+			<p>A loader hook that converts a <a href="moduleIdentifier.html">moduleIdentifier</a> into a <a href="moduleName.html">moduleName</a> to serve as the canonical key for a module.</p>
+
+		</section>
+		
 
 		
+			
+				<section class="signature">
+					<h2 id="sig_normalize_name_parentName_parentAddress_">normalize(name, parentName, parentAddress)
+</h2>
+<div class="signature-wrapper">
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>name
+				<code>{String}</code></h4>
+			<div class="description">
+				<p>The <a href="moduleIdentifier.html">moduleIdentifier</a> provided in the <code>import</code>, <code>require()</code> or similar call depending on the module syntax used.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>parentName
+				<code>{String}</code><span class="pull-right optional">Optional</span></h4>
+			<div class="description">
+				<p>The <a href="moduleName.html">moduleName</a> of the parent module; the module that is doing the importing.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>parentAddress
+				<code>{String}</code><span class="pull-right optional">Optional</span></h4>
+			<div class="description">
+				<p>The address (as determined in <a href="steal.hooks.locate.html">locate</a>) of the parent module.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Promise | String}</code></h4>
+		<div class="description">
+			<p>The string <a href="moduleName.html">moduleName</a> as determined by applying the normalize algorithm, or a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a> that will resolve with the moduleName.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+				</section>
 			
 		
 
 		
 
 
+		
+		<section class="comment">
+			<p>The <strong>normalize</strong> hook is used to convert a <a href="moduleIdentifier.html">moduleIdentifier</a> from a given context and, using the normalization algorithm, to a canonical <a href="moduleName.html">moduleName</a>.</p>
+
+		</section>
 		
 		
 
@@ -232,7 +253,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"StealJS.types","title":"types","type":"group","parent":"steal","description":"","order":0,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"function","name":"steal.hooks.normalize","src":"steal/docs/hook-normalize.md","description":"A loader hook that converts a [moduleIdentifier] into a [moduleName] to serve as the canonical key for a module.","title":"normalize","parent":"StealJS.hooks","signatures":[{"code":"normalize(name, parentName, parentAddress)","description":"","params":[{"types":[{"type":"String"}],"name":"name","description":"The [moduleIdentifier] provided in the `import`, `require()` or similar call depending on the module syntax used."},{"types":[{"type":"String"}],"optional":true,"name":"parentName","description":"The [moduleName] of the parent module; the module that is doing the importing."},{"types":[{"type":"String"}],"optional":true,"name":"parentAddress","description":"The address (as determined in [steal.hooks.locate]) of the parent module."}],"returns":{"types":[{"type":"Promise"},{"type":"String"}],"description":"The string [moduleName] as determined by applying the normalize algorithm, or a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) that will resolve with the moduleName."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

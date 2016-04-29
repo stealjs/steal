@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS  - System.bundle</title>
+	<title>StealJS  - moduleIdentifier</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -141,7 +141,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="property" href="System.bundle.html" data-search="System.bundle">
 						System.bundle
 					</a>
@@ -771,7 +771,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="typedef" href="moduleIdentifier.html" data-search="moduleIdentifier">
 						moduleIdentifier
 					</a>
@@ -820,9 +820,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>System.bundle</h1>
+<h1>moduleIdentifier</h1>
 	<ul class="tags">
-		<li>property</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -831,7 +831,7 @@
 <div class="sub-heading">
 	
 	
-	<h2><code>{Array&lt;<a href="moduleName.html" >moduleName</a>&gt; | Glob}</code></h2>
+	<h2><code>{String}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -854,41 +854,16 @@
 		
 
 		
-		<section class="description">
-			<p>Specifies which modules will be progressively loaded.  This is
-used by the build.</p>
-
-		</section>
-		
 
 		
 			
 			<section class='primary-options'>
 				
 
-  <h2 id="sig_">Array&lt;<a href="moduleName.html" >moduleName</a>&gt;
+  <h2 id="sig_">String
 </h2>
 <div class="signature-wrapper">
-<p>Array of module names.</p>
-
-
-
-
-
-
-
-</div>
-
-  
-
-
-  <h2 id="sig_">Glob
-</h2>
-<div class="signature-wrapper">
-<p>A glob pattern used to match module names. For example:</p>
-<pre><code>System.bundle = &quot;components/*/*&quot;;
-</code></pre>
-<p>Would match <code>components/home/home</code> and <code>components/admin/admin</code> but not <code>utils/collections/find</code>.</p>
+<p>The string passed into import functions such as <code>require()</code> when using CommonJS, <code>import</code> when using ES6, and <a href="System.import.html">System.import</a> when dynamically loading a module.</p>
 
 
 
@@ -909,23 +884,13 @@ used by the build.</p>
 
 		
 		<section class="comment">
-			<h2>Use</h2>
-<p>It is possible to load an app in chunks, rather than one single production file. If there is modules segmented by &quot;pages&quot;, for example:</p>
+			<p>A <strong>moduleIdentifier</strong> is a string written in code to import a module. It could be:</p>
 <ul>
-<li>A home screen in &quot;js/pages/home&quot;</li>
-<li>Search results in &quot;js/pages/search&quot;</li>
-<li>Details in &quot;js/pages/details&quot;</li>
+<li>Relative to the current module like <code>'./foo'</code>.</li>
+<li>The name of an NPM dependency of your project like <code>'lodash'</code>.</li>
+<li>The name you are using to refer to a module that has been <a href="System.map.html">mapped</a> to another <a href="moduleName.html">moduleName</a>.</li>
 </ul>
-<p>It will be more efficient to load &quot;search&quot; and &quot;details&quot; progressively, making the &quot;home&quot; page load lighter. <code>System.bundle</code> allows you to create multiple production files by defining the starting point:</p>
-<pre><code>System.bundle = [&quot;js/pages/home&quot;,&quot;js/pages/search&quot;,&quot;js/pages/details&quot;]
-</code></pre>
-<p>Within the main application, the condition may exist such as:</p>
-<pre><code>import $ from 'jquery';
-
-if(/*route === home*/) {
-    System.import('js/pages/home', function() {});
-}
-</code></pre>
+<p>When Steal imports your code it sees the moduleIdentifiers and through <a href="steal.hooks.normalize.html">normalization</a> it converts these to <a href="moduleName.html">moduleNames</a> that it uses as keys in the module registry.</p>
 
 		</section>
 		
@@ -950,7 +915,7 @@ if(/*route === home*/) {
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"property","name":"System.bundle","src":"steal/docs/system-bundle.md","description":"Specifies which modules will be progressively loaded.  This is \nused by the build.","types":[{"type":"Array","template":[{"types":[{"type":"moduleName"}]}],"description":"Array of module names."},{"type":"Glob","description":"A glob pattern used to match module names. For example:\n\n    System.bundle = \"components/*/*\";\n\nWould match `components/home/home` and `components/admin/admin` but not `utils/collections/find`."}],"title":"","parent":"StealJS.config","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"moduleIdentifier","src":"steal/docs/type-moduleIdentifier.md","description":"","title":"","types":[{"type":"String","description":"The string passed into import functions such as `require()` when using CommonJS, `import` when using ES6, and [System.import] when dynamically loading a module."}],"parent":"StealJS.types","comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	
