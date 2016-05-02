@@ -884,7 +884,11 @@
 
 		
 		<section class="comment">
-			<p>It's important to understand the difference between a moduleName and module identifier. For example:</p>
+			<p>The <strong>moduleName</strong> is a string that serves as the canonical name for a module. It is used as the key in the module registry.</p>
+<p>In Steal, as with most module loaders, each module is only load (executed) <em>once</em> even if it is being imported by dozens of other modules. In order to provide importing modules with the correct exported values Steal has a module registry; an object where the moduleName is the key and the value is metadata about the module, as well as it's exported value.</p>
+<p>When a module imports another, such as <code>require(&quot;./foo&quot;)</code> the string used to import is called a <a href="moduleIdentifier.html">moduleIdentifier</a>. This identifier is then <a href="steal.hooks.normalize.html">normalized</a> which produces the canonical <strong>moduleName</strong>.</p>
+<h2>moduleName vs moduleIdentifier</h2>
+<p>It's important to understand the difference between a moduleName and <a href="moduleIdentifier.html">moduleIdentifier</a>. A moduleIdentifier is the string that is provided to the <code>import</code>, <code>require()</code>, (or any other format) statements. For example:</p>
 <table>
 <thead>
 <tr>
@@ -893,9 +897,47 @@
 </thead>
 <tbody>
 <tr><td>./dep</td><td>app/util/dep</td></tr>
-<tr><td>styles.css!</td><td>styles.css!$css</td></tr>
+<tr><td>styles.css</td><td>styles.css!$css</td></tr>
+<tr><td>lodash</td><td>lodash@3.0.0#main</td></tr>
 </tbody>
 </table>
+<p>These identifiers are always relative to the current module. For example the import:</p>
+<pre><code>import &quot;./foo&quot;;
+</code></pre>
+<p>When the current module is <code>app/main</code> will normalize to <code>app/foo</code> and is located at <a href="System.baseURL.html">System.baseURL</a> + app/foo.js.</p>
+<p>Similarly <a href="npm.html">npm</a> packages are also normalized relative to their parent. Consider this:</p>
+<pre><code>import _ from &quot;lodash&quot;;
+</code></pre>
+<p>If the parent module, <code>app/main</code> has an npm dependency on the lodash package then this will normalize to <code>lodash@1.0.0#main</code> and the address will be something like <code>http://example.com/node_modules/lodash/main.js</code>.</p>
+<p>However, if the parent module does <em>not</em> have an npm dependency on lodash then the moduleName will be <code>lodash</code> and the address something like <code>http://example.com/lodash.js</code>.</p>
+<h2>npm module names</h2>
+<p>When importing modules installed with npm the moduleName normalizes to something like <code>lodash@1.0.0#main</code>. Why strange looking this form has a purpose. Remember that each moduleName in the registry must be <em>unique</em>. NPM packages, however, are not, and nested dependencies can use different versions of the same package. When this happens it's important that each module gets a <a href="http://semver.org/">semver compatible</a> version of the package they need.</p>
+<p>Here are the parts of an npm moduleName, using <code>lodash@1.0.0#main</code>:</p>
+<h3>packageName</h3>
+<p>The first part is the <strong>packageName</strong>, <code>lodash</code>. It is the string that you provide when installing the package like <code>npm install lodash --save</code>.</p>
+<h3>version</h3>
+<p>The second part, between the <strong>@</strong> and the <strong>#</strong> is the package <strong>version</strong>, in this case it is <code>1.0.0</code>. Steal ensures that you get a semver compatible version of a package.</p>
+<p>Consider there are two dependencies in your project that both depend on the <code>foo</code> package. One of their package.jsons looks like:</p>
+<pre><code>{
+  &quot;dependencies&quot;: {
+    &quot;foo&quot;: &quot;^1.0.0&quot;
+  }
+}
+</code></pre>
+<p>And the other like:</p>
+<pre><code>{
+  &quot;dependencies&quot;: {
+    &quot;foo&quot;: &quot;^1.1.0&quot;
+  }
+}
+</code></pre>
+<p>Both of these packages depend on <strong>foo</strong>, however the second depends on a higher version, <code>^1.1.0</code>. The <strong>^</strong> symbol means that it depends on <em>at least</em> that version, and can accept anything up to (but not including) <code>2.0.0</code>.  See the <a href="http://semver.npmjs.com/">semver calculator</a> to better understand the versioning rules.</p>
+<p>Since both packages depend on foo and and 1.1.0 is semver compatible with <code>^1.0.0</code> then both will receive the same version of the package. <code>import &quot;foo&quot;</code> will resolve to a module name like:</p>
+<pre><code>foo@1.1.0#main
+</code></pre>
+<h3>modulePath</h3>
+<p>The last part of the npm moduleName is the <strong>modulePath</strong>. The modulePath is the part that comes after the <strong>#</strong> symbol. With the lodash example the modulePath is <code>main</code>. The modulePath is used to know where the module is located within the package. Here it will be at <code>http://example.com/node_modules/lodash/main.js</code>.</p>
+<p>You can import paths within a package, not just the package's main. To do that you might import: <code>import each from &quot;lodash/arrays/for_each&quot;</code>. This module's moduleName would be <code>lodash@1.0.0#arrays/for_each</code> and it's address <code>http://example.com/node_modules/lodash/arrays/for_each.js</code>.</p>
 
 		</section>
 		
