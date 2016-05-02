@@ -34,7 +34,7 @@ exports.forPackage = convertForPackage;
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
-function convertSystem(context, pkg, system, root, ignoreWaiting, withinPkg) {
+function convertSystem(context, pkg, system, root, ignoreWaiting) {
 	if(!system) {
 		return system;
 	}
@@ -44,8 +44,7 @@ function convertSystem(context, pkg, system, root, ignoreWaiting, withinPkg) {
 		system.meta = convertPropertyNames(context, pkg, system.meta, root, waiting);
 	}
 	if(system.map) {
-		system.map = convertPropertyNamesAndValues(context, pkg, system.map,
-												   root, waiting, withinPkg);
+		system.map = convertPropertyNamesAndValues(context, pkg, system.map, root, waiting);
 	}
 	if(system.paths) {
 		system.paths = convertPropertyNames(context, pkg, system.paths, root, waiting);
@@ -57,11 +56,10 @@ function convertSystem(context, pkg, system, root, ignoreWaiting, withinPkg) {
 
 	// Push the waiting conversions down.
 	if(ignoreWaiting !== true && waiting.length) {
-		convertLater(context, waiting, function(loadedPkg){
+		convertLater(context, waiting, function(){
 			var context = this;
 			var local = utils.extend({}, copy, true);
-			var config = convertSystem(context, pkg, local, root, true,
-									   loadedPkg.name);
+			var config = convertSystem(context, pkg, local, root, true);
 
 			// If we are building we need to resave the package's system
 			// configuration so that it will be written out into the build.
@@ -80,7 +78,7 @@ function convertSystem(context, pkg, system, root, ignoreWaiting, withinPkg) {
 }
 
 // converts only the property name
-function convertPropertyNames (context, pkg, map , root, waiting, withinPkg) {
+function convertPropertyNames (context, pkg, map , root, waiting) {
 	if(!map) {
 		return map;
 	}
@@ -103,8 +101,7 @@ function convertPropertyNames (context, pkg, map , root, waiting, withinPkg) {
 }
 
 // converts both property name and value
-function convertPropertyNamesAndValues (context, pkg, map, root, waiting,
-										withinPkg) {
+function convertPropertyNamesAndValues (context, pkg, map, root, waiting) {
 	if(!map) {
 		return map;
 	}
@@ -115,8 +112,7 @@ function convertPropertyNamesAndValues (context, pkg, map, root, waiting,
 		val = typeof val === "object"
 			? convertPropertyNamesAndValues(context, pkg, val, root, waiting)
 			: convertName(context, pkg, map, root, val, waiting);
-		if(typeof name !== 'undefined' && typeof val !== 'undefined' &&
-		  configShouldApply(name, withinPkg)) {
+		if(typeof name !== 'undefined' && typeof val !== 'undefined') {
 			clone[name] = val;
 		}
 	}
@@ -347,7 +343,7 @@ function convertForPackage(context, pkg) {
 			if(depPkg) {
 				fns = pkgConv[range];
 				for(var i = 0, len = fns.length; i < len; i++) {
-					fns[i].call(context, pkg);
+					fns[i].call(context);
 				}
 				delete pkgConv[range];
 			} else {
@@ -358,19 +354,6 @@ function convertForPackage(context, pkg) {
 			delete conv[name];
 		}
 	}
-}
-
-// Determines whether config should be applied. Only apply config if within
-// a pkg if this is late-bound config associated with progressively loaded pkg.
-function configShouldApply(name, pkgName) {
-	if(!pkgName) {
-		return true;
-	}
-	var parsedModuleName = utils.moduleName.parse(name);
-	if(parsedModuleName.packageName && parsedModuleName.packageName !== pkgName) {
-		return false;
-	}
-	return true;
 }
 
 var warn = (function(){
