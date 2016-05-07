@@ -491,6 +491,18 @@ var utils = {
 		basename: function(address){
 			var parts = address.split("/");
 			return parts[parts.length - 1];
+		},
+		relativeTo: function(modulePath, rel) {
+			var parts = modulePath.split("/");
+			var idx = 1;
+			while(rel[idx] === ".") {
+				parts.pop();
+				idx++;
+			}
+			return parts.join("/");
+		},
+		isPackageRootDir: function(pth) {
+			return pth.indexOf("/") === -1;
 		}
 	},
 	includeInBuild: true
