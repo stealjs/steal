@@ -149,7 +149,7 @@ exports.addExtension = function(System){
 		if(!depPkg) {
 			var browserPackageName = this.globalBrowser[parsedModuleName.packageName];
 			if(browserPackageName) {
-				parsedModuleName.packageName = browserPackageName;
+				parsedModuleName.packageName = browserPackageName.moduleName;
 				depPkg = utils.pkg.findByName(this, parsedModuleName.packageName);
 			}
 		}
