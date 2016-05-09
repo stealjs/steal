@@ -65,6 +65,24 @@ exports.addExtension = function(System){
 									 pluginNormalize);
 		}
 
+		// If name is ./ or ../
+		var isPointingAtParentFolder = name === "../" || name === "./";
+
+		if(parentIsNpmModule && isPointingAtParentFolder) {
+			var parsedParentModuleName = utils.moduleName.parse(parentName);
+			var parentModulePath = parsedParentModuleName.modulePath || "";
+			var relativePath = utils.path.relativeTo(parentModulePath, name);
+			var isInRoot = utils.path.isPackageRootDir(relativePath);
+
+			if(isInRoot) {
+				name = refPkg.name + "#" + utils.path.removeJS(refPkg.main);
+
+			} else {
+				name = name + "index";
+			}
+		}
+
+
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
 																 name,
@@ -79,7 +97,6 @@ exports.addExtension = function(System){
 			parentIsNpmModule &&
 			nameIsRelative &&
 			parsedPackageNameIsReferringPackage;
-
 
 		// Look for the dependency package specified by the current package
 		var depPkg, wantedPkg;
