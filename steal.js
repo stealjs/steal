@@ -5482,8 +5482,22 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var transpiledDepsExp = /System\.register\((\[.+?\])\,/;
-	var singleQuoteExp = /'/g;
+	function regexAll(exp, str){
+		var results = [];
+		var res = exp.exec(str);
+
+		while(res) {
+			results.push(res);
+
+			res = exp.exec(str);
+		}
+
+		exp.lastIndex = 0;
+
+		return results;
+	}
+
+	var esDepsExp = /import .*["'](.+)["']/g;
 	var instantiate = loader.instantiate;
 	loader.instantiate = function(load){
 		this._traceData.loads[load.name] = load;
@@ -5519,16 +5533,12 @@ function applyTraceExtension(loader){
 		return instantiatePromise.then(function(result){
 			// This must be es6
 			if(!result) {
-				return loader.transpile(load).then(function(source){
-					load.metadata.transpiledSource = source;
-
-					var depsMatches = transpiledDepsExp.exec(source);
-					var depsSource = depsMatches ? depsMatches[1] : "[]";
-					var deps = JSON.parse(depsSource.replace(singleQuoteExp, '"'));
-					load.metadata.deps = deps;
-
-					return finalizeResult(result);
-				});
+				var res = regexAll(esDepsExp, load.source);
+				var deps = [];
+				for(var i = 0, len = res.length; i < len; i++) {
+					deps.push(res[i][1]);
+				}
+				load.metadata.deps = deps;
 			}
 			return finalizeResult(result);
 		});

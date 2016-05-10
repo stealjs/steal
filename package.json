@@ -21,7 +21,7 @@
     "steal-less": "0.2.2",
     "system-npm": "0.6.10",
     "system-live-reload": "1.4.0",
-    "system-trace": "0.2.1",
+    "system-trace": "0.2.2",
     "steal-env": "^1.0.0",
     "babel-core": "5.8.14",
     "bower": "1.3.8",
