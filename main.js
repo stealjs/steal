@@ -535,7 +535,7 @@ function applyTraceExtension(loader){
 	};
 
 	var esImportDepsExp = /import .*["'](.+)["']/g;
-	var esExportDepsExp = /export .+["'](.+)["']/g;
+	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
 	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
 
