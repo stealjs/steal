@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "main": "steal.js",
-  "version": "0.16.8",
+  "version": "0.16.9",
   "ignore": [
     "test",
     "src",
