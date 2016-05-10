@@ -534,22 +534,49 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	function regexAll(exp, str){
-		var results = [];
-		var res = exp.exec(str);
+	var esDepsExp = /import .*["'](.+)["']/g;
+	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
 
-		while(res) {
-			results.push(res);
+	function getESDeps(source) {
+		esDepsExp.lastIndex = commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
 
-			res = exp.exec(str);
+		var deps = [];
+
+		var match;
+
+		// track string and comment locations for unminified source
+		var stringLocations = [], commentLocations = [];
+
+		function inLocation(locations, match) {
+		  for (var i = 0; i < locations.length; i++)
+			if (locations[i][0] < match.index && locations[i][1] > match.index)
+			  return true;
+		  return false;
 		}
 
-		exp.lastIndex = 0;
+		if (source.length / source.split('\n').length < 200) {
+		  while (match = stringRegEx.exec(source))
+			stringLocations.push([match.index, match.index + match[0].length]);
 
-		return results;
+		  while (match = commentRegEx.exec(source)) {
+			// only track comments not starting in strings
+			if (!inLocation(stringLocations, match))
+			  commentLocations.push([match.index, match.index + match[0].length]);
+		  }
+		}
+
+		while (match = esDepsExp.exec(source)) {
+		  // ensure we're not within a string or comment location
+		  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+			var dep = match[1];//.substr(1, match[1].length - 2);
+			deps.push(dep);
+		  }
+		}
+
+		return deps;
 	}
 
-	var esDepsExp = /import .*["'](.+)["']/g;
 	var instantiate = loader.instantiate;
 	loader.instantiate = function(load){
 		this._traceData.loads[load.name] = load;
@@ -585,11 +612,7 @@ function applyTraceExtension(loader){
 		return instantiatePromise.then(function(result){
 			// This must be es6
 			if(!result) {
-				var res = regexAll(esDepsExp, load.source);
-				var deps = [];
-				for(var i = 0, len = res.length; i < len; i++) {
-					deps.push(res[i][1]);
-				}
+				var deps = getESDeps(load.source);
 				load.metadata.deps = deps;
 			}
 			return finalizeResult(result);
