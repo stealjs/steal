@@ -5482,12 +5482,14 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var esDepsExp = /import .*["'](.+)["']/g;
+	var esImportDepsExp = /import .*["'](.+)["']/g;
+	var esExportDepsExp = /export .+["'](.+)["']/g;
 	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
 
 	function getESDeps(source) {
-		esDepsExp.lastIndex = commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
+		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
+			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
 
 		var deps = [];
 
@@ -5503,6 +5505,16 @@ function applyTraceExtension(loader){
 		  return false;
 		}
 
+		function addDeps(exp) {
+			while (match = exp.exec(source)) {
+			  // ensure we're not within a string or comment location
+			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+				var dep = match[1];//.substr(1, match[1].length - 2);
+				deps.push(dep);
+			  }
+			}
+		}
+
 		if (source.length / source.split('\n').length < 200) {
 		  while (match = stringRegEx.exec(source))
 			stringLocations.push([match.index, match.index + match[0].length]);
@@ -5514,13 +5526,8 @@ function applyTraceExtension(loader){
 		  }
 		}
 
-		while (match = esDepsExp.exec(source)) {
-		  // ensure we're not within a string or comment location
-		  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
-			var dep = match[1];//.substr(1, match[1].length - 2);
-			deps.push(dep);
-		  }
-		}
+		addDeps(esImportDepsExp);
+		addDeps(esExportDepsExp);
 
 		return deps;
 	}
