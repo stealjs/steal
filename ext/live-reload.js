@@ -182,6 +182,28 @@ function bind(fn, ctx){
 	};
 }
 
+function getModuleNames(msg) {
+	var names;
+	try {
+		names = JSON.parse(msg);
+	} catch(ex) {
+		names = [msg];
+	}
+	return names;
+}
+
+function reloadAll(msg) {
+	var moduleNames = getModuleNames(msg);
+	var promises = [];
+	for(var i = 0, len = moduleNames.length; i < len; i++) {
+		promises.push(reload(moduleNames[i]));
+	}
+	return Promise.all(promises).then(function(){
+		var e = loader._liveEmitter;
+		e.emit("!cycleComplete");
+	});
+}
+
 function reload(moduleName) {
 	var e = loader._liveEmitter;
 	var currentDeps = loader.getDependencies(moduleName) || [];
@@ -202,10 +224,9 @@ function reload(moduleName) {
 		imports.push(importModule(modName));
 	}
 	// Once everything is imported call the global listener callback functions.
-	Promise.all(imports).then(function(){
+	return Promise.all(imports).then(function(){
 		// Remove any newly orphaned modules before declaring the cycle complete.
 		removeOrphans(moduleName, currentDeps);
-		e.emit("!cycleComplete");
 	}, function(){
 		// There was an error re-importing modules
 		// Workers don't have a location and no way to refresh the page.
@@ -249,7 +270,7 @@ function setup(){
 
 	var onmessage = ws.onmessage = function(ev){
 		var moduleName = ev.data;
-		reload(moduleName);
+		reloadAll(moduleName);
 	};
 
 	var attempts = typeof loader.liveReloadAttempts !== "undefined" ?
@@ -278,6 +299,8 @@ if(!isBuildEnvironment) {
 	} else {
 		setTimeout(setup);
 	}
+
+	module.exports = reloadAll;
 } else {
 	var metaConfig = loader.meta["live-reload"];
 	if(!metaConfig) {
