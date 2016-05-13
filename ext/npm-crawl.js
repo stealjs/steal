@@ -157,6 +157,9 @@ var crawl = {
 					});
 					return finishLoad(newCopy);
 				}
+
+				crawl.setVersionsConfig(context, lpkg, copy.version);
+
 				return lpkg;
 			});
 		}
@@ -339,6 +342,13 @@ var crawl = {
 		loader.npm[pkg.name+"@"+pkg.version] = pkg;
 		var pkgAddress = pkg.fileUrl.replace(/\/package\.json.*/,"");
 		loader.npmPaths[pkgAddress] = pkg;
+	},
+	setVersionsConfig: function(context, pkg, versionRange) {
+		if(!context.versions[pkg.name]) {
+			context.versions[pkg.name] = {};
+		}
+		var versions = context.versions[pkg.name];
+		versions[versionRange] = pkg;
 	},
 	pkgSatisfies: function(pkg, versionRange) {
 		return SemVer.validRange(versionRange) ?
