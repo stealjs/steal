@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "steal-css": "0.4.1",
-    "steal-less": "0.2.2",
-    "system-npm": "0.6.10",
+    "steal-less": "0.3.0",
+    "system-npm": "0.6.11",
     "system-live-reload": "1.5.1",
     "system-trace": "0.2.5",
     "steal-env": "^1.0.0",
