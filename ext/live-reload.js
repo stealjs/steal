@@ -146,6 +146,9 @@ function makeReload(moduleName, listeners){
 		setupUnbind("!cycleComplete", moduleName);
 	}
 
+	reload.isReloading = function(){
+		return !!loader._inLiveReloadCycle;
+	};
 	reload.on = bind(e.on, e);
 	reload.off = bind(e.off, e);
 	reload.once = bind(e.once, e);
@@ -194,12 +197,14 @@ function getModuleNames(msg) {
 
 function reloadAll(msg) {
 	var moduleNames = getModuleNames(msg);
+	loader._inLiveReloadCycle = true;
 	var promises = [];
 	for(var i = 0, len = moduleNames.length; i < len; i++) {
 		promises.push(reload(moduleNames[i]));
 	}
 	return Promise.all(promises).then(function(){
 		var e = loader._liveEmitter;
+		loader._inLiveReloadCycle = false;
 		e.emit("!cycleComplete");
 	});
 }
