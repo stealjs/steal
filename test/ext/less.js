@@ -11,6 +11,7 @@ options.optimization |= lessEngine.optimization;
 
 exports.translate = function(load) {
 	var address = load.address.replace(/^file\:/,"");
+	var useFileCache = true;
 
 	var pathParts = (address+'').split('/');
 	pathParts[pathParts.length - 1] = ''; // Remove filename
@@ -20,36 +21,50 @@ exports.translate = function(load) {
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 	}
 
-	return new Promise(function(resolve, reject){
-		var renderOptions = {
-			filename: address,
-			useFileCache: true
-		};
-		for (var prop in options){
-			renderOptions[prop] = options[prop];
-		}
-		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
+	function renderLess() {
+		return new Promise(function(resolve, reject){
+			var renderOptions = {
+				filename: address,
+				useFileCache: useFileCache
+			};
+			for (var prop in options){
+				renderOptions[prop] = options[prop];
+			}
+			renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
 
-		renderOptions.plugins = (options.plugins || []);
-		if (stealLessPlugin !== undefined) {
-			renderOptions.plugins.push(stealLessPlugin);
-		}
+			renderOptions.plugins = (options.plugins || []);
+			if (stealLessPlugin !== undefined) {
+				renderOptions.plugins.push(stealLessPlugin);
+			}
 
-		renderOptions.relativeUrls = options.relativeUrls === undefined ? true : options.relativeUrls;
+			renderOptions.relativeUrls = options.relativeUrls === undefined ? true : options.relativeUrls;
 
-		var done = function(output) {
-			// Put the source map on metadata if one was created.
-			load.metadata.map = output.map;
-			load.metadata.includedDeps = output.imports || [];
-			resolve(output.css);
-		};
+			var done = function(output) {
+				// Put the source map on metadata if one was created.
+				load.metadata.map = output.map;
+				load.metadata.includedDeps = output.imports || [];
+				resolve(output.css);
+			};
 
-		var fail = function(error) {
-			reject(error);
-		};
+			var fail = function(error) {
+				reject(error);
+			};
 
-		lessEngine.render(load.source, renderOptions).then(done, fail);
-	});
+			lessEngine.render(load.source, renderOptions).then(done, fail);
+		});
+	}
+
+	if(loader.liveReloadInstalled) {
+		return loader["import"]("live-reload", { name: module.id })
+		.then(function(reload){
+			if(reload.isReloading()) {
+				useFileCache = false;
+			}
+		})
+		.then(renderLess, renderLess);
+	}
+
+	return renderLess();
 };
 exports.locateScheme = true;
 exports.buildType = "css";
