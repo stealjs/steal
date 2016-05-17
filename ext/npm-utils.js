@@ -264,11 +264,26 @@ var utils = {
 			return (pkg.system && pkg.system.name) || pkg.name;
 		},
 		main: function(pkg) {
-			return  utils.path.removeJS(
-				(pkg.system && pkg.system.main)
-				|| (typeof pkg.browser === "string" && (utils.path.endsWithSlash(pkg.browser) ? pkg.browser+'index' : pkg.browser) )
-				|| (typeof pkg.jam === "object" && pkg.jam.main)
-				|| pkg.main || 'index' ) ;
+			var main;
+			if(pkg.system && pkg.system.main) {
+				main = pkg.system.main;
+			} else if(typeof pkg.browser === "string") {
+				if(utils.path.endsWithSlash(pkg.browser)) {
+					main = pkg.browser + "index";
+				} else {
+					main = pkg.browser;
+				}
+			} else if(typeof pkg.jam === "object") {
+				main = pkg.jam.main;
+			} else if(pkg.main) {
+				main = pkg.main;
+			} else {
+				main = "index";
+			}
+
+			return utils.path.removeJS(
+				utils.path.removeDotSlash(main)
+			);
 		},
 		rootDir: function(pkg, isRoot) {
 			var root = isRoot ?
@@ -438,6 +453,11 @@ var utils = {
 		},
 		startsWithDotSlash: function( path ) {
 			return path.substr(0,2) === "./";
+		},
+		removeDotSlash: function(path) {
+			return utils.path.startsWithDotSlash(path) ?
+				path.substr(2) :
+				path;
 		},
 		endsWithSlash: function(path){
 			return path[path.length -1] === "/";
