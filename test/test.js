@@ -307,6 +307,10 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("inline code", function(){
 			makeIframe("basics/inline_code.html");
 		});
+
+		asyncTest("inline code works without line breaks", function(){
+			makeIframe("basics/inline_code_no_break.html");
+		});
 	}
 
 	asyncTest("warn in production when main is not set (#537)", function(){
