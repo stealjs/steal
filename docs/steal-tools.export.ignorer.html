@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - Export Helpers </title>
+	<title>StealJS - ignorer </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -94,8 +94,8 @@
 		
 		
 			<li class="search-container active">
-			<a class="sidebar-title" href="steal-tools.helpers.html" data-search="Export Helpers">
-				Export Helpers
+			<a class="sidebar-title" href="steal-tools.export.output.html" data-search="ExportOutput">
+				ExportOutput
 			</a>
 			
 	<ul>
@@ -103,45 +103,9 @@
 			
 				
 				
-				<li class="search-container">
-					<a class="module" href="steal-tools|lib|build|helpers|amd.html" data-search="amd">
-						amd
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="module" href="steal-tools|lib|build|helpers|cjs.html" data-search="cjs">
-						cjs
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="module" href="steal-tools|lib|build|helpers|global.html" data-search="global">
-						global
-					</a>
-				</li>
-				
-			
-			
-		
-			
-				
-				
-				<li class="search-container">
-					<a class="module" href="steal-tools|lib|build|helpers|standalone.html" data-search="standalone">
-						standalone
+				<li class="search-container active">
+					<a class="typedef" href="steal-tools.export.ignorer.html" data-search="ignorer">
+						ignorer
 					</a>
 				</li>
 				
@@ -166,9 +130,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>Export Helpers</h1>
+<h1>ignorer</h1>
 	<ul class="tags">
-		<li>group</li>
+		<li>typedef</li>
 	</ul>
 	
 	
@@ -177,9 +141,11 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">steal-tools.helpers</span>
+		<span class="module">steal-tools.export.ignorer</span>
 	
 	
+	
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -202,14 +168,80 @@
 		
 
 		
+		<section class="description">
+			<p>Specifies a function that decides of a module should be ignored (not included) in the exported artifact.</p>
+
+		</section>
+		
 
 		
+			
+				<section class="signature">
+					<h2 id="sig_ignorer_name_load_">ignorer(name, load)
+</h2>
+<div class="signature-wrapper">
+
+
+	<h3>Parameters</h3>
+
+	<ol class="parameters">
+		
+		<li class="parameter">
+			<h4>name
+				<code>{<a href="moduleName.html" >moduleName</a>}</code></h4>
+			<div class="description">
+				<p>The module name.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+		<li class="parameter">
+			<h4>load
+				<code>{<a href="load.html" >load</a>}</code></h4>
+			<div class="description">
+				<p>The load object for this module.</p>
+
+			</div>
+			
+			
+			
+		</li>
+		
+	</ol>
+
+
+	<h3>Returns</h3>
+	<div class="returns">
+		<h4><code>{Boolean}</code></h4>
+		<div class="description">
+			<p>True if this module should be ignored.</p>
+
+		</div>
+		
+		
+	</div>
+	
+
+
+
+
+
+</div>
+
+				</section>
 			
 		
 
 		
 
 
+		
+		<section class="comment">
+			
+		</section>
 		
 		
 
@@ -232,7 +264,7 @@
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"name":"steal-tools.helpers","title":"Export Helpers","type":"group","parent":"steal-tools","description":"","order":0,"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"type":"typedef","name":"steal-tools.export.ignorer","src":"steal-tools/doc/types/steal-export-ignorer.md","description":"Specifies a function that decides of a module should be ignored (not included) in the exported artifact.","title":"ignorer","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"parent":"steal-tools.export.output","signatures":[{"code":"ignorer(name, load)","description":"","params":[{"types":[{"type":"moduleName"}],"name":"name","description":"The module name."},{"types":[{"type":"load"}],"name":"load","description":"The load object for this module."}],"returns":{"types":[{"type":"Boolean"}],"description":"True if this module should be ignored."}}],"templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

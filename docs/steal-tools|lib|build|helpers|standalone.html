@@ -17,7 +17,7 @@
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
-	<title>StealJS - steal-tools transform </title>
+	<title>StealJS - standalone </title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -219,7 +219,7 @@
 			
 				
 				
-				<li class="search-container active">
+				<li class="search-container">
 					<a class="function" href="steal-tools.cmd.transform.html" data-search="steal-tools transform">
 						steal-tools transform
 					</a>
@@ -339,7 +339,7 @@
 			
 				
 				
-				<li class="search-container">
+				<li class="search-container active">
 					<a class="module" href="steal-tools|lib|build|helpers|standalone.html" data-search="standalone">
 						standalone
 					</a>
@@ -592,9 +592,9 @@
 		
 		<section class="title">
 			<div class="heading">
-<h1>steal-tools transform</h1>
+<h1>standalone</h1>
 	<ul class="tags">
-		<li>function</li>
+		<li>module</li>
 	</ul>
 	
 	
@@ -603,9 +603,11 @@
 <div class="sub-heading">
 	
 	
-		<span class="module">steal-tools.cmd.transform</span>
+		<span class="module">steal-tools/lib/build/helpers/standalone</span>
 	
 	
+	
+	<h2><code>{function()}</code></h2>
 	
 	<span class="inherits">&nbsp;</span>
 </div>
@@ -629,7 +631,7 @@
 
 		
 		<section class="description">
-			<p>Transform a module from the command line.</p>
+			<p>Helper that make exporting to <a href="syntax.global.html">global</a> formats easier.</p>
 
 		</section>
 		
@@ -637,55 +639,12 @@
 		
 			
 				<section class="signature">
-					<h2 id="sig_steal_toolstransform___OPTION_NAMEOPTION_VALUE____">steal-tools transform [--OPTION_NAME OPTION_VALUE]...
+					<h2 id="sig___34__standalone__34______OVERRIDES____">&#34;+standalone&#34;: { ... OVERRIDES ... }
 </h2>
 <div class="signature-wrapper">
+<p>Exports all Javascript into a single file, including all dependencies.</p>
 
 
-	<h3>Parameters</h3>
-
-	<ol class="parameters">
-		
-		<li class="parameter">
-			<h4>OPTION_NAME
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>Any <code>config</code>, <code>pluginifierOptions</code>, or <code>options</code> name in
-<a href="steal-tools.transformImport.html">transformImport</a> or <a href="steal-tools.transform.html">transform</a>.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-		<li class="parameter">
-			<h4>OPTION_VALUE
-				<code>{String}</code></h4>
-			<div class="description">
-				<p>The value of <code>OPTION_NAME</code>.  The <code>ignores</code> option
-will be converted to a regular expression.</p>
-
-			</div>
-			
-			
-			
-		</li>
-		
-	</ol>
-
-
-	<h3>Returns</h3>
-	<div class="returns">
-		<h4><code>{String}</code></h4>
-		<div class="description">
-			<p>Writes the output to the console.</p>
-
-		</div>
-		
-		
-	</div>
-	
 
 
 
@@ -703,31 +662,19 @@ will be converted to a regular expression.</p>
 		
 		<section class="comment">
 			<h2>Use</h2>
-<blockquote>
-<p>Note: The <code>steal-tools transform</code> command-line
-utility calls <a href="steal-tools.transform.html">steal-tools.transform</a> and
-<a href="steal-tools.transformImport.html">steal-tools.transformImport</a>
-internally. This page documents the specifics of the command-line utility. Read
-<a href="steal-tools.transform.html">steal-tools.transform's documentation</a> for how to use
-transform in various workflows and detailed information
-on the options available.</p>
-</blockquote>
-<p>Access <code>steal-tools</code> in <em>node_modules/.bin</em>, like:</p>
-<pre><code>&gt; ./node_modules/.bin/steal-tools transform \
-           --config app/config.js \
-           --main app \
-           --ignores foo/.+
-           &gt; app.js
-</code></pre>
-<p>Or, <code>steal-tools</code> can be installed into the command line, like:</p>
-<pre><code>&gt; npm install steal-tools -g
-</code></pre>
-<p>Then you can run <code>steal-tools transform</code>, like:</p>
-<pre><code>&gt; steal-tools transform \
-           --config app/config.js \
-           --main app \
-           --ignores foo/.+
-           &gt; app.js
+<p>Add in <code>+standalone</code> in an output name to export your project to a single
+file which will include NPM dependencies. This is the option you most often
+want when creating a build meant to be used in a script tag or jsbin, etc.</p>
+<pre><code>stealTools.export({
+  system: {
+    config: __dirname+&quot;/package.json!npm&quot;
+  },
+  outputs: {
+   &quot;+standalone&quot;: {
+      dest: __dirname + &quot;/mylib.js&quot;
+   }
+  }
+});
 </code></pre>
 
 		</section>
@@ -753,7 +700,7 @@ on the options available.</p>
 		</nav>
 	</footer>
 	<script type="text/javascript">
-		var docObject = {"type":"function","name":"steal-tools.cmd.transform","src":"steal-tools/doc/command-transform.md","description":"Transform a module from the command line.","title":"steal-tools transform","parent":"steal-tools.cmd","signatures":[{"code":"steal-tools transform [--OPTION_NAME OPTION_VALUE]...","description":"","params":[{"types":[{"type":"String"}],"name":"OPTION_NAME","description":"Any `config`, `pluginifierOptions`, or `options` name in \n[steal-tools.transformImport] or [steal-tools.transform transform]."},{"types":[{"type":"String"}],"name":"OPTION_VALUE","description":"The value of `OPTION_NAME`.  The `ignores` option\nwill be converted to a regular expression."}],"returns":{"types":[{"type":"String"}],"description":"Writes the output to the console."}}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
+		var docObject = {"name":"steal-tools/lib/build/helpers/standalone","type":"module","parent":"steal-tools.helpers","src":"steal-tools/lib/build/helpers/standalone.js","line":4,"codeLine":35,"description":"Helper that make exporting to [syntax.global] formats easier.","title":"standalone","types":[{"type":"function","returns":{"types":[{"type":"undefined"}]},"params":[]}],"signatures":[{"code":"\"+standalone\": { ... OVERRIDES ... }","description":"Exports all Javascript into a single file, including all dependencies.","params":[]}],"comment":" ","templates":"/Users/matthew/Projects/steal/theme/templates","static":"/Users/matthew/Projects/steal/theme/static","glob":{"pattern":"{steal/docs,steal-tools/doc,steal-tools/lib}/**/*.+(md|js)","ignore":["**/{node_modules,bower_components}/**/*"],"cwd":"/Users/matthew/Projects/steal"},"dest":"/Users/matthew/Projects/steal/docs","generators":["html"],"docConfigDest":"../documentjs.json","project":{}};
 	</script>
 	
 	

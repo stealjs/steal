@@ -377,16 +377,42 @@ Concatenating and minifying your scripts can help but the web page still loads f
 			<p>This guide is a step-by-step guide to create the app from scratch, or you can clone the source from the <a href="https://github.com/stealjs/progressive-loading">GitHub Quick Start repo</a>.</p>
 <h2>Setup</h2>
 <p>This basic single page app demonstrates progressive loading. It uses a common file structure, but Steal supports a wide variety of other configuration options which can be found <a href="steal.html">here</a>.</p>
-<p>To get started, ensure <a href="http://nodejs.org/">Node.js</a>is properly installed on your computer, then initialize a <strong>package.json</strong> and install <a href="steal-tools.html">steal-tools</a>, jquery and steal.</p>
+<p>Start by creating a new folder somewhere on your harddrive, we're going to call this project <strong>progressive-app</strong>:</p>
+<pre><code>&gt; mkdir progressive-app
+&gt; cd progressive-app
+</code></pre>
+<p>Once in the new folder, ensure <a href="http://nodejs.org/">Node.js</a> is properly installed on your computer, then initialize a <strong>package.json</strong> and install <a href="steal-tools.html">steal-tools</a>, jquery and steal.</p>
 <pre><code>&gt; npm init
-&gt; npm install steal-tools --save-dev
+</code></pre>
+<p>This will ask you questions like the name of your application, the version, etc. You can just accept the defaults for now, we will change these later in the guide.</p>
+<p>Once you've gotten through these, install steal-tools, steal and jquery:</p>
+<pre><code>&gt; npm install steal-tools --save-dev
 &gt; npm install steal jquery --save
 </code></pre>
-<p>If you already have a webserver running locally, you can skip this step. If you don't have a web server, install this simple command-line <a href="https://www.npmjs.com/package/http-server">http-server</a> to help you get started.</p>
-<pre><code>&gt; npm install http-server -g
+<p>Finally install <a href="https://www.npmjs.com/package/http-server">http-server</a> in your project:</p>
+<pre><code>&gt; npm install http-server --save
 </code></pre>
+<p>And add it to the <strong>start</strong> script in your package.json:</p>
+<pre><code>{
+  ...
+
+  &quot;scripts&quot;: {
+    &quot;start&quot;: &quot;http-server&quot;
+  }
+}
+</code></pre>
+<p>Now to start the app you can simply run <code>npm start</code> and you'll see this output:</p>
+<pre><code>&gt; http-server
+
+Starting up http-server, serving ./
+Available on:
+  http://127.0.0.1:8080
+  http://192.168.1.106:8080
+Hit CTRL-C to stop the server
+</code></pre>
+<p>If you open <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a> you'll now see a directory listing of the application.</p>
 <h2>Create your modules</h2>
-<p>Create a main module that loads only the bare minimum to determine what &quot;page&quot; you are on. A bare bones example might have a file structure like:</p>
+<p>Next we'll a main module that loads only the bare minimum to determine what &quot;page&quot; you are on. A bare bones example might have a file structure like:</p>
 <pre><code>node_modules/
   steal-tools/
   steal/
@@ -403,21 +429,21 @@ site/
   site.html
 </code></pre>
 <p>Create <strong>site/app.js</strong> which imports jquery using ES6 module syntax. We'll use the <code>hashchange</code> as a simple mechanism to
-track the state of our app. So create an event handler which listens to the <code>hashchange</code> event. The hashes<code>#login</code>, <code>signup</code> and <code>#homepage</code> coorespond to a state or &quot;page&quot;. Steal-tools will load only the files needed for each state.</p>
-<h3>app.js</h3>
+track the state of our app. So create an event handler which listens to the <code>hashchange</code> event. The hashes<code>#login</code>, <code>#signup</code> and <code>#homepage</code> correspond to a section or &quot;page&quot;. steal-tools will load only the files needed for each page.</p>
+<h3>site/app.js</h3>
 <pre><code>import $ from 'jquery';
 $(function(){
   var onhashchange = function(){
     if(window.location.hash === &quot;#login&quot;) {
-      System.import(&quot;app/login&quot;).then(function(){
+      System.import(&quot;site/login&quot;).then(function(){
         $(&quot;#main&quot;).login();
       });
     } else if(window.location.hash === &quot;#signup&quot; ) {
-      System.import(&quot;app/signup&quot;).then(function(){
+      System.import(&quot;site/signup&quot;).then(function(){
         $(&quot;#main&quot;).signup();
       });
     } else {
-      System.import(&quot;app/homepage&quot;).then(function(){
+      System.import(&quot;site/homepage&quot;).then(function(){
         $(&quot;#main&quot;).homepage();
       });
     }
@@ -426,30 +452,31 @@ $(function(){
   onhashchange();
 });
 </code></pre>
-<h3>homepage.js</h3>
+<h3>site/homepage.js</h3>
 <pre><code>define(['jquery'], function($){
   return $.fn.homepage = function(){
     this.html(&quot;&lt;h1&gt;Homepage&lt;/h1&gt;&quot;);
   };
 });
 </code></pre>
-<h3>signup.js</h3>
+<h3>site/signup.js</h3>
 <pre><code>module.exports = $.fn.signup = function(){
   this.html(&quot;&lt;h1&gt;Signup&lt;/h1&gt;&quot;);
 };
 </code></pre>
-<h3>login.js</h3>
+<h3>site/login.js</h3>
 <pre><code>module.exports = $.fn.login = function() {
   this.html(&quot;&lt;h1&gt;Login&lt;/h1&gt;&quot;);
 };
 </code></pre>
 <h3>package.json</h3>
 <pre><code>{
-  &quot;name&quot;: &quot;app&quot;,
+  &quot;name&quot;: &quot;progressive-app&quot;,
   &quot;version&quot;: &quot;1.0.0&quot;,
   &quot;description&quot;: &quot;&quot;,
-  &quot;main&quot;: &quot;app.js&quot;,
+  &quot;main&quot;: &quot;site/app.js&quot;,
   &quot;scripts&quot;: {
+    &quot;start&quot;: &quot;http-server&quot;,
     &quot;build&quot;: &quot;steal-tools&quot;,
     &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
   },
@@ -463,21 +490,23 @@ $(function(){
   },
   &quot;system&quot;: {
     &quot;npmAlgorithm&quot;: &quot;flat&quot;,
-    &quot;directories&quot;: {
-      &quot;lib&quot;: &quot;site&quot;
-    },
     &quot;bundle&quot;: [
-      &quot;app/homepage&quot;,
-      &quot;app/signup&quot;,
-      &quot;app/login&quot;
+      &quot;site/homepage&quot;,
+      &quot;site/signup&quot;,
+      &quot;site/login&quot;
     ]
   }
 }
 </code></pre>
 <h2>Create your page</h2>
-<p>Now we'll create the <strong>site.html</strong> page which loads <strong>steal.js</strong>. The <code>main</code>attribute tells steal to load <code>app.js</code> as the application's main module.</p>
-<h3>site.html</h3>
-<pre><code>&lt;div id=&quot;main&quot;&gt;&lt;/div&gt;
+<p>Now we'll create the <strong>index.html</strong> page which loads <strong>steal.js</strong>. The <code>main</code> attribute tells steal to load <code>site/app.js</code> as the application's main module.</p>
+<h3>index.html</h3>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Progressive App&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;main&quot;&gt;&lt;/div&gt;
 
 &lt;ul&gt;
     &lt;li&gt;&lt;a href='#homepage'&gt;home page&lt;/a&gt;&lt;/li&gt;
@@ -486,7 +515,9 @@ $(function(){
 &lt;/ul&gt;
 
 &lt;script src=&quot;../node_modules/steal/steal.js&quot;
-        main=&quot;app/app&quot;&gt;&lt;/script&gt;
+        main=&quot;site/app&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 </code></pre>
 <p>This is the development mode which progressively loads the scripts but doesn't use the concatenated or minified versions.</p>
 <h2>Build your site</h2>
@@ -494,7 +525,7 @@ $(function(){
 <pre><code>&gt; npm run build
 </code></pre>
 <p>This command generates a bundle <code>./dist/bundles</code>. The directory should have a file structure like:</p>
-<pre><code>dist/bundles/app/
+<pre><code>dist/bundles/site/
   app.js
   homepage.js
   signup.js
@@ -502,13 +533,12 @@ $(function(){
 </code></pre>
 <p>Open site.html in your browser, and open the Network panel in the Developer Tools. As you click on the &quot;home page&quot;, &quot;sign up&quot; and &quot;log in&quot; links you'll notice the individual scripts loading as needed. This is progressive loading in action. Only the necessary scripts were loaded initially, the remaining scripts are loaded as needed.</p>
 <h2>See it live</h2>
-<p>For production, add <code>env=&quot;production&quot;</code> attribute to your script tag. This tells Steal to use the concatenated and minified versions of the files:</p>
+<p>For production, change the src to <code>steal.production.js</code> in the script tag. This tells Steal to use the concatenated and minified versions of the files:</p>
 <pre><code>&lt;div id=&quot;main&quot;&gt;&lt;/div&gt;
-&lt;script src=&quot;../node_modules/steal/steal.js&quot;
-        main=&quot;app/app&quot;
-        env=&quot;production&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;../node_modules/steal/steal.production.js&quot;
+        main=&quot;site/app&quot;&gt;&lt;/script&gt;
 </code></pre>
-<p>Again, open the <code>site.html</code> in a browser and view the Network tab in the Developer Tools. You notice <code>app.js</code> now contains a minified and concatenated version of jquery and config.js. And the <code>homepage.js</code>, <code>signup.js</code> and <code>login.js</code> are only loaded when needed.</p>
+<p>Again, open <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a> in a browser and view the Network tab in the Developer Tools. You notice <code>app.js</code> now contains a minified and concatenated version of jquery and config.js. And the <code>homepage.js</code>, <code>signup.js</code> and <code>login.js</code> are only loaded when needed.</p>
 
 		</section>
 		
