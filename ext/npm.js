@@ -38,7 +38,8 @@ exports.translate = function(load){
 		deferredConversions: {},
 		npmLoad: npmLoad,
 		crawl: crawl,
-		resavePackageInfo: resavePackageInfo
+		resavePackageInfo: resavePackageInfo,
+		forwardSlashMap: {}
 	};
 	this.npmContext = context;
 	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
