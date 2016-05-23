@@ -68,7 +68,7 @@ To use this in production you only need to change the script tag to:
 
 In this example we are using `bundleAssets`, which includes a copy of steal.production.js that is configured to work with your bundles. This allows you to simple serve the `dist/` folder in production and not expose the development files.
 
-[This production](https://gist.github.com/matthewp/ee36a94997f0eb62bb348de35bbbab2a) shows off this workflow.
+[This example app](https://gist.github.com/matthewp/ee36a94997f0eb62bb348de35bbbab2a) shows off this workflow.
 
 ### bundleSteal
 
