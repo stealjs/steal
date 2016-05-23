@@ -41,6 +41,8 @@ stealTools.build({}, {
 
 With everything packaged together you can move the `dist/` folder to where it is exposed on your webserver.
 
+This will also pack a `steal.production.js` file that can be used to load the app in production.
+
 ## Create a production html file
 
 In a lot of Steal apps you might have separate html files for development and production. Your development.html might look like:
@@ -59,10 +61,14 @@ In a lot of Steal apps you might have separate html files for development and pr
 To use this in production you only need to change the script tag to:
 
 ```
-<script src="./node_modules/steal/steal.production.js" main="app/app"></script>
+<script src="./dist/node_modules/steal/steal.production.js" main="app/app"></script>
 ```
 
 *Note* that the `main` attribute must be provided for production to work. This is how Steal knows where to find your app's bundles.
+
+In this example we are using `bundleAssets`, which includes a copy of steal.production.js that is configured to work with your bundles. This allows you to simple serve the `dist/` folder in production and not expose the development files.
+
+[This production](https://gist.github.com/matthewp/ee36a94997f0eb62bb348de35bbbab2a) shows off this workflow.
 
 ### bundleSteal
 
