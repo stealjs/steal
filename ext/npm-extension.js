@@ -210,7 +210,9 @@ exports.addExtension = function(System){
 			// get a 404 and need to retry with lib/index.js
 			if(identifierEndsWithSlash) {
 				p.then(function(name){
-					context.forwardSlashMap[name] = true;
+					if(context && context.forwardSlashMap) {
+						context.forwardSlashMap[name] = true;
+					}
 				});
 			}
 
