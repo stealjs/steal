@@ -4141,21 +4141,39 @@ function amd(loader) {
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
+  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
-
   var fnBracketRegEx = /\(([^\)]*)\)/;
-
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
 
   function getCJSDeps(source, requireIndex) {
+    var stringLocations = [];
+
+    var match;
+
+    function inLocation(locations, index) {
+      for (var i = 0; i < locations.length; i++)
+        if (locations[i][0] < index && locations[i][1] > index)
+          return true;
+      return false;
+    }
+
+    while (match = stringRegEx.exec(source))
+      stringLocations.push([match.index, match.index + match[0].length]);
 
     // remove comments
-    source = source.replace(commentRegEx, '');
+    source = source.replace(commentRegEx, function(match, a, b, c, d, offset){
+      if(inLocation(stringLocations, offset + 1)) {
+        return match;
+      } else {
+        return '';
+      }
+    });
 
     // determine the require alias
     var params = source.match(fnBracketRegEx);
@@ -4257,20 +4275,20 @@ function amd(loader) {
 
       // remove system dependencies
       var requireIndex, exportsIndex, moduleIndex;
-      
+
       if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
-        
+
         deps.splice(requireIndex, 1);
 
         var factoryText = factory.toString();
 
         deps = deps.concat(getCJSDeps(factoryText, requireIndex));
       }
-        
+
 
       if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
         deps.splice(exportsIndex, 1);
-      
+
       if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
         deps.splice(moduleIndex, 1);
 
@@ -4289,10 +4307,10 @@ function amd(loader) {
           // add back in system dependencies
           if (moduleIndex != -1)
             depValues.splice(moduleIndex, 0, module);
-          
+
           if (exportsIndex != -1)
             depValues.splice(exportsIndex, 0, exports);
-          
+
           if (requireIndex != -1)
             depValues.splice(requireIndex, 0, makeRequire(module.id, require, loader));
 
