@@ -31,8 +31,10 @@ exports.translate = function(load){
 	var context = {
 		packages: [],
 		loader: this,
-		// places we
+		// places we load package.jsons from
 		paths: {},
+		// paths that are currently be loaded
+		loadingPaths: {},
 		versions: {},
 		fetchCache: {},
 		deferredConversions: {},
