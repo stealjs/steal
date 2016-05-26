@@ -391,15 +391,53 @@ function FetchTask(context, pkg){
 
 utils.extend(FetchTask.prototype, {
 	load: function(){
+		// Get the fileUrl and pass to fetch
+		// Check if the fileUrl is already loading
+		// check if the fileUrl is already loaded
+		// check if the fileUrl that is already loaded is semver compat
+		var pkg = this.pkg;
+		var context = this.context;
+		var fileUrl = pkg.fileUrl = pkg.nextFileUrl || pkg.origFileUrl;
+
+		// If a task is currently loading this fileUrl,
+		// wait for it to complete
+		var loadingTask = context.loadingPaths[fileUrl];
+		if(loadingTask) {
+			var self = this;
+			return loadingTask.promise.then(function(){
+				if(loadingTask.failed) {
+					self.error = loadingTask.error;
+					self.failed = true;
+				} else {
+					self._fetchedPackage = loadingTask.getPackage();
+				}
+			});
+		}
+
+		// If it is already loaded check to see if it's semver compatible
+		// and if so use it. Otherwise reject.
+		var loadedPkg = context.paths[fileUrl];
+		if(loadedPkg) {
+			this._fetchedPackage = loadedPkg;
+			if(!this.isCompatibleVersion()) {
+				this.failed = true;
+			}
+			return Promise.resolve();
+		}
+
+		return this.fetch(fileUrl);
+	},
+
+	fetch: function(fileUrl){
 		var task = this;
 		var pkg = this.pkg;
 		var context = this.context;
 		var loader = context.loader;
 
-		var fileUrl = pkg.fileUrl = pkg.nextFileUrl || pkg.origFileUrl;
 		context.paths[fileUrl] = pkg;
+		context.loadingPaths[fileUrl] = this;
 
-		return loader.fetch({
+		this.promise = loader.fetch({
 			address: fileUrl,
 			name: fileUrl,
 			metadata: {}
@@ -410,17 +448,21 @@ utils.extend(FetchTask.prototype, {
 			if(!task.isCompatibleVersion()) {
 				task.failed = true;
 			}
+			delete context.loadingPaths[fileUrl];
 		}, function(err){
 			task.error = err;
 			task.failed = true;
+			delete context.loadingPaths[fileUrl];
 		});
+
+		return this.promise;
 	},
 
 	/**
 	 * Is the package fetched from this task a compatible version?
 	 */
-	isCompatibleVersion: function(){
-		var pkg = this.getPackage();
+	isCompatibleVersion: function(pkg){
+		var pkg = pkg || this.getPackage();
 		var requestedVersion = this.requestedVersion;
 
 		return SemVer.validRange(requestedVersion) && 
@@ -472,6 +514,8 @@ utils.extend(FetchTask.prototype, {
 	}
 });
 
+crawl.FetchTask = FetchTask;
+
 // Loads package.json
 // if it finds one, it sets that package in paths
 // so it won't be loaded twice.
@@ -482,14 +526,7 @@ function npmLoad(context, pkg){
 		if(task.failed) {
 			// Recurse. Calling task.next gives us a new pkg object
 			// with the fileUrl being the parent node_modules folder.
-			pkg = task.next();
-			
-			var loadedPkg = context.paths[pkg.nextFileUrl];
-			if(loadedPkg) {
-				return loadedPkg;
-			}
-
-			return npmLoad(context, pkg);
+			return npmLoad(context, task.next());
 		}
 		return task.getPackage();
 	});
