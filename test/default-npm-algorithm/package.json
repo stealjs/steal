@@ -1,0 +1,9 @@
+{
+  "name": "foobar",
+  "version": "1.0.0",
+  "system": {
+  },
+  "dependencies": {
+    "some": "1.0.0"
+  }
+}

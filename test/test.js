@@ -199,6 +199,14 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
+	asyncTest("default npm-algorithm", function(){
+		makeIframe("default-npm-algorithm/default.html");
+	});
+
+	asyncTest("npm-algorithm less npm 3", function(){
+		makeIframe("nested-npm-algorithm/nested.html");
+	});
+
 	asyncTest("compat - production bundle works", function(){
 		makeIframe("production/prod.html");
 	});
