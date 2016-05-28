@@ -7,11 +7,37 @@ set properties like [System.configPath] and [System.env].
 
 @param {Object} config An object of configuration values.
 
+```
+System.config({
+  map: {
+    foo: 'bar'
+  }
+});
+```
+
 @body
 
 ## Use
 
-`System.config` can be called in three ways.  
+`System.config` can be called in four ways.
+
+### package.json
+
+If using the [npm] plugin you can add config to your package.json's **config** property:
+
+```
+{
+  "system": {
+    "meta": {
+      "jquery-plugin": {
+        "deps": [
+          "jquery"
+        ]
+      }
+    }
+  }
+}
+```
 
 ### Programatically
 
@@ -33,6 +59,15 @@ Any property besides src, id, and type will be used to set on System:
             main="app">
     </script>
 
+The above will be translated to a call like:
+
+```
+System.config({
+  configPath: "../path/to/stealconfig.js",
+  main: "app"
+});
+```
+
 ### steal object
 
 A `steal` object loaded before `steal.js` will be used as a System.config argument.
@@ -44,10 +79,3 @@ A `steal` object loaded before `steal.js` will be used as a System.config argume
       }
     </script>
     <script src="../path/to/steal/steal.js"></script>
-
-
-## Implementation
-
-Basic deep merging of configuration properties is done in [SystemJS](https://github.com/bitovi/systemjs).
-
-Side effect property setting is done by steal.

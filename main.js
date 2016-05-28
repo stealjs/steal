@@ -2,8 +2,8 @@
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -108,8 +108,8 @@
 			return "./" + result.join("") + uriParts.join("/");
 		};
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -534,8 +534,56 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var transpiledDepsExp = /System\.register\((\[.+?\])\,/;
-	var singleQuoteExp = /'/g;
+	var esImportDepsExp = /import .*["'](.+)["']/g;
+	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
+	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+
+	function getESDeps(source) {
+		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
+			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
+
+		var deps = [];
+
+		var match;
+
+		// track string and comment locations for unminified source
+		var stringLocations = [], commentLocations = [];
+
+		function inLocation(locations, match) {
+		  for (var i = 0; i < locations.length; i++)
+			if (locations[i][0] < match.index && locations[i][1] > match.index)
+			  return true;
+		  return false;
+		}
+
+		function addDeps(exp) {
+			while (match = exp.exec(source)) {
+			  // ensure we're not within a string or comment location
+			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+				var dep = match[1];//.substr(1, match[1].length - 2);
+				deps.push(dep);
+			  }
+			}
+		}
+
+		if (source.length / source.split('\n').length < 200) {
+		  while (match = stringRegEx.exec(source))
+			stringLocations.push([match.index, match.index + match[0].length]);
+
+		  while (match = commentRegEx.exec(source)) {
+			// only track comments not starting in strings
+			if (!inLocation(stringLocations, match))
+			  commentLocations.push([match.index, match.index + match[0].length]);
+		  }
+		}
+
+		addDeps(esImportDepsExp);
+		addDeps(esExportDepsExp);
+
+		return deps;
+	}
+
 	var instantiate = loader.instantiate;
 	loader.instantiate = function(load){
 		this._traceData.loads[load.name] = load;
@@ -571,16 +619,8 @@ function applyTraceExtension(loader){
 		return instantiatePromise.then(function(result){
 			// This must be es6
 			if(!result) {
-				return loader.transpile(load).then(function(source){
-					load.metadata.transpiledSource = source;
-
-					var depsMatches = transpiledDepsExp.exec(source);
-					var depsSource = depsMatches ? depsMatches[1] : "[]";
-					var deps = JSON.parse(depsSource.replace(singleQuoteExp, '"'));
-					load.metadata.deps = deps;
-
-					return finalizeResult(result);
-				});
+				var deps = getESDeps(load.source);
+				load.metadata.deps = deps;
 			}
 			return finalizeResult(result);
 		});
@@ -1046,7 +1086,7 @@ function addEnv(loader){
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -1062,7 +1102,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.

@@ -9,6 +9,7 @@ exports.propertyNamesAndValues = convertPropertyNamesAndValues;
 exports.name = convertName;
 exports.browser = convertBrowser;
 exports.browserProperty = convertBrowserProperty;
+exports.jspm = convertJspm;
 exports.toPackage = convertToPackage;
 exports.forPackage = convertForPackage;
 
@@ -242,10 +243,28 @@ function convertBrowser(pkg, browser) {
 function convertBrowserProperty(map, pkg, fromName, toName) {
 	var packageName = pkg.name;
 
-	var fromParsed = utils.moduleName.parse(fromName, packageName),
-		  toParsed = toName  ? utils.moduleName.parse(toName, packageName): "@empty";
+	var fromParsed = utils.moduleName.parse(fromName, packageName);
+	var toResult = toName;
 
-	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
+	if(!toName || typeof toName === "string") {
+		var toParsed = toName ? utils.moduleName.parse(toName, packageName)
+			: "@empty";
+		toResult = utils.moduleName.create(toParsed);
+	} else if(utils.isArray(toName)) {
+		toResult = toName;
+	}
+	
+	map[utils.moduleName.create(fromParsed)] = toResult;
+}
+
+function convertJspm(pkg, jspm){
+	var type = typeof jspm;
+	if(type === "undefined" || type === "string") {
+		return jspm;
+	}
+	return {
+		main: jspm.main
+	};
 }
 
 
@@ -264,7 +283,9 @@ function convertToPackage(context, pkg, index) {
 			main: pkg.main,
 			system: convertSystem(context, pkg, pkg.system, index === 0),
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
-			browser: convertBrowser(pkg, pkg.browser)
+			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
+			jspm: convertJspm(pkg, pkg.jspm),
+			jam: convertJspm(pkg, pkg.jam)
 		};
 		packages.push(localPkg);
 		packages[nameAndVersion] = true;

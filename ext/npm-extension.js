@@ -33,10 +33,17 @@ exports.addExtension = function(System){
 		var hasNoParent = !parentName;
 		var nameIsRelative = utils.path.isRelative(name);
 		var parentIsNpmModule = utils.moduleName.isNpm(parentName);
+		var identifierEndsWithSlash = utils.path.endsWithSlash(name);
 
 		// If this is a relative module name and the parent is not an npm module
 		// we can skip all of this logic.
 		if(parentName && nameIsRelative && !parentIsNpmModule) {
+			return oldNormalize.call(this, name, parentName, parentAddress,
+									 pluginNormalize);
+		}
+
+		// don't normalize name module yet if it includes any conditionals
+		if (utils.moduleName.isConditional(name)) {
 			return oldNormalize.call(this, name, parentName, parentAddress,
 									 pluginNormalize);
 		}
@@ -59,9 +66,27 @@ exports.addExtension = function(System){
 									 pluginNormalize);
 		}
 
+		// If name is ./ or ../
+		var isPointingAtParentFolder = name === "../" || name === "./";
+
+		if(parentIsNpmModule && isPointingAtParentFolder) {
+			var parsedParentModuleName = utils.moduleName.parse(parentName);
+			var parentModulePath = parsedParentModuleName.modulePath || "";
+			var relativePath = utils.path.relativeTo(parentModulePath, name);
+			var isInRoot = utils.path.isPackageRootDir(relativePath);
+
+			if(isInRoot) {
+				name = refPkg.name + "#" + utils.path.removeJS(refPkg.main);
+
+			} else {
+				name = name + "index";
+			}
+		}
+
+
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
-																 name, 
+																 name,
 																 parentName);
 
 		var isRoot = utils.pkg.isRoot(this, refPkg);
@@ -73,7 +98,6 @@ exports.addExtension = function(System){
 			parentIsNpmModule &&
 			nameIsRelative &&
 			parsedPackageNameIsReferringPackage;
-
 
 		// Look for the dependency package specified by the current package
 		var depPkg, wantedPkg;
@@ -89,7 +113,7 @@ exports.addExtension = function(System){
 		if(!depPkg) {
 			if(crawl && !isRoot) {
 				var parentPkg = nameIsRelative ? null :
-					crawl.matchedVersion(context, refPkg.name, 
+					crawl.matchedVersion(context, refPkg.name,
 										 refPkg.version);
 				if(parentPkg) {
 					wantedPkg = crawl.getDependencyMap(this, parentPkg, isRoot)[parsedModuleName.packageName];
@@ -126,7 +150,7 @@ exports.addExtension = function(System){
 		if(!depPkg) {
 			var browserPackageName = this.globalBrowser[parsedModuleName.packageName];
 			if(browserPackageName) {
-				parsedModuleName.packageName = browserPackageName;
+				parsedModuleName.packageName = browserPackageName.moduleName;
 				depPkg = utils.pkg.findByName(this, parsedModuleName.packageName);
 			}
 		}
@@ -179,8 +203,20 @@ exports.addExtension = function(System){
 			   typeof refPkg.system.map[moduleName] === "string") {
 				moduleName = refPkg.system.map[moduleName];
 			}
-			return oldNormalize.call(loader, moduleName, parentName,
-									 parentAddress, pluginNormalize);
+			var p = oldNormalize.call(loader, moduleName, parentName,
+									  parentAddress, pluginNormalize);
+
+			// For identifiers like ./lib/ save this info as we might
+			// get a 404 and need to retry with lib/index.js
+			if(identifierEndsWithSlash) {
+				p.then(function(name){
+					if(context && context.forwardSlashMap) {
+						context.forwardSlashMap[name] = true;
+					}
+				});
+			}
+
+			return p;
 
 		}
 	};
@@ -237,44 +273,37 @@ exports.addExtension = function(System){
 		}
 
 		var loader = this;
-		return Promise.resolve(oldFetch.apply(this, arguments))
-			.then(null, function(){
-				return tryWith("/index").then(null, function(err){
-					if(utils.moduleName.isNpm(load.name) &&
-					   utils.path.basename(load.address) === "package.js") {
-						// This is package.js, try as package.json
-						return tryWith(".json");
+		var context = loader.npmContext;
+		var fetchPromise = Promise.resolve(oldFetch.apply(this, arguments));
+
+		if(utils.moduleName.isNpm(load.name)) {
+			fetchPromise = fetchPromise.then(null, function(err){
+				// Begin attempting retries. `retryTypes` defines different
+				// types of retries to do, currently retrying on the
+				// /index and /package.json conventions.
+				var types = [].slice.call(retryTypes);
+
+				return retryAll(types, err);
+				
+				function retryAll(types, err){
+					if(!types.length) {
+						throw err;
 					}
-					throw err;
-				});
 
-				function tryWith(addedPart){
-					var local = utils.extend({}, load);
-					local.name = load.name + addedPart;
-					local.metadata = { dryRun: true };
+					var type = types.shift();
+					if(!type.test(load)) {
+						throw err;
+					}
 
-					return Promise.resolve(loader.locate(local))
-						.then(function(address){
-							local.address = address;
-							return loader.fetch(local);
-						})
-						.then(function(source){
-							load.address = local.address;
-							loader.npmParentMap[load.name] = local.name;
-							var npmLoad = loader.npmContext && 
-								loader.npmContext.npmLoad;
-							if(npmLoad) {
-								npmLoad.saveLoadIfNeeded(loader.npmContext);
-								utils.warnOnce("Some 404s were encountered " +
-											   "while loading. Don't panic! " +
-											   "These will only happen in dev " +
-											   "and are harmless.");
-							}
-							return source;
-						});
-
+					return Promise.resolve(retryFetch.call(loader, load, type))
+					.then(null, function(err){
+						return retryAll(types, err);
+					});
 				}
 			});
+		}
+
+		return fetchPromise;
 	};
 
 	// Given a moduleName convert it into a npm-style moduleName if it belongs
@@ -330,4 +359,63 @@ exports.addExtension = function(System){
 		}
 		oldConfig.apply(loader, arguments);
 	};
+
+	function retryFetch(load, type) {
+		var loader = this;
+
+		// Get the new moduleName to test against
+		var moduleName = typeof type.name === "function" ?
+			type.name(loader, load) :
+			load.name + type.name;
+
+		var local = utils.extend({}, load);
+		local.name = moduleName;
+		local.metadata = { dryRun: true };
+
+		return Promise.resolve(loader.locate(local))
+			.then(function(address){
+				local.address = address;
+				return loader.fetch(local);
+			})
+			.then(function(source){
+				load.address = local.address;
+				loader.npmParentMap[load.name] = local.name;
+				var npmLoad = loader.npmContext &&
+					loader.npmContext.npmLoad;
+				if(npmLoad) {
+					npmLoad.saveLoadIfNeeded(loader.npmContext);
+					if(!isNode) {
+						utils.warnOnce("Some 404s were encountered " +
+									   "while loading. Don't panic! " +
+									   "These will only happen in dev " +
+									   "and are harmless.");
+					}
+				}
+				return source;
+			});
+	}
+
+	// These define ways to retry a fetch when it fails (404)
+	var retryTypes = [
+		{
+			name: function(loader, load){
+				var context = loader.npmContext;
+				if(context.forwardSlashMap[load.name]) {
+					var parts = load.name.split("/");
+					parts.pop();
+					return parts.concat(["index"]).join("/");
+				}
+
+				return load.name + "/index";
+			},
+			test: function() { return true; }
+		},
+		{
+			name: ".json",
+			test: function(load){
+				return utils.moduleName.isNpm(load.name) &&
+					utils.path.basename(load.address) === "package.js";
+			}
+		}
+	];
 };

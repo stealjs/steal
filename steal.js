@@ -4141,21 +4141,39 @@ function amd(loader) {
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
+  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
-
   var fnBracketRegEx = /\(([^\)]*)\)/;
-
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
 
   function getCJSDeps(source, requireIndex) {
+    var stringLocations = [];
+
+    var match;
+
+    function inLocation(locations, index) {
+      for (var i = 0; i < locations.length; i++)
+        if (locations[i][0] < index && locations[i][1] > index)
+          return true;
+      return false;
+    }
+
+    while (match = stringRegEx.exec(source))
+      stringLocations.push([match.index, match.index + match[0].length]);
 
     // remove comments
-    source = source.replace(commentRegEx, '');
+    source = source.replace(commentRegEx, function(match, a, b, c, d, offset){
+      if(inLocation(stringLocations, offset + 1)) {
+        return match;
+      } else {
+        return '';
+      }
+    });
 
     // determine the require alias
     var params = source.match(fnBracketRegEx);
@@ -4257,20 +4275,20 @@ function amd(loader) {
 
       // remove system dependencies
       var requireIndex, exportsIndex, moduleIndex;
-      
+
       if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
-        
+
         deps.splice(requireIndex, 1);
 
         var factoryText = factory.toString();
 
         deps = deps.concat(getCJSDeps(factoryText, requireIndex));
       }
-        
+
 
       if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
         deps.splice(exportsIndex, 1);
-      
+
       if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
         deps.splice(moduleIndex, 1);
 
@@ -4289,10 +4307,10 @@ function amd(loader) {
           // add back in system dependencies
           if (moduleIndex != -1)
             depValues.splice(moduleIndex, 0, module);
-          
+
           if (exportsIndex != -1)
             depValues.splice(exportsIndex, 0, exports);
-          
+
           if (requireIndex != -1)
             depValues.splice(requireIndex, 0, makeRequire(module.id, require, loader));
 
@@ -4950,8 +4968,8 @@ var $__curScript, __eval;
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -5056,8 +5074,8 @@ var $__curScript, __eval;
 			return "./" + result.join("") + uriParts.join("/");
 		};
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -5482,8 +5500,56 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var transpiledDepsExp = /System\.register\((\[.+?\])\,/;
-	var singleQuoteExp = /'/g;
+	var esImportDepsExp = /import .*["'](.+)["']/g;
+	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
+	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+
+	function getESDeps(source) {
+		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
+			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
+
+		var deps = [];
+
+		var match;
+
+		// track string and comment locations for unminified source
+		var stringLocations = [], commentLocations = [];
+
+		function inLocation(locations, match) {
+		  for (var i = 0; i < locations.length; i++)
+			if (locations[i][0] < match.index && locations[i][1] > match.index)
+			  return true;
+		  return false;
+		}
+
+		function addDeps(exp) {
+			while (match = exp.exec(source)) {
+			  // ensure we're not within a string or comment location
+			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+				var dep = match[1];//.substr(1, match[1].length - 2);
+				deps.push(dep);
+			  }
+			}
+		}
+
+		if (source.length / source.split('\n').length < 200) {
+		  while (match = stringRegEx.exec(source))
+			stringLocations.push([match.index, match.index + match[0].length]);
+
+		  while (match = commentRegEx.exec(source)) {
+			// only track comments not starting in strings
+			if (!inLocation(stringLocations, match))
+			  commentLocations.push([match.index, match.index + match[0].length]);
+		  }
+		}
+
+		addDeps(esImportDepsExp);
+		addDeps(esExportDepsExp);
+
+		return deps;
+	}
+
 	var instantiate = loader.instantiate;
 	loader.instantiate = function(load){
 		this._traceData.loads[load.name] = load;
@@ -5519,16 +5585,8 @@ function applyTraceExtension(loader){
 		return instantiatePromise.then(function(result){
 			// This must be es6
 			if(!result) {
-				return loader.transpile(load).then(function(source){
-					load.metadata.transpiledSource = source;
-
-					var depsMatches = transpiledDepsExp.exec(source);
-					var depsSource = depsMatches ? depsMatches[1] : "[]";
-					var deps = JSON.parse(depsSource.replace(singleQuoteExp, '"'));
-					load.metadata.deps = deps;
-
-					return finalizeResult(result);
-				});
+				var deps = getESDeps(load.source);
+				load.metadata.deps = deps;
 			}
 			return finalizeResult(result);
 		});
@@ -6079,7 +6137,7 @@ function addEnv(loader){
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -6095,7 +6153,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.

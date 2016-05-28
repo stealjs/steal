@@ -2,8 +2,8 @@
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -108,5 +108,5 @@
 			return "./" + result.join("") + uriParts.join("/");
 		};
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";

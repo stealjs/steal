@@ -7,8 +7,9 @@
  */
 
 // A regex to test if a moduleName is npm-like.
-var npmModuleRegEx = /.+@.+\..+\..+#.+/;
 var slice = Array.prototype.slice;
+var npmModuleRegEx = /.+@.+\..+\..+#.+/;
+var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
 
 var utils = {
 	extend: function(d, s, deep){
@@ -107,6 +108,14 @@ var utils = {
 		 */
 		isNpm: function(moduleName){
 			return npmModuleRegEx.test(moduleName);
+		},
+		/**
+		 * @function moduleName.isConditional
+		 * Determines whether a moduleName includes a condition.
+		 * @return {Boolean}
+		 */
+		isConditional: function(moduleName){
+			return conditionalModuleRegEx.test(moduleName);
 		},
 		/**
 		 * @function moduleName.isFullyConvertedModuleName
@@ -255,12 +264,26 @@ var utils = {
 			return (pkg.system && pkg.system.name) || pkg.name;
 		},
 		main: function(pkg) {
-			return  utils.path.removeJS( 
-				(pkg.system && pkg.system.main)
-				|| (typeof pkg.browser === "string" && (utils.path.endsWithSlash(pkg.browser) ? pkg.browser+'index' : pkg.browser) )
-				|| (typeof pkg.jspm === "string" && pkg.jspm) 
-				|| (typeof pkg.jspm === "object" && pkg.jspm.main) 
-				|| pkg.main || 'index' ) ;
+			var main;
+			if(pkg.system && pkg.system.main) {
+				main = pkg.system.main;
+			} else if(typeof pkg.browser === "string") {
+				if(utils.path.endsWithSlash(pkg.browser)) {
+					main = pkg.browser + "index";
+				} else {
+					main = pkg.browser;
+				}
+			} else if(typeof pkg.jam === "object") {
+				main = pkg.jam.main;
+			} else if(pkg.main) {
+				main = pkg.main;
+			} else {
+				main = "index";
+			}
+
+			return utils.path.removeJS(
+				utils.path.removeDotSlash(main)
+			);
 		},
 		rootDir: function(pkg, isRoot) {
 			var root = isRoot ?
@@ -431,6 +454,11 @@ var utils = {
 		startsWithDotSlash: function( path ) {
 			return path.substr(0,2) === "./";
 		},
+		removeDotSlash: function(path) {
+			return utils.path.startsWithDotSlash(path) ?
+				path.substr(2) :
+				path;
+		},
 		endsWithSlash: function(path){
 			return path[path.length -1] === "/";
 		},
@@ -483,6 +511,18 @@ var utils = {
 		basename: function(address){
 			var parts = address.split("/");
 			return parts[parts.length - 1];
+		},
+		relativeTo: function(modulePath, rel) {
+			var parts = modulePath.split("/");
+			var idx = 1;
+			while(rel[idx] === ".") {
+				parts.pop();
+				idx++;
+			}
+			return parts.join("/");
+		},
+		isPackageRootDir: function(pth) {
+			return pth.indexOf("/") === -1;
 		}
 	},
 	includeInBuild: true

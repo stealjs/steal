@@ -31,14 +31,17 @@ exports.translate = function(load){
 	var context = {
 		packages: [],
 		loader: this,
-		// places we
+		// places we load package.jsons from
 		paths: {},
+		// paths that are currently be loaded
+		loadingPaths: {},
 		versions: {},
 		fetchCache: {},
 		deferredConversions: {},
 		npmLoad: npmLoad,
 		crawl: crawl,
-		resavePackageInfo: resavePackageInfo
+		resavePackageInfo: resavePackageInfo,
+		forwardSlashMap: {}
 	};
 	this.npmContext = context;
 	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
@@ -63,7 +66,9 @@ exports.translate = function(load){
 					main: pkg.main,
 					system: convert.system(context, pkg, pkg.system, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
-					browser: convert.browser(pkg,  pkg.browser)
+					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
+					jspm: convert.jspm(pkg, pkg.jspm),
+					jam: convert.jspm(pkg, pkg.jam)
 				});
 				packages[pkg.name+"@"+pkg.version] = true;
 			}

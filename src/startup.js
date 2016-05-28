@@ -18,7 +18,7 @@
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -34,7 +34,7 @@
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
