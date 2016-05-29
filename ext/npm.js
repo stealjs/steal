@@ -53,6 +53,9 @@ exports.translate = function(load){
 	// backwards compatible for < npm 3
 	if(pkg.system && pkg.system.npmAlgorithm === "nested") {
 		context.isFlatFileStructure = false;
+	} else {
+		pkg.system = pkg.system || {};
+		pkg.system.npmAlgorithm = "flat";
 	}
 
 	return crawl.deps(context, pkg, true).then(function(){
