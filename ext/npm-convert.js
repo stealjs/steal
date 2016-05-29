@@ -166,7 +166,7 @@ function convertName (context, pkg, map, root, name, waiting) {
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						if(root) warn(name);
+						if(root) utils.warnOnce("Could not find " + name + " in node_modules. Ignoring!");
 						return name;
 					}
 					requestedVersion = requestedProject.version;
@@ -355,16 +355,3 @@ function convertForPackage(context, pkg) {
 		}
 	}
 }
-
-var warn = (function(){
-	var warned = {};
-	return function(name){
-		if(!warned[name]) {
-			warned[name] = true;
-			var warning = "WARN: Could not find " + name + " in node_modules. Ignoring.";
-			if(typeof steal !== "undefined" && steal.dev && steal.dev.warn) steal.dev.warn(warning)
-			else if(console.warn) console.warn(warning);
-			else console.log(warning);
-		}
-	};
-})();
