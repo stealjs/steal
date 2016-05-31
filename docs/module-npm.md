@@ -212,12 +212,16 @@ Even though `npmIgnore` is set to ignore all `devDependencies` the use of `npmDe
 
 ### package.system.npmAlgorithm
 
-Used to determine which algorithm is used to look up packages. [NPM 3](http://blog.npmjs.org/post/122450408965/npm-weekly-20-npm-3-is-here-ish) introduced a new flat file structure inside node_modules. If you are using NPM 3 set this option:
+Used to determine which algorithm is used to look up packages.
+
+The default algorithm is `flat`. **We assume that you are using NPM 3 or higher.** See [here](https://github.com/npm/npm/releases/tag/v3.0.0) more about the flat file structure of NPM 3.
+
+If you are using NPM 2 your dependencies of `node_modules` will be nested. StealJS can handle the lookup by setting `npmAlgorithm` to `nested`.
 
 ```js
 {
   "system": {
-    "npmAlgorithm": "flat"
+    "npmAlgorithm": "nested"
   }
 }
 ```
