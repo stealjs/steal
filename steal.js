@@ -5431,11 +5431,13 @@ var addScriptModule = function(loader) {
 	}
 
 	loader.loadScriptModules = function(){
-		if (document.readyState === 'complete') {
-			setTimeout(ready);
-		}else if (document.addEventListener) {
-			document.addEventListener('DOMContentLoaded', completed, false);
-			window.addEventListener('load', completed, false);
+		if(isBrowserWithWindow) {
+			if (document.readyState === 'complete') {
+				setTimeout(ready);
+			} else if (document.addEventListener) {
+				document.addEventListener('DOMContentLoaded', completed, false);
+				window.addEventListener('load', completed, false);
+			}
 		}
 
 	};
