@@ -62,7 +62,9 @@ exports.translate = function(load){
 				packages.push({
 					name: pkg.name,
 					version: pkg.version,
-					fileUrl: utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
+					fileUrl: utils.path.isRelative(pkg.fileUrl) ?
+						pkg.fileUrl :
+						utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
 					system: convert.system(context, pkg, pkg.system, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),

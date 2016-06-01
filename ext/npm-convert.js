@@ -279,7 +279,9 @@ function convertToPackage(context, pkg, index) {
 		localPkg = {
 			name: pkg.name,
 			version: pkg.version,
-			fileUrl: utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
+			fileUrl: utils.path.isRelative(pkg.fileUrl) ?
+				pkg.fileUrl :
+				utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 			main: pkg.main,
 			system: convertSystem(context, pkg, pkg.system, index === 0),
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),

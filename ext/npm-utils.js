@@ -331,7 +331,13 @@ var utils = {
 					}
 				}
 				if(moduleAddress) {
-					var packageFolder = utils.pkg.folderAddress(moduleAddress);
+					// Remove the baseURL so that folderAddress only detects
+					// node_modules that are within the baseURL. Otherwise
+					// you cannot load a project that is itself within
+					// node_modules
+					var startingAddress = utils.relativeURI(loader.baseURL,
+															moduleAddress);
+					var packageFolder = utils.pkg.folderAddress(startingAddress);
 					return packageFolder ? loader.npmPaths[packageFolder] : utils.pkg.getDefault(loader);
 				} else {
 					return utils.pkg.getDefault(loader);
