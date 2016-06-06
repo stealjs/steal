@@ -247,8 +247,8 @@ define(function(require) {
 	};
 
 	function isNode () {
-		return typeof process !== 'undefined' && process !== null &&
-			typeof process.nextTick === 'function';
+		return typeof process !== 'undefined' &&
+			Object.prototype.toString.call(process) === '[object process]';
 	}
 
 	function hasMutationObserver () {
@@ -299,7 +299,7 @@ define(function() {
 	 * @returns {String} formatted string, suitable for output to developers
 	 */
 	function formatError(e) {
-		var s = typeof e === 'object' && e !== null && e.stack ? e.stack : formatObject(e);
+		var s = typeof e === 'object' && e !== null && (e.stack || e.message) ? e.stack || e.message : formatObject(e);
 		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
 	}
 
@@ -1265,6 +1265,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
+//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -2537,8 +2538,6 @@ function logloads(loads) {
 
     - Implemented to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js
 
-    - <script type="module"> supported
-
 *********************************************************************************************
 */
 
@@ -2840,46 +2839,6 @@ function logloads(loads) {
     module.exports = System;
 
   __global.System = System;
-
-  // <script type="module"> support
-  // allow a data-init function callback once loaded
-  if (isBrowser && typeof document.getElementsByTagName != 'undefined') {
-    var curScript = document.getElementsByTagName('script');
-    curScript = curScript[curScript.length - 1];
-
-    function completed() {
-      document.removeEventListener( "DOMContentLoaded", completed, false );
-      window.removeEventListener( "load", completed, false );
-      ready();
-    }
-
-    function ready() {
-      var scripts = document.getElementsByTagName('script');
-      for (var i = 0; i < scripts.length; i++) {
-        var script = scripts[i];
-        if (script.type == 'module') {
-          var source = script.innerHTML.substr(1);
-          // It is important to reference the global System, rather than the one
-          // in our closure. We want to ensure that downstream users/libraries
-          // can override System w/ custom behavior.
-          __global.System.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
-        }
-      }
-    }
-
-    // DOM ready, taken from https://github.com/jquery/jquery/blob/master/src/core/ready.js#L63
-    if (document.readyState === 'complete') {
-      setTimeout(ready);
-    }
-    else if (document.addEventListener) {
-      document.addEventListener('DOMContentLoaded', completed, false);
-      window.addEventListener('load', completed, false);
-    }
-
-    // run the data-init function on the script tag
-    if (curScript.getAttribute('data-init'))
-      window[curScript.getAttribute('data-init')]();
-  }
 })();
 
 

@@ -31,7 +31,7 @@
     "qunitjs": "~1.12.0",
     "steal-css": "0.4.1",
     "steal-env": "^1.0.0",
-    "steal-es6-module-loader": "^0.17.5",
+    "steal-es6-module-loader": "^0.17.6",
     "steal-less": "0.2.2",
     "system-bower": "stealjs/system-bower#v0.2.1",
     "system-live-reload": "1.4.0",
