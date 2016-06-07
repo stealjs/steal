@@ -106,7 +106,7 @@
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined";
@@ -727,7 +727,6 @@ if(typeof System !== "undefined") {
 		less: '$less'
 	};
 	System.logLevel = 0;
-	System.transpiler = "traceur";
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -982,6 +981,7 @@ if(typeof System !== "undefined") {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');

@@ -58,7 +58,7 @@
 		warn: function( out ) {
 			var ll = steal.config('logLevel');
 			if(ll < 2){
-				Array.prototype.unshift.call(arguments, 'steal.js WARN:');
+				Array.prototype.unshift.call(arguments, 'steal.js WARNING:');
 				if ( window.console && console.warn ) {
 					this._logger( "warn", Array.prototype.slice.call(arguments) );
 				} else if ( window.console && console.log ) {
