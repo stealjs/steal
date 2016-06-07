@@ -16,7 +16,7 @@ describe("default configuration", function () {
 			config: __dirname+"/npm-deep/package.json!npm"
 		});
 		steal.startup().then(function(){
-			assert.equal(steal.System.transpiler, 'traceur');
+			assert.equal(steal.System.transpiler, 'babel');
 			assert.equal(steal.System.configMain, 'package.json!npm');
 			assert.strictEqual(steal.System.npmContext.isFlatFileStructure, true);
 			done();
