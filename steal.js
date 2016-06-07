@@ -247,8 +247,8 @@ define(function(require) {
 	};
 
 	function isNode () {
-		return typeof process !== 'undefined' && process !== null &&
-			typeof process.nextTick === 'function';
+		return typeof process !== 'undefined' &&
+			Object.prototype.toString.call(process) === '[object process]';
 	}
 
 	function hasMutationObserver () {
@@ -299,7 +299,7 @@ define(function() {
 	 * @returns {String} formatted string, suitable for output to developers
 	 */
 	function formatError(e) {
-		var s = typeof e === 'object' && e !== null && e.stack ? e.stack : formatObject(e);
+		var s = typeof e === 'object' && e !== null && (e.stack || e.message) ? e.stack || e.message : formatObject(e);
 		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
 	}
 
@@ -1265,6 +1265,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
+//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -2537,8 +2538,6 @@ function logloads(loads) {
 
     - Implemented to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js
 
-    - <script type="module"> supported
-
 *********************************************************************************************
 */
 
@@ -2840,46 +2839,6 @@ function logloads(loads) {
     module.exports = System;
 
   __global.System = System;
-
-  // <script type="module"> support
-  // allow a data-init function callback once loaded
-  if (isBrowser && typeof document.getElementsByTagName != 'undefined') {
-    var curScript = document.getElementsByTagName('script');
-    curScript = curScript[curScript.length - 1];
-
-    function completed() {
-      document.removeEventListener( "DOMContentLoaded", completed, false );
-      window.removeEventListener( "load", completed, false );
-      ready();
-    }
-
-    function ready() {
-      var scripts = document.getElementsByTagName('script');
-      for (var i = 0; i < scripts.length; i++) {
-        var script = scripts[i];
-        if (script.type == 'module') {
-          var source = script.innerHTML.substr(1);
-          // It is important to reference the global System, rather than the one
-          // in our closure. We want to ensure that downstream users/libraries
-          // can override System w/ custom behavior.
-          __global.System.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
-        }
-      }
-    }
-
-    // DOM ready, taken from https://github.com/jquery/jquery/blob/master/src/core/ready.js#L63
-    if (document.readyState === 'complete') {
-      setTimeout(ready);
-    }
-    else if (document.addEventListener) {
-      document.addEventListener('DOMContentLoaded', completed, false);
-      window.addEventListener('load', completed, false);
-    }
-
-    // run the data-init function on the script tag
-    if (curScript.getAttribute('data-init'))
-      window[curScript.getAttribute('data-init')]();
-  }
 })();
 
 
@@ -4141,21 +4100,39 @@ function amd(loader) {
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
+  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
-
   var fnBracketRegEx = /\(([^\)]*)\)/;
-
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
 
   function getCJSDeps(source, requireIndex) {
+    var stringLocations = [];
+
+    var match;
+
+    function inLocation(locations, index) {
+      for (var i = 0; i < locations.length; i++)
+        if (locations[i][0] < index && locations[i][1] > index)
+          return true;
+      return false;
+    }
+
+    while (match = stringRegEx.exec(source))
+      stringLocations.push([match.index, match.index + match[0].length]);
 
     // remove comments
-    source = source.replace(commentRegEx, '');
+    source = source.replace(commentRegEx, function(match, a, b, c, d, offset){
+      if(inLocation(stringLocations, offset + 1)) {
+        return match;
+      } else {
+        return '';
+      }
+    });
 
     // determine the require alias
     var params = source.match(fnBracketRegEx);
@@ -4257,20 +4234,20 @@ function amd(loader) {
 
       // remove system dependencies
       var requireIndex, exportsIndex, moduleIndex;
-      
+
       if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
-        
+
         deps.splice(requireIndex, 1);
 
         var factoryText = factory.toString();
 
         deps = deps.concat(getCJSDeps(factoryText, requireIndex));
       }
-        
+
 
       if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
         deps.splice(exportsIndex, 1);
-      
+
       if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
         deps.splice(moduleIndex, 1);
 
@@ -4289,10 +4266,10 @@ function amd(loader) {
           // add back in system dependencies
           if (moduleIndex != -1)
             depValues.splice(moduleIndex, 0, module);
-          
+
           if (exportsIndex != -1)
             depValues.splice(exportsIndex, 0, exports);
-          
+
           if (requireIndex != -1)
             depValues.splice(requireIndex, 0, makeRequire(module.id, require, loader));
 
@@ -4950,8 +4927,8 @@ var $__curScript, __eval;
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -5054,10 +5031,10 @@ var $__curScript, __eval;
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -5390,6 +5367,44 @@ if(typeof System !== "undefined") {
   addContextual(System);
 }
 
+var addScriptModule = function(loader) {
+	// stolen from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
+
+	function completed() {
+		document.removeEventListener( "DOMContentLoaded", completed, false );
+		window.removeEventListener( "load", completed, false );
+		ready();
+	}
+
+	function ready() {
+		var scripts = document.getElementsByTagName('script');
+		for (var i = 0; i < scripts.length; i++) {
+			var script = scripts[i];
+			if (script.type == 'text/steal-module') {
+				var source = script.innerHTML;
+				if(/\S/.test(source)){
+					loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+				}
+			}
+		}
+	}
+
+	loader.loadScriptModules = function(){
+		if(isBrowserWithWindow) {
+			if (document.readyState === 'complete') {
+				setTimeout(ready);
+			} else if (document.addEventListener) {
+				document.addEventListener('DOMContentLoaded', completed, false);
+				window.addEventListener('load', completed, false);
+			}
+		}
+
+	};
+};
+
+if(typeof System !== "undefined") {
+	addScriptModule(System);
+}
 function applyTraceExtension(loader){
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -5722,7 +5737,6 @@ if (typeof System !== "undefined") {
 		less: '$less'
 	};
 	System.logLevel = 0;
-	System.transpiler = "traceur";
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -5977,6 +5991,7 @@ if (typeof System !== "undefined") {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');
@@ -6119,7 +6134,9 @@ function addEnv(loader){
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			// main source within steals script is deprecated
+			// and will be removed in future releases
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -6135,7 +6152,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -6214,11 +6231,19 @@ function addEnv(loader){
 
 		}
 
+		// main source within steals script is deprecated
+		// and will be removed in future releases
 		if(System.mainSource) {
 			appDeferred = appDeferred.then(function(){
 				System.module(System.mainSource);
 			});
 		}
+
+		// load script modules they are tagged as
+		// text/steal-module
+		appDeferred = appDeferred.then(function(){
+			System.loadScriptModules();
+		});
 		return appDeferred;
 	};
 	steal.done = function(){

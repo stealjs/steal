@@ -1,6 +1,8 @@
 language: node_js
-node_js: 0.10
-before_script: node node_modules/bower/bin/bower install
+node_js:
+    - 0.12
+    - 4
+    - 5.5
 script: npm test
 before_install:
   - "export DISPLAY=:99.0"

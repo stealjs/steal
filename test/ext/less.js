@@ -40,7 +40,6 @@ exports.translate = function(load) {
 		var done = function(output) {
 			// Put the source map on metadata if one was created.
 			load.metadata.map = output.map;
-			load.metadata.includedDeps = output.imports || [];
 			resolve(output.css);
 		};
 
@@ -138,8 +137,6 @@ if (lessEngine.FileManager) {
 			pluginManager.addFileManager(new StealLessManager());
 		}
 	};
-
-	exports.StealLessManager = StealLessManager;
 }
 
 var normalizePath = function(path) {

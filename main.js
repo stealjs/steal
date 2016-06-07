@@ -2,8 +2,8 @@
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -106,10 +106,10 @@
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -442,6 +442,44 @@ if(typeof System !== "undefined") {
   addContextual(System);
 }
 
+var addScriptModule = function(loader) {
+	// stolen from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
+
+	function completed() {
+		document.removeEventListener( "DOMContentLoaded", completed, false );
+		window.removeEventListener( "load", completed, false );
+		ready();
+	}
+
+	function ready() {
+		var scripts = document.getElementsByTagName('script');
+		for (var i = 0; i < scripts.length; i++) {
+			var script = scripts[i];
+			if (script.type == 'text/steal-module') {
+				var source = script.innerHTML;
+				if(/\S/.test(source)){
+					loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+				}
+			}
+		}
+	}
+
+	loader.loadScriptModules = function(){
+		if(isBrowserWithWindow) {
+			if (document.readyState === 'complete') {
+				setTimeout(ready);
+			} else if (document.addEventListener) {
+				document.addEventListener('DOMContentLoaded', completed, false);
+				window.addEventListener('load', completed, false);
+			}
+		}
+
+	};
+};
+
+if(typeof System !== "undefined") {
+	addScriptModule(System);
+}
 function applyTraceExtension(loader){
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -689,7 +727,6 @@ if(typeof System !== "undefined") {
 		less: '$less'
 	};
 	System.logLevel = 0;
-	System.transpiler = "traceur";
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -944,6 +981,7 @@ if(typeof System !== "undefined") {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');
@@ -1086,7 +1124,9 @@ function addEnv(loader){
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			// main source within steals script is deprecated
+			// and will be removed in future releases
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -1102,7 +1142,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -1181,11 +1221,19 @@ function addEnv(loader){
 
 		}
 
+		// main source within steals script is deprecated
+		// and will be removed in future releases
 		if(System.mainSource) {
 			appDeferred = appDeferred.then(function(){
 				System.module(System.mainSource);
 			});
 		}
+
+		// load script modules they are tagged as
+		// text/steal-module
+		appDeferred = appDeferred.then(function(){
+			System.loadScriptModules();
+		});
 		return appDeferred;
 	};
 	steal.done = function(){
