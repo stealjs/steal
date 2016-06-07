@@ -5179,13 +5179,13 @@ var makeSteal = function(System){
 
 			if(matches) {
 				var hasBang = name[name.length - 1] === "!",
-						ext = matches[1];
-				// has bang and matches ext mapping
-				if(hasBang && loader.ext[ext]) {
-					name = name + (hasBang ? "" : "!") + loader.ext[ext];
+					ext = matches[1];
 				// load js-files nodd-like
-				}else if(!parentName && loader.configMain !== name && matches[0] === '.js') {
+				if(parentName && loader.configMain !== name && matches[0] === '.js') {
 					name = name.substr(0, name.lastIndexOf("."));
+					// matches ext mapping
+				} else if(loader.ext[ext]) {
+					name = name + (hasBang ? "" : "!") + loader.ext[ext];
 				}
 			}
 			return normalize.call(this, name, parentName, parentAddress);
