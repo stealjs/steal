@@ -3,7 +3,6 @@ node_js:
     - 0.12
     - 4
     - 5.5
-before_script: node node_modules/bower/bin/bower install
 script: npm test
 before_install:
   - "export DISPLAY=:99.0"

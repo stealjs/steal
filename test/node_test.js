@@ -8,17 +8,8 @@ var makeSteal = function(config){
 	return localSteal;
 };
 
-describe("default cofiguration", function () {
+describe("default configuration", function () {
 	this.timeout(20000);
-
-	it("without any configuration", function (done) {
-		var steal = makeSteal();
-		steal.startup().then(function(){
-			assert.equal(steal.System.transpiler, 'traceur');
-			assert.equal(steal.System.paths['@config'], "stealconfig.js");
-			done();
-		},done);
-	});
 
 	it("with a npm configuration", function (done) {
 		var steal = makeSteal({
