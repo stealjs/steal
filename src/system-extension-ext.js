@@ -15,15 +15,19 @@
 				return normalize.apply(this, arguments);
 			}
 
-			var matches = name.match(endingExtension),
-				ext,
-				newName = name;
+			var matches = name.match(endingExtension);
 
-			if(matches && loader.ext[ext = matches[1]]) {
+			if(matches) {
 				var hasBang = name[name.length - 1] === "!";
-				newName = name + (hasBang ? "" : "!") + loader.ext[ext];
+				// has bang and matches ext mapping
+				if(hasBang && loader.ext[matches[1]]) {
+					name = name + (hasBang ? "" : "!") + loader.ext[ext];
+				// load js-files nodd-like
+				}else if(matches[0] === '.js') {
+					name = name.substr(0, name.lastIndexOf("."));
+				}
 			}
-			return normalize.call(this, newName, parentName, parentAddress);
+			return normalize.call(this, name, parentName, parentAddress);
 		};
 	};
 
