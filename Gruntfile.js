@@ -16,8 +16,8 @@ module.exports = function (grunt) {
 	concat: {
 	  dist: {
 		src: [
-			"bower_components/es6-module-loader/dist/es6-module-loader.src.js",
-			"bower_components/systemjs/dist/system.src.js",
+			"node_modules/steal-es6-module-loader/dist/es6-module-loader.src.js",
+			"node_modules/steal-systemjs/dist/system.src.js",
 			"src/start.js",
 			"src/normalize.js",
 			"src/core.js",		// starts makeSteal
@@ -25,6 +25,7 @@ module.exports = function (grunt) {
 			"src/system-extension-forward-slash.js",
 			"src/system-extension-locate.js",
 			"src/system-extension-contextual.js",
+			"src/system-extension-script-module.js",
 			"node_modules/system-trace/trace.js",
 			"node_modules/system-json/json.js",
 			"src/config.js",
@@ -55,6 +56,7 @@ module.exports = function (grunt) {
 		  "src/system-extension-forward-slash.js",
 		  "src/system-extension-locate.js",
 		  "src/system-extension-contextual.js",
+		  "src/system-extension-script-module.js",
 		  "node_modules/system-trace/trace.js",
 		  "src/config.js",
 		  "node_modules/steal-env/env.js",
@@ -97,12 +99,10 @@ module.exports = function (grunt) {
           {src:["node_modules/system-npm/npm-load.js"], dest: "ext/npm-load.js", filter: "isFile"},
 		  {src:["node_modules/system-npm/semver.js"], dest: "ext/semver.js", filter: "isFile"},
 		  {src:["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
-		  {src:["bower_components/traceur/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
-		  {src:["bower_components/traceur-runtime/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: "isFile"},
-		  {src:["bower_components/system-bower/bower.js"], dest: "ext/bower.js", filter: "isFile"},
-		  {src:["node_modules/babel-core/browser.js"], dest: "ext/babel.js", filter: "isFile"},
-		  {src:["node_modules/babel-core/external-helpers.js"], dest: "ext/babel-runtime.js", filter: "isFile"},
-		  {src:["node_modules/babel-core/browser-polyfill.js"], dest: "ext/babel-polyfill.js", filter: "isFile"},
+		  {src:["node_modules/traceur/bin/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
+		  {src:["node_modules/traceur/bin/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: "isFile"},
+		  {src:["node_modules/system-bower/bower.js"], dest: "ext/bower.js", filter: "isFile"},
+		  {src:["node_modules/babel-standalone/babel.js"], dest: "ext/babel.js", filter: "isFile"},
 		]
 	  },
 	  toTest: {
@@ -113,19 +113,20 @@ module.exports = function (grunt) {
 		  {expand: true, src: core, dest: "test/npm/node_modules/steal/", filter: "isFile"},
 		  {expand: true, src: core, dest: "test/npm-deep/node_modules/steal/", filter: "isFile"},
 		  {expand: true, src: core, dest: "test/npm/bower/node_modules/steal/", filter: "isFile"},
+			{expand: true, src: core, dest: "test/steal-module-script/node_modules/steal/", filter: "isFile"},
 		  {expand: true, src: core, dest: "test/bower/bower_components/steal/", filter: "isFile"},
 		  {expand: true, src: core, dest: "test/bower/npm/bower_components/steal/", filter: "isFile"},
 		  {expand: true, src: ["node_modules/jquery/**"], dest: "test/npm/", filter: "isFile"},
-		  {expand: true, cwd: "bower_components/system-bower/", src: ["*"], dest: "test/bower_components/system-bower/", filter: "isFile"},
-		  {expand: true, cwd: "bower_components/system-bower/", src: ["*"], dest: "test/bower/bower_components/system-bower/", filter: "isFile"},
-		  {expand: true, cwd: "bower_components/system-bower/", src: ["*"], dest: "test/bower/with_paths/bower_components/system-bower/", filter: "isFile"},
-		  {expand: true, cwd: "bower_components/system-bower/", src: ["*"], dest: "test/bower/as_config/vendor/system-bower/", filter: "isFile"}
+		  {expand: true, cwd: "node_modules/system-bower/", src: ["*"], dest: "test/bower_components/system-bower/", filter: "isFile"},
+		  {expand: true, cwd: "node_modules/system-bower/", src: ["*"], dest: "test/bower/bower_components/system-bower/", filter: "isFile"},
+		  {expand: true, cwd: "node_modules/system-bower/", src: ["*"], dest: "test/bower/with_paths/bower_components/system-bower/", filter: "isFile"},
+		  {expand: true, cwd: "node_modules/system-bower/", src: ["*"], dest: "test/bower/as_config/vendor/system-bower/", filter: "isFile"}
 		]
 	  },
 
 	},
 	watch: {
-	  files: [ "src/*.js", "bower_components/systemjs/dist/**"],
+	  files: [ "src/*.js", "node_modules/systemjs/dist/**"],
 	  tasks: "default"
 	},
 	jshint: {

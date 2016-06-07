@@ -18,7 +18,9 @@
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			// main source within steals script is deprecated
+			// and will be removed in future releases
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -34,7 +36,7 @@
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -113,11 +115,19 @@
 
 		}
 
+		// main source within steals script is deprecated
+		// and will be removed in future releases
 		if(System.mainSource) {
 			appDeferred = appDeferred.then(function(){
 				System.module(System.mainSource);
 			});
 		}
+
+		// load script modules they are tagged as
+		// text/steal-module
+		appDeferred = appDeferred.then(function(){
+			System.loadScriptModules();
+		});
 		return appDeferred;
 	};
 	steal.done = function(){

@@ -169,6 +169,10 @@ QUnit.config.testTimeout = 30000;
 				"basics/basics.html",
 				'src="../steal/steal.js?basics"'));
 		});
+
+		asyncTest("jsx is enabled by default", function(){
+			makeIframe("jsx/dev.html");
+		});
 	}
 
 	asyncTest("inline", function(){
@@ -198,6 +202,18 @@ QUnit.config.testTimeout = 30000;
 				'src="../../steal.js?configed" data-config="../config.js"'));
 		});
 	}
+
+	asyncTest("default npm-algorithm", function(){
+		makeIframe("default-npm-algorithm/default.html");
+	});
+
+	asyncTest("default npm-algorithm overwritten", function(){
+		makeIframe("default-npm-algorithm/npm-algorithm.html");
+	});
+
+	asyncTest("npm-algorithm less npm 3", function(){
+		makeIframe("nested-npm-algorithm/nested.html");
+	});
 
 	asyncTest("compat - production bundle works", function(){
 		makeIframe("production/prod.html");
@@ -306,6 +322,10 @@ QUnit.config.testTimeout = 30000;
 
 		asyncTest("inline code", function(){
 			makeIframe("basics/inline_code.html");
+		});
+
+		asyncTest("inline code works without line breaks", function(){
+			makeIframe("basics/inline_code_no_break.html");
 		});
 	}
 

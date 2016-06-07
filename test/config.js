@@ -5,7 +5,8 @@ System.config({
 	bundle: ["foo"],
 	ext : {
 		crazy : "extensions/text"
-	}
+	},
+	transpiler: "traceur"
 });
 
 System.ext.txt = "extensions/text";

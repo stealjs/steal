@@ -7,12 +7,8 @@ Options that will be passed into Babel when compiling ES6 code. The options are 
 
 ## JSX
 
-Babel comes with support for transpiling JSX but it is not enabled by default in Steal. To enable the JSX support you can simply pass an empty array for the blacklist like so:
+JSX is supported by default, so you can use it directly in your code like:
 
 ```js
-System.config({
-  "babelOptions": {
-    "blacklist": []
-  }
-});
+export default <div>Hello <strong>world!</strong></div>;
 ```

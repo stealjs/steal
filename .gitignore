@@ -8,3 +8,6 @@ bower_components/
 test/ext/
 test/bower/as_config/vendor/system-bower/
 test/npm-deep/node_modules/steal/
+!test/default-npm-algorithm/node_modules/
+!test/nested-npm-algorithm/node_modules/
+!test/nested-npm-algorithm/node_modules/some/node_modules/

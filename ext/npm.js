@@ -31,20 +31,30 @@ exports.translate = function(load){
 	var context = {
 		packages: [],
 		loader: this,
-		// places we
+		// places we load package.jsons from
 		paths: {},
+		// paths that are currently be loaded
+		loadingPaths: {},
 		versions: {},
 		fetchCache: {},
 		deferredConversions: {},
 		npmLoad: npmLoad,
 		crawl: crawl,
-		resavePackageInfo: resavePackageInfo
+		resavePackageInfo: resavePackageInfo,
+		forwardSlashMap: {},
+		// default file structure for npm 3 and higher
+		isFlatFileStructure: true
 	};
 	this.npmContext = context;
 	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
 	crawl.processPkgSource(context, pkg, load.source);
-	if(pkg.system && pkg.system.npmAlgorithm === "flat") {
-		context.isFlatFileStructure = true;
+
+	// backwards compatible for < npm 3
+	if(pkg.system && pkg.system.npmAlgorithm === "nested") {
+		context.isFlatFileStructure = false;
+	} else {
+		pkg.system = pkg.system || {};
+		pkg.system.npmAlgorithm = "flat";
 	}
 
 	return crawl.deps(context, pkg, true).then(function(){
