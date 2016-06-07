@@ -2,8 +2,8 @@
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -94,6 +94,19 @@
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		},
+		relativeURI = function(base, path) {
+			var uriParts = path.split("/"),
+				baseParts = base.split("/"),
+				result = [];
+			while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+				uriParts.shift();
+				baseParts.shift();
+			}
+			for(var i = 0 ; i< baseParts.length-1; i++) {
+				result.push("../");
+			}
+			return "./" + result.join("") + uriParts.join("/");
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";

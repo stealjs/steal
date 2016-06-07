@@ -199,6 +199,18 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
+	asyncTest("default npm-algorithm", function(){
+		makeIframe("default-npm-algorithm/default.html");
+	});
+
+	asyncTest("default npm-algorithm overwritten", function(){
+		makeIframe("default-npm-algorithm/npm-algorithm.html");
+	});
+
+	asyncTest("npm-algorithm less npm 3", function(){
+		makeIframe("nested-npm-algorithm/nested.html");
+	});
+
 	asyncTest("compat - production bundle works", function(){
 		makeIframe("production/prod.html");
 	});
@@ -209,6 +221,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("steal.production.js doesn't require setting env", function(){
 		makeIframe("production/prod-env.html");
+	});
+
+	asyncTest("steal.production.js logs errors", function(){
+		makeIframe("production_err/prod.html");
 	});
 
 	asyncTest("loadBundles true with a different env loads the bundles", function(){
@@ -303,6 +319,10 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("inline code", function(){
 			makeIframe("basics/inline_code.html");
 		});
+
+		asyncTest("inline code works without line breaks", function(){
+			makeIframe("basics/inline_code_no_break.html");
+		});
 	}
 
 	asyncTest("warn in production when main is not set (#537)", function(){
@@ -323,6 +343,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("envs config is applied after a live-reload", function(){
 		makeIframe("envs/envs-live.html");
+	});
+
+	asyncTest("script tag wins against global steal object", function(){
+		makeIframe("script-tag_wins/index.html");
 	});
 
 	module("json extension");
@@ -354,6 +378,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("forward slash with npm", function(){
 		makeIframe("npm-deep/dev.html");
+	});
+
+	asyncTest("meta config is deep", function(){
+		makeIframe("meta-deep/index.html");
 	});
 
 	module("Bower extension");
@@ -388,5 +416,58 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
+	module("Locate/Pkg Path Scheme extension");
+
+	asyncTest("Basics work", function(){
+		makeIframe("locate/site.html");
+	});
+
+	module("Contextual extension");
+
+	asyncTest("Basics work", function(){
+		makeIframe("contextual/test.html");
+	});
+
+	module("ext-steal-clone")
+
+	asyncTest("basics work", function() {
+		makeIframe("ext-steal-clone/basics/index.html");
+	});
+
+	asyncTest("does not share the module registry and extensions with cloned loader", function() {
+		makeIframe("ext-steal-clone/config-separation/index.html");
+	});
+
+	asyncTest("caches source of parent modules to avoid duplicate downloads", function() {
+		makeIframe("ext-steal-clone/fetch-cache/index.html");
+	});
+
+	asyncTest("works when overriding multiple modules", function() {
+		makeIframe("ext-steal-clone/multiple-overrides/index.html");
+	});
+
+	asyncTest("works when using the npm extensions", function() {
+		makeIframe("ext-steal-clone/npm-extension/index.html");
+	});
+
+	asyncTest("supports loading css, less files", function() {
+		makeIframe("ext-steal-clone/other-extensions/index.html");
+	});
+
+	asyncTest("works when a parent of injected dependency has been imported", function() {
+		makeIframe("ext-steal-clone/prior-import/index.html");
+	});
+
+	asyncTest("works when using relative imports", function() {
+		makeIframe("ext-steal-clone/relative-import/index.html");
+	});
+
+	asyncTest("works when using relative overrides", function() {
+		makeIframe("ext-steal-clone/relative-override/index.html");
+	});
+
+	asyncTest("what happens within a cloned loader should not leak", function(){
+		makeIframe("ext-steal-clone/leak/index.html");
+	});
 
 })();

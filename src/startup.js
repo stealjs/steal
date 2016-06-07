@@ -18,7 +18,7 @@
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -34,7 +34,7 @@
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -43,13 +43,15 @@
 			};
 		}
 
+		// first set the config that is set with a steal object
+		if(config){
+			System.config(config);
+		}
+
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
 
-		if(config){
-			System.config(config);
-		}
 
 		setEnvsConfig.call(this.System);
 
@@ -61,7 +63,7 @@
 		// we only load things with force = true
 		if ( System.loadBundles ) {
 
-			if(!System.main && System.isEnv("production")) {
+			if(!System.main && System.isEnv("production") && !System.stealBundled) {
 				// prevent this warning from being removed by Uglify
 				var warn = console && console.warn || function() {};
 				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
@@ -72,8 +74,6 @@
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {

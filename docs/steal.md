@@ -5,6 +5,8 @@
 @group StealJS.modules modules
 @group StealJS.types types
 @group StealJS.functions functions
+@group StealJS.schemes schemes
+@group StealJS.hooks hooks
 
 Steal is a  module loader that supports a wide variety of 
 syntaxes and configuration options. It makes modular development, test
@@ -186,7 +188,7 @@ to the [System.configPath configPath] and [System.main main] entrypoint of your 
 </script>
 ```
 
-### Configure
+### <a name="path-configure"></a>Configure
 
 `config.js` is used to configure the behavior of
 your site's modules. For example, to load jQuery from a CDN:

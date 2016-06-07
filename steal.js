@@ -247,8 +247,8 @@ define(function(require) {
 	};
 
 	function isNode () {
-		return typeof process !== 'undefined' && process !== null &&
-			typeof process.nextTick === 'function';
+		return typeof process !== 'undefined' &&
+			Object.prototype.toString.call(process) === '[object process]';
 	}
 
 	function hasMutationObserver () {
@@ -299,7 +299,7 @@ define(function() {
 	 * @returns {String} formatted string, suitable for output to developers
 	 */
 	function formatError(e) {
-		var s = typeof e === 'object' && e !== null && e.stack ? e.stack : formatObject(e);
+		var s = typeof e === 'object' && e !== null && (e.stack || e.message) ? e.stack || e.message : formatObject(e);
 		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
 	}
 
@@ -1265,6 +1265,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
+//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -2495,7 +2496,7 @@ function logloads(loads) {
   }
 
   function babelTranspile(load, babel) {
-    babel = babel.Babel || babel;
+    babel = babel.Babel || babel.babel || babel;
     var options = this.babelOptions || {};
     options.sourceMap = 'inline';
     options.filename = load.address;
@@ -2536,8 +2537,6 @@ function logloads(loads) {
   System Loader Implementation
 
     - Implemented to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js
-
-    - <script type="module"> supported
 
 *********************************************************************************************
 */
@@ -2840,46 +2839,6 @@ function logloads(loads) {
     module.exports = System;
 
   __global.System = System;
-
-  // <script type="module"> support
-  // allow a data-init function callback once loaded
-  if (isBrowser && typeof document.getElementsByTagName != 'undefined') {
-    var curScript = document.getElementsByTagName('script');
-    curScript = curScript[curScript.length - 1];
-
-    function completed() {
-      document.removeEventListener( "DOMContentLoaded", completed, false );
-      window.removeEventListener( "load", completed, false );
-      ready();
-    }
-
-    function ready() {
-      var scripts = document.getElementsByTagName('script');
-      for (var i = 0; i < scripts.length; i++) {
-        var script = scripts[i];
-        if (script.type == 'module') {
-          var source = script.innerHTML.substr(1);
-          // It is important to reference the global System, rather than the one
-          // in our closure. We want to ensure that downstream users/libraries
-          // can override System w/ custom behavior.
-          __global.System.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
-        }
-      }
-    }
-
-    // DOM ready, taken from https://github.com/jquery/jquery/blob/master/src/core/ready.js#L63
-    if (document.readyState === 'complete') {
-      setTimeout(ready);
-    }
-    else if (document.addEventListener) {
-      document.addEventListener('DOMContentLoaded', completed, false);
-      window.addEventListener('load', completed, false);
-    }
-
-    // run the data-init function on the script tag
-    if (curScript.getAttribute('data-init'))
-      window[curScript.getAttribute('data-init')]();
-  }
 })();
 
 
@@ -4022,24 +3981,51 @@ function cjs(loader) {
 
   // CJS Module Format
   // require('...') || exports[''] = ... || exports.asd = ... || module.exports = ...
-  var cjsExportsRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.]|module\.)(exports\s*\[['"]|\exports\s*\.)|(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])module\.exports\s*\=/;
+  var cjsExportsRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])(exports\s*(\[['"]|\.)|module(\.exports|\['exports'\]|\["exports"\])\s*(\[['"]|[=,\.]))/;
   // RegEx adjusted from https://github.com/jbrantly/yabble/blob/master/lib/yabble.js#L339
   var cjsRequireRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF."'])require\s*\(\s*("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')\s*\)/g;
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+  var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+
+  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
 
   function getCJSDeps(source) {
-    cjsRequireRegEx.lastIndex = 0;
+    cjsRequireRegEx.lastIndex = commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
 
     var deps = [];
 
-    // remove comments from the source first, if not minified
-    if (source.length / source.split('\n').length < 200)
-      source = source.replace(commentRegEx, '');
-
     var match;
 
-    while (match = cjsRequireRegEx.exec(source))
-      deps.push(match[1].substr(1, match[1].length - 2));
+    // track string and comment locations for unminified source
+    var stringLocations = [], commentLocations = [];
+
+    function inLocation(locations, match) {
+      for (var i = 0; i < locations.length; i++)
+        if (locations[i][0] < match.index && locations[i][1] > match.index)
+          return true;
+      return false;
+    }
+
+    if (source.length / source.split('\n').length < 200) {
+      while (match = stringRegEx.exec(source))
+        stringLocations.push([match.index, match.index + match[0].length]);
+
+      while (match = commentRegEx.exec(source)) {
+        // only track comments not starting in strings
+        if (!inLocation(stringLocations, match))
+          commentLocations.push([match.index, match.index + match[0].length]);
+      }
+    }
+
+    while (match = cjsRequireRegEx.exec(source)) {
+      // ensure we're not within a string or comment location
+      if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+        var dep = match[1].substr(1, match[1].length - 2);
+        // skip cases like require('" + file + "')
+        if (dep.match(/"|'/))
+          continue;
+        deps.push(dep);
+      }
+    }
 
     return deps;
   }
@@ -4084,7 +4070,7 @@ function cjs(loader) {
 
         var execLoad = {
           name: load.name,
-          source: '(function() {\n(function(global, exports, module, require, __filename, __dirname){\n' + load.source + 
+          source: '(function() {\n(function(global, exports, module, require, __filename, __dirname){\n' + load.source +
                                   '\n}).call(_g.exports, _g.global, _g.exports, _g.module, _g.require, _g.__filename, _g.__dirname);})();',
           address: load.address
         };
@@ -4114,21 +4100,39 @@ function amd(loader) {
   // define([.., .., ..], ...)
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
+  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
-
   var fnBracketRegEx = /\(([^\)]*)\)/;
-
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
 
   function getCJSDeps(source, requireIndex) {
+    var stringLocations = [];
+
+    var match;
+
+    function inLocation(locations, index) {
+      for (var i = 0; i < locations.length; i++)
+        if (locations[i][0] < index && locations[i][1] > index)
+          return true;
+      return false;
+    }
+
+    while (match = stringRegEx.exec(source))
+      stringLocations.push([match.index, match.index + match[0].length]);
 
     // remove comments
-    source = source.replace(commentRegEx, '');
+    source = source.replace(commentRegEx, function(match, a, b, c, d, offset){
+      if(inLocation(stringLocations, offset + 1)) {
+        return match;
+      } else {
+        return '';
+      }
+    });
 
     // determine the require alias
     var params = source.match(fnBracketRegEx);
@@ -4230,20 +4234,20 @@ function amd(loader) {
 
       // remove system dependencies
       var requireIndex, exportsIndex, moduleIndex;
-      
+
       if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
-        
+
         deps.splice(requireIndex, 1);
 
         var factoryText = factory.toString();
 
         deps = deps.concat(getCJSDeps(factoryText, requireIndex));
       }
-        
+
 
       if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
         deps.splice(exportsIndex, 1);
-      
+
       if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
         deps.splice(moduleIndex, 1);
 
@@ -4262,10 +4266,10 @@ function amd(loader) {
           // add back in system dependencies
           if (moduleIndex != -1)
             depValues.splice(moduleIndex, 0, module);
-          
+
           if (exportsIndex != -1)
             depValues.splice(exportsIndex, 0, exports);
-          
+
           if (requireIndex != -1)
             depValues.splice(requireIndex, 0, makeRequire(module.id, require, loader));
 
@@ -4822,6 +4826,8 @@ var $__curScript, __eval;
 (function() {
 
   var doEval;
+  var isWorker = typeof window == 'undefined' && typeof self != 'undefined' && typeof importScripts != 'undefined';
+  var isBrowser = typeof window != 'undefined' && typeof document != 'undefined';
 
   __eval = function(source, address, sourceMap) {
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
@@ -4839,7 +4845,31 @@ var $__curScript, __eval;
     }
   };
 
-  if (typeof document != 'undefined') {
+  if (isWorker || isBrowser && window.chrome && window.chrome.extension) {
+    doEval = function(source) {
+      try {
+        eval(source);
+      } catch(e) {
+        throw e;
+      }
+    };
+
+    if (!$__global.System || !$__global.LoaderPolyfill) {
+      var basePath = '';
+      try {
+        throw new Error('Get worker base path via error stack');
+      } catch (e) {
+        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
+          basePath = url.replace(/\/[^\/]*$/, '/');
+        });
+      }
+      importScripts(basePath + 'steal-es6-module-loader.js');
+      $__global.upgradeSystemLoader();
+    } else {
+      $__global.upgradeSystemLoader();
+    }
+  }
+  else if (typeof document != 'undefined') {
     var head;
 
     var scripts = document.getElementsByTagName('script');
@@ -4876,30 +4906,6 @@ var $__curScript, __eval;
       $__global.upgradeSystemLoader();
     }
   }
-  else if (typeof WorkerGlobalScope != 'undefined' && typeof importScripts != 'undefined') {
-    doEval = function(source) {
-      try {
-        eval(source);
-      } catch(e) {
-        throw e;
-      }
-    };
-
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      var basePath = '';
-      try {
-        throw new Error('Get worker base path via error stack');
-      } catch (e) {
-        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
-          basePath = url.replace(/\/[^\/]*$/, '/');
-        });
-      }
-      importScripts(basePath + 'steal-es6-module-loader.js');
-      $__global.upgradeSystemLoader();
-    } else {
-      $__global.upgradeSystemLoader();
-    }
-  }
   else {
     var es6ModuleLoader = require('steal-es6-module-loader');
     $__global.System = es6ModuleLoader.System;
@@ -4921,8 +4927,8 @@ var $__curScript, __eval;
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -5013,9 +5019,22 @@ var $__curScript, __eval;
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		},
+		relativeURI = function(base, path) {
+			var uriParts = path.split("/"),
+				baseParts = base.split("/"),
+				result = [];
+			while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+				uriParts.shift();
+				baseParts.shift();
+			}
+			for(var i = 0 ; i< baseParts.length-1; i++) {
+				result.push("../");
+			}
+			return "./" + result.join("") + uriParts.join("/");
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -5130,10 +5149,14 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
+	steal.relativeURI = relativeURI;
 
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar
 	var addExt = function(loader) {
+		if (loader._extensions) {
+			loader._extensions.push(addExt);
+		}
 
 		loader.ext = {};
 
@@ -5165,8 +5188,11 @@ var makeSteal = function(System){
 
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
-		var normalize = loader.normalize;
+		if (loader._extensions) {
+			loader._extensions.push(addForwardSlash);
+		}
 
+		var normalize = loader.normalize;
 		var npmLike = /@.+#.+/;
 
 		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
@@ -5190,6 +5216,156 @@ var makeSteal = function(System){
 	if (typeof System) {
 		addForwardSlash(System);
 	}
+
+// override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
+// in resources loaded by supporting plugins
+
+var addLocate = function(loader){
+	/**
+	 * @hide
+	 * @function normalizeAndLocate
+	 * @description Run a module identifier through Normalize and Locate hooks.
+	 * @param {String} moduleName The module to run through normalize and locate.
+	 * @return {Promise} A promise to resolve when the address is found.
+	 */
+	var normalizeAndLocate = function(moduleName, parentName){
+		var loader = this;
+		return Promise.resolve(loader.normalize(moduleName, parentName))
+			.then(function(name){
+				return loader.locate({name: name, metadata: {}});
+			}).then(function(address){
+				if(address.substr(address.length - 3) === ".js") {
+					address = address.substr(0, address.length - 3);
+				}
+				return address;
+			});
+	};
+
+	var relative = function(base, path){
+		var uriParts = path.split("/"),
+			baseParts = base.split("/"),
+			result = [];
+
+		while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+			uriParts.shift();
+			baseParts.shift();
+		}
+
+		for(var i = 0 ; i< baseParts.length-1; i++) {
+			result.push("../");
+		}
+
+		return result.join("") + uriParts.join("/");
+	};
+
+	var schemePattern = /(locate):\/\/([a-z0-9/._@-]*)/ig,
+		parsePathSchemes = function(source, parent) {
+			var locations = [];
+			source.replace(schemePattern, function(whole, scheme, path, index){
+				locations.push({
+					start: index,
+					end: index+whole.length,
+					name: path,
+					postLocate: function(address){
+						return relative(parent, address);
+					}
+				});
+			});
+			return locations;
+		};
+
+	var _translate = loader.translate;
+	loader.translate = function(load){
+		var loader = this;
+
+		// This only applies to plugin resources.
+		if(!load.metadata.plugin) {
+			return _translate.call(this, load);
+		}
+
+		// Use the translator if this file path scheme is supported by the plugin
+		var locateSupport = load.metadata.plugin.locateScheme;
+		if(!locateSupport) {
+			return _translate.call(this, load);
+		}
+
+		// Parse array of module names
+		var locations = parsePathSchemes(load.source, load.address);
+
+		// no locations found
+		if(!locations.length) {
+			return _translate.call(this, load);
+		}
+
+		// normalize and locate all of the modules found and then replace those instances in the source.
+		var promises = [];
+		for(var i = 0, len = locations.length; i < len; i++) {
+			promises.push(
+				normalizeAndLocate.call(this, locations[i].name, load.name)
+			);
+		}
+		return Promise.all(promises).then(function(addresses){
+			for(var i = locations.length - 1; i >= 0; i--) {
+				load.source = load.source.substr(0, locations[i].start)
+					+ locations[i].postLocate(addresses[i])
+					+ load.source.substr(locations[i].end, load.source.length);
+			}
+			return _translate.call(loader, load);
+		});
+	};
+};
+
+if(typeof System !== "undefined") {
+	addLocate(System);
+}
+
+function addContextual(loader){
+  if (loader._extensions) {
+    loader._extensions.push(addContextual);
+  }
+  loader._contextualModules = {};
+
+  loader.setContextual = function(moduleName, definer){
+    this._contextualModules[moduleName] = definer;
+  };
+
+  var normalize = loader.normalize;
+  loader.normalize = function(name, parentName){
+    var loader = this;
+
+    if (parentName) {
+      var definer = this._contextualModules[name];
+
+      // See if `name` is a contextual module
+      if (definer) {
+        name = name + '/' + parentName;
+
+        if(!loader.has(name)) {
+          // `definer` could be a function or could be a moduleName
+          if (typeof definer === 'string') {
+            definer = loader['import'](definer);
+          }
+
+          return Promise.resolve(definer)
+          .then(function(definer) {
+            if (definer['default']) {
+              definer = definer['default'];
+            }
+            loader.set(name, loader.newModule(definer.call(loader, parentName)));
+            return name;
+          });
+        }
+        return Promise.resolve(name);
+      }
+    }
+
+    return normalize.apply(this, arguments);
+  };
+}
+
+if(typeof System !== "undefined") {
+  addContextual(System);
+}
 
 function applyTraceExtension(loader){
 	if(loader._extensions) {
@@ -5283,8 +5459,56 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var transpiledDepsExp = /System\.register\((\[.+?\])\,/;
-	var singleQuoteExp = /'/g;
+	var esImportDepsExp = /import .*["'](.+)["']/g;
+	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
+	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+
+	function getESDeps(source) {
+		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
+			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
+
+		var deps = [];
+
+		var match;
+
+		// track string and comment locations for unminified source
+		var stringLocations = [], commentLocations = [];
+
+		function inLocation(locations, match) {
+		  for (var i = 0; i < locations.length; i++)
+			if (locations[i][0] < match.index && locations[i][1] > match.index)
+			  return true;
+		  return false;
+		}
+
+		function addDeps(exp) {
+			while (match = exp.exec(source)) {
+			  // ensure we're not within a string or comment location
+			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+				var dep = match[1];//.substr(1, match[1].length - 2);
+				deps.push(dep);
+			  }
+			}
+		}
+
+		if (source.length / source.split('\n').length < 200) {
+		  while (match = stringRegEx.exec(source))
+			stringLocations.push([match.index, match.index + match[0].length]);
+
+		  while (match = commentRegEx.exec(source)) {
+			// only track comments not starting in strings
+			if (!inLocation(stringLocations, match))
+			  commentLocations.push([match.index, match.index + match[0].length]);
+		  }
+		}
+
+		addDeps(esImportDepsExp);
+		addDeps(esExportDepsExp);
+
+		return deps;
+	}
+
 	var instantiate = loader.instantiate;
 	loader.instantiate = function(load){
 		this._traceData.loads[load.name] = load;
@@ -5320,16 +5544,8 @@ function applyTraceExtension(loader){
 		return instantiatePromise.then(function(result){
 			// This must be es6
 			if(!result) {
-				return loader.transpile(load).then(function(source){
-					load.metadata.transpiledSource = source;
-
-					var depsMatches = transpiledDepsExp.exec(source);
-					var depsSource = depsMatches ? depsMatches[1] : "[]";
-					var deps = JSON.parse(depsSource.replace(singleQuoteExp, '"'));
-					load.metadata.deps = deps;
-
-					return finalizeResult(result);
-				});
+				var deps = getESDeps(load.source);
+				load.metadata.deps = deps;
 			}
 			return finalizeResult(result);
 		});
@@ -5344,6 +5560,12 @@ function applyTraceExtension(loader){
 			return Promise.resolve(transpiled);
 		}
 		return transpile.apply(this, arguments);
+	};
+
+	loader.eachModule = function(cb){
+		for (var moduleName in this._loader.modules) {
+			cb.call(this, moduleName, this.get(moduleName));
+		}
 	};
 }
 
@@ -5377,6 +5599,12 @@ function _SYSTEM_addJSON(loader) {
 	  });
 	};
 
+	var transform = function(loader, load, data){
+		var fn = loader.jsonOptions && loader.jsonOptions.transform;
+		if(!fn) return data;
+		return fn.call(loader, load, data);
+	};
+
 	// If we are in a build we should convert to CommonJS instead.
 	if(inNode) {
 		var loaderTranslate = loader.translate;
@@ -5384,8 +5612,9 @@ function _SYSTEM_addJSON(loader) {
 			if(jsonExt.test(load.name)) {
 				var parsed = parse(load);
 				if(parsed) {
+					parsed = transform(this, load, parsed);
 					return "def" + "ine([], function(){\n" +
-						"\treturn " + load.source + "\n});";
+						"\treturn " + JSON.stringify(parsed) + "\n});";
 				}
 			}
 
@@ -5401,6 +5630,7 @@ function _SYSTEM_addJSON(loader) {
 
 		parsed = parse(load);
 		if(parsed) {
+			parsed = transform(loader, load, parsed);
 			load.metadata.format = 'json';
 
 			load.metadata.execute = function(){
@@ -5591,7 +5821,6 @@ if (typeof System !== "undefined") {
 		}
 	};
 
-	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	var envsSpecial = { map: true, paths: true, meta: true };
 	setterConfig(System, specialConfig = {
@@ -5655,14 +5884,20 @@ if (typeof System !== "undefined") {
 					searchParts = search.split("&"),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
-					stealPath = paths.join("/");
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+				// if steal is bundled we always are in production environment
+				if(this.stealBundled && this.stealBundled === true) {
 					this.config({ env: platform+"-production" });
-					addProductionBundles.call(this);
+
+				}else{
+					specialConfig.stealPath.set.call(this,stealPath, cfg);
+
+					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+						this.config({ env: platform+"-production" });
+						addProductionBundles.call(this);
+					}
 				}
 
 				if(searchParts.length && searchParts[0].length) {
@@ -5691,9 +5926,6 @@ if (typeof System !== "undefined") {
 
 				// Split on / to get rootUrl
 
-
-
-
 			}
 		},
 		// this gets called with the __dirname steal is in
@@ -5706,21 +5938,28 @@ if (typeof System !== "undefined") {
 				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
 				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
 				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
+				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
+
 				if(isNode) {
-					System.register("less",[], false, function(){
+					System.register("@less-engine", [], false, function(){
 						var r = require;
 						return r('less');
 					});
@@ -5735,10 +5974,10 @@ if (typeof System !== "undefined") {
 					}
 
 				} else {
-					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
+					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -5779,6 +6018,26 @@ if (typeof System !== "undefined") {
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		meta: {
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					if(typeof value !== "object") {
+						return;
+					}
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						// Keep the deps, if we have any
+						var deps = value.deps;
+						extend(value, cur);
+						if(deps) {
+							value.deps = deps;
+						}
+					}
+				});
+				extend(this.meta, cfg);
+			}
 		}
 	});
 
@@ -5789,7 +6048,6 @@ if (typeof System !== "undefined") {
 			System.config(cfg);
 		}
 	};
-
 
 if(typeof System !== "undefined") {
 	addEnv(System);
@@ -5838,7 +6096,7 @@ function addEnv(loader){
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -5854,7 +6112,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -5863,13 +6121,15 @@ function addEnv(loader){
 			};
 		}
 
+		// first set the config that is set with a steal object
+		if(config){
+			System.config(config);
+		}
+
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
 
-		if(config){
-			System.config(config);
-		}
 
 		setEnvsConfig.call(this.System);
 
@@ -5881,7 +6141,7 @@ function addEnv(loader){
 		// we only load things with force = true
 		if ( System.loadBundles ) {
 
-			if(!System.main && System.isEnv("production")) {
+			if(!System.main && System.isEnv("production") && !System.stealBundled) {
 				// prevent this warning from being removed by Uglify
 				var warn = console && console.warn || function() {};
 				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
@@ -5892,8 +6152,6 @@ function addEnv(loader){
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {
@@ -5974,6 +6232,9 @@ function addEnv(loader){
   Provides the Steal module format definition.
 */
 function addSteal(loader) {
+	if (loader._extensions) {
+		loader._extensions.push(addSteal);
+	}
 
   // Steal Module Format Detection RegEx
   // steal(module, ...)
@@ -6078,8 +6339,12 @@ if (typeof System !== "undefined") {
 		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
+				if(typeof console !== "undefined") {
+					// Hide from uglify
+					var c = console;
+					var type = c.error ? "error" : "log";
+					c[type](error, error.stack);
+				}
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;

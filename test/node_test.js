@@ -8,6 +8,22 @@ var makeSteal = function(config){
 	return localSteal;
 };
 
+describe("default configuration", function () {
+	this.timeout(20000);
+
+	it("with a npm configuration", function (done) {
+		var steal = makeSteal({
+			config: __dirname+"/npm-deep/package.json!npm"
+		});
+		steal.startup().then(function(){
+			assert.equal(steal.System.transpiler, 'babel');
+			assert.equal(steal.System.configMain, 'package.json!npm');
+			assert.strictEqual(steal.System.npmContext.isFlatFileStructure, true);
+			done();
+		},done);
+	});
+});
+
 describe("plugins", function(){
 	this.timeout(20000);
 
@@ -42,4 +58,25 @@ describe("plugins", function(){
 		}
 	});
 
+});
+
+describe("Modules that don't exist", function(){
+	it("should reject", function(done){
+		var steal = makeSteal({
+			config: __dirname + "/../package.json!npm",
+			main: "@empty"
+		});
+
+		steal.startup().then(function(){
+			var System = steal.System;
+
+			System.import("some/fake/module")
+			.then(function(){
+				assert.ok(false, "Promise resolved when it should have rejected");
+			}, function(err){
+				assert.ok(err instanceof Error, "Got an error");
+			})
+			.then(done, done);
+		});
+	});
 });

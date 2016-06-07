@@ -7,12 +7,27 @@
  */
 
 // A regex to test if a moduleName is npm-like.
+var slice = Array.prototype.slice;
 var npmModuleRegEx = /.+@.+\..+\..+#.+/;
+var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
 
 var utils = {
-	extend: function(d, s){
+	extend: function(d, s, deep){
+		var val;
 		for(var prop in s) {
-			d[prop] = s[prop];
+			val = s[prop];
+
+			if(deep) {
+				if(utils.isArray(val)) {
+					d[prop] = slice.call(val);
+				} else if(utils.isObject(val)) {
+					d[prop] = utils.extend({}, val, deep);
+				} else {
+					d[prop] = s[prop];
+				}
+			} else {
+				d[prop] = s[prop];
+			}
 		}
 		return d;
 	},
@@ -38,6 +53,37 @@ var utils = {
 		for(; i < len; i++) {
 			fn.call(arr, arr[i], i);
 		}
+	},
+	isObject: function(obj){
+		return typeof obj === "object";
+	},
+	isArray: Array.isArray || function(arr){
+		return Object.prototype.toString.call(arr) === "[object Array]";
+	},
+	isEnv: function(name) {
+		return this.isEnv ? this.isEnv(name) : this.env === name;
+	},
+	warnOnce: function(msg){
+		var w = this._warnings = this._warnings || {};
+		if(w[msg]) return;
+		w[msg] = true;
+		this.warn(msg);
+	},
+	warn: function(msg){
+		if(typeof steal !== "undefined" && typeof console !== "undefined" && console.warn) {
+			steal.done().then(function(){
+				if(steal.dev && steal.dev.warn){
+					steal.dev.warn(msg)
+				} else if(console.warn) {
+					console.warn("steal.js WARNING: "+msg);
+				} else {
+					console.log(msg);
+				}
+			});
+		}
+	},
+	relativeURI: function(baseURL, url) {
+		return typeof steal !== "undefined" ? steal.relativeURI(baseURL, url) : url;
 	},
 	moduleName: {
 		/**
@@ -72,6 +118,24 @@ var utils = {
 			return npmModuleRegEx.test(moduleName);
 		},
 		/**
+		 * @function moduleName.isConditional
+		 * Determines whether a moduleName includes a condition.
+		 * @return {Boolean}
+		 */
+		isConditional: function(moduleName){
+			return conditionalModuleRegEx.test(moduleName);
+		},
+		/**
+		 * @function moduleName.isFullyConvertedModuleName
+		 * Determines whether a moduleName is a fully npm name, not npm-like
+		 * With a parsed module name we can make sure there is a package name,
+		 * package version, and module path.
+		 */
+		isFullyConvertedNpm: function(parsedModuleName){
+			return !!(parsedModuleName.packageName &&
+					  parsedModuleName.version && parsedModuleName.modulePath);
+		},
+		/**
 		 * @function moduleName.isScoped
 		 * Determines whether a moduleName is from a scoped package.
 		 * @return {Boolean}
@@ -87,7 +151,7 @@ var utils = {
 		 *
 		 * @return {system-npm/parsed_npm}
 		 */
-		parse: function (moduleName, currentPackageName) {
+		parse: function (moduleName, currentPackageName, global) {
 			var pluginParts = moduleName.split('!');
 			var modulePathParts = pluginParts[0].split("#");
 			var versionParts = modulePathParts[0].split("@");
@@ -131,7 +195,8 @@ var utils = {
 				version: versionParts[1],
 				modulePath: modulePath,
 				packageName: packageName,
-				moduleName: moduleName
+				moduleName: moduleName,
+				isGlobal: global
 			};
 		},
 		/**
@@ -151,10 +216,16 @@ var utils = {
 		parseFromPackage: function(loader, refPkg, name, parentName) {
 			// Get the name of the
 			var packageName = utils.pkg.name(refPkg),
-			    parsedModuleName = utils.moduleName.parse(name, packageName);
+			    parsedModuleName = utils.moduleName.parse(name, packageName),
+				isRelative = utils.path.isRelative(parsedModuleName.modulePath);
+
+			if(isRelative && !parentName) {
+				throw new Error("Cannot resolve a relative module identifier " +
+								"with no parent module:", name);
+			}
 
 			// If the module needs to be loaded relative.
-			if( utils.path.isRelative( parsedModuleName.modulePath ) ) {
+			if(isRelative) {
 				// get the location of the parent
 				var parentParsed = utils.moduleName.parse( parentName, packageName );
 				// If the parentModule and the currentModule are from the same parent
@@ -182,7 +253,7 @@ var utils = {
 			}
 
 			if(mappedName) {
-				return utils.moduleName.parse(mappedName, packageName);
+				return utils.moduleName.parse(mappedName, packageName, !!global);
 			} else {
 				return parsedModuleName;
 			}
@@ -201,12 +272,26 @@ var utils = {
 			return (pkg.system && pkg.system.name) || pkg.name;
 		},
 		main: function(pkg) {
-			return  utils.path.removeJS( 
-				(pkg.system && pkg.system.main) 
-				|| (typeof pkg.browser === "string" && pkg.browser) 
-				|| (typeof pkg.jspm === "string" && pkg.jspm) 
-				|| (typeof pkg.jspm === "object" && pkg.jspm.main) 
-				|| pkg.main || 'index' ) ;
+			var main;
+			if(pkg.system && pkg.system.main) {
+				main = pkg.system.main;
+			} else if(typeof pkg.browser === "string") {
+				if(utils.path.endsWithSlash(pkg.browser)) {
+					main = pkg.browser + "index";
+				} else {
+					main = pkg.browser;
+				}
+			} else if(typeof pkg.jam === "object") {
+				main = pkg.jam.main;
+			} else if(pkg.main) {
+				main = pkg.main;
+			} else {
+				main = "index";
+			}
+
+			return utils.path.removeJS(
+				utils.path.removeDotSlash(main)
+			);
 		},
 		rootDir: function(pkg, isRoot) {
 			var root = isRoot ?
@@ -218,6 +303,18 @@ var utils = {
 				root = utils.path.joinURIs(utils.path.addEndingSlash(root), lib);
 			}
 			return root;
+		},
+		/**
+		 * @function pkg.isRoot
+		 * Determines whether a module is the loader's root module.
+		 * @return {Boolean}
+		 */
+		isRoot: function(loader, pkg) {
+			var root = utils.pkg.getDefault(loader);
+			return pkg.name === root.name && pkg.version === root.version;
+		},
+		getDefault: function(loader) {
+			return loader.npmPaths.__default;
 		},
 		/**
 		 * Returns packageData given a module's name or module's address.
@@ -243,9 +340,9 @@ var utils = {
 				}
 				if(moduleAddress) {
 					var packageFolder = utils.pkg.folderAddress(moduleAddress);
-					return packageFolder ? loader.npmPaths[packageFolder] : loader.npmPaths.__default;
+					return packageFolder ? loader.npmPaths[packageFolder] : utils.pkg.getDefault(loader);
 				} else {
-					return loader.npmPaths.__default;
+					return utils.pkg.getDefault(loader);
 				}
 			}
 		},
@@ -289,9 +386,27 @@ var utils = {
 				return loader.npm[name];
 			}
 		},
+		findByUrl: function(loader, url) {
+			if(loader.npm) {
+				url = utils.pkg.folderAddress(url);
+				return loader.npmPaths[url];
+			}
+		},
 		hasDirectoriesLib: function(pkg) {
 			var system = pkg.system;
 			return system && system.directories && !!system.directories.lib;
+		},
+		findPackageInfo: function(context, pkg){
+			var pkgInfo = context.pkgInfo;
+			if(pkgInfo) {
+				var out;
+				utils.forEach(pkgInfo, function(p){
+					if(pkg.name === p.name && pkg.version === p.version) {
+						out = p;
+					}
+				});
+				return out;
+			}
 		}
 	},
 	path: {
@@ -347,6 +462,11 @@ var utils = {
 		startsWithDotSlash: function( path ) {
 			return path.substr(0,2) === "./";
 		},
+		removeDotSlash: function(path) {
+			return utils.path.startsWithDotSlash(path) ?
+				path.substr(2) :
+				path;
+		},
 		endsWithSlash: function(path){
 			return path[path.length -1] === "/";
 		},
@@ -395,6 +515,22 @@ var utils = {
 			if(nodeModulesIndex >= 0) {
 				return nextSlash>=0 ? address.substr(0, nextSlash) : address;
 			}
+		},
+		basename: function(address){
+			var parts = address.split("/");
+			return parts[parts.length - 1];
+		},
+		relativeTo: function(modulePath, rel) {
+			var parts = modulePath.split("/");
+			var idx = 1;
+			while(rel[idx] === ".") {
+				parts.pop();
+				idx++;
+			}
+			return parts.join("/");
+		},
+		isPackageRootDir: function(pth) {
+			return pth.indexOf("/") === -1;
 		}
 	},
 	includeInBuild: true

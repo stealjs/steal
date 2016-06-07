@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "main": "steal.js",
-  "version": "0.13.2",
+  "version": "0.16.17",
   "ignore": [
     "test",
     "src",
@@ -9,11 +9,5 @@
     "docs"
   ],
   "devDependencies": {
-    "qunit": "~1.12.0",
-    "systemjs": "bitovi/systemjs#0.17.0",
-    "traceur": "0.0.91",
-    "system-bower": "^0.2.1",
-    "es6-module-loader": "bitovi/es6-module-loader#v0.17.4",
-    "traceur-runtime": "0.0.91"
   }
 }

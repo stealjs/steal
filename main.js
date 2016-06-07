@@ -2,8 +2,8 @@
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -94,9 +94,22 @@
 					(href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
 					href.hash;
 		},
+		relativeURI = function(base, path) {
+			var uriParts = path.split("/"),
+				baseParts = base.split("/"),
+				result = [];
+			while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+				uriParts.shift();
+				baseParts.shift();
+			}
+			for(var i = 0 ; i< baseParts.length-1; i++) {
+				result.push("../");
+			}
+			return "./" + result.join("") + uriParts.join("/");
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined";
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -211,10 +224,14 @@ var makeSteal = function(System){
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
+	steal.relativeURI = relativeURI;
 
 	// System.ext = {bar: "path/to/bar"}
 	// foo.bar! -> foo.bar!path/to/bar
 	var addExt = function(loader) {
+		if (loader._extensions) {
+			loader._extensions.push(addExt);
+		}
 
 		loader.ext = {};
 
@@ -246,8 +263,11 @@ var makeSteal = function(System){
 
 	// "path/to/folder/" -> "path/to/folder/folder"
 	var addForwardSlash = function(loader) {
-		var normalize = loader.normalize;
+		if (loader._extensions) {
+			loader._extensions.push(addForwardSlash);
+		}
 
+		var normalize = loader.normalize;
 		var npmLike = /@.+#.+/;
 
 		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
@@ -271,6 +291,156 @@ var makeSteal = function(System){
 	if (typeof System) {
 		addForwardSlash(System);
 	}
+
+// override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
+// in resources loaded by supporting plugins
+
+var addLocate = function(loader){
+	/**
+	 * @hide
+	 * @function normalizeAndLocate
+	 * @description Run a module identifier through Normalize and Locate hooks.
+	 * @param {String} moduleName The module to run through normalize and locate.
+	 * @return {Promise} A promise to resolve when the address is found.
+	 */
+	var normalizeAndLocate = function(moduleName, parentName){
+		var loader = this;
+		return Promise.resolve(loader.normalize(moduleName, parentName))
+			.then(function(name){
+				return loader.locate({name: name, metadata: {}});
+			}).then(function(address){
+				if(address.substr(address.length - 3) === ".js") {
+					address = address.substr(0, address.length - 3);
+				}
+				return address;
+			});
+	};
+
+	var relative = function(base, path){
+		var uriParts = path.split("/"),
+			baseParts = base.split("/"),
+			result = [];
+
+		while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+			uriParts.shift();
+			baseParts.shift();
+		}
+
+		for(var i = 0 ; i< baseParts.length-1; i++) {
+			result.push("../");
+		}
+
+		return result.join("") + uriParts.join("/");
+	};
+
+	var schemePattern = /(locate):\/\/([a-z0-9/._@-]*)/ig,
+		parsePathSchemes = function(source, parent) {
+			var locations = [];
+			source.replace(schemePattern, function(whole, scheme, path, index){
+				locations.push({
+					start: index,
+					end: index+whole.length,
+					name: path,
+					postLocate: function(address){
+						return relative(parent, address);
+					}
+				});
+			});
+			return locations;
+		};
+
+	var _translate = loader.translate;
+	loader.translate = function(load){
+		var loader = this;
+
+		// This only applies to plugin resources.
+		if(!load.metadata.plugin) {
+			return _translate.call(this, load);
+		}
+
+		// Use the translator if this file path scheme is supported by the plugin
+		var locateSupport = load.metadata.plugin.locateScheme;
+		if(!locateSupport) {
+			return _translate.call(this, load);
+		}
+
+		// Parse array of module names
+		var locations = parsePathSchemes(load.source, load.address);
+
+		// no locations found
+		if(!locations.length) {
+			return _translate.call(this, load);
+		}
+
+		// normalize and locate all of the modules found and then replace those instances in the source.
+		var promises = [];
+		for(var i = 0, len = locations.length; i < len; i++) {
+			promises.push(
+				normalizeAndLocate.call(this, locations[i].name, load.name)
+			);
+		}
+		return Promise.all(promises).then(function(addresses){
+			for(var i = locations.length - 1; i >= 0; i--) {
+				load.source = load.source.substr(0, locations[i].start)
+					+ locations[i].postLocate(addresses[i])
+					+ load.source.substr(locations[i].end, load.source.length);
+			}
+			return _translate.call(loader, load);
+		});
+	};
+};
+
+if(typeof System !== "undefined") {
+	addLocate(System);
+}
+
+function addContextual(loader){
+  if (loader._extensions) {
+    loader._extensions.push(addContextual);
+  }
+  loader._contextualModules = {};
+
+  loader.setContextual = function(moduleName, definer){
+    this._contextualModules[moduleName] = definer;
+  };
+
+  var normalize = loader.normalize;
+  loader.normalize = function(name, parentName){
+    var loader = this;
+
+    if (parentName) {
+      var definer = this._contextualModules[name];
+
+      // See if `name` is a contextual module
+      if (definer) {
+        name = name + '/' + parentName;
+
+        if(!loader.has(name)) {
+          // `definer` could be a function or could be a moduleName
+          if (typeof definer === 'string') {
+            definer = loader['import'](definer);
+          }
+
+          return Promise.resolve(definer)
+          .then(function(definer) {
+            if (definer['default']) {
+              definer = definer['default'];
+            }
+            loader.set(name, loader.newModule(definer.call(loader, parentName)));
+            return name;
+          });
+        }
+        return Promise.resolve(name);
+      }
+    }
+
+    return normalize.apply(this, arguments);
+  };
+}
+
+if(typeof System !== "undefined") {
+  addContextual(System);
+}
 
 function applyTraceExtension(loader){
 	if(loader._extensions) {
@@ -364,8 +534,56 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var transpiledDepsExp = /System\.register\((\[.+?\])\,/;
-	var singleQuoteExp = /'/g;
+	var esImportDepsExp = /import .*["'](.+)["']/g;
+	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
+	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+
+	function getESDeps(source) {
+		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
+			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
+
+		var deps = [];
+
+		var match;
+
+		// track string and comment locations for unminified source
+		var stringLocations = [], commentLocations = [];
+
+		function inLocation(locations, match) {
+		  for (var i = 0; i < locations.length; i++)
+			if (locations[i][0] < match.index && locations[i][1] > match.index)
+			  return true;
+		  return false;
+		}
+
+		function addDeps(exp) {
+			while (match = exp.exec(source)) {
+			  // ensure we're not within a string or comment location
+			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
+				var dep = match[1];//.substr(1, match[1].length - 2);
+				deps.push(dep);
+			  }
+			}
+		}
+
+		if (source.length / source.split('\n').length < 200) {
+		  while (match = stringRegEx.exec(source))
+			stringLocations.push([match.index, match.index + match[0].length]);
+
+		  while (match = commentRegEx.exec(source)) {
+			// only track comments not starting in strings
+			if (!inLocation(stringLocations, match))
+			  commentLocations.push([match.index, match.index + match[0].length]);
+		  }
+		}
+
+		addDeps(esImportDepsExp);
+		addDeps(esExportDepsExp);
+
+		return deps;
+	}
+
 	var instantiate = loader.instantiate;
 	loader.instantiate = function(load){
 		this._traceData.loads[load.name] = load;
@@ -401,16 +619,8 @@ function applyTraceExtension(loader){
 		return instantiatePromise.then(function(result){
 			// This must be es6
 			if(!result) {
-				return loader.transpile(load).then(function(source){
-					load.metadata.transpiledSource = source;
-
-					var depsMatches = transpiledDepsExp.exec(source);
-					var depsSource = depsMatches ? depsMatches[1] : "[]";
-					var deps = JSON.parse(depsSource.replace(singleQuoteExp, '"'));
-					load.metadata.deps = deps;
-
-					return finalizeResult(result);
-				});
+				var deps = getESDeps(load.source);
+				load.metadata.deps = deps;
 			}
 			return finalizeResult(result);
 		});
@@ -425,6 +635,12 @@ function applyTraceExtension(loader){
 			return Promise.resolve(transpiled);
 		}
 		return transpile.apply(this, arguments);
+	};
+
+	loader.eachModule = function(cb){
+		for (var moduleName in this._loader.modules) {
+			cb.call(this, moduleName, this.get(moduleName));
+		}
 	};
 }
 
@@ -595,7 +811,6 @@ if(typeof System !== "undefined") {
 		}
 	};
 
-	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	var envsSpecial = { map: true, paths: true, meta: true };
 	setterConfig(System, specialConfig = {
@@ -659,14 +874,20 @@ if(typeof System !== "undefined") {
 					searchParts = search.split("&"),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
-					stealPath = paths.join("/");
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+				// if steal is bundled we always are in production environment
+				if(this.stealBundled && this.stealBundled === true) {
 					this.config({ env: platform+"-production" });
-					addProductionBundles.call(this);
+
+				}else{
+					specialConfig.stealPath.set.call(this,stealPath, cfg);
+
+					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+						this.config({ env: platform+"-production" });
+						addProductionBundles.call(this);
+					}
 				}
 
 				if(searchParts.length && searchParts[0].length) {
@@ -695,9 +916,6 @@ if(typeof System !== "undefined") {
 
 				// Split on / to get rootUrl
 
-
-
-
 			}
 		},
 		// this gets called with the __dirname steal is in
@@ -710,21 +928,28 @@ if(typeof System !== "undefined") {
 				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
 				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
 				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
+				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
+
 				if(isNode) {
-					System.register("less",[], false, function(){
+					System.register("@less-engine", [], false, function(){
 						var r = require;
 						return r('less');
 					});
@@ -739,10 +964,10 @@ if(typeof System !== "undefined") {
 					}
 
 				} else {
-					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
+					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -783,6 +1008,26 @@ if(typeof System !== "undefined") {
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		meta: {
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					if(typeof value !== "object") {
+						return;
+					}
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						// Keep the deps, if we have any
+						var deps = value.deps;
+						extend(value, cur);
+						if(deps) {
+							value.deps = deps;
+						}
+					}
+				});
+				extend(this.meta, cfg);
+			}
 		}
 	});
 
@@ -793,7 +1038,6 @@ if(typeof System !== "undefined") {
 			System.config(cfg);
 		}
 	};
-
 
 if(typeof System !== "undefined") {
 	addEnv(System);
@@ -842,7 +1086,7 @@ function addEnv(loader){
 				options[optionName] = (attr.value === "") ? true : attr.value;
 			});
 
-			var source = script.innerHTML.substr(1);
+			var source = script.innerHTML;
 			if(/\S/.test(source)){
 				options.mainSource = source;
 			}
@@ -858,7 +1102,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(global.document) {
+		} else if(isBrowserWithWindow) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -867,13 +1111,15 @@ function addEnv(loader){
 			};
 		}
 
+		// first set the config that is set with a steal object
+		if(config){
+			System.config(config);
+		}
+
 		// B: DO THINGS WITH OPTIONS
 		// CALCULATE CURRENT LOCATION OF THINGS ...
 		System.config(urlOptions);
 
-		if(config){
-			System.config(config);
-		}
 
 		setEnvsConfig.call(this.System);
 
@@ -885,7 +1131,7 @@ function addEnv(loader){
 		// we only load things with force = true
 		if ( System.loadBundles ) {
 
-			if(!System.main && System.isEnv("production")) {
+			if(!System.main && System.isEnv("production") && !System.stealBundled) {
 				// prevent this warning from being removed by Uglify
 				var warn = console && console.warn || function() {};
 				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
@@ -896,8 +1142,6 @@ function addEnv(loader){
 			appDeferred = configDeferred.then(function(cfg){
 				setEnvsConfig.call(System);
 				return System.main ? System["import"](System.main) : cfg;
-			})["catch"](function(e){
-				console.log(e);
 			});
 
 		} else {
@@ -978,6 +1222,9 @@ function addEnv(loader){
   Provides the Steal module format definition.
 */
 function addSteal(loader) {
+	if (loader._extensions) {
+		loader._extensions.push(addSteal);
+	}
 
   // Steal Module Format Detection RegEx
   // steal(module, ...)
@@ -1082,8 +1329,12 @@ if (typeof System !== "undefined") {
 		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
 			.then(null, function(error){
-				console.log("error",error,  error.stack);
-				throw error;
+				if(typeof console !== "undefined") {
+					// Hide from uglify
+					var c = console;
+					var type = c.error ? "error" : "log";
+					c[type](error, error.stack);
+				}
 			});
 		global.steal.clone = cloneSteal;
 		global.steal.addSteal = addSteal;

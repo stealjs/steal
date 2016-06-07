@@ -1,3 +1,5 @@
+var convert = require("./npm-convert");
+var npmModuleLoad = require("./npm-load");
 var utils = require("./npm-utils");
 var SemVer = require('./semver');
 /**
@@ -30,81 +32,107 @@ var crawl = {
 		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
 
 		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
-			// if a peer dependency, and not isRoot
-			if(childPkg._isPeerDependency && !isRoot ) {
-				// check one node_module level higher
-				childPkg.origFileUrl = nodeModuleAddress(pkg.fileUrl)+"/"+childPkg.name+"/package.json";
-			} else if(isRoot) {
-				childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
-			} else {
-				// npm 2
-				childPkg.origFileUrl = childPkg.nestedFileUrl = 
-					utils.path.depPackage(pkg.fileUrl, childPkg.name);
-
-				if(context.isFlatFileStructure) {
-					// npm 3
-					childPkg.origFileUrl = crawl.parentMostAddress(context,
-																   childPkg);
-				}
-			}
-
-			// check if childPkg matches a parent's version ... if it 
-			// does ... do nothing
-			if(crawl.hasParentPackageThatMatches(context, childPkg)) {
-				return;
-			}
-			
-			if(crawl.isSameRequestedVersionFound(context, childPkg)) {
-				return;
-			}
-
-			return finishLoad(childPkg);
-			
-			// otherwise go get child ... but don't process dependencies until all of these dependencies have finished
-			function finishLoad(childPkg) {
-				var copy = utils.extend({}, childPkg);
-
-				return npmLoad(context, childPkg)
-				.then(function(source){
-					if(source) {
-						return crawl.processPkgSource(context, childPkg, source); 
-					} // else if there's no source, it's likely because this dependency has been found elsewhere
-				})
-				.then(function(lpkg){
-					if(!lpkg) {
-						return lpkg;
-					}
-
-					// npm3 -> if we found an incorrect version, start back in the
-					// most nested position possible and crawl up from there.
-					if(SemVer.validRange(copy.version) &&
-					   SemVer.valid(lpkg.version) && 
-					   !SemVer.satisfies(lpkg.version, copy.version) &&
-						!!childPkg.nestedFileUrl && 
-						childPkg.origFileUrl !== childPkg.nestedFileUrl) {
-
-						var newCopy = utils.extend({}, copy);
-						newCopy.origFileUrl = crawl.parentMostAddress(context, {
-							name: newCopy.name,
-							version: newCopy.version,
-							origFileUrl: newCopy.nestedFileUrl
-						});
-						return finishLoad(newCopy);
-					}
-					return lpkg;
-				});
-			}
-			
+			return crawl.fetchDep(context, pkg, childPkg, isRoot);
 		}), truthy)).then(function(packages){
 			// at this point all dependencies of pkg have been loaded, it's ok to get their children
-	
-			return Promise.all(utils.filter(utils.map(packages, function(childPkg){
-				if(childPkg) {
+			
+			// TODO exception for steal-builtins
+			return Promise.all(utils.map(packages, function(childPkg){
+				if(childPkg && childPkg.name === 'steal-builtins') {
 					return crawl.deps(context, childPkg);
-				} 
-			}), truthy));
+				}
+			})).then(function(){
+				return packages;
+			});
 		});
 	},
+
+	dep: function(context, pkg, childPkg, isRoot) {
+		var versionAndRange = childPkg.name+"@"+childPkg.version;
+		if(context.fetchCache[versionAndRange]) {
+			return context.fetchCache[versionAndRange];
+		}
+
+		childPkg = utils.extend({}, childPkg);
+
+		var p = context.fetchCache[versionAndRange] =
+			crawl.fetchDep(context, pkg, childPkg, isRoot);
+
+		p = Promise.resolve(p).then(function(result){
+			// Package already being fetched
+			if(result === undefined) {
+				var fetchedPkg = crawl.matchedVersion(context, childPkg.name,
+													  childPkg.version);
+				return fetchedPkg;
+			} else {
+				childPkg = result;
+			}
+
+			// Save this pkgInfo into the context
+			var localPkg = convert.toPackage(context, childPkg);
+
+			convert.forPackage(context, childPkg);
+			
+
+			// Save package.json!npm load
+			npmModuleLoad.saveLoadIfNeeded(context);
+
+			// Setup any config that needs to be placed on the loader.
+			crawl.setConfigForPackage(context, localPkg);
+
+			return localPkg;
+		});
+		return p;
+	},
+
+	/**
+	 * Fetch a particular package.json dependency
+	 * @param {Object} context
+	 * @param {NpmPackage} parentPkg
+	 * @param {NpmPackage} childPkg
+	 * @param {Boolean} [isRoot] If the root module's dependencies shoudl be crawled.
+	 * @return {Promise} A promise when the package has loaded
+	 */
+	fetchDep: function(context, parentPkg, childPkg, isRoot){
+		var pkg = parentPkg;
+		var isFlat = context.isFlatFileStructure;
+
+		// if a peer dependency, and not isRoot
+		if(childPkg._isPeerDependency && !isRoot ) {
+			// check one node_module level higher
+			childPkg.origFileUrl = nodeModuleAddress(pkg.fileUrl)+"/"+childPkg.name+"/package.json";
+		} else if(isRoot) {
+			childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
+		} else {
+			// npm 2
+			childPkg.origFileUrl = childPkg.nestedFileUrl = 
+				utils.path.depPackage(pkg.fileUrl, childPkg.name);
+
+			if(isFlat) {
+				// npm 3
+				childPkg.origFileUrl = crawl.parentMostAddress(context,
+															   childPkg);
+			}
+		}
+
+		// check if childPkg matches a parent's version ... if it 
+		// does ... do nothing
+		if(crawl.hasParentPackageThatMatches(context, childPkg)) {
+			return;
+		}
+		
+		if(crawl.isSameRequestedVersionFound(context, childPkg)) {
+			return;
+		}
+
+		var requestedVersion = childPkg.version;
+		return npmLoad(context, childPkg, requestedVersion)
+		.then(function(pkg){
+			crawl.setVersionsConfig(context, pkg, requestedVersion);
+			return pkg;
+		});
+	},
+
 	/**
 	 * Returns an array of the dependency names that should be crawled.
 	 * @param {Object} loader
@@ -240,11 +268,62 @@ var crawl = {
 			curAddress = packageAddress;
 		}
 		return curAddress;
+	},
+	setConfigForPackage: function(context, pkg) {
+		var loader = context.loader;
+		var setGlobalBrowser = function(globals, pkg){
+			for(var name in globals) {
+				loader.globalBrowser[name] = {
+					pkg: pkg,
+					moduleName: globals[name]
+				};
+			}
+		};
+		var setInNpm = function(name, pkg){
+			if(!loader.npm[name]) {
+				loader.npm[name] = pkg;
+			}
+			loader.npm[name+"@"+pkg.version] = pkg;
+		};
+
+		if(pkg.system) {
+			// don't set system.main
+			var main = pkg.system.main;
+			delete pkg.system.main;
+			delete pkg.system.configDependencies;
+			loader.config(pkg.system);
+			pkg.system.main = main;
+
+		}
+		if(pkg.globalBrowser) {
+			setGlobalBrowser(pkg.globalBrowser, pkg);
+		}
+		var systemName = pkg.system && pkg.system.name;
+		if(systemName) {
+			setInNpm(systemName, pkg);
+		} else {
+			setInNpm(pkg.name, pkg);
+		}
+		if(!loader.npm[pkg.name]) {
+			loader.npm[pkg.name] = pkg;
+		}
+		loader.npm[pkg.name+"@"+pkg.version] = pkg;
+		var pkgAddress = pkg.fileUrl.replace(/\/package\.json.*/,"");
+		loader.npmPaths[pkgAddress] = pkg;
+	},
+	setVersionsConfig: function(context, pkg, versionRange) {
+		if(!context.versions[pkg.name]) {
+			context.versions[pkg.name] = {};
+		}
+		var versions = context.versions[pkg.name];
+		versions[versionRange] = pkg;
+	},
+	pkgSatisfies: function(pkg, versionRange) {
+		return SemVer.validRange(versionRange) &&
+			SemVer.valid(pkg.version) ?
+			SemVer.satisfies(pkg.version, versionRange) : true;
 	}
 };
-
-
-module.exports = crawl;
 
 function nodeModuleAddress(address) {
 	var nodeModules = "/node_modules/",
@@ -282,47 +361,175 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 		return !!(!npmIgnore || !npmIgnore[name]);
 	}
 	
+	defaultProps = defaultProps || {};
+	var val;
 	for(var name in dependencies) {
 		if(includeDep(name)) {
-			deps[name] = utils.extend(defaultProps || {}, {name: name, version: dependencies[name]});
+			val = utils.extend({}, defaultProps);
+			utils.extend(val, {name: name, version: dependencies[name]});
+			deps[name] = val;
 		}
 	}
 }
+
+/**
+ * A FetchTask is an *attempt* to load a package.json. It might fail
+ * if there is a 404 or if the package we fetched is not the correct version.
+ * In either of those cases we'll either:
+ *
+ * 1) If npm3 we'll first try to crawl from the most nested position
+ * 2) If not npm3 (or we've already done #1) we'll traverse up the
+ * node_modules folder structure.
+ */
+function FetchTask(context, pkg){
+	this.context = context;
+	this.pkg = pkg;
+	this.orig = utils.extend({}, pkg);
+	this.requestedVersion = pkg.version;
+	this.failed = false;
+}
+
+utils.extend(FetchTask.prototype, {
+	load: function(){
+		// Get the fileUrl and pass to fetch
+		// Check if the fileUrl is already loading
+		// check if the fileUrl is already loaded
+		// check if the fileUrl that is already loaded is semver compat
+		var pkg = this.pkg;
+		var context = this.context;
+		var fileUrl = pkg.fileUrl = pkg.nextFileUrl || pkg.origFileUrl;
+
+		// If a task is currently loading this fileUrl,
+		// wait for it to complete
+		var loadingTask = context.loadingPaths[fileUrl];
+		if(loadingTask) {
+			var self = this;
+			return loadingTask.promise.then(function(){
+				if(loadingTask.failed) {
+					self.error = loadingTask.error;
+					self.failed = true;
+				} else {
+					self._fetchedPackage = loadingTask.getPackage();
+				}
+			});
+		}
+
+		// If it is already loaded check to see if it's semver compatible
+		// and if so use it. Otherwise reject.
+		var loadedPkg = context.paths[fileUrl];
+		if(loadedPkg) {
+			this._fetchedPackage = loadedPkg;
+			if(!this.isCompatibleVersion()) {
+				this.failed = true;
+			}
+			return Promise.resolve();
+		}
+
+		return this.fetch(fileUrl);
+	},
+
+	fetch: function(fileUrl){
+		var task = this;
+		var pkg = this.pkg;
+		var context = this.context;
+		var loader = context.loader;
+
+		context.paths[fileUrl] = pkg;
+		context.loadingPaths[fileUrl] = this;
+
+		this.promise = loader.fetch({
+			address: fileUrl,
+			name: fileUrl,
+			metadata: {}
+		})
+		.then(function(src){
+			task.src = src;
+
+			if(!task.isCompatibleVersion()) {
+				task.failed = true;
+			}
+			delete context.loadingPaths[fileUrl];
+		}, function(err){
+			task.error = err;
+			task.failed = true;
+			delete context.loadingPaths[fileUrl];
+		});
+
+		return this.promise;
+	},
+
+	/**
+	 * Is the package fetched from this task a compatible version?
+	 */
+	isCompatibleVersion: function(pkg){
+		var pkg = pkg || this.getPackage();
+		var requestedVersion = this.requestedVersion;
+
+		return SemVer.validRange(requestedVersion) && 
+			SemVer.valid(pkg.version) ?
+			SemVer.satisfies(pkg.version, requestedVersion) : true;
+	},
+
+	/**
+	 * Get the package.json from this task.
+	 */
+	getPackage: function(){
+		if(this._fetchedPackage) {
+			return this._fetchedPackage;
+		}
+		this._fetchedPackage = crawl.processPkgSource(this.context,
+													  this.pkg,
+													  this.src);
+		return this._fetchedPackage;
+	},
+
+	/**
+	 * Get the next package to look up by traversing up the node_modules.
+	 * Create a new pkg by extending the existing one
+	 */
+	next: function(){
+		var pkg = utils.extend({}, this.orig);
+
+		var isFlat = this.context.isFlatFileStructure;
+		var fileUrl = this.pkg.fileUrl;
+		var context = this.context;
+
+		if(isFlat && !pkg.__crawledNestedPosition) {
+			pkg.__crawledNestedPosition = true;
+			pkg.nextFileUrl = pkg.nestedFileUrl;
+		}
+		else {
+			// make sure we aren't loading something we've already loaded
+			var parentAddress = utils.path.parentNodeModuleAddress(fileUrl);
+			if(!parentAddress) {
+				throw new Error('Did not find ' + pkg.origFileUrl);
+			}
+			var nodeModuleAddress = parentAddress + "/" + pkg.name +
+				"/package.json";
+
+			pkg.nextFileUrl = nodeModuleAddress;
+		}
+
+		return pkg;
+	}
+});
+
+crawl.FetchTask = FetchTask;
 
 // Loads package.json
 // if it finds one, it sets that package in paths
 // so it won't be loaded twice.
-function npmLoad(context, pkg, fileUrl){
-	var loader = context.loader;
-	fileUrl = fileUrl || pkg.origFileUrl;
-	context.paths[fileUrl] = pkg;
-	pkg.fileUrl = fileUrl;
+function npmLoad(context, pkg){
+	var task = new FetchTask(context, pkg);
 
-	return loader.fetch({
-		address: fileUrl,
-		name: fileUrl,
-		metadata: {}
-	}).then(null,function(ex){
-		if(pkg.nestedFileUrl && !pkg.__crawledNestedPosition) {
-			pkg.__crawledNestedPosition = true;
-			fileUrl = pkg.nestedFileUrl || fileUrl;
+	return task.load().then(function(){
+		if(task.failed) {
+			// Recurse. Calling task.next gives us a new pkg object
+			// with the fileUrl being the parent node_modules folder.
+			return npmLoad(context, task.next());
 		}
-
-		return npmTraverseUp(context, pkg, fileUrl);
+		return task.getPackage();
 	});
-};
-
-function npmTraverseUp(context, pkg, fileUrl) {
-	// make sure we aren't loading something we've already loaded
-	var parentAddress = utils.path.parentNodeModuleAddress(fileUrl);
-	if(!parentAddress) {
-		throw new Error('Did not find ' + pkg.origFileUrl);
-	}
-	var nodeModuleAddress = parentAddress+"/"+pkg.name+"/package.json";
-	if(context.paths[nodeModuleAddress]) {
-		// already processed
-		return;
-	} else {
-		return npmLoad(context, pkg, nodeModuleAddress);
-	}
 }
+
+module.exports = crawl;

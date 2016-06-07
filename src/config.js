@@ -161,7 +161,6 @@
 		}
 	};
 
-	var LESS_ENGINE = "less-2.4.0";
 	var specialConfig;
 	var envsSpecial = { map: true, paths: true, meta: true };
 	setterConfig(System, specialConfig = {
@@ -225,14 +224,20 @@
 					searchParts = search.split("&"),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
-					stealPath = paths.join("/");
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-				if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-					var platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+				// if steal is bundled we always are in production environment
+				if(this.stealBundled && this.stealBundled === true) {
 					this.config({ env: platform+"-production" });
-					addProductionBundles.call(this);
+
+				}else{
+					specialConfig.stealPath.set.call(this,stealPath, cfg);
+
+					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
+						this.config({ env: platform+"-production" });
+						addProductionBundles.call(this);
+					}
 				}
 
 				if(searchParts.length && searchParts[0].length) {
@@ -261,9 +266,6 @@
 
 				// Split on / to get rootUrl
 
-
-
-
 			}
 		},
 		// this gets called with the __dirname steal is in
@@ -276,21 +278,28 @@
 				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
 				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
 				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
+				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
 				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
 				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
+				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
 				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
+
 				if(isNode) {
-					System.register("less",[], false, function(){
+					System.register("@less-engine", [], false, function(){
 						var r = require;
 						return r('less');
 					});
@@ -305,10 +314,10 @@
 					}
 
 				} else {
-					setIfNotPresent(this.paths, "less", dirname + "/ext/less-engine.js");
+					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath ) {
+					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -349,6 +358,26 @@
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		meta: {
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					if(typeof value !== "object") {
+						return;
+					}
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						// Keep the deps, if we have any
+						var deps = value.deps;
+						extend(value, cur);
+						if(deps) {
+							value.deps = deps;
+						}
+					}
+				});
+				extend(this.meta, cfg);
+			}
 		}
 	});
 
@@ -359,4 +388,3 @@
 			System.config(cfg);
 		}
 	};
-
