@@ -1,0 +1,14 @@
+<script>
+    window.QUnit = window.parent.QUnit;
+    window.removeMyself = window.parent.removeMyself;
+</script>
+<script src="node_modules/steal/steal.js" base-url="./" config-main="@empty">
+    import foobar from "foobar";
+    if(typeof window !== "undefined" && window.QUnit) {
+        QUnit.ok(foobar,"works");
+        QUnit.start();
+        removeMyself();
+    }else{
+        console.log(foobar);
+    }
+</script>

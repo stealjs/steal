@@ -169,6 +169,10 @@ QUnit.config.testTimeout = 30000;
 				"basics/basics.html",
 				'src="../steal/steal.js?basics"'));
 		});
+
+		asyncTest("jsx is enabled by default", function(){
+			makeIframe("jsx/dev.html");
+		});
 	}
 
 	asyncTest("inline", function(){
