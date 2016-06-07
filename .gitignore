@@ -11,3 +11,4 @@ test/npm-deep/node_modules/steal/
 !test/default-npm-algorithm/node_modules/
 !test/nested-npm-algorithm/node_modules/
 !test/nested-npm-algorithm/node_modules/some/node_modules/
+!test/import-js-file/node_modules/

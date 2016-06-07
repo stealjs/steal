@@ -226,8 +226,15 @@ var makeSteal = function(System){
 	steal.normalize = normalize;
 	steal.relativeURI = relativeURI;
 
-	// System.ext = {bar: "path/to/bar"}
-	// foo.bar! -> foo.bar!path/to/bar
+	// System-Ext
+	// This normalize-hook does 2 things.
+	// 1. with specify a extension in your config
+	// 		you can use the "!" (bang) operator to load
+	// 		that file with the extension
+	// 		System.ext = {bar: "path/to/bar"}
+	// 		foo.bar! -> foo.bar!path/to/bar
+	// 2. if you load a javascript file e.g. require("./foo.js")
+	// 		normalize will remove the ".js" to load the module
 	var addExt = function(loader) {
 		if (loader._extensions) {
 			loader._extensions.push(addExt);
@@ -243,15 +250,20 @@ var makeSteal = function(System){
 				return normalize.apply(this, arguments);
 			}
 
-			var matches = name.match(endingExtension),
-				ext,
-				newName = name;
+			var matches = name.match(endingExtension);
 
-			if(matches && loader.ext[ext = matches[1]]) {
-				var hasBang = name[name.length - 1] === "!";
-				newName = name + (hasBang ? "" : "!") + loader.ext[ext];
+			if(matches) {
+				var hasBang = name[name.length - 1] === "!",
+					ext = matches[1];
+				// load js-files nodd-like
+				if(parentName && loader.configMain !== name && matches[0] === '.js') {
+					name = name.substr(0, name.lastIndexOf("."));
+					// matches ext mapping
+				} else if(loader.ext[ext]) {
+					name = name + (hasBang ? "" : "!") + loader.ext[ext];
+				}
 			}
-			return normalize.call(this, newName, parentName, parentAddress);
+			return normalize.call(this, name, parentName, parentAddress);
 		};
 	};
 

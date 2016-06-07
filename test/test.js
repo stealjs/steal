@@ -203,6 +203,14 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
+	asyncTest("load js-file and npm module", function(){
+		makeIframe("import-js-file/npm.html");
+	});
+
+	asyncTest("load js-file with es6", function(){
+		makeIframe("import-js-file/es6.html");
+	});
+
 	asyncTest("default npm-algorithm", function(){
 		makeIframe("default-npm-algorithm/default.html");
 	});
