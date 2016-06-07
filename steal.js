@@ -5178,9 +5178,10 @@ var makeSteal = function(System){
 			var matches = name.match(endingExtension);
 
 			if(matches) {
-				var hasBang = name[name.length - 1] === "!";
+				var hasBang = name[name.length - 1] === "!",
+						ext = matches[1];
 				// has bang and matches ext mapping
-				if(hasBang && loader.ext[matches[1]]) {
+				if(hasBang && loader.ext[ext]) {
 					name = name + (hasBang ? "" : "!") + loader.ext[ext];
 				// load js-files nodd-like
 				}else if(!parentName && loader.configMain !== name && matches[0] === '.js') {
