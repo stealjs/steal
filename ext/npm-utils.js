@@ -384,6 +384,12 @@ var utils = {
 				return loader.npm[name];
 			}
 		},
+		findByNameAndVersion: function(loader, name, version) {
+			if(loader.npm && !utils.path.startsWithDotSlash(name)) {
+				var nameAndVersion = name + "@" + version;
+				return loader.npm[nameAndVersion];
+			}
+		},
 		findByUrl: function(loader, url) {
 			if(loader.npm) {
 				url = utils.pkg.folderAddress(url);
