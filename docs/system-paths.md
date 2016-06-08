@@ -64,8 +64,3 @@ to the following rules:
 - `"bundles/*.css"` - defaults to _"dist/bundles/\*css"_
 
 _Note: `STEAL_BASE` is the parent folder of the steal folder._
-
-
-## Implementation
-
-Implemented in [ES6ModuleLoader](https://github.com/ModuleLoader/es6-module-loader/#paths-implementation)

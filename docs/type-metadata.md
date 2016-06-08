@@ -70,3 +70,42 @@ the module is:
         }
     }
     ```
+
+@option {String} [eval=function] Specify the type of *eval* that should be applied to this module.
+
+Most modules are evaled using the Function constructor like: `new Function(source).call(context)`. However, if you have a global module that looks like:
+
+```
+var Foo = function(){
+
+};
+```
+
+Where `Foo` is the exported value in your configuration:
+
+```
+"system": {
+	"meta": {
+		"foo": {
+			"format": "global",
+			"exports": "Foo"
+		}
+	}
+}
+```
+
+In this situation, the default `new Function` method of evaluation will not work and the `Foo` variable will not be set on the window. In this case we want to update our **eval** configuration to `script`:
+
+```
+"system": {
+	"meta": {
+		"foo": {
+			"format": "global",
+			"exports": "Foo",
+			"eval": "script"
+		}
+	}
+}
+```
+
+This will use `<script>` elements for evaluation and the `Foo` property will be set.

@@ -50,7 +50,3 @@ elect to ignore the dependency by mapping it to `@empty`:
     System.map["some/optional_dep"] = "@empty";
 
 `@empty` is a pseudo-module defined by SystemJS to represent a module with no value.
-
-## Implementation
-
-Implemented by [SystemJS](https://github.com/systemjs/systemjs#map-configuration). 

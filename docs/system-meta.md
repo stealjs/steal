@@ -8,6 +8,21 @@ point to metadata values.
 
 @body
 
-## Implementation
+## Use
 
-Implemented by [SystemJS](https://github.com/systemjs/systemjs#meta-configuration)
+Meta configuration is used to provide additional information about a module. It is most often used as a type of *shim* configuration for globals. [load.metadata This page] specifies the types of metadata that can be added.
+
+For a global most likely you will want configuration that looks like:
+
+```
+"system": {
+	"meta": {
+		"jquerty": {
+			"format": "global",
+			"exports": "jQuerty"
+		}
+	}
+}
+```
+
+This specifies that the module **jquerty** uses the global format and exports the value of `window.jQuerty`.
