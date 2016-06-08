@@ -167,10 +167,18 @@ var utils = {
 			var packageName,
 				modulePath;
 
-			// if relative, use currentPackageName
-			if( currentPackageName && utils.path.isRelative(moduleName) ) {
-				packageName= currentPackageName;
+			// if the module name is relative
+			// use the currentPackageName
+			if (currentPackageName && utils.path.isRelative(moduleName)) {
+				packageName = currentPackageName;
 				modulePath = versionParts[0];
+
+				// if the module name starts with the ~ (tilde) operator
+				// use the currentPackageName
+			} else if (currentPackageName && utils.path.startsWithTildeSlash(moduleName)) {
+				packageName = currentPackageName;
+				modulePath = versionParts[0].split("/").slice(1).join("/");
+
 			} else {
 
 				if(modulePathParts[1]) { // foo@1.2#./path
@@ -339,7 +347,13 @@ var utils = {
 					}
 				}
 				if(moduleAddress) {
-					var packageFolder = utils.pkg.folderAddress(moduleAddress);
+					// Remove the baseURL so that folderAddress only detects
+					// node_modules that are within the baseURL. Otherwise
+					// you cannot load a project that is itself within
+					// node_modules
+					var startingAddress = utils.relativeURI(loader.baseURL,
+															moduleAddress);
+					var packageFolder = utils.pkg.folderAddress(startingAddress);
 					return packageFolder ? loader.npmPaths[packageFolder] : utils.pkg.getDefault(loader);
 				} else {
 					return utils.pkg.getDefault(loader);
@@ -433,6 +447,9 @@ var utils = {
 		},
 		isRelative: function(path) {
 			return  path.substr(0,1) === ".";
+		},
+		startsWithTildeSlash: function( path ) {
+			return path.substr(0,2) === "~/";
 		},
 		joinURIs: function(base, href) {
 			function removeDotSegments(input) {
