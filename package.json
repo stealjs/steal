@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "less": "^2.4.0",
-    "steal-systemjs": "^0.18.0",
+    "steal-systemjs": "^0.18.1",
     "system-json": "^0.1.0"
   },
   "devDependencies": {
