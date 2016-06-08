@@ -1,0 +1,8 @@
+{
+  "name": "npm-test",
+  "main": "main2",
+  "dependencies": {
+    "bar": "1.0.0",
+    "foo": "1.0.0"
+  }
+}
