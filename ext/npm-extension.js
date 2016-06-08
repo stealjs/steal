@@ -133,9 +133,15 @@ exports.addExtension = function(System){
 			}
 		}
 
+		// If the parent package is loading itself by name, look up by version
+		if(parsedPackageNameIsReferringPackage) {
+			depPkg = utils.pkg.findByNameAndVersion(this,
+													parsedModuleName.packageName,
+													refPkg.version);
+		}
+
 		// This really shouldn't happen, but lets find a package.
-		var lookupByName = parsedModuleName.isGlobal || hasNoParent ||
-			parsedPackageNameIsReferringPackage;
+		var lookupByName = parsedModuleName.isGlobal || hasNoParent;
 		if (!depPkg) {
 			depPkg = utils.pkg.findByName(this, parsedModuleName.packageName);
 		}
