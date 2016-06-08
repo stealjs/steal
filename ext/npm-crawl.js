@@ -396,36 +396,12 @@ utils.extend(FetchTask.prototype, {
 		// check if the fileUrl is already loaded
 		// check if the fileUrl that is already loaded is semver compat
 		var pkg = this.pkg;
-		var context = this.context;
 		var fileUrl = pkg.fileUrl = pkg.nextFileUrl || pkg.origFileUrl;
 
-		// If a task is currently loading this fileUrl,
-		// wait for it to complete
-		var loadingTask = context.loadingPaths[fileUrl];
-		if(loadingTask) {
-			var self = this;
-			return loadingTask.promise.then(function(){
-				if(loadingTask.failed) {
-					self.error = loadingTask.error;
-					self.failed = true;
-				} else {
-					self._fetchedPackage = loadingTask.getPackage();
-				}
-			});
-		}
+		var promise = this.handleCurrentlyLoading() ||
+			this.handleAlreadyLoaded();
 
-		// If it is already loaded check to see if it's semver compatible
-		// and if so use it. Otherwise reject.
-		var loadedPkg = context.paths[fileUrl];
-		if(loadedPkg) {
-			this._fetchedPackage = loadedPkg;
-			if(!this.isCompatibleVersion()) {
-				this.failed = true;
-			}
-			return Promise.resolve();
-		}
-
-		return this.fetch(fileUrl);
+		return promise || this.fetch(fileUrl);
 	},
 
 	fetch: function(fileUrl){
@@ -481,6 +457,52 @@ utils.extend(FetchTask.prototype, {
 													  this.pkg,
 													  this.src);
 		return this._fetchedPackage;
+	},
+
+	/**
+	 * If this task had a loading error, like a 404
+	 */
+	hadErrorLoading: function(){
+		return this.failed && !!this.error;
+	},
+
+	/**
+	 * Handle the case where this fileUrl is already loading
+	 */
+	handleCurrentlyLoading: function(){
+		// If a task is currently loading this fileUrl,
+		// wait for it to complete
+		var loadingTask = this.context.loadingPaths[this.fileUrl];
+		if(loadingTask) {
+			var task = this;
+			return loadingTask.promise.then(function(){
+				if(loadingTask.hadErrorLoading()) {
+					task.error = loadingTask.error;
+					task.failed = true;
+				} else {
+					task._fetchedPackage = loadingTask.getPackage();
+					if(!task.isCompatibleVersion()) {
+						task.failed = true;
+					}
+				}
+			});
+		}
+	},
+
+	/**
+	 * Handle the case where this fileUrl has already loaded.
+	 */
+	handleAlreadyLoaded: function(){
+		// If it is already loaded check to see if it's semver compatible
+		// and if so use it. Otherwise reject.
+		var loadedPkg = this.context.paths[this.fileUrl];
+		if(loadedPkg) {
+			this._fetchedPackage = loadedPkg;
+			if(!this.isCompatibleVersion()) {
+				this.failed = true;
+			}
+			return Promise.resolve();
+		}
 	},
 
 	/**

@@ -82,8 +82,7 @@ exports.addExtension = function(System){
 				name = name + "index";
 			}
 		}
-
-
+		
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
 																 name,
