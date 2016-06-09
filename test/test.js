@@ -486,4 +486,14 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/leak/index.html");
 	});
 
+	module("module detection");
+
+	asyncTest("works with basic steal config", function() {
+		makeIframe("module-detection/dev.html");
+	});
+
+	asyncTest("works with npm", function(){
+		makeIframe("module-detection/dev2.html");
+	});
+
 })();
