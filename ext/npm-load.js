@@ -43,7 +43,7 @@ exports.makeSource = function(context, pkg){
 	return "def" + "ine(" + JSON.stringify(configDependencies) +
 		", function(loader, npmExtension, module){\n" +
 		"npmExtension.addExtension(loader);\n"+
-		(pkgMain ? "if(!loader.main){ loader.main = " +
+		(pkg.main ? "if(!loader.main){ loader.main = " + 
 		 JSON.stringify(pkgMain) + "; }\n" : "") +
 		"loader._npmExtensions = [].slice.call(arguments, 2);\n" +
 		"("+ translateConfig.toString() + ")(loader, " + 
