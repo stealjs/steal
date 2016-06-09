@@ -34,11 +34,11 @@ var crawl = {
 		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
 			return crawl.fetchDep(context, pkg, childPkg, isRoot);
 		}), truthy)).then(function(packages){
-			// at this point all dependencies of pkg have been loaded, it's ok to get their children
-			
-			// TODO exception for steal-builtins
+ 			// at this point all dependencies of pkg have been loaded, it's ok to get their children
+
 			return Promise.all(utils.map(packages, function(childPkg){
-				if(childPkg && childPkg.name === 'steal-builtins') {
+				// Also load 'steal' so that the builtins will be configured
+				if(childPkg && childPkg.name === 'steal') {
 					return crawl.deps(context, childPkg);
 				}
 			})).then(function(){
@@ -337,7 +337,7 @@ function truthy(x) {
 	return x;
 }
 
-var alwaysIgnore = {"steal": 1,"steal-tools":1,"bower":1,"grunt":1, "grunt-cli": 1};
+var alwaysIgnore = {"steal-tools":1,"bower":1,"grunt":1,"grunt-cli":1};
 
 function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 	// convert an array to a map
