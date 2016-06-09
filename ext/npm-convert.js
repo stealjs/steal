@@ -229,7 +229,8 @@ function convertName (context, pkg, map, root, name, waiting) {
  * ```
  */
 function convertBrowser(pkg, browser) {
-	if(typeof browser === "string") {
+	var type = typeof browser;
+	if(type === "string" || type === "undefined") {
 		return browser;
 	}
 	var map = {};

@@ -176,7 +176,11 @@ var translateConfig = function(loader, packages, options){
 
 		}
 		if(pkg.globalBrowser) {
-			setGlobalBrowser(pkg.globalBrowser, pkg);
+			var doNotApplyGlobalBrowser = pkg.name === "steal" &&
+				loader.builtins === false;
+			if(!doNotApplyGlobalBrowser) {
+				setGlobalBrowser(pkg.globalBrowser, pkg);
+			}
 		}
 		var systemName = pkg.system && pkg.system.name;
 		if(systemName) {
