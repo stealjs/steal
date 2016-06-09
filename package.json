@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "1.0.0-pre.1",
+  "version": "1.0.0-pre.2",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "less": "^2.4.0",
-    "steal-systemjs": "^0.18.0",
+    "steal-systemjs": "^0.18.1",
     "system-json": "^0.1.0"
   },
   "devDependencies": {
