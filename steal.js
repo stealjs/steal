@@ -2937,6 +2937,78 @@ $__global.upgradeSystemLoader = function() {
   }
 
   
+var getOwnPropertyDescriptor = true;
+try {
+  Object.getOwnPropertyDescriptor({ a: 0 }, 'a');
+}
+catch(e) {
+  getOwnPropertyDescriptor = false;
+}
+
+var defineProperty;
+(function () {
+  try {
+    if (!!Object.defineProperty({}, 'a', {}))
+      defineProperty = Object.defineProperty;
+  }
+  catch (e) {
+    defineProperty = function(obj, prop, opt) {
+      try {
+        obj[prop] = opt.value || opt.get.call(obj);
+      }
+      catch(e) {}
+    }
+  }
+})();
+
+// converts any module.exports object into an object ready for SystemJS.newModule
+function getESModule(exports) {
+  var esModule = {};
+  // don't trigger getters/setters in environments that support them
+  if ((typeof exports == 'object' || typeof exports == 'function') && exports !== $__global) {
+      if (getOwnPropertyDescriptor) {
+        for (var p in exports) {
+          // The default property is copied to esModule later on
+          if (p === 'default')
+            continue;
+          defineOrCopyProperty(esModule, exports, p);
+        }
+      }
+      else {
+        extend(esModule, exports);
+      }
+  }
+  esModule['default'] = exports;
+  defineProperty(esModule, '__useDefault', {
+    value: true
+  });
+  return esModule;
+}
+
+function defineOrCopyProperty(targetObj, sourceObj, propName) {
+  try {
+    var d;
+    if (d = Object.getOwnPropertyDescriptor(sourceObj, propName))
+      defineProperty(targetObj, propName, d);
+  }
+  catch (ex) {
+    // Object.getOwnPropertyDescriptor threw an exception, fall back to normal set property
+    // we dont need hasOwnProperty here because getOwnPropertyDescriptor would have returned undefined above
+    targetObj[propName] = sourceObj[propName];
+    return false;
+  }
+}
+
+function extend(a, b, prepend) {
+  var hasOwnProperty = b && b.hasOwnProperty;
+  for (var p in b) {
+    if (hasOwnProperty && !b.hasOwnProperty(p))
+      continue;
+    if (!prepend || !(p in a))
+      a[p] = b[p];
+  }
+  return a;
+}
 /*
  * SystemJS Core
  * Code should be vaguely readable
@@ -3452,7 +3524,8 @@ function register(loader) {
         if (depEntry.module.exports && depEntry.module.exports.__esModule)
           depExports = depEntry.module.exports;
         else
-          depExports = { 'default': depEntry.module.exports, '__useDefault': true };
+          depExports = depEntry.esModule;
+          //depExports = { 'default': depEntry.module.exports, '__useDefault': true };
       }
       // in the loader registry
       else if (!depEntry) {
@@ -3539,10 +3612,18 @@ function register(loader) {
     if (output)
       module.exports = output;
 
-    /*if ( output && output.__esModule )
-      entry.module = output;
-    else if (output)
-      entry.module['default'] = output;*/
+    // create the esModule object, which allows ES6 named imports of dynamics
+    exports = module.exports;
+
+    // __esModule flag treats as already-named
+    if (exports && (exports.__esModule || exports instanceof Module))
+      entry.esModule = exports;
+    // set module as 'default' export, then fake named exports by iterating properties
+    else if (entry.esmExports && exports !== loader.global)
+      entry.esModule = getESModule(exports);
+    // just use the 'default' export
+    else
+      entry.esModule = { 'default': exports };
   }
 
   /*
@@ -3581,6 +3662,8 @@ function register(loader) {
     entry.evaluated = true;
     entry.module.execute.call(loader.global);
   }
+
+  var Module = loader.newModule({}).constructor;
 
   var registerRegEx = /System\.register/;
 
@@ -3644,6 +3727,7 @@ function register(loader) {
       entry = {
         declarative: false,
         deps: load.metadata.deps || [],
+        esModule: null,
         execute: load.metadata.execute,
         executingRequire: load.metadata.executingRequire // NodeJS-style requires or not
       };
@@ -3691,6 +3775,7 @@ function register(loader) {
 
     entry.deps = dedupe(entry.deps);
     entry.name = load.name;
+    entry.esmExports = load.metadata.esmExports !== false;
 
     // first, normalize all dependencies
     var normalizePromises = [];
@@ -3716,8 +3801,8 @@ function register(loader) {
 
           var module = entry.module.exports;
 
-          if (!module || !entry.declarative && module.__esModule !== true)
-            module = { 'default': module, __useDefault: true };
+          if(!entry.declarative)
+            module = entry.esModule;
 
           // return the defined module object
           return loader.newModule(module);
