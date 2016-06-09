@@ -33,8 +33,7 @@ describe("plugins", function(){
 			main: "dep_plugins/main"
 		});
 		steal.startup().then(function(){
-
-			assert.ok( /width: 200px/.test( steal.System._loader.modules["dep_plugins/main.less!$less"].module.default.source ) );
+			assert.ok( /width: 200px/.test( steal.System.getModuleLoad("dep_plugins/main.less!$less").source ) );
 			done();
 		},done);
 
