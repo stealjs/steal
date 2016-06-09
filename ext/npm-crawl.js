@@ -33,7 +33,18 @@ var crawl = {
 
 		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
 			return crawl.fetchDep(context, pkg, childPkg, isRoot);
-		}), truthy));
+		}), truthy)).then(function(packages){
+ 			// at this point all dependencies of pkg have been loaded, it's ok to get their children
+
+			return Promise.all(utils.map(packages, function(childPkg){
+				// Also load 'steal' so that the builtins will be configured
+				if(childPkg && childPkg.name === 'steal') {
+					return crawl.deps(context, childPkg);
+				}
+			})).then(function(){
+				return packages;
+			});
+		});
 	},
 
 	dep: function(context, pkg, childPkg, isRoot) {
