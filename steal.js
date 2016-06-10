@@ -4366,6 +4366,7 @@ function amd(loader) {
 
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
+		debugger;
     var loader = this;
 
     if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
@@ -4806,18 +4807,18 @@ function depCache(loader) {
     return loaderLocate.call(loader, load);
   }
 }
-  
-core(System);
-meta(System);
-register(System);
-global(System);
-amd(System);
-cjs(System);
-es6(System);
-map(System);
-plugins(System);
-bundles(System);
-depCache(System);
+
+	core(System);
+	meta(System);
+	register(System);
+	es6(System);
+	global(System);
+	cjs(System);
+	amd(System);
+	map(System);
+	plugins(System);
+	bundles(System);
+	depCache(System);
 
 };
 
