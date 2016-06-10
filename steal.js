@@ -2937,6 +2937,78 @@ $__global.upgradeSystemLoader = function() {
   }
 
   
+var getOwnPropertyDescriptor = true;
+try {
+  Object.getOwnPropertyDescriptor({ a: 0 }, 'a');
+}
+catch(e) {
+  getOwnPropertyDescriptor = false;
+}
+
+var defineProperty;
+(function () {
+  try {
+    if (!!Object.defineProperty({}, 'a', {}))
+      defineProperty = Object.defineProperty;
+  }
+  catch (e) {
+    defineProperty = function(obj, prop, opt) {
+      try {
+        obj[prop] = opt.value || opt.get.call(obj);
+      }
+      catch(e) {}
+    }
+  }
+})();
+
+// converts any module.exports object into an object ready for SystemJS.newModule
+function getESModule(exports) {
+  var esModule = {};
+  // don't trigger getters/setters in environments that support them
+  if ((typeof exports == 'object' || typeof exports == 'function') && exports !== $__global) {
+      if (getOwnPropertyDescriptor) {
+        for (var p in exports) {
+          // The default property is copied to esModule later on
+          if (p === 'default')
+            continue;
+          defineOrCopyProperty(esModule, exports, p);
+        }
+      }
+      else {
+        extend(esModule, exports);
+      }
+  }
+  esModule['default'] = exports;
+  defineProperty(esModule, '__useDefault', {
+    value: true
+  });
+  return esModule;
+}
+
+function defineOrCopyProperty(targetObj, sourceObj, propName) {
+  try {
+    var d;
+    if (d = Object.getOwnPropertyDescriptor(sourceObj, propName))
+      defineProperty(targetObj, propName, d);
+  }
+  catch (ex) {
+    // Object.getOwnPropertyDescriptor threw an exception, fall back to normal set property
+    // we dont need hasOwnProperty here because getOwnPropertyDescriptor would have returned undefined above
+    targetObj[propName] = sourceObj[propName];
+    return false;
+  }
+}
+
+function extend(a, b, prepend) {
+  var hasOwnProperty = b && b.hasOwnProperty;
+  for (var p in b) {
+    if (hasOwnProperty && !b.hasOwnProperty(p))
+      continue;
+    if (!prepend || !(p in a))
+      a[p] = b[p];
+  }
+  return a;
+}
 /*
  * SystemJS Core
  * Code should be vaguely readable
@@ -3163,11 +3235,11 @@ function meta(loader) {
  * - Also supports metadata.deps, metadata.execute and metadata.executingRequire
  *     for handling dynamic modules alongside register-transformed ES6 modules
  *
- * Works as a standalone extension, but benefits from having a more 
+ * Works as a standalone extension, but benefits from having a more
  * advanced __eval defined like in SystemJS polyfill-wrapper-end.js
  *
  * The code here replicates the ES6 linking groups algorithm to ensure that
- * circular ES6 compiled into System.register can work alongside circular AMD 
+ * circular ES6 compiled into System.register can work alongside circular AMD
  * and CommonJS, identically to the actual ES6 loader.
  *
  */
@@ -3183,7 +3255,7 @@ function register(loader) {
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
   var curSystem;
-  function exec(load) {
+  function exec(load, context) {
     var loader = this;
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
@@ -3196,7 +3268,9 @@ function register(loader) {
       }
     }
 
-    __eval(load.source, load.address, sourceMappingURL);
+    var evalType = load.metadata && load.metadata.eval;
+    context = context || loader.global;
+    __eval(load.source, load.address, context, sourceMappingURL, evalType);
   }
   loader.__exec = exec;
 
@@ -3214,7 +3288,7 @@ function register(loader) {
    *    see https://github.com/ModuleLoader/es6-module-loader/wiki/System.register-Explained
    *
    * 2. System.register for dynamic modules (3-4 params) - System.register([name, ]deps, executingRequire, execute)
-   * the true or false statement 
+   * the true or false statement
    *
    * this extension implements the linking algorithm for the two variations identical to the spec
    * allowing compiled ES6 circular references to work alongside AMD and CJS circular references.
@@ -3232,7 +3306,7 @@ function register(loader) {
     }
 
     calledRegister = true;
-    
+
     var register;
 
     // dynamic
@@ -3252,13 +3326,13 @@ function register(loader) {
         declare: declare
       };
     }
-    
+
     // named register
     if (name) {
       register.name = name;
       // we never overwrite an existing define
       if (!(name in loader.defined))
-        loader.defined[name] = register; 
+        loader.defined[name] = register;
     }
     // anonymous register
     else if (register.declarative) {
@@ -3271,7 +3345,7 @@ function register(loader) {
    * Registry side table - loader.defined
    * Registry Entry Contains:
    *    - name
-   *    - deps 
+   *    - deps
    *    - declare for declarative modules
    *    - execute for dynamic modules, different to declarative execute on module
    *    - executingRequire indicates require drives execution for circularity of dynamic modules
@@ -3285,7 +3359,7 @@ function register(loader) {
    *    - evaluated indicating whether evaluation has happend
    *    - module the module record object, containing:
    *      - exports actual module exports
-   *      
+   *
    *    Then for declarative only we track dynamic bindings with the records:
    *      - name
    *      - setters declarative setter functions
@@ -3306,7 +3380,7 @@ function register(loader) {
 
     if (!loader.defined)
       loader.defined = {};
-    
+
     // script injection mode calls this function synchronously on load
     var onScriptLoad = loader.onScriptLoad;
     loader.onScriptLoad = function(load) {
@@ -3314,7 +3388,7 @@ function register(loader) {
       // anonymous define
       if (anonRegister)
         load.metadata.entry = anonRegister;
-      
+
       if (calledRegister) {
         load.metadata.format = load.metadata.format || 'register';
         load.metadata.registered = true;
@@ -3335,17 +3409,17 @@ function register(loader) {
     for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
       var depName = entry.normalizedDeps[i];
       var depEntry = loader.defined[depName];
-      
+
       // not in the registry means already linked / ES6
       if (!depEntry || depEntry.evaluated)
         continue;
-      
+
       // now we know the entry is in our unlinked linkage group
       var depGroupIndex = entry.groupIndex + (depEntry.declarative != entry.declarative);
 
       // the group index of an entry is always the maximum
       if (depEntry.groupIndex === undefined || depEntry.groupIndex < depGroupIndex) {
-        
+
         // if already in a group, remove from the old group
         if (depEntry.groupIndex !== undefined) {
           groups[depEntry.groupIndex].splice(indexOf.call(groups[depEntry.groupIndex], depEntry), 1);
@@ -3387,7 +3461,7 @@ function register(loader) {
         else
           linkDynamicModule(entry, loader);
       }
-      curGroupDeclarative = !curGroupDeclarative; 
+      curGroupDeclarative = !curGroupDeclarative;
     }
   }
 
@@ -3425,7 +3499,7 @@ function register(loader) {
       module.locked = false;
       return value;
     });
-    
+
     module.setters = declaration.setters;
     module.execute = declaration.execute;
 
@@ -3450,7 +3524,8 @@ function register(loader) {
         if (depEntry.module.exports && depEntry.module.exports.__esModule)
           depExports = depEntry.module.exports;
         else
-          depExports = { 'default': depEntry.module.exports, '__useDefault': true };
+          depExports = depEntry.esModule;
+          //depExports = { 'default': depEntry.module.exports, '__useDefault': true };
       }
       // in the loader registry
       else if (!depEntry) {
@@ -3492,7 +3567,7 @@ function register(loader) {
     else {
       if (entry.declarative)
         ensureEvaluated(name, [], loader);
-    
+
       else if (!entry.evaluated)
         linkDynamicModule(entry, loader);
 
@@ -3501,7 +3576,7 @@ function register(loader) {
 
     if ((!entry || entry.declarative) && exports && exports.__useDefault)
       return exports['default'];
-    
+
     return exports;
   }
 
@@ -3533,14 +3608,22 @@ function register(loader) {
       }
       throw new TypeError('Module ' + name + ' not declared as a dependency.');
     }, exports, module);
-    
+
     if (output)
       module.exports = output;
-      
-    /*if ( output && output.__esModule )
-      entry.module = output;
-    else if (output)
-      entry.module['default'] = output;*/
+
+    // create the esModule object, which allows ES6 named imports of dynamics
+    exports = module.exports;
+
+    // __esModule flag treats as already-named
+    if (exports && (exports.__esModule || exports instanceof Module))
+      entry.esModule = exports;
+    // set module as 'default' export, then fake named exports by iterating properties
+    else if (entry.esmExports && exports !== loader.global)
+      entry.esModule = getESModule(exports);
+    // just use the 'default' export
+    else
+      entry.esModule = { 'default': exports };
   }
 
   /*
@@ -3549,7 +3632,7 @@ function register(loader) {
    *  (unless one is a circular dependency already in the list of seen
    *  modules, in which case we execute it)
    *
-   * Then we evaluate the module itself depth-first left to right 
+   * Then we evaluate the module itself depth-first left to right
    * execution to match ES6 modules
    */
   function ensureEvaluated(moduleName, seen, loader) {
@@ -3580,6 +3663,8 @@ function register(loader) {
     entry.module.execute.call(loader.global);
   }
 
+  var Module = loader.newModule({}).constructor;
+
   var registerRegEx = /System\.register/;
 
   var loaderFetch = loader.fetch;
@@ -3606,7 +3691,7 @@ function register(loader) {
 
     // we run the meta detection here (register is after meta)
     return Promise.resolve(loaderTranslate.call(this, load)).then(function(source) {
-      
+
       // dont run format detection for globals shimmed
       // ideally this should be in the global extension, but there is
       // currently no neat way to separate it
@@ -3642,6 +3727,7 @@ function register(loader) {
       entry = {
         declarative: false,
         deps: load.metadata.deps || [],
+        esModule: null,
         execute: load.metadata.execute,
         executingRequire: load.metadata.executingRequire // NodeJS-style requires or not
       };
@@ -3689,6 +3775,7 @@ function register(loader) {
 
     entry.deps = dedupe(entry.deps);
     entry.name = load.name;
+    entry.esmExports = load.metadata.esmExports !== false;
 
     // first, normalize all dependencies
     var normalizePromises = [];
@@ -3702,7 +3789,7 @@ function register(loader) {
       return {
         deps: entry.deps,
         execute: function() {
-          // recursively ensure that the module and all its 
+          // recursively ensure that the module and all its
           // dependencies are linked (with dependency group handling)
           link(load.name, loader);
 
@@ -3714,8 +3801,8 @@ function register(loader) {
 
           var module = entry.module.exports;
 
-          if (!module || !entry.declarative && module.__esModule !== true)
-            module = { 'default': module, __useDefault: true };
+          if(!entry.declarative)
+            module = entry.esModule;
 
           // return the defined module object
           return loader.newModule(module);
@@ -3962,7 +4049,7 @@ function global(loader) {
         loader.global.module = undefined;
         loader.global.exports = undefined;
 
-        loader.__exec(load);
+        loader.__exec(load, loader.global);
 
         loader.global.require = require;
         loader.global.define = define;
@@ -4366,7 +4453,6 @@ function amd(loader) {
 
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
-		debugger;
     var loader = this;
 
     if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
@@ -4807,18 +4893,18 @@ function depCache(loader) {
     return loaderLocate.call(loader, load);
   }
 }
-
-	core(System);
-	meta(System);
-	register(System);
-	es6(System);
-	global(System);
-	cjs(System);
-	amd(System);
-	map(System);
-	plugins(System);
-	bundles(System);
-	depCache(System);
+  
+core(System);
+meta(System);
+register(System);
+es6(System);
+global(System);
+cjs(System);
+amd(System);
+map(System);
+plugins(System);
+bundles(System);
+depCache(System);
 
 };
 
@@ -4829,55 +4915,29 @@ var $__curScript, __eval;
   var doEval;
   var isWorker = typeof window == 'undefined' && typeof self != 'undefined' && typeof importScripts != 'undefined';
   var isBrowser = typeof window != 'undefined' && typeof document != 'undefined';
+  var isChromeExtension = isBrowser && window.chrome && window.chrome.extension;
+  var isNode = typeof process === 'object' && {}.toString.call(process) === '[object process]';
+  var scriptEval;
 
-  __eval = function(source, address, sourceMap) {
-    source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
-
+  doEval = function(source, address, context) {
     try {
-      doEval(source);
+      new Function(source).call(context);
     }
     catch(e) {
-      var msg = 'Error evaluating ' + address + '\n';
-      if (e instanceof Error)
-        e.message = msg + e.message;
-      else
-        e = msg + e;
-      throw e;
+      throw addToError(e, 'Evaluating ' + address);
     }
   };
 
-  if (isWorker || isBrowser && window.chrome && window.chrome.extension) {
-    doEval = function(source) {
-      try {
-        eval(source);
-      } catch(e) {
-        throw e;
-      }
-    };
-
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      var basePath = '';
-      try {
-        throw new Error('Get worker base path via error stack');
-      } catch (e) {
-        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
-          basePath = url.replace(/\/[^\/]*$/, '/');
-        });
-      }
-      importScripts(basePath + 'steal-es6-module-loader.js');
-      $__global.upgradeSystemLoader();
-    } else {
-      $__global.upgradeSystemLoader();
-    }
-  }
-  else if (typeof document != 'undefined') {
+  if(isWorker) {
+    $__global.upgradeSystemLoader();
+  } else if (isBrowser && !isChromeExtension) {
     var head;
 
     var scripts = document.getElementsByTagName('script');
     $__curScript = scripts[scripts.length - 1];
 
     // globally scoped eval for the browser
-    doEval = function(source) {
+    scriptEval = function(source) {
       if (!head)
         head = document.head || document.body || document.documentElement;
 
@@ -4893,21 +4953,11 @@ var $__curScript, __eval;
       window.onerror = onerror;
       if (e)
         throw e;
-    }
+    };
 
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      // determine the current script path as the base path
-      var curPath = $__curScript.src;
-      var basePath = curPath.substr(0, curPath.lastIndexOf('/') + 1);
-      document.write(
-        '<' + 'script type="text/javascript" src="' + basePath + 'steal-es6-module-loader.js" data-init="upgradeSystemLoader">' + '<' + '/script>'
-      );
-    }
-    else {
-      $__global.upgradeSystemLoader();
-    }
+    $__global.upgradeSystemLoader();
   }
-  else {
+  else if(isNode) {
     var es6ModuleLoader = require('steal-es6-module-loader');
     $__global.System = es6ModuleLoader.System;
     $__global.Loader = es6ModuleLoader.Loader;
@@ -4916,10 +4966,58 @@ var $__curScript, __eval;
 
     // global scoped eval for node
     var vm = require('vm');
-    doEval = function(source, address, sourceMap) {
+    doEval = function(source) {
       vm.runInThisContext(source);
     }
   }
+
+  var errArgs = new Error(0, '_').fileName == '_';
+
+  function addToError(err, msg) {
+    // parse the stack removing loader code lines for simplification
+    if (!err.originalErr) {
+      var stack = (err.stack || err.message || err).toString().split('\n');
+      var newStack = [];
+      for (var i = 0; i < stack.length; i++) {
+        if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
+          newStack.push(stack[i]);
+      }
+    }
+
+    var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
+
+    // Convert file:/// URLs to paths in Node
+    if (!isBrowser)
+      newMsg = newMsg.replace(isWindows ? /file:\/\/\//g : /file:\/\//g, '');
+
+    var newErr = errArgs ? new Error(newMsg, err.fileName, err.lineNumber) : new Error(newMsg);
+
+    // Node needs stack adjustment for throw to show message
+    if (!isBrowser)
+      newErr.stack = newMsg;
+    // Clearing the stack stops unnecessary loader lines showing
+    else
+      newErr.stack = null;
+
+    // track the original error
+    newErr.originalErr = err.originalErr || err;
+
+    return newErr;
+  }
+
+  __eval = function(source, address, context, sourceMap, evalType) {
+    source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
+
+
+    var useScriptEval = evalType === 'script'
+      && typeof scriptEval === 'function';
+    if(useScriptEval) {
+      scriptEval(source);
+    } else {
+      doEval(source, address, context);
+    }
+  };
+
 })();
 
 })(typeof window != 'undefined' ? window : (typeof WorkerGlobalScope != 'undefined' ? self : global));

@@ -174,7 +174,7 @@ QUnit.config.testTimeout = 30000;
 			makeIframe("jsx/dev.html");
 		});
 	}
-	
+
 	asyncTest("steal done promise is rejected without steal config", function() {
 		makeIframe("no-config-error/test.html");
 	});
@@ -363,6 +363,10 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("script tag wins against global steal object", function(){
 		makeIframe("script-tag_wins/index.html");
+	});
+
+	asyncTest("Node builtins come for free when using npm", function(){
+		makeIframe("builtins/dev.html");
 	});
 
 	module("json extension");
