@@ -109,11 +109,3 @@ In this situation, the default `new Function` method of evaluation will not work
 ```
 
 This will use `<script>` elements for evaluation and the `Foo` property will be set.
-
-@option {Boolean} [insertNodeGlobals=true] Specifies whether Node globals should be inserted. By default globals such as `Buffer` are detected and a shim is injected into code. This is for code that is written primarily to be ran in Node, but can also be ran in the browser. To disable these inserts, set the value to `false` either for a specific module in system.meta, or globally:
-
-```
-"system": {
-  "insertNodeGlobals": false
-}
-```

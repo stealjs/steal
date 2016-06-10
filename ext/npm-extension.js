@@ -305,30 +305,6 @@ exports.addExtension = function(System){
 		return fetchPromise;
 	};
 
-	// Trying to detect the use of global Buffer; doesn't contain something like
-	// var Buffer or let Buffer
-	var bufferGlobalExp = /^(?!.*(var|let|const) Buffer)(.*Buffer)/;
-
-	// Override 'translate' to add Node global shims.
-	function insertNodeGlobals(loader, load) {
-		return loader.insertNodeGlobals !== false &&
-			load.metadata.insertNodeGlobals !== false;
-	}
-
-	var oldTranslate = System.translate;
-	System.translate = function(load){
-		// Only insert the globals if not turned off for this module
-		// or globally
-		if(insertNodeGlobals(this, load)) {
-			var usesBufferGlobal = bufferGlobalExp.test(load.source);
-			if(usesBufferGlobal) {
-				load.source = "(function(Buffer){\n" + load.source +
-					"\n})(require(\"buffer\").Buffer);";
-			}
-		}
-		return oldTranslate.apply(this, arguments);
-	};
-
 	// Given a moduleName convert it into a npm-style moduleName if it belongs
 	// to a package.
 	var convertName = function(loader, name){
