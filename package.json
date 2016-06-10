@@ -52,7 +52,7 @@
     "steal-less": "0.3.1",
     "system-bower": "stealjs/system-bower#v0.2.1",
     "system-live-reload": "1.5.2",
-    "system-npm": "1.0.0-pre.3",
+    "system-npm": "1.0.0-pre.4",
     "system-trace": "0.2.5",
     "testee": "^0.2.0",
     "traceur": "0.0.91",
