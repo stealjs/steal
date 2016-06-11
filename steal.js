@@ -4452,31 +4452,38 @@ function amd(loader) {
   }
 
   var loaderInstantiate = loader.instantiate;
-  loader.instantiate = function(load) {
-    var loader = this;
+	loader.instantiate = function (load) {
+		// TODO: make a helper to remove comments in source
+		var loader = this,
+			sourceWithoutComments = load.source.replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '$1'),
+			match = sourceWithoutComments.match(amdRegEx);
 
-    if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
-      load.metadata.format = 'amd';
+		if (load.metadata.format == 'amd' || !load.metadata.format && match) {
 
-      if (loader.execute !== false) {
-        createDefine(loader);
+			if (sourceWithoutComments.substring(0, sourceWithoutComments.indexOf(match[0])).replace(/\s/g, "").length === 0) {
 
-        loader.__exec(load);
+				load.metadata.format = 'amd';
 
-        removeDefine(loader);
+				if (loader.execute !== false) {
+					createDefine(loader);
 
-        if (!anonDefine && !defineBundle && !isNode)
-          throw new TypeError('AMD module ' + load.name + ' did not define');
-      }
+					loader.__exec(load);
 
-      if (anonDefine) {
-        load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
-        load.metadata.execute = anonDefine.execute;
-      }
-    }
+					removeDefine(loader);
 
-    return loaderInstantiate.call(loader, load);
-  }
+					if (!anonDefine && !defineBundle && !isNode)
+						throw new TypeError('AMD module ' + load.name + ' did not define');
+				}
+
+				if (anonDefine) {
+					load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
+					load.metadata.execute = anonDefine.execute;
+				}
+			}
+		}
+
+		return loaderInstantiate.call(loader, load);
+	}
 }
 /*
   SystemJS map support

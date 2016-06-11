@@ -6,6 +6,9 @@ function makeDefinition(bar) {
 	}
 }
 
-console.log(foo, bar);
+if (typeof window !== "undefined" && window.QUnit) {
+	QUnit.equal(foo, "foo");
+	QUnit.equal(bar, "bar");
+}
 
 export {makeDefinition}
