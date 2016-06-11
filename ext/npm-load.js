@@ -77,14 +77,12 @@ exports.configDeps = function(context, pkg){
  */
 exports.pkgMain = function(context, pkg){
 	var pkgMain = utils.pkg.main(pkg);
-	// Convert the main if using directories.lib
-	if(utils.pkg.hasDirectoriesLib(pkg)) {
-		var mainHasPkg = pkgMain.indexOf(pkg.name) === 0;
-		if(mainHasPkg) {
-			pkgMain = convert.name(context, pkg, false, true, pkgMain);
-		} else {
-			pkgMain = convert.name(context, pkg, false, true, pkg.name+"/"+pkgMain);
-		}
+	// Convert the main
+	var mainHasPkg = pkgMain.indexOf(pkg.name) === 0;
+	if(mainHasPkg) {
+		pkgMain = convert.name(context, pkg, false, true, pkgMain);
+	} else {
+		pkgMain = convert.name(context, pkg, false, true, pkg.name+"/"+pkgMain);
 	}
 	return pkgMain;
 };
