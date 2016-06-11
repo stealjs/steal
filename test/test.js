@@ -139,7 +139,6 @@ QUnit.config.testTimeout = 30000;
 		});
 	});
 
-
 	module("steal via html");
 
 	if(supportsES) {
@@ -313,6 +312,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("@loader is current loader with steal syntax", function(){
 		makeIframe("current-loader/dev-steal.html");
 	});
+
 	asyncTest("@steal is the current steal", function(){
 		makeIframe("current-steal/dev.html");
 	});
@@ -367,6 +367,12 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("Node builtins come for free when using npm", function(){
 		makeIframe("builtins/dev.html");
+	});
+
+	module("steal startup and config");
+
+	asyncTest("Load urlOptions correctly with async script append", function(){
+		makeIframe("async-script/index.html");
 	});
 
 	module("json extension");

@@ -14,10 +14,10 @@
 			}
 		}
 
-		if(!configDeferred) {
+		if(!configPromise) {
 			steal.startup();
 		}
 
-		return configDeferred.then(afterConfig);
+		return configPromise.then(afterConfig);
 	};
 	return steal;

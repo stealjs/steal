@@ -1,0 +1,6 @@
+steal.config({
+	paths: {
+	},
+	map: {
+	}
+});

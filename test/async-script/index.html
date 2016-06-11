@@ -1,0 +1,43 @@
+<!--<!doctype html>-->
+<!--<html>-->
+<!--<head>-->
+	<!--<script>-->
+		<!--window.QUnit = window.parent.QUnit;-->
+		<!--window.removeMyself = window.parent.removeMyself;-->
+	<!--</script>-->
+	<!--<script>-->
+		<!--var s = document.createElement("script");-->
+		<!--s.src = 'async.js';-->
+		<!--document.head.appendChild(s);-->
+	<!--</script>-->
+	<!--<script id="foobar" src='../../steal.production.js' main="module" bundles-path="async-script/dist" config="../config.js"></script>-->
+	<!--<script src="dist/bundles/main.js"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--</body>-->
+<!--</html>-->
+<!doctype html>
+<html>
+<head>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+	<script>
+		setTimeout(function(){
+			var s = document.createElement("script");
+			s.src = 'async.js';
+			document.head.appendChild(s);
+		}, 1);
+	</script>
+	<script src='../../steal.js' main="main" config="./stealconfig.js" foo="bar"></script>
+	<!--<script src="dist/bundles/main.js"></script>-->
+	<script>
+		steal.done().then(function(){
+			console.log("test");
+		});
+	</script>
+</head>
+<body>
+</body>
+</html>
