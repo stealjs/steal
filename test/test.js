@@ -375,6 +375,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("async-script/index.html");
 	});
 
+	asyncTest("use steal object and configMain", function(){
+		makeIframe("stealconfig/dev.html");
+	});
+
 	module("json extension");
 
 	asyncTest("json extension", function(){

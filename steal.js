@@ -6176,6 +6176,12 @@ function addEnv(loader){
 				});
 
 			} else if(isBrowserWithWindow) {
+				// if the browser supports currentScript, us it!
+				if (document.currentScript) {
+					resolve(getScriptOptions(document.currentScript));
+					return;
+				}
+
 				// dealing with async & deferred scripts
 				// set an onload handler for all script tags and the first one which executes
 				// is your stealjs
