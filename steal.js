@@ -5952,7 +5952,7 @@ if(typeof System !== "undefined") {
 					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
 				// if steal is bundled we always are in production environment
-				if(this.stealBundled && this.stealBundled === true) {
+				if(cfg.stealBundled && cfg.stealBundled === true) {
 					this.config({ env: platform+"-production" });
 
 				}else{
