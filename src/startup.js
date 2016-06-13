@@ -1,3 +1,4 @@
+	// extract the script tag options
 	var getScriptOptions = function (script) {
 		var options = {},
 			parts, src, query, startFile, env;
@@ -19,11 +20,12 @@
 		if(/\S/.test(source)){
 			options.mainSource = source;
 		}
-
-
 		return options;
 	};
 
+	// get steal URL
+	// if we are in a browser, we need to know which script is steal
+	// to extract the script tag options => getScriptOptions()
 	var getUrlOptions = function (){
 		return new Promise(function(resolve, reject){
 
@@ -63,7 +65,11 @@
 		})
 	};
 
+	// configure and startup steal
+	// load the main module(s) if everything is configured
 	steal.startup = function(config){
+		var steal = this;
+
 		appPromise = getUrlOptions().then(function(urlOptions) {
 
 			if (typeof config === 'object') {
@@ -76,12 +82,7 @@
 			// set the config
 			System.config(config);
 
-			setEnvsConfig.call(this.System);
-
-			// Read the env now because we can't overwrite everything yet
-
-			// immediate steals we do
-			var steals = [];
+			setEnvsConfig.call(steal.System);
 
 			// we only load things with force = true
 			if (System.loadBundles) {
