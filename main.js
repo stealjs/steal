@@ -896,7 +896,6 @@ if(typeof System !== "undefined") {
 				});
 			}
 		},
-		baseUrl: fileSetter("baseURL"),
 		baseURL: fileSetter("baseURL"),
 		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
@@ -1122,13 +1121,17 @@ function addEnv(loader){
 			parts, src, query, startFile, env;
 
 		options.stealURL = script.src;
-		// Split on question mark to get query
+
+		var urlRegEx = /Url$/;
 
 		each(script.attributes, function(attr){
+			// get option, remove "data" and camelize
 			var optionName =
 				camelize( attr.nodeName.indexOf("data-") === 0 ?
 					attr.nodeName.replace("data-","") :
 					attr.nodeName );
+			// make options uniform e.g. baseUrl => baseURL
+			optionName = optionName.replace(urlRegEx, "URL")
 			options[optionName] = (attr.value === "") ? true : attr.value;
 		});
 
