@@ -11,7 +11,6 @@
 				// if there is a setter and a value
 				if(special.set && data[name]){
 					// call the setter
-					debugger;
 					var res = special.set.call(loader,data[name], cfg);
 					// if the setter returns a value
 					if(res !== undefined) {
@@ -56,7 +55,6 @@
 			}
 			System.configMain = name;
 			System.paths[name] = name;
-			debugger;
 			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
