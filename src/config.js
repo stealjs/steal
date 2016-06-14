@@ -196,7 +196,6 @@
 				});
 			}
 		},
-		baseUrl: fileSetter("baseURL"),
 		baseURL: fileSetter("baseURL"),
 		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
