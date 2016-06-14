@@ -699,17 +699,19 @@ if(typeof System !== "undefined") {
 }
 
 	// Overwrites System.config with setter hooks
-	var setterConfig = function(loader, configSpecial){
+	var setterConfig = function(loader, configOrder, configSpecial){
 		var oldConfig = loader.config;
 
 		loader.config =  function(cfg){
 
 			var data = extend({},cfg);
 			// check each special
-			each(configSpecial, function(special, name){
+			each(configOrder, function(name){
+				var special = configSpecial[name];
 				// if there is a setter and a value
 				if(special.set && data[name]){
 					// call the setter
+					debugger;
 					var res = special.set.call(loader,data[name], cfg);
 					// if the setter returns a value
 					if(res !== undefined) {
@@ -754,14 +756,13 @@ if(typeof System !== "undefined") {
 			}
 			System.configMain = name;
 			System.paths[name] = name;
-			addProductionBundles.call(this);
+			debugger;
 			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
 		mainSetter = {
 			set: function(val){
 				this.main = val;
-				addProductionBundles.call(this);
 			}
 		};
 
@@ -806,6 +807,7 @@ if(typeof System !== "undefined") {
 			return name.substr(bang+1);
 		}
 	};
+
 	var pluginResource = function(name){
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
@@ -862,8 +864,24 @@ if(typeof System !== "undefined") {
 	};
 
 	var specialConfig;
+	var specialConfigOrder = [
+		'instantiated',
+		'envs',
+		'env',
+		'loadBundles',
+		'stealBundled',
+		'bundle',
+		'bundlesPath',
+		'meta',
+		'config',
+		'configPath',
+		'baseURL',
+		'queryMain',
+		'main',
+		'stealURL'
+	];
 	var envsSpecial = { map: true, paths: true, meta: true };
-	setterConfig(System, specialConfig = {
+	setterConfig(System, specialConfigOrder, specialConfig = {
 		env: {
 			set: function(val){
 				this.env = val;
@@ -871,8 +889,6 @@ if(typeof System !== "undefined") {
 				if(this.isEnv("production")) {
 					this.loadBundles = true;
 				}
-
-				addProductionBundles.call(this);
 			}
 		},
 		envs: {
@@ -897,17 +913,23 @@ if(typeof System !== "undefined") {
 			}
 		},
 		baseURL: fileSetter("baseURL"),
-		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
 		configPath: configSetter,
 		loadBundles: {
 			set: function(val){
 				this.loadBundles = val;
-				addProductionBundles.call(this);
 			}
 		},
-		startId: {
+		stealBundled: {
 			set: function(val){
+				this.stealBundled = val;
+			}
+		},
+		queryMain: {
+			set: function(val){
+				// if we configured the main via query like steal.js?main
+				// note, that "main"-config-setter if after "queryMain"
+				// so script tags ever wins!
 				mainSetter.set.call(this, normalize(val) );
 			}
 		},
@@ -916,54 +938,25 @@ if(typeof System !== "undefined") {
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
 				System.stealURL = url;
-				var urlParts = url.split("?");
-
-				var path = urlParts.shift(),
-					search = urlParts.join("?"),
-					searchParts = search.split("&"),
+				var urlParts = url.split("?"),
+					path = urlParts.shift(),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
 					stealPath = paths.join("/"),
 					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				// if steal is bundled we always are in production environment
-				if(cfg.stealBundled && cfg.stealBundled === true) {
+				// if steal is bundled or we are loading steal.production
+				// we always are in production environment
+				if((this.stealBundled && this.stealBundled === true) ||
+					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
 					this.config({ env: platform+"-production" });
+				}
 
+				if(this.isEnv("production") || this.loadBundles) {
+					addProductionBundles.call(this);
 				}else{
 					specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-						this.config({ env: platform+"-production" });
-						addProductionBundles.call(this);
-					}
 				}
-
-				if(searchParts.length && searchParts[0].length) {
-					var searchConfig = {},
-						searchPart;
-					for(var i =0; i < searchParts.length; i++) {
-						searchPart = searchParts[i];
-						var paramParts = searchPart.split("=");
-						if(paramParts.length > 1) {
-							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
-						} else {
-							if(steal.dev) {
-								steal.dev.warn("Please use search params like ?main=main&env=production");
-							}
-							var oldParamParts = searchPart.split(",");
-							if (oldParamParts[0]) {
-								searchConfig.startId = oldParamParts[0];
-							}
-							if (oldParamParts[1]) {
-								searchConfig.env = oldParamParts[1];
-							}
-						}
-					}
-					this.config(searchConfig);
-				}
-
-				// Split on / to get rootUrl
 
 			}
 		},
@@ -1016,7 +1009,7 @@ if(typeof System !== "undefined") {
 					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
+					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -1115,14 +1108,51 @@ function addEnv(loader){
 	};
 }
 
+	var getQueryOptions = function(url) {
+		var queryOptions = {},
+			urlRegEx = /Url$/,
+			urlParts = url.split("?"),
+			path = urlParts.shift(),
+			search = urlParts.join("?"),
+			searchParts = search.split("&"),
+			paths = path.split("/"),
+			lastPart = paths.pop(),
+			stealPath = paths.join("/");
+
+		if(searchParts.length && searchParts[0].length) {
+				var searchPart;
+			for(var i =0; i < searchParts.length; i++) {
+				searchPart = searchParts[i];
+				var paramParts = searchPart.split("=");
+				if(paramParts.length > 1) {
+					var optionName = camelize(paramParts[0]);
+					// make options uniform e.g. baseUrl => baseURL
+					optionName = optionName.replace(urlRegEx, "URL")
+					queryOptions[optionName] = paramParts.slice(1).join("=");
+				} else {
+					/// like /steal.js?basics&production
+					if(steal.dev) {
+						steal.dev.warn("Please use query params like ?main=main&env=production");
+					}
+					var oldParamParts = searchPart.split(",");
+					if (oldParamParts[0]) {
+						queryOptions.queryMain = oldParamParts[0];
+					}
+					if (oldParamParts[1]) {
+						queryOptions.env = oldParamParts[1];
+					}
+				}
+			}
+		}
+		return queryOptions;
+	};
+
 	// extract the script tag options
 	var getScriptOptions = function (script) {
-		var options = {},
-			parts, src, query, startFile, env;
+		var scriptOptions = {},
+			urlRegEx = /Url$/;
 
-		options.stealURL = script.src;
-
-		var urlRegEx = /Url$/;
+		scriptOptions.stealURL = script.src;
 
 		each(script.attributes, function(attr){
 			// get option, remove "data" and camelize
@@ -1132,16 +1162,17 @@ function addEnv(loader){
 					attr.nodeName );
 			// make options uniform e.g. baseUrl => baseURL
 			optionName = optionName.replace(urlRegEx, "URL")
-			options[optionName] = (attr.value === "") ? true : attr.value;
+			scriptOptions[optionName] = (attr.value === "") ? true : attr.value;
 		});
 
 		// main source within steals script is deprecated
 		// and will be removed in future releases
 		var source = script.innerHTML;
 		if(/\S/.test(source)){
-			options.mainSource = source;
+			scriptOptions.mainSource = source;
 		}
-		return options;
+		// script config ever wins!
+		return extend(getQueryOptions(script.src), scriptOptions);
 	};
 
 	// get steal URL

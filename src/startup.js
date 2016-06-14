@@ -1,11 +1,48 @@
+	var getQueryOptions = function(url) {
+		var queryOptions = {},
+			urlRegEx = /Url$/,
+			urlParts = url.split("?"),
+			path = urlParts.shift(),
+			search = urlParts.join("?"),
+			searchParts = search.split("&"),
+			paths = path.split("/"),
+			lastPart = paths.pop(),
+			stealPath = paths.join("/");
+
+		if(searchParts.length && searchParts[0].length) {
+				var searchPart;
+			for(var i =0; i < searchParts.length; i++) {
+				searchPart = searchParts[i];
+				var paramParts = searchPart.split("=");
+				if(paramParts.length > 1) {
+					var optionName = camelize(paramParts[0]);
+					// make options uniform e.g. baseUrl => baseURL
+					optionName = optionName.replace(urlRegEx, "URL")
+					queryOptions[optionName] = paramParts.slice(1).join("=");
+				} else {
+					/// like /steal.js?basics&production
+					if(steal.dev) {
+						steal.dev.warn("Please use query params like ?main=main&env=production");
+					}
+					var oldParamParts = searchPart.split(",");
+					if (oldParamParts[0]) {
+						queryOptions.queryMain = oldParamParts[0];
+					}
+					if (oldParamParts[1]) {
+						queryOptions.env = oldParamParts[1];
+					}
+				}
+			}
+		}
+		return queryOptions;
+	};
+
 	// extract the script tag options
 	var getScriptOptions = function (script) {
-		var options = {},
-			parts, src, query, startFile, env;
+		var scriptOptions = {},
+			urlRegEx = /Url$/;
 
-		options.stealURL = script.src;
-
-		var urlRegEx = /Url$/;
+		scriptOptions.stealURL = script.src;
 
 		each(script.attributes, function(attr){
 			// get option, remove "data" and camelize
@@ -15,16 +52,17 @@
 					attr.nodeName );
 			// make options uniform e.g. baseUrl => baseURL
 			optionName = optionName.replace(urlRegEx, "URL")
-			options[optionName] = (attr.value === "") ? true : attr.value;
+			scriptOptions[optionName] = (attr.value === "") ? true : attr.value;
 		});
 
 		// main source within steals script is deprecated
 		// and will be removed in future releases
 		var source = script.innerHTML;
 		if(/\S/.test(source)){
-			options.mainSource = source;
+			scriptOptions.mainSource = source;
 		}
-		return options;
+		// script config ever wins!
+		return extend(getQueryOptions(script.src), scriptOptions);
 	};
 
 	// get steal URL

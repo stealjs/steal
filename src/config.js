@@ -1,15 +1,17 @@
 	// Overwrites System.config with setter hooks
-	var setterConfig = function(loader, configSpecial){
+	var setterConfig = function(loader, configOrder, configSpecial){
 		var oldConfig = loader.config;
 
 		loader.config =  function(cfg){
 
 			var data = extend({},cfg);
 			// check each special
-			each(configSpecial, function(special, name){
+			each(configOrder, function(name){
+				var special = configSpecial[name];
 				// if there is a setter and a value
 				if(special.set && data[name]){
 					// call the setter
+					debugger;
 					var res = special.set.call(loader,data[name], cfg);
 					// if the setter returns a value
 					if(res !== undefined) {
@@ -54,14 +56,13 @@
 			}
 			System.configMain = name;
 			System.paths[name] = name;
-			addProductionBundles.call(this);
+			debugger;
 			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
 		mainSetter = {
 			set: function(val){
 				this.main = val;
-				addProductionBundles.call(this);
 			}
 		};
 
@@ -106,6 +107,7 @@
 			return name.substr(bang+1);
 		}
 	};
+
 	var pluginResource = function(name){
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
@@ -162,8 +164,24 @@
 	};
 
 	var specialConfig;
+	var specialConfigOrder = [
+		'instantiated',
+		'envs',
+		'env',
+		'loadBundles',
+		'stealBundled',
+		'bundle',
+		'bundlesPath',
+		'meta',
+		'config',
+		'configPath',
+		'baseURL',
+		'queryMain',
+		'main',
+		'stealURL'
+	];
 	var envsSpecial = { map: true, paths: true, meta: true };
-	setterConfig(System, specialConfig = {
+	setterConfig(System, specialConfigOrder, specialConfig = {
 		env: {
 			set: function(val){
 				this.env = val;
@@ -171,8 +189,6 @@
 				if(this.isEnv("production")) {
 					this.loadBundles = true;
 				}
-
-				addProductionBundles.call(this);
 			}
 		},
 		envs: {
@@ -197,17 +213,23 @@
 			}
 		},
 		baseURL: fileSetter("baseURL"),
-		root: fileSetter("baseURL"),  //backwards comp
 		config: configSetter,
 		configPath: configSetter,
 		loadBundles: {
 			set: function(val){
 				this.loadBundles = val;
-				addProductionBundles.call(this);
 			}
 		},
-		startId: {
+		stealBundled: {
 			set: function(val){
+				this.stealBundled = val;
+			}
+		},
+		queryMain: {
+			set: function(val){
+				// if we configured the main via query like steal.js?main
+				// note, that "main"-config-setter if after "queryMain"
+				// so script tags ever wins!
 				mainSetter.set.call(this, normalize(val) );
 			}
 		},
@@ -216,54 +238,25 @@
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
 				System.stealURL = url;
-				var urlParts = url.split("?");
-
-				var path = urlParts.shift(),
-					search = urlParts.join("?"),
-					searchParts = search.split("&"),
+				var urlParts = url.split("?"),
+					path = urlParts.shift(),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
 					stealPath = paths.join("/"),
 					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				// if steal is bundled we always are in production environment
-				if(cfg.stealBundled && cfg.stealBundled === true) {
+				// if steal is bundled or we are loading steal.production
+				// we always are in production environment
+				if((this.stealBundled && this.stealBundled === true) ||
+					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
 					this.config({ env: platform+"-production" });
+				}
 
+				if(this.isEnv("production") || this.loadBundles) {
+					addProductionBundles.call(this);
 				}else{
 					specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-						this.config({ env: platform+"-production" });
-						addProductionBundles.call(this);
-					}
 				}
-
-				if(searchParts.length && searchParts[0].length) {
-					var searchConfig = {},
-						searchPart;
-					for(var i =0; i < searchParts.length; i++) {
-						searchPart = searchParts[i];
-						var paramParts = searchPart.split("=");
-						if(paramParts.length > 1) {
-							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
-						} else {
-							if(steal.dev) {
-								steal.dev.warn("Please use search params like ?main=main&env=production");
-							}
-							var oldParamParts = searchPart.split(",");
-							if (oldParamParts[0]) {
-								searchConfig.startId = oldParamParts[0];
-							}
-							if (oldParamParts[1]) {
-								searchConfig.env = oldParamParts[1];
-							}
-						}
-					}
-					this.config(searchConfig);
-				}
-
-				// Split on / to get rootUrl
 
 			}
 		},
@@ -316,7 +309,7 @@
 					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
 					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
+					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
