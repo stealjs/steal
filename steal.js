@@ -5985,6 +5985,7 @@ if (typeof System !== "undefined") {
 		'baseURL',
 		'queryMain',
 		'main',
+		'stealPath',
 		'stealURL'
 	];
 	var envsSpecial = { map: true, paths: true, meta: true };
@@ -6051,7 +6052,7 @@ if (typeof System !== "undefined") {
 					lastPart = paths.pop(),
 					stealPath = paths.join("/"),
 					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
-				
+
 				System.stealURL = path;
 
 				// if steal is bundled or we are loading steal.production
@@ -6070,6 +6071,7 @@ if (typeof System !== "undefined") {
 			}
 		},
 		// this gets called with the __dirname steal is in
+		// directly called from steal-tools
 		stealPath: {
 			set: function(dirname, cfg) {
 				dirname = envPath(dirname);
