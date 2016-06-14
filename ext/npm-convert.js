@@ -166,7 +166,10 @@ function convertName (context, pkg, map, root, name, waiting) {
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						if(root) utils.warnOnce("Could not find " + name + " in node_modules. Ignoring!");
+						if(root) {
+							utils.warnOnce("The map for " + name + " is not an npm dependency, if this is a local module " +
+								"use ./" + name + " instead.");
+						}
 						return name;
 					}
 					requestedVersion = requestedProject.version;
