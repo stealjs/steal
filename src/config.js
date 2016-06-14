@@ -226,6 +226,7 @@
 		queryMain: {
 			set: function(val){
 				// if we configured the main via query like steal.js?main
+				// for Worker...
 				// note, that "main"-config-setter if after "queryMain"
 				// so script tags ever wins!
 				mainSetter.set.call(this, normalize(val) );
@@ -235,13 +236,14 @@
 		stealURL: {
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
-				System.stealURL = url;
 				var urlParts = url.split("?"),
 					path = urlParts.shift(),
 					paths = path.split("/"),
 					lastPart = paths.pop(),
 					stealPath = paths.join("/"),
 					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+				
+				System.stealURL = path;
 
 				// if steal is bundled or we are loading steal.production
 				// we always are in production environment

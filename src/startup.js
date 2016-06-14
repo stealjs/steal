@@ -71,15 +71,16 @@
 	var getUrlOptions = function (){
 		return new Promise(function(resolve, reject){
 
-			// Get options from the script tag
+			// for Workers get options from steal query
 			if (isWebWorker) {
-				resolve({
+				resolve(extend({
 					stealURL: location.href
-				});
-
+				}, getQueryOptions(location.href)));
+				return;
 			} else if(isBrowserWithWindow) {
 				// if the browser supports currentScript, us it!
 				if (document.currentScript) {
+					// get options from script tag and query
 					resolve(getScriptOptions(document.currentScript));
 					return;
 				}
