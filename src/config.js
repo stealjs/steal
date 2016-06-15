@@ -114,7 +114,8 @@
 	};
 
 	var addProductionBundles = function(){
-		if(this.loadBundles && this.main) {
+		// we don't want add the main bundled module if steal is bundled inside!
+		if(this.loadBundles && this.main && !this.stealBundled) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+main;
