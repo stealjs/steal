@@ -758,10 +758,26 @@ if(typeof System !== "undefined") {
 			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
-		mainSetter = {
-			set: function(val){
-				this.main = val;
+		valueSetter = function(prop) {
+			return {
+				set: function(val) {
+					this[prop] = val;
+				}
 			}
+		},
+		booleanSetter = function(prop) {
+			return {
+				set: function(val) {
+					this[prop] = !!val;
+				}
+			}
+		},
+		fileSetter = function(prop) {
+			return {
+				set: function(val) {
+					this[prop] = envPath(val);
+				}
+			};
 		};
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
@@ -777,14 +793,6 @@ if(typeof System !== "undefined") {
 			return "file:" + val;
 		}
 		return val;
-	};
-
-	var fileSetter = function(prop) {
-		return {
-			set: function(val) {
-				this[prop] = envPath(val);
-			}
-		};
 	};
 
 	var setToSystem = function(prop){
@@ -914,23 +922,11 @@ if(typeof System !== "undefined") {
 			}
 		},
 		baseURL: fileSetter("baseURL"),
-		configMain: {
-			set: function(val) {
-				this.configMain = val
-			}
-		},
+		configMain: valueSetter("configMain"),
 		config: configSetter,
 		configPath: configSetter,
-		loadBundles: {
-			set: function(val){
-				this.loadBundles = val;
-			}
-		},
-		stealBundled: {
-			set: function(val){
-				this.stealBundled = val;
-			}
-		},
+		loadBundles: booleanSetter("loadBundles"),
+		stealBundled: booleanSetter("stealBundled"),
 		queryMain: {
 			set: function(val){
 				// if we configured the main via query like steal.js?main
@@ -940,7 +936,7 @@ if(typeof System !== "undefined") {
 				mainSetter.set.call(this, normalize(val) );
 			}
 		},
-		main: mainSetter,
+		main: valueSetter("main"),
 		stealURL: {
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
