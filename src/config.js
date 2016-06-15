@@ -171,6 +171,7 @@
 		'bundle',
 		'bundlesPath',
 		'meta',
+		'configMain',
 		'config',
 		'configPath',
 		'baseURL',
@@ -212,6 +213,11 @@
 			}
 		},
 		baseURL: fileSetter("baseURL"),
+		configMain: {
+			set: function(val) {
+				this.configMain = val
+			}
+		},
 		config: configSetter,
 		configPath: configSetter,
 		loadBundles: {
