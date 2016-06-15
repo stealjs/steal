@@ -233,7 +233,7 @@
 				// for Worker...
 				// note, that "main"-config-setter if after "queryMain"
 				// so script tags ever wins!
-				mainSetter.set.call(this, normalize(val) );
+				valueSetter("main").set.call(this, normalize(val) );
 			}
 		},
 		main: valueSetter("main"),
