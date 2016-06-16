@@ -88,3 +88,7 @@ Then to use change your script tag to:
 ```
 <script src="./dist/bundles/app/app.js"></script>
 ```
+
+## Load Scripts from a CDN
+
+You may have very common scripts like jQuery that you want to load from a CDN in production. To do this, see [Loading Scripts from a CDN](http://stealjs.com/docs/StealJS.loading-from-cdn.html).
