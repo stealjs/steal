@@ -5854,35 +5854,41 @@ if (typeof System !== "undefined") {
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 
-	var configSetter = {
-		set: function(val){
-			var name = filename(val),
-				root = dir(val);
+	var configSetter = function(order){
+		return {
+			order: order,
+			set: function(val){
+				var name = filename(val),
+					root = dir(val);
 
-			if(!isNode) {
-				System.configPath = joinURIs( location.href, val);
+				if(!isNode) {
+					System.configPath = joinURIs( location.href, val);
+				}
+				System.configMain = name;
+				System.paths[name] = name;
+				this.config({ baseURL: (root === val ? "." : root) + "/" });
 			}
-			System.configMain = name;
-			System.paths[name] = name;
-			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
-		valueSetter = function(prop) {
+		valueSetter = function(prop, order) {
 			return {
+				order: order,
 				set: function(val) {
 					this[prop] = val;
 				}
 			}
 		},
-		booleanSetter = function(prop) {
+		booleanSetter = function(prop, order) {
 			return {
+				order: order,
 				set: function(val) {
 					this[prop] = !!val;
 				}
 			}
 		},
-		fileSetter = function(prop) {
+		fileSetter = function(prop, order) {
 			return {
+				order: order,
 				set: function(val) {
 					this[prop] = envPath(val);
 				}
@@ -5979,37 +5985,21 @@ if (typeof System !== "undefined") {
 		}
 	};
 
-	var specialConfig;
-	var specialConfigOrder = [
-		'instantiated',
-		'envs',
-		'env',
-		'loadBundles',
-		'stealBundled',
-		'bundle',
-		'bundlesPath',
-		'meta',
-		'configMain',
-		'config',
-		'configPath',
-		'baseURL',
-		'queryMain',
-		'main',
-		'stealPath',
-		'stealURL'
-	];
+	var specialConfigOrder = [];
 	var envsSpecial = { map: true, paths: true, meta: true };
-	setterConfig(System, specialConfigOrder, specialConfig = {
-		env: {
+	var specialConfig = {
+		instantiated: {
+			order: 1,
 			set: function(val){
-				this.env = val;
+				var loader = this;
 
-				if(this.isEnv("production")) {
-					this.loadBundles = true;
-				}
+				each(val || {}, function(value, name){
+					loader.set(name,  loader.newModule(value));
+				});
 			}
 		},
 		envs: {
+			order: 2,
 			set: function(val){
 				// envs should be set, deep
 				var envs = this.envs;
@@ -6030,13 +6020,60 @@ if (typeof System !== "undefined") {
 				});
 			}
 		},
-		baseURL: fileSetter("baseURL"),
-		configMain: valueSetter("configMain"),
-		config: configSetter,
-		configPath: configSetter,
-		loadBundles: booleanSetter("loadBundles"),
-		stealBundled: booleanSetter("stealBundled"),
+		env: {
+			order: 3,
+			set: function(val){
+				this.env = val;
+
+				if(this.isEnv("production")) {
+					this.loadBundles = true;
+				}
+			}
+		},
+		loadBundles: booleanSetter("loadBundles", 4),
+		stealBundled: booleanSetter("stealBundled", 5),
+		// System.config does not like being passed arrays.
+		bundle: {
+			order: 6,
+			set: function(val){
+				System.bundle = val;
+			}
+		},
+		bundlesPath: {
+			order: 7,
+			set: function(val){
+				this.paths[cssBundlesNameGlob] = val+"/*css";
+				this.paths[jsBundlesNameGlob]  = val+"/*.js";
+				return val;
+			}
+		},
+		meta: {
+			order: 8,
+			set: function(cfg){
+				var loader = this;
+				each(cfg || {}, function(value, name){
+					if(typeof value !== "object") {
+						return;
+					}
+					var cur = loader.meta[name];
+					if(cur && cur.format === value.format) {
+						// Keep the deps, if we have any
+						var deps = value.deps;
+						extend(value, cur);
+						if(deps) {
+							value.deps = deps;
+						}
+					}
+				});
+				extend(this.meta, cfg);
+			}
+		},
+		configMain: valueSetter("configMain", 9),
+		config: configSetter(10),
+		configPath: configSetter(11),
+		baseURL: fileSetter("baseURL", 12),
 		queryMain: {
+			order: 13,
 			set: function(val){
 				// if we configured the main via query like steal.js?main
 				// for Worker...
@@ -6045,38 +6082,11 @@ if (typeof System !== "undefined") {
 				valueSetter("main").set.call(this, normalize(val) );
 			}
 		},
-		main: valueSetter("main"),
-		stealURL: {
-			// http://domain.com/steal/steal.js?moduleName,env&
-			set: function(url, cfg)	{
-				var urlParts = url.split("?"),
-					path = urlParts.shift(),
-					paths = path.split("/"),
-					lastPart = paths.pop(),
-					stealPath = paths.join("/"),
-					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
-
-				System.stealURL = path;
-
-				// if steal is bundled or we are loading steal.production
-				// we always are in production environment
-				if((this.stealBundled && this.stealBundled === true) ||
-					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
-					this.config({ env: platform+"-production" });
-				}
-
-				if(this.isEnv("production") || this.loadBundles) {
-					addProductionBundles.call(this);
-				}
-				// }else{
-					specialConfig.stealPath.set.call(this,stealPath, cfg);
-				// }
-
-			}
-		},
+		main: valueSetter("main", 14),
 		// this gets called with the __dirname steal is in
 		// directly called from steal-tools
 		stealPath: {
+			order: 15,
 			set: function(dirname, cfg) {
 				dirname = envPath(dirname);
 				var parts = dirname.split("/");
@@ -6144,49 +6154,48 @@ if (typeof System !== "undefined") {
 				System.stealPath = dirname;
 			}
 		},
-		// System.config does not like being passed arrays.
-		bundle: {
-			set: function(val){
-				System.bundle = val;
-			}
-		},
-		bundlesPath: {
-			set: function(val){
-				this.paths[cssBundlesNameGlob] = val+"/*css";
-				this.paths[jsBundlesNameGlob]  = val+"/*.js";
-				return val;
-			}
-		},
-		instantiated: {
-			set: function(val){
-				var loader = this;
+		stealURL: {
+			order: 16,
+			// http://domain.com/steal/steal.js?moduleName,env&
+			set: function(url, cfg)	{
+				var urlParts = url.split("?"),
+					path = urlParts.shift(),
+					paths = path.split("/"),
+					lastPart = paths.pop(),
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
 
-				each(val || {}, function(value, name){
-					loader.set(name,  loader.newModule(value));
-				});
-			}
-		},
-		meta: {
-			set: function(cfg){
-				var loader = this;
-				each(cfg || {}, function(value, name){
-					if(typeof value !== "object") {
-						return;
-					}
-					var cur = loader.meta[name];
-					if(cur && cur.format === value.format) {
-						// Keep the deps, if we have any
-						var deps = value.deps;
-						extend(value, cur);
-						if(deps) {
-							value.deps = deps;
-						}
-					}
-				});
-				extend(this.meta, cfg);
+				System.stealURL = path;
+
+				// if steal is bundled or we are loading steal.production
+				// we always are in production environment
+				if((this.stealBundled && this.stealBundled === true) ||
+					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
+					this.config({ env: platform+"-production" });
+				}
+
+				if(this.isEnv("production") || this.loadBundles) {
+					addProductionBundles.call(this);
+				}
+				// }else{
+					specialConfig.stealPath.set.call(this,stealPath, cfg);
+				// }
+
 			}
 		}
+	}
+
+	// make a setter order
+	each(specialConfig, function(setter, name){
+		if(!setter.order) {
+			specialConfigOrder.push(name)
+		}else{
+			specialConfigOrder.splice(setter.order, 0, name);
+		}
 	});
+
+	// special setter config
+	setterConfig(System, specialConfigOrder, specialConfig);
 
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
@@ -6223,6 +6232,9 @@ function addEnv(loader){
 	};
 }
 
+	// get config by the URL query
+	// like ?main=foo&env=production
+	// formally used for Webworkers
 	var getQueryOptions = function(url) {
 		var queryOptions = {},
 			urlRegEx = /Url$/,

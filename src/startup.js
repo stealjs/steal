@@ -1,3 +1,6 @@
+	// get config by the URL query
+	// like ?main=foo&env=production
+	// formally used for Webworkers
 	var getQueryOptions = function(url) {
 		var queryOptions = {},
 			urlRegEx = /Url$/,
