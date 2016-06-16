@@ -958,9 +958,10 @@ if(typeof System !== "undefined") {
 
 				if(this.isEnv("production") || this.loadBundles) {
 					addProductionBundles.call(this);
-				}else{
-					specialConfig.stealPath.set.call(this,stealPath, cfg);
 				}
+				// }else{
+					specialConfig.stealPath.set.call(this,stealPath, cfg);
+				// }
 
 			}
 		},
