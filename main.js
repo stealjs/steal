@@ -906,8 +906,6 @@ if(typeof System !== "undefined") {
 							env[name] = val;
 						}
 					});
-
-					//extend(env, cfg);
 				});
 			}
 		},
@@ -967,7 +965,7 @@ if(typeof System !== "undefined") {
 			order: 13,
 			set: function(val){
 				// if we configured the main via query like steal.js?main
-				// for Worker...
+				// this is formally used by webworkers
 				// note, that "main"-config-setter if after "queryMain"
 				// so script tags ever wins!
 				valueSetter("main").set.call(this, normalize(val) );
@@ -1024,8 +1022,13 @@ if(typeof System !== "undefined") {
 				} else {
 					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
-					// make sure we don't set baseURL if something else is going to set it
+					// make sure we don't set baseURL if it already set
 					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
+
+						// if we loading steal.js and it is located in node_modules or bower_components
+						// we rewrite the baseURL relative to steal.js (one directory up!)
+						// we do this because, normaly our app is located as a sibling folder to
+						// node_modules or bower_components
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -1068,15 +1071,32 @@ if(typeof System !== "undefined") {
 				if(this.isEnv("production") || this.loadBundles) {
 					addProductionBundles.call(this);
 				}
-				// }else{
-					specialConfig.stealPath.set.call(this,stealPath, cfg);
-				// }
+
+				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 			}
 		}
 	}
 
-	// make a setter order
+	/*
+	 make a setter order
+	 currently:
+
+	 instantiated
+	 envs
+	 env
+	 loadBundles
+	 stealBundled
+	 bundle
+	 bundlesPath
+	 meta
+	 config
+	 configPath
+	 baseURL
+	 queryMain
+	 main
+	 stealURL
+	 */
 	each(specialConfig, function(setter, name){
 		if(!setter.order) {
 			specialConfigOrder.push(name)

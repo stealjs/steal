@@ -4188,8 +4188,10 @@ function amd(loader) {
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
 
+  var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
   var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+  var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
   var fnBracketRegEx = /\(([^\)]*)\)/;
@@ -4453,25 +4455,36 @@ function amd(loader) {
 
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
-    var loader = this;
+    var loader = this,
+      sourceWithoutComments = load.source.replace(strictCommentRegEx, '$1'),
+      match = sourceWithoutComments.match(amdRegEx);
 
-    if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
-      load.metadata.format = 'amd';
+    if (load.metadata.format == 'amd' || !load.metadata.format && match) {
 
-      if (loader.execute !== false) {
-        createDefine(loader);
+      // make sure that this is really a AMD module
+      // get the content from beginning till the matched define block
+      var sourceBeforeDefine = sourceWithoutComments.substring(0, sourceWithoutComments.indexOf(match[0])),
+        trimmed = sourceBeforeDefine.replace(wsRegEx, "")
 
-        loader.__exec(load);
+      // check if that there is no commen javscript keywork before
+      if (!beforeRegEx.test(trimmed)) {
+        load.metadata.format = 'amd';
 
-        removeDefine(loader);
+        if (loader.execute !== false) {
+          createDefine(loader);
 
-        if (!anonDefine && !defineBundle && !isNode)
-          throw new TypeError('AMD module ' + load.name + ' did not define');
-      }
+          loader.__exec(load);
 
-      if (anonDefine) {
-        load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
-        load.metadata.execute = anonDefine.execute;
+          removeDefine(loader);
+
+          if (!anonDefine && !defineBundle && !isNode)
+            throw new TypeError('AMD module ' + load.name + ' did not define');
+        }
+
+        if (anonDefine) {
+          load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
+          load.metadata.execute = anonDefine.execute;
+        }
       }
     }
 
@@ -6015,8 +6028,6 @@ if (typeof System !== "undefined") {
 							env[name] = val;
 						}
 					});
-
-					//extend(env, cfg);
 				});
 			}
 		},
@@ -6076,7 +6087,7 @@ if (typeof System !== "undefined") {
 			order: 13,
 			set: function(val){
 				// if we configured the main via query like steal.js?main
-				// for Worker...
+				// this is formally used by webworkers
 				// note, that "main"-config-setter if after "queryMain"
 				// so script tags ever wins!
 				valueSetter("main").set.call(this, normalize(val) );
@@ -6133,8 +6144,13 @@ if (typeof System !== "undefined") {
 				} else {
 					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
 
-					// make sure we don't set baseURL if something else is going to set it
+					// make sure we don't set baseURL if it already set
 					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
+
+						// if we loading steal.js and it is located in node_modules or bower_components
+						// we rewrite the baseURL relative to steal.js (one directory up!)
+						// we do this because, normaly our app is located as a sibling folder to
+						// node_modules or bower_components
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
@@ -6177,15 +6193,32 @@ if (typeof System !== "undefined") {
 				if(this.isEnv("production") || this.loadBundles) {
 					addProductionBundles.call(this);
 				}
-				// }else{
-					specialConfig.stealPath.set.call(this,stealPath, cfg);
-				// }
+
+				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 			}
 		}
 	}
 
-	// make a setter order
+	/*
+	 make a setter order
+	 currently:
+
+	 instantiated
+	 envs
+	 env
+	 loadBundles
+	 stealBundled
+	 bundle
+	 bundlesPath
+	 meta
+	 config
+	 configPath
+	 baseURL
+	 queryMain
+	 main
+	 stealURL
+	 */
 	each(specialConfig, function(setter, name){
 		if(!setter.order) {
 			specialConfigOrder.push(name)
