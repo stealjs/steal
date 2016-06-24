@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+	<script>
+		setTimeout(function(){
+			var s = document.createElement("script");
+			s.src = 'async.js';
+			document.head.appendChild(s);
+		}, 1);
+	</script>
+	<script src='../../steal.js' main="main" config="./stealconfig.js" foo="bar"></script>
+</head>
+<body>
+</body>
+</html>
