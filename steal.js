@@ -4188,8 +4188,10 @@ function amd(loader) {
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
 
+  var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
   var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+  var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
   var fnBracketRegEx = /\(([^\)]*)\)/;
@@ -4453,25 +4455,36 @@ function amd(loader) {
 
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
-    var loader = this;
+    var loader = this,
+      sourceWithoutComments = load.source.replace(strictCommentRegEx, '$1'),
+      match = sourceWithoutComments.match(amdRegEx);
 
-    if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
-      load.metadata.format = 'amd';
+    if (load.metadata.format == 'amd' || !load.metadata.format && match) {
 
-      if (loader.execute !== false) {
-        createDefine(loader);
+      // make sure that this is really a AMD module
+      // get the content from beginning till the matched define block
+      var sourceBeforeDefine = sourceWithoutComments.substring(0, sourceWithoutComments.indexOf(match[0])),
+        trimmed = sourceBeforeDefine.replace(wsRegEx, "")
 
-        loader.__exec(load);
+      // check if that there is no commen javscript keywork before
+      if (!beforeRegEx.test(trimmed)) {
+        load.metadata.format = 'amd';
 
-        removeDefine(loader);
+        if (loader.execute !== false) {
+          createDefine(loader);
 
-        if (!anonDefine && !defineBundle && !isNode)
-          throw new TypeError('AMD module ' + load.name + ' did not define');
-      }
+          loader.__exec(load);
 
-      if (anonDefine) {
-        load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
-        load.metadata.execute = anonDefine.execute;
+          removeDefine(loader);
+
+          if (!anonDefine && !defineBundle && !isNode)
+            throw new TypeError('AMD module ' + load.name + ' did not define');
+        }
+
+        if (anonDefine) {
+          load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
+          load.metadata.execute = anonDefine.execute;
+        }
       }
     }
 
