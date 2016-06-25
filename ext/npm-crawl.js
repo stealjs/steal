@@ -183,11 +183,12 @@ var crawl = {
 		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
 				"peerDependencies", {_isPeerDependency: true});
 
-		addDeps(packageJSON, packageJSON.dependencies || {}, deps, "dependencies");
+		addDeps(packageJSON, packageJSON.dependencies || {}, deps,
+				"dependencies", null, loader);
 
 		if(isRoot) {
 			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
-				   "devDependencies");
+				   "devDependencies", null, loader);
 		}
 
 		return deps;
@@ -339,7 +340,7 @@ function truthy(x) {
 
 var alwaysIgnore = {"steal-tools":1,"bower":1,"grunt":1,"grunt-cli":1};
 
-function addDeps(packageJSON, dependencies, deps, type, defaultProps){
+function addDeps(packageJSON, dependencies, deps, type, defaultProps, loader){
 	// convert an array to a map
 	var npmIgnore = packageJSON.system && packageJSON.system.npmIgnore;
 	var npmDependencies = packageJSON.system && packageJSON.system.npmDependencies;
@@ -347,6 +348,10 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 
 	function includeDep(name) {
 		if(alwaysIgnore[name]) return false;
+
+		if(loader.disableNpmIgnore) {
+			return true;
+		}
 
 		if(!npmIgnore && npmDependencies) {
 			return !!npmDependencies[name];

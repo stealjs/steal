@@ -1,0 +1,9 @@
+{
+	"name": "steal",
+	"version": "0.0.0",
+	"main": "main.js",
+	"devDependencies": {
+		"steal-test-helpers": "*",
+		"steal-qunit": "*"
+	}
+}

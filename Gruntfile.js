@@ -29,6 +29,7 @@ module.exports = function (grunt) {
 			"node_modules/system-trace/trace.js",
 			"node_modules/system-json/json.js",
 			"src/config.js",
+			"src/scoped_meta/scoped_meta.js",
 			"node_modules/steal-env/env.js",
 			"src/startup.js",
 			"src/import.js",
@@ -59,6 +60,7 @@ module.exports = function (grunt) {
 		  "src/system-extension-script-module.js",
 		  "node_modules/system-trace/trace.js",
 		  "src/config.js",
+		  "src/scoped_meta/scoped_meta.js",
 		  "node_modules/steal-env/env.js",
 		  "src/startup.js",
 		  "src/import.js",
@@ -126,7 +128,7 @@ module.exports = function (grunt) {
 
 	},
 	watch: {
-	  files: [ "src/*.js", "node_modules/systemjs/dist/**"],
+	  files: [ "src/**/*.js", "node_modules/systemjs/dist/**"],
 	  tasks: "default"
 	},
 	jshint: {
