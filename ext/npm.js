@@ -19,7 +19,7 @@ var isNode = typeof process === "object" &&
  */
 exports.translate = function(load){
 	var loader = this;
-
+	
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
@@ -66,6 +66,8 @@ exports.translate = function(load){
 				if(pkg.browser){
 					delete pkg.browser.transform;
 				}
+				pkg = utils.json.transform(loader, load, pkg);
+
 				packages.push({
 					name: pkg.name,
 					version: pkg.version,
