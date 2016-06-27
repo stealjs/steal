@@ -550,6 +550,21 @@ var utils = {
 			return pth.indexOf("/") === -1;
 		}
 	},
+	json: {
+		/**
+		 * if a jsonOptions transformer is provided (by the System.config)
+		 * use it for all json files, package.json's are also included
+		 * @param loader
+		 * @param load
+		 * @param data
+		 * @returns data
+		 */
+		transform: function(loader, load, data) {
+			var fn = loader.jsonOptions && loader.jsonOptions.transform;
+			if(!fn) return data;
+			return fn.call(loader, load, data);
+		}
+	},
 	includeInBuild: true
 };
 

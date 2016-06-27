@@ -280,6 +280,13 @@ function convertToPackage(context, pkg, index) {
 		if(pkg.browser){
 			delete pkg.browser.transform;
 		}
+		// fake load obj, because we don't have one here
+		pkg = utils.json.transform(context.loader, {
+			address: pkg.fileUrl,
+			name: pkg.fileUrl.split('/').pop(),
+			metadata: {}
+		}, pkg);
+
 		localPkg = {
 			name: pkg.name,
 			version: pkg.version,
