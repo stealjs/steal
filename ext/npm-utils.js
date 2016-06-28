@@ -219,12 +219,33 @@ var utils = {
 			// If the module needs to be loaded relative.
 			if(isRelative) {
 				// get the location of the parent
-				var parentParsed = utils.moduleName.parse( parentName, packageName );
+				var parentParsed = utils.moduleName.parse(parentName, packageName);
+
 				// If the parentModule and the currentModule are from the same parent
 				if( parentParsed.packageName === parsedModuleName.packageName && parentParsed.modulePath ) {
-					// Make the path relative to the parentName's path.
-					parsedModuleName.modulePath = utils.path.makeRelative(
-						utils.path.joinURIs(parentParsed.modulePath, parsedModuleName.modulePath) );
+					var makePathRelative = true;
+
+					if(name === "../" || name === "./" || name === "..") {
+						var relativePath = utils.path.relativeTo(
+							parentParsed.modulePath, name);
+						var isInRoot = utils.path.isPackageRootDir(relativePath);
+						if(isInRoot) {
+							parsedModuleName.modulePath = utils.pkg.main(refPkg);
+							makePathRelative = false;
+						} else {
+							parsedModuleName.modulePath = name + 
+								(utils.path.endsWithSlash(name) ? "" : "/") +
+								"index";
+						}
+					} 
+					
+					if(makePathRelative) {
+						// Make the path relative to the parentName's path.
+						parsedModuleName.modulePath = utils.path.makeRelative(
+							utils.path.joinURIs(parentParsed.modulePath,
+												parsedModuleName.modulePath)
+						);
+					}
 				}
 			}
 
