@@ -9,7 +9,7 @@ A Loader-unique string that represents a module.
 
 The **moduleName** is a string that serves as the canonical name for a module. It is used as the key in the module registry.
 
-In Steal, as with most module loaders, each module is only load (executed) *once* even if it is being imported by dozens of other modules. In order to provide importing modules with the correct exported values Steal has a module registry; an object where the moduleName is the key and the value is metadata about the module, as well as it's exported value.
+In Steal, as with most module loaders, each module is only loaded (executed) *once* even if it is being imported by dozens of other modules. In order to provide importing modules with the correct exported values Steal has a module registry; an object where the moduleName is the key and the value is metadata about the module, as well as it's exported value.
 
 When a module imports another, such as `require("./foo")` the string used to import is called a [moduleIdentifier]. This identifier is then [steal.hooks.normalize normalized] which produces the canonical **moduleName**.
 
