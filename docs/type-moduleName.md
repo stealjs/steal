@@ -50,7 +50,7 @@ However, if the parent module does *not* have an npm dependency on lodash then t
 
 ## npm module names
 
-When importing modules installed with npm the moduleName normalizes to something like `lodash@1.0.0#main`. Why strange looking this form has a purpose. Remember that each moduleName in the registry must be *unique*. NPM packages, however, are not, and nested dependencies can use different versions of the same package. When this happens it's important that each module gets a [semver compatible](http://semver.org/) version of the package they need.
+When importing modules installed with npm the moduleName normalizes to something like `lodash@1.0.0#main`. While strange looking this form has a purpose. Remember that each moduleName in the registry must be *unique*. NPM packages, however, are not, and nested dependencies can use different versions of the same package. When this happens it's important that each module gets a [semver compatible](http://semver.org/) version of the package they need.
 
 Here are the parts of an npm moduleName, using `lodash@1.0.0#main`:
 
