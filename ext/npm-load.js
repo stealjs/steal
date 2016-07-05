@@ -111,7 +111,8 @@ var translateConfig = function(loader, packages, options){
 			browser: true,
 			env: {
 				NODE_ENV: loader.env
-			}
+			},
+			version: ''
 		};
 	}
 
