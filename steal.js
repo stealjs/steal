@@ -2639,6 +2639,7 @@ function logloads(loads) {
         }
       };
       xhr.open("GET", url, true);
+      xhr.withCredentials = true;
 
       if (doTimeout)
         setTimeout(function() {
