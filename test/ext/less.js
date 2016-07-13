@@ -9,8 +9,22 @@ var options = loader.lessOptions || {};
 // default optimization value.
 options.optimization |= lessEngine.optimization;
 
+// We store sources so files are only fetched once and shared between
+// Steal and the Less File Manager
+exports.fetch = function(load, fetch){
+	var p = getSource(load.address);
+	if(p) {
+		return p;
+	}
+
+	p = fetch.call(this, load);
+	addSource(load.address, p);
+	return p;
+};
+
 exports.translate = function(load) {
 	var address = load.address.replace(/^file\:/,"");
+	var useFileCache = true;
 
 	var pathParts = (address+'').split('/');
 	pathParts[pathParts.length - 1] = ''; // Remove filename
@@ -20,35 +34,52 @@ exports.translate = function(load) {
 		pathParts[pathParts.length - 1] = ''; // Remove filename
 	}
 
-	return new Promise(function(resolve, reject){
-		var renderOptions = {
-			filename: address,
-			useFileCache: true
-		};
-		for (var prop in options){
-			renderOptions[prop] = options[prop];
-		}
-		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
+	function renderLess() {
+		return new Promise(function(resolve, reject){
+			var renderOptions = {
+				filename: address,
+				useFileCache: useFileCache
+			};
+			for (var prop in options){
+				renderOptions[prop] = options[prop];
+			}
+			renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
 
-		renderOptions.plugins = (options.plugins || []);
-		if (stealLessPlugin !== undefined) {
-			renderOptions.plugins.push(stealLessPlugin);
-		}
+			renderOptions.plugins = (options.plugins || []);
+			if (stealLessPlugin !== undefined) {
+				renderOptions.plugins.push(stealLessPlugin);
+			}
 
-		renderOptions.relativeUrls = options.relativeUrls === undefined ? true : options.relativeUrls;
+			renderOptions.relativeUrls = options.relativeUrls === undefined ? true : options.relativeUrls;
 
-		var done = function(output) {
-			// Put the source map on metadata if one was created.
-			load.metadata.map = output.map;
-			resolve(output.css);
-		};
+			var done = function(output) {
+				// Put the source map on metadata if one was created.
+				load.metadata.map = output.map;
+				load.metadata.includedDeps = output.imports || [];
+				resolve(output.css);
+			};
 
-		var fail = function(error) {
-			reject(error);
-		};
+			var fail = function(error) {
+				reject(error);
+			};
 
-		lessEngine.render(load.source, renderOptions).then(done, fail);
-	});
+			lessEngine.render(load.source, renderOptions).then(done, fail);
+		});
+	}
+
+	if(loader.liveReloadInstalled) {
+		return loader["import"]("live-reload", { name: module.id })
+		.then(function(reload){
+			if(reload.isReloading()) {
+				useFileCache = false;
+			}
+		})
+		.then(renderLess, renderLess);
+	}
+
+	addSource(load.address, load.source);
+
+	return renderLess();
 };
 exports.locateScheme = true;
 exports.buildType = "css";
@@ -109,6 +140,7 @@ if (lessEngine.FileManager) {
 			promise;
 
 		callback = function(err, file) {
+			addSource(file.filename, Promise.resolve(file.contents));
 			if (err) {
 				return _callback.call(self, err);
 			}
@@ -122,7 +154,8 @@ if (lessEngine.FileManager) {
 
 		promise = FileManager.prototype.loadFile.call(this, filename, currentDirectory, options, environment, callback);
 
-		// when promise is returned we must wrap promise, when one is not, the wrapped callback is used
+		// when promise is returned we must wrap promise, when one is not,
+		// the wrapped callback is used
 		if (promise && typeof promise.then == 'function') {
 			return promise.then(function(file) {
 				file._directory = directory;
@@ -132,12 +165,40 @@ if (lessEngine.FileManager) {
 		}
 	};
 
+	var doXHR = StealLessManager.prototype.doXHR;
+	StealLessManager.prototype.doXHR = function(url, type, callback, errback){
+		var p = getSource(url);
+		if(p) {
+			return p.then(function(src){
+				callback(src, new Date());
+			}, function(err){
+				errback(err);
+			});
+		}
+		return doXHR.apply(this, arguments);
+	};
+
 	stealLessPlugin = {
 		install: function(less, pluginManager) {
 			pluginManager.addFileManager(new StealLessManager());
 		}
 	};
+
+	exports.StealLessManager = StealLessManager;
 }
+
+var getSource = function(url){
+	return loader._lessSources && loader._lessSources[url];
+}
+
+var addSource = function(url, p){
+	if(!loader._lessSources) {
+		loader._lessSources = {};
+	}
+	if(!loader._lessSources[url]) {
+		loader._lessSources[url] = Promise.resolve(p);
+	}
+};
 
 var normalizePath = function(path) {
 	var parts = path.split('/'),
