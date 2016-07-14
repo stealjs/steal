@@ -963,7 +963,7 @@
 		
 		<section class="comment">
 			<p>The <strong>moduleName</strong> is a string that serves as the canonical name for a module. It is used as the key in the module registry.</p>
-<p>In Steal, as with most module loaders, each module is only load (executed) <em>once</em> even if it is being imported by dozens of other modules. In order to provide importing modules with the correct exported values Steal has a module registry; an object where the moduleName is the key and the value is metadata about the module, as well as it's exported value.</p>
+<p>In Steal, as with most module loaders, each module is only loaded (executed) <em>once</em> even if it is being imported by dozens of other modules. In order to provide importing modules with the correct exported values Steal has a module registry; an object where the moduleName is the key and the value is metadata about the module, as well as it's exported value.</p>
 <p>When a module imports another, such as <code>require(&quot;./foo&quot;)</code> the string used to import is called a <a href="moduleIdentifier.html">moduleIdentifier</a>. This identifier is then <a href="steal.hooks.normalize.html">normalized</a> which produces the canonical <strong>moduleName</strong>.</p>
 <h2>moduleName vs moduleIdentifier</h2>
 <p>It's important to understand the difference between a moduleName and <a href="moduleIdentifier.html">moduleIdentifier</a>. A moduleIdentifier is the string that is provided to the <code>import</code>, <code>require()</code>, (or any other format) statements. For example:</p>
@@ -989,7 +989,7 @@
 <p>If the parent module, <code>app/main</code> has an npm dependency on the lodash package then this will normalize to <code>lodash@1.0.0#main</code> and the address will be something like <code>http://example.com/node_modules/lodash/main.js</code>.</p>
 <p>However, if the parent module does <em>not</em> have an npm dependency on lodash then the moduleName will be <code>lodash</code> and the address something like <code>http://example.com/lodash.js</code>.</p>
 <h2>npm module names</h2>
-<p>When importing modules installed with npm the moduleName normalizes to something like <code>lodash@1.0.0#main</code>. Why strange looking this form has a purpose. Remember that each moduleName in the registry must be <em>unique</em>. NPM packages, however, are not, and nested dependencies can use different versions of the same package. When this happens it's important that each module gets a <a href="http://semver.org/">semver compatible</a> version of the package they need.</p>
+<p>When importing modules installed with npm the moduleName normalizes to something like <code>lodash@1.0.0#main</code>. While strange looking this form has a purpose. Remember that each moduleName in the registry must be <em>unique</em>. NPM packages, however, are not, and nested dependencies can use different versions of the same package. When this happens it's important that each module gets a <a href="http://semver.org/">semver compatible</a> version of the package they need.</p>
 <p>Here are the parts of an npm moduleName, using <code>lodash@1.0.0#main</code>:</p>
 <h3>packageName</h3>
 <p>The first part is the <strong>packageName</strong>, <code>lodash</code>. It is the string that you provide when installing the package like <code>npm install lodash --save</code>.</p>
