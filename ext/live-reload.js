@@ -265,7 +265,8 @@ function setup(){
 	var port = loader.liveReloadPort || 8012;
 
 	var host = loader.liveReloadHost || window.document.location.host.replace(/:.*/, '');
-	var url = "ws://" + host + ":" + port;
+	var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+	var url = protocol + "//" + host + ":" + port;
 	var ws = new WebSocket(url);
 
 	// Let the server know about the main module
