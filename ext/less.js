@@ -9,6 +9,25 @@ var options = loader.lessOptions || {};
 // default optimization value.
 options.optimization |= lessEngine.optimization;
 
+// We store sources so files are only fetched once and shared between
+// Steal and the Less File Manager
+exports.fetch = function(load, fetch){
+	var liveReload = loader.get("live-reload");
+	if(liveReload && liveReload.isReloading()) {
+		removeSource(load.address);
+		return fetch.apply(this, arguments);
+	}
+
+	var p = getSource(load.address);
+	if(p) {
+		return p;
+	}
+
+	p = fetch.call(this, load);
+	addSource(load.address, p);
+	return p;
+};
+
 exports.translate = function(load) {
 	var address = load.address.replace(/^file\:/,"");
 	var useFileCache = true;
@@ -63,6 +82,8 @@ exports.translate = function(load) {
 		})
 		.then(renderLess, renderLess);
 	}
+
+	addSource(load.address, load.source);
 
 	return renderLess();
 };
@@ -125,6 +146,7 @@ if (lessEngine.FileManager) {
 			promise;
 
 		callback = function(err, file) {
+			addSource(file.filename, Promise.resolve(file.contents));
 			if (err) {
 				return _callback.call(self, err);
 			}
@@ -138,7 +160,8 @@ if (lessEngine.FileManager) {
 
 		promise = FileManager.prototype.loadFile.call(this, filename, currentDirectory, options, environment, callback);
 
-		// when promise is returned we must wrap promise, when one is not, the wrapped callback is used
+		// when promise is returned we must wrap promise, when one is not,
+		// the wrapped callback is used
 		if (promise && typeof promise.then == 'function') {
 			return promise.then(function(file) {
 				file._directory = directory;
@@ -146,6 +169,19 @@ if (lessEngine.FileManager) {
 				return self.parseFile(file);
 			});
 		}
+	};
+
+	var doXHR = StealLessManager.prototype.doXHR;
+	StealLessManager.prototype.doXHR = function(url, type, callback, errback){
+		var p = getSource(url);
+		if(p) {
+			return p.then(function(src){
+				callback(src, new Date());
+			}, function(err){
+				errback(err);
+			});
+		}
+		return doXHR.apply(this, arguments);
 	};
 
 	stealLessPlugin = {
@@ -156,6 +192,25 @@ if (lessEngine.FileManager) {
 
 	exports.StealLessManager = StealLessManager;
 }
+
+var getSource = function(url){
+	return loader._lessSources && loader._lessSources[url];
+}
+
+var addSource = function(url, p){
+	if(!loader._lessSources) {
+		loader._lessSources = {};
+	}
+	if(!loader._lessSources[url]) {
+		loader._lessSources[url] = Promise.resolve(p);
+	}
+};
+
+var removeSource = function(url){
+	if(loader._lessSources) {
+		delete loader._lessSources[url];
+	}
+};
 
 var normalizePath = function(path) {
 	var parts = path.split('/'),
