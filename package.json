@@ -51,7 +51,7 @@
     "steal-es6-module-loader": "^0.17.6",
     "steal-less": "0.4.0-pre.0",
     "system-bower": "stealjs/system-bower#v0.2.1",
-    "system-live-reload": "1.5.2",
+    "system-live-reload": "1.5.3",
     "system-npm": "1.0.0-pre.10",
     "system-trace": "0.2.5",
     "testee": "^0.2.0",
