@@ -109,4 +109,12 @@
 		};
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
-		isBrowserWithWindow = !isNode && typeof window !== "undefined";
+		isBrowserWithWindow = !isNode && typeof window !== "undefined",
+		isNW = isNode && (function(){
+			try {
+				return require("nw.gui") !== "undefined";
+			} catch(e) {
+				return false;
+			}
+		})();
+		isNode = isNode && !isNW;

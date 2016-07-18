@@ -109,7 +109,15 @@
 		};
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
-		isBrowserWithWindow = !isNode && typeof window !== "undefined";
+		isBrowserWithWindow = !isNode && typeof window !== "undefined",
+		isNW = isNode && (function(){
+			try {
+				return require("nw.gui") !== "undefined";
+			} catch(e) {
+				return false;
+			}
+		})();
+		isNode = isNode && !isNW;
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -1102,7 +1110,7 @@ function addEnv(loader){
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(isBrowserWithWindow) {
+		} else if(isBrowserWithWindow || isNW) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
@@ -1313,7 +1321,7 @@ if (typeof System !== "undefined") {
   addSteal(System);
 }
 
-	if( isNode ) {
+	if( isNode && !isNW ) {
 		require('steal-systemjs');
 
 		global.steal = makeSteal(System);

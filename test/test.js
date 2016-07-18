@@ -458,4 +458,9 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/leak/index.html");
 	});
 
+	module("nw.js");
+
+	asyncTest("it works", function(){
+		makeIframe("nw/nw.html");
+	});
 })();
