@@ -55,7 +55,7 @@ If you want to load a script from a CDN in all environments:
 * Load the file using a script tag
 * Configure Steal to use the previously loaded file
 
-### Load Using a <script> Tag and Configure Steal to use Loaded Version
+### Load Using a &lt;script&gt; Tag and Configure Steal to use Loaded Version
 
 ```
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
