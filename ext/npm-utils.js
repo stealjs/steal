@@ -311,7 +311,7 @@ var utils = {
 				utils.path.removePackage( pkg.fileUrl ) :
 				utils.path.pkgDir(pkg.fileUrl);
 
-			var lib = pkg.system && pkg.system.directories && pkg.system.directories.lib;
+			var lib = utils.pkg.directoriesLib(pkg);
 			if(lib) {
 				root = utils.path.joinURIs(utils.path.addEndingSlash(root), lib);
 			}
@@ -416,6 +416,20 @@ var utils = {
 				url = utils.pkg.folderAddress(url);
 				return loader.npmPaths[url];
 			}
+		},
+		directoriesLib: function(pkg) {
+			var system = pkg.system;
+			var lib = system && system.directories && system.directories.lib;
+			var ignores = [".", "/"], ignore;
+			
+			if(!lib) return undefined;
+
+			while(!!(ignore = ignores.shift())) {
+				if(lib[0] === ignore) {
+					lib = lib.substr(1);
+				}
+			}
+			return lib;
 		},
 		hasDirectoriesLib: function(pkg) {
 			var system = pkg.system;
