@@ -22,36 +22,46 @@ exports.translate = function(load) {
 	}
 
 	function renderLess() {
-		return new Promise(function(resolve, reject){
-			var renderOptions = {
-				filename: address,
-				useFileCache: useFileCache
-			};
-			for (var prop in options){
+		var renderOptions = {
+			filename: address,
+			useFileCache: useFileCache
+		};
+		var pluginPromises = [];
+
+		for (var prop in options){
+			if( prop !== 'plugins') {
 				renderOptions[prop] = options[prop];
 			}
-			renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
+		}
+		renderOptions.paths = (options.paths || []).concat(pathParts.join('/'));
 
-			renderOptions.plugins = (options.plugins || []);
-			if (stealLessPlugin !== undefined) {
-				renderOptions.plugins.push(stealLessPlugin);
-			}
+		renderOptions.plugins = [];
+		if(options.plugins) {
+			options.plugins.forEach(function(plugin) {
+				if(typeof plugin === 'string') {
+					pluginPromises.push(loader.import(plugin).then(function(resolvedPlugin){
+						renderOptions.plugins.push(resolvedPlugin);
+					}));
+				}
+			});
+		}
+		if (stealLessPlugin !== undefined) {
+			renderOptions.plugins.push(stealLessPlugin);
+		}
 
-			renderOptions.relativeUrls = options.relativeUrls === undefined ? true : options.relativeUrls;
+		renderOptions.relativeUrls = options.relativeUrls === undefined ? true : options.relativeUrls;
 
-			var done = function(output) {
-				// Put the source map on metadata if one was created.
-				load.metadata.map = output.map;
-				load.metadata.includedDeps = output.imports || [];
-				resolve(output.css);
-			};
+		var done = function(output) {
+			// Put the source map on metadata if one was created.
+			load.metadata.map = output.map;
+			load.metadata.includedDeps = output.imports || [];
+			return output.css;
+		};
 
-			var fail = function(error) {
-				reject(error);
-			};
-
-			lessEngine.render(load.source, renderOptions).then(done, fail);
+		return Promise.all(pluginPromises).then(function(){
+			return lessEngine.render(load.source, renderOptions).then(done);
 		});
+
 	}
 
 	if(loader.liveReloadInstalled) {
