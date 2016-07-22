@@ -967,7 +967,9 @@
 		
 		<section class="comment">
 			<h2>Use</h2>
-<p>You can see the list of possible options in the less <a href="http://lesscss.org/usage/index.html#command-line-usage-options">docs page</a>. One of the available options is <code>strictMath</code>, which by default, the less compiler will process all maths in your css.</p>
+<p>You can see the list of possible options in the less <a href="http://lesscss.org/usage/index.html#command-line-usage-options">docs page</a>.</p>
+<h3>strictMath</h3>
+<p>One of the available options is <code>strictMath</code>, which by default, the less compiler will process all maths in your css.</p>
 <pre><code>.foo {
     height: calc(100% - 10px);
 }
@@ -990,7 +992,28 @@
     height: calc(100% - 5px);
 }
 </code></pre>
+<h3>paths</h3>
 <p>You can also provide <code>lessOptions.paths</code> (array) option which will be used to resolve imports (see less/css docs).</p>
+<h3>plugins</h3>
+<p>You can also provide an array of plugins for the less compiler to use. Each entry should be the path to the plugin in your project.</p>
+<p>If you want to use <a href="https://www.npmjs.com/package/less-plugin-autoprefix"><code>less-plugin-autoprefixer</code></a>, you create a file that exports the configured plugin:</p>
+<pre><code>// src/steal/less/autoprefixer.js
+const autoprefixPlugin = require('less-plugin-autoprefix'); 
+const config = {
+  browsers: [&quot;last 2 versions&quot;]
+};
+module.exports = new autoprefixPlugin(config);
+</code></pre>
+<p>Then add the path of the file to the <code>plugins</code> array:</p>
+<pre><code>System.config({
+    main: &quot;myapp&quot;,
+    lessOptions: {
+        plugins: [&quot;myapp/steal/less/autoprefixer&quot;]
+    }
+});
+</code></pre>
+<p>Now all LESS files will go through the autoprefixer plugin.</p>
+<h3>filename</h3>
 <p><code>lessOptions.filename</code> are used internally by StealJS and any value
 provided will be ignored.</p>
 
