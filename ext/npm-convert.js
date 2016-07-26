@@ -68,9 +68,12 @@ function convertSystem(context, pkg, system, root, ignoreWaiting) {
 				info.system = config;
 			}
 
+			// Temporarily remove system.main so that it doesn't set System.main
+			var systemMain = config.main;
 			delete config.main;
 			delete config.transpiler;
 			context.loader.config(config);
+			config.main = systemMain;
 		});
 	}
 

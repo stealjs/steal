@@ -43,7 +43,7 @@ var utils = {
 		for(; i < len; i++) {
 			res = fn.call(arr, arr[i]);
 			if(res) {
-				out.push(res);
+				out.push(arr[i]);
 			}
 		}
 		return out;
