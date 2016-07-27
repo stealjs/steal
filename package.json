@@ -20,7 +20,7 @@
     "steal-css": "0.4.1",
     "steal-less": "0.3.4",
     "system-npm": "0.6.26",
-    "system-live-reload": "1.4.0",
+    "system-live-reload": "1.5.3",
     "system-trace": "0.2.6",
     "steal-env": "^1.0.0",
     "babel-core": "5.8.14",
