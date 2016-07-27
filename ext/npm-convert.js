@@ -290,8 +290,7 @@ function convertToPackage(context, pkg, index) {
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
 			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
 			jspm: convertJspm(pkg, pkg.jspm),
-			jam: convertJspm(pkg, pkg.jam),
-			resolutions: {}
+			jam: convertJspm(pkg, pkg.jam)
 		};
 		packages.push(localPkg);
 		packages[nameAndVersion] = true;
