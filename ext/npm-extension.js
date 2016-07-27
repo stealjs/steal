@@ -110,8 +110,13 @@ exports.addExtension = function(System){
 					}
 				}
 			} else {
-				depPkg = utils.pkg.findDep(this, refPkg,
-										   parsedModuleName.packageName);
+				if(isRoot) {
+					depPkg = utils.pkg.findDepWalking(this, refPkg,
+													  parsedModuleName.packageName);
+				} else {
+					depPkg = utils.pkg.findDep(this, refPkg, 
+											   parsedModuleName.packageName);
+				}
 			}
 		}
 
@@ -133,7 +138,7 @@ exports.addExtension = function(System){
 		if(!isThePackageWeWant) {
 			depPkg = undefined;
 		} else if(isDev && depPkg) {
-			utils.pkg.saveResolution(refPkg, depPkg);
+			utils.pkg.saveResolution(context, refPkg, depPkg);
 		}
 
 		// It could be something like `fs` so check in globals

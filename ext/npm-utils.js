@@ -385,6 +385,33 @@ var utils = {
 				return pkg;
 			}
 		},
+		/**
+		 * Walks up npmPaths looking for a [name]/package.json.  Returns
+		 * the package data it finds.
+		 *
+		 * @param {Loader} loader
+		 * @param {NpmPackage} refPackage
+		 * @param {packgeName} name the package name we are looking for.
+		 *
+		 * @return {undefined|NpmPackage}
+		 */
+		findDepWalking: function (loader, refPackage, name) {
+			if(loader.npm && refPackage && !utils.path.startsWithDotSlash(name)) {
+				// Todo .. first part of name
+				var curPackage = utils.path.depPackageDir(refPackage.fileUrl, name);
+				while(curPackage) {
+					var pkg = loader.npmPaths[curPackage];
+					if(pkg) {
+						return pkg;
+					}
+					var parentAddress = utils.path.parentNodeModuleAddress(curPackage);
+					if(!parentAddress) {
+						return;
+					}
+					curPackage = parentAddress+"/"+name;
+				}
+			}
+		},
 		findByName: function(loader, name) {
 			if(loader.npm && !utils.path.startsWithDotSlash(name)) {
 				return loader.npm[name];
@@ -432,8 +459,10 @@ var utils = {
 				return out;
 			}
 		},
-		saveResolution: function(refPkg, pkg){
-			refPkg.resolutions[pkg.name] = pkg.version;
+		saveResolution: function(context, refPkg, pkg){
+			var npmPkg = utils.pkg.findPackageInfo(context, refPkg);
+			npmPkg.resolutions[pkg.name] = refPkg.resolutions[pkg.name] =
+				pkg.version;
 		}
 	},
 	path: {
