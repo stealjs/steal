@@ -92,6 +92,7 @@ exports.addExtension = function(System){
 
 		var context = this.npmContext;
 		var crawl = context && context.crawl;
+		var isDev = !!crawl;
 		if(!depPkg) {
 			if(crawl && !isRoot) {
 				var parentPkg = nameIsRelative ? null :
@@ -109,9 +110,8 @@ exports.addExtension = function(System){
 					}
 				}
 			} else {
-
-			//if(!depPkg) {
-				depPkg = utils.pkg.findDep(this, refPkg, parsedModuleName.packageName);
+				depPkg = utils.pkg.findDep(this, refPkg,
+										   parsedModuleName.packageName);
 			}
 		}
 
@@ -128,10 +128,12 @@ exports.addExtension = function(System){
 			depPkg = utils.pkg.findByName(this, parsedModuleName.packageName);
 		}
 
-		var isThePackageWeWant = !crawl || !depPkg ||
+		var isThePackageWeWant = !isDev || !depPkg ||
 			(wantedPkg ? crawl.pkgSatisfies(depPkg, wantedPkg.version) : true);
 		if(!isThePackageWeWant) {
 			depPkg = undefined;
+		} else if(isDev && depPkg) {
+			utils.pkg.saveResolution(refPkg, depPkg);
 		}
 
 		// It could be something like `fs` so check in globals
