@@ -70,7 +70,8 @@ exports.translate = function(load){
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
 					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
 					jspm: convert.jspm(pkg, pkg.jspm),
-					jam: convert.jspm(pkg, pkg.jam)
+					jam: convert.jspm(pkg, pkg.jam),
+					resolutions: {}
 				});
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
