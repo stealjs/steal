@@ -18,6 +18,36 @@
 			-moz-border-radius: 5px;
 			-webkit-border-radius: 5px;
 		}
+		h2 {
+			text-align: center;
+			font-weight: 600;
+			margin-top: 100px;
+			margin-bottom: 18px;
+		}
+		.logos {
+			padding: 28px 24px 0;
+		}
+		.logos .row {
+			padding-bottom: 50px;
+			display: -webkit-flex;
+			display: flex;
+			justify-content: -webkit-space-between;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.logos .row.group-middle {
+			padding-left: 250px;
+			padding-right: 250px;
+			padding-bottom: 0;
+		}
+		p.action-link {
+			text-align: center;
+			font-size: 24px;
+			padding-top: 22px;
+		}
+		#stealjspluginsanimation_hype_container {
+			cursor: pointer;
+		}
   </style>
 </head>
 <body>
@@ -96,13 +126,42 @@
 				Build Tools:
 				<pre><code>> npm install steal-tools --save-dev</code></pre>
 			</div>
-      <h3>Why StealJS</h3>
+
+			<h2>Works with your favorite tech</h2>
+			<div class="logos">
+				<div class="row">
+					<a href="http://donejs.com"><img src="/img/logo-donejs.svg" alt="DoneJS"></a>
+					<a href="https://github.com/stealjs/steal-canjs-example"><img src="/img/logo-canjs.svg" alt="CanJS"></a>
+					<a href="https://github.com/stealjs/react-example"><img src="/img/logo-react.svg" alt="React"></a>
+					<a href="https://github.com/stealjs/steal-angular2-example"><img src="/img/logo-angular.svg" alt="Angular 2"></a>
+					<a href="https://github.com/stealjs/vuejs-example"><img src="/img/logo-vue.svg" alt="VueJS"></a>
+				</div>
+				<div class="row">
+					<a href="https://github.com/stealjs/steal-cordova"><img src="/img/logo-cordova.png" alt="Apache Cordova / PhoneGap"></a>
+					<a href="https://github.com/stealjs/system-npm"><img src="/img/logo-npm.svg" alt="npm"></a>
+					<a href="https://github.com/ilyavf/steal-coffee"><img src="/img/logo-coffeescript.svg" alt="CoffeeScript"></a>
+					<a href="https://github.com/stealjs/steal-less"><img src="/img/logo-less.svg" alt="Less"></a>
+					<a href="https://github.com/stealjs/steal-sass"><img src="/img/logo-sass.svg" alt="Sass"></a>
+				</div>
+				<div class="row group-middle">
+					<a href="http://stealjs.com/docs/syntax.es6.html"><img src="/img/logo-es6.png" alt="JavaScript ES6"></a>
+					<a href="http://stealjs.com/docs/$css.html"><img src="/img/logo-css3.svg" alt="CSS 3"></a>
+				</div>
+			</div>
+
+			<h2>Easy to extend with your own plugins</h2>
+			<div id="stealjspluginsanimation_hype_container" style="margin:auto;position:relative;width:320px;height:474px;overflow:hidden;" aria-live="polite" onclick="window.location.href = 'http://stealjs.com/docs/StealJS.writing-plugins.html'">
+				<script type="text/javascript" charset="utf-8" src="/img/stealjs-plugins-animation.hyperesources/stealjspluginsanimation_hype_generated_script.js?10184"></script>
+			</div>
+			<p class="action-link"><a href="http://stealjs.com/docs/StealJS.writing-plugins.html">Learn how to make a plugin</a></p>
+
+      <h2>Why StealJS</h2>
       <div class="videos" style="text-align: center;">
         <iframe width="395" height="222" src="https://www.youtube.com/embed/C-kM0v9L9UY" frameborder="0" allowfullscreen></iframe>
         <iframe width="395" height="222" src="https://www.youtube.com/embed/eIfUsPdKF4A" frameborder="0" allowfullscreen></iframe>
       </div>
 			<div class="embed-outer-wrap">
-        <h3>Latest Activity</h3>
+        <h2>Latest Activity</h2>
 				<div class="embed-wrap">
 					<a href="http://bithub.com/embed?hubId=1&tenant=charming_volcano_7196_1&view=public" class="bithub-embed">StealJS Embed</a><script src="http://bithub.com/embed.js"></script>
 				</div>

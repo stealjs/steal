@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="163px" height="163px" viewBox="0 0 163 163" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.7.2 (28276) - http://www.bohemiancoding.com/sketch -->
+    <title>steal-bare-logo</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-1014.000000, -1223.000000)">
+            <g id="steal-bare-logo" transform="translate(1014.000000, 1223.000000)">
+                <g id="Group" transform="translate(5.000000, 17.000000)" fill="#E6E7E8">
+                    <path d="M70.7,71.2 L70.4,71.2 L1.7,52.8 C1.3,52.7 0.9,52.3 0.8,51.9 C0.7,51.5 0.8,51 1.1,50.7 L50.8,1 C51.1,0.7 51.6,0.6 52,0.7 L120.6,19.1 C121,19.2 121.4,19.6 121.5,20 C121.6,20.4 121.5,20.9 121.2,21.2 L71.5,70.9 C71.3,71.1 71,71.2 70.7,71.2 L70.7,71.2 Z M4.4,50.9 L70.3,68.5 L118,20.9 L52.1,3.3 L4.4,50.9 L4.4,50.9 Z" id="Shape"></path>
+                    <path d="M89,139.9 L88.7,139.9 C88.3,139.8 87.9,139.4 87.8,139 L69.4,70.4 C69.3,70 69.4,69.5 69.7,69.2 L119.4,19.5 C119.7,19.2 120.2,19.1 120.6,19.2 C121,19.3 121.4,19.7 121.5,20.1 L139.9,88.8 C140,89.2 139.9,89.7 139.6,90 L89.9,139.7 C89.7,139.8 89.3,139.9 89,139.9 L89,139.9 Z M72,70.4 L89.6,136.3 L137.3,88.6 L119.7,22.7 L72,70.4 L72,70.4 Z" id="Shape"></path>
+                    <path d="M89.2,139.7 L89,139.7 L88.2,139.5 L20.2,121.3 C19.8,121.2 19.4,120.8 19.3,120.4 L0.9,51.7 C0.8,51.3 0.9,50.8 1.2,50.5 C1.5,50.2 2,50.1 2.4,50.2 L71.1,68.6 C71.5,68.7 71.9,69.1 72,69.5 L90.4,138.1 C90.5,138.5 90.4,139 90.1,139.3 C89.9,139.6 89.5,139.7 89.2,139.7 L89.2,139.7 Z M21.5,119.1 L87.4,136.8 L69.7,70.9 L3.8,53.2 L21.5,119.1 L21.5,119.1 Z" id="Shape"></path>
+                </g>
+                <polygon id="Shape" fill="#AAAAAA" points="56.3 0.2 56.4 0.6 67.1 40.5 107 51.2 107.5 51.3 96.7 11"></polygon>
+                <polygon id="Shape" fill="#D1D3D4" points="49.9 2.6 21 31.5 31.7 71.4 60.6 42.5"></polygon>
+                <polygon id="Shape" fill="#AAAAAA" points="35.8 76 75.7 86.7 104.6 57.8 64.7 47.1"></polygon>
+                <polygon id="Shape" fill="#D1D3D4" points="111.7 55.6 111.8 56 122.5 95.9 162.4 106.6 162.9 106.7 152.1 66.4"></polygon>
+                <polygon id="Shape" fill="#D1D3D4" points="104.6 57.8 75.7 86.7 86.4 126.6 115.3 97.7"></polygon>
+                <polygon id="Shape" fill="#AAAAAA" points="91.8 131.4 131.7 142.1 160.6 113.2 120.7 102.5"></polygon>
+                <polygon id="Shape" fill="#F1F2F2" points="35.8 75.9 35.9 76.3 46.5 115.8 86 126.4 86.5 126.5 75.8 86.6"></polygon>
+                <polygon id="Shape" fill="#AAAAAA" points="29.4 78.3 0.5 107.3 11.2 147.2 40.1 118.3"></polygon>
+                <polygon id="Shape" fill="#D1D3D4" points="15.8 151.8 55.8 162.5 84.7 133.6 44.8 122.9"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>
