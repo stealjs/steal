@@ -351,6 +351,15 @@
 					loader.set(name,  loader.newModule(value));
 				});
 			}
+		},
+		traceur: {
+			set: function(opts) {
+				this.import("@traceur").then(function() {
+					each(opts || {}, function(value, name) {
+						traceur.options[name] = value;
+					});
+				});
+			}
 		}
 	});
 
