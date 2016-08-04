@@ -1,5 +1,5 @@
 steal.config({
-	paths: {
+	"paths": {
 		"steal/*" : "../*.js",
 		"@traceur": "traceur/traceur.js"
 	}

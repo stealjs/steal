@@ -8,7 +8,8 @@ if(typeof window === "undefined" || window.noConfig !== true)  {
 			"pathed/pathed": "basics/pathed.js"
 		},
 		map: {
-			"mapd/mapd": "map/mapped"
+			"mapd/mapd": "map/mapped",
+			"hello.js": "basics/commonjs/salute"
 		}
 	});
 
