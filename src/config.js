@@ -307,7 +307,7 @@
 					if(this.configMain === "@config" && last(parts) === "steal") {
 						parts.pop();
 						if(last(parts) === "node_modules") {
-							this.configMain = "package.json!npm";
+							this.config({config: "package.json!npm"});
 							addProductionBundles.call(this);
 							parts.pop();
 						}
@@ -321,17 +321,19 @@
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							if ( last(parts) === "bower_components" ) {
-								System.configMain = "bower.json!bower";
+								this.config({config: "bower.json!bower"});
 								addProductionBundles.call(this);
 								parts.pop();
 							}
 							if (last(parts) === "node_modules") {
-								System.configMain = "package.json!npm";
+								this.config({config: "package.json!npm"});
 								addProductionBundles.call(this);
-								parts.pop();
+								parts.length = 0;
 							}
 						}
-						this.config({ baseURL: parts.join("/")+"/"});
+						if(parts.length){
+							this.config({ baseURL: parts.join("/")+"/"});
+						}
 					}
 				}
 				System.stealPath = dirname;
