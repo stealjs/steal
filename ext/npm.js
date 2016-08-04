@@ -41,13 +41,21 @@ exports.translate = function(load){
 		npmLoad: npmLoad,
 		crawl: crawl,
 		resavePackageInfo: resavePackageInfo,
-		forwardSlashMap: {}
+		forwardSlashMap: {},
+		// default file structure for npm 3 and higher
+		isFlatFileStructure: true
 	};
 	this.npmContext = context;
 	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
 	crawl.processPkgSource(context, pkg, load.source);
-	if(pkg.system && pkg.system.npmAlgorithm === "flat") {
-		context.isFlatFileStructure = true;
+	var pkgName = pkg.name;
+
+	// backwards compatible for < npm 3
+	if(pkg.system && pkg.system.npmAlgorithm === "nested") {
+		context.isFlatFileStructure = false;
+	} else {
+		pkg.system = pkg.system || {};
+		pkg.system.npmAlgorithm = "flat";
 	}
 
 	return crawl.deps(context, pkg, true).then(function(){
@@ -58,6 +66,10 @@ exports.translate = function(load){
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){
 					delete pkg.browser.transform;
+				}
+				if(pkg.system && pkg.system.npmAlgorithm === "nested" && context.isFlatFileStructure === true) {
+					utils.warn("Different npmAlgorithm between '" + pkgName +"' " +
+						"and '" + pkg.name + "'. Do not mix npmAlgorithm between npm modules!")
 				}
 				packages.push({
 					name: pkg.name,

@@ -67,10 +67,18 @@ var utils = {
 		var w = this._warnings = this._warnings || {};
 		if(w[msg]) return;
 		w[msg] = true;
-		if(typeof steal !== "undefined" && typeof console !== "undefined" &&
-		  console.warn) {
+		this.warn(msg);
+	},
+	warn: function(msg){
+		if(typeof steal !== "undefined" && typeof console !== "undefined" && console.warn) {
 			steal.done().then(function(){
-				console.warn(msg);
+				if(steal.dev && steal.dev.warn){
+					steal.dev.warn(msg)
+				} else if(console.warn) {
+					console.warn("steal.js WARNING: "+msg);
+				} else {
+					console.log(msg);
+				}
 			});
 		}
 	},

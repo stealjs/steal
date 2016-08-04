@@ -8,6 +8,31 @@ var makeSteal = function(config){
 	return localSteal;
 };
 
+describe("default cofiguration", function () {
+	this.timeout(20000);
+
+	it("without any configuration", function (done) {
+		var steal = makeSteal();
+		steal.startup().then(function(){
+			assert.equal(steal.System.transpiler, 'traceur');
+			assert.equal(steal.System.paths['@config'], "stealconfig.js");
+			done();
+		},done);
+	});
+
+	it("with a npm configuration", function (done) {
+		var steal = makeSteal({
+			config: __dirname+"/npm-deep/package.json!npm"
+		});
+		steal.startup().then(function(){
+			assert.equal(steal.System.transpiler, 'traceur');
+			assert.equal(steal.System.configMain, 'package.json!npm');
+			assert.strictEqual(steal.System.npmContext.isFlatFileStructure, true);
+			done();
+		},done);
+	});
+});
+
 describe("plugins", function(){
 	this.timeout(20000);
 
