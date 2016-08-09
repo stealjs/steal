@@ -112,7 +112,8 @@ var translateConfig = function(loader, packages, options){
 			env: {
 				NODE_ENV: loader.env
 			},
-			version: ''
+			version: '',
+			platform: (navigator && navigator.userAgent && /Windows/.test(navigator.userAgent)) ? "win" : ""
 		};
 	}
 
