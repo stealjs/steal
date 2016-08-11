@@ -542,7 +542,7 @@ function applyTraceExtension(loader){
 		return res;
 	};
 
-	var esImportDepsExp = /import .*["'](.+)["']/g;
+	var esImportDepsExp = /import [\s\S]*?["'](.+)["']/g;
 	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
 	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 	var stringRegEx = /(?:("|')[^\1\\\n\r]*(?:\\.[^\1\\\n\r]*)*\1|`[^`]*`)/g;
