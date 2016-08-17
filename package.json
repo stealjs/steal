@@ -46,7 +46,7 @@
     "grunt-simple-mocha": "^0.4.0",
     "jquery": "^1.11.0",
     "qunitjs": "~1.12.0",
-    "steal-css": "0.5.0",
+    "steal-css": "0.5.1",
     "steal-env": "^1.0.0",
     "steal-es6-module-loader": "^0.17.6",
     "steal-less": "0.4.0-pre.0",

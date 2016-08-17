@@ -21,16 +21,26 @@ var onloadCss = function(link, cb){
 	});
 };
 
-
 if(isProduction()) {
 	exports.fetch = function(load) {
 		// inspired by https://github.com/filamentgroup/loadCSS
+
+		var styleSheets = document.styleSheets;
 
 		// wait until the css file is loaded
 		return new Promise(function(resolve, reject) {
 			var timeout = setTimeout(function() {
 				reject('Unable to load CSS');
 			}, waitSeconds * 1000);
+
+			// if found a stylesheet with the same address
+			// resolve this promise without adding a link element to the page.
+			for (var i = 0; i < styleSheets.length; ++i) {
+				if(load.address === styleSheets[i].href){
+					resolve('');
+					return;
+				}
+			}
 
 			var link = document.createElement('link');
 			link.type = 'text/css';
@@ -67,6 +77,11 @@ if(isProduction()) {
 
 			document.head.appendChild(link);
 
+			// if after appending link styleSheet and the length is still 0 we call always loadCB()
+			// this is a bad workaround for the Zombie.js browser
+			if(document.styleSheets.length === 0) {
+				loadCB();
+			}
 		});
 	};
 
