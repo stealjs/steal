@@ -12,20 +12,32 @@ options.optimization |= lessEngine.optimization;
 // We store sources so files are only fetched once and shared between
 // Steal and the Less File Manager
 exports.fetch = function(load, fetch){
-	var liveReload = loader.get("live-reload");
-	if(liveReload && liveReload.isReloading()) {
-		removeSource(load.address);
-		return fetch.apply(this, arguments);
+	var p = Promise.resolve(false);
+	if(this.liveReloadInstalled) {
+		var loader = this, args = arguments;
+		p = loader.import("live-reload", { name: module.id })
+		.then(function(liveReload){
+			return liveReload.isReloading();
+		});
 	}
 
-	var p = getSource(load.address);
-	if(p) {
+	var loader = this, args = arguments;
+
+	return p.then(function(isReloading){
+		if(isReloading) {
+			removeSource(load.address);
+			return fetch.apply(loader, args);
+		}
+
+		var p = getSource(load.address);
+		if(p) {
+			return p;
+		}
+
+		p = fetch.call(loader, load);
+		addSource(load.address, p);
 		return p;
-	}
-
-	p = fetch.call(this, load);
-	addSource(load.address, p);
-	return p;
+	});
 };
 
 exports.translate = function(load) {
