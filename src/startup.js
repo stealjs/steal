@@ -21,14 +21,7 @@
 					var optionName = camelize(paramParts[0]);
 					// make options uniform e.g. baseUrl => baseURL
 					optionName = optionName.replace(urlRegEx, "URL")
-
-					// need to know if it is `main`, because we
-					// have to normalize the main
-					if(optionName.toLowerCase() === "main") {
-						queryOptions.queryMain = paramParts[1];
-					}else {
-						queryOptions[optionName] = paramParts[1];
-					}
+					queryOptions[optionName] = paramParts.slice(1).join("=");
 				}
 			}
 		}

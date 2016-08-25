@@ -261,21 +261,11 @@
 		config: configSetter(10),
 		configPath: configSetter(11),
 		baseURL: fileSetter("baseURL", 12),
-		queryMain: {
-			order: 13,
-			set: function(val){
-				// if we configured the main via query like steal.js?main=main
-				// this is formally used by webworkers
-				// note, that "main"-config-setter if after "queryMain"
-				// so script tags ever wins!
-				valueSetter("main").set.call(this, normalize(val) );
-			}
-		},
-		main: valueSetter("main", 14),
+		main: valueSetter("main", 13),
 		// this gets called with the __dirname steal is in
 		// directly called from steal-tools
 		stealPath: {
-			order: 15,
+			order: 14,
 			set: function(dirname, cfg) {
 				dirname = envPath(dirname);
 				var parts = dirname.split("/");
@@ -349,7 +339,7 @@
 			}
 		},
 		stealURL: {
-			order: 16,
+			order: 15,
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
 				var urlParts = url.split("?"),
@@ -394,7 +384,6 @@
 	 configPath
 	 baseURL
 	 main
-	 queryMain
 	 stealPath
 	 stealURL
 	 */

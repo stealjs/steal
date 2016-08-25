@@ -1,4 +1,4 @@
-
+debugger;
 var worker = new Worker(System.stealURL+"?main=webworkers/worker&config="+System.configPath);
 
 worker.addEventListener("message", function(ev){
