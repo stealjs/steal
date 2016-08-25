@@ -6101,7 +6101,7 @@ if (typeof System !== "undefined") {
 		// this gets called with the __dirname steal is in
 		// directly called from steal-tools
 		stealPath: {
-			order: 14,
+			order: 15,
 			set: function(dirname, cfg) {
 				dirname = envPath(dirname);
 				var parts = dirname.split("/");
@@ -6175,7 +6175,7 @@ if (typeof System !== "undefined") {
 			}
 		},
 		stealURL: {
-			order: 15,
+			order: 16,
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
 				var urlParts = url.split("?"),
@@ -6220,6 +6220,7 @@ if (typeof System !== "undefined") {
 	 configPath
 	 baseURL
 	 main
+	 queryMain
 	 stealPath
 	 stealURL
 	 */
@@ -6293,12 +6294,13 @@ function addEnv(loader){
 					// make options uniform e.g. baseUrl => baseURL
 					optionName = optionName.replace(urlRegEx, "URL")
 
+					// need to know if it is `main`, because we
+					// have to normalize the main
 					if(optionName.toLowerCase() === "main") {
 						queryOptions.queryMain = paramParts[1];
 					}else {
 						queryOptions[optionName] = paramParts[1];
 					}
-
 				}
 			}
 		}
