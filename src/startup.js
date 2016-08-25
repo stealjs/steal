@@ -21,18 +21,13 @@
 					var optionName = camelize(paramParts[0]);
 					// make options uniform e.g. baseUrl => baseURL
 					optionName = optionName.replace(urlRegEx, "URL")
-					queryOptions[optionName] = paramParts.slice(1).join("=");
-				} else {
-					/// like /steal.js?basics&production
-					if(steal.dev) {
-						steal.dev.warn("Please use query params like ?main=main&env=production");
-					}
-					var oldParamParts = searchPart.split(",");
-					if (oldParamParts[0]) {
-						queryOptions.queryMain = oldParamParts[0];
-					}
-					if (oldParamParts[1]) {
-						queryOptions.env = oldParamParts[1];
+
+					// need to know if it is `main`, because we
+					// have to normalize the main
+					if(optionName.toLowerCase() === "main") {
+						queryOptions.queryMain = paramParts[1];
+					}else {
+						queryOptions[optionName] = paramParts[1];
 					}
 				}
 			}

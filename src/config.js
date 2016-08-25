@@ -264,7 +264,7 @@
 		queryMain: {
 			order: 13,
 			set: function(val){
-				// if we configured the main via query like steal.js?main
+				// if we configured the main via query like steal.js?main=main
 				// this is formally used by webworkers
 				// note, that "main"-config-setter if after "queryMain"
 				// so script tags ever wins!
@@ -393,8 +393,9 @@
 	 config
 	 configPath
 	 baseURL
-	 queryMain
 	 main
+	 queryMain
+	 stealPath
 	 stealURL
 	 */
 	each(specialConfig, function(setter, name){
