@@ -154,19 +154,19 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("basics with generated html", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../../steal.js?basics" data-config="../config.js"'));
+				'src="../../steal.js?main=basics/basics" data-config="../config.js"'));
 		});
 
 		asyncTest("default config path", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../steal.js?basics"'));
+				'src="../steal.js?main=basics/basics"'));
 		});
 
 		asyncTest("default config path", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../steal/steal.js?basics"'));
+				'src="../steal/steal.js?main=basics/basics"'));
 		});
 
 		asyncTest("jsx is enabled by default", function(){
@@ -186,7 +186,7 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("default bower_components config path", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../bower_components/steal/steal.js?basics"'));
+				'src="../bower_components/steal/steal.js?main=basics/basics"'));
 		});
 
 		asyncTest("default bower_components without config still works", function(){
@@ -202,7 +202,7 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("read config", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../../steal.js?configed" data-config="../config.js"'));
+				'src="../../steal.js?main=configed/configed" data-config="../config.js"'));
 		});
 	}
 
@@ -257,7 +257,7 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("Using path's * qualifier", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
-			'src="../steal.js?../paths" data-config="../paths/config.js"'));
+			'src="../steal.js?main=../paths" data-config="../paths/config.js"'));
 	});
 
 	// Less doesn't work in ie8

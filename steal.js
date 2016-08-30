@@ -6087,21 +6087,11 @@ if (typeof System !== "undefined") {
 		config: configSetter(10),
 		configPath: configSetter(11),
 		baseURL: fileSetter("baseURL", 12),
-		queryMain: {
-			order: 13,
-			set: function(val){
-				// if we configured the main via query like steal.js?main
-				// this is formally used by webworkers
-				// note, that "main"-config-setter if after "queryMain"
-				// so script tags ever wins!
-				valueSetter("main").set.call(this, normalize(val) );
-			}
-		},
-		main: valueSetter("main", 14),
+		main: valueSetter("main", 13),
 		// this gets called with the __dirname steal is in
 		// directly called from steal-tools
 		stealPath: {
-			order: 15,
+			order: 14,
 			set: function(dirname, cfg) {
 				dirname = envPath(dirname);
 				var parts = dirname.split("/");
@@ -6175,7 +6165,7 @@ if (typeof System !== "undefined") {
 			}
 		},
 		stealURL: {
-			order: 16,
+			order: 15,
 			// http://domain.com/steal/steal.js?moduleName,env&
 			set: function(url, cfg)	{
 				var urlParts = url.split("?"),
@@ -6219,8 +6209,9 @@ if (typeof System !== "undefined") {
 	 config
 	 configPath
 	 baseURL
-	 queryMain
 	 main
+	 queryMain
+	 stealPath
 	 stealURL
 	 */
 	each(specialConfig, function(setter, name){
@@ -6293,18 +6284,6 @@ function addEnv(loader){
 					// make options uniform e.g. baseUrl => baseURL
 					optionName = optionName.replace(urlRegEx, "URL")
 					queryOptions[optionName] = paramParts.slice(1).join("=");
-				} else {
-					/// like /steal.js?basics&production
-					if(steal.dev) {
-						steal.dev.warn("Please use query params like ?main=main&env=production");
-					}
-					var oldParamParts = searchPart.split(",");
-					if (oldParamParts[0]) {
-						queryOptions.queryMain = oldParamParts[0];
-					}
-					if (oldParamParts[1]) {
-						queryOptions.env = oldParamParts[1];
-					}
 				}
 			}
 		}
