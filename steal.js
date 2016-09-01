@@ -6210,7 +6210,6 @@ if (typeof System !== "undefined") {
 	 configPath
 	 baseURL
 	 main
-	 queryMain
 	 stealPath
 	 stealURL
 	 */
