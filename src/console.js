@@ -1,3 +1,4 @@
 if(typeof console === "undefined") {
-	console = { log: function(){} };
+	console = {};
+	console.log = console.error = console.warn = console.info = console.clear = function(){};
 }
