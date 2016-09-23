@@ -1,3 +1,11 @@
 if(typeof console === "undefined") {
-	console = { log: function(){} };
+	var noop = function() {};
+
+	console = {
+		log: noop,
+		error: noop,
+		warn: noop,
+		info: noop,
+		clear: noop
+	};
 }
