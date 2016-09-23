@@ -16,6 +16,7 @@ module.exports = function (grunt) {
 	concat: {
 	  dist: {
 		src: [
+			"src/console.js",
 			"bower_components/es6-module-loader/dist/es6-module-loader.src.js",
 			"bower_components/systemjs/dist/system.src.js",
 			"src/start.js",
