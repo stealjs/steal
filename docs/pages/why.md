@@ -101,8 +101,8 @@ Up until this point we have been concentrating on nailing the basics but now hav
 Lastly, StealJS has a long-standing commitment to backwards compatibility. Even though StealJS is now built on a completely different codebase than it was just a year ago it is mostly compatible with applications that use Legacy Steal with just a few minor config changes. We won't abandon our users when a breaking change comes; there will always be a bridge that makes upgrading your application something that can be done in a day or so.
 
  [1]: https://plus.google.com/events/cfrtqkdrgabil1tojif1dnlq770
- [2]: #build-optimization
- [3]: #workflows
- [4]: #exporting
+ [2]: #section_BuildOptimization
+ [3]: #section_Workflows
+ [4]: #section_Exporting
  [5]: http://stealjs.com/docs/StealJS.project-exporting.html
  [6]: http://stealjs.com
