@@ -10,7 +10,7 @@ StealJS is a dependency loader and build tool that solves the most difficult par
 
 ## Why StealJS?
 
-The landscape of module loaders in 2015 is vast; there are more choices today than there have ever been. At Bitovi we work with a large variety of different types of teams with their own unique workflows. We needed a modular loader that was flexible to accommodate all of these different teams. So we focused on a few key areas:
+The landscape of module loaders today is vast; there are more choices today than there have ever been. At Bitovi we work with a large variety of different types of teams with their own unique workflows. We needed a modular loader that was flexible to accommodate all of these different teams. So we focused on a few key areas:
 
 ## Build Optimization
 
@@ -101,8 +101,8 @@ Up until this point we have been concentrating on nailing the basics but now hav
 Lastly, StealJS has a long-standing commitment to backwards compatibility. Even though StealJS is now built on a completely different codebase than it was just a year ago it is mostly compatible with applications that use Legacy Steal with just a few minor config changes. We won't abandon our users when a breaking change comes; there will always be a bridge that makes upgrading your application something that can be done in a day or so.
 
  [1]: https://plus.google.com/events/cfrtqkdrgabil1tojif1dnlq770
- [2]: #build-optimization
- [3]: #workflows
- [4]: #exporting
+ [2]: #section_BuildOptimization
+ [3]: #section_Workflows
+ [4]: #section_Exporting
  [5]: http://stealjs.com/docs/StealJS.project-exporting.html
  [6]: http://stealjs.com
