@@ -17,8 +17,9 @@ By default, if [System.stealPath] points to steal.js within node_modules like:
 
     <script src="../node_modules/steal/steal.js"></script>
     
-[System.configMain] will point to `"package.json!npm"`. The `npm` plugin
-reads `package.json` and sets a normalize and locate hook.
+[System.configMain] will point to `"package.json!npm"`. The plugin is included with Steal and no configuration is needed on your part to use it.
+
+The `npm` plugin reads `package.json` and sets a normalize and locate hook.
 
 **Note**: if you are using NPM 3 see the *npmAlgorithm* option below.
 
