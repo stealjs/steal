@@ -982,8 +982,8 @@ at a <code>package.json</code>, you will be able to import npm packages as modul
 <p>By default, if <a href="System.stealPath.html">System.stealPath</a> points to steal.js within node_modules like:</p>
 <pre><code>&lt;script src=&quot;../node_modules/steal/steal.js&quot;&gt;&lt;/script&gt;
 </code></pre>
-<p><a href="System.configMain.html">System.configMain</a> will point to <code>&quot;package.json!npm&quot;</code>. The <code>npm</code> plugin
-reads <code>package.json</code> and sets a normalize and locate hook.</p>
+<p><a href="System.configMain.html">System.configMain</a> will point to <code>&quot;package.json!npm&quot;</code>. The plugin is included with Steal and no configuration is needed on your part to use it.</p>
+<p>The <code>npm</code> plugin reads <code>package.json</code> and sets a normalize and locate hook.</p>
 <p><strong>Note</strong>: if you are using NPM 3 see the <em>npmAlgorithm</em> option below.</p>
 <h2>NPM Module names</h2>
 <p>Package dependency module names are converted to look like:</p>
