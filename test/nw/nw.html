@@ -3,7 +3,12 @@
 	window.removeMyself = window.parent.removeMyself;
 </script>
 <script>
-	process = {platform: "web"};
+	process = {
+		nextTick: function(fn){
+			setTimeout(fn, 0);
+		},
+		platform: "web"
+	};
 
 	require = function(){ return {}; };
 	module = { exports: {} };
