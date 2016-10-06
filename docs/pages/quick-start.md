@@ -10,8 +10,7 @@ and [jquery](http://jquery.com/) to build a *Hello World* app. This guide is a s
 
 Install [Node.js](http://nodejs.org/) on your computer.
 
-Create a directory for all your static content, scripts, and styles.
-This is your [System.baseURL baseURL] folder. Within that folder run `npm init` to, create a **package.json**:
+Create a directory for all your static content, scripts, and styles called `quick-start` and navigate into the folder. This is your [System.baseURL baseURL] folder. Within that folder run `npm init` to, create a **package.json**:
 
 Note: when it asks for the *entry point*, write **index.js**.
 
