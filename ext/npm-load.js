@@ -163,6 +163,7 @@ var translateConfig = function(loader, packages, options){
 			});
 		}
 	};
+	var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
 	forEach(packages, function(pkg){
 		if(pkg.system) {
 			var system = pkg.system;
@@ -171,8 +172,9 @@ var translateConfig = function(loader, packages, options){
 			delete system.main;
 			var configDeps = system.configDependencies;
 			if(pkg !== rootPkg) {
-				delete system.configDependencies;
-				delete system.bundle;
+				forEach(ignoredConfig, function(name){
+					delete system[name];
+				});
 			}
 
 			loader.config(system);
