@@ -285,12 +285,15 @@ var crawl = {
 			}
 			loader.npm[name+"@"+pkg.version] = pkg;
 		};
-
 		if(pkg.system) {
+			var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
+
 			// don't set system.main
 			var main = pkg.system.main;
 			delete pkg.system.main;
-			delete pkg.system.configDependencies;
+			utils.forEach(ignoredConfig, function(name){
+				delete pkg.system[name];
+			});
 			loader.config(pkg.system);
 			pkg.system.main = main;
 
