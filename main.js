@@ -978,7 +978,7 @@ if(typeof System !== "undefined") {
 					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
 						if ( last(parts) === "steal" ) {
 							parts.pop();
-							if ( last(parts) === "bower_components" ) {
+							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
 								System.configMain = "bower.json!bower";
 								addProductionBundles.call(this);
 								parts.pop();
