@@ -8,3 +8,4 @@ bower_components/
 test/ext/
 test/bower/as_config/vendor/system-bower/
 test/npm-deep/node_modules/steal/
+test/bower/as_config/vendor/steal/
