@@ -24,7 +24,3 @@ can also be set inline like:
     "format global";
     "exports hello";
     hello = "world";
-
-## Implementation
-
-Implemented in [SystemJS](https://github.com/systemjs/systemjs#global-module-format-support)

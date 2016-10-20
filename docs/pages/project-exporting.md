@@ -31,15 +31,15 @@ bit-tabs/
 The project's `package.json` is used to configure how Browserify or Steal loads your
 project. The following walks through the important parts:
 
-### "system"
+### "steal"
 
-The `system` property specifies SystemJS and StealJS overwrites. Set the [System.main] property as follows to tell SystemJS to use `src/bit-tabs.js` as the starting point of the application. The "npmIgnore" property tells StealJS to ignore processing the package.json files of certain dependencies.
+The `steal` property specifies SystemJS and StealJS overwrites. Set the [System.main] property as follows to tell SystemJS to use `src/bit-tabs.js` as the starting point of the application. The "npmIgnore" property tells StealJS to ignore processing the package.json files of certain dependencies.
 
-> In the system property, create a "main" property that points to the main entry-point. And,
+> In the steal property, create a "main" property that points to the main entry-point. And,
 > set "npmIgnore" to ignore dependencies that aren't needed by the browser.
 
 ```
-  "system": {
+  "steal": {
     "main": "src/bit-tabs",
     "npmIgnore": ["devDependencies"]
   },
@@ -127,7 +127,7 @@ module.exports = function (grunt) {
 	grunt.initConfig({
 		"steal-export": {
 			dist: {
-				system: {
+				steal: {
 					config: "package.json!npm"
 				},
 				outputs: {
@@ -143,7 +143,7 @@ module.exports = function (grunt) {
 };
 ```
 
-The [steal-tools.grunt.export] grunt task above loads modules and transpiles them to CommonJS, AMD, and a global distributables. The [steal-tools.grunt.export] task requires a [steal-tools.SystemConfig]. In this example, `system.config` points to the `package.json` file which will hold the export configuration.
+The [steal-tools.grunt.export] grunt task above loads modules and transpiles them to CommonJS, AMD, and a global distributables. The [steal-tools.grunt.export] task requires a [steal-tools.SystemConfig]. In this example, `steal.config` points to the `package.json` file which will hold the export configuration.
 
 
 ## Publishing
@@ -199,7 +199,7 @@ specific values.
       "can": "2.2.0-alpha.10",
       "cssify": "^0.6.0"
   },
-  "system": {
+  "steal": {
       "main": "src/bit-tabs",
       "npmIgnore": ["testee","cssify"]
   },

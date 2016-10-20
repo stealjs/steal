@@ -68,7 +68,7 @@ Use live-reload by including it as a configDependency in your `package.json`:
 
 ```json
 {
-  "system": {
+  "steal": {
     "configDependencies": [
       "live-reload"
     ]

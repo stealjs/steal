@@ -7,7 +7,5 @@
     "src",
     "core",
     "docs"
-  ],
-  "devDependencies": {
-  }
+  ]
 }

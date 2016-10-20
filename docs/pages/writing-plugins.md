@@ -68,7 +68,7 @@ And now cat.png is preload it. If we were to insert it into the page later, such
 If you wanted to associate *all* .png files with this preload plugin, you could special it as the handler using [System.ext] configuration:
 
 ```
-"system": {
+"steal": {
   "ext": {
     "png": "preload"
   }

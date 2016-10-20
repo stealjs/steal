@@ -22,7 +22,7 @@ The default options for the Babel 6 transpiler are
 
 An example of configuration `babelOptions` in your __package.json__
 ```
-"system": {
+"steal": {
     "babelOptions": {
         "presets": [
             "es2015-no-commonjs",
@@ -50,7 +50,7 @@ If you activated Babel as the default transpiler, steal sets the following as de
 If you want JSX support, pass an empty array for the blacklist option.
 An example of configuration `babelOptions` in your __package.json__
 ```
-"system": {
+"steal": {
     "babelOptions": {
         "blacklist": []
     }

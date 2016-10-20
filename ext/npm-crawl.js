@@ -158,9 +158,11 @@ var crawl = {
 	 * @return {Object<String,Range>} A map of dependency names and requested version ranges.
 	 */
 	getDependencyMap: function(loader, packageJSON, isRoot){
-		var system = packageJSON.system;
+		var config = utils.pkg.config(packageJSON);
+		var hasConfig = !!config;
+
 		// convert npmIgnore
-		var npmIgnore = system && system.npmIgnore;
+		var npmIgnore = hasConfig && config.npmIgnore;
 		function convertToMap(arr) {
 			var npmMap = {};
 			for(var i = 0; i < arr.length; i++) {
@@ -169,12 +171,12 @@ var crawl = {
 			return npmMap;
 		}
 		if(npmIgnore && typeof npmIgnore.length === 'number') {
-			npmIgnore = packageJSON.system.npmIgnore = convertToMap(npmIgnore);
+			npmIgnore = config.npmIgnore = convertToMap(npmIgnore);
 		}
 		// convert npmDependencies
-		var npmDependencies = system && system.npmDependencies;
+		var npmDependencies = hasConfig && config.npmDependencies;
 		if(npmDependencies && typeof npmDependencies.length === "number") {
-			packageJSON.system.npmDependencies = convertToMap(npmDependencies);
+			config.npmDependencies = convertToMap(npmDependencies);
 		}
 		npmIgnore = npmIgnore || {};
 		
@@ -285,20 +287,24 @@ var crawl = {
 			}
 			loader.npm[name+"@"+pkg.version] = pkg;
 		};
+		var config = utils.pkg.config(pkg);
+		if(config) {
+			var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
 
-		if(pkg.system) {
-			// don't set system.main
-			var main = pkg.system.main;
-			delete pkg.system.main;
-			delete pkg.system.configDependencies;
-			loader.config(pkg.system);
-			pkg.system.main = main;
+			// don't set steal.main
+			var main = config.main;
+			delete config.main;
+			utils.forEach(ignoredConfig, function(name){
+				delete config[name];
+			});
+			loader.config(config);
+			config.main = main;
 
 		}
 		if(pkg.globalBrowser) {
 			setGlobalBrowser(pkg.globalBrowser, pkg);
 		}
-		var systemName = pkg.system && pkg.system.name;
+		var systemName = config && config.name;
 		if(systemName) {
 			setInNpm(systemName, pkg);
 		} else {
@@ -340,9 +346,11 @@ function truthy(x) {
 var alwaysIgnore = {"steal-tools":1,"bower":1,"grunt":1,"grunt-cli":1};
 
 function addDeps(packageJSON, dependencies, deps, type, defaultProps){
+	var config = utils.pkg.config(packageJSON);
+
 	// convert an array to a map
-	var npmIgnore = packageJSON.system && packageJSON.system.npmIgnore;
-	var npmDependencies = packageJSON.system && packageJSON.system.npmDependencies;
+	var npmIgnore = config && config.npmIgnore;
+	var npmDependencies = config && config.npmDependencies;
 	var ignoreType = npmIgnore && npmIgnore[type];
 
 	function includeDep(name) {

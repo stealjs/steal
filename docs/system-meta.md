@@ -15,7 +15,7 @@ Meta configuration is used to provide additional information about a module. It 
 For a global most likely you will want configuration that looks like:
 
 ```
-"system": {
+"steal": {
 	"meta": {
 		"jquerty": {
 			"format": "global",

@@ -27,7 +27,7 @@ If using the [npm] plugin you can add config to your package.json's **config** p
 
 ```
 {
-  "system": {
+  "steal": {
     "meta": {
       "jquery-plugin": {
         "deps": [
