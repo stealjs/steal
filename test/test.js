@@ -500,4 +500,12 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/leak/index.html");
 	});
 
+	module("Service Workers");
+
+	if("serviceWorker" in navigator) {
+		asyncTest("steal is able to load within a service worker", function(){
+			makeIframe("service-worker/dev.html");
+		});
+	}
+
 })();
