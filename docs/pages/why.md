@@ -76,7 +76,7 @@ If you're a library author you've probably experienced the pain of building your
 It shouldn't be this difficult. As library authors you really don't care about what module loader your users choose; you want them to be able to use your code everywhere. Steal-Tools is a set of build tools that includes a way to export your project to a variety of formats and gives you complete control over what gets built and how. You can, for example, have a large project and export "foo" and "bar" as their own individual modules if needed. For most common tasks there are helpers that make it easy to export into the common format. For example you could do:
 
     stealTools.export({
-      system: {
+      steal: {
         config: "package.json!npm",
         main: "my/project"
       },

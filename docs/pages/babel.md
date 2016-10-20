@@ -16,7 +16,7 @@ If you want to use the version of Babel that comes with Steal you can skip this 
 If you have a code-base that needs a specific version of Babel you can include it using paths config. Here's an example of using Babel version 5.
 
 ```
-"system": {
+"steal": {
   "paths": {
     "babel": "node_modules/babel-core/browser.js"
   }
@@ -45,7 +45,7 @@ Steal's bundled version of Babel comes with the presets and plugins provided by 
 To specify which plugins/presets you want to use, specify the [System.babelOptions] configuration like so:
 
 ```
-"system": {
+"steal": {
   "babelOptions": {
     "presets": ["react"]
   }

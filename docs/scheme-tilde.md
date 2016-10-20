@@ -1,7 +1,7 @@
 @property ~
 @parent StealJS.schemes
 
-A lookup scheme that roots module lookup to your project's base folder, either your `system.directories.lib` folder or the [System.baseURL].
+A lookup scheme that roots module lookup to your project's base folder, either your `steal.directories.lib` folder or the [System.baseURL].
 
 This syntax is supported by all module formats.
 
@@ -14,7 +14,7 @@ Prepend lookups with `~/` such as:
 This will load the module from `BASE/components/tabs/tabs.js`. If your package.json has:
 
     {
-      "system": {
+      "steal": {
         "directories": {
           "lib": "src"
 		}

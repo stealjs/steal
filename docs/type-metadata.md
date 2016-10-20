@@ -84,7 +84,7 @@ var Foo = function(){
 Where `Foo` is the exported value in your configuration:
 
 ```
-"system": {
+"steal": {
 	"meta": {
 		"foo": {
 			"format": "global",
@@ -97,7 +97,7 @@ Where `Foo` is the exported value in your configuration:
 In this situation, the default `new Function` method of evaluation will not work and the `Foo` variable will not be set on the window. In this case we want to update our **eval** configuration to `script`:
 
 ```
-"system": {
+"steal": {
 	"meta": {
 		"foo": {
 			"format": "global",

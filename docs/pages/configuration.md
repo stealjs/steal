@@ -3,14 +3,14 @@
 
 @body
 
-Steal allows you to configure module loading through a **system** property in your package.json. If you're not using Steal through NPM (you should be) you can also configure using any of the options provided by [System.config].
+Steal allows you to configure module loading through a **steal** property in your package.json. If you're not using Steal through NPM (you should be) you can also configure using any of the options provided by [System.config].
 
 A basic configuration might look like this:
 
 ```
 {
   ...
-  "system": {
+  "steal": {
     "meta": {
 	  "jquery-plugin": {
         "deps": ["jquery"]
@@ -40,7 +40,7 @@ To use these modules you need to configure them as globals. This is similar to *
 
   ...
 
-  "system": {
+  "steal": {
     "meta": {
       "jquery-plugin": {
         "deps": ["jquery"],
@@ -88,7 +88,7 @@ You can specify your bundles with the **bundle** property in config:
 ```
 {
   ...
-  "system": {
+  "steal": {
     "bundle": [
       "app/cart"
 	]
@@ -108,7 +108,7 @@ Often projects will store their code in a subfolder like `src/` or `public/` and
 
   ...
 
-  "system": {
+  "steal": {
     "directories": {
       "lib": "src"
     }

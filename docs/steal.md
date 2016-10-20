@@ -66,7 +66,7 @@ main is not provided, [System.main] will be set to _package.json_'s main.
 Steal reads your application's _package.json_ and all of its 
 `dependencies`, `peerDependencies`, and `devDependencies` recursively.
 
-Most configuration is done in the `system` property of 
+Most configuration is done in the `steal` property of 
 package.json. The special npm configuration options are listed [npm here].
 
 
@@ -80,7 +80,7 @@ The following _package.json_ only loads the `dependencies`.
     "jquery": "2.1.3"
   },
   "devDependencies": {...}
-  "system": {
+  "steal": {
     "npmIgnore": ["devDependencies"]
   }
 }
@@ -214,18 +214,6 @@ In _myapp.js_, import your dependencies and write your app:
 import $ from "jquery";
 $("body").append("<h1>Hello World</h1>")
 ```
-
-## Loader and System objects
-
-Loader is a proposed constructor, allowing for the creating of custom ES6 module loaders. Documentation 
-can be found [here](http://whatwg.github.io/loader/).
-
-System is the proposed default Loader, allowing for APIs such 
-as [System.import] and [System.config]. Documentation and polyfill information can be 
-found [here](https://github.com/ModuleLoader/es6-module-loader).
-
-Loader and System are currently 
-polyfilled by [SystemJS](https://github.com/systemjs/systemjs).
 
 ## Configuring the `System` loader
 

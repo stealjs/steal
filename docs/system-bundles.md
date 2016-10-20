@@ -39,8 +39,3 @@ System.bundles["bundles/myapp"] = ["myapp"]
 
 This way, when the `"myapp"` module is imported, System will load ["bundles/myapp"].  Use [System.bundlesPath]
 to configure where bundles are found.
-
-
-## Implementation
-
-Provided by [SystemJS](https://github.com/systemjs/systemjs#bundles).

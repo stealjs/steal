@@ -15,7 +15,7 @@ Or with ext config like:
 
 ```
 {
-  "system": {
+  "steal": {
     "ext": {
       "css": "css-plugin"
     }
