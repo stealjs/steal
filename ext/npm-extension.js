@@ -109,6 +109,7 @@ exports.addExtension = function(System){
 
 		var context = this.npmContext;
 		var crawl = context && context.crawl;
+		var isDev = !!crawl;
 		if(!depPkg) {
 			if(crawl && !isRoot) {
 				var parentPkg = nameIsRelative ? null :
@@ -126,23 +127,35 @@ exports.addExtension = function(System){
 					}
 				}
 			} else {
-
-			//if(!depPkg) {
-				depPkg = utils.pkg.findDep(this, refPkg, parsedModuleName.packageName);
+				if(isRoot) {
+					depPkg = utils.pkg.findDepWalking(this, refPkg,
+													  parsedModuleName.packageName);
+				} else {
+					depPkg = utils.pkg.findDep(this, refPkg, 
+											   parsedModuleName.packageName);
+				}
 			}
 		}
 
+		// If the parent package is loading itself by name, look up by version
+		if(parsedPackageNameIsReferringPackage) {
+			depPkg = utils.pkg.findByNameAndVersion(this,
+													parsedModuleName.packageName,
+													refPkg.version);
+		}
+
 		// This really shouldn't happen, but lets find a package.
-		var lookupByName = parsedModuleName.isGlobal || hasNoParent ||
-			parsedPackageNameIsReferringPackage;
+		var lookupByName = parsedModuleName.isGlobal || hasNoParent;
 		if (!depPkg) {
 			depPkg = utils.pkg.findByName(this, parsedModuleName.packageName);
 		}
 
-		var isThePackageWeWant = !crawl || !depPkg ||
+		var isThePackageWeWant = !isDev || !depPkg ||
 			(wantedPkg ? crawl.pkgSatisfies(depPkg, wantedPkg.version) : true);
 		if(!isThePackageWeWant) {
 			depPkg = undefined;
+		} else if(isDev && depPkg) {
+			utils.pkg.saveResolution(context, refPkg, depPkg);
 		}
 
 		// It could be something like `fs` so check in globals
@@ -198,9 +211,10 @@ exports.addExtension = function(System){
 			}
 			var moduleName = utils.moduleName.create(parsedModuleName);
 			// Apply mappings, if they exist in the refPkg
-			if(refPkg.system && refPkg.system.map &&
-			   typeof refPkg.system.map[moduleName] === "string") {
-				moduleName = refPkg.system.map[moduleName];
+			var steal = utils.pkg.config(refPkg);
+			if(steal && steal.map &&
+			   typeof steal.map[moduleName] === "string") {
+				moduleName = steal.map[moduleName];
 			}
 			var p = oldNormalize.call(loader, moduleName, parentName,
 									  parentAddress, pluginNormalize);

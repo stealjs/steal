@@ -60,7 +60,6 @@ define('pkg.json!npm', ['@loader'], function (loader) {
     (function (System) {
         var oldNormalize = System.normalize;
         System.normalize = function (name, parentName, parentAddress) {
-            console.log('normalize', name, parentName, parentAddress);
             var refPkg = findPackageByAddress(this, parentName, parentAddress);
             if (!refPkg) {
                 return oldNormalize.call(this, name, parentName, parentAddress);

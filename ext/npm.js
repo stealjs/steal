@@ -1,14 +1,11 @@
 "format cjs";
 
-// TODO: cleanup removing package.json
 var utils = require('./npm-utils');
 var convert = require("./npm-convert");
 var crawl = require('./npm-crawl');
 var npmLoad = require("./npm-load");
 var isNode = typeof process === "object" &&
 	{}.toString.call(process) === "[object process]";
-
-// SYSTEMJS PLUGIN EXPORTS =================
 
 /**
  * @function translate
@@ -50,11 +47,12 @@ exports.translate = function(load){
 	crawl.processPkgSource(context, pkg, load.source);
 
 	// backwards compatible for < npm 3
-	if(pkg.system && pkg.system.npmAlgorithm === "nested") {
+	var steal = utils.pkg.config(pkg);
+	if(steal && steal.npmAlgorithm === "nested") {
 		context.isFlatFileStructure = false;
 	} else {
-		pkg.system = pkg.system || {};
-		pkg.system.npmAlgorithm = "flat";
+		pkg.steal = steal = steal || {};
+		steal.npmAlgorithm = "flat";
 	}
 
 	return crawl.deps(context, pkg, true).then(function(){
@@ -67,6 +65,7 @@ exports.translate = function(load){
 					delete pkg.browser.transform;
 				}
 				pkg = utils.json.transform(loader, load, pkg);
+				var steal = utils.pkg.config(pkg);
 
 				packages.push({
 					name: pkg.name,
@@ -75,11 +74,12 @@ exports.translate = function(load){
 						pkg.fileUrl :
 						utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
-					system: convert.system(context, pkg, pkg.system, index === 0),
+					steal: convert.steal(context, pkg, steal, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
 					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
 					jspm: convert.jspm(pkg, pkg.jspm),
-					jam: convert.jspm(pkg, pkg.jam)
+					jam: convert.jspm(pkg, pkg.jam),
+					resolutions: {}
 				});
 				packages[pkg.name+"@"+pkg.version] = true;
 			}
