@@ -272,21 +272,11 @@ website.  To edit the docs:
         > git submodule init
         > git submodule update
         
-4. Generate site
-
-        > node build.js
-        
-5. Edit markdown files in `steal/docs` or `steal-tools/doc`
+4. Edit markdown files in `steal/docs` or `steal-tools/doc`
   
-6. Regenerate site and check changes
+5. Regenerate site and check changes
 
         > ./node_modules/.bin/documentjs
 
-7. Checkin and push markdown changes to steal or steal-tools.
-8. Checkin and push gh-pages branch changes.  
-
-
-
-
-
-
+6. Checkin and push markdown changes to steal or steal-tools.
+7. Checkin and push gh-pages branch changes.  
