@@ -198,6 +198,8 @@ var utils = {
 
 			}
 
+			modulePath = utils.path.removeJS(modulePath);
+
 			return {
 				plugin: pluginParts.length === 2 ? "!"+pluginParts[1] : undefined,
 				version: versionParts[1],
