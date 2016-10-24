@@ -6378,6 +6378,13 @@ function addEnv(loader){
 	// load the main module(s) if everything is configured
 	steal.startup = function(config){
 		var steal = this;
+		var configResolve;
+		var configReject;
+
+		configPromise = new Promise(function(resolve, reject){
+			configResolve = resolve;
+			configReject = reject;
+		});
 
 		appPromise = getUrlOptions().then(function(urlOptions) {
 
@@ -6403,7 +6410,8 @@ function addEnv(loader){
 					warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				configPromise = System["import"](System.configMain);
+				System["import"](System.configMain)
+				.then(configResolve, configReject);
 
 				return configPromise.then(function (cfg) {
 					setEnvsConfig.call(System);
@@ -6411,7 +6419,8 @@ function addEnv(loader){
 				});
 
 			} else {
-				configPromise = System["import"](System.configMain);
+				System["import"](System.configMain)
+				.then(configResolve, configReject);
 
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(System);
@@ -6475,6 +6484,12 @@ function addEnv(loader){
 		}
 
 		if(!configPromise) {
+			// In Node a main isn't required, but we still want
+			// to call startup() to do autoconfiguration,
+			// so setting to empty allows this to work.
+			if(!loader.main) {
+				loader.main = "@empty";
+			}
 			steal.startup();
 		}
 

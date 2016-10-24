@@ -152,7 +152,10 @@ module.exports = function (grunt) {
 	},
 	simplemocha: {
 		builders: {
-			src: ["test/node_test.js"]
+			src: [
+				"test/node_test.js",
+				"test/steal_import/test.js"
+			]
 		}
 	}
   });
