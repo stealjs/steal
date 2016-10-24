@@ -7,7 +7,6 @@
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
-		require("system-json");
 
 	} else {
 		var oldSteal = global.steal;

@@ -16,6 +16,8 @@ QUnit.config.testTimeout = 30000;
 		}
 	})();
 
+	System.baseURL = "../";
+
 	var writeIframe = function(html){
 		var iframe = document.createElement('iframe');
 		window.removeMyself = function(){
@@ -63,7 +65,7 @@ QUnit.config.testTimeout = 30000;
 	};
 
 	asyncTest('steal basics', function(){
-		System['import']('tests/module').then(function(m){
+		System['import']('test/tests/module').then(function(m){
 			equal(m.name,"module.js", "module returned" );
 			equal(m.bar.name, "bar", "module.js was not able to get bar");
 			start();
@@ -74,7 +76,7 @@ QUnit.config.testTimeout = 30000;
 	});
 
 	asyncTest("steal's normalize", function(){
-		System['import']('tests/mod/mod').then(function(m){
+		System['import']('test/tests/mod/mod').then(function(m){
 			equal(m.name,"mod", "mod returned" );
 			equal(m.module.bar.name, "bar", "module.js was able to get bar");
 			equal(m.widget(), "widget", "got a function");
@@ -110,8 +112,8 @@ QUnit.config.testTimeout = 30000;
 	});
 
 	asyncTest("ignoring an import by mapping to @empty", function(){
-		System.map["map-empty/other"] = "@empty";
-		System["import"]("map-empty/main").then(function(m) {
+		System.map["test/map-empty/other"] = "@empty";
+		System["import"]("test/map-empty/main").then(function(m) {
 			var empty = System.get("@empty");
 			equal(m.other, empty, "Other is an empty module because it was mapped to empty in the config");
 		}, function(){
@@ -120,17 +122,17 @@ QUnit.config.testTimeout = 30000;
 	});
 
 	asyncTest("steal.dev.assert", function() {
-		System["import"]("ext/dev").then(function(dev){
+		System["import"]("@dev").then(function(){
 			throws(
 				function() {
-					dev.assert(false);
+					steal.dev.assert(false);
 				},
 				/Expected/,
 				"throws an error with default message"
 			);
 			throws(
 				function() {
-					dev.assert(false, "custom message");
+					steal.dev.assert(false, "custom message");
 				},
 				/custom message/,
 				"throws an error with custom message"

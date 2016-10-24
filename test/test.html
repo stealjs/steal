@@ -14,14 +14,10 @@
 		<ol id="qunit-tests"></ol>
 		<div id="qunit-test-area"></div>
 
-		<script src="../node_modules/steal-es6-module-loader/dist/es6-module-loader.src.js" type="text/javascript"></script>
-		<script src="../node_modules/steal-systemjs/dist/system.src.js" data-traceur-src="../node_modules/traceur/bin/traceur.js" type="text/javascript"></script>
-		<script src="../system-format-steal.js"></script>
+		<script src="../steal.js" config-main="@empty" main="@empty"></script>
 		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
 
 		<script src="test.js"></script>
-    <script>
-      //delete window.define;
-    </script>
+		<script src="../src/json/json_test.js"></script>
 	</body>
 </html>

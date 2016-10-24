@@ -5161,7 +5161,8 @@ var $__curScript, __eval;
 		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
-		isBrowserWithWindow = !isNode && typeof window !== "undefined";
+		isBrowserWithWindow = !isNode && typeof window !== "undefined",
+		warn = typeof console === "object" ? console.warn.bind(console) : function(){};
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -5758,7 +5759,6 @@ function _SYSTEM_addJSON(loader) {
 	var jsonTest = /^[\s\n\r]*[\{\[]/;
 	var jsonExt = /\.json$/i;
 	var jsExt = /\.js$/i;
-	var inNode = typeof window === "undefined";
 
 	// Add the extension to _extensions so that it can be cloned.
 	loader._extensions.push(_SYSTEM_addJSON);
@@ -5783,7 +5783,7 @@ function _SYSTEM_addJSON(loader) {
 	};
 
 	// If we are in a build we should convert to CommonJS instead.
-	if(inNode) {
+	if(isNode) {
 		var loaderTranslate = loader.translate;
 		loader.translate = function(load){
 			if(jsonExt.test(load.name)) {
@@ -5825,7 +5825,10 @@ function _SYSTEM_addJSON(loader) {
 		if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
 			try {
 				return JSON.parse(load.source);
-			} catch(e) {}
+			} catch(e) {
+				warn("Error parsing " + load.address + ":", e);
+				return {};
+			}
 		}
 
 	}
@@ -6585,7 +6588,6 @@ if (typeof System !== "undefined") {
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
-		require("system-json");
 
 	} else {
 		var oldSteal = global.steal;
