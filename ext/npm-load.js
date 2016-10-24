@@ -103,6 +103,7 @@ var translateConfig = function(loader, packages, options){
 	var g = loader.global;
 	if(!g.process) {
 		g.process = {
+			argv: [],
 			cwd: function(){
 				var baseURL = loader.baseURL;
 				return baseURL;
@@ -125,8 +126,8 @@ var translateConfig = function(loader, packages, options){
 		loader.npmParentMap = options.npmParentMap || {};
 	}
 	var rootPkg = loader.npmPaths.__default = packages[0];
-	var steal = rootPkg.steal || rootPkg.system;
-	var lib = steal && steal.directories && steal.directories.lib;
+	var rootConfig = rootPkg.steal || rootPkg.system;
+	var lib = rootConfig && rootConfig.directories && rootConfig.directories.lib;
 
 	var setGlobalBrowser = function(globals, pkg){
 		for(var name in globals) {
@@ -162,7 +163,9 @@ var translateConfig = function(loader, packages, options){
 			});
 		}
 	};
+
 	var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
+	packages.reverse();
 	forEach(packages, function(pkg){
 		var steal = pkg.steal || pkg.system;
 		if(steal) {
@@ -184,7 +187,7 @@ var translateConfig = function(loader, packages, options){
 		}
 		if(pkg.globalBrowser) {
 			var doNotApplyGlobalBrowser = pkg.name === "steal" &&
-				loader.builtins === false;
+				rootConfig.builtins === false;
 			if(!doNotApplyGlobalBrowser) {
 				setGlobalBrowser(pkg.globalBrowser, pkg);
 			}

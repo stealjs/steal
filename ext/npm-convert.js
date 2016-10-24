@@ -166,17 +166,12 @@ function convertName (context, pkg, map, root, name, waiting) {
 					plugin: parsed.plugin
 				});
 			} else {
-				// TODO: share code better!
 				// SYSTEM.NAME
 				if(  pkg.name === parsed.packageName || ( (pkg.system && pkg.system.name) === parsed.packageName) ) {
 					depPkg = pkg;
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						if(root) {
-							utils.warnOnce("The map for " + name + " is not an npm dependency, if this is a local module " +
-								"use ./" + name + " instead.");
-						}
 						return name;
 					}
 					requestedVersion = requestedProject.version;

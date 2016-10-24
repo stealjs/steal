@@ -49,7 +49,7 @@
     "steal-env": "^1.0.0",
     "steal-es6-module-loader": "0.17.10",
     "steal-less": "0.4.0-pre.1",
-    "steal-npm": "1.0.0-alpha.0",
+    "steal-npm": "1.0.0-alpha.2",
     "steal-qunit": "^0.1.4",
     "system-bower": "stealjs/system-bower#v0.2.1",
     "system-live-reload": "1.5.3",
