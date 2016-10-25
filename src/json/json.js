@@ -34,7 +34,7 @@ function _SYSTEM_addJSON(loader) {
 		var loaderTranslate = loader.translate;
 		loader.translate = function(load){
 			var address = load.metadata.address || load.address;
-			if(jsonExt.test(address)) {
+			if(jsonExt.test(address) && load.name.indexOf('!') === -1) {
 				var parsed = parse(load);
 				if(parsed) {
 					parsed = transform(this, load, parsed);
