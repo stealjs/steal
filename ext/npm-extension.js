@@ -391,7 +391,7 @@ exports.addExtension = function(System){
 				return loader.fetch(local);
 			})
 			.then(function(source){
-				load.address = local.address;
+				load.metadata.address = local.address;
 				loader.npmParentMap[load.name] = local.name;
 				var npmLoad = loader.npmContext &&
 					loader.npmContext.npmLoad;
