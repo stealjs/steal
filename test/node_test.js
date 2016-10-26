@@ -79,3 +79,19 @@ describe("Modules that don't exist", function(){
 		});
 	});
 });
+
+describe("Without setting config", function(){
+	it("loads package.json by default", function(done){
+		var steal = makeSteal({
+			main: "@empty"
+		});
+
+		steal.startup()
+		.then(function(){
+			var loader = steal.System;
+
+			assert.equal(loader.configMain, "package.json!npm");
+		})
+		.then(done, done);
+	});
+});

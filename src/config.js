@@ -302,8 +302,8 @@
 
 					if(this.configMain === "@config" && last(parts) === "steal") {
 						parts.pop();
+						this.configMain = "package.json!npm";
 						if(last(parts) === "node_modules") {
-							this.configMain = "package.json!npm";
 							addProductionBundles.call(this);
 							parts.pop();
 						}
