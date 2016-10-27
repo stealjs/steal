@@ -1,5 +1,5 @@
 @page guides.Contributing Contributing
-@parent StealJS.guides
+@parent StealJS.about
 
 Thank you for contributing! 
 

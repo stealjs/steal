@@ -1,5 +1,5 @@
 @page StealJS.changelog Changelog
-@parent StealJS.guides
+@parent StealJS.about
 
 @body
 

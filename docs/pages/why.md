@@ -1,5 +1,5 @@
 @page StealJS.why Why StealJS
-@parent StealJS.guides 0
+@parent StealJS.about 0
 
 StealJS is a dependency loader and build tool that solves the most difficult parts of building large JavaScript applications. With it's focus on simplified workflows and highly efficient production builds, we hope that StealJS is the last module loader you'll ever need. If you haven't checked out StealJS yet, we provide:
 

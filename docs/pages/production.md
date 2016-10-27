@@ -1,5 +1,5 @@
 @page StealJS.moving-to-prod Moving to Production
-@parent StealJS.guides
+@parent StealJS.topics
 
 @body
 
