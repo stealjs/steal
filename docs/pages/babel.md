@@ -1,5 +1,5 @@
 @page StealJS.babel Babel
-@parent StealJS.guides
+@parent StealJS.topics
 
 @body
 

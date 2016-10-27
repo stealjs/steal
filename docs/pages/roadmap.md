@@ -1,5 +1,5 @@
 @page StealJS.roadmap Roadmap
-@parent StealJS.guides
+@parent StealJS.about
 
 Here's what we've got planned:
 

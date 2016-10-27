@@ -1,5 +1,5 @@
 @page StealJS.configuration Configuration
-@parent StealJS.guides
+@parent StealJS.topics
 
 @body
 

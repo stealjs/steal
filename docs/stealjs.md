@@ -1,6 +1,8 @@
 @page StealJS
 @group StealJS.api apis
 @group StealJS.guides guides
+@group StealJS.topics topics
+@group StealJS.about about
 
 _Good artists copy; great artists steal._
 

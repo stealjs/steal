@@ -1,5 +1,5 @@
-@page StealJS.migrating Migrating
-@parent StealJS.guides
+@page StealJS.migrating Migrating from Legacy Steal
+@parent StealJS.topics
 
 
 ## Migrating from Legacy Steal
