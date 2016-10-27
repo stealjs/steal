@@ -56,16 +56,13 @@ The **index.html** page loads your app. All that is needed is the script tag tha
 Steal uses **package.json** to configure its behavior. Find the full details on
 the [npm npm extension page]. Most of the configuration happens within
 a special "steal" property. Its worth creating it now in case you'll
-need it later. If you are using NPM 3 (you probably are) also set the npmAlgorithm option within the steal property, otherwise leave it out.
+need it later.
 
 ```
 {
   "name": "stealjs",
   "version": "1.0.0",
   "main": "index.js",
-  "steal": {
-    "npmAlgorithm": "flat"
-  },
   "devDependencies": {
     ...
   }
