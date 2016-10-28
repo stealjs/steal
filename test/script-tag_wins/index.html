@@ -10,7 +10,7 @@
 <script src="../steal.js" data-foo="foo"></script>
 <script>
     steal.done().then(function(){
-        QUnit.ok(System.foo,"foo");
+        QUnit.ok(steal.config("foo"),"foo");
         QUnit.start();
         removeMyself();
     });

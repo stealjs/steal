@@ -1,11 +1,11 @@
-var MySystem = require('@loader');
+var loader = require('@loader');
 
 if(typeof window !== "undefined" && window.QUnit) {
 
-	QUnit.ok(MySystem == System,  "got back the current loader");
+	QUnit.ok(loader == steal.loader,  "got back the current loader");
 
 	QUnit.start();
 	removeMyself();
 } else {
-	console.log("Systems", MySystem == System);
+	console.log("Systems", loader == steal.loader);
 }

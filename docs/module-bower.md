@@ -12,23 +12,23 @@ process, usually `bower.json`.
 
 The `bower` plugin makes it easy to work in projects that use a lot of Bower dependencies.
 Instead of configuring each package individually you can use your `bower.json`
-file in place of the [System.configMain] and all of your dependencies will be
+file in place of the [config.configMain] and all of your dependencies will be
 pre-configured for you.
 
-By default, if [System.stealPath] points to steal.js within bower_components like:
+By default, if [config.stealPath] points to steal.js within bower_components like:
 
     <script src="bower_components/steal/steal.js"></script>
 
-[System.configMain] will point to `"bower.json!bower"`. The `bower` plugin reads your
+[config.configMain] will point to `"bower.json!bower"`. The `bower` plugin reads your
 bower.json file and configure each dependency so they can be automatically loaded.
 
 ## Options
 
-### System.bowerPath
+### bowerPath
 
 Specifies the path to the folder where Bower dependencies can be found.
 
-When using the [Bower plugin](https://github.com/bitovi/system-bower) by default it will assume dependencies are located at `System.baseURL` + `/bower_components`, which is the default location that Bower installs dependencies. Since this is configurable by Bower itself, `bowerPath` provices a way to point to the directory where you install Bower dependencies.  Using in the script tag is the best option:
+When using the [Bower plugin](https://github.com/bitovi/system-bower) by default it will assume dependencies are located at `baseURL` + `/bower_components`, which is the default location that Bower installs dependencies. Since this is configurable by Bower itself, `bowerPath` provices a way to point to the directory where you install Bower dependencies.  Using in the script tag is the best option:
 
 ```html
 <script src="vendor/steal/steal.js"
@@ -38,7 +38,7 @@ When using the [Bower plugin](https://github.com/bitovi/system-bower) by default
 
 Would load the Bower configuration file for, for example, `lodash` in `vendor/lodash/bower.json`.
 
-### System.bowerDev
+### bowerDev
 
 Specifies whether `devDependencies` included in your bower.json will be included in configuration.
 
@@ -57,12 +57,12 @@ contains a list of properties that are used by the Bower plugin to configure the
 
 ### package.main
 
-Specifies the [System.main] property unless already defined (such as setting the main
+Specifies the [config.main] property unless already defined (such as setting the main
 in your `<script>` tag).
 
 ### package.system
 
-By default, any property on the package.system object is passed to [System.config]. A few properties have special behavior, however:
+By default, any property on the package.system object is passed to [config.config]. A few properties have special behavior, however:
 
 ### package.system.main
 

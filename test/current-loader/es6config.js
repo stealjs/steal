@@ -1,11 +1,11 @@
-import MySystem from '@loader';
+import loader from '@loader';
 
 if(typeof window !== "undefined" && window.QUnit) {
 
-	QUnit.ok(MySystem == System,  "got back the current loader");
+	QUnit.ok(loader == steal.loader,  "got back the current loader");
 
 	QUnit.start();
 	removeMyself();
 } else {
-	console.log("Systems", MySystem == System);
+	console.log("loaders", loader == steal.loader);
 }

@@ -1,4 +1,4 @@
-@property {Object} System.lessOptions
+@property {Object} config.lessOptions lessOptions
 @parent StealJS.config
 
 A hash of options to customize the behavior of the [less](http://lesscss.org/usage/index.html#command-line-usage-options) compiler.
@@ -18,7 +18,7 @@ You can see the list of possible options in the less [docs page](http://lesscss.
 If you want to change `strictMath` processing, you'd do the following:
 
 ```
-System.config({
+steal.config({
     main: "myapp",
     lessOptions: {
         strictMath: true  // default value is false.

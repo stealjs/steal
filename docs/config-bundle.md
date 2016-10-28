@@ -1,4 +1,4 @@
-@property {(Array.<moduleName>|Glob)} System.bundle
+@property {(Array.<moduleName>|Glob)} config.bundle bundle
 @parent StealJS.config
 
 Specifies which modules will be progressively loaded.  This is 
@@ -12,7 +12,9 @@ Array of module names.
 
 A glob pattern used to match module names. For example:
 
-    System.bundle = "components/*/*";
+    steal.config({
+		"bundle": "components/*/*"
+	});
 
 Would match `components/home/home` and `components/admin/admin` but not `utils/collections/find`.
 
@@ -26,9 +28,11 @@ It is possible to load an app in chunks, rather than one single production file.
 - Search results in "js/pages/search"
 - Details in "js/pages/details"
 
-It will be more efficient to load "search" and "details" progressively, making the "home" page load lighter. `System.bundle` allows you to create multiple production files by defining the starting point:
+It will be more efficient to load "search" and "details" progressively, making the "home" page load lighter. `bundle` allows you to create multiple production files by defining the starting point:
 
-    System.bundle = ["js/pages/home","js/pages/search","js/pages/details"]
+    steal.config({
+		bundle: ["js/pages/home","js/pages/search","js/pages/details"]
+	});
 
 Within the main application, the condition may exist such as:
 
@@ -36,6 +40,6 @@ Within the main application, the condition may exist such as:
 import $ from 'jquery';
 
 if(/*route === home*/) {
-	System.import('js/pages/home', function() {});
+	steal.import('js/pages/home');
 }
 ```

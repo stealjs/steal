@@ -1,18 +1,14 @@
-@property {String} System.configPath
+@property {String} config.configPath configPath
 @parent StealJS.config
 @alias steal.config
 
-A shortcut for specifying the [@config] module [System.paths path] and [System.baseURL baseURL]. 
+A shortcut for specifying the [@config] module [config.paths path] and [config.baseURL baseURL]. 
 
 @option {String}
 
 Specifies the path to the [@config] configuration file that will be loaded before the
-[System.main main] module. This will also set [System.baseURL baseURL] to
+[config.main main] module. This will also set [config.baseURL baseURL] to
 the `main` module directory.
-   
-If a path to [@config] is not specified, is default value is specified in
-[paths](System.paths.html#section_Defaultpathsconfiguredbysteal).
-   
    
 @body
 
@@ -47,4 +43,4 @@ instead of having to specify it like:
 
 
 
-It also can be specified with any of the approaches in [System.config].
+It also can be specified with any of the approaches in [config.config].

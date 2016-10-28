@@ -1,9 +1,9 @@
-@property {function} System.isEnv
+@property {function} steal.isEnv
 @parent StealJS.functions
 
-Determines the environment Steal is running in, as specified by [System.env].
+Determines the environment Steal is running in, as specified by [config.env].
 
-@signature `System.isEnv(envName)`
+@signature `steal.isEnv(envName)`
 
 @param {String} envName The name of the environment to test.
 

@@ -1,4 +1,4 @@
-@property {Object} System.jsonOptions
+@property {Object} config.jsonOptions jsonOptions
 @parent StealJS.config
 
 Provides options that can be applied to JSON loading. The JSON extension has the following options:
@@ -6,7 +6,7 @@ Provides options that can be applied to JSON loading. The JSON extension has the
 @option {Function} [transform] A function that allows you to transform the JSON object that will be used as the module value.
 
 ```js
-System.config({
+steal.config({
   jsonOptions: {
     transform: function(load, data) {
       // Delete secret data
@@ -38,7 +38,7 @@ Which will be imported by Steal. However the package.json contains metadata incl
 Typically code only needs their version for a few properties, such as the **version**. Using the *transform* function we can remote all others:
 
 ```
-System.config({
+steal.config({
   jsonOptions: {
     transform: function(load, data) {
       // Delete every prop by `version`

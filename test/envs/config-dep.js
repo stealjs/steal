@@ -1,4 +1,4 @@
-System.config({
+steal.config({
 	envs: {
 		"window-staging": {
 			FOO: "bar",

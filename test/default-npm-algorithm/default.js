@@ -1,7 +1,7 @@
-System.import("some").then(function (module) {
+steal.import("some").then(function (module) {
 	if (typeof window !== "undefined" && window.QUnit) {
-		QUnit.strictEqual(System.npmContext.isFlatFileStructure, true, "default npm-algorithm is flat");
-		QUnit.equal(System.npmAlgorithm, 'flat');
+		QUnit.strictEqual(steal.loader.npmContext.isFlatFileStructure, true, "default npm-algorithm is flat");
+		QUnit.equal(steal.loader.npmAlgorithm, 'flat');
 
 		QUnit.equal(module.some, 'some', "module loaded");
 		QUnit.equal(module.other, 'other', 'nested module loaded');
@@ -9,6 +9,6 @@ System.import("some").then(function (module) {
 		QUnit.start();
 		removeMyself();
 	} else {
-		console.log(steal.System);
+		console.log(steal.steal.loader);
 	}
 });

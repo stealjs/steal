@@ -1,4 +1,4 @@
-@property {Object<moduleName, Array.<moduleName>>} System.bundles
+@property {Object<moduleName, Array.<moduleName>>} config.bundles bundles
 @parent StealJS.config
 
 Bundles configuration allows a single bundle file to be loaded in place of separate module files.
@@ -15,27 +15,32 @@ the bundle contains.
 Specify `bundles` if you are using a prebuilt bundle. For example, if `"jqueryui.autocomplete"` 
 and `"jqueryui.datepicker"` are in `"jqueryui.custom"`, you can specify that like:
 
-```
-System.bundles["jqueryui.custom"] = [
-  "jqueryui.autocomplete",
-  "jqueryui.datepicker"
-];
+```json
+steal.config({
+	bundles: {
+		"jqueryui.custom": [
+			"jqueryui.autocomplete",
+			"jqueryui.datepicker"
+		]
+	}
+});
 ```
 
 If `bundle` is passed to [steal-tools], it will write out where to load bundles in the production bundles. 
 
 ## Production Default Values
 
-In [System.env production] a bundles is written out to 
-contain the [System.main] module.  For example:
+In [config.env production] a bundles is written out to 
+contain the [config.main] module.  For example:
 
 ```
-System.config({
+steal.config({
   main: "myapp",
   env: "production"
+  bundles: {
+	"bundles/myapp": "myapp"
+  }
 });
-System.bundles["bundles/myapp"] = ["myapp"]
 ```
 
-This way, when the `"myapp"` module is imported, System will load ["bundles/myapp"].  Use [System.bundlesPath]
-to configure where bundles are found.
+This way, when the `"myapp"` module is imported, Steal will load ["bundles/myapp"].  Use [config.bundlesPath] to configure where bundles are found.

@@ -9,7 +9,7 @@
 
 <script>
 	if(window.QUnit) {
-		QUnit.ok(System.foo === true, "Sytem.foo should be truthy");
+		QUnit.ok(steal.config("foo") === true, "Sytem.foo should be truthy");
 		QUnit.start();
 		removeMyself();
 	}

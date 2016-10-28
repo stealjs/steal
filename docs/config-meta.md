@@ -1,4 +1,4 @@
-@property {Object} System.meta
+@property {Object} config.meta meta
 @parent StealJS.config
 
 Specify properties on the [load.metadata metadata] object.  

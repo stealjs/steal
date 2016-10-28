@@ -5,7 +5,7 @@
 
 # Using Babel
 
-Babel is a popular library that turns ES6 (now known as ES2015) code and transpiles it ES5 that can be used in today's browsers. As of Steal 1.0 Babel is the default [System.transpiler transpiler]. This page explains some of the ways you can configure it.
+Babel is a popular library that turns ES6 (now known as ES2015) code and transpiles it ES5 that can be used in today's browsers. As of Steal 1.0 Babel is the default [config.transpiler transpiler]. This page explains some of the ways you can configure it.
 
 ## Specifying version
 
@@ -42,7 +42,7 @@ stealTools.build({
 
 Steal's bundled version of Babel comes with the presets and plugins provided by the babel-standalone project. You can see the full list [here](https://github.com/Daniel15/babel-standalone/blob/master/src/index.js#L51).
 
-To specify which plugins/presets you want to use, specify the [System.babelOptions] configuration like so:
+To specify which plugins/presets you want to use, specify the [config.babelOptions] configuration like so:
 
 ```
 "steal": {

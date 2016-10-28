@@ -1,10 +1,10 @@
-@property {moduleName} System.configMain
+@property {moduleName} config.configMain configMain
 @parent StealJS.config
 
-The name of a module that is loaded before [@dev] and [System.main].
+The name of a module that is loaded before [@dev] and [config.main].
 
 @option {moduleName} A configuration module that is loaded before 
-the [System.main] module(s). This is where all configuration 
+the [config.main] module(s). This is where all configuration 
 should happen. The `configMain` module and all of its dependencies
 run during a build, so make sure they can operate without a DOM.
 
@@ -13,7 +13,7 @@ run during a build, so make sure they can operate without a DOM.
 ## Use
 
 
-The `configMain` name and path is typically specified with [System.configPath] in the steal.js `<script>` tag like:
+The `configMain` name and path is typically specified with [config.configPath] in the steal.js `<script>` tag like:
 
     <script src="../path/to/steal/steal.js"
             config-path="../path/to/stealconfig.js"

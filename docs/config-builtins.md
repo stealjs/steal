@@ -1,4 +1,4 @@
-@property {Boolean} System.builtins
+@property {Boolean} config.builtins builtins
 @parent StealJS.config
 
 Used to configure whether Node builtins modules are automatically loaded. If you (or a dependency) has code that does:

@@ -400,8 +400,8 @@
 
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
-			return System[cfg];
+			return this.loader[cfg];
 		} else {
-			System.config(cfg);
+			this.loader.config(cfg);
 		}
 	};

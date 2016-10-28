@@ -1,14 +1,14 @@
-@property {function} System.config
+@property {function} config.config config
 @parent StealJS.config
 @alias steal.config
 
-Specifies configuration values on System. This should be used to
-set properties like [System.configPath] and [System.env].
+Specifies configuration values for Steal. This should be used to
+set properties like [config.configPath] and [config.env].
 
 @param {Object} config An object of configuration values.
 
 ```
-System.config({
+steal.config({
   map: {
     foo: 'bar'
   }
@@ -19,7 +19,7 @@ System.config({
 
 ## Use
 
-`System.config` can be called in four ways.
+`config` can be called in four ways.
 
 ### package.json
 
@@ -41,9 +41,9 @@ If using the [npm] plugin you can add config to your package.json's **config** p
 
 ### Programatically
 
-Call `System.config` after _steal.js_ has been loaded like:
+Call `steal.config` after _steal.js_ has been loaded like:
 
-    System.config({
+    steal.config({
       paths: { ... },
       map: { ... }
     });
@@ -52,7 +52,7 @@ This is is most commonly done in the [@config] module.
 
 ### Script Attributes
 
-Any property besides src, id, and type will be used to set on System:
+Any property besides src, id, and type will be used to set on the loader:
 
     <script src="../path/to/steal/steal.js"
             config-path="../path/to/stealconfig.js"
@@ -62,7 +62,7 @@ Any property besides src, id, and type will be used to set on System:
 The above will be translated to a call like:
 
 ```
-System.config({
+steal.config({
   configPath: "../path/to/stealconfig.js",
   main: "app"
 });
@@ -70,10 +70,10 @@ System.config({
 
 ### steal object
 
-A `steal` object loaded before `steal.js` will be used as a System.config argument.
+A `steal` object loaded before `steal.js` will be used as a steal.config argument.
 
     <script>
-      var steal = {
+      steal = {
         configPath: "../path/to/stealconfig.js",
         main: "app"
       }

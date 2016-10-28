@@ -1,6 +1,6 @@
 require("bower.json!bower");
 
-System.config({
+steal.config({
 	paths: {
 		"lodash": "lodash.js"
 	}

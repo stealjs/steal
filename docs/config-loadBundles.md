@@ -1,4 +1,4 @@
-@property {Boolean} System.loadBundles
+@property {Boolean} config.loadBundles loadBundles
 @parent StealJS.config
 
 Specifies whether bundles should be loaded, used primarily for production.
@@ -10,13 +10,13 @@ Specifies whether bundles should be loaded, used primarily for production.
 ## Use
 
 Setting `loadBundles` to **true** is a short cut to prevent steal from loading the
-[@config] and [@dev] modules and make steal load the [System.main] module
+[@config] and [@dev] modules and make steal load the [config.main] module
 in a bundle.
 
 For example:
 
 ```
-System.config({
+steal.config({
   main: "myapp",
   loadBundles: true
 });
@@ -25,14 +25,14 @@ System.config({
 Sets:
 
 ```
-System.bundles["bundles/myapp"] //-> ["myapp"]
-System.meta["bundles/myapp"]    //-> {format: "amd"}
-System.paths["bundles/*"]       //-> "dist/bundles/*.js"
-System.paths["bundles/*.css"]   //-> "dist/bundles/*.css"
+steal.config("bundles")["bundles/myapp"] //-> ["myapp"]
+steal.config("meta")["bundles/myapp"]    //-> {format: "amd"}
+steal.config("paths")["bundles/*"]       //-> "dist/bundles/*.js"
+steal.config("paths")["bundles/*.css"]   //-> "dist/bundles/*.css"
 ```
 
-Setting `System.loadBundles` to `true` must happen prior to loading `steal.js`.  So it should
-be [System.config configured] via the `steal.js` script tag like:
+Setting `loadBundles` to `true` must happen prior to loading `steal.js`.  So it should
+be [config.config configured] via the `steal.js` script tag like:
 
 ```
 <script src="../path/to/steal/steal.js"

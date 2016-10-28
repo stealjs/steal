@@ -1,10 +1,9 @@
 var steal = require("../main");
 var assert = require("assert");
 
-
 var makeSteal = function(config){
 	var localSteal =  steal.clone();
-	localSteal.System.config(config || {});
+	localSteal.config(config || {});
 	return localSteal;
 };
 
@@ -16,9 +15,9 @@ describe("default configuration", function () {
 			config: __dirname+"/npm-deep/package.json!npm"
 		});
 		steal.startup().then(function(){
-			assert.equal(steal.System.transpiler, 'babel');
-			assert.equal(steal.System.configMain, 'package.json!npm');
-			assert.strictEqual(steal.System.npmContext.isFlatFileStructure, true);
+			assert.equal(steal.loader.transpiler, 'babel');
+			assert.equal(steal.loader.configMain, 'package.json!npm');
+			assert.strictEqual(steal.loader.npmContext.isFlatFileStructure, true);
 			done();
 		},done);
 	});
@@ -33,7 +32,7 @@ describe("plugins", function(){
 			main: "dep_plugins/main"
 		});
 		steal.startup().then(function(){
-			assert.ok( /width: 200px/.test( steal.System.getModuleLoad("dep_plugins/main.less!$less").source ) );
+			assert.ok( /width: 200px/.test( steal.loader.getModuleLoad("dep_plugins/main.less!$less").source ) );
 			done();
 		},done);
 
@@ -67,9 +66,7 @@ describe("Modules that don't exist", function(){
 		});
 
 		steal.startup().then(function(){
-			var System = steal.System;
-
-			System.import("some/fake/module")
+			steal.import("some/fake/module")
 			.then(function(){
 				assert.ok(false, "Promise resolved when it should have rejected");
 			}, function(err){

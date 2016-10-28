@@ -13,11 +13,11 @@ to process. This will normally be a package.json of your base application.
 The `npm` plugin makes it easy to work with npm packages. By pointing it 
 at a `package.json`, you will be able to import npm packages as modules.
 
-By default, if [System.stealPath] points to steal.js within node_modules like:
+By default, if [config.stealPath] points to steal.js within node_modules like:
 
     <script src="../node_modules/steal/steal.js"></script>
     
-[System.configMain] will point to `"package.json!npm"`. The `npm` plugin
+[config.configMain] will point to `"package.json!npm"`. The `npm` plugin
 reads `package.json` and sets a normalize and locate hook.
 
 **Note**: if you are using NPM 3 see the *npmAlgorithm* option below.
@@ -45,7 +45,7 @@ steal uses.
 
 ### package.main
 
-Specifies the [System.main] property unless it is overwritten by `package.browser` or
+Specifies the [config.main] property unless it is overwritten by `package.browser` or
 `package.steal.main`. 
 
 ```
@@ -83,7 +83,7 @@ Global browser specific overwrites for module file resolution.  These mapping ta
 
 ### package.steal
 
-By default, any property on the package.steal object is passed to [System.config]. However, the 
+By default, any property on the package.steal object is passed to [config.config]. However, the 
 following properties have special behavior:
 
 ### package.steal.main
@@ -106,7 +106,7 @@ imported.  This path that `my-main` will be found depends on the `directories.li
 
 ### package.steal.map
 
-The map config works similar to the base [System.map] behavior.  However, both the keys and values
+The map config works similar to the base [config.map] behavior.  However, both the keys and values
 are converted to NPM module names.  The keys and values must:
 
  - Start with `./` to map modules within the package like `"./src/util"`, or
@@ -125,7 +125,7 @@ are converted to NPM module names.  The keys and values must:
 
 ### package.steal.meta
 
-The meta config works similar to the base [System.meta] behavior.  However, the module names must:
+The meta config works similar to the base [config.meta] behavior.  However, the module names must:
 
  - Start with `./` to add metadata to modules within the package like `"./src/util"`, or
  - Look like `packageName#./modulePath` to add metadata to direct dependencies of the package.
