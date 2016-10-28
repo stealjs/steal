@@ -1,4 +1,8 @@
-var worker = new Worker(System.stealURL+"?main=webworkers/worker&config="+System.configPath);
+var workerURL = steal.config("stealURL") +
+	"?main=webworkers/worker&config=" +
+	steal.config("configPath");
+
+var worker = new Worker(workerURL);
 
 worker.addEventListener("message", function(ev){
 	if(window.QUnit) {
@@ -8,7 +12,7 @@ worker.addEventListener("message", function(ev){
 	} else {
 		console.log("got message", ev);
 	}
-	
+
 });
 
 module.exports = worker;

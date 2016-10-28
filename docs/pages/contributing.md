@@ -41,7 +41,7 @@ To __test__, open `test/test.html`, and make sure everything passes.
 
  - [ES6ModuleLoader](https://github.com/ModuleLoader/es6-module-loader) - Provides the [Loader](steal#section_LoaderandSystemnamespaces) and [System](steal#section_LoaderandSystemnamespaces) Polyfill.
  - [SystemJS](https://github.com/systemjs/systemjs) - Provides most System extensions 
-   like [System.paths], [System.map] and the [syntax.amd AMD] and [syntax.CommonJS CommonJS] syntaxes.
+   like [config.paths], [config.map] and the [syntax.amd AMD] and [syntax.CommonJS CommonJS] syntaxes.
 
 And `steal.js` includes everything in the `src` folder.  On a high level, steal.js is
 organized like:

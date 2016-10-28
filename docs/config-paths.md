@@ -1,4 +1,4 @@
-@property {Object.<glob,glob>} System.paths
+@property {Object.<glob,glob>} config.paths paths
 @parent StealJS.config
 
 Configure the location of a module or modules.
@@ -17,11 +17,17 @@ will provide [default paths](#section_Defaultpathsconfiguredbysteal).
 
 ## Use
 
-`System.paths` can be configured with any of the approaches in [System.config]. It
+`paths` can be configured with any of the approaches in [config.config]. It
 is used to provide the path of a module. You might use this if you install a module
 with a package manager, for example with bower. For example:
 
-    System.paths.jquery = "bower_components/jquery/dist/jquery.js"
+```json
+"steal": {
+	"paths": {
+		"jquery": "bower_components/jquery/dist/jquery.js"
+	}
+}
+```
 
 Will map the the `jquery` module to where the JavaScript file is located in bower_components.
 
@@ -34,8 +40,15 @@ module.
 
 For example:
 
-    System.paths["lodash/*"] = "/js/lodash/*.js"
-    System.paths["theme/*"] = "jquery-ui/themes/base/jquery.ui.*css"
+```json
+"steal": {
+	"paths": {
+		"lodash/*": "/js/lodash/*.js",
+		"theme/*": "jquery-ui/themes/base/jquery.ui.*css"
+
+	}
+}
+```
 
 This would allow you to do:
 
@@ -55,7 +68,7 @@ to the following rules:
 
 - [@config] - If `steal.js` is in _ROOT/bower\_components/steal/steal.js_, `@config` defaults to
   <i>ROOT/stealconfig.js</i>; otherwise, it defaults to 
-  _[System.baseURL baseURL]/stealconfig.js_. Specifying `@config` will specify [System.baseURL baseURL].
+  _[config.baseURL baseURL]/stealconfig.js_. Specifying `@config` will specify [config.baseURL baseURL].
 - [@dev] - defaults to _STEAL\_BASE/steal/dev.js_
 - [@traceur] - defaults to _STEAL\_BASE/traceur/traceur.js_
 - [$css] - defaults to _STEAL\_BASE/steal/css.js_

@@ -33,7 +33,7 @@ project. The following walks through the important parts:
 
 ### "steal"
 
-The `steal` property specifies SystemJS and StealJS overwrites. Set the [System.main] property as follows to tell SystemJS to use `src/bit-tabs.js` as the starting point of the application. The "npmIgnore" property tells StealJS to ignore processing the package.json files of certain dependencies.
+The `steal` property specifies StealJS overwrites. Set the [config.main] property as follows to tell Steal to use `src/bit-tabs.js` as the starting point of the application. The "npmIgnore" property tells StealJS to ignore processing the package.json files of certain dependencies.
 
 > In the steal property, create a "main" property that points to the main entry-point. And,
 > set "npmIgnore" to ignore dependencies that aren't needed by the browser.
@@ -143,7 +143,7 @@ module.exports = function (grunt) {
 };
 ```
 
-The [steal-tools.grunt.export] grunt task above loads modules and transpiles them to CommonJS, AMD, and a global distributables. The [steal-tools.grunt.export] task requires a [steal-tools.SystemConfig]. In this example, `steal.config` points to the `package.json` file which will hold the export configuration.
+The [steal-tools.grunt.export] grunt task above loads modules and transpiles them to CommonJS, AMD, and a global distributables. The [steal-tools.grunt.export] task requires a [steal-tools.StealConfig]. In this example, `steal.config` points to the `package.json` file which will hold the export configuration.
 
 
 ## Publishing

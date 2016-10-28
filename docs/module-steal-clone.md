@@ -104,7 +104,7 @@ loader.import('moduleB').then(function(){
 });
 ```
 
-You will be able to override the value of `moduleB`. Note that for this to work you must import [@loader] to use for dynamic loading instead of using `System.import`. This is because `@loader` will refer to the cloned loader you created where as `System` always refers back to the global loader. Using [@loader] is always recommended anyways.
+You will be able to override the value of `moduleB`. Note that for this to work you must import [@loader] to use for dynamic loading instead of using `steal.import`. This is because `@loader` will refer to the cloned loader you created where as `steal.loader` always refers back to the global loader. Using [@loader] is always recommended anyways.
 
 ### Use with Bower or NPM
 

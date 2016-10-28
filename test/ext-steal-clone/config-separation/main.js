@@ -10,10 +10,10 @@ function excludeRegistry() {
 
   if (typeof window !== "undefined" && window.QUnit) {
     QUnit.ok(!clone.has(deletedModule), 'should delete module from clone');
-    QUnit.ok(System.has(deletedModule), 'should not delete module from System');
+    QUnit.ok(steal.loader.has(deletedModule), 'should not delete module from loader');
   } else {
     console.log(' clone.has(' + deletedModule + '):', clone.has(deletedModule));
-    console.log('System.has(' + deletedModule + '):', System.has(deletedModule));
+    console.log('steal.loader.has(' + deletedModule + '):', steal.loader.has(deletedModule));
   }
 
   return Promise.resolve();
@@ -25,10 +25,10 @@ function excludeExtensions() {
 
   if (typeof window !== "undefined" && window.QUnit) {
     QUnit.ok(clone._extensions.indexOf(cloneExtension) >= 0, 'clone should include new extensions');
-    QUnit.ok(System._extensions.indexOf(cloneExtension) < 0, 'System should not include new extensions');
+    QUnit.ok(steal.loader._extensions.indexOf(cloneExtension) < 0, 'steal.loader should not include new extensions');
   } else {
     console.log('index of cloneExtension in clone:', clone._extensions.indexOf(cloneExtension));
-    console.log('index of cloneExtension in System:', System._extensions.indexOf(cloneExtension));
+    console.log('index of cloneExtension in steal.loader:', steal.loader._extensions.indexOf(cloneExtension));
   }
 
   return Promise.resolve();

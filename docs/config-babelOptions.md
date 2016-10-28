@@ -1,4 +1,4 @@
-@property {Object} System.babelOptions
+@property {Object} config.babelOptions babelOptions
 @parent StealJS.config
 
 Babel 6 is the default JavaScript compiler in stealJS.
@@ -41,7 +41,7 @@ Babel options like `optional`, `whitelist` or `blacklist` are __not__ vaild opti
 
 ## Babel 5 options for stealJS < 1.0
 If you are using a stealJS version less than 1.0, Babel is not the default transpiler.
-See [System.transpiler] how to change the JavaScript compiler.
+See [config.transpiler] how to change the JavaScript compiler.
 If you activated Babel as the default transpiler, steal sets the following as default options
 
 #### blacklist

@@ -1,5 +1,5 @@
 
-System["import"]("lodash").then(function(_) {
+steal.import("lodash").then(function(_) {
 
 	if(typeof window !== "undefined" && window.QUnit) {
 		QUnit.equal(_.myModule, "lodash", "Grabbed the correct lodash");

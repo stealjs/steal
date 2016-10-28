@@ -1,5 +1,5 @@
 
-var worker = new Worker(System.stealURL+"?main=envs/worker/worker&config="+System.configPath);
+var worker = new Worker(steal.loader.stealURL+"?main=envs/worker/worker&config=" + steal.loader.configPath);
 
 worker.addEventListener("message", function(ev){
 	if(window.QUnit) {

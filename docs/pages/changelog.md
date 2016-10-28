@@ -21,7 +21,7 @@
 
 - package.jsons are now [progressively fetched](https://github.com/stealjs/system-npm/issues/41) as needed to configure.
 - Using npm you can [now load](https://github.com/stealjs/system-npm/issues/3) modules that use the `folder/index.js` convention.
-- When importing json files you can now make transformations with the new [jsonOptions](http://stealjs.com/docs/System.jsonOptions.html).
+- When importing json files you can now make transformations with the new [jsonOptions](http://stealjs.com/docs/config.jsonOptions.html).
 - The [contextual module](https://github.com/stealjs/steal/issues/518) extension makes it easy to create modules that are aware of their parent.
 - Better [CommonJS detection](https://github.com/stealjs/steal/pull/583).
 - Configuration added to the script tag now [beats out](https://github.com/stealjs/steal/pull/579) global configuration.
@@ -62,7 +62,7 @@
 - Babel and Traceur updated to the latest versions.
 - [envs configuration](https://github.com/stealjs/steal/issues/454).
 - The [@loader](https://github.com/stealjs/steal/pull/460) module not works with the Steal syntax.
-- Whether bundles are loaded is not configured by [System.loadBundles], not the `env` flag, but env=production still works for backworks compatibility.
+- Whether bundles are loaded is not configured by [config.loadBundles], not the `env` flag, but env=production still works for backworks compatibility.
 - The [@steal] module was created to serve a similar purpose as [@loader].
 
 ### steal-tools
@@ -111,14 +111,14 @@
 - [npm] and [bower] plugins can be used with each other using [configDependencies](http://stealjs.com/docs/npm.html)
 (and [here](http://stealjs.com/docs/bower.html)).
 - Updated SystemJS and ESML.
-- Choice of ES6 compiler can be controlled through the [System.transpiler transpiler] config.
-- [System.bundle] can now take a glob.
+- Choice of ES6 compiler can be controlled through the [config.transpiler transpiler] config.
+- [config.bundle] can now take a glob.
 - Loading in Node on Windows no longer requires setting paths with `file:` prefix.
 - Less plugin upgraded to use Less 2.4.0.
 
 ### steal-tools
 
-- Bundles now get written to subdirectories of [System.bundlesPath bundlesPath] to ensure unique. [#52](https://github.com/bitovi/steal-tools/pull/54)
+- Bundles now get written to subdirectories of [config.bundlesPath bundlesPath] to ensure unique. [#52](https://github.com/bitovi/steal-tools/pull/54)
 - All tests passing on Windows.
 - `main` and `bundle` names can be the unnormalized. [#89](https://github.com/bitovi/steal-tools/issues/89).
 
@@ -134,10 +134,10 @@
 - Add the [bower] extension.
 - Updated SystemJS and ESML
 - If _steal.js_ is found in node_modules, 
-  load `package.json!npm` as [System.configMain].
+  load `package.json!npm` as [config.configMain].
 - If _steal.js_ is found in bower_components, load
-  `bower.json!bower` as [System.configMain].
-- Replaced `@config` with [System.configMain]. If you were doing:
+  `bower.json!bower` as [config.configMain].
+- Replaced `@config` with [config.configMain]. If you were doing:
       
       System.import("@config")
       

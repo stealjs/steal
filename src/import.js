@@ -26,4 +26,7 @@
 
 		return configPromise.then(afterConfig);
 	};
+	steal.setContextual = System.setContextual.bind(System);
+	steal.isEnv = System.isEnv.bind(System);
+	steal.isPlatform = System.isPlatform.bind(System);
 	return steal;

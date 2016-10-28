@@ -1,4 +1,4 @@
-@property {Object<moduleName,*>} System.instantiated
+@property {Object<moduleName,*>} config.instantiated instantiated
 @parent StealJS.config
 
 Specify modules that have already been loaded prior to loading `steal.js`.

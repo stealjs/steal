@@ -1,12 +1,12 @@
 
 QUnit.module("meta configuration", {
 	teardown: function(){
-		delete System.meta.foo;
+		delete steal.config("meta").foo;
 	}
 });
 
 QUnit.test("is set deep", function(){
-	System.config({
+	steal.config({
 		meta: {
 			foo: {
 				format: "global",
@@ -15,7 +15,7 @@ QUnit.test("is set deep", function(){
 		}
 	});
 
-	System.config({
+	steal.config({
 		meta: {
 			foo: {
 				format: "global"
@@ -23,12 +23,12 @@ QUnit.test("is set deep", function(){
 		}
 	});
 
-	var cfg = System.meta.foo;
+	var cfg = steal.config("meta").foo;
 	QUnit.equal(cfg.deps.length, 1, "still have the one dep");
 });
 
 QUnit.test("added deps get added", function(){
-	System.config({
+	steal.config({
 		meta: {
 			foo: {
 				format: "global",
@@ -37,7 +37,7 @@ QUnit.test("added deps get added", function(){
 		}
 	});
 
-	System.config({
+	steal.config({
 		meta: {
 			foo: {
 				format: "global",
@@ -46,12 +46,12 @@ QUnit.test("added deps get added", function(){
 		}
 	});
 
-	var cfg = System.meta.foo;
+	var cfg = steal.config("meta").foo;
 	QUnit.equal(cfg.deps.length, 1, "still have the one dep");
 });
 
 QUnit.test("setting deps to empty removes them", function(){
-	System.config({
+	steal.config({
 		meta: {
 			foo: {
 				format: "global",
@@ -60,7 +60,7 @@ QUnit.test("setting deps to empty removes them", function(){
 		}
 	});
 
-	System.config({
+	steal.config({
 		meta: {
 			foo: {
 				format: "global",
@@ -69,24 +69,24 @@ QUnit.test("setting deps to empty removes them", function(){
 		}
 	});
 
-	var cfg = System.meta.foo;
+	var cfg = steal.config("meta").foo;
 	QUnit.equal(cfg.deps.length, 0, "deps were removed");
 });
 
 QUnit.test("Can provide a string as the meta value", function(){
-	System.config({
+	steal.config({
 		meta: {
 			foo: "bar"
 		}
 	});
 
-	System.config({
+	steal.config({
 		meta: {
 			foo: "qux"
 		}
 	});
 
-	var cfg = System.meta.foo;
+	var cfg = steal.config("meta").foo;
 	QUnit.equal(cfg, "qux", "meta was set");
 });
 

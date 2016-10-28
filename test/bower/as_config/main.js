@@ -1,5 +1,5 @@
 
-System["import"]("jquerty").then(function($) {
+steal.import("jquerty").then(function($) {
 
 	if(typeof window !== "undefined" && window.QUnit) {
 		QUnit.equal($, "jquerty", "Grabbed the correct module");

@@ -1,4 +1,4 @@
-@property {String} System.transpiler
+@property {String} config.transpiler transpiler
 @parent StealJS.config
 
 Specifies which transpiler to use for ES6 modules. Traceur has been around for a longer time, but Babel provides advantages such as a smaller overhead.
@@ -15,6 +15,8 @@ Specifies which transpiler to use for ES6 modules. Traceur has been around for a
 
 If you'd like to control which ES6 transpiler is used simply set in your config:
 
-    System.config({
-      transpiler: "traceur"
-    });
+```json
+"steal": {
+	"transpiler": "traceur"
+}
+```

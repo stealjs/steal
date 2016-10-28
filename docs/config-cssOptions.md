@@ -1,9 +1,9 @@
-@property {Object} System.cssOptions
+@property {Object} config.cssOptions cssOptions
 @parent StealJS.config
 
 @option {Integer} timeout This specifies the time (in seconds) steal will try to load a css file, within a javascript module (e.g. `require('mycssfile.css')`, in __production mode__.
 ```js
-System.config({
+steal.config({
     cssOptions: {
         timeout: 15
     }

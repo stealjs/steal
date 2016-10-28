@@ -1,5 +1,5 @@
-@property {String} System.baseURL
-@alias System.baseUrl
+@property {String} config.baseURL baseURL
+@alias config.baseUrl
 @parent StealJS.config
 
 Specifies the root path to use for all module lookups. 
@@ -8,7 +8,7 @@ Specifies the root path to use for all module lookups.
 module lookups. If baseURL is not specified, the baseURL is treated
 as the page's directory in a browser and `process.cwd()` in node.
 
-Specifying [System.config] will set `baseURL` to the config's parent directory.
+Specifying [config.config] will set `baseURL` to the config's parent directory.
 
 
 @body
@@ -19,12 +19,10 @@ When a module is imported, the `baseURL` will be the prepended to the module loc
 default. For example:
 
 ```
-System.baseURL = "../libs";
-System.import("mylib")      // looks in ../libs/mylib
+steal.config({
+	baseURL: "../libs"
+});
+steal.import("mylib")      // looks in ../libs/mylib
 ```
 
-This behavior can futher be modified by [System.paths]
-
-## Implementation
-
-Provided by [ES6 Module Loader](https://github.com/ModuleLoader/es6-module-loader#baseurl).
+This behavior can futher be modified by [config.paths]

@@ -103,6 +103,7 @@
 	// load the main module(s) if everything is configured
 	steal.startup = function(config){
 		var steal = this;
+		var loader = this.loader;
 		var configResolve;
 		var configReject;
 
@@ -121,69 +122,70 @@
 			}
 
 			// set the config
-			System.config(config);
+			loader.config(config);
 
-			setEnvsConfig.call(steal.System);
+			setEnvsConfig.call(loader);
 
 			// we only load things with force = true
-			if (System.loadBundles) {
+			if (loader.loadBundles) {
 
-				if (!System.main && System.isEnv("production") && !System.stealBundled) {
+				if (!loader.main && loader.isEnv("production") &&
+					!loader.stealBundled) {
 					// prevent this warning from being removed by Uglify
 					var warn = console && console.warn || function () {
 						};
 					warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				System["import"](System.configMain)
+				loader["import"](loader.configMain)
 				.then(configResolve, configReject);
 
 				return configPromise.then(function (cfg) {
-					setEnvsConfig.call(System);
-					return System.main ? System["import"](System.main) : cfg;
+					setEnvsConfig.call(loader);
+					return loader.main ? loader["import"](loader.main) : cfg;
 				});
 
 			} else {
-				System["import"](System.configMain)
+				loader["import"](loader.configMain)
 				.then(configResolve, configReject);
 
 				devPromise = configPromise.then(function () {
-					setEnvsConfig.call(System);
-					setupLiveReload.call(System);
+					setEnvsConfig.call(loader);
+					setupLiveReload.call(loader);
 
 					// If a configuration was passed to startup we'll use that to overwrite
 					// what was loaded in stealconfig.js
 					// This means we call it twice, but that's ok
 					if (config) {
-						System.config(config);
+						loader.config(config);
 					}
 
-					return System["import"]("@dev");
+					return loader["import"]("@dev");
 				});
 
 				return devPromise.then(function () {
 					// if there's a main, get it, otherwise, we are just loading
 					// the config.
-					if (!System.main || System.env === "build") {
+					if (!loader.main || loader.env === "build") {
 						return configPromise;
 					}
-					var main = System.main;
+					var main = loader.main;
 					if (typeof main === "string") {
 						main = [main];
 					}
 					return Promise.all(map(main, function (main) {
-						return System["import"](main);
+						return loader["import"](main);
 					}));
 				});
 			}
 		}).then(function(){
-			if(System.mainSource) {
-				return System.module(System.mainSource);
+			if(loader.mainSource) {
+				return loader.module(loader.mainSource);
 			}
 
 			// load script modules they are tagged as
 			// text/steal-module
-			return System.loadScriptModules();
+			return loader.loadScriptModules();
 		});
 
 		return appPromise;

@@ -1,7 +1,7 @@
 @typedef {*} @loader
 @parent StealJS.modules
 
-**@loader** is a module that refers to the loader that is loading the module. Any time you need to configure the loader or dynamically import modules, it's best to use `@loader` rather than the global `System`.
+**@loader** is a module that refers to the loader that is loading the module. Any time you need to configure the loader or dynamically import modules, it's best to use `@loader` rather than the global `steal.loader`.
 
 In most cases they are the same, but during the build there are multiple loaders; and if using [steal.steal-clone] to test injected modules.
 
@@ -12,7 +12,7 @@ In most cases they are the same, but during the build there are multiple loaders
 ## Use
 
 To use **@loader** simply import it and use it in the same way you
-would use [System](steal#section_LoaderandSystemnamespaces).
+would use [steal.loader](steal#section_LoaderandSystemnamespaces).
 
     import loader from "@loader";
 
@@ -26,4 +26,4 @@ would use [System](steal#section_LoaderandSystemnamespaces).
 
 	});
 
-This works with any syntax supported by StealJS.
+This works with any syntax supported by Steal.

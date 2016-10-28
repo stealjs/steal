@@ -53,8 +53,8 @@ _myapp.html_:
 ### Add the script tag
 
 In _myapp.html_, add a script tag that that loads _steal.js_ and points
-to the [System.main main] entrypoint of your application. If
-main is not provided, [System.main] will be set to _package.json_'s main.
+to the [config.main main] entrypoint of your application. If
+main is not provided, [config.main] will be set to _package.json_'s main.
 
 ```
 <!-- myapp.html -->
@@ -81,7 +81,7 @@ The following _package.json_ only loads the `dependencies`.
   },
   "devDependencies": {...}
   "steal": {
-    "npmIgnore": ["devDependencies"]
+
   }
 }
 ```
@@ -97,47 +97,6 @@ In _myapp.js_, import your dependencies and write your app:
 import $ from "jquery";
 $("body").append("<h1>Hello World</h1>")
 ```
-
-
-## Bower basics
-
-Using Bower is similar to using NPM but has a few options specific to how Bower works.
-
-### Install
-
-```
-> bower install steal --save
-> bower install canjs --save
-```
-
-### Use
-
-If you are using a typical installation of Bower using it can be as simple as:
-
-```html
-<script src="bower_components/steal/steal.js" main="myapp"></script>
-```
-
-This will load your `bower.json` file and use your `dependencies` to configure packages
-that you are using (such as CanJS in this example). Unlike NPM, with Bower your
-`devDependencies` are not configured by default, although this may change in the future.
-To enable the configuration of devDependencies add the following to your script tag:
-
-```html
-bower-dev="true"
-```
-
-#### Specifying components folder
-
-Unlike NPM, Bower allows you to configure an alternate folder to install dependencies
-rather than the default `bower_components`. If you are using a different folder
-you can specify that as an attribute in the script tag as well:
-
-```html
-bower-path="vendor"
-```
-
-Will look for dependencies in `System.baseURL` + "/vendor".
 
 ### Importing in your app
 
@@ -178,7 +137,7 @@ _myapp.html_ and _config.js_. You should have something like:
 ### Add the script tag
 
 In _myapp.html_, add a script tag that that loads _steal.js_ and points
-to the [System.configPath configPath] and [System.main main] entrypoint of your application.
+to the [config.configPath configPath] and [config.main main] entrypoint of your application.
 
 
 ```
@@ -196,7 +155,7 @@ your site's modules. For example, to load jQuery from a CDN:
 
 ```
 // config.js
-System.config({
+steal.config({
   paths: {"jquery": "http://code.jquery.com/jquery-1.11.0.min.js"}
 });
 ```
@@ -215,7 +174,7 @@ import $ from "jquery";
 $("body").append("<h1>Hello World</h1>")
 ```
 
-## Configuring the `System` loader
+## Configuring `steal.loader`
 
 Once steal.js loads, its startup behavior is determined
 configuration values.  Configuration values can be set in three ways:
@@ -233,26 +192,23 @@ configuration values.  Configuration values can be set in three ways:
                 main="myapp">
         </script>
  
- - Calling [System.config] or setting `System` configuration properties
-   after `steal.js` has loaded. This technique is typically used in the [System.configMain] module.
+ - Calling [config.config]. This technique is typically used in the [config.configMain] module.
 
-        System.config({
+        steal.config({
           paths: {"can/*" : "http://canjs.com/release/2.0.1/can/*"}
         })
-        System.meta["jquery"] = {format: "global"}
         
-   If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. System
-   configuration happens in their `system` properties:
+   If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. Steal configuration happens in their `steal` properties:
    
         {
           "name": "myapp",
           "dependencies": { ... },
-          "system": {
+          "steal": {
             "map": {"can/util/util": "can/util/jquery/jquery"}
           }
         }
 
-Typically, developers configure the [System.main] and [System.configPath] properties 
+Typically, developers configure the [config.main] and [config.configPath] properties 
 with attributes on the steal.js script tag like:
 
     <script src="../path/to/steal/steal.js"
@@ -260,13 +216,13 @@ with attributes on the steal.js script tag like:
             config-path="../config.js">
     </script>
 
-Setting [System.configPath] sets [System.baseURL] to the 
+Setting [config.configPath] sets [config.baseURL] to the 
 configPath's parent directory.  This would load _config.js_ prior to
 loading _../myapp.js_.
 
-When _steal.js_ loads, it sets [System.stealPath stealPath].  [System.stealPath stealPath] sets default values
-for [System.baseURL baseURL] and [System.configPath configPath]. If _steal.js_ is in _bower_components_,
-[System.configPath] defaults to _bower_components_ parent folder. So if you write:
+When _steal.js_ loads, it sets [config.stealPath stealPath].  [config.stealPath stealPath] sets default values
+for [config.baseURL baseURL] and [config.configPath configPath]. If _steal.js_ is in _bower_components_,
+[config.configPath] defaults to _bower_components_ parent folder. So if you write:
 
     <script src="../../bower_components/steal/steal.js"
             main="myapp">

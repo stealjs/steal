@@ -1,10 +1,10 @@
-var System = require("@loader");
+var loader = require("@loader");
 var steal = require("@steal");
 
-System.liveReloadInstalled = true;
+loader.liveReloadInstalled = true;
 
 function updateEnvs() {
-	System.config({
+	steal.config({
 		envs: {
 			"window-staging": {
 				map: {

@@ -1,4 +1,4 @@
-@property {Object.<moduleGlob, moduleName|Object.<moduleGlob,moduleName>>} System.map
+@property {Object.<moduleGlob, moduleName|Object.<moduleGlob,moduleName>>} config.map map
 @parent StealJS.config
 
 Alter [moduleName] keys.
@@ -10,14 +10,20 @@ be specified globally or limited to a specific path.
 
 The following will alter "glob/*" modules across the whole application.
 
-    System.map["glob/*"] = "moduleName/*" 
+    steal.config("map")["glob/*"] = "moduleName/*" 
 
 The following limits converting "jquery" to "jquery@1.2" to only within modules that match
 "oldcode/*":
 
-    System.map["oldcode/*"] = {
-      "jquery": "jquery@1.2"
-    };
+```js
+steal.config({
+	map: {
+		"oldcode/*": {
+			"jquery": "jquery@1.2"
+		}
+	}
+});
+```
 
 @body
 
@@ -32,7 +38,7 @@ that heavily used Underscore. You might want to migrate to Lodash for added
 features or performance reasons. You can use map to do this without updating all of 
 your code that uses Underscore like so:
 
-    System.map.underscore = "lodash";
+    steal.config("map").underscore = "lodash";
 
 This would save you from updating every module that had previously imported Underscore,
 however in some cases you are unable to update the modules in the first place  
@@ -47,6 +53,6 @@ if you need them. Because there isn't a standard way to define conditional depen
 they likely just import them explicitly. If you do not need this option you can
 elect to ignore the dependency by mapping it to `@empty`:
 
-    System.map["some/optional_dep"] = "@empty";
+    steal.config("map")["some/optional_dep"] = "@empty";
 
-`@empty` is a pseudo-module defined by SystemJS to represent a module with no value.
+`@empty` is a pseudo-module defined by Steal to represent a module with no value.
