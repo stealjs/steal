@@ -1,4 +1,4 @@
-	if( isNode && !isNW ) {
+	if( isNode && !isNW && !isElectron) {
 		require('steal-systemjs');
 
 		global.steal = makeSteal(System);

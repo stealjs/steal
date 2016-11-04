@@ -34,7 +34,7 @@
 			var urlOptions = {
 				stealURL: location.href
 			};
-		} else if(isBrowserWithWindow || isNW) {
+		} else if(isBrowserWithWindow || isNW || isElectron) {
 			var urlOptions = getScriptOptions();
 		} else {
 			// or the only option is where steal is.
