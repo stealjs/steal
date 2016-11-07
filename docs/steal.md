@@ -1,5 +1,6 @@
 @page steal
 @parent StealJS.api
+@group StealJS.ecosystem ecosystem
 @group StealJS.syntaxes syntaxes
 @group StealJS.config config
 @group StealJS.modules modules
