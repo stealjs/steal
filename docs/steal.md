@@ -7,7 +7,6 @@
 @group StealJS.functions functions
 @group StealJS.schemes schemes
 @group StealJS.hooks hooks
-@group StealJS.ecosystem ecosystem
 
 Steal is a  module loader that supports a wide variety of 
 syntaxes and configuration options. It makes modular development, test

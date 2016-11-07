@@ -1,6 +1,7 @@
 @page StealJS
 @group StealJS.api apis
 @group StealJS.guides guides
+@group StealJS.ecosystem ecosystem
 
 _Good artists copy; great artists steal._
 
