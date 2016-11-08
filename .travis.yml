@@ -3,6 +3,7 @@ node_js:
     - 0.12
     - 4
     - 5.5
+    - stable
 script: npm test
 before_install:
   - "export DISPLAY=:99.0"
