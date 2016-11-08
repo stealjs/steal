@@ -3,6 +3,7 @@
 @group StealJS.guides guides
 @group StealJS.topics topics
 @group StealJS.about about
+@group StealJS.ecosystem ecosystem
 
 _Good artists copy; great artists steal._
 
