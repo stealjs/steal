@@ -34,7 +34,7 @@ If you'd also like it to copy your fonts and images (from CSS) you can specify t
 ```
 var stealTools = require("steal-tools");
 
-stealTools.build({
+stealTools.build({}, {
   bundleAssets: true
 });
 ```
@@ -73,7 +73,7 @@ Alternatively you could use the [steal-tools.BuildOptions bundleSteal] option wi
 ```
 var stealTools = require("steal-tools");
 
-stealTools.build({
+stealTools.build({}, {
   bundleAssets: true,
   bundleSteal: true
 });
