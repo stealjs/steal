@@ -607,8 +607,7 @@ Create _index.html_ with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <script src="./node_modules/steal/steal.production.js"
-        main="myhub/myhub"></script>
+    <script src="./dist/steal.production.js"></script>
   </body>
 </html>
 ```
@@ -633,8 +632,7 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
-    <script src="./node_modules/steal/steal.production.js"
-        main="myhub/myhub"></script>
+    <script src="./dist/steal.production.js"></script>
   </body>
 </html>
 ```
@@ -783,7 +781,7 @@ Create _build.js_:
 ```js
 var stealTools = require("steal-tools");
 
-stealTools.build({}, {
+stealTools.build({
   bundleSteal: true
 });
 ```
