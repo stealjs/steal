@@ -122,9 +122,7 @@ Change `index.html` to look like:
     <!DOCTYPE html>
     <html>
       <body>
-        <script src="./node_modules/steal/steal.production.js"
-                main="index">
-        </script>
+        <script src="./dist/steal.production.js"></script>
       </body>
     </html>
 

@@ -34,7 +34,7 @@ If you'd also like it to copy your fonts and images (from CSS) you can specify t
 ```
 var stealTools = require("steal-tools");
 
-stealTools.build({}, {
+stealTools.build({
   bundleAssets: true
 });
 ```
@@ -61,14 +61,10 @@ In a lot of Steal apps you might have separate html files for development and pr
 To use this in production you only need to change the script tag to:
 
 ```
-<script src="./dist/node_modules/steal/steal.production.js" main="app/app"></script>
+<script src="./dist/steal.production.js"></script>
 ```
 
-*Note* that the `main` attribute must be provided for production to work. This is how Steal knows where to find your app's bundles.
-
-In this example we are using `bundleAssets`, which includes a copy of steal.production.js that is configured to work with your bundles. This allows you to simple serve the `dist/` folder in production and not expose the development files.
-
-[This example app](https://gist.github.com/matthewp/ee36a94997f0eb62bb348de35bbbab2a) shows off this workflow.
+Notice that steal-tools has copied over *steal.production.js* into your dist folder. This script is preconfigured, so all you need to do is add it to your page. Because we use `bundleAssets`, everything is packaged into the dist folder and your development files are never touched in production.
 
 ### bundleSteal
 
@@ -77,7 +73,7 @@ Alternatively you could use the [steal-tools.BuildOptions bundleSteal] option wi
 ```
 var stealTools = require("steal-tools");
 
-stealTools.build({}, {
+stealTools.build({
   bundleAssets: true,
   bundleSteal: true
 });
