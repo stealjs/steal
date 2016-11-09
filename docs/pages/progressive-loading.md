@@ -781,7 +781,7 @@ Create _build.js_:
 ```js
 var stealTools = require("steal-tools");
 
-stealTools.build({
+stealTools.build({}, {
   bundleSteal: true
 });
 ```
