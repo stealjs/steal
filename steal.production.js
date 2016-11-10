@@ -1,5 +1,5 @@
 /*
- *  steal v0.16.41
+ *  steal v0.16.42
  *  
  *  Copyright (c) 2016 Bitovi; Licensed MIT
  */
