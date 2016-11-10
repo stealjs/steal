@@ -6210,7 +6210,7 @@ function addEnv(loader){
 
 		if(System.mainSource) {
 			appDeferred = appDeferred.then(function(){
-				System.module(System.mainSource);
+				return System.module(System.mainSource);
 			});
 		}
 		return appDeferred;
