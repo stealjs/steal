@@ -117,6 +117,7 @@ Update _myhub.html_ with:
   </body>
 </html>
 ```
+@highlight 6
 
 ### Update package.json with the right main
 
@@ -154,6 +155,8 @@ import "./myhub.less";
 $("body").html("<h1>Goodbye script tags!</h1>");
 ```
 
+@highlight 2
+
 Each string used to import such as `"jquery"` and `"./myhub.less"` are called [moduleIdentifier module identifiers]. They identify a module to be imported within the context of the module that is importing them. That means that when you import a module like `"./myhub.less"` you are importing that module relative to the current module (in this case it is your myhub.js module).
 
 Internally Steal resolves all module identifiers into [moduleName moduleNames], which it uses as the **key** to look up modules. This allows you to load modules from many different places in the application and them all resolve to the same module.
@@ -184,6 +187,8 @@ Update the _myhub.html_ to use bootstrap with:
 </html>
 ```
 
+@highlight 4-6,9
+
 Import it and use it with the following updated _myhub.js_:
 
 ```js
@@ -197,6 +202,8 @@ $("body").append(`
     </div>
 `);
 ```
+
+@highlight 3,5-9
 
 Once you restart your server again (`npm start`) you'll be able to see your changes when you refresh.
 
@@ -294,7 +301,7 @@ import repos from "./repos";
 QUnit.module("myhub/repos/");
 
 QUnit.test("basics", function(){
-    stop();
+    QUnit.stop();
     var fixtureEl = document.getElementById("qunit-fixture");
 
     repos(fixtureEl);
@@ -332,6 +339,8 @@ $("body").append(
 
 repos('#repos');
 ```
+
+@highlight 4,9,12
 
 ## Create test with dependency injection
 
@@ -402,6 +411,8 @@ QUnit.asyncTest("basics with dependency injection", function(){
 });
 ```
 
+@highlight 3-4,28-58
+
 ## Import a global script in a CommonJS modlet
 
 Steal supports all of the most common module formats: [syntax.es6 ES modules], [syntax.CommonJS], and [syntax.amd]. Your project can contain multiple formats; as is common when you are using ES modules but a dependency is using CommonJS, for example.
@@ -464,25 +475,8 @@ Change _package.json_ to:
 
 ```json
 {
-  "name": "myhub",
-  "version": "1.0.0",
-  "description": "",
-  "main": "myhub.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bootstrap": "^3.3.6",
-    "jquery": "^3.0.0",
-    "justifiedGallery": "^3.6.2",
-    "steal": "^1.0.0"
-  },
-  "devDependencies": {
-    "steal-qunit": "^0.1.1",
-    "steal-tools": "^1.0.0"
-  },
+  ...
+
   "steal": {
      "map": {
          "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
@@ -496,6 +490,8 @@ Change _package.json_ to:
   }
 }
 ```
+
+@highlight 4-14
 
 ### Use justifiedGallery
 
@@ -530,6 +526,8 @@ module.exports = function(selector) {
 	});
 };
 ```
+
+@highlight 2,5-24
 
 ## Build a production app
 
@@ -572,6 +570,8 @@ $(window).on("hashchange", updatePage);
 
 updatePage();
 ```
+
+@highlight 5,8-29
 
 ### Build the app and switch to production
 
@@ -637,6 +637,8 @@ Update _index.html_ to:
 </html>
 ```
 
+@highlight 7
+
 Now if you restart your server with `npm start` and reload the page you'll notice that only a few resources are downloaded.
 
 <img width="744" alt="screen shot 2016-11-02 at 2 27 00 pm" src="https://cloud.githubusercontent.com/assets/361671/19943420/b0900d0c-a10d-11e6-99d6-8c1aea6632d5.png">
@@ -679,6 +681,8 @@ Update _index.html_ to:
 </html>
 ```
 
+@highlight 10
+
 ## Build a progressive loading production app
 
 For this size app we're in a good spot. For larging apps you want to avoid bundling your entire site into 1 JavaScript and one CSS file. Instead you should progressively load your app based on which page the user is viewing.
@@ -719,6 +723,8 @@ $(window).on("hashchange", updatePage);
 updatePage();
 ```
 
+@highlight 3,13-22
+
 In the above code we have a div `#main` that each page renders into. Based on the location.hash, dynamically import the page being requested. So when the hash is `#repos` use [steal.import] to import the repos modlet; if the hash is `#puppies` use steal.import to import the puppies modlet.
 
 ### Update bundles to build
@@ -729,35 +735,11 @@ Update _package.json_ to:
 
 ```json
 {
-  "name": "myhub",
-  "version": "1.0.0",
-  "description": "",
-  "main": "myhub.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bootstrap": "^3.3.6",
-    "jquery": "^3.0.0",
-    "justifiedGallery": "^3.6.2",
-    "steal": "^1.0.0"
-  },
-  "devDependencies": {
-    "steal-tools": "^1.0.0",
-    "steal-qunit": "^0.1.1"
-  },
+  ...
+
   "steal": {
-    "map": {
-      "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
-    },
-    "meta": {
-      "justifiedGallery/src/js/justifiedGallery": {
-        "format": "global",
-        "deps": ["jquery","justifiedGallery/src/less/justifiedGallery.less"]
-      }
-    },
+    ...
+
     "bundle": [
       "myhub/puppies/puppies",
       "myhub/repos/repos"
@@ -765,6 +747,8 @@ Update _package.json_ to:
   }
 }
 ```
+
+@highlight 7-10
 
 Run:
 
