@@ -174,6 +174,9 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("inline", function(){
 		makeIframe("basics/inline_basics.html");
 	});
+	asyncTest("inline main source", function(){
+		makeIframe("basics/inline_main_source.html");
+	});
 
 	if(supportsES) {
 		asyncTest("default bower_components config path", function(){
