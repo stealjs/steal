@@ -89,10 +89,7 @@ module.exports = function (grunt) {
 		// copy plugins that steal should contain
 	  extensions: {
 		files: [
-		  {src:["node_modules/steal-css/css.js"], dest: "ext/css.js", filter: "isFile"},
 		  {src:["node_modules/steal-npm/npm.js"], dest: "ext/npm.js", filter: "isFile"},
-		  {src:["node_modules/steal-less/less.js"], dest: "ext/less.js", filter: "isFile"},
-		  {src:["node_modules/steal-less/node_modules/less/dist/less.js"], dest: "ext/less-engine.js", filter: "isFile"},
 		  {src:["node_modules/steal-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: "isFile"},
 		  {src:["node_modules/steal-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: "isFile"},
 		  {src:["node_modules/steal-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: "isFile"},

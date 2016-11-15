@@ -26,18 +26,6 @@ describe("default configuration", function () {
 describe("plugins", function(){
 	this.timeout(20000);
 
-	it("are able to convert less", function(done){
-		var steal = makeSteal({
-			config: __dirname+"/config.js",
-			main: "dep_plugins/main"
-		});
-		steal.startup().then(function(){
-			assert.ok( /width: 200px/.test( steal.loader.getModuleLoad("dep_plugins/main.less!$less").source ) );
-			done();
-		},done);
-
-	});
-
 	it("able to load a config without an absolute path", function(done){
 		var pwd = process.cwd();
 		process.chdir(__dirname);
