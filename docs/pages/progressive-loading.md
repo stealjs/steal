@@ -82,7 +82,7 @@ Installing these 3 dependencies gives us everything we need to build our applica
 
 ```
 > npm install steal jquery --save
-> npm install steal-tools steal-less --save-dev
+> npm install steal-tools steal-less steal-css --save-dev
 ```
 
 Now restart your server; you can keep it on while you develop the rest of the application.
