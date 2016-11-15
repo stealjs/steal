@@ -831,10 +831,7 @@ if (typeof System !== "undefined") {
 	System.configMain = "@config";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
-	System.ext = {
-		css: '$css',
-		less: '$less'
-	};
+	System.ext = {};
 	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
@@ -1068,9 +1065,6 @@ if (typeof System !== "undefined") {
 
 				// steal keeps this around to make things easy no matter how you are using it.
 				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
-				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
-				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
-				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
 				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
 				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
 				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
@@ -1091,11 +1085,6 @@ if (typeof System !== "undefined") {
 				this.setContextual('steal-clone', 'steal-clone');
 
 				if(isNode) {
-					System.register("@less-engine", [], false, function(){
-						var r = require;
-						return r('less');
-					});
-
 					if(this.configMain === "@config" && last(parts) === "steal") {
 						parts.pop();
 						if(last(parts) === "node_modules") {
@@ -1106,8 +1095,6 @@ if (typeof System !== "undefined") {
 					}
 
 				} else {
-					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
-
 					// make sure we don't set baseURL if it already set
 					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
 

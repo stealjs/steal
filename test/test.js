@@ -248,38 +248,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("load-bundles/prod.html");
 	});
 
-	asyncTest("automatic loading of css plugin", function(){
-		makeIframe("plugins/site.html");
-	});
-
-	asyncTest("product bundle with css", function(){
-		makeIframe("production/prod-bar.html");
-	});
-
 	asyncTest("Using path's * qualifier", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
 			'src="../steal.js?main=../paths" data-config="../paths/config.js"'));
 	});
-
-	// Less doesn't work in ie8
-	if(supportsES) {
-		asyncTest("automatic loading of less plugin", function(){
-			makeIframe("dep_plugins/site.html");
-		});
-
-		asyncTest("url paths in less work", function(){
-			makeIframe("less_paths/site.html");
-		});
-
-		asyncTest("ext extension", function(){
-			makeIframe("extensions/site.html");
-		});
-
-		asyncTest("ext extension works without the bang", function(){
-			makeIframe("extensions/site_no_bang.html");
-		});
-	}
 
 	asyncTest("forward slash extension", function(){
 		makeIframe("forward_slash/site.html");
@@ -480,10 +453,6 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("works when using the npm extensions", function() {
 		makeIframe("ext-steal-clone/npm-extension/index.html");
-	});
-
-	asyncTest("supports loading css, less files", function() {
-		makeIframe("ext-steal-clone/other-extensions/index.html");
 	});
 
 	asyncTest("works when a parent of injected dependency has been imported", function() {
