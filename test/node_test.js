@@ -64,3 +64,17 @@ describe("Modules that don't exist", function(){
 		});
 	});
 });
+
+describe("@node-require", function(){
+	it("Should be able to load projects that have Node deps", function(done){
+		var steal = makeSteal({
+			config: __dirname + "/plugin-require/package.json!npm",
+			main: "@empty"
+		});
+
+		steal.import("main").then(function(mod){
+			assert.equal(mod, "bar", "loaded it");
+		})
+		.then(done, done);
+	});
+});
