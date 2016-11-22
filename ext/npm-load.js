@@ -220,6 +220,12 @@ exports.addExistingPackages = function(context, existingPackages){
 			if(!packages[nameAndVersion]) {
 				packages.push(pkg);
 				packages[nameAndVersion] = true;
+			} else {
+				var curPkg = utils.filter(packages, function(p){
+					return p.name === pkg.name && p.version === pkg.version;
+				})[0];
+				if(!curPkg) return;
+				utils.extend(curPkg.resolutions || {}, pkg.resolutions || {});
 			}
 		});
 	}
