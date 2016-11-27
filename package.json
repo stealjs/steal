@@ -34,7 +34,7 @@
     "grunt-contrib-watch": "~0.3.0",
     "grunt-release": "^0.7.0",
     "grunt-simple-mocha": "^0.4.0",
-    "jquery": "^1.11.0",
+    "jquery": "^3.1.0",
     "testee": "^0.2.0"
   },
   "system": {
