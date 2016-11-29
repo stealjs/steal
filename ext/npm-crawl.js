@@ -70,9 +70,14 @@ var crawl = {
 
 			// Save this pkgInfo into the context
 			var localPkg = convert.toPackage(context, childPkg);
-
 			convert.forPackage(context, childPkg);
-			
+
+			// If this is a build we need to copy over the configuration
+			// from the plugin loader to the localLoader.
+			if(context.loader.localLoader) {
+				var localContext = context.loader.localLoader.npmContext;
+				convert.toPackage(localContext, childPkg);
+			}
 
 			// Save package.json!npm load
 			npmModuleLoad.saveLoadIfNeeded(context);

@@ -20,9 +20,13 @@ exports.saveLoad = function(context){
 
 exports.saveLoadIfNeeded = function(context){
 	// Only do the actual saving in the build
-	var loader = context.loader;
 	if(context.resavePackageInfo) {
 		exports.saveLoad(context);
+
+		var localLoader = context.loader.localLoader;
+		if(localLoader) {
+			exports.saveLoad(localLoader.npmContext);
+		}
 	}
 };
 
