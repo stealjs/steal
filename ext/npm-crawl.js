@@ -21,14 +21,25 @@ var crawl = {
 		return pkg;
 	},
 	/**
+	 * Crawl from the root, only fetching Steal and its dependencies so
+	 * that Node built-ins are autoconfigured.
+	 */
+	root: function(context, pkg){
+		var deps = crawl.getDependencyMap(context.loader, pkg, true);
+
+		var pluginsPromise = crawl.loadPlugins(context, pkg, true, deps, true);
+		var stealPromise = crawl.loadSteal(context, pkg, true, deps);
+
+		return Promise.all([pluginsPromise, stealPromise]);
+	},
+	/**
 	 * Crawls the packages dependencies
 	 * @param {Object} context
 	 * @param {NpmPackage} pkg
-	 * @param {Boolean} [isRoot] If the root module's dependencies shoudl be crawled.
+	 * @param {Boolean} [isRoot] If the root module's dependencies should be crawled.
 	 * @return {Promise} A promise when all packages have been loaded
 	 */
 	deps: function(context, pkg, isRoot) {
-	
 		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
 
 		return Promise.all(utils.filter(utils.map(deps, function(childPkg){
@@ -47,8 +58,8 @@ var crawl = {
 		});
 	},
 
-	dep: function(context, pkg, childPkg, isRoot) {
-		var versionAndRange = childPkg.name+"@"+childPkg.version;
+	dep: function(context, pkg, childPkg, isRoot, skipSettingConfig) {
+		var versionAndRange = childPkg.name + "@" + childPkg.version;
 		if(context.fetchCache[versionAndRange]) {
 			return context.fetchCache[versionAndRange];
 		}
@@ -67,23 +78,33 @@ var crawl = {
 			} else {
 				childPkg = result;
 			}
-
+			return result;
+		}).then(function(childPkg){
 			// Save this pkgInfo into the context
-			var localPkg = convert.toPackage(context, childPkg);
-			convert.forPackage(context, childPkg);
+			if(!skipSettingConfig) {
+				var localPkg = convert.toPackage(context, childPkg);
+				convert.forPackage(context, childPkg);
 
-			// If this is a build we need to copy over the configuration
-			// from the plugin loader to the localLoader.
-			if(context.loader.localLoader) {
-				var localContext = context.loader.localLoader.npmContext;
-				convert.toPackage(localContext, childPkg);
+				// If this is a build we need to copy over the configuration
+				// from the plugin loader to the localLoader.
+				if(context.loader.localLoader) {
+					var localContext = context.loader.localLoader.npmContext;
+					convert.toPackage(localContext, childPkg);
+				}
 			}
 
-			// Save package.json!npm load
-			npmModuleLoad.saveLoadIfNeeded(context);
+			return crawl.loadPlugins(context, childPkg, isRoot, null,
+									skipSettingConfig).then(function(){
+				return localPkg;
+			});
+		}).then(function(localPkg){
+			if(!skipSettingConfig) {
+				// Save package.json!npm load
+				npmModuleLoad.saveLoadIfNeeded(context);
 
-			// Setup any config that needs to be placed on the loader.
-			crawl.setConfigForPackage(context, localPkg);
+				// Setup any config that needs to be placed on the loader.
+				crawl.setConfigForPackage(context, localPkg);
+			}
 
 			return localPkg;
 		});
@@ -137,7 +158,37 @@ var crawl = {
 			return pkg;
 		});
 	},
+	loadPlugins: function(context, pkg, isRoot, deps, skipSettingConfig){
+		var deps = deps || crawl.getDependencyMap(context.loader, pkg, isRoot);
+		var plugins = crawl.getPlugins(pkg, deps);
+		var needFetching = utils.filter(plugins, function(pluginPkg){
+			return !crawl.matchedVersion(context, pluginPkg.name,
+										 pluginPkg.version);
+		}, truthy);
 
+		return Promise.all(utils.map(needFetching, function(pluginPkg){
+			return crawl.dep(context, pkg, pluginPkg, isRoot, skipSettingConfig);
+		}));
+	},
+	/**
+	 * Load steal and its dependencies, if needed
+	 */
+	loadSteal: function(context, pkg, isRoot, deps){
+		var stealPkg = utils.filter(deps, function(dep){
+			return dep && dep.name === "steal";
+		})[0];
+
+		if(stealPkg) {
+			return crawl.fetchDep(context, pkg, stealPkg, isRoot)
+				.then(function(childPkg){
+					if(childPkg) {
+						return crawl.deps(context, childPkg);
+					}
+				});
+		} else {
+			return Promise.resolve();
+		}
+	},
 	/**
 	 * Returns an array of the dependency names that should be crawled.
 	 * @param {Object} loader
@@ -199,6 +250,13 @@ var crawl = {
 
 		return deps;
 	},
+	getPlugins: function(packageJSON, deps) {
+		var config = utils.pkg.config(packageJSON) || {};
+		var plugins = config.plugins || [];
+		return utils.filter(utils.map(plugins, function(pluginName){
+			return deps[pluginName];
+		}), truthy);
+	},
 	isSameRequestedVersionFound: function(context, childPkg) {
 		if(!context.versions[childPkg.name]) {
 			context.versions[childPkg.name] = {};
@@ -248,8 +306,9 @@ var crawl = {
 		var versions = context.versions[packageName], pkg;
 		for(v in versions) {
 			pkg = versions[v];
-			if(SemVer.valid(pkg.version) &&
-			   SemVer.satisfies(pkg.version, requestedVersion)) {
+			if((SemVer.valid(pkg.version) &&
+			   SemVer.satisfies(pkg.version, requestedVersion)) ||
+			   utils.isGitUrl(requestedVersion)) {
 				return pkg;
 			}
 		}

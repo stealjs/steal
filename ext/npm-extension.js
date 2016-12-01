@@ -111,7 +111,8 @@ exports.addExtension = function(System){
 		var crawl = context && context.crawl;
 		var isDev = !!crawl;
 		if(!depPkg) {
-			if(crawl && !isRoot) {
+			// Development mode
+			if(crawl) {
 				var parentPkg = nameIsRelative ? null :
 					crawl.matchedVersion(context, refPkg.name,
 										 refPkg.version);
