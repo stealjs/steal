@@ -10,6 +10,7 @@
 var slice = Array.prototype.slice;
 var npmModuleRegEx = /.+@.+\..+\..+#.+/;
 var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
+var gitUrlEx = /(git|http(s?)):\/\//;
 
 var utils = {
 	extend: function(d, s, deep){
@@ -62,6 +63,9 @@ var utils = {
 	},
 	isEnv: function(name) {
 		return this.isEnv ? this.isEnv(name) : this.env === name;
+	},
+	isGitUrl: function(str) {
+		return gitUrlEx.test(str);
 	},
 	warnOnce: function(msg){
 		var w = this._warnings = this._warnings || {};

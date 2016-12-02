@@ -34,7 +34,7 @@ exports.forPackage = convertForPackage;
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
-function convertSteal(context, pkg, steal, root, ignoreWaiting) {
+function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInfo) {
 	if(!steal) {
 		return steal;
 	}
@@ -67,7 +67,7 @@ function convertSteal(context, pkg, steal, root, ignoreWaiting) {
 
 			// If we are building we need to resave the package's system
 			// configuration so that it will be written out into the build.
-			if(context.resavePackageInfo) {
+			if(context.resavePackageInfo && resavePackageInfo !== false) {
 				var info = utils.pkg.findPackageInfo(context, pkg);
 				info.steal = info.system = config;
 			}
