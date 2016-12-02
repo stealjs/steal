@@ -372,7 +372,7 @@ exports.addExtension = function(System){
 		if(loader.npmContext) {
 			var context = loader.npmContext;
 			var pkg = context.versions.__default;
-			context.convert.steal(context, pkg, cfg, true);
+			context.convert.steal(context, pkg, cfg, true, false, false);
 			oldConfig.apply(loader, arguments);
 			return;
 		}
