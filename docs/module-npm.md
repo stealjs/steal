@@ -273,3 +273,15 @@ your `bower.json` as a configDependency:
   }
 }
 ```
+
+### package.steal.plugins
+
+Specifies packages that are used as plugins. These packages will be prefetched so that they're configuration will be applied before your app loads. An example is [steal-css]. 
+
+```js
+{
+  "steal": {
+    "plugins": ["steal-css"]
+  }
+}
+```
