@@ -38,6 +38,7 @@ exports.translate = function(load){
 		deferredConversions: {},
 		npmLoad: npmLoad,
 		crawl: crawl,
+		convert: convert,
 		resavePackageInfo: resavePackageInfo,
 		forwardSlashMap: {},
 		// default file structure for npm 3 and higher
@@ -47,7 +48,7 @@ exports.translate = function(load){
 	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
 	crawl.processPkgSource(context, pkg, load.source);
 	var pkgVersion = context.versions[pkg.name] = {};
-	pkgVersion[pkg.version] = pkg;
+	pkgVersion[pkg.version] = context.versions.__default = pkg;
 
 	// backwards compatible for < npm 3
 	var steal = utils.pkg.config(pkg);

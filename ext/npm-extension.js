@@ -366,6 +366,17 @@ exports.addExtension = function(System){
 	var oldConfig = System.config;
 	System.config = function(cfg){
 		var loader = this;
+
+		// Use npm-convert if it is available as it is better
+		// and has the ability to push mappings into a waiting queue.
+		if(loader.npmContext) {
+			var context = loader.npmContext;
+			var pkg = context.versions.__default;
+			context.convert.steal(context, pkg, cfg, true);
+			oldConfig.apply(loader, arguments);
+			return;
+		}
+
 		for(var name in cfg) {
 			if(configSpecial[name]) {
 				cfg[name] = configSpecial[name].call(loader, cfg[name]);
