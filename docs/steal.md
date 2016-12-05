@@ -249,7 +249,7 @@ configuration values.  Configuration values can be set in three ways:
    after `steal.js` has loaded. This technique is typically used in the [System.configMain] module.
 
         System.config({
-          paths: {"can/*" : "http://v2.canjs.com/release/2.0.1/can/*"}
+          paths: {"can/*" : "http://canjs.com/release/2.0.1/can/*"}
         })
         System.meta["jquery"] = {format: "global"}
         
