@@ -10,4 +10,11 @@ export function foo() {
     return privateBar();
 }
 
-foo();
+var result = foo();
+
+if(typeof window !== "undefined" && window.QUnit) {
+	QUnit.equal(result, "bar result", "it worked yo");
+
+	QUnit.start();
+	removeMyself();
+}
