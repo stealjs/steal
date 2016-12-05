@@ -344,6 +344,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("builtins/dev.html");
 	});
 
+	asyncTest("Private scope variables are available in ES exports", function(){
+		makeIframe("reg/index.html");
+	});
+
 	module("steal startup and config");
 
 	asyncTest("Load urlOptions correctly with async script append", function(){
