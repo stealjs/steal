@@ -1,7 +1,5 @@
 sudo: false
 language: node_js
-addons:
-  sauce_connect: true
 matrix:
   include:
     - node_js: 0.12
@@ -11,6 +9,8 @@ matrix:
     - node_js: 6
       script: npm test
     - node_js: node
+      addons:
+        sauce_connect: true
       before_script:
         - npm run http-server &
         - sleep 2
