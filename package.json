@@ -9,6 +9,7 @@
   },
   "scripts": {
     "ci": "grunt build && node test/test-sauce-labs.js",
+    "http-server": "http-server -p 3000 --silent",
     "test": "grunt test --stack",
     "test-windows": "grunt test-windows --stack"
   },
