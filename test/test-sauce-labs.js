@@ -50,7 +50,7 @@ var platforms = [{
 	platformName: 'iOS',
 	platformVersion: '10.0',
 	deviceName: 'iPhone 7 Simulator'
-}*/];
+}];
 
 // add properties to all platforms
 platforms.forEach((platform) => {
