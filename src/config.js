@@ -165,7 +165,9 @@
 	var setupLiveReload = function(){
 		if(this.liveReloadInstalled) {
 			var loader = this;
-			this.import("live-reload", { name: "@@steal" }).then(function(reload){
+			this["import"]("live-reload", {
+				name: "@@steal"
+			}).then(function(reload){
 				reload(loader.configMain, function(){
 					setEnvsConfig.call(loader);
 				});
@@ -308,15 +310,21 @@
 						// node_modules or bower_components
 						if ( last(parts) === "steal" ) {
 							parts.pop();
+							var isFromPackage = false;
 							if ( last(parts) === "bower_components" ) {
 								System.configMain = "bower.json!bower";
 								addProductionBundles.call(this);
 								parts.pop();
+								isFromPackage = true;
 							}
 							if (last(parts) === "node_modules") {
 								System.configMain = "package.json!npm";
 								addProductionBundles.call(this);
 								parts.pop();
+								isFromPackage = true;
+							}
+							if(!isFromPackage) {
+								parts.push("steal");
 							}
 						}
 						this.config({ baseURL: parts.join("/")+"/"});
