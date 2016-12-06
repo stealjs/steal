@@ -5,6 +5,8 @@
 [![Build Status](https://travis-ci.org/stealjs/steal.svg?branch=master)](https://travis-ci.org/stealjs/steal)
 [![npm version](https://badge.fury.io/js/steal.svg)](http://badge.fury.io/js/steal)
 
+[![Sauce Test Status](https://saucelabs.com/buildstatus/matthewphillips)](https://saucelabs.com/u/matthewphillips)
+
 `steal` is a JavaScript module loader. `steal` supports ES6, AMD, CommonJS, LESS, and 
 CSS modules. It makes development workflows simple.
 
