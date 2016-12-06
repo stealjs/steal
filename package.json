@@ -11,7 +11,7 @@
     "ui": "grunt build && node test/test-sauce-labs.js",
     "http-server": "http-server -p 3000 --silent",
     "test": "grunt test --stack",
-    "test-all": "npm run test && npm run ui",
+    "test-node": "grunt simplemocha",
     "test-windows": "grunt test-windows --stack"
   },
   "dependencies": {
