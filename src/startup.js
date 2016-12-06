@@ -80,14 +80,26 @@
 				// set an onload handler for all script tags and the first one which executes
 				// is your stealjs
 				var scripts = document.scripts;
-				function onLoad() {
-					for (var i = 0; i < scripts.length; ++i) {
-						scripts[i].removeEventListener('load', onLoad, false);
+				var isStealSrc = /steal/;
+				function onLoad(e) {
+					var target = e.target || event.target;
+					if(target.src && isStealSrc.test(target.src)) {
+						for (var i = 0; i < scripts.length; ++i) {
+							scripts[i].removeEventListener('load', onLoad, false);
+						}
+
+						resolve(getScriptOptions(target));
 					}
-					resolve(getScriptOptions(event.target));
 				}
+				var script;
+				var finishedReadyStates = { "complete": true, "interactive": true };
 				for (var i = 0; i < scripts.length; ++i) {
-					scripts[i].addEventListener('load', onLoad, false);
+					script = scripts[i];
+					if(finishedReadyStates[script.readyState]) {
+						onLoad({ target: script });
+					} else {
+						script.addEventListener('load', onLoad, false);
+					}
 				}
 
 			} else {
@@ -132,9 +144,7 @@
 				if (!loader.main && loader.isEnv("production") &&
 					!loader.stealBundled) {
 					// prevent this warning from being removed by Uglify
-					var warn = console && console.warn || function () {
-						};
-					warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
 				loader["import"](loader.configMain)

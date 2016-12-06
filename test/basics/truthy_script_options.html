@@ -8,9 +8,12 @@
 <script src="../steal.js" data-foo></script>
 
 <script>
-	if(window.QUnit) {
-		QUnit.ok(steal.config("foo") === true, "Sytem.foo should be truthy");
-		QUnit.start();
-		removeMyself();
-	}
+	steal.done().then(function(){
+		if(window.QUnit) {
+			QUnit.ok(steal.config("foo") === true,
+				"config's foo should be truthy");
+			QUnit.start();
+			removeMyself();
+		}
+	});
 </script>

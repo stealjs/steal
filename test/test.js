@@ -4,16 +4,11 @@ QUnit.config.testTimeout = 30000;
 
 (function(){
 
-	// Legacy IE doesn't support reserved keywords and Traceur uses them
-	// so using this as an easy way to feature-detect browser support for
-	// ES6 transpilers.
+	// Babel uses __proto__
 	var supportsES = (function(){
-		try {
-			eval("var foo = { typeof: 'typeof' };");
-			return true;
-		} catch(e) {
-			return false;
-		}
+		var foo = {};
+		foo.__proto = { bar: "baz" };
+		return foo.bar === "baz";
 	})();
 
 	System.baseURL = "../";
@@ -68,8 +63,11 @@ QUnit.config.testTimeout = 30000;
 		System['import']('test/tests/module').then(function(m){
 			equal(m.name,"module.js", "module returned" );
 			equal(m.bar.name, "bar", "module.js was not able to get bar");
+console.log("TIS:", System.baseURL);
 			start();
 		}, function(err){
+			console.log("TIS:", System.baseURL);
+			console.error(err);
 			ok(false, "steal not loaded");
 			start();
 		});
@@ -115,8 +113,12 @@ QUnit.config.testTimeout = 30000;
 		System.map["test/map-empty/other"] = "@empty";
 		System["import"]("test/map-empty/main").then(function(m) {
 			var empty = System.get("@empty");
+
+			console.log(m.other);
+
 			equal(m.other, empty, "Other is an empty module because it was mapped to empty in the config");
-		}, function(){
+		}, function(e){
+			console.error(e);
 			ok(false, "Loaded a module that should have been ignored");
 		}).then(start);
 	});
@@ -206,14 +208,14 @@ QUnit.config.testTimeout = 30000;
 				"basics/basics.html",
 				'src="../../steal.js?main=configed/configed" data-config="../config.js"'));
 		});
+
+		asyncTest("load js-file with es6", function(){
+			makeIframe("import-js-file/es6.html");
+		});
 	}
 
 	asyncTest("load js-file and npm module", function(){
 		makeIframe("import-js-file/npm.html");
-	});
-
-	asyncTest("load js-file with es6", function(){
-		makeIframe("import-js-file/es6.html");
 	});
 
 	asyncTest("default npm-algorithm", function(){
@@ -292,12 +294,6 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("current-steal/dev.html");
 	});
 
-	/*
-	asyncTest("Loads traceur-runtime automatically", function(){
-		makeIframe("traceur_runtime/dev.html");
-	});
-	*/
-
 	asyncTest("allow truthy script options (#298)", function(){
 		makeIframe("basics/truthy_script_options.html");
 	});
@@ -344,9 +340,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("builtins/dev.html");
 	});
 
-	asyncTest("Private scope variables are available in ES exports", function(){
-		makeIframe("reg/index.html");
-	});
+	if(supportsES) {
+		asyncTest("Private scope variables are available in ES exports", function(){
+			makeIframe("reg/index.html");
+		});
+	}
 
 	module("steal startup and config");
 
@@ -455,9 +453,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/multiple-overrides/index.html");
 	});
 
-	asyncTest("works when using the npm extensions", function() {
-		makeIframe("ext-steal-clone/npm-extension/index.html");
-	});
+	if(supportsES) {
+		asyncTest("works when using the npm extensions", function() {
+			makeIframe("ext-steal-clone/npm-extension/index.html");
+		});
+	}
 
 	asyncTest("works when a parent of injected dependency has been imported", function() {
 		makeIframe("ext-steal-clone/prior-import/index.html");

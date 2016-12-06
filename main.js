@@ -107,10 +107,12 @@
 			}
 			return "./" + result.join("") + uriParts.join("/");
 		},
+		fBind = Function.prototype.bind,
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
-		warn = typeof console === "object" ? console.warn.bind(console) : function(){};
+		warn = typeof console === "object" ?
+			fBind.call(console.warn, console) : function(){};
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -967,7 +969,9 @@ if (typeof System !== "undefined") {
 	var setupLiveReload = function(){
 		if(this.liveReloadInstalled) {
 			var loader = this;
-			this.import("live-reload", { name: "@@steal" }).then(function(reload){
+			this["import"]("live-reload", {
+				name: "@@steal"
+			}).then(function(reload){
 				reload(loader.configMain, function(){
 					setEnvsConfig.call(loader);
 				});
@@ -1110,15 +1114,21 @@ if (typeof System !== "undefined") {
 						// node_modules or bower_components
 						if ( last(parts) === "steal" ) {
 							parts.pop();
+							var isFromPackage = false;
 							if ( last(parts) === "bower_components" ) {
 								System.configMain = "bower.json!bower";
 								addProductionBundles.call(this);
 								parts.pop();
+								isFromPackage = true;
 							}
 							if (last(parts) === "node_modules") {
 								System.configMain = "package.json!npm";
 								addProductionBundles.call(this);
 								parts.pop();
+								isFromPackage = true;
+							}
+							if(!isFromPackage) {
+								parts.push("steal");
 							}
 						}
 						this.config({ baseURL: parts.join("/")+"/"});
@@ -1304,14 +1314,26 @@ function addEnv(loader){
 				// set an onload handler for all script tags and the first one which executes
 				// is your stealjs
 				var scripts = document.scripts;
-				function onLoad() {
-					for (var i = 0; i < scripts.length; ++i) {
-						scripts[i].removeEventListener('load', onLoad, false);
+				var isStealSrc = /steal/;
+				function onLoad(e) {
+					var target = e.target || event.target;
+					if(target.src && isStealSrc.test(target.src)) {
+						for (var i = 0; i < scripts.length; ++i) {
+							scripts[i].removeEventListener('load', onLoad, false);
+						}
+
+						resolve(getScriptOptions(target));
 					}
-					resolve(getScriptOptions(event.target));
 				}
+				var script;
+				var finishedReadyStates = { "complete": true, "interactive": true };
 				for (var i = 0; i < scripts.length; ++i) {
-					scripts[i].addEventListener('load', onLoad, false);
+					script = scripts[i];
+					if(finishedReadyStates[script.readyState]) {
+						onLoad({ target: script });
+					} else {
+						script.addEventListener('load', onLoad, false);
+					}
 				}
 
 			} else {
@@ -1356,9 +1378,7 @@ function addEnv(loader){
 				if (!loader.main && loader.isEnv("production") &&
 					!loader.stealBundled) {
 					// prevent this warning from being removed by Uglify
-					var warn = console && console.warn || function () {
-						};
-					warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
 				loader["import"](loader.configMain)
@@ -1472,9 +1492,9 @@ function addEnv(loader){
 
 		return configPromise.then(afterConfig);
 	};
-	steal.setContextual = System.setContextual.bind(System);
-	steal.isEnv = System.isEnv.bind(System);
-	steal.isPlatform = System.isPlatform.bind(System);
+	steal.setContextual = fBind.call(System.setContextual, System);
+	steal.isEnv = fBind.call(System.isEnv, System);
+	steal.isPlatform = fBind.call(System.isPlatform, System);
 	return steal;
 
 };

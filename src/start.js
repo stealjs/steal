@@ -107,7 +107,9 @@
 			}
 			return "./" + result.join("") + uriParts.join("/");
 		},
+		fBind = Function.prototype.bind,
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
-		warn = typeof console === "object" ? console.warn.bind(console) : function(){};
+		warn = typeof console === "object" ?
+			fBind.call(console.warn, console) : function(){};
