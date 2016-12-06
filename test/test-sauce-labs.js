@@ -25,7 +25,7 @@ var platforms = [{
 	browserName: 'firefox',
 	platform: 'Windows 10',
 	version: '49.0'
-}/*, {
+}, {
 	browserName: 'googlechrome',
 	platform: 'Windows 10'
 }, {
@@ -44,7 +44,7 @@ var platforms = [{
 	browserName: 'internet explorer',
 	platform: 'Windows 7',
 	version: '9'
-}, {
+}/*, {
 	browserName: 'Safari',
 	'appium-version': '1.6.0',
 	platformName: 'iOS',
