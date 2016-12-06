@@ -8,6 +8,7 @@
     "web": "http://bitovi.com/"
   },
   "scripts": {
+    "ci": "grunt build && node test/test-sauce-labs.js",
     "test": "grunt test --stack",
     "test-windows": "grunt test-windows --stack"
   },
@@ -33,6 +34,7 @@
     "zlib-browserify": "~0.0.3"
   },
   "devDependencies": {
+    "async": "^2.1.4",
     "babel-standalone": "6.19.0",
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
@@ -43,8 +45,10 @@
     "grunt-contrib-watch": "~0.3.0",
     "grunt-release": "^0.7.0",
     "grunt-simple-mocha": "^0.4.0",
+    "http-server": "^0.9.0",
     "jquery": "^1.11.0",
     "qunitjs": "~1.12.0",
+    "saucelabs": "^1.3.0",
     "steal-env": "^1.0.0",
     "steal-es6-module-loader": "0.17.10",
     "steal-npm": "1.0.0-beta.2",
@@ -54,7 +58,8 @@
     "system-trace": "0.2.5",
     "testee": "^0.2.0",
     "traceur": "0.0.91",
-    "traceur-runtime": "jmcriffey/bower-traceur-runtime#0.0.91"
+    "traceur-runtime": "jmcriffey/bower-traceur-runtime#0.0.91",
+    "wd": "^1.0.0"
   },
   "globalBrowser": {
     "console": "console-browserify",
