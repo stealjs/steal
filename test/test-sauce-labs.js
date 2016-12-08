@@ -40,11 +40,11 @@ var platforms = [{
 	browserName: 'internet explorer',
 	platform: 'Windows 8',
 	version: '10.0'
-}/*, {
+}, {
 	browserName: 'internet explorer',
 	platform: 'Windows 7',
 	version: '9'
-}*/, {
+}, {
 	browserName: 'Safari',
 	'appium-version': '1.6.0',
 	platformName: 'iOS',
