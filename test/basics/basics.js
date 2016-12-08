@@ -11,7 +11,23 @@ steal('basics/module', function(module){
 		QUnit.start();
 		removeMyself();
 	} else {
-		console.log("basics loaded", module.name, module.es6module.name, module.es6module.amdModule.name);
+		if(typeof console === "object") {
+			console.log("basics loaded", module.name, module.es6module.name, module.es6module.amdModule.name);
+		}
+
+		var host = document.createElement("div");
+		var one = document.createElement("div");
+		var two = document.createElement("div");
+		var three = document.createElement("div");
+
+		one.textContent = module.name;
+		two.textContent = module.es6module.name;
+		three.textContent = module.es6module.amdModule.name;
+
+		[one, two, three].forEach(function(div){
+			host.appendChild(div);
+		});
+		document.body.appendChild(host);
 	}
 
 });

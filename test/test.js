@@ -3,6 +3,19 @@ module("steal via system import");
 QUnit.config.testTimeout = 30000;
 
 (function(){
+	var hasConsole = typeof console === "object";
+
+	var logError = function(msg){
+		if(hasConsole && typeof console.error !== "undefined") {
+			console.error(msg);
+		}
+	};
+
+	var logInfo = function(msg){
+		if(hasConsole && typeof console.log !== "undefined") {
+			console.log(msg);
+		}
+	};
 
 	// Babel uses __proto__
 	var supportsES = (function(){
@@ -63,11 +76,9 @@ QUnit.config.testTimeout = 30000;
 		System['import']('test/tests/module').then(function(m){
 			equal(m.name,"module.js", "module returned" );
 			equal(m.bar.name, "bar", "module.js was not able to get bar");
-console.log("TIS:", System.baseURL);
 			start();
 		}, function(err){
-			console.log("TIS:", System.baseURL);
-			console.error(err);
+			logError(err);
 			ok(false, "steal not loaded");
 			start();
 		});
@@ -113,12 +124,9 @@ console.log("TIS:", System.baseURL);
 		System.map["test/map-empty/other"] = "@empty";
 		System["import"]("test/map-empty/main").then(function(m) {
 			var empty = System.get("@empty");
-
-			console.log(m.other);
-
 			equal(m.other, empty, "Other is an empty module because it was mapped to empty in the config");
 		}, function(e){
-			console.error(e);
+			logError(e);
 			ok(false, "Loaded a module that should have been ignored");
 		}).then(start);
 	});
@@ -242,9 +250,11 @@ console.log("TIS:", System.baseURL);
 		makeIframe("production/prod-env.html");
 	});
 
-	asyncTest("steal.production.js logs errors", function(){
-		makeIframe("production_err/prod.html");
-	});
+	if(hasConsole) {
+		asyncTest("steal.production.js logs errors", function(){
+			makeIframe("production_err/prod.html");
+		});
+	}
 
 	asyncTest("loadBundles true with a different env loads the bundles", function(){
 		makeIframe("load-bundles/prod.html");
@@ -312,9 +322,11 @@ console.log("TIS:", System.baseURL);
 		});
 	}
 
-	asyncTest("warn in production when main is not set (#537)", function(){
-		makeIframe("basics/no_main_warning.html");
-	});
+	if(hasConsole) {
+		asyncTest("warn in production when main is not set (#537)", function(){
+			makeIframe("basics/no_main_warning.html");
+		});
+	}
 
 	asyncTest("can load a bundle with an amd module depending on a global", function(){
 		makeIframe("prod_define/prod.html");
