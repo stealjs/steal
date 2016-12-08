@@ -10,6 +10,5 @@ define('components/page2', [
         return obj && obj.__esModule ? obj['default'] : obj;
     };
     var jqwerty = _interopRequire(_jqwerty);
-    console.log('page2.js loaded.');
     module.exports = {};
 });

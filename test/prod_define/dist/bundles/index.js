@@ -76,8 +76,6 @@ System["import"]('components/page1')
 			removeMyself();
 			return {};
 		} else {
-			console.log("Loaded page 1");
-			console.assert(window.jqwerty.modName == "jqwerty");
 		}
     })
     ["catch"](function(ex) {
@@ -87,7 +85,6 @@ System["import"]('components/page1')
 			QUnit.start();
 			removeMyself();
 		} else {
-			console.error("unable to load page 1");
 			throw ex;
 		}
     });
