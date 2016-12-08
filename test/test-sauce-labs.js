@@ -33,6 +33,9 @@ var platforms = [{
 	platform: 'OS X 10.11',
 	version: '10.0'
 }, {
+	browserName: 'MicrosoftEdge',
+	platform: 'Windows 10'
+}, {
 	browserName: 'internet explorer',
 	platform: 'Windows 10',
 	version: '11.0'
