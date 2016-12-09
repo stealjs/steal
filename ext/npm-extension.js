@@ -66,6 +66,23 @@ exports.addExtension = function(System){
 									 pluginNormalize);
 		}
 
+		// If name is ./ or ../
+		var isPointingAtParentFolder = name === "../" || name === "./";
+
+		if(parentIsNpmModule && isPointingAtParentFolder) {
+			var parsedParentModuleName = utils.moduleName.parse(parentName);
+			var parentModulePath = parsedParentModuleName.modulePath || "";
+			var relativePath = utils.path.relativeTo(parentModulePath, name);
+			var isInRoot = utils.path.isPackageRootDir(relativePath);
+
+			if(isInRoot) {
+				name = refPkg.name + "#" + utils.path.removeJS(refPkg.main);
+
+			} else {
+				name = name + "index";
+			}
+		}
+		
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
 																 name,
@@ -94,7 +111,8 @@ exports.addExtension = function(System){
 		var crawl = context && context.crawl;
 		var isDev = !!crawl;
 		if(!depPkg) {
-			if(crawl && !isRoot) {
+			// Development mode
+			if(crawl) {
 				var parentPkg = nameIsRelative ? null :
 					crawl.matchedVersion(context, refPkg.name,
 										 refPkg.version);
@@ -194,9 +212,10 @@ exports.addExtension = function(System){
 			}
 			var moduleName = utils.moduleName.create(parsedModuleName);
 			// Apply mappings, if they exist in the refPkg
-			if(refPkg.system && refPkg.system.map &&
-			   typeof refPkg.system.map[moduleName] === "string") {
-				moduleName = refPkg.system.map[moduleName];
+			var steal = utils.pkg.config(refPkg);
+			if(steal && steal.map &&
+			   typeof steal.map[moduleName] === "string") {
+				moduleName = steal.map[moduleName];
 			}
 			var p = oldNormalize.call(loader, moduleName, parentName,
 									  parentAddress, pluginNormalize);
@@ -347,6 +366,17 @@ exports.addExtension = function(System){
 	var oldConfig = System.config;
 	System.config = function(cfg){
 		var loader = this;
+
+		// Use npm-convert if it is available as it is better
+		// and has the ability to push mappings into a waiting queue.
+		if(loader.npmContext) {
+			var context = loader.npmContext;
+			var pkg = context.versions.__default;
+			context.convert.steal(context, pkg, cfg, true, false, false);
+			oldConfig.apply(loader, arguments);
+			return;
+		}
+
 		for(var name in cfg) {
 			if(configSpecial[name]) {
 				cfg[name] = configSpecial[name].call(loader, cfg[name]);
@@ -373,7 +403,7 @@ exports.addExtension = function(System){
 				return loader.fetch(local);
 			})
 			.then(function(source){
-				load.address = local.address;
+				load.metadata.address = local.address;
 				loader.npmParentMap[load.name] = local.name;
 				var npmLoad = loader.npmContext &&
 					loader.npmContext.npmLoad;

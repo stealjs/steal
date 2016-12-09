@@ -5,6 +5,6 @@ if (typeof window !== "undefined" && window.QUnit) {
 
 	QUnit.start();
 	removeMyself();
-} else {
+} else if(typeof window !== "undefined") {
 	console.log("module: ", name);
 }

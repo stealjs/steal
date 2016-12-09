@@ -1,5 +1,5 @@
 @page StealJS.roadmap Roadmap
-@parent StealJS.guides
+@parent StealJS.about
 
 Here's what we've got planned:
 
@@ -15,7 +15,7 @@ Or with ext config like:
 
 ```
 {
-  "system": {
+  "steal": {
     "ext": {
       "css": "css-plugin"
     }

@@ -1,5 +1,5 @@
 @page StealJS.writing-plugins Writing Plugins
-@parent StealJS.guides
+@parent StealJS.topics
 
 @body
 
@@ -65,10 +65,10 @@ require("./cat.png!preload");
 
 And now cat.png is preload it. If we were to insert it into the page later, such as after a user had clicked on a link, it would be fresh in the browser cache and would display nearly instantly.
 
-If you wanted to associate *all* .png files with this preload plugin, you could special it as the handler using [System.ext] configuration:
+If you wanted to associate *all* .png files with this preload plugin, you could special it as the handler using [config.ext] configuration:
 
 ```
-"system": {
+"steal": {
   "ext": {
     "png": "preload"
   }

@@ -4,8 +4,11 @@ var cloneSteal = function(System){
 };
 
 var makeSteal = function(System){
+	System.set('@loader', System.newModule({
+		'default': System,
+		__useDefault: true
+	}));
 
-	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 	System.config({
 		map: {
 			"@loader/@loader": "@loader",
@@ -13,9 +16,9 @@ var makeSteal = function(System){
 		}
 	});
 
-	var configDeferred,
-		devDeferred,
-		appDeferred;
+	var configPromise,
+		devPromise,
+		appPromise;
 
 	var steal = function(){
 		var args = arguments;
@@ -43,14 +46,18 @@ var makeSteal = function(System){
 			return afterConfig();
 		} else {
 			// wait until the config has loaded
-			return configDeferred.then(afterConfig,afterConfig);
+			return configPromise.then(afterConfig,afterConfig);
 		}
 
 	};
 
-	System.set("@steal", System.newModule({"default":steal, __useDefault:true}));
+	System.set("@steal", System.newModule({
+		"default": steal,
+		__useDefault:true
+	}));
 
-	steal.System = System;
+	// steal.System remains for backwards compat only
+	steal.System = steal.loader = System;
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;

@@ -3,7 +3,7 @@
 var crawl = require('./npm-crawl');
 var utils = require("./npm-utils");
 
-exports.system = convertSystem;
+exports.steal = convertSteal;
 exports.propertyNames = convertPropertyNames;
 exports.propertyNamesAndValues = convertPropertyNamesAndValues;
 exports.name = convertName;
@@ -34,24 +34,28 @@ exports.forPackage = convertForPackage;
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
-function convertSystem(context, pkg, system, root, ignoreWaiting) {
-	if(!system) {
-		return system;
+function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInfo) {
+	if(!steal) {
+		return steal;
 	}
-	var copy = utils.extend({}, system, true);
+	var copy = utils.extend({}, steal, true);
 	var waiting = utils.isArray(ignoreWaiting) ? ignoreWaiting : [];
-	if(system.meta) {
-		system.meta = convertPropertyNames(context, pkg, system.meta, root, waiting);
+	if(steal.meta) {
+		steal.meta = convertPropertyNames(context, pkg, steal.meta, root,
+										  waiting);
 	}
-	if(system.map) {
-		system.map = convertPropertyNamesAndValues(context, pkg, system.map, root, waiting);
+	if(steal.map) {
+		steal.map = convertPropertyNamesAndValues(context, pkg, steal.map,
+												  root, waiting);
 	}
-	if(system.paths) {
-		system.paths = convertPropertyNames(context, pkg, system.paths, root, waiting);
+	if(steal.paths) {
+		steal.paths = convertPropertyNames(context, pkg, steal.paths, root,
+										   waiting);
 	}
 	// needed for builds
-	if(system.buildConfig) {
-		system.buildConfig = convertSystem(context, pkg, system.buildConfig, root, waiting);
+	if(steal.buildConfig) {
+		steal.buildConfig = convertSteal(context, pkg, steal.buildConfig,
+										  root, waiting);
 	}
 
 	// Push the waiting conversions down.
@@ -59,25 +63,25 @@ function convertSystem(context, pkg, system, root, ignoreWaiting) {
 		convertLater(context, waiting, function(){
 			var context = this;
 			var local = utils.extend({}, copy, true);
-			var config = convertSystem(context, pkg, local, root, true);
+			var config = convertSteal(context, pkg, local, root, true);
 
 			// If we are building we need to resave the package's system
 			// configuration so that it will be written out into the build.
-			if(context.resavePackageInfo) {
+			if(context.resavePackageInfo && resavePackageInfo !== false) {
 				var info = utils.pkg.findPackageInfo(context, pkg);
-				info.system = config;
+				info.steal = info.system = config;
 			}
 
-			// Temporarily remove system.main so that it doesn't set System.main
-			var systemMain = config.main;
+			// Temporarily remove steal.main so that it doesn't set System.main
+			var stealMain = config.main;
 			delete config.main;
 			delete config.transpiler;
 			context.loader.config(config);
-			config.main = systemMain;
+			config.main = stealMain;
 		});
 	}
 
-	return system;
+	return steal;
 }
 
 // converts only the property name
@@ -162,14 +166,12 @@ function convertName (context, pkg, map, root, name, waiting) {
 					plugin: parsed.plugin
 				});
 			} else {
-				// TODO: share code better!
 				// SYSTEM.NAME
 				if(  pkg.name === parsed.packageName || ( (pkg.system && pkg.system.name) === parsed.packageName) ) {
 					depPkg = pkg;
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						if(root) warn(name);
 						return name;
 					}
 					requestedVersion = requestedProject.version;
@@ -232,7 +234,8 @@ function convertName (context, pkg, map, root, name, waiting) {
  * ```
  */
 function convertBrowser(pkg, browser) {
-	if(typeof browser === "string") {
+	var type = typeof browser;
+	if(type === "string" || type === "undefined") {
 		return browser;
 	}
 	var map = {};
@@ -279,6 +282,14 @@ function convertToPackage(context, pkg, index) {
 		if(pkg.browser){
 			delete pkg.browser.transform;
 		}
+		// fake load obj, because we don't have one here
+		pkg = utils.json.transform(context.loader, {
+			address: pkg.fileUrl,
+			name: pkg.fileUrl.split('/').pop(),
+			metadata: {}
+		}, pkg);
+		var steal = utils.pkg.config(pkg);
+
 		localPkg = {
 			name: pkg.name,
 			version: pkg.version,
@@ -286,7 +297,7 @@ function convertToPackage(context, pkg, index) {
 				pkg.fileUrl :
 				utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 			main: pkg.main,
-			system: convertSystem(context, pkg, pkg.system, index === 0),
+			steal: convertSteal(context, pkg, steal, index === 0),
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
 			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
 			jspm: convertJspm(pkg, pkg.jspm),
@@ -361,16 +372,3 @@ function convertForPackage(context, pkg) {
 		}
 	}
 }
-
-var warn = (function(){
-	var warned = {};
-	return function(name){
-		if(!warned[name]) {
-			warned[name] = true;
-			var warning = "WARN: Could not find " + name + " in node_modules. Ignoring.";
-			if(typeof steal !== "undefined" && steal.dev && steal.dev.warn) steal.dev.warn(warning)
-			else if(console.warn) console.warn(warning);
-			else console.log(warning);
-		}
-	};
-})();

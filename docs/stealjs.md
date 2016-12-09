@@ -1,6 +1,9 @@
 @page StealJS
 @group StealJS.api apis
 @group StealJS.guides guides
+@group StealJS.topics topics
+@group StealJS.about about
+@group StealJS.ecosystem ecosystem
 
 _Good artists copy; great artists steal._
 
@@ -17,7 +20,7 @@ while supporting [syntax.amd], and [syntax.CommonJS]. It can load [npm] modules 
 
 Steal makes your development workflow simple and easy. Steal automatically
 loads a [@config config] and [@dev development tools] module, supports css and less, and makes it easy to switch
-between development and production [System.env environments].
+between development and production [config.env environments].
 
 ### The Builder
 [steal-tools Steal-tools] builds your application or exports your project to AMD, CommonJS or standalone formats.

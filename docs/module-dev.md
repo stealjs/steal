@@ -1,8 +1,8 @@
 @typedef {{logLevel: Number, warn: function(), log: function()}} @dev
 @parent StealJS.modules
 
-A module loaded in [System.env development] after [@config] but 
-before [System.main].  It typically loads development-only 
+A module loaded in [config.env development] after [@config] but 
+before [config.main].  It typically loads development-only 
 tools.  By default, it loads `steal/dev.js` which provides the following
 values on a global `steal.dev`:
 

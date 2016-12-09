@@ -106,7 +106,8 @@
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
+		fBind = Function.prototype.bind,
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
@@ -117,7 +118,9 @@
 				return false;
 			}
 		})();
-		isNode = isNode && !isNW;
+		isNode = isNode && !isNW,
+		warn = typeof console === "object" ?
+			fBind.call(console.warn, console) : function(){};
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -182,8 +185,11 @@ var cloneSteal = function(System){
 };
 
 var makeSteal = function(System){
+	System.set('@loader', System.newModule({
+		'default': System,
+		__useDefault: true
+	}));
 
-	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 	System.config({
 		map: {
 			"@loader/@loader": "@loader",
@@ -191,9 +197,9 @@ var makeSteal = function(System){
 		}
 	});
 
-	var configDeferred,
-		devDeferred,
-		appDeferred;
+	var configPromise,
+		devPromise,
+		appPromise;
 
 	var steal = function(){
 		var args = arguments;
@@ -221,21 +227,32 @@ var makeSteal = function(System){
 			return afterConfig();
 		} else {
 			// wait until the config has loaded
-			return configDeferred.then(afterConfig,afterConfig);
+			return configPromise.then(afterConfig,afterConfig);
 		}
 
 	};
 
-	System.set("@steal", System.newModule({"default":steal, __useDefault:true}));
+	System.set("@steal", System.newModule({
+		"default": steal,
+		__useDefault:true
+	}));
 
-	steal.System = System;
+	// steal.System remains for backwards compat only
+	steal.System = steal.loader = System;
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
 	steal.relativeURI = relativeURI;
 
-	// System.ext = {bar: "path/to/bar"}
-	// foo.bar! -> foo.bar!path/to/bar
+	// System-Ext
+	// This normalize-hook does 2 things.
+	// 1. with specify a extension in your config
+	// 		you can use the "!" (bang) operator to load
+	// 		that file with the extension
+	// 		System.ext = {bar: "path/to/bar"}
+	// 		foo.bar! -> foo.bar!path/to/bar
+	// 2. if you load a javascript file e.g. require("./foo.js")
+	// 		normalize will remove the ".js" to load the module
 	var addExt = function(loader) {
 		if (loader._extensions) {
 			loader._extensions.push(addExt);
@@ -251,15 +268,20 @@ var makeSteal = function(System){
 				return normalize.apply(this, arguments);
 			}
 
-			var matches = name.match(endingExtension),
-				ext,
-				newName = name;
+			var matches = name.match(endingExtension);
 
-			if(matches && loader.ext[ext = matches[1]]) {
-				var hasBang = name[name.length - 1] === "!";
-				newName = name + (hasBang ? "" : "!") + loader.ext[ext];
+			if(matches) {
+				var hasBang = name[name.length - 1] === "!",
+					ext = matches[1];
+				// load js-files nodd-like
+				if(parentName && loader.configMain !== name && matches[0] === '.js') {
+					name = name.substr(0, name.lastIndexOf("."));
+					// matches ext mapping
+				} else if(loader.ext[ext]) {
+					name = name + (hasBang ? "" : "!") + loader.ext[ext];
+				}
 			}
-			return normalize.call(this, newName, parentName, parentAddress);
+			return normalize.call(this, name, parentName, parentAddress);
 		};
 	};
 
@@ -403,53 +425,97 @@ if(typeof System !== "undefined") {
 }
 
 function addContextual(loader){
-  if (loader._extensions) {
-    loader._extensions.push(addContextual);
-  }
-  loader._contextualModules = {};
+	if(loader._extensions) {
+		loader._extensions.push(addContextual);
+	}
+	loader._contextualModules = {};
 
-  loader.setContextual = function(moduleName, definer){
-    this._contextualModules[moduleName] = definer;
-  };
+	loader.setContextual = function(moduleName, definer){
+		this._contextualModules[moduleName] = definer;
+	};
 
-  var normalize = loader.normalize;
-  loader.normalize = function(name, parentName){
-    var loader = this;
+	var normalize = loader.normalize;
+	loader.normalize = function(name, parentName){
+		var loader = this;
 
-    if (parentName) {
-      var definer = this._contextualModules[name];
+		if (parentName) {
+			var definer = this._contextualModules[name];
 
-      // See if `name` is a contextual module
-      if (definer) {
-        name = name + '/' + parentName;
+			// See if `name` is a contextual module
+			if (definer) {
+				name = name + '/' + parentName;
 
-        if(!loader.has(name)) {
-          // `definer` could be a function or could be a moduleName
-          if (typeof definer === 'string') {
-            definer = loader['import'](definer);
-          }
+				if(!loader.has(name)) {
+					// `definer` could be a function or could be a moduleName
+					if (typeof definer === 'string') {
+						definer = loader['import'](definer);
+					}
 
-          return Promise.resolve(definer)
-          .then(function(definer) {
-            if (definer['default']) {
-              definer = definer['default'];
-            }
-            loader.set(name, loader.newModule(definer.call(loader, parentName)));
-            return name;
-          });
-        }
-        return Promise.resolve(name);
-      }
-    }
+					return Promise.resolve(definer)
+					.then(function(definer) {
+						if (definer['default']) {
+							definer = definer['default'];
+						}
+						var definePromise = Promise.resolve(
+							definer.call(loader, parentName)
+						);
+						return definePromise;
+					})
+					.then(function(moduleDef){
+						loader.set(name, loader.newModule(moduleDef));
+						return name;
+					});
+				}
+				return Promise.resolve(name);
+			}
+		}
 
-    return normalize.apply(this, arguments);
-  };
+		return normalize.apply(this, arguments);
+	};
 }
 
 if(typeof System !== "undefined") {
   addContextual(System);
 }
 
+var addScriptModule = function(loader) {
+	// stolen from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
+
+	function completed() {
+		document.removeEventListener( "DOMContentLoaded", completed, false );
+		window.removeEventListener( "load", completed, false );
+		ready();
+	}
+
+	function ready() {
+		var scripts = document.getElementsByTagName('script');
+		for (var i = 0; i < scripts.length; i++) {
+			var script = scripts[i];
+			if (script.type == 'text/steal-module') {
+				var source = script.innerHTML;
+				if(/\S/.test(source)){
+					loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+				}
+			}
+		}
+	}
+
+	loader.loadScriptModules = function(){
+		if(isBrowserWithWindow) {
+			if (document.readyState === 'complete') {
+				setTimeout(ready);
+			} else if (document.addEventListener) {
+				document.addEventListener('DOMContentLoaded', completed, false);
+				window.addEventListener('load', completed, false);
+			}
+		}
+
+	};
+};
+
+if(typeof System !== "undefined") {
+	addScriptModule(System);
+}
 function applyTraceExtension(loader){
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -656,15 +722,104 @@ if(typeof System !== "undefined") {
 	applyTraceExtension(System);
 }
 
+/*
+  SystemJS JSON Format
+  Provides the JSON module format definition.
+*/
+function _SYSTEM_addJSON(loader) {
+	var jsonTest = /^[\s\n\r]*[\{\[]/;
+	var jsonExt = /\.json$/i;
+	var jsExt = /\.js$/i;
+
+	// Add the extension to _extensions so that it can be cloned.
+	loader._extensions.push(_SYSTEM_addJSON);
+
+	// if someone has a moduleName that is .json, make sure it loads a json file
+	// no matter what paths might do
+	var loaderLocate = loader.locate;
+	loader.locate = function(load){
+	  return loaderLocate.apply(this, arguments).then(function(address){
+		if(jsonExt.test(load.name)) {
+			return address.replace(jsExt, "");
+		}
+
+	    return address;
+	  });
+	};
+
+	var transform = function(loader, load, data){
+		var fn = loader.jsonOptions && loader.jsonOptions.transform;
+		if(!fn) return data;
+		return fn.call(loader, load, data);
+	};
+
+	// If we are in a build we should convert to CommonJS instead.
+	if(isNode) {
+		var loaderTranslate = loader.translate;
+		loader.translate = function(load){
+			var address = load.metadata.address || load.address;
+			if(jsonExt.test(address) && load.name.indexOf('!') === -1) {
+				var parsed = parse(load);
+				if(parsed) {
+					parsed = transform(this, load, parsed);
+					return "def" + "ine([], function(){\n" +
+						"\treturn " + JSON.stringify(parsed) + "\n});";
+				}
+			}
+
+			return loaderTranslate.call(this, load);
+		};
+		return;
+	}
+
+	var loaderInstantiate = loader.instantiate;
+	loader.instantiate = function(load) {
+		var loader = this,
+			parsed;
+
+		parsed = parse(load);
+		if(parsed) {
+			parsed = transform(loader, load, parsed);
+			load.metadata.format = 'json';
+
+			load.metadata.execute = function(){
+				return parsed;
+			};
+		}
+
+		return loaderInstantiate.call(loader, load);
+	};
+
+	return loader;
+
+	// Attempt to parse a load as json.
+	function parse(load){
+		if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
+			try {
+				return JSON.parse(load.source);
+			} catch(e) {
+				warn("Error parsing " + load.address + ":", e);
+				return {};
+			}
+		}
+
+	}
+}
+
+if (typeof System !== "undefined") {
+	_SYSTEM_addJSON(System);
+}
+
 	// Overwrites System.config with setter hooks
-	var setterConfig = function(loader, configSpecial){
+	var setterConfig = function(loader, configOrder, configSpecial){
 		var oldConfig = loader.config;
 
 		loader.config =  function(cfg){
 
 			var data = extend({},cfg);
 			// check each special
-			each(configSpecial, function(special, name){
+			each(configOrder, function(name){
+				var special = configSpecial[name];
 				// if there is a setter and a value
 				if(special.set && data[name]){
 					// call the setter
@@ -692,36 +847,52 @@ if(typeof System !== "undefined") {
 	System.configMain = "@config";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
-	System.ext = {
-		css: '$css',
-		less: '$less'
-	};
+	System.ext = {};
 	System.logLevel = 0;
-	System.transpiler = "traceur";
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 
-	var configSetter = {
-		set: function(val){
-			var name = filename(val),
-				root = dir(val);
+	var configSetter = function(order){
+		return {
+			order: order,
+			set: function(val){
+				var name = filename(val),
+					root = dir(val);
 
-			if(!isNode) {
-				System.configPath = joinURIs( location.href, val);
+				if(!isNode) {
+					System.configPath = joinURIs( location.href, val);
+				}
+				System.configMain = name;
+				System.paths[name] = name;
+				this.config({ baseURL: (root === val ? "." : root) + "/" });
 			}
-			System.configMain = name;
-			System.paths[name] = name;
-			addProductionBundles.call(this);
-			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
-		mainSetter = {
-			set: function(val){
-				this.main = val;
-				addProductionBundles.call(this);
+		valueSetter = function(prop, order) {
+			return {
+				order: order,
+				set: function(val) {
+					this[prop] = val;
+				}
 			}
+		},
+		booleanSetter = function(prop, order) {
+			return {
+				order: order,
+				set: function(val) {
+					this[prop] = !!val;
+				}
+			}
+		},
+		fileSetter = function(prop, order) {
+			return {
+				order: order,
+				set: function(val) {
+					this[prop] = envPath(val);
+				}
+			};
 		};
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
@@ -737,14 +908,6 @@ if(typeof System !== "undefined") {
 			return "file:" + val;
 		}
 		return val;
-	};
-
-	var fileSetter = function(prop) {
-		return {
-			set: function(val) {
-				this[prop] = envPath(val);
-			}
-		};
 	};
 
 	var setToSystem = function(prop){
@@ -765,6 +928,7 @@ if(typeof System !== "undefined") {
 			return name.substr(bang+1);
 		}
 	};
+
 	var pluginResource = function(name){
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
@@ -773,7 +937,8 @@ if(typeof System !== "undefined") {
 	};
 
 	var addProductionBundles = function(){
-		if(this.loadBundles && this.main) {
+		// we don't want add the main bundled module if steal is bundled inside!
+		if(this.loadBundles && this.main && !this.stealBundled) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+main;
@@ -812,7 +977,9 @@ if(typeof System !== "undefined") {
 	var setupLiveReload = function(){
 		if(this.liveReloadInstalled) {
 			var loader = this;
-			this.import("live-reload", { name: "@@steal" }).then(function(reload){
+			this["import"]("live-reload", {
+				name: "@@steal"
+			}).then(function(reload){
 				reload(loader.configMain, function(){
 					setEnvsConfig.call(loader);
 				});
@@ -820,21 +987,21 @@ if(typeof System !== "undefined") {
 		}
 	};
 
-	var specialConfig;
+	var specialConfigOrder = [];
 	var envsSpecial = { map: true, paths: true, meta: true };
-	setterConfig(System, specialConfig = {
-		env: {
+	var specialConfig = {
+		instantiated: {
+			order: 1,
 			set: function(val){
-				this.env = val;
+				var loader = this;
 
-				if(this.isEnv("production")) {
-					this.loadBundles = true;
-				}
-
-				addProductionBundles.call(this);
+				each(val || {}, function(value, name){
+					loader.set(name,  loader.newModule(value));
+				});
 			}
 		},
 		envs: {
+			order: 2,
 			set: function(val){
 				// envs should be set, deep
 				var envs = this.envs;
@@ -850,174 +1017,38 @@ if(typeof System !== "undefined") {
 							env[name] = val;
 						}
 					});
-
-					//extend(env, cfg);
 				});
 			}
 		},
-		baseUrl: fileSetter("baseURL"),
-		baseURL: fileSetter("baseURL"),
-		root: fileSetter("baseURL"),  //backwards comp
-		config: configSetter,
-		configPath: configSetter,
-		loadBundles: {
+		env: {
+			order: 3,
 			set: function(val){
-				this.loadBundles = val;
-				addProductionBundles.call(this);
-			}
-		},
-		startId: {
-			set: function(val){
-				mainSetter.set.call(this, normalize(val) );
-			}
-		},
-		main: mainSetter,
-		stealURL: {
-			// http://domain.com/steal/steal.js?moduleName,env&
-			set: function(url, cfg)	{
-				System.stealURL = url;
-				var urlParts = url.split("?");
+				this.env = val;
 
-				var path = urlParts.shift(),
-					search = urlParts.join("?"),
-					searchParts = search.split("&"),
-					paths = path.split("/"),
-					lastPart = paths.pop(),
-					stealPath = paths.join("/"),
-					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
-
-				// if steal is bundled we always are in production environment
-				if(this.stealBundled && this.stealBundled === true) {
-					this.config({ env: platform+"-production" });
-
-				}else{
-					specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-						this.config({ env: platform+"-production" });
-						addProductionBundles.call(this);
-					}
+				if(this.isEnv("production")) {
+					this.loadBundles = true;
 				}
-
-				if(searchParts.length && searchParts[0].length) {
-					var searchConfig = {},
-						searchPart;
-					for(var i =0; i < searchParts.length; i++) {
-						searchPart = searchParts[i];
-						var paramParts = searchPart.split("=");
-						if(paramParts.length > 1) {
-							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
-						} else {
-							if(steal.dev) {
-								steal.dev.warn("Please use search params like ?main=main&env=production");
-							}
-							var oldParamParts = searchPart.split(",");
-							if (oldParamParts[0]) {
-								searchConfig.startId = oldParamParts[0];
-							}
-							if (oldParamParts[1]) {
-								searchConfig.env = oldParamParts[1];
-							}
-						}
-					}
-					this.config(searchConfig);
-				}
-
-				// Split on / to get rootUrl
-
 			}
 		},
-		// this gets called with the __dirname steal is in
-		stealPath: {
-			set: function(dirname, cfg) {
-				dirname = envPath(dirname);
-				var parts = dirname.split("/");
-
-				// steal keeps this around to make things easy no matter how you are using it.
-				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
-				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
-				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
-				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
-				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
-				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
-				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
-				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
-				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
-				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
-				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
-				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
-				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
-				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
-				this.paths["traceur"] = dirname+"/ext/traceur.js";
-				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
-				this.paths["babel"] = dirname+"/ext/babel.js";
-				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
-
-				// steal-clone is contextual so it can override modules using relative paths
-				this.setContextual('steal-clone', 'steal-clone');
-
-				if(isNode) {
-					System.register("@less-engine", [], false, function(){
-						var r = require;
-						return r('less');
-					});
-
-					if(this.configMain === "@config" && last(parts) === "steal") {
-						parts.pop();
-						if(last(parts) === "node_modules") {
-							this.configMain = "package.json!npm";
-							addProductionBundles.call(this);
-							parts.pop();
-						}
-					}
-
-				} else {
-					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
-
-					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
-						if ( last(parts) === "steal" ) {
-							parts.pop();
-							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
-								System.configMain = "bower.json!bower";
-								addProductionBundles.call(this);
-								parts.pop();
-							}
-							if (last(parts) === "node_modules") {
-								System.configMain = "package.json!npm";
-								addProductionBundles.call(this);
-								parts.pop();
-							}
-						}
-						this.config({ baseURL: parts.join("/")+"/"});
-					}
-				}
-				System.stealPath = dirname;
-			}
-		},
+		loadBundles: booleanSetter("loadBundles", 4),
+		stealBundled: booleanSetter("stealBundled", 5),
 		// System.config does not like being passed arrays.
 		bundle: {
+			order: 6,
 			set: function(val){
 				System.bundle = val;
 			}
 		},
 		bundlesPath: {
+			order: 7,
 			set: function(val){
 				this.paths[cssBundlesNameGlob] = val+"/*css";
 				this.paths[jsBundlesNameGlob]  = val+"/*.js";
 				return val;
 			}
 		},
-		instantiated: {
-			set: function(val){
-				var loader = this;
-
-				each(val || {}, function(value, name){
-					loader.set(name,  loader.newModule(value));
-				});
-			}
-		},
 		meta: {
+			order: 8,
 			set: function(cfg){
 				var loader = this;
 				each(cfg || {}, function(value, name){
@@ -1036,14 +1067,149 @@ if(typeof System !== "undefined") {
 				});
 				extend(this.meta, cfg);
 			}
+		},
+		configMain: valueSetter("configMain", 9),
+		config: configSetter(10),
+		configPath: configSetter(11),
+		baseURL: fileSetter("baseURL", 12),
+		main: valueSetter("main", 13),
+		// this gets called with the __dirname steal is in
+		// directly called from steal-tools
+		stealPath: {
+			order: 14,
+			set: function(dirname, cfg) {
+				dirname = envPath(dirname);
+				var parts = dirname.split("/");
+
+				// steal keeps this around to make things easy no matter how you are using it.
+				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
+				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
+				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
+				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
+				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
+				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
+				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
+				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
+				this.paths["traceur"] = dirname+"/ext/traceur.js";
+				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
+				this.paths["babel"] = dirname+"/ext/babel.js";
+				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
+
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
+
+				if(isNode) {
+					if(this.configMain === "@config" && last(parts) === "steal") {
+						parts.pop();
+						if(last(parts) === "node_modules") {
+							this.configMain = "package.json!npm";
+							addProductionBundles.call(this);
+							parts.pop();
+						}
+					}
+
+				} else {
+					// make sure we don't set baseURL if it already set
+					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
+
+						// if we loading steal.js and it is located in node_modules or bower_components
+						// we rewrite the baseURL relative to steal.js (one directory up!)
+						// we do this because, normaly our app is located as a sibling folder to
+						// node_modules or bower_components
+						if ( last(parts) === "steal" ) {
+							parts.pop();
+							var isFromPackage = false;
+							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
+								System.configMain = "bower.json!bower";
+								addProductionBundles.call(this);
+								parts.pop();
+								isFromPackage = true;
+							}
+							if (last(parts) === "node_modules") {
+								System.configMain = "package.json!npm";
+								addProductionBundles.call(this);
+								parts.pop();
+								isFromPackage = true;
+							}
+							if(!isFromPackage) {
+								parts.push("steal");
+							}
+						}
+						this.config({ baseURL: parts.join("/")+"/"});
+					}
+				}
+				System.stealPath = dirname;
+			}
+		},
+		stealURL: {
+			order: 15,
+			// http://domain.com/steal/steal.js?moduleName,env&
+			set: function(url, cfg)	{
+				var urlParts = url.split("?"),
+					path = urlParts.shift(),
+					paths = path.split("/"),
+					lastPart = paths.pop(),
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+
+				System.stealURL = path;
+
+				// if steal is bundled or we are loading steal.production
+				// we always are in production environment
+				if((this.stealBundled && this.stealBundled === true) ||
+					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
+					this.config({ env: platform+"-production" });
+				}
+
+				if(this.isEnv("production") || this.loadBundles) {
+					addProductionBundles.call(this);
+				}
+
+				specialConfig.stealPath.set.call(this,stealPath, cfg);
+
+			}
+		}
+	}
+
+	/*
+	 make a setter order
+	 currently:
+
+	 instantiated
+	 envs
+	 env
+	 loadBundles
+	 stealBundled
+	 bundle
+	 bundlesPath
+	 meta
+	 config
+	 configPath
+	 baseURL
+	 main
+	 stealPath
+	 stealURL
+	 */
+	each(specialConfig, function(setter, name){
+		if(!setter.order) {
+			specialConfigOrder.push(name)
+		}else{
+			specialConfigOrder.splice(setter.order, 0, name);
 		}
 	});
 
+	// special setter config
+	setterConfig(System, specialConfigOrder, specialConfig);
+
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
-			return System[cfg];
+			return this.loader[cfg];
 		} else {
-			System.config(cfg);
+			this.loader.config(cfg);
 		}
 	};
 
@@ -1074,131 +1240,237 @@ function addEnv(loader){
 	};
 }
 
-	var getScriptOptions = function () {
+	// get config by the URL query
+	// like ?main=foo&env=production
+	// formally used for Webworkers
+	var getQueryOptions = function(url) {
+		var queryOptions = {},
+			urlRegEx = /Url$/,
+			urlParts = url.split("?"),
+			path = urlParts.shift(),
+			search = urlParts.join("?"),
+			searchParts = search.split("&"),
+			paths = path.split("/"),
+			lastPart = paths.pop(),
+			stealPath = paths.join("/");
 
-		var options = {},
-			parts, src, query, startFile, env,
-			scripts = document.getElementsByTagName("script");
-
-		var script = scripts[scripts.length - 1];
-
-		if (script) {
-			options.stealURL = script.src;
-			// Split on question mark to get query
-
-			each(script.attributes, function(attr){
-				var optionName =
-					camelize( attr.nodeName.indexOf("data-") === 0 ?
-						attr.nodeName.replace("data-","") :
-						attr.nodeName );
-				options[optionName] = (attr.value === "") ? true : attr.value;
-			});
-
-			var source = script.innerHTML;
-			if(/\S/.test(source)){
-				options.mainSource = source;
+		if(searchParts.length && searchParts[0].length) {
+				var searchPart;
+			for(var i =0; i < searchParts.length; i++) {
+				searchPart = searchParts[i];
+				var paramParts = searchPart.split("=");
+				if(paramParts.length > 1) {
+					var optionName = camelize(paramParts[0]);
+					// make options uniform e.g. baseUrl => baseURL
+					optionName = optionName.replace(urlRegEx, "URL")
+					queryOptions[optionName] = paramParts.slice(1).join("=");
+				}
 			}
 		}
-
-		return options;
+		return queryOptions;
 	};
 
+	// extract the script tag options
+	var getScriptOptions = function (script) {
+		var scriptOptions = {},
+			urlRegEx = /Url$/;
+
+		scriptOptions.stealURL = script.src;
+
+		each(script.attributes, function(attr){
+			// get option, remove "data" and camelize
+			var optionName =
+				camelize( attr.nodeName.indexOf("data-") === 0 ?
+					attr.nodeName.replace("data-","") :
+					attr.nodeName );
+			// make options uniform e.g. baseUrl => baseURL
+			optionName = optionName.replace(urlRegEx, "URL")
+			scriptOptions[optionName] = (attr.value === "") ? true : attr.value;
+		});
+
+		// main source within steals script is deprecated
+		// and will be removed in future releases
+		var source = script.innerHTML;
+		if(/\S/.test(source)){
+			scriptOptions.mainSource = source;
+		}
+		// script config ever wins!
+		return extend(getQueryOptions(script.src), scriptOptions);
+	};
+
+	// get steal URL
+	// if we are in a browser, we need to know which script is steal
+	// to extract the script tag options => getScriptOptions()
+	var getUrlOptions = function (){
+		return new Promise(function(resolve, reject){
+
+			// for Workers get options from steal query
+			if (isWebWorker) {
+				resolve(extend({
+					stealURL: location.href
+				}, getQueryOptions(location.href)));
+				return;
+			} else if(isBrowserWithWindow) {
+				// if the browser supports currentScript, us it!
+				if (document.currentScript) {
+					// get options from script tag and query
+					resolve(getScriptOptions(document.currentScript));
+					return;
+				}
+
+				// dealing with async & deferred scripts
+				// set an onload handler for all script tags and the first one which executes
+				// is your stealjs
+				var scripts = document.scripts;
+				var isStealSrc = /steal/;
+				function onLoad(e) {
+					var target = e.target || event.target;
+					if(target.src && isStealSrc.test(target.src)) {
+						for (var i = 0; i < scripts.length; ++i) {
+							scripts[i].removeEventListener('load', onLoad, false);
+						}
+
+						resolve(getScriptOptions(target));
+					}
+				}
+				var script;
+				var finishedReadyStates = { "complete": true, "interactive": true };
+				for (var i = 0; i < scripts.length; ++i) {
+					script = scripts[i];
+					if(finishedReadyStates[script.readyState]) {
+						onLoad({ target: script });
+					} else {
+						script.addEventListener('load', onLoad, false);
+					}
+				}
+
+			} else {
+				// or the only option is where steal is.
+				resolve({
+					stealPath: __dirname
+				});
+			}
+		})
+	};
+
+	// configure and startup steal
+	// load the main module(s) if everything is configured
 	steal.startup = function(config){
+		var steal = this;
+		var loader = this.loader;
+		var configResolve;
+		var configReject;
 
-		// Get options from the script tag
-		if (isWebWorker) {
-			var urlOptions = {
-				stealURL: location.href
-			};
-		} else if(isBrowserWithWindow || isNW) {
-			var urlOptions = getScriptOptions();
-		} else {
-			// or the only option is where steal is.
-			var urlOptions = {
-				stealPath: __dirname
-			};
-		}
+		configPromise = new Promise(function(resolve, reject){
+			configResolve = resolve;
+			configReject = reject;
+		});
 
-		// first set the config that is set with a steal object
-		if(config){
-			System.config(config);
-		}
+		appPromise = getUrlOptions().then(function(urlOptions) {
 
-		// B: DO THINGS WITH OPTIONS
-		// CALCULATE CURRENT LOCATION OF THINGS ...
-		System.config(urlOptions);
-
-
-		setEnvsConfig.call(this.System);
-
-		// Read the env now because we can't overwrite everything yet
-
-		// immediate steals we do
-		var steals = [];
-
-		// we only load things with force = true
-		if ( System.loadBundles ) {
-
-			if(!System.main && System.isEnv("production") && !System.stealBundled) {
-				// prevent this warning from being removed by Uglify
-				var warn = console && console.warn || function() {};
-				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+			if (typeof config === 'object') {
+				// the url options are the source of truth
+				config = extend(config, urlOptions);
+			} else {
+				config = urlOptions;
 			}
 
-			configDeferred = System["import"](System.configMain);
+			// set the config
+			loader.config(config);
 
-			appDeferred = configDeferred.then(function(cfg){
-				setEnvsConfig.call(System);
-				return System.main ? System["import"](System.main) : cfg;
-			});
+			setEnvsConfig.call(loader);
 
-		} else {
-			configDeferred = System["import"](System.configMain);
+			// we only load things with force = true
+			if (loader.loadBundles) {
 
-			devDeferred = configDeferred.then(function(){
-				setEnvsConfig.call(System);
-				setupLiveReload.call(System);
-
-				// If a configuration was passed to startup we'll use that to overwrite
-				// what was loaded in stealconfig.js
-				// This means we call it twice, but that's ok
-				if(config) {
-					System.config(config);
+				if (!loader.main && loader.isEnv("production") &&
+					!loader.stealBundled) {
+					// prevent this warning from being removed by Uglify
+					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				return System["import"]("@dev");
-			},function(e){
-				console.log("steal - error loading @config.",e);
-				return steal.System["import"]("@dev");
-			});
+				loader["import"](loader.configMain)
+				.then(configResolve, configReject);
 
-			appDeferred = devDeferred.then(function(){
-				// if there's a main, get it, otherwise, we are just loading
-				// the config.
-				if(!System.main || System.env === "build") {
-					return configDeferred;
-				}
-				var main = System.main;
-				if(typeof main === "string") {
-					main = [main];
-				}
-				return Promise.all( map(main,function(main){
-					return System["import"](main);
-				}) );
-			});
+				return configPromise.then(function (cfg) {
+					setEnvsConfig.call(loader);
+					return loader.main ? loader["import"](loader.main) : cfg;
+				});
 
-		}
+			} else {
+				loader["import"](loader.configMain)
+				.then(configResolve, configReject);
 
-		if(System.mainSource) {
-			appDeferred = appDeferred.then(function(){
-				return System.module(System.mainSource);
-			});
-		}
-		return appDeferred;
+				devPromise = configPromise.then(function () {
+					setEnvsConfig.call(loader);
+					setupLiveReload.call(loader);
+
+					// If a configuration was passed to startup we'll use that to overwrite
+					// what was loaded in stealconfig.js
+					// This means we call it twice, but that's ok
+					if (config) {
+						loader.config(config);
+					}
+
+					return loader["import"]("@dev");
+				});
+
+				return devPromise.then(function () {
+					// if there's a main, get it, otherwise, we are just loading
+					// the config.
+					if (!loader.main || loader.env === "build") {
+						return configPromise;
+					}
+					var main = loader.main;
+					if (typeof main === "string") {
+						main = [main];
+					}
+					return Promise.all(map(main, function (main) {
+						return loader["import"](main);
+					}));
+				});
+			}
+		}).then(function(){
+			if(loader.mainSource) {
+				return loader.module(loader.mainSource);
+			}
+
+			// load script modules they are tagged as
+			// text/steal-module
+			return loader.loadScriptModules();
+		});
+
+		return appPromise;
 	};
 	steal.done = function(){
-		return appDeferred;
+		return appPromise;
 	};
+
+
+	System.setContextual("@node-require", function(name){
+		if(isNode) {
+			var nodeRequire = require;
+			var load = {name: name, metadata: {}};
+			return this.locate(load).then(function(address){
+				var url = address.replace("file:", "");
+				return {
+					"default": function(specifier){
+						var resolve = nodeRequire("resolve");
+						var res = resolve.sync(specifier, {
+							basedir: nodeRequire("path").dirname(url)
+						});
+						return nodeRequire(res);
+					},
+					__useDefault: true
+				};
+			});
+		} else {
+			return {
+				"default": function(){},
+				__useDefault: true
+			}
+		}
+	});
 
 	steal["import"] = function(){
 		var names = arguments;
@@ -1216,12 +1488,21 @@ function addEnv(loader){
 			}
 		}
 
-		if(!configDeferred) {
+		if(!configPromise) {
+			// In Node a main isn't required, but we still want
+			// to call startup() to do autoconfiguration,
+			// so setting to empty allows this to work.
+			if(!loader.main) {
+				loader.main = "@empty";
+			}
 			steal.startup();
 		}
 
-		return configDeferred.then(afterConfig);
+		return configPromise.then(afterConfig);
 	};
+	steal.setContextual = fBind.call(System.setContextual, System);
+	steal.isEnv = fBind.call(System.isEnv, System);
+	steal.isPlatform = fBind.call(System.isPlatform, System);
 	return steal;
 
 };
@@ -1330,7 +1611,6 @@ if (typeof System !== "undefined") {
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
-		require("system-json");
 
 	} else {
 		var oldSteal = global.steal;

@@ -1,8 +1,7 @@
 @typedef {{}} load.metadata metadata
 @parent StealJS.types
 
-An object that is passed between `Loader` hooks.  Any values can be set.  These are the ones that `steal.js` and
-SystemJS recognize.
+An object that is passed between `Loader` hooks.  Any values can be set.  These are the ones that `steal.js` recognize.
 
 @option {String} format Specifies what type of Syntax is used.  This can be specified like:
 
@@ -44,10 +43,10 @@ used, like a page for your app that users rarely visit.
   }
 }
 ```
-If you exclude a module from the bundled file, you have to make sure, that in the [production environment configuration](http://stealjs.com/docs/System.envs.html)
+If you exclude a module from the bundled file, you have to make sure, that in the [production environment configuration](http://stealjs.com/docs/config.envs.html)
 the module is:
 
-* ... [mapped to the pseudo-module @empty](http://stealjs.com/docs/System.map.html#ignoring-optional-dependencies)
+* ... [mapped to the pseudo-module @empty](http://stealjs.com/docs/config.map.html#ignoring-optional-dependencies)
 
     ```
     "envs": {
@@ -59,7 +58,7 @@ the module is:
     }
     ```
 
-* ... [configured](http://stealjs.com/docs/steal.html#path-configure) to the [right location](http://stealjs.com/docs/System.paths.html) of the module e.g. a CDN
+* ... [configured](http://stealjs.com/docs/steal.html#path-configure) to the [right location](http://stealjs.com/docs/config.paths.html) of the module e.g. a CDN
 
     ```
     "envs": {
@@ -70,3 +69,42 @@ the module is:
         }
     }
     ```
+
+@option {String} [eval=function] Specify the type of *eval* that should be applied to this module.
+
+Most modules are evaled using the Function constructor like: `new Function(source).call(context)`. However, if you have a global module that looks like:
+
+```
+var Foo = function(){
+
+};
+```
+
+Where `Foo` is the exported value in your configuration:
+
+```
+"steal": {
+	"meta": {
+		"foo": {
+			"format": "global",
+			"exports": "Foo"
+		}
+	}
+}
+```
+
+In this situation, the default `new Function` method of evaluation will not work and the `Foo` variable will not be set on the window. In this case we want to update our **eval** configuration to `script`:
+
+```
+"steal": {
+	"meta": {
+		"foo": {
+			"format": "global",
+			"exports": "Foo",
+			"eval": "script"
+		}
+	}
+}
+```
+
+This will use `<script>` elements for evaluation and the `Foo` property will be set.

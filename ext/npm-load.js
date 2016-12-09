@@ -20,9 +20,13 @@ exports.saveLoad = function(context){
 
 exports.saveLoadIfNeeded = function(context){
 	// Only do the actual saving in the build
-	var loader = context.loader;
 	if(context.resavePackageInfo) {
 		exports.saveLoad(context);
+
+		var localLoader = context.loader.localLoader;
+		if(localLoader) {
+			exports.saveLoad(localLoader.npmContext);
+		}
 	}
 };
 
@@ -60,8 +64,9 @@ exports.makeSource = function(context, pkg){
  */
 exports.configDeps = function(context, pkg){
 	var deps = [];
-	if(pkg.system && pkg.system.configDependencies) {
-		deps = deps.concat(pkg.system.configDependencies);
+	var config = utils.pkg.config(pkg);
+	if(config && config.configDependencies) {
+		deps = deps.concat(config.configDependencies);
 	}
 	if(context.loader.configDependencies) {
 		deps = deps.concat(context.loader.configDependencies);
@@ -77,14 +82,12 @@ exports.configDeps = function(context, pkg){
  */
 exports.pkgMain = function(context, pkg){
 	var pkgMain = utils.pkg.main(pkg);
-	// Convert the main if using directories.lib
-	if(utils.pkg.hasDirectoriesLib(pkg)) {
-		var mainHasPkg = pkgMain.indexOf(pkg.name) === 0;
-		if(mainHasPkg) {
-			pkgMain = convert.name(context, pkg, false, true, pkgMain);
-		} else {
-			pkgMain = convert.name(context, pkg, false, true, pkg.name+"/"+pkgMain);
-		}
+	// Convert the main
+	var mainHasPkg = pkgMain.indexOf(pkg.name) === 0;
+	if(mainHasPkg) {
+		pkgMain = convert.name(context, pkg, false, true, pkgMain);
+	} else {
+		pkgMain = convert.name(context, pkg, false, true, pkg.name+"/"+pkgMain);
 	}
 	return pkgMain;
 };
@@ -104,6 +107,7 @@ var translateConfig = function(loader, packages, options){
 	var g = loader.global;
 	if(!g.process) {
 		g.process = {
+			argv: [],
 			cwd: function(){
 				var baseURL = loader.baseURL;
 				return baseURL;
@@ -126,8 +130,8 @@ var translateConfig = function(loader, packages, options){
 		loader.npmParentMap = options.npmParentMap || {};
 	}
 	var rootPkg = loader.npmPaths.__default = packages[0];
-	var lib = packages[0].system && packages[0].system.directories && packages[0].system.directories.lib;
-
+	var rootConfig = rootPkg.steal || rootPkg.system;
+	var lib = rootConfig && rootConfig.directories && rootConfig.directories.lib;
 
 	var setGlobalBrowser = function(globals, pkg){
 		for(var name in globals) {
@@ -163,30 +167,36 @@ var translateConfig = function(loader, packages, options){
 			});
 		}
 	};
+
 	var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
+	packages.reverse();
 	forEach(packages, function(pkg){
-		if(pkg.system) {
-			var system = pkg.system;
-			// don't set system.main
-			var main = system.main;
-			delete system.main;
-			var configDeps = system.configDependencies;
+		var steal = pkg.steal || pkg.system;
+		if(steal) {
+			// don't set steal.main
+			var main = steal.main;
+			delete steal.main;
+			var configDeps = steal.configDependencies;
 			if(pkg !== rootPkg) {
 				forEach(ignoredConfig, function(name){
-					delete system[name];
+					delete steal[name];
 				});
 			}
 
-			loader.config(system);
+			loader.config(steal);
 			if(pkg === rootPkg) {
-				system.configDependencies = configDeps;
+				steal.configDependencies = configDeps;
 			}
-			system.main = main;
+			steal.main = main;
 		}
 		if(pkg.globalBrowser) {
-			setGlobalBrowser(pkg.globalBrowser, pkg);
+			var doNotApplyGlobalBrowser = pkg.name === "steal" &&
+				rootConfig.builtins === false;
+			if(!doNotApplyGlobalBrowser) {
+				setGlobalBrowser(pkg.globalBrowser, pkg);
+			}
 		}
-		var systemName = system && system.name;
+		var systemName = steal && steal.name;
 		if(systemName) {
 			setInNpm(systemName, pkg);
 		} else {

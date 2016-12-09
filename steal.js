@@ -1270,7 +1270,6 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
-//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -1416,8 +1415,13 @@ function logloads(loads) {
 
 (function() {
   var Promise = __global.Promise || require('when/es6-shim/Promise');
-  if (__global.console)
+  var console;
+  if (__global.console) {
+    console = __global.console;
     console.assert = console.assert || function() {};
+  } else {
+    console = { assert: function() {} };
+  }
 
   // IE8 support
   var indexOf = Array.prototype.indexOf || function(item) {
@@ -2673,6 +2677,17 @@ function logloads(loads) {
       });
     }
   }
+  else if(typeof fetch === 'function') {
+    fetchTextFromURL = function(url, fulfill, reject) {
+      fetch(url).then(function(resp){
+        return resp.text();
+      }).then(function(text){
+        fulfill(text);
+      }).then(null, function(err){
+        reject(err);
+      });
+    }
+  }
   else {
     throw new TypeError('No environment fetch API available.');
   }
@@ -2812,7 +2827,7 @@ function logloads(loads) {
 
         // percent encode just '#' in module names
         // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
-        // we should encode everything, but it breaks for servers that don't expect it 
+        // we should encode everything, but it breaks for servers that don't expect it
         // like in (https://github.com/systemjs/systemjs/issues/168)
         if (isBrowser)
           outPath = outPath.replace(/#/g, '%23');
@@ -2946,6 +2961,78 @@ $__global.upgradeSystemLoader = function() {
   }
 
   
+var getOwnPropertyDescriptor = true;
+try {
+  Object.getOwnPropertyDescriptor({ a: 0 }, 'a');
+}
+catch(e) {
+  getOwnPropertyDescriptor = false;
+}
+
+var defineProperty;
+(function () {
+  try {
+    if (!!Object.defineProperty({}, 'a', {}))
+      defineProperty = Object.defineProperty;
+  }
+  catch (e) {
+    defineProperty = function(obj, prop, opt) {
+      try {
+        obj[prop] = opt.value || opt.get.call(obj);
+      }
+      catch(e) {}
+    }
+  }
+})();
+
+// converts any module.exports object into an object ready for SystemJS.newModule
+function getESModule(exports) {
+  var esModule = {};
+  // don't trigger getters/setters in environments that support them
+  if ((typeof exports == 'object' || typeof exports == 'function') && exports !== $__global) {
+      if (getOwnPropertyDescriptor) {
+        for (var p in exports) {
+          // The default property is copied to esModule later on
+          if (p === 'default')
+            continue;
+          defineOrCopyProperty(esModule, exports, p);
+        }
+      }
+      else {
+        extend(esModule, exports);
+      }
+  }
+  esModule['default'] = exports;
+  defineProperty(esModule, '__useDefault', {
+    value: true
+  });
+  return esModule;
+}
+
+function defineOrCopyProperty(targetObj, sourceObj, propName) {
+  try {
+    var d;
+    if (d = Object.getOwnPropertyDescriptor(sourceObj, propName))
+      defineProperty(targetObj, propName, d);
+  }
+  catch (ex) {
+    // Object.getOwnPropertyDescriptor threw an exception, fall back to normal set property
+    // we dont need hasOwnProperty here because getOwnPropertyDescriptor would have returned undefined above
+    targetObj[propName] = sourceObj[propName];
+    return false;
+  }
+}
+
+function extend(a, b, prepend) {
+  var hasOwnProperty = b && b.hasOwnProperty;
+  for (var p in b) {
+    if (hasOwnProperty && !b.hasOwnProperty(p))
+      continue;
+    if (!prepend || !(p in a))
+      a[p] = b[p];
+  }
+  return a;
+}
 /*
  * SystemJS Core
  * Code should be vaguely readable
@@ -3172,11 +3259,11 @@ function meta(loader) {
  * - Also supports metadata.deps, metadata.execute and metadata.executingRequire
  *     for handling dynamic modules alongside register-transformed ES6 modules
  *
- * Works as a standalone extension, but benefits from having a more 
+ * Works as a standalone extension, but benefits from having a more
  * advanced __eval defined like in SystemJS polyfill-wrapper-end.js
  *
  * The code here replicates the ES6 linking groups algorithm to ensure that
- * circular ES6 compiled into System.register can work alongside circular AMD 
+ * circular ES6 compiled into System.register can work alongside circular AMD
  * and CommonJS, identically to the actual ES6 loader.
  *
  */
@@ -3192,7 +3279,7 @@ function register(loader) {
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
   var curSystem;
-  function exec(load) {
+  function exec(load, context) {
     var loader = this;
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
@@ -3205,7 +3292,9 @@ function register(loader) {
       }
     }
 
-    __eval(load.source, load.address, sourceMappingURL);
+    var evalType = load.metadata && load.metadata.eval;
+    context = context || loader.global;
+    __eval(load.source, load.address, context, sourceMappingURL, evalType);
   }
   loader.__exec = exec;
 
@@ -3223,7 +3312,7 @@ function register(loader) {
    *    see https://github.com/ModuleLoader/es6-module-loader/wiki/System.register-Explained
    *
    * 2. System.register for dynamic modules (3-4 params) - System.register([name, ]deps, executingRequire, execute)
-   * the true or false statement 
+   * the true or false statement
    *
    * this extension implements the linking algorithm for the two variations identical to the spec
    * allowing compiled ES6 circular references to work alongside AMD and CJS circular references.
@@ -3241,7 +3330,7 @@ function register(loader) {
     }
 
     calledRegister = true;
-    
+
     var register;
 
     // dynamic
@@ -3261,13 +3350,13 @@ function register(loader) {
         declare: declare
       };
     }
-    
+
     // named register
     if (name) {
       register.name = name;
       // we never overwrite an existing define
       if (!(name in loader.defined))
-        loader.defined[name] = register; 
+        loader.defined[name] = register;
     }
     // anonymous register
     else if (register.declarative) {
@@ -3280,7 +3369,7 @@ function register(loader) {
    * Registry side table - loader.defined
    * Registry Entry Contains:
    *    - name
-   *    - deps 
+   *    - deps
    *    - declare for declarative modules
    *    - execute for dynamic modules, different to declarative execute on module
    *    - executingRequire indicates require drives execution for circularity of dynamic modules
@@ -3294,7 +3383,7 @@ function register(loader) {
    *    - evaluated indicating whether evaluation has happend
    *    - module the module record object, containing:
    *      - exports actual module exports
-   *      
+   *
    *    Then for declarative only we track dynamic bindings with the records:
    *      - name
    *      - setters declarative setter functions
@@ -3315,7 +3404,7 @@ function register(loader) {
 
     if (!loader.defined)
       loader.defined = {};
-    
+
     // script injection mode calls this function synchronously on load
     var onScriptLoad = loader.onScriptLoad;
     loader.onScriptLoad = function(load) {
@@ -3323,7 +3412,7 @@ function register(loader) {
       // anonymous define
       if (anonRegister)
         load.metadata.entry = anonRegister;
-      
+
       if (calledRegister) {
         load.metadata.format = load.metadata.format || 'register';
         load.metadata.registered = true;
@@ -3344,17 +3433,17 @@ function register(loader) {
     for (var i = 0, l = entry.normalizedDeps.length; i < l; i++) {
       var depName = entry.normalizedDeps[i];
       var depEntry = loader.defined[depName];
-      
+
       // not in the registry means already linked / ES6
       if (!depEntry || depEntry.evaluated)
         continue;
-      
+
       // now we know the entry is in our unlinked linkage group
       var depGroupIndex = entry.groupIndex + (depEntry.declarative != entry.declarative);
 
       // the group index of an entry is always the maximum
       if (depEntry.groupIndex === undefined || depEntry.groupIndex < depGroupIndex) {
-        
+
         // if already in a group, remove from the old group
         if (depEntry.groupIndex !== undefined) {
           groups[depEntry.groupIndex].splice(indexOf.call(groups[depEntry.groupIndex], depEntry), 1);
@@ -3396,7 +3485,7 @@ function register(loader) {
         else
           linkDynamicModule(entry, loader);
       }
-      curGroupDeclarative = !curGroupDeclarative; 
+      curGroupDeclarative = !curGroupDeclarative;
     }
   }
 
@@ -3434,7 +3523,7 @@ function register(loader) {
       module.locked = false;
       return value;
     });
-    
+
     module.setters = declaration.setters;
     module.execute = declaration.execute;
 
@@ -3459,7 +3548,8 @@ function register(loader) {
         if (depEntry.module.exports && depEntry.module.exports.__esModule)
           depExports = depEntry.module.exports;
         else
-          depExports = { 'default': depEntry.module.exports, '__useDefault': true };
+          depExports = depEntry.esModule;
+          //depExports = { 'default': depEntry.module.exports, '__useDefault': true };
       }
       // in the loader registry
       else if (!depEntry) {
@@ -3501,7 +3591,7 @@ function register(loader) {
     else {
       if (entry.declarative)
         ensureEvaluated(name, [], loader);
-    
+
       else if (!entry.evaluated)
         linkDynamicModule(entry, loader);
 
@@ -3510,7 +3600,7 @@ function register(loader) {
 
     if ((!entry || entry.declarative) && exports && exports.__useDefault)
       return exports['default'];
-    
+
     return exports;
   }
 
@@ -3542,14 +3632,22 @@ function register(loader) {
       }
       throw new TypeError('Module ' + name + ' not declared as a dependency.');
     }, exports, module);
-    
+
     if (output)
       module.exports = output;
-      
-    /*if ( output && output.__esModule )
-      entry.module = output;
-    else if (output)
-      entry.module['default'] = output;*/
+
+    // create the esModule object, which allows ES6 named imports of dynamics
+    exports = module.exports;
+
+    // __esModule flag treats as already-named
+    if (exports && (exports.__esModule || exports instanceof Module))
+      entry.esModule = exports;
+    // set module as 'default' export, then fake named exports by iterating properties
+    else if (entry.esmExports && exports !== loader.global)
+      entry.esModule = getESModule(exports);
+    // just use the 'default' export
+    else
+      entry.esModule = { 'default': exports };
   }
 
   /*
@@ -3558,7 +3656,7 @@ function register(loader) {
    *  (unless one is a circular dependency already in the list of seen
    *  modules, in which case we execute it)
    *
-   * Then we evaluate the module itself depth-first left to right 
+   * Then we evaluate the module itself depth-first left to right
    * execution to match ES6 modules
    */
   function ensureEvaluated(moduleName, seen, loader) {
@@ -3589,6 +3687,8 @@ function register(loader) {
     entry.module.execute.call(loader.global);
   }
 
+  var Module = loader.newModule({}).constructor;
+
   var registerRegEx = /System\.register/;
 
   var loaderFetch = loader.fetch;
@@ -3615,7 +3715,7 @@ function register(loader) {
 
     // we run the meta detection here (register is after meta)
     return Promise.resolve(loaderTranslate.call(this, load)).then(function(source) {
-      
+
       // dont run format detection for globals shimmed
       // ideally this should be in the global extension, but there is
       // currently no neat way to separate it
@@ -3651,6 +3751,7 @@ function register(loader) {
       entry = {
         declarative: false,
         deps: load.metadata.deps || [],
+        esModule: null,
         execute: load.metadata.execute,
         executingRequire: load.metadata.executingRequire // NodeJS-style requires or not
       };
@@ -3698,6 +3799,7 @@ function register(loader) {
 
     entry.deps = dedupe(entry.deps);
     entry.name = load.name;
+    entry.esmExports = load.metadata.esmExports !== false;
 
     // first, normalize all dependencies
     var normalizePromises = [];
@@ -3711,7 +3813,7 @@ function register(loader) {
       return {
         deps: entry.deps,
         execute: function() {
-          // recursively ensure that the module and all its 
+          // recursively ensure that the module and all its
           // dependencies are linked (with dependency group handling)
           link(load.name, loader);
 
@@ -3723,8 +3825,8 @@ function register(loader) {
 
           var module = entry.module.exports;
 
-          if (!module || !entry.declarative && module.__esModule !== true)
-            module = { 'default': module, __useDefault: true };
+          if(!entry.declarative)
+            module = entry.esModule;
 
           // return the defined module object
           return loader.newModule(module);
@@ -3971,7 +4073,7 @@ function global(loader) {
         loader.global.module = undefined;
         loader.global.exports = undefined;
 
-        loader.__exec(load);
+        loader.__exec(load, loader.global);
 
         loader.global.require = require;
         loader.global.define = define;
@@ -4110,8 +4212,10 @@ function amd(loader) {
   // define(varName); || define(function(require, exports) {}); || define({})
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
 
+  var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
   var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
+  var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
   var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
   var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
   var fnBracketRegEx = /\(([^\)]*)\)/;
@@ -4375,25 +4479,36 @@ function amd(loader) {
 
   var loaderInstantiate = loader.instantiate;
   loader.instantiate = function(load) {
-    var loader = this;
+    var loader = this,
+      sourceWithoutComments = load.source.replace(strictCommentRegEx, '$1'),
+      match = sourceWithoutComments.match(amdRegEx);
 
-    if (load.metadata.format == 'amd' || !load.metadata.format && load.source.match(amdRegEx)) {
-      load.metadata.format = 'amd';
+    if (load.metadata.format == 'amd' || !load.metadata.format && match) {
 
-      if (loader.execute !== false) {
-        createDefine(loader);
+      // make sure that this is really a AMD module
+      // get the content from beginning till the matched define block
+      var sourceBeforeDefine = sourceWithoutComments.substring(0, sourceWithoutComments.indexOf(match[0])),
+        trimmed = sourceBeforeDefine.replace(wsRegEx, "")
 
-        loader.__exec(load);
+      // check if that there is no commen javscript keywork before
+      if (!beforeRegEx.test(trimmed)) {
+        load.metadata.format = 'amd';
 
-        removeDefine(loader);
+        if (loader.execute !== false) {
+          createDefine(loader);
 
-        if (!anonDefine && !defineBundle && !isNode)
-          throw new TypeError('AMD module ' + load.name + ' did not define');
-      }
+          loader.__exec(load);
 
-      if (anonDefine) {
-        load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
-        load.metadata.execute = anonDefine.execute;
+          removeDefine(loader);
+
+          if (!anonDefine && !defineBundle && !isNode)
+            throw new TypeError('AMD module ' + load.name + ' did not define');
+        }
+
+        if (anonDefine) {
+          load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(anonDefine.deps) : anonDefine.deps;
+          load.metadata.execute = anonDefine.execute;
+        }
       }
     }
 
@@ -4837,55 +4952,29 @@ var $__curScript, __eval;
   var doEval;
   var isWorker = typeof window == 'undefined' && typeof self != 'undefined' && typeof importScripts != 'undefined';
   var isBrowser = typeof window != 'undefined' && typeof document != 'undefined';
+  var isChromeExtension = isBrowser && window.chrome && window.chrome.extension;
+  var isNode = typeof process === 'object' && {}.toString.call(process) === '[object process]';
+  var scriptEval;
 
-  __eval = function(source, address, sourceMap) {
-    source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
-
+  doEval = function(source, address, context) {
     try {
-      doEval(source);
+      new Function(source).call(context);
     }
     catch(e) {
-      var msg = 'Error evaluating ' + address + '\n';
-      if (e instanceof Error)
-        e.message = msg + e.message;
-      else
-        e = msg + e;
-      throw e;
+      throw addToError(e, 'Evaluating ' + address);
     }
   };
 
-  if (isWorker || isBrowser && window.chrome && window.chrome.extension) {
-    doEval = function(source) {
-      try {
-        eval(source);
-      } catch(e) {
-        throw e;
-      }
-    };
-
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      var basePath = '';
-      try {
-        throw new Error('Get worker base path via error stack');
-      } catch (e) {
-        e.stack.replace(/(?:at|@).*(http.+):[\d]+:[\d]+/, function (m, url) {
-          basePath = url.replace(/\/[^\/]*$/, '/');
-        });
-      }
-      importScripts(basePath + 'steal-es6-module-loader.js');
-      $__global.upgradeSystemLoader();
-    } else {
-      $__global.upgradeSystemLoader();
-    }
-  }
-  else if (typeof document != 'undefined') {
+  if(isWorker) {
+    $__global.upgradeSystemLoader();
+  } else if (isBrowser && !isChromeExtension) {
     var head;
 
     var scripts = document.getElementsByTagName('script');
     $__curScript = scripts[scripts.length - 1];
 
     // globally scoped eval for the browser
-    doEval = function(source) {
+    scriptEval = function(source) {
       if (!head)
         head = document.head || document.body || document.documentElement;
 
@@ -4901,21 +4990,11 @@ var $__curScript, __eval;
       window.onerror = onerror;
       if (e)
         throw e;
-    }
+    };
 
-    if (!$__global.System || !$__global.LoaderPolyfill) {
-      // determine the current script path as the base path
-      var curPath = $__curScript.src;
-      var basePath = curPath.substr(0, curPath.lastIndexOf('/') + 1);
-      document.write(
-        '<' + 'script type="text/javascript" src="' + basePath + 'steal-es6-module-loader.js" data-init="upgradeSystemLoader">' + '<' + '/script>'
-      );
-    }
-    else {
-      $__global.upgradeSystemLoader();
-    }
+    $__global.upgradeSystemLoader();
   }
-  else {
+  else if(isNode) {
     var es6ModuleLoader = require('steal-es6-module-loader');
     $__global.System = es6ModuleLoader.System;
     $__global.Loader = es6ModuleLoader.Loader;
@@ -4924,10 +5003,58 @@ var $__curScript, __eval;
 
     // global scoped eval for node
     var vm = require('vm');
-    doEval = function(source, address, sourceMap) {
+    doEval = function(source) {
       vm.runInThisContext(source);
     }
   }
+
+  var errArgs = new Error(0, '_').fileName == '_';
+
+  function addToError(err, msg) {
+    // parse the stack removing loader code lines for simplification
+    if (!err.originalErr) {
+      var stack = (err.stack || err.message || err).toString().split('\n');
+      var newStack = [];
+      for (var i = 0; i < stack.length; i++) {
+        if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
+          newStack.push(stack[i]);
+      }
+    }
+
+    var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
+
+    // Convert file:/// URLs to paths in Node
+    if (!isBrowser)
+      newMsg = newMsg.replace(isWindows ? /file:\/\/\//g : /file:\/\//g, '');
+
+    var newErr = errArgs ? new Error(newMsg, err.fileName, err.lineNumber) : new Error(newMsg);
+
+    // Node needs stack adjustment for throw to show message
+    if (!isBrowser)
+      newErr.stack = newMsg;
+    // Clearing the stack stops unnecessary loader lines showing
+    else
+      newErr.stack = null;
+
+    // track the original error
+    newErr.originalErr = err.originalErr || err;
+
+    return newErr;
+  }
+
+  __eval = function(source, address, context, sourceMap, evalType) {
+    source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
+
+
+    var useScriptEval = evalType === 'script'
+      && typeof scriptEval === 'function';
+    if(useScriptEval) {
+      scriptEval(source);
+    } else {
+      doEval(source, address, context);
+    }
+  };
+
 })();
 
 })(typeof window != 'undefined' ? window : (typeof WorkerGlobalScope != 'undefined' ? self : global));
@@ -5040,7 +5167,8 @@ var $__curScript, __eval;
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
+		fBind = Function.prototype.bind,
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
@@ -5051,7 +5179,9 @@ var $__curScript, __eval;
 				return false;
 			}
 		})();
-		isNode = isNode && !isNW;
+		isNode = isNode && !isNW,
+		warn = typeof console === "object" ?
+			fBind.call(console.warn, console) : function(){};
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -5116,8 +5246,11 @@ var cloneSteal = function(System){
 };
 
 var makeSteal = function(System){
+	System.set('@loader', System.newModule({
+		'default': System,
+		__useDefault: true
+	}));
 
-	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
 	System.config({
 		map: {
 			"@loader/@loader": "@loader",
@@ -5125,9 +5258,9 @@ var makeSteal = function(System){
 		}
 	});
 
-	var configDeferred,
-		devDeferred,
-		appDeferred;
+	var configPromise,
+		devPromise,
+		appPromise;
 
 	var steal = function(){
 		var args = arguments;
@@ -5155,21 +5288,32 @@ var makeSteal = function(System){
 			return afterConfig();
 		} else {
 			// wait until the config has loaded
-			return configDeferred.then(afterConfig,afterConfig);
+			return configPromise.then(afterConfig,afterConfig);
 		}
 
 	};
 
-	System.set("@steal", System.newModule({"default":steal, __useDefault:true}));
+	System.set("@steal", System.newModule({
+		"default": steal,
+		__useDefault:true
+	}));
 
-	steal.System = System;
+	// steal.System remains for backwards compat only
+	steal.System = steal.loader = System;
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
 	steal.relativeURI = relativeURI;
 
-	// System.ext = {bar: "path/to/bar"}
-	// foo.bar! -> foo.bar!path/to/bar
+	// System-Ext
+	// This normalize-hook does 2 things.
+	// 1. with specify a extension in your config
+	// 		you can use the "!" (bang) operator to load
+	// 		that file with the extension
+	// 		System.ext = {bar: "path/to/bar"}
+	// 		foo.bar! -> foo.bar!path/to/bar
+	// 2. if you load a javascript file e.g. require("./foo.js")
+	// 		normalize will remove the ".js" to load the module
 	var addExt = function(loader) {
 		if (loader._extensions) {
 			loader._extensions.push(addExt);
@@ -5185,15 +5329,20 @@ var makeSteal = function(System){
 				return normalize.apply(this, arguments);
 			}
 
-			var matches = name.match(endingExtension),
-				ext,
-				newName = name;
+			var matches = name.match(endingExtension);
 
-			if(matches && loader.ext[ext = matches[1]]) {
-				var hasBang = name[name.length - 1] === "!";
-				newName = name + (hasBang ? "" : "!") + loader.ext[ext];
+			if(matches) {
+				var hasBang = name[name.length - 1] === "!",
+					ext = matches[1];
+				// load js-files nodd-like
+				if(parentName && loader.configMain !== name && matches[0] === '.js') {
+					name = name.substr(0, name.lastIndexOf("."));
+					// matches ext mapping
+				} else if(loader.ext[ext]) {
+					name = name + (hasBang ? "" : "!") + loader.ext[ext];
+				}
 			}
-			return normalize.call(this, newName, parentName, parentAddress);
+			return normalize.call(this, name, parentName, parentAddress);
 		};
 	};
 
@@ -5337,53 +5486,97 @@ if(typeof System !== "undefined") {
 }
 
 function addContextual(loader){
-  if (loader._extensions) {
-    loader._extensions.push(addContextual);
-  }
-  loader._contextualModules = {};
+	if(loader._extensions) {
+		loader._extensions.push(addContextual);
+	}
+	loader._contextualModules = {};
 
-  loader.setContextual = function(moduleName, definer){
-    this._contextualModules[moduleName] = definer;
-  };
+	loader.setContextual = function(moduleName, definer){
+		this._contextualModules[moduleName] = definer;
+	};
 
-  var normalize = loader.normalize;
-  loader.normalize = function(name, parentName){
-    var loader = this;
+	var normalize = loader.normalize;
+	loader.normalize = function(name, parentName){
+		var loader = this;
 
-    if (parentName) {
-      var definer = this._contextualModules[name];
+		if (parentName) {
+			var definer = this._contextualModules[name];
 
-      // See if `name` is a contextual module
-      if (definer) {
-        name = name + '/' + parentName;
+			// See if `name` is a contextual module
+			if (definer) {
+				name = name + '/' + parentName;
 
-        if(!loader.has(name)) {
-          // `definer` could be a function or could be a moduleName
-          if (typeof definer === 'string') {
-            definer = loader['import'](definer);
-          }
+				if(!loader.has(name)) {
+					// `definer` could be a function or could be a moduleName
+					if (typeof definer === 'string') {
+						definer = loader['import'](definer);
+					}
 
-          return Promise.resolve(definer)
-          .then(function(definer) {
-            if (definer['default']) {
-              definer = definer['default'];
-            }
-            loader.set(name, loader.newModule(definer.call(loader, parentName)));
-            return name;
-          });
-        }
-        return Promise.resolve(name);
-      }
-    }
+					return Promise.resolve(definer)
+					.then(function(definer) {
+						if (definer['default']) {
+							definer = definer['default'];
+						}
+						var definePromise = Promise.resolve(
+							definer.call(loader, parentName)
+						);
+						return definePromise;
+					})
+					.then(function(moduleDef){
+						loader.set(name, loader.newModule(moduleDef));
+						return name;
+					});
+				}
+				return Promise.resolve(name);
+			}
+		}
 
-    return normalize.apply(this, arguments);
-  };
+		return normalize.apply(this, arguments);
+	};
 }
 
 if(typeof System !== "undefined") {
   addContextual(System);
 }
 
+var addScriptModule = function(loader) {
+	// stolen from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
+
+	function completed() {
+		document.removeEventListener( "DOMContentLoaded", completed, false );
+		window.removeEventListener( "load", completed, false );
+		ready();
+	}
+
+	function ready() {
+		var scripts = document.getElementsByTagName('script');
+		for (var i = 0; i < scripts.length; i++) {
+			var script = scripts[i];
+			if (script.type == 'text/steal-module') {
+				var source = script.innerHTML;
+				if(/\S/.test(source)){
+					loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+				}
+			}
+		}
+	}
+
+	loader.loadScriptModules = function(){
+		if(isBrowserWithWindow) {
+			if (document.readyState === 'complete') {
+				setTimeout(ready);
+			} else if (document.addEventListener) {
+				document.addEventListener('DOMContentLoaded', completed, false);
+				window.addEventListener('load', completed, false);
+			}
+		}
+
+	};
+};
+
+if(typeof System !== "undefined") {
+	addScriptModule(System);
+}
 function applyTraceExtension(loader){
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -5598,7 +5791,6 @@ function _SYSTEM_addJSON(loader) {
 	var jsonTest = /^[\s\n\r]*[\{\[]/;
 	var jsonExt = /\.json$/i;
 	var jsExt = /\.js$/i;
-	var inNode = typeof window === "undefined";
 
 	// Add the extension to _extensions so that it can be cloned.
 	loader._extensions.push(_SYSTEM_addJSON);
@@ -5623,10 +5815,11 @@ function _SYSTEM_addJSON(loader) {
 	};
 
 	// If we are in a build we should convert to CommonJS instead.
-	if(inNode) {
+	if(isNode) {
 		var loaderTranslate = loader.translate;
 		loader.translate = function(load){
-			if(jsonExt.test(load.name)) {
+			var address = load.metadata.address || load.address;
+			if(jsonExt.test(address) && load.name.indexOf('!') === -1) {
 				var parsed = parse(load);
 				if(parsed) {
 					parsed = transform(this, load, parsed);
@@ -5665,7 +5858,10 @@ function _SYSTEM_addJSON(loader) {
 		if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
 			try {
 				return JSON.parse(load.source);
-			} catch(e) {}
+			} catch(e) {
+				warn("Error parsing " + load.address + ":", e);
+				return {};
+			}
 		}
 
 	}
@@ -5676,14 +5872,15 @@ if (typeof System !== "undefined") {
 }
 
 	// Overwrites System.config with setter hooks
-	var setterConfig = function(loader, configSpecial){
+	var setterConfig = function(loader, configOrder, configSpecial){
 		var oldConfig = loader.config;
 
 		loader.config =  function(cfg){
 
 			var data = extend({},cfg);
 			// check each special
-			each(configSpecial, function(special, name){
+			each(configOrder, function(name){
+				var special = configSpecial[name];
 				// if there is a setter and a value
 				if(special.set && data[name]){
 					// call the setter
@@ -5711,36 +5908,52 @@ if (typeof System !== "undefined") {
 	System.configMain = "@config";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
-	System.ext = {
-		css: '$css',
-		less: '$less'
-	};
+	System.ext = {};
 	System.logLevel = 0;
-	System.transpiler = "traceur";
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
 
-	var configSetter = {
-		set: function(val){
-			var name = filename(val),
-				root = dir(val);
+	var configSetter = function(order){
+		return {
+			order: order,
+			set: function(val){
+				var name = filename(val),
+					root = dir(val);
 
-			if(!isNode) {
-				System.configPath = joinURIs( location.href, val);
+				if(!isNode) {
+					System.configPath = joinURIs( location.href, val);
+				}
+				System.configMain = name;
+				System.paths[name] = name;
+				this.config({ baseURL: (root === val ? "." : root) + "/" });
 			}
-			System.configMain = name;
-			System.paths[name] = name;
-			addProductionBundles.call(this);
-			this.config({ baseURL: (root === val ? "." : root) + "/" });
 		}
 	},
-		mainSetter = {
-			set: function(val){
-				this.main = val;
-				addProductionBundles.call(this);
+		valueSetter = function(prop, order) {
+			return {
+				order: order,
+				set: function(val) {
+					this[prop] = val;
+				}
 			}
+		},
+		booleanSetter = function(prop, order) {
+			return {
+				order: order,
+				set: function(val) {
+					this[prop] = !!val;
+				}
+			}
+		},
+		fileSetter = function(prop, order) {
+			return {
+				order: order,
+				set: function(val) {
+					this[prop] = envPath(val);
+				}
+			};
 		};
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
@@ -5756,14 +5969,6 @@ if (typeof System !== "undefined") {
 			return "file:" + val;
 		}
 		return val;
-	};
-
-	var fileSetter = function(prop) {
-		return {
-			set: function(val) {
-				this[prop] = envPath(val);
-			}
-		};
 	};
 
 	var setToSystem = function(prop){
@@ -5784,6 +5989,7 @@ if (typeof System !== "undefined") {
 			return name.substr(bang+1);
 		}
 	};
+
 	var pluginResource = function(name){
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
@@ -5792,7 +5998,8 @@ if (typeof System !== "undefined") {
 	};
 
 	var addProductionBundles = function(){
-		if(this.loadBundles && this.main) {
+		// we don't want add the main bundled module if steal is bundled inside!
+		if(this.loadBundles && this.main && !this.stealBundled) {
 			var main = this.main,
 				bundlesDir = this.bundlesName || "bundles/",
 				mainBundleName = bundlesDir+main;
@@ -5831,7 +6038,9 @@ if (typeof System !== "undefined") {
 	var setupLiveReload = function(){
 		if(this.liveReloadInstalled) {
 			var loader = this;
-			this.import("live-reload", { name: "@@steal" }).then(function(reload){
+			this["import"]("live-reload", {
+				name: "@@steal"
+			}).then(function(reload){
 				reload(loader.configMain, function(){
 					setEnvsConfig.call(loader);
 				});
@@ -5839,21 +6048,21 @@ if (typeof System !== "undefined") {
 		}
 	};
 
-	var specialConfig;
+	var specialConfigOrder = [];
 	var envsSpecial = { map: true, paths: true, meta: true };
-	setterConfig(System, specialConfig = {
-		env: {
+	var specialConfig = {
+		instantiated: {
+			order: 1,
 			set: function(val){
-				this.env = val;
+				var loader = this;
 
-				if(this.isEnv("production")) {
-					this.loadBundles = true;
-				}
-
-				addProductionBundles.call(this);
+				each(val || {}, function(value, name){
+					loader.set(name,  loader.newModule(value));
+				});
 			}
 		},
 		envs: {
+			order: 2,
 			set: function(val){
 				// envs should be set, deep
 				var envs = this.envs;
@@ -5869,174 +6078,38 @@ if (typeof System !== "undefined") {
 							env[name] = val;
 						}
 					});
-
-					//extend(env, cfg);
 				});
 			}
 		},
-		baseUrl: fileSetter("baseURL"),
-		baseURL: fileSetter("baseURL"),
-		root: fileSetter("baseURL"),  //backwards comp
-		config: configSetter,
-		configPath: configSetter,
-		loadBundles: {
+		env: {
+			order: 3,
 			set: function(val){
-				this.loadBundles = val;
-				addProductionBundles.call(this);
-			}
-		},
-		startId: {
-			set: function(val){
-				mainSetter.set.call(this, normalize(val) );
-			}
-		},
-		main: mainSetter,
-		stealURL: {
-			// http://domain.com/steal/steal.js?moduleName,env&
-			set: function(url, cfg)	{
-				System.stealURL = url;
-				var urlParts = url.split("?");
+				this.env = val;
 
-				var path = urlParts.shift(),
-					search = urlParts.join("?"),
-					searchParts = search.split("&"),
-					paths = path.split("/"),
-					lastPart = paths.pop(),
-					stealPath = paths.join("/"),
-					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
-
-				// if steal is bundled we always are in production environment
-				if(this.stealBundled && this.stealBundled === true) {
-					this.config({ env: platform+"-production" });
-
-				}else{
-					specialConfig.stealPath.set.call(this,stealPath, cfg);
-
-					if (lastPart.indexOf("steal.production") > -1 && !cfg.env) {
-						this.config({ env: platform+"-production" });
-						addProductionBundles.call(this);
-					}
+				if(this.isEnv("production")) {
+					this.loadBundles = true;
 				}
-
-				if(searchParts.length && searchParts[0].length) {
-					var searchConfig = {},
-						searchPart;
-					for(var i =0; i < searchParts.length; i++) {
-						searchPart = searchParts[i];
-						var paramParts = searchPart.split("=");
-						if(paramParts.length > 1) {
-							searchConfig[paramParts[0]] = paramParts.slice(1).join("=");
-						} else {
-							if(steal.dev) {
-								steal.dev.warn("Please use search params like ?main=main&env=production");
-							}
-							var oldParamParts = searchPart.split(",");
-							if (oldParamParts[0]) {
-								searchConfig.startId = oldParamParts[0];
-							}
-							if (oldParamParts[1]) {
-								searchConfig.env = oldParamParts[1];
-							}
-						}
-					}
-					this.config(searchConfig);
-				}
-
-				// Split on / to get rootUrl
-
 			}
 		},
-		// this gets called with the __dirname steal is in
-		stealPath: {
-			set: function(dirname, cfg) {
-				dirname = envPath(dirname);
-				var parts = dirname.split("/");
-
-				// steal keeps this around to make things easy no matter how you are using it.
-				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
-				setIfNotPresent(this.paths,"$css", dirname+"/ext/css.js");
-				setIfNotPresent(this.paths,"$less", dirname+"/ext/less.js");
-				setIfNotPresent(this.paths,"@less-engine", dirname+"/ext/less-engine.js");
-				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
-				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
-				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
-				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
-				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
-				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
-				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
-				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
-				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
-				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
-				this.paths["traceur"] = dirname+"/ext/traceur.js";
-				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
-				this.paths["babel"] = dirname+"/ext/babel.js";
-				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
-
-				// steal-clone is contextual so it can override modules using relative paths
-				this.setContextual('steal-clone', 'steal-clone');
-
-				if(isNode) {
-					System.register("@less-engine", [], false, function(){
-						var r = require;
-						return r('less');
-					});
-
-					if(this.configMain === "@config" && last(parts) === "steal") {
-						parts.pop();
-						if(last(parts) === "node_modules") {
-							this.configMain = "package.json!npm";
-							addProductionBundles.call(this);
-							parts.pop();
-						}
-					}
-
-				} else {
-					setIfNotPresent(this.paths, "@less-engine", dirname + "/ext/less-engine.js");
-
-					// make sure we don't set baseURL if something else is going to set it
-					if(!cfg.root && !cfg.baseUrl && !cfg.baseURL && !cfg.config && !cfg.configPath) {
-						if ( last(parts) === "steal" ) {
-							parts.pop();
-							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
-								System.configMain = "bower.json!bower";
-								addProductionBundles.call(this);
-								parts.pop();
-							}
-							if (last(parts) === "node_modules") {
-								System.configMain = "package.json!npm";
-								addProductionBundles.call(this);
-								parts.pop();
-							}
-						}
-						this.config({ baseURL: parts.join("/")+"/"});
-					}
-				}
-				System.stealPath = dirname;
-			}
-		},
+		loadBundles: booleanSetter("loadBundles", 4),
+		stealBundled: booleanSetter("stealBundled", 5),
 		// System.config does not like being passed arrays.
 		bundle: {
+			order: 6,
 			set: function(val){
 				System.bundle = val;
 			}
 		},
 		bundlesPath: {
+			order: 7,
 			set: function(val){
 				this.paths[cssBundlesNameGlob] = val+"/*css";
 				this.paths[jsBundlesNameGlob]  = val+"/*.js";
 				return val;
 			}
 		},
-		instantiated: {
-			set: function(val){
-				var loader = this;
-
-				each(val || {}, function(value, name){
-					loader.set(name,  loader.newModule(value));
-				});
-			}
-		},
 		meta: {
+			order: 8,
 			set: function(cfg){
 				var loader = this;
 				each(cfg || {}, function(value, name){
@@ -6055,14 +6128,149 @@ if (typeof System !== "undefined") {
 				});
 				extend(this.meta, cfg);
 			}
+		},
+		configMain: valueSetter("configMain", 9),
+		config: configSetter(10),
+		configPath: configSetter(11),
+		baseURL: fileSetter("baseURL", 12),
+		main: valueSetter("main", 13),
+		// this gets called with the __dirname steal is in
+		// directly called from steal-tools
+		stealPath: {
+			order: 14,
+			set: function(dirname, cfg) {
+				dirname = envPath(dirname);
+				var parts = dirname.split("/");
+
+				// steal keeps this around to make things easy no matter how you are using it.
+				setIfNotPresent(this.paths,"@dev", dirname+"/ext/dev.js");
+				setIfNotPresent(this.paths,"npm", dirname+"/ext/npm.js");
+				setIfNotPresent(this.paths,"npm-extension", dirname+"/ext/npm-extension.js");
+				setIfNotPresent(this.paths,"npm-utils", dirname+"/ext/npm-utils.js");
+				setIfNotPresent(this.paths,"npm-crawl", dirname+"/ext/npm-crawl.js");
+				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
+				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
+				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
+				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
+				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
+				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
+				this.paths["traceur"] = dirname+"/ext/traceur.js";
+				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
+				this.paths["babel"] = dirname+"/ext/babel.js";
+				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
+
+				// steal-clone is contextual so it can override modules using relative paths
+				this.setContextual('steal-clone', 'steal-clone');
+
+				if(isNode) {
+					if(this.configMain === "@config" && last(parts) === "steal") {
+						parts.pop();
+						if(last(parts) === "node_modules") {
+							this.configMain = "package.json!npm";
+							addProductionBundles.call(this);
+							parts.pop();
+						}
+					}
+
+				} else {
+					// make sure we don't set baseURL if it already set
+					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
+
+						// if we loading steal.js and it is located in node_modules or bower_components
+						// we rewrite the baseURL relative to steal.js (one directory up!)
+						// we do this because, normaly our app is located as a sibling folder to
+						// node_modules or bower_components
+						if ( last(parts) === "steal" ) {
+							parts.pop();
+							var isFromPackage = false;
+							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
+								System.configMain = "bower.json!bower";
+								addProductionBundles.call(this);
+								parts.pop();
+								isFromPackage = true;
+							}
+							if (last(parts) === "node_modules") {
+								System.configMain = "package.json!npm";
+								addProductionBundles.call(this);
+								parts.pop();
+								isFromPackage = true;
+							}
+							if(!isFromPackage) {
+								parts.push("steal");
+							}
+						}
+						this.config({ baseURL: parts.join("/")+"/"});
+					}
+				}
+				System.stealPath = dirname;
+			}
+		},
+		stealURL: {
+			order: 15,
+			// http://domain.com/steal/steal.js?moduleName,env&
+			set: function(url, cfg)	{
+				var urlParts = url.split("?"),
+					path = urlParts.shift(),
+					paths = path.split("/"),
+					lastPart = paths.pop(),
+					stealPath = paths.join("/"),
+					platform = this.getPlatform() || (isWebWorker ? "worker" : "window");
+
+				System.stealURL = path;
+
+				// if steal is bundled or we are loading steal.production
+				// we always are in production environment
+				if((this.stealBundled && this.stealBundled === true) ||
+					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
+					this.config({ env: platform+"-production" });
+				}
+
+				if(this.isEnv("production") || this.loadBundles) {
+					addProductionBundles.call(this);
+				}
+
+				specialConfig.stealPath.set.call(this,stealPath, cfg);
+
+			}
+		}
+	}
+
+	/*
+	 make a setter order
+	 currently:
+
+	 instantiated
+	 envs
+	 env
+	 loadBundles
+	 stealBundled
+	 bundle
+	 bundlesPath
+	 meta
+	 config
+	 configPath
+	 baseURL
+	 main
+	 stealPath
+	 stealURL
+	 */
+	each(specialConfig, function(setter, name){
+		if(!setter.order) {
+			specialConfigOrder.push(name)
+		}else{
+			specialConfigOrder.splice(setter.order, 0, name);
 		}
 	});
 
+	// special setter config
+	setterConfig(System, specialConfigOrder, specialConfig);
+
 	steal.config = function(cfg){
 		if(typeof cfg === "string") {
-			return System[cfg];
+			return this.loader[cfg];
 		} else {
-			System.config(cfg);
+			this.loader.config(cfg);
 		}
 	};
 
@@ -6093,130 +6301,210 @@ function addEnv(loader){
 	};
 }
 
-	var getScriptOptions = function () {
+	// get config by the URL query
+	// like ?main=foo&env=production
+	// formally used for Webworkers
+	var getQueryOptions = function(url) {
+		var queryOptions = {},
+			urlRegEx = /Url$/,
+			urlParts = url.split("?"),
+			path = urlParts.shift(),
+			search = urlParts.join("?"),
+			searchParts = search.split("&"),
+			paths = path.split("/"),
+			lastPart = paths.pop(),
+			stealPath = paths.join("/");
 
-		var options = {},
-			parts, src, query, startFile, env,
-			scripts = document.getElementsByTagName("script");
-
-		var script = scripts[scripts.length - 1];
-
-		if (script) {
-			options.stealURL = script.src;
-			// Split on question mark to get query
-
-			each(script.attributes, function(attr){
-				var optionName =
-					camelize( attr.nodeName.indexOf("data-") === 0 ?
-						attr.nodeName.replace("data-","") :
-						attr.nodeName );
-				options[optionName] = (attr.value === "") ? true : attr.value;
-			});
-
-			var source = script.innerHTML;
-			if(/\S/.test(source)){
-				options.mainSource = source;
+		if(searchParts.length && searchParts[0].length) {
+				var searchPart;
+			for(var i =0; i < searchParts.length; i++) {
+				searchPart = searchParts[i];
+				var paramParts = searchPart.split("=");
+				if(paramParts.length > 1) {
+					var optionName = camelize(paramParts[0]);
+					// make options uniform e.g. baseUrl => baseURL
+					optionName = optionName.replace(urlRegEx, "URL")
+					queryOptions[optionName] = paramParts.slice(1).join("=");
+				}
 			}
 		}
-
-		return options;
+		return queryOptions;
 	};
 
+	// extract the script tag options
+	var getScriptOptions = function (script) {
+		var scriptOptions = {},
+			urlRegEx = /Url$/;
+
+		scriptOptions.stealURL = script.src;
+
+		each(script.attributes, function(attr){
+			// get option, remove "data" and camelize
+			var optionName =
+				camelize( attr.nodeName.indexOf("data-") === 0 ?
+					attr.nodeName.replace("data-","") :
+					attr.nodeName );
+			// make options uniform e.g. baseUrl => baseURL
+			optionName = optionName.replace(urlRegEx, "URL")
+			scriptOptions[optionName] = (attr.value === "") ? true : attr.value;
+		});
+
+		// main source within steals script is deprecated
+		// and will be removed in future releases
+		var source = script.innerHTML;
+		if(/\S/.test(source)){
+			scriptOptions.mainSource = source;
+		}
+		// script config ever wins!
+		return extend(getQueryOptions(script.src), scriptOptions);
+	};
+
+	// get steal URL
+	// if we are in a browser, we need to know which script is steal
+	// to extract the script tag options => getScriptOptions()
+	var getUrlOptions = function (){
+		return new Promise(function(resolve, reject){
+
+			// for Workers get options from steal query
+			if (isWebWorker) {
+				resolve(extend({
+					stealURL: location.href
+				}, getQueryOptions(location.href)));
+				return;
+			} else if(isBrowserWithWindow) {
+				// if the browser supports currentScript, us it!
+				if (document.currentScript) {
+					// get options from script tag and query
+					resolve(getScriptOptions(document.currentScript));
+					return;
+				}
+
+				// dealing with async & deferred scripts
+				// set an onload handler for all script tags and the first one which executes
+				// is your stealjs
+				var scripts = document.scripts;
+				var isStealSrc = /steal/;
+				function onLoad(e) {
+					var target = e.target || event.target;
+					if(target.src && isStealSrc.test(target.src)) {
+						for (var i = 0; i < scripts.length; ++i) {
+							scripts[i].removeEventListener('load', onLoad, false);
+						}
+
+						resolve(getScriptOptions(target));
+					}
+				}
+				var script;
+				var finishedReadyStates = { "complete": true, "interactive": true };
+				for (var i = 0; i < scripts.length; ++i) {
+					script = scripts[i];
+					if(finishedReadyStates[script.readyState]) {
+						onLoad({ target: script });
+					} else {
+						script.addEventListener('load', onLoad, false);
+					}
+				}
+
+			} else {
+				// or the only option is where steal is.
+				resolve({
+					stealPath: __dirname
+				});
+			}
+		})
+	};
+
+	// configure and startup steal
+	// load the main module(s) if everything is configured
 	steal.startup = function(config){
+		var steal = this;
+		var loader = this.loader;
+		var configResolve;
+		var configReject;
 
-		// Get options from the script tag
-		if (isWebWorker) {
-			var urlOptions = {
-				stealURL: location.href
-			};
-		} else if(isBrowserWithWindow || isNW) {
-			var urlOptions = getScriptOptions();
-		} else {
-			// or the only option is where steal is.
-			var urlOptions = {
-				stealPath: __dirname
-			};
-		}
+		configPromise = new Promise(function(resolve, reject){
+			configResolve = resolve;
+			configReject = reject;
+		});
 
-		// first set the config that is set with a steal object
-		if(config){
-			System.config(config);
-		}
+		appPromise = getUrlOptions().then(function(urlOptions) {
 
-		// B: DO THINGS WITH OPTIONS
-		// CALCULATE CURRENT LOCATION OF THINGS ...
-		System.config(urlOptions);
-
-
-		setEnvsConfig.call(this.System);
-
-		// Read the env now because we can't overwrite everything yet
-
-		// immediate steals we do
-		var steals = [];
-
-		// we only load things with force = true
-		if ( System.loadBundles ) {
-
-			if(!System.main && System.isEnv("production") && !System.stealBundled) {
-				// prevent this warning from being removed by Uglify
-				var warn = console && console.warn || function() {};
-				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+			if (typeof config === 'object') {
+				// the url options are the source of truth
+				config = extend(config, urlOptions);
+			} else {
+				config = urlOptions;
 			}
 
-			configDeferred = System["import"](System.configMain);
+			// set the config
+			loader.config(config);
 
-			appDeferred = configDeferred.then(function(cfg){
-				setEnvsConfig.call(System);
-				return System.main ? System["import"](System.main) : cfg;
-			});
+			setEnvsConfig.call(loader);
 
-		} else {
-			configDeferred = System["import"](System.configMain);
+			// we only load things with force = true
+			if (loader.loadBundles) {
 
-			devDeferred = configDeferred.then(function(){
-				setEnvsConfig.call(System);
-				setupLiveReload.call(System);
-
-				// If a configuration was passed to startup we'll use that to overwrite
-				// what was loaded in stealconfig.js
-				// This means we call it twice, but that's ok
-				if(config) {
-					System.config(config);
+				if (!loader.main && loader.isEnv("production") &&
+					!loader.stealBundled) {
+					// prevent this warning from being removed by Uglify
+					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				return System["import"]("@dev");
-			},function(e){
-				console.log("steal - error loading @config.",e);
-				return steal.System["import"]("@dev");
-			});
+				loader["import"](loader.configMain)
+				.then(configResolve, configReject);
 
-			appDeferred = devDeferred.then(function(){
-				// if there's a main, get it, otherwise, we are just loading
-				// the config.
-				if(!System.main || System.env === "build") {
-					return configDeferred;
-				}
-				var main = System.main;
-				if(typeof main === "string") {
-					main = [main];
-				}
-				return Promise.all( map(main,function(main){
-					return System["import"](main);
-				}) );
-			});
+				return configPromise.then(function (cfg) {
+					setEnvsConfig.call(loader);
+					return loader.main ? loader["import"](loader.main) : cfg;
+				});
 
-		}
+			} else {
+				loader["import"](loader.configMain)
+				.then(configResolve, configReject);
 
-		if(System.mainSource) {
-			appDeferred = appDeferred.then(function(){
-				return System.module(System.mainSource);
-			});
-		}
-		return appDeferred;
+				devPromise = configPromise.then(function () {
+					setEnvsConfig.call(loader);
+					setupLiveReload.call(loader);
+
+					// If a configuration was passed to startup we'll use that to overwrite
+					// what was loaded in stealconfig.js
+					// This means we call it twice, but that's ok
+					if (config) {
+						loader.config(config);
+					}
+
+					return loader["import"]("@dev");
+				});
+
+				return devPromise.then(function () {
+					// if there's a main, get it, otherwise, we are just loading
+					// the config.
+					if (!loader.main || loader.env === "build") {
+						return configPromise;
+					}
+					var main = loader.main;
+					if (typeof main === "string") {
+						main = [main];
+					}
+					return Promise.all(map(main, function (main) {
+						return loader["import"](main);
+					}));
+				});
+			}
+		}).then(function(){
+			if(loader.mainSource) {
+				return loader.module(loader.mainSource);
+			}
+
+			// load script modules they are tagged as
+			// text/steal-module
+			return loader.loadScriptModules();
+		});
+
+		return appPromise;
 	};
 	steal.done = function(){
-		return appDeferred;
+		return appPromise;
 	};
 
 	steal["import"] = function(){
@@ -6235,12 +6523,21 @@ function addEnv(loader){
 			}
 		}
 
-		if(!configDeferred) {
+		if(!configPromise) {
+			// In Node a main isn't required, but we still want
+			// to call startup() to do autoconfiguration,
+			// so setting to empty allows this to work.
+			if(!loader.main) {
+				loader.main = "@empty";
+			}
 			steal.startup();
 		}
 
-		return configDeferred.then(afterConfig);
+		return configPromise.then(afterConfig);
 	};
+	steal.setContextual = fBind.call(System.setContextual, System);
+	steal.isEnv = fBind.call(System.isEnv, System);
+	steal.isPlatform = fBind.call(System.isPlatform, System);
 	return steal;
 
 };
@@ -6349,7 +6646,6 @@ if (typeof System !== "undefined") {
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
 		global.steal.addSteal = addSteal;
-		require("system-json");
 
 	} else {
 		var oldSteal = global.steal;

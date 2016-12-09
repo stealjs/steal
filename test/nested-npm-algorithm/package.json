@@ -1,0 +1,10 @@
+{
+  "name": "foobar",
+  "version": "1.0.0",
+  "system": {
+    "npmAlgorithm": "nested"
+  },
+  "dependencies": {
+    "some": "1.0.0"
+  }
+}

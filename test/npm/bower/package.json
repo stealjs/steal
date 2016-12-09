@@ -1,5 +1,7 @@
 {
+  "name": "npm-with-bower",
   "main": "main",
+  "version": "1.0.0",
   "dependencies": {
     "bar": ">2.0"
   },

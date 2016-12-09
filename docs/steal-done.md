@@ -5,7 +5,7 @@ A promise for when the application has loaded. Useful if you want to automatical
 
 @signature `steal.done()`
 
-@return {Promise} A promise that will resolve when the [System.configMain] and [System.main] have loaded.
+@return {Promise} A promise that will resolve when the [config.configMain] and [config.main] have loaded.
 
 @body
 

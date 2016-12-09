@@ -1,25 +1,30 @@
+<!doctype html>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <script>
 	if(window.parent) {
 		window.QUnit = window.parent.QUnit;
 		window.removeMyself = window.parent.removeMyself;
 	}
 
-	var warn = window.console.warn;
+	window.WARN = Function.prototype.bind.call(window.console.warn,
+			window.console);
 	window.console.warn = function(msg) {
 		if(window.QUnit) {
 			QUnit.ok(msg, "should give a warning when 'main' is not set in production environment.");
 		}
-		warn.call(window.console, msg);
+		window.WARN(msg);
 	}
 </script>
 
 <script src="../steal.production.js"></script>
 
 <script>
-	if (window.QUnit) {
-		QUnit.start();
-		removeMyself();
-	}
-	window.console.warn = warn;
-	delete warn;
+	steal.done().then(function(){
+		if (window.QUnit) {
+			QUnit.start();
+			removeMyself();
+		}
+		if(window.console)
+			window.console.warn = window.WARN;
+	});
 </script>

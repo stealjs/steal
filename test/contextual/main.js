@@ -1,5 +1,5 @@
 function basic() {
-	System.setContextual('foo', function(parentName) {
+	steal.setContextual('foo', function(parentName) {
 		return {
 			'default': function() {
 				return parentName + ' bar';
@@ -8,7 +8,7 @@ function basic() {
 		}
 	});
 
-	return System.import('contextual/moduleA')
+	return steal.import('contextual/moduleA')
 	.then(function(moduleA) {
 		if (typeof window !== "undefined" && window.QUnit) {
 			QUnit.equal(moduleA.default(), 'contextual/moduleA bar');
@@ -19,9 +19,9 @@ function basic() {
 }
 
 function definer() {
-	System.setContextual('foo', 'contextual/foo');
+	steal.setContextual('foo', 'contextual/foo');
 
-	return System.import('contextual/moduleB')
+	return steal.import('contextual/moduleB')
 	.then(function(moduleA) {
 		if (typeof window !== "undefined" && window.QUnit) {
 			QUnit.equal(moduleA.default(), 'contextual/moduleB baz');

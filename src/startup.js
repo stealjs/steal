@@ -1,125 +1,205 @@
-	var getScriptOptions = function () {
+	// get config by the URL query
+	// like ?main=foo&env=production
+	// formally used for Webworkers
+	var getQueryOptions = function(url) {
+		var queryOptions = {},
+			urlRegEx = /Url$/,
+			urlParts = url.split("?"),
+			path = urlParts.shift(),
+			search = urlParts.join("?"),
+			searchParts = search.split("&"),
+			paths = path.split("/"),
+			lastPart = paths.pop(),
+			stealPath = paths.join("/");
 
-		var options = {},
-			parts, src, query, startFile, env,
-			scripts = document.getElementsByTagName("script");
-
-		var script = scripts[scripts.length - 1];
-
-		if (script) {
-			options.stealURL = script.src;
-			// Split on question mark to get query
-
-			each(script.attributes, function(attr){
-				var optionName =
-					camelize( attr.nodeName.indexOf("data-") === 0 ?
-						attr.nodeName.replace("data-","") :
-						attr.nodeName );
-				options[optionName] = (attr.value === "") ? true : attr.value;
-			});
-
-			var source = script.innerHTML;
-			if(/\S/.test(source)){
-				options.mainSource = source;
+		if(searchParts.length && searchParts[0].length) {
+				var searchPart;
+			for(var i =0; i < searchParts.length; i++) {
+				searchPart = searchParts[i];
+				var paramParts = searchPart.split("=");
+				if(paramParts.length > 1) {
+					var optionName = camelize(paramParts[0]);
+					// make options uniform e.g. baseUrl => baseURL
+					optionName = optionName.replace(urlRegEx, "URL")
+					queryOptions[optionName] = paramParts.slice(1).join("=");
+				}
 			}
 		}
-
-		return options;
+		return queryOptions;
 	};
 
+	// extract the script tag options
+	var getScriptOptions = function (script) {
+		var scriptOptions = {},
+			urlRegEx = /Url$/;
+
+		scriptOptions.stealURL = script.src;
+
+		each(script.attributes, function(attr){
+			// get option, remove "data" and camelize
+			var optionName =
+				camelize( attr.nodeName.indexOf("data-") === 0 ?
+					attr.nodeName.replace("data-","") :
+					attr.nodeName );
+			// make options uniform e.g. baseUrl => baseURL
+			optionName = optionName.replace(urlRegEx, "URL")
+			scriptOptions[optionName] = (attr.value === "") ? true : attr.value;
+		});
+
+		// main source within steals script is deprecated
+		// and will be removed in future releases
+		var source = script.innerHTML;
+		if(/\S/.test(source)){
+			scriptOptions.mainSource = source;
+		}
+		// script config ever wins!
+		return extend(getQueryOptions(script.src), scriptOptions);
+	};
+
+	// get steal URL
+	// if we are in a browser, we need to know which script is steal
+	// to extract the script tag options => getScriptOptions()
+	var getUrlOptions = function (){
+		return new Promise(function(resolve, reject){
+
+			// for Workers get options from steal query
+			if (isWebWorker) {
+				resolve(extend({
+					stealURL: location.href
+				}, getQueryOptions(location.href)));
+				return;
+			} else if(isBrowserWithWindow) {
+				// if the browser supports currentScript, us it!
+				if (document.currentScript) {
+					// get options from script tag and query
+					resolve(getScriptOptions(document.currentScript));
+					return;
+				}
+
+				// dealing with async & deferred scripts
+				// set an onload handler for all script tags and the first one which executes
+				// is your stealjs
+				var scripts = document.scripts;
+				var isStealSrc = /steal/;
+				function onLoad(e) {
+					var target = e.target || event.target;
+					if(target.src && isStealSrc.test(target.src)) {
+						for (var i = 0; i < scripts.length; ++i) {
+							scripts[i].removeEventListener('load', onLoad, false);
+						}
+
+						resolve(getScriptOptions(target));
+					}
+				}
+				var script;
+				var finishedReadyStates = { "complete": true, "interactive": true };
+				for (var i = 0; i < scripts.length; ++i) {
+					script = scripts[i];
+					if(finishedReadyStates[script.readyState]) {
+						onLoad({ target: script });
+					} else {
+						script.addEventListener('load', onLoad, false);
+					}
+				}
+
+			} else {
+				// or the only option is where steal is.
+				resolve({
+					stealPath: __dirname
+				});
+			}
+		})
+	};
+
+	// configure and startup steal
+	// load the main module(s) if everything is configured
 	steal.startup = function(config){
+		var steal = this;
+		var loader = this.loader;
+		var configResolve;
+		var configReject;
 
-		// Get options from the script tag
-		if (isWebWorker) {
-			var urlOptions = {
-				stealURL: location.href
-			};
-		} else if(isBrowserWithWindow || isNW) {
-			var urlOptions = getScriptOptions();
-		} else {
-			// or the only option is where steal is.
-			var urlOptions = {
-				stealPath: __dirname
-			};
-		}
+		configPromise = new Promise(function(resolve, reject){
+			configResolve = resolve;
+			configReject = reject;
+		});
 
-		// first set the config that is set with a steal object
-		if(config){
-			System.config(config);
-		}
+		appPromise = getUrlOptions().then(function(urlOptions) {
 
-		// B: DO THINGS WITH OPTIONS
-		// CALCULATE CURRENT LOCATION OF THINGS ...
-		System.config(urlOptions);
-
-
-		setEnvsConfig.call(this.System);
-
-		// Read the env now because we can't overwrite everything yet
-
-		// immediate steals we do
-		var steals = [];
-
-		// we only load things with force = true
-		if ( System.loadBundles ) {
-
-			if(!System.main && System.isEnv("production") && !System.stealBundled) {
-				// prevent this warning from being removed by Uglify
-				var warn = console && console.warn || function() {};
-				warn.call(console, "Attribute 'main' is required in production environment. Please add it to the script tag.");
+			if (typeof config === 'object') {
+				// the url options are the source of truth
+				config = extend(config, urlOptions);
+			} else {
+				config = urlOptions;
 			}
 
-			configDeferred = System["import"](System.configMain);
+			// set the config
+			loader.config(config);
 
-			appDeferred = configDeferred.then(function(cfg){
-				setEnvsConfig.call(System);
-				return System.main ? System["import"](System.main) : cfg;
-			});
+			setEnvsConfig.call(loader);
 
-		} else {
-			configDeferred = System["import"](System.configMain);
+			// we only load things with force = true
+			if (loader.loadBundles) {
 
-			devDeferred = configDeferred.then(function(){
-				setEnvsConfig.call(System);
-				setupLiveReload.call(System);
-
-				// If a configuration was passed to startup we'll use that to overwrite
-				// what was loaded in stealconfig.js
-				// This means we call it twice, but that's ok
-				if(config) {
-					System.config(config);
+				if (!loader.main && loader.isEnv("production") &&
+					!loader.stealBundled) {
+					// prevent this warning from being removed by Uglify
+					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				return System["import"]("@dev");
-			},function(e){
-				console.log("steal - error loading @config.",e);
-				return steal.System["import"]("@dev");
-			});
+				loader["import"](loader.configMain)
+				.then(configResolve, configReject);
 
-			appDeferred = devDeferred.then(function(){
-				// if there's a main, get it, otherwise, we are just loading
-				// the config.
-				if(!System.main || System.env === "build") {
-					return configDeferred;
-				}
-				var main = System.main;
-				if(typeof main === "string") {
-					main = [main];
-				}
-				return Promise.all( map(main,function(main){
-					return System["import"](main);
-				}) );
-			});
+				return configPromise.then(function (cfg) {
+					setEnvsConfig.call(loader);
+					return loader.main ? loader["import"](loader.main) : cfg;
+				});
 
-		}
+			} else {
+				loader["import"](loader.configMain)
+				.then(configResolve, configReject);
 
-		if(System.mainSource) {
-			appDeferred = appDeferred.then(function(){
-				return System.module(System.mainSource);
-			});
-		}
-		return appDeferred;
+				devPromise = configPromise.then(function () {
+					setEnvsConfig.call(loader);
+					setupLiveReload.call(loader);
+
+					// If a configuration was passed to startup we'll use that to overwrite
+					// what was loaded in stealconfig.js
+					// This means we call it twice, but that's ok
+					if (config) {
+						loader.config(config);
+					}
+
+					return loader["import"]("@dev");
+				});
+
+				return devPromise.then(function () {
+					// if there's a main, get it, otherwise, we are just loading
+					// the config.
+					if (!loader.main || loader.env === "build") {
+						return configPromise;
+					}
+					var main = loader.main;
+					if (typeof main === "string") {
+						main = [main];
+					}
+					return Promise.all(map(main, function (main) {
+						return loader["import"](main);
+					}));
+				});
+			}
+		}).then(function(){
+			if(loader.mainSource) {
+				return loader.module(loader.mainSource);
+			}
+
+			// load script modules they are tagged as
+			// text/steal-module
+			return loader.loadScriptModules();
+		});
+
+		return appPromise;
 	};
 	steal.done = function(){
-		return appDeferred;
+		return appPromise;
 	};

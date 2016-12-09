@@ -1,0 +1,36 @@
+<!doctype html>
+<title>Steal in Service Workers test</title>
+<script>
+	window.QUnit = window.parent.QUnit;
+	window.removeMyself = window.parent.removeMyself;
+</script>
+
+<script>
+let swURL = new URL('./sw.js', document.baseURI);
+
+if('serviceWorker' in navigator) {
+	navigator.serviceWorker.register(swURL).catch(function(err) {
+		// registration failed :(
+		console.log('ServiceWorker registration failed: ', err);
+	});
+
+	navigator.serviceWorker.ready.then(function(reg){
+		var sw = reg.active;
+		sw.postMessage('ping');
+	});
+
+	navigator.serviceWorker.onmessage = function(ev){
+		let data = ev.data;
+
+		if(self.QUnit) {
+			QUnit.equal(data.hello, "world", "got the message back");
+
+			QUnit.start();
+			removeMyself();
+		} else {
+			console.log("dep", data);
+		}
+	};
+
+}
+</script>

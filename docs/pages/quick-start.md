@@ -10,13 +10,17 @@ and [jquery](http://jquery.com/) to build a *Hello World* app. This guide is a s
 
 Install [Node.js](http://nodejs.org/) on your computer.
 
-Create a directory for all your static content, scripts, and styles called `quick-start` and navigate into the folder. This is your [System.baseURL baseURL] folder. Within that folder run `npm init` to, create a **package.json**:
+Create a directory for all your static content, scripts, and styles called `quick-start`.
+
+    > mkdir quick-start
+
+This is your [config.baseURL baseURL] folder. Within that folder run `npm init` to, create a **package.json**:
 
 Note: when it asks for the *entry point*, write **index.js**.
 
     > npm init
 
-Within the BASE folder, use [npm](https://www.npmjs.org/) to install steal, steal-tools, and jquery. Use `--save-dev` to save the configuration to **package.json**.
+Within the quick-start folder, use [npm](https://www.npmjs.org/) to install steal, steal-tools, and jquery. Use `--save-dev` to save the configuration to **package.json**.
 
 	> npm install steal steal-tools jquery --save-dev
 
@@ -24,9 +28,9 @@ If you already have a webserver running locally, you can skip this step. If you 
 
     > npm install http-server -g
 
-Your `BASE` should now look like this:
+Your quick-start should now look like this:
 
-      BASE/
+      quick-start/
         node_modules/
           steal/
           steal-tools/
@@ -35,9 +39,9 @@ Your `BASE` should now look like this:
 
 ### Setup
 
-Create **index.html** and **index.js**, files in your BASE folder so it looks like:
+Create **index.html** and **index.js**, files in your folder so it looks like:
 
-      BASE/
+      quick-start/
         node_modules/
         package.json
         index.html
@@ -45,31 +49,34 @@ Create **index.html** and **index.js**, files in your BASE folder so it looks li
 
 The **index.html** page loads your app. All that is needed is the script tag that loads steal, which will in turn load your **index.js** as well.
 
-    <!DOCTYPE html>
-    <html>
-      <body>
-        <script src="./node_modules/steal/steal.js"></script>
-      </body>
-    </html>
+```
+<!doctype html>
+<html>
+  <body>
+	<script src="./node_modules/steal/steal.js"></script>
+  </body>
+</html>
+```
 
 Steal uses **package.json** to configure its behavior. Find the full details on
 the [npm npm extension page]. Most of the configuration happens within
-a special "system" property. Its worth creating it now in case you'll
-need it later. If you are using NPM 3 (you probably are) also set the npmAlgorithm option within the system property, otherwise leave it out.
+a special "steal" property. Its worth creating it now in case you'll
+need it later.
 
 ```
 {
   "name": "stealjs",
   "version": "1.0.0",
   "main": "index.js",
-  "system": {
-    "npmAlgorithm": "flat"
-  },
   "devDependencies": {
     ...
+  },
+  "steal": {
   }
 }
 ```
+
+@highlight 8-9
 
 
 **index.js** is the entrypoint of the application. It should load import your
@@ -78,7 +85,7 @@ app's other modules and kickoff the application. Write the following in **index.
     import $ from "jquery";
     $(document.body).append("<h1>Hello World!</h1>");
 
-The line `import $ from "jquery";` is an ES2015 module import that loads jQuery.
+The line `import $ from "jquery";` is an ES module import that loads jQuery.
 
 ### Run in the browser
 
@@ -99,19 +106,20 @@ Open up your **package.json** and add the following `build` script to your **scr
 
 ```
 {
-  "name": "stealjs",
+  "name": "quick-start",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "build": "steal-tools"
   },
-  "system": {
-    "npmAlgorithm": "flat"
+  "steal": {
   },
   "devDependencies": {
     ...
   }
 ```
+
+@highlight 6
 
 After saving **package.json** run:
 
@@ -121,16 +129,17 @@ After saving **package.json** run:
 
 Change `index.html` to look like:
 
-    <!DOCTYPE html>
-    <html>
-      <body>
-        <script src="./node_modules/steal/steal.production.js"
-                main="index">
-        </script>
-      </body>
-    </html>
+```
+<!doctype html>
+<html>
+  <body>
+    <script src="./dist/steal.production.js"></script>
+  </body>
+</html>
+```
+
+@highlight 4
 
 ### Run in production
 
-Reload `http://localhost:8080/index.html` and check the network tab again, you will see only two scripts load. 
-The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into **index.js**. 
+Reload `http://localhost:8080/index.html` and check the network tab again, you will see only two scripts load. The steal-tools grunt task builds a graph of the required files, minifies and concatenates all the scripts into **index.js**. 

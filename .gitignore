@@ -9,3 +9,7 @@ test/ext/
 test/bower/as_config/vendor/system-bower/
 test/npm-deep/node_modules/steal/
 test/bower/as_config/vendor/steal/
+!test/default-npm-algorithm/node_modules/
+!test/nested-npm-algorithm/node_modules/
+!test/nested-npm-algorithm/node_modules/some/node_modules/
+!test/import-js-file/node_modules/

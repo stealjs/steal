@@ -146,6 +146,9 @@ function makeReload(moduleName, listeners){
 		setupUnbind("!cycleComplete", moduleName);
 	}
 
+	reload.isReloading = function(){
+		return !!loader._inLiveReloadCycle;
+	};
 	reload.on = bind(e.on, e);
 	reload.off = bind(e.off, e);
 	reload.once = bind(e.once, e);
@@ -182,6 +185,30 @@ function bind(fn, ctx){
 	};
 }
 
+function getModuleNames(msg) {
+	var names;
+	try {
+		names = JSON.parse(msg);
+	} catch(ex) {
+		names = [msg];
+	}
+	return names;
+}
+
+function reloadAll(msg) {
+	var moduleNames = getModuleNames(msg);
+	loader._inLiveReloadCycle = true;
+	var promises = [];
+	for(var i = 0, len = moduleNames.length; i < len; i++) {
+		promises.push(reload(moduleNames[i]));
+	}
+	return Promise.all(promises).then(function(){
+		var e = loader._liveEmitter;
+		loader._inLiveReloadCycle = false;
+		e.emit("!cycleComplete");
+	});
+}
+
 function reload(moduleName) {
 	var e = loader._liveEmitter;
 	var currentDeps = loader.getDependencies(moduleName) || [];
@@ -202,10 +229,9 @@ function reload(moduleName) {
 		imports.push(importModule(modName));
 	}
 	// Once everything is imported call the global listener callback functions.
-	Promise.all(imports).then(function(){
+	return Promise.all(imports).then(function(){
 		// Remove any newly orphaned modules before declaring the cycle complete.
 		removeOrphans(moduleName, currentDeps);
-		e.emit("!cycleComplete");
 	}, function(){
 		// There was an error re-importing modules
 		// Workers don't have a location and no way to refresh the page.
@@ -239,7 +265,8 @@ function setup(){
 	var port = loader.liveReloadPort || 8012;
 
 	var host = loader.liveReloadHost || window.document.location.host.replace(/:.*/, '');
-	var url = "ws://" + host + ":" + port;
+	var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+	var url = protocol + "//" + host + ":" + port;
 	var ws = new WebSocket(url);
 
 	// Let the server know about the main module
@@ -249,7 +276,7 @@ function setup(){
 
 	var onmessage = ws.onmessage = function(ev){
 		var moduleName = ev.data;
-		reload(moduleName);
+		reloadAll(moduleName);
 	};
 
 	var attempts = typeof loader.liveReloadAttempts !== "undefined" ?
@@ -278,6 +305,8 @@ if(!isBuildEnvironment) {
 	} else {
 		setTimeout(setup);
 	}
+
+	module.exports = reloadAll;
 } else {
 	var metaConfig = loader.meta["live-reload"];
 	if(!metaConfig) {

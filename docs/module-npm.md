@@ -13,13 +13,12 @@ to process. This will normally be a package.json of your base application.
 The `npm` plugin makes it easy to work with npm packages. By pointing it 
 at a `package.json`, you will be able to import npm packages as modules.
 
-By default, if [System.stealPath] points to steal.js within node_modules like:
+By default, if [config.stealPath] points to steal.js within node_modules like:
 
     <script src="../node_modules/steal/steal.js"></script>
     
-[System.configMain] will point to `"package.json!npm"`. The plugin is included with Steal and no configuration is needed on your part to use it.
-
-The `npm` plugin reads `package.json` and sets a normalize and locate hook.
+[config.configMain] will point to `"package.json!npm"`. The `npm` plugin
+reads `package.json` and sets a normalize and locate hook.
 
 **Note**: if you are using NPM 3 see the *npmAlgorithm* option below.
 
@@ -46,8 +45,8 @@ steal uses.
 
 ### package.main
 
-Specifies the [System.main] property unless it is overwritten by `package.browser` or
-`package.system.main`. 
+Specifies the [config.main] property unless it is overwritten by `package.browser` or
+`package.steal.main`. 
 
 ```
 {
@@ -71,9 +70,7 @@ behaves like Browserify's [browser field](https://github.com/substack/node-brows
 
 ### package.globalBrowser
 
-Global browser specific overwrites for module file resolution.  These mapping take effect
-for all projects.  Use sparingly. Add [steal-builtins](https://www.npmjs.com/package/steal-builtins)
-as a dependency for a nearly comprehensive list. See the [example app](https://github.com/stealjs/steal-builtins-example) which uses the `events` builtin.
+Global browser specific overwrites for module file resolution.  These mapping take effect for all projects. Use sparingly.
 
 ```
 {
@@ -84,12 +81,12 @@ as a dependency for a nearly comprehensive list. See the [example app](https://g
 }
 ```
 
-### package.system
+### package.steal
 
-By default, any property on the package.system object is passed to [System.config]. However, the 
+By default, any property on the package.steal object is passed to [config.config]. However, the 
 following properties have special behavior:
 
-### package.system.main
+### package.steal.main
 
 The moduleName of the initial module that should be loaded when the package is imported. For example:
 
@@ -97,7 +94,7 @@ The moduleName of the initial module that should be loaded when the package is i
 {
   "name": "my-module",
   "version": "1.2.3",
-  "system": {
+  "steal": {
     "main": "my-main"
   }
 }
@@ -107,9 +104,9 @@ When `my-module` is imported, `my-module@1.2.3#my-main` will be the actual modul
 imported.  This path that `my-main` will be found depends on the `directories.lib` setting.
 
 
-### package.system.map
+### package.steal.map
 
-The map config works similar to the base [System.map] behavior.  However, both the keys and values
+The map config works similar to the base [config.map] behavior.  However, both the keys and values
 are converted to NPM module names.  The keys and values must:
 
  - Start with `./` to map modules within the package like `"./src/util"`, or
@@ -117,7 +114,7 @@ are converted to NPM module names.  The keys and values must:
  
 ```js
 {
-  "system": {
+  "steal": {
     "map": {
       "./util/util": "./util/jquery/jquery",
       "jquery" : "lodash"
@@ -126,9 +123,9 @@ are converted to NPM module names.  The keys and values must:
 }
 ```
 
-### package.system.meta
+### package.steal.meta
 
-The meta config works similar to the base [System.meta] behavior.  However, the module names must:
+The meta config works similar to the base [config.meta] behavior.  However, the module names must:
 
  - Start with `./` to add metadata to modules within the package like `"./src/util"`, or
  - Look like `packageName#./modulePath` to add metadata to direct dependencies of the package.
@@ -137,7 +134,7 @@ Example:
 
 ```js
 {
-  "system": {
+  "steal": {
     "meta": {
       "./src/utils": {"format": "amd"},
       "jquery": {"format": "global"},
@@ -147,7 +144,7 @@ Example:
 }
 ```
 
-### package.system.npmIgnore
+### package.steal.npmIgnore
 
 Use npmIgnore to prevent package information from being loaded for specified dependencies
 in the `peerDependencies`, `devDependencies` or `dependencies`.  The following
@@ -163,7 +160,7 @@ dependencies will be loaded:
   "devDependencies": {
     "steal-tools": "0.5.0"
   },
-  "system": {
+  "steal": {
     "npmIgnore": ["devDependencies","cssify"]
   }
 }
@@ -175,7 +172,7 @@ The following packages are ignored by default:
  - "bower"
  - "grunt", "grunt-cli"
 
-### package.system.npmDependencies
+### package.steal.npmDependencies
 
 Like `npmIgnore` but affirmative. If used alone will only include the dependencies listed. If used in conjunction with `npmIgnore` acts as an override. For example the following config:
 
@@ -185,7 +182,7 @@ Like `npmIgnore` but affirmative. If used alone will only include the dependenci
     "one": "1.0.0",
 	"two": "1.0.0"
   },
-  "system": {
+  "steal": {
     "npmDependencies": [ "one" ]
   }
 }
@@ -202,7 +199,7 @@ When used in conjuction with `npmIgnore`:
 	"two": "1.0.0",
 	"three": "1.0.0"
   },
-  "system": {
+  "steal": {
 	"npmIgnore": [ "devDependencies" ],
 	"npmDependencies": [ "one" ]
   }
@@ -211,31 +208,35 @@ When used in conjuction with `npmIgnore`:
 
 Even though `npmIgnore` is set to ignore all `devDependencies` the use of `npmDependencies` acts as an override. The package `one` will be loaded, but not `two` or `three`.
 
-### package.system.npmAlgorithm
+### package.steal.npmAlgorithm
 
-Used to determine which algorithm is used to look up packages. [NPM 3](http://blog.npmjs.org/post/122450408965/npm-weekly-20-npm-3-is-here-ish) introduced a new flat file structure inside node_modules. If you are using NPM 3 set this option:
+Used to determine which algorithm is used to look up packages.
+
+The default algorithm is `flat`. **We assume that you are using NPM 3 or higher.** See [here](https://github.com/npm/npm/releases/tag/v3.0.0) more about the flat file structure of NPM 3.
+
+If you are using NPM 2 your dependencies of `node_modules` will be nested. StealJS can handle the lookup by setting `npmAlgorithm` to `nested`.
 
 ```js
 {
-  "system": {
-    "npmAlgorithm": "flat"
+  "steal": {
+    "npmAlgorithm": "nested"
   }
 }
 ```
 
-### package.system.ignoreBrowser
+### package.steal.ignoreBrowser
 
 Set to true to ignore browserfy's `browser` and `browserify` configurations.
 
 ```js
 {
-  "system": {
+  "steal": {
     "ignoreBrowser": true
   }
 }
 ```
 
-### package.system.directories
+### package.steal.directories
 
 Set a folder to look for module's within your project.  Only the `lib` 
 directory can be specified.
@@ -246,7 +247,7 @@ In the following setup, `my-project/my-utils` will be looked for in
 ```js
 {
   "name": "my-project"
-  "system": {
+  "steal": {
     "directories" : {
       "lib" : "src"
     }
@@ -254,7 +255,7 @@ In the following setup, `my-project/my-utils` will be looked for in
 }
 ```
 
-### package.system.configDependencies
+### package.steal.configDependencies
 
 Defines dependencies of your npm package. This is useful for loading modules,
 like extensions, that need to be initialized before the rest of your application
@@ -265,10 +266,22 @@ your `bower.json` as a configDependency:
 
 {
   "name": "my-project",
-  "system": {
+  "steal": {
     "configDependencies": [
       "bower.json!bower"
     ]
+  }
+}
+```
+
+### package.steal.plugins
+
+Specifies packages that are used as plugins. These packages will be prefetched so that they're configuration will be applied before your app loads. An example is [steal-css]. 
+
+```js
+{
+  "steal": {
+    "plugins": ["steal-css"]
   }
 }
 ```

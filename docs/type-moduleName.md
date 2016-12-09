@@ -36,7 +36,7 @@ These identifiers are always relative to the current module. For example the imp
 import "./foo";
 ```
 
-When the current module is `app/main` will normalize to `app/foo` and is located at [System.baseURL] + app/foo.js.
+When the current module is `app/main` will normalize to `app/foo` and is located at [config.baseURL] + app/foo.js.
 
 Similarly [npm] packages are also normalized relative to their parent. Consider this:
 

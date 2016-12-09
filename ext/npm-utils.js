@@ -10,6 +10,7 @@
 var slice = Array.prototype.slice;
 var npmModuleRegEx = /.+@.+\..+\..+#.+/;
 var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
+var gitUrlEx = /(git|http(s?)):\/\//;
 
 var utils = {
 	extend: function(d, s, deep){
@@ -63,14 +64,25 @@ var utils = {
 	isEnv: function(name) {
 		return this.isEnv ? this.isEnv(name) : this.env === name;
 	},
+	isGitUrl: function(str) {
+		return gitUrlEx.test(str);
+	},
 	warnOnce: function(msg){
 		var w = this._warnings = this._warnings || {};
 		if(w[msg]) return;
 		w[msg] = true;
-		if(typeof steal !== "undefined" && typeof console !== "undefined" &&
-		  console.warn) {
+		this.warn(msg);
+	},
+	warn: function(msg){
+		if(typeof steal !== "undefined" && typeof console !== "undefined" && console.warn) {
 			steal.done().then(function(){
-				console.warn(msg);
+				if(steal.dev && steal.dev.warn){
+					steal.dev.warn(msg)
+				} else if(console.warn) {
+					console.warn("steal.js WARNING: "+msg);
+				} else {
+					console.log(msg);
+				}
 			});
 		}
 	},
@@ -159,10 +171,18 @@ var utils = {
 			var packageName,
 				modulePath;
 
-			// if relative, use currentPackageName
-			if( currentPackageName && utils.path.isRelative(moduleName) ) {
-				packageName= currentPackageName;
+			// if the module name is relative
+			// use the currentPackageName
+			if (currentPackageName && utils.path.isRelative(moduleName)) {
+				packageName = currentPackageName;
 				modulePath = versionParts[0];
+
+				// if the module name starts with the ~ (tilde) operator
+				// use the currentPackageName
+			} else if (currentPackageName && utils.path.startsWithTildeSlash(moduleName)) {
+				packageName = currentPackageName;
+				modulePath = versionParts[0].split("/").slice(1).join("/");
+
 			} else {
 
 				if(modulePathParts[1]) { // foo@1.2#./path
@@ -181,6 +201,8 @@ var utils = {
 				}
 
 			}
+
+			modulePath = utils.path.removeJS(modulePath);
 
 			return {
 				plugin: pluginParts.length === 2 ? "!"+pluginParts[1] : undefined,
@@ -252,17 +274,23 @@ var utils = {
 			// we have the moduleName without the version
 			// we check this against various configs
 			var mapName = utils.moduleName.create(parsedModuleName),
+				refSteal = utils.pkg.config(refPkg),
 			    mappedName;
 
 			// The refPkg might have a browser [https://github.com/substack/node-browserify#browser-field] mapping.
 			// Perform that mapping here.
-			if(refPkg.browser && (typeof refPkg.browser !== "string") && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
-				mappedName = refPkg.browser[mapName] === false ? "@empty" : refPkg.browser[mapName];
+			if(refPkg.browser && (typeof refPkg.browser !== "string") &&
+			   (mapName in refPkg.browser) &&
+				   (!refSteal || !refSteal.ignoreBrowser)) {
+				mappedName = refPkg.browser[mapName] === false ?
+					"@empty" : refPkg.browser[mapName];
 			}
 			// globalBrowser looks like: {moduleName: aliasName, pgk: aliasingPkg}
-			var global = loader && loader.globalBrowser && loader.globalBrowser[mapName];
+			var global = loader && loader.globalBrowser &&
+				loader.globalBrowser[mapName];
 			if(global) {
-				mappedName = global.moduleName === false ? "@empty" : global.moduleName;
+				mappedName = global.moduleName === false ? "@empty" :
+					global.moduleName;
 			}
 
 			if(mappedName) {
@@ -282,12 +310,14 @@ var utils = {
 		 * @return {String}
 		 */
 		name: function(pkg){
-			return (pkg.system && pkg.system.name) || pkg.name;
+			var steal = utils.pkg.config(pkg);
+			return (steal && steal.name) || pkg.name;
 		},
 		main: function(pkg) {
 			var main;
-			if(pkg.system && pkg.system.main) {
-				main = pkg.system.main;
+			var steal = utils.pkg.config(pkg);
+			if(steal && steal.main) {
+				main = steal.main;
 			} else if(typeof pkg.browser === "string") {
 				if(utils.path.endsWithSlash(pkg.browser)) {
 					main = pkg.browser + "index";
@@ -430,8 +460,8 @@ var utils = {
 			}
 		},
 		directoriesLib: function(pkg) {
-			var system = pkg.system;
-			var lib = system && system.directories && system.directories.lib;
+			var steal = utils.pkg.config(pkg);
+			var lib = steal && steal.directories && steal.directories.lib;
 			var ignores = [".", "/"], ignore;
 			
 			if(!lib) return undefined;
@@ -444,8 +474,8 @@ var utils = {
 			return lib;
 		},
 		hasDirectoriesLib: function(pkg) {
-			var system = pkg.system;
-			return system && system.directories && !!system.directories.lib;
+			var steal = utils.pkg.config(pkg);
+			return steal && steal.directories && !!steal.directories.lib;
 		},
 		findPackageInfo: function(context, pkg){
 			var pkgInfo = context.pkgInfo;
@@ -463,6 +493,9 @@ var utils = {
 			var npmPkg = utils.pkg.findPackageInfo(context, refPkg);
 			npmPkg.resolutions[pkg.name] = refPkg.resolutions[pkg.name] =
 				pkg.version;
+		},
+		config: function(pkg){
+			return pkg.steal || pkg.system;
 		}
 	},
 	path: {
@@ -489,6 +522,9 @@ var utils = {
 		},
 		isRelative: function(path) {
 			return  path.substr(0,1) === ".";
+		},
+		startsWithTildeSlash: function( path ) {
+			return path.substr(0,2) === "~/";
 		},
 		joinURIs: function(base, href) {
 			function removeDotSegments(input) {
@@ -587,6 +623,21 @@ var utils = {
 		},
 		isPackageRootDir: function(pth) {
 			return pth.indexOf("/") === -1;
+		}
+	},
+	json: {
+		/**
+		 * if a jsonOptions transformer is provided (by the System.config)
+		 * use it for all json files, package.json's are also included
+		 * @param loader
+		 * @param load
+		 * @param data
+		 * @returns data
+		 */
+		transform: function(loader, load, data) {
+			var fn = loader.jsonOptions && loader.jsonOptions.transform;
+			if(!fn) return data;
+			return fn.call(loader, load, data);
 		}
 	},
 	includeInBuild: true

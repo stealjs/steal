@@ -1,14 +1,11 @@
 "format cjs";
 
-// TODO: cleanup removing package.json
 var utils = require('./npm-utils');
 var convert = require("./npm-convert");
 var crawl = require('./npm-crawl');
 var npmLoad = require("./npm-load");
 var isNode = typeof process === "object" &&
 	{}.toString.call(process) === "[object process]";
-
-// SYSTEMJS PLUGIN EXPORTS =================
 
 /**
  * @function translate
@@ -19,7 +16,7 @@ var isNode = typeof process === "object" &&
  */
 exports.translate = function(load){
 	var loader = this;
-
+	
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
@@ -30,6 +27,7 @@ exports.translate = function(load){
 	var prevPackages = loader.npmContext && loader.npmContext.pkgInfo;
 	var context = {
 		packages: [],
+		pkgInfo: [],
 		loader: this,
 		// places we load package.jsons from
 		paths: {},
@@ -40,25 +38,39 @@ exports.translate = function(load){
 		deferredConversions: {},
 		npmLoad: npmLoad,
 		crawl: crawl,
+		convert: convert,
 		resavePackageInfo: resavePackageInfo,
-		forwardSlashMap: {}
+		forwardSlashMap: {},
+		// default file structure for npm 3 and higher
+		isFlatFileStructure: true
 	};
 	this.npmContext = context;
 	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
 	crawl.processPkgSource(context, pkg, load.source);
-	if(pkg.system && pkg.system.npmAlgorithm === "flat") {
-		context.isFlatFileStructure = true;
+	var pkgVersion = context.versions[pkg.name] = {};
+	pkgVersion[pkg.version] = context.versions.__default = pkg;
+
+	// backwards compatible for < npm 3
+	var steal = utils.pkg.config(pkg);
+	if(steal && steal.npmAlgorithm === "nested") {
+		context.isFlatFileStructure = false;
+	} else {
+		pkg.steal = steal = steal || {};
+		steal.npmAlgorithm = "flat";
 	}
 
-	return crawl.deps(context, pkg, true).then(function(){
+	return crawl.root(context, pkg, true).then(function(){
 		// clean up packages so everything is unique
 		var names = {};
-		var packages = context.pkgInfo = [];
+		var packages = context.pkgInfo;
 		utils.forEach(context.packages, function(pkg, index){
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){
 					delete pkg.browser.transform;
 				}
+				pkg = utils.json.transform(loader, load, pkg);
+				var steal = utils.pkg.config(pkg);
+
 				packages.push({
 					name: pkg.name,
 					version: pkg.version,
@@ -66,7 +78,7 @@ exports.translate = function(load){
 						pkg.fileUrl :
 						utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
-					system: convert.system(context, pkg, pkg.system, index === 0),
+					steal: convert.steal(context, pkg, steal, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
 					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
 					jspm: convert.jspm(pkg, pkg.jspm),
@@ -77,9 +89,8 @@ exports.translate = function(load){
 			}
 		});
 
-		var source = npmLoad.makeSource(context, pkg);
-
 		npmLoad.addExistingPackages(context, prevPackages);
+		var source = npmLoad.makeSource(context, pkg);
 
 		return source;
 	});

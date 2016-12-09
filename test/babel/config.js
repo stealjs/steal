@@ -1,3 +1,3 @@
-System.config({
+steal.config({
 	transpiler: "babel"
 });

@@ -1,5 +1,5 @@
-@page StealJS.migrating Migrating
-@parent StealJS.guides
+@page StealJS.migrating Migrating from Legacy Steal
+@parent StealJS.topics
 
 
 ## Migrating from Legacy Steal
@@ -60,11 +60,15 @@ The old Steal always produced a `production.js` file, but this is no longer the 
 
 You will also need to add the following to your `stealconfig.js` file to be able to build the CanJS projects (note if you are using NPM this isn't necessary):
 
-    System.buildConfig = {
-      map: {
-        "can/util/util" : "can/util/domless/domless"
-      }
-    };
+```js
+steal.config({
+	buildConfig: {
+	  map: {
+		"can/util/util" : "can/util/domless/domless"
+	  }
+	}
+})
+```
 
 ## Paths in the less files
 

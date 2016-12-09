@@ -1,0 +1,10 @@
+{
+	"name": "js-ext",
+	"version": "1.0.0",
+	"main": "./npm_main.js",
+	"dependencies": {
+		"salute.js": "1.0.0"
+	},
+	"system": {
+	}
+}

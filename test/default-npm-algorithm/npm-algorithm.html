@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+<body>
+
+<script>
+    window.QUnit = window.parent.QUnit;
+    window.removeMyself = window.parent.removeMyself;
+</script>
+<!-- note, that a "npm-algorithm" config attr does not overwrite "isFlatFileStructure". see test for more info -->
+<script type="text/javascript" src='../../steal.js' main="npm-algorithm" config="package.json!npm" npm-algorithm="nested"></script>
+</body>
+</html>

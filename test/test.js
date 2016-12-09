@@ -3,18 +3,28 @@ module("steal via system import");
 QUnit.config.testTimeout = 30000;
 
 (function(){
+	var hasConsole = typeof console === "object";
 
-	// Legacy IE doesn't support reserved keywords and Traceur uses them
-	// so using this as an easy way to feature-detect browser support for
-	// ES6 transpilers.
-	var supportsES = (function(){
-		try {
-			eval("var foo = { typeof: 'typeof' };");
-			return true;
-		} catch(e) {
-			return false;
+	var logError = function(msg){
+		if(hasConsole && typeof console.error !== "undefined") {
+			console.error(msg);
 		}
+	};
+
+	var logInfo = function(msg){
+		if(hasConsole && typeof console.log !== "undefined") {
+			console.log(msg);
+		}
+	};
+
+	// Babel uses __proto__
+	var supportsES = (function(){
+		var foo = {};
+		foo.__proto = { bar: "baz" };
+		return foo.bar === "baz";
 	})();
+
+	System.baseURL = "../";
 
 	var writeIframe = function(html){
 		var iframe = document.createElement('iframe');
@@ -63,18 +73,19 @@ QUnit.config.testTimeout = 30000;
 	};
 
 	asyncTest('steal basics', function(){
-		System['import']('tests/module').then(function(m){
+		System['import']('test/tests/module').then(function(m){
 			equal(m.name,"module.js", "module returned" );
 			equal(m.bar.name, "bar", "module.js was not able to get bar");
 			start();
 		}, function(err){
+			logError(err);
 			ok(false, "steal not loaded");
 			start();
 		});
 	});
 
 	asyncTest("steal's normalize", function(){
-		System['import']('tests/mod/mod').then(function(m){
+		System['import']('test/tests/mod/mod').then(function(m){
 			equal(m.name,"mod", "mod returned" );
 			equal(m.module.bar.name, "bar", "module.js was able to get bar");
 			equal(m.widget(), "widget", "got a function");
@@ -110,27 +121,28 @@ QUnit.config.testTimeout = 30000;
 	});
 
 	asyncTest("ignoring an import by mapping to @empty", function(){
-		System.map["map-empty/other"] = "@empty";
-		System["import"]("map-empty/main").then(function(m) {
+		System.map["test/map-empty/other"] = "@empty";
+		System["import"]("test/map-empty/main").then(function(m) {
 			var empty = System.get("@empty");
 			equal(m.other, empty, "Other is an empty module because it was mapped to empty in the config");
-		}, function(){
+		}, function(e){
+			logError(e);
 			ok(false, "Loaded a module that should have been ignored");
 		}).then(start);
 	});
 
 	asyncTest("steal.dev.assert", function() {
-		System["import"]("ext/dev").then(function(dev){
+		System["import"]("@dev").then(function(){
 			throws(
 				function() {
-					dev.assert(false);
+					steal.dev.assert(false);
 				},
 				/Expected/,
 				"throws an error with default message"
 			);
 			throws(
 				function() {
-					dev.assert(false, "custom message");
+					steal.dev.assert(false, "custom message");
 				},
 				/custom message/,
 				"throws an error with custom message"
@@ -138,7 +150,6 @@ QUnit.config.testTimeout = 30000;
 			start();
 		});
 	});
-
 
 	module("steal via html");
 
@@ -155,21 +166,29 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("basics with generated html", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../../steal.js?basics" data-config="../config.js"'));
+				'src="../../steal.js?main=basics/basics" data-config="../config.js"'));
 		});
 
 		asyncTest("default config path", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../steal.js?basics"'));
+				'src="../steal.js?main=basics/basics"'));
 		});
 
 		asyncTest("default config path", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../steal/steal.js?basics"'));
+				'src="../steal/steal.js?main=basics/basics"'));
+		});
+
+		asyncTest("jsx is enabled by default", function(){
+			makeIframe("jsx/dev.html");
 		});
 	}
+
+	asyncTest("steal done promise is rejected without steal config", function() {
+		makeIframe("no-config-error/test.html");
+	});
 
 	asyncTest("inline", function(){
 		makeIframe("basics/inline_basics.html");
@@ -182,7 +201,7 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("default bower_components config path", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../bower_components/steal/steal.js?basics"'));
+				'src="../bower_components/steal/steal.js?main=basics/basics"'));
 		});
 
 		asyncTest("default bower_components without config still works", function(){
@@ -198,9 +217,29 @@ QUnit.config.testTimeout = 30000;
 		asyncTest("read config", function(){
 			writeIframe(makeStealHTML(
 				"basics/basics.html",
-				'src="../../steal.js?configed" data-config="../config.js"'));
+				'src="../../steal.js?main=configed/configed" data-config="../config.js"'));
+		});
+
+		asyncTest("load js-file with es6", function(){
+			makeIframe("import-js-file/es6.html");
 		});
 	}
+
+	asyncTest("load js-file and npm module", function(){
+		makeIframe("import-js-file/npm.html");
+	});
+
+	asyncTest("default npm-algorithm", function(){
+		makeIframe("default-npm-algorithm/default.html");
+	});
+
+	asyncTest("default npm-algorithm overwritten", function(){
+		makeIframe("default-npm-algorithm/npm-algorithm.html");
+	});
+
+	asyncTest("npm-algorithm less npm 3", function(){
+		makeIframe("nested-npm-algorithm/nested.html");
+	});
 
 	asyncTest("compat - production bundle works", function(){
 		makeIframe("production/prod.html");
@@ -214,46 +253,21 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("production/prod-env.html");
 	});
 
-	asyncTest("steal.production.js logs errors", function(){
-		makeIframe("production_err/prod.html");
-	});
+	if(hasConsole) {
+		asyncTest("steal.production.js logs errors", function(){
+			makeIframe("production_err/prod.html");
+		});
+	}
 
 	asyncTest("loadBundles true with a different env loads the bundles", function(){
 		makeIframe("load-bundles/prod.html");
 	});
 
-	asyncTest("automatic loading of css plugin", function(){
-		makeIframe("plugins/site.html");
-	});
-
-	asyncTest("product bundle with css", function(){
-		makeIframe("production/prod-bar.html");
-	});
-
 	asyncTest("Using path's * qualifier", function(){
 		writeIframe(makeStealHTML(
 			"basics/basics.html",
-			'src="../steal.js?../paths" data-config="../paths/config.js"'));
+			'src="../steal.js?main=../paths" data-config="../paths/config.js"'));
 	});
-
-	// Less doesn't work in ie8
-	if(supportsES) {
-		asyncTest("automatic loading of less plugin", function(){
-			makeIframe("dep_plugins/site.html");
-		});
-
-		asyncTest("url paths in less work", function(){
-			makeIframe("less_paths/site.html");
-		});
-
-		asyncTest("ext extension", function(){
-			makeIframe("extensions/site.html");
-		});
-
-		asyncTest("ext extension works without the bang", function(){
-			makeIframe("extensions/site_no_bang.html");
-		});
-	}
 
 	asyncTest("forward slash extension", function(){
 		makeIframe("forward_slash/site.html");
@@ -288,15 +302,10 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("@loader is current loader with steal syntax", function(){
 		makeIframe("current-loader/dev-steal.html");
 	});
+
 	asyncTest("@steal is the current steal", function(){
 		makeIframe("current-steal/dev.html");
 	});
-
-	/*
-	asyncTest("Loads traceur-runtime automatically", function(){
-		makeIframe("traceur_runtime/dev.html");
-	});
-	*/
 
 	asyncTest("allow truthy script options (#298)", function(){
 		makeIframe("basics/truthy_script_options.html");
@@ -316,9 +325,11 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
-	asyncTest("warn in production when main is not set (#537)", function(){
-		makeIframe("basics/no_main_warning.html");
-	});
+	if(hasConsole) {
+		asyncTest("warn in production when main is not set (#537)", function(){
+			makeIframe("basics/no_main_warning.html");
+		});
+	}
 
 	asyncTest("can load a bundle with an amd module depending on a global", function(){
 		makeIframe("prod_define/prod.html");
@@ -338,6 +349,26 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("script tag wins against global steal object", function(){
 		makeIframe("script-tag_wins/index.html");
+	});
+
+	asyncTest("Node builtins come for free when using npm", function(){
+		makeIframe("builtins/dev.html");
+	});
+
+	if(supportsES) {
+		asyncTest("Private scope variables are available in ES exports", function(){
+			makeIframe("reg/index.html");
+		});
+	}
+
+	module("steal startup and config");
+
+	asyncTest("Load urlOptions correctly with async script append", function(){
+		makeIframe("async-script/index.html");
+	});
+
+	asyncTest("use steal object and configMain", function(){
+		makeIframe("stealconfig/dev.html");
 	});
 
 	module("json extension");
@@ -379,9 +410,6 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("Basics work", function(){
 		makeIframe("bower/site.html");
-	});
-	asyncTest("Doesn't overwrite paths", function(){
-		makeIframe("bower/with_paths/site.html");
 	});
 	asyncTest("Works in place of @config", function(){
 		makeIframe("bower/as_config/site.html");
@@ -437,13 +465,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/multiple-overrides/index.html");
 	});
 
-	asyncTest("works when using the npm extensions", function() {
-		makeIframe("ext-steal-clone/npm-extension/index.html");
-	});
-
-	asyncTest("supports loading css, less files", function() {
-		makeIframe("ext-steal-clone/other-extensions/index.html");
-	});
+	if(supportsES) {
+		asyncTest("works when using the npm extensions", function() {
+			makeIframe("ext-steal-clone/npm-extension/index.html");
+		});
+	}
 
 	asyncTest("works when a parent of injected dependency has been imported", function() {
 		makeIframe("ext-steal-clone/prior-import/index.html");
@@ -466,4 +492,12 @@ QUnit.config.testTimeout = 30000;
 	asyncTest("it works", function(){
 		makeIframe("nw/nw.html");
 	});
+
+	module("Service Workers");
+
+	if("serviceWorker" in navigator) {
+		asyncTest("steal is able to load within a service worker", function(){
+			makeIframe("service-worker/dev.html");
+		});
+	}
 })();

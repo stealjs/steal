@@ -1,16 +1,16 @@
 @page StealJS.configuration Configuration
-@parent StealJS.guides
+@parent StealJS.topics
 
 @body
 
-Steal allows you to configure module loading through a **system** property in your package.json. If you're not using Steal through NPM (you should be) you can also configure using any of the options provided by [System.config].
+Steal allows you to configure module loading through a **steal** property in your package.json. If you're not using Steal through NPM (you should be) you can also configure using any of the options provided by [config.config].
 
 A basic configuration might look like this:
 
 ```
 {
   ...
-  "system": {
+  "steal": {
     "meta": {
 	  "jquery-plugin": {
         "deps": ["jquery"]
@@ -40,7 +40,7 @@ To use these modules you need to configure them as globals. This is similar to *
 
   ...
 
-  "system": {
+  "steal": {
     "meta": {
       "jquery-plugin": {
         "deps": ["jquery"],
@@ -73,10 +73,10 @@ Will get the `FOO` global.
 
 ## Progressively loaded bundles
 
-In the [steal-tools.guides.progressive_loading progressive loading guide] we show how to progressively load different pages within your app. You import these modules using the [System.import] function like so:
+In the [steal-tools.guides.progressive_loading progressive loading guide] we show how to progressively load different pages within your app. You import these modules using the [steal.import] function like so:
 
 ```
-System.import("app/cart").then(function(cart){
+steal.import("app/cart").then(function(cart){
 
 });
 ```
@@ -88,7 +88,7 @@ You can specify your bundles with the **bundle** property in config:
 ```
 {
   ...
-  "system": {
+  "steal": {
     "bundle": [
       "app/cart"
 	]
@@ -96,7 +96,7 @@ You can specify your bundles with the **bundle** property in config:
 }
 ```
 
-Then when you perform a build it will create a bundle in `dist/bundles/app/cart.js` by default (you can specify the path using [System.bundlesPath bundlesPath] configuration).
+Then when you perform a build it will create a bundle in `dist/bundles/app/cart.js` by default (you can specify the path using [config.bundlesPath bundlesPath] configuration).
 
 ## Specify your project's root folder
 
@@ -108,7 +108,7 @@ Often projects will store their code in a subfolder like `src/` or `public/` and
 
   ...
 
-  "system": {
+  "steal": {
     "directories": {
       "lib": "src"
     }

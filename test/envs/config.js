@@ -1,5 +1,5 @@
 define(["config-dep"], function(){
-	System.config({
+	steal.config({
 		envs: {
 			"window-staging": {
 				map: {
