@@ -24,10 +24,17 @@ var account = new SauceLabs({
 var platforms = [{
 	browserName: 'firefox',
 	platform: 'Windows 10',
-	version: '49.0'
+	version: '50.0'
+}, {
+	browserName: 'firefox',
+	platform: 'OS X 10.11',
+	version: '50.0'
 }, {
 	browserName: 'googlechrome',
 	platform: 'Windows 10'
+}, {
+	browserName: 'googlechrome',
+	platform: 'OS X 10.11'
 }, {
 	browserName: 'safari',
 	platform: 'OS X 10.11',
