@@ -1,9 +1,10 @@
-module("steal via system import");
+QUnit.module("steal via system import");
 
 QUnit.config.testTimeout = 30000;
 
 (function(){
 	var hasConsole = typeof console === "object";
+	var supportsTypedArrays = typeof Uint16Array !== "undefined";
 
 	var logError = function(msg){
 		if(hasConsole && typeof console.error !== "undefined") {
@@ -80,7 +81,7 @@ QUnit.config.testTimeout = 30000;
 		}, function(err){
 			logError(err);
 			ok(false, "steal not loaded");
-			start();
+			QUnit.start();
 		});
 	});
 
@@ -151,7 +152,7 @@ QUnit.config.testTimeout = 30000;
 		});
 	});
 
-	module("steal via html");
+	QUnit.module("steal via html");
 
 	if(supportsES) {
 		asyncTest("basics", function(){
@@ -351,9 +352,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("script-tag_wins/index.html");
 	});
 
-	asyncTest("Node builtins come for free when using npm", function(){
-		makeIframe("builtins/dev.html");
-	});
+	if(supportsTypedArrays) {
+		asyncTest("Node builtins come for free when using npm", function(){
+			makeIframe("builtins/dev.html");
+		});
+	}
 
 	if(supportsES) {
 		asyncTest("Private scope variables are available in ES exports", function(){
@@ -361,7 +364,7 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
-	module("steal startup and config");
+	QUnit.module("steal startup and config");
 
 	asyncTest("Load urlOptions correctly with async script append", function(){
 		makeIframe("async-script/index.html");
@@ -371,13 +374,13 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("stealconfig/dev.html");
 	});
 
-	module("json extension");
+	QUnit.module("json extension");
 
 	asyncTest("json extension", function(){
 		makeIframe("json/dev.html");
 	});
 
-	module("npm");
+	QUnit.module("npm");
 
 	asyncTest("default-main", function(){
 		makeIframe("npm/default-main.html");
@@ -406,7 +409,7 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("meta-deep/index.html");
 	});
 
-	module("Bower extension");
+	QUnit.module("Bower extension");
 
 	asyncTest("Basics work", function(){
 		makeIframe("bower/site.html");
@@ -423,7 +426,7 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("bower/npm/index.html");
 	});
 
-	module("Web Workers");
+	QUnit.module("Web Workers");
 
 	if(window.Worker) {
 		asyncTest("basics works", function(){
@@ -435,19 +438,19 @@ QUnit.config.testTimeout = 30000;
 		});
 	}
 
-	module("Locate/Pkg Path Scheme extension");
+	QUnit.module("Locate/Pkg Path Scheme extension");
 
 	asyncTest("Basics work", function(){
 		makeIframe("locate/site.html");
 	});
 
-	module("Contextual extension");
+	QUnit.module("Contextual extension");
 
 	asyncTest("Basics work", function(){
 		makeIframe("contextual/test.html");
 	});
 
-	module("ext-steal-clone")
+	QUnit.module("ext-steal-clone")
 
 	asyncTest("basics work", function() {
 		makeIframe("ext-steal-clone/basics/index.html");
@@ -487,13 +490,13 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/leak/index.html");
 	});
 
-	module("nw.js");
+	QUnit.module("nw.js");
 
 	asyncTest("it works", function(){
 		makeIframe("nw/nw.html");
 	});
 
-	module("Service Workers");
+	QUnit.module("Service Workers");
 
 	if("serviceWorker" in navigator) {
 		asyncTest("steal is able to load within a service worker", function(){
