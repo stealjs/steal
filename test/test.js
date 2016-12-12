@@ -4,6 +4,7 @@ QUnit.config.testTimeout = 30000;
 
 (function(){
 	var hasConsole = typeof console === "object";
+	var supportsTypedArrays = typeof Uint16Array !== "undefined";
 
 	var logError = function(msg){
 		if(hasConsole && typeof console.error !== "undefined") {
@@ -351,9 +352,11 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("script-tag_wins/index.html");
 	});
 
-	asyncTest("Node builtins come for free when using npm", function(){
-		makeIframe("builtins/dev.html");
-	});
+	if(supportsTypedArrays) {
+		asyncTest("Node builtins come for free when using npm", function(){
+			makeIframe("builtins/dev.html");
+		});
+	}
 
 	if(supportsES) {
 		asyncTest("Private scope variables are available in ES exports", function(){
