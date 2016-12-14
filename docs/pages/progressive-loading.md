@@ -136,6 +136,25 @@ Reload _myhub.html_ to see your changes.
 
 What's an application without a little bit of flare? Steal allows using [less](http://lesscss.org/) through [steal-less](https://github.com/stealjs/steal-less), which we installed earlier.
 
+### Update package.json
+
+We need to update our package.json to specify the *plugins* that need to be loaded:
+
+```json
+{
+   ...
+
+   "steal": {
+     "plugins": [
+       "steal-css",
+       "steal-less"
+     ]
+   }
+}
+```
+
+@highlight 4-9
+
 ### Create and import a less file
 
 Create _myhub.less_ with:
@@ -478,6 +497,10 @@ Change _package.json_ to:
   ...
 
   "steal": {
+    "plugins": [
+      "steal-css",
+      "steal-less"
+     ],
      "map": {
          "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
      },
@@ -491,7 +514,7 @@ Change _package.json_ to:
 }
 ```
 
-@highlight 4-14
+@highlight 9-17
 
 ### Use justifiedGallery
 
