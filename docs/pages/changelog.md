@@ -3,6 +3,37 @@
 
 @body
 
+## 1.0.0
+
+### steal
+
+- Steal now defaults to Babel as the ES transpiler. See [https://stealjs.com/docs/StealJS.babel.html] for more information.
+- Steal can now be run within a [Service Worker](https://github.com/stealjs/steal/pull/879).
+- Fixed bug with child package configuration [overriding parent](https://github.com/stealjs/steal-npm/pull/186) configuration.
+- When loading JSON, [syntax errors](https://github.com/stealjs/steal/pull/884) will now be logged.
+- The [main property](https://github.com/stealjs/steal/pull/885) is no longer required when loading Steal in Node.js.
+- The use of the **System** global is [now deprecated](https://github.com/stealjs/steal/pull/896) in favor of **steal**. To import a module use either [steal.import] or [steal.loader.import].
+- The [npmAlgorithm](https://github.com/stealjs/steal/pull/893) option is no longer necessary when using npm 3+. If using npm 2 you should set `"npmAlgorithm": "nested"`.
+- Added documentation about [circular dependencies](https://github.com/stealjs/steal/pull/892) when you can see [StealJS.circular here].
+- Added a [new progressive loading](https://github.com/stealjs/steal/pull/902) guide which goes into a little more detail. You can see the guide [StealJS.guides.progressive_loading here].
+- Added [saucelabs testing](https://github.com/stealjs/steal/pull/944) so now all PRs are tested in IE9+.
+- [steal-css] and [steal-less] are no longer bundled with Steal, but rather have to be [installed separately](https://github.com/stealjs/steal/issues/878).
+- The site's documentation now uses [bit-docs](https://github.com/stealjs/steal/issues/891) rather than DocumentJS.
+- Added a new [plugins configuration](https://github.com/stealjs/steal-npm/pull/202) that allows you to specify which plugins are being used. This was necessary so that would could avoid fetching package.jsons that are not used.
+- Improved support for the various "browser" configuration [options in package.json](https://github.com/stealjs/steal-npm/pull/188).
+
+### steal-tools
+
+- The [configuration option](https://github.com/stealjs/steal-tools/pull/534) in `stealTools.build` is now optional.
+- steal-tools now bundles a pre-configured version of [steal.production.js](https://github.com/stealjs/steal/pull/913) into builds, using that prevents you from having to worry about configuring.
+- A new [dest option](https://github.com/stealjs/steal-tools/pull/548) was added that replaces `bundlesPath`.
+- The Grunt tasks were removed from steal-tools and moved to [grunt-steal](https://github.com/stealjs/grunt-steal).
+- In stealTools.export and other places that previously took a **system** option now takes a **steal** option.
+- stealTools.build's result (The BuildResult object) is now [better documented](https://github.com/stealjs/steal-tools/pull/559).
+- Renamed [bundleDepth to maxBundleRequests](https://github.com/stealjs/steal-tools/pull/542).
+- Fixed bug when building an app that uses [scoped package names](https://github.com/stealjs/steal-tools/pull/533).
+- Using [bundleAssets no longer](https://github.com/stealjs/steal-bundler/issues/12) includes a steal.production.js. Instead this functionality is handled by steal-tools always (even if bundleAssets is not used).
+
 ## 0.15.0
 
 ### steal
