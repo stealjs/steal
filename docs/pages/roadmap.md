@@ -3,6 +3,7 @@
 
 Here's what we've got planned:
 
+
 ## New Plugins API
 
 Currently plugins can only be loaded either with a bang syntax like:
@@ -27,15 +28,9 @@ This is sufficient for plugins that are based around a filetype, but we would li
 
 https://github.com/stealjs/steal/issues/671
 
-## Conditional loading
-
-This is currently available as [steal-conditional](https://github.com/stealjs/conditional), but will be part of core in 1.0.
-
 ## Development Packages
 
-Build a package that will be loaded in development. For example, instead of
-loading each CanJS module individually, you could easily build them
-into a package that would be loaded in development as a single file.
+Build a package that will be loaded in development. For example, instead of loading each CanJS module individually, you could easily build them into a package that would be loaded in development as a single file.
 
 ## Enhanced caching
 
