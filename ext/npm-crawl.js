@@ -93,7 +93,7 @@ var crawl = {
 				}
 			}
 
-			return crawl.loadPlugins(context, childPkg, isRoot, null,
+			return crawl.loadPlugins(context, childPkg, false, null,
 									skipSettingConfig).then(function(){
 				return localPkg;
 			});
