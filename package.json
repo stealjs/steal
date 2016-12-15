@@ -29,7 +29,7 @@
     "process": "~0.11.9",
     "punycode": "~2.0.1",
     "resolve": "^1.1.7",
-    "steal-systemjs": "0.18.4",
+    "steal-systemjs": "0.18.5",
     "string_decoder": "~0.10.31",
     "tty-browserify": "~0.0.0",
     "vm-browserify": "~0.0.4",
