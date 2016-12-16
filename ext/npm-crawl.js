@@ -67,47 +67,46 @@ var crawl = {
 		childPkg = utils.extend({}, childPkg);
 
 		var p = context.fetchCache[versionAndRange] =
-			crawl.fetchDep(context, pkg, childPkg, isRoot);
-
-		p = Promise.resolve(p).then(function(result){
-			// Package already being fetched
-			if(result === undefined) {
-				var fetchedPkg = crawl.matchedVersion(context, childPkg.name,
-													  childPkg.version);
-				return fetchedPkg;
-			} else {
-				childPkg = result;
-			}
-			return result;
-		}).then(function(childPkg){
-			// Save this pkgInfo into the context
-			if(!skipSettingConfig) {
-				var localPkg = convert.toPackage(context, childPkg);
-				convert.forPackage(context, childPkg);
-
-				// If this is a build we need to copy over the configuration
-				// from the plugin loader to the localLoader.
-				if(context.loader.localLoader) {
-					var localContext = context.loader.localLoader.npmContext;
-					convert.toPackage(localContext, childPkg);
+			Promise.resolve(crawl.fetchDep(context, pkg, childPkg, isRoot))
+			.then(function(result){
+				// Package already being fetched
+				if(result === undefined) {
+					var fetchedPkg = crawl.matchedVersion(context, childPkg.name,
+														  childPkg.version);
+					return fetchedPkg;
+				} else {
+					childPkg = result;
 				}
-			}
+				return result;
+			}).then(function(childPkg){
+				// Save this pkgInfo into the context
+				if(!skipSettingConfig) {
+					var localPkg = convert.toPackage(context, childPkg);
+					convert.forPackage(context, childPkg);
 
-			return crawl.loadPlugins(context, childPkg, false, null,
-									skipSettingConfig).then(function(){
+					// If this is a build we need to copy over the configuration
+					// from the plugin loader to the localLoader.
+					if(context.loader.localLoader) {
+						var localContext = context.loader.localLoader.npmContext;
+						convert.toPackage(localContext, childPkg);
+					}
+				}
+
+				return crawl.loadPlugins(context, childPkg, false, null,
+										skipSettingConfig).then(function(){
+					return localPkg;
+				});
+			}).then(function(localPkg){
+				if(!skipSettingConfig) {
+					// Save package.json!npm load
+					npmModuleLoad.saveLoadIfNeeded(context);
+
+					// Setup any config that needs to be placed on the loader.
+					crawl.setConfigForPackage(context, localPkg);
+				}
+
 				return localPkg;
 			});
-		}).then(function(localPkg){
-			if(!skipSettingConfig) {
-				// Save package.json!npm load
-				npmModuleLoad.saveLoadIfNeeded(context);
-
-				// Setup any config that needs to be placed on the loader.
-				crawl.setConfigForPackage(context, localPkg);
-			}
-
-			return localPkg;
-		});
 		return p;
 	},
 
