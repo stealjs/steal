@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "async": "^2.1.4",
-    "babel-standalone": "6.19.0",
+    "babel-standalone": "6.21.0",
     "grunt": "~1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-concat": "~1.0.1",
