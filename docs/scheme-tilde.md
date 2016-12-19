@@ -1,4 +1,4 @@
-@property ~
+@property tilde ~
 @parent StealJS.schemes
 
 A lookup scheme that roots module lookup to your project's base folder, either your `steal.directories.lib` folder or the [config.baseURL].
