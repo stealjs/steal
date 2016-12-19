@@ -11,10 +11,36 @@ var slice = Array.prototype.slice;
 var npmModuleRegEx = /.+@.+\..+\..+#.+/;
 var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
 var gitUrlEx = /(git|http(s?)):\/\//;
+var supportsSet = typeof Set === "function";
 
 var utils = {
-	extend: function(d, s, deep){
+	extend: function(d, s, deep, set){
 		var val;
+
+		if(deep) {
+			if(!set) {
+				if(supportsSet) {
+					set = new Set();
+				} else {
+					set = [];
+				}
+			}
+
+			if(supportsSet) {
+				if(set.has(s)) {
+					return s;
+				} else {
+					set.add(s);
+				}
+			} else {
+				if(set.indexOf(s) !== -1) {
+					return s;
+				} else {
+					set.push(s);
+				}
+			}
+		}
+
 		for(var prop in s) {
 			val = s[prop];
 
@@ -22,7 +48,7 @@ var utils = {
 				if(utils.isArray(val)) {
 					d[prop] = slice.call(val);
 				} else if(utils.isObject(val)) {
-					d[prop] = utils.extend({}, val, deep);
+					d[prop] = utils.extend({}, val, deep, set);
 				} else {
 					d[prop] = s[prop];
 				}
