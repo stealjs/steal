@@ -1430,14 +1430,16 @@ function addEnv(loader){
 					}));
 				});
 			}
-		}).then(function(){
+		}).then(function(main){
 			if(loader.mainSource) {
 				return loader.module(loader.mainSource);
 			}
 
 			// load script modules they are tagged as
 			// text/steal-module
-			return loader.loadScriptModules();
+			loader.loadScriptModules();
+
+			return main;
 		});
 
 		return appPromise;
