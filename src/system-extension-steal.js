@@ -1,19 +1,13 @@
-/*
-  SystemJS Steal Format
-  Provides the Steal module format definition.
-*/
-function addSteal(loader) {
-	if (loader._extensions) {
-		loader._extensions.push(addSteal);
-	}
-
+// SystemJS Steal Format
+// Provides the Steal module format definition.
+addStealExtension(function (loader) {
   // Steal Module Format Detection RegEx
   // steal(module, ...)
   var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
 
   // What we stole.
   var stealInstantiateResult;
-  
+
   function createSteal(loader) {
     stealInstantiateResult = null;
 
@@ -24,7 +18,7 @@ function addSteal(loader) {
     function steal() {
       var deps = [];
       var factory;
-      
+
       for( var i = 0; i < arguments.length; i++ ) {
         if (typeof arguments[i] === 'string') {
           deps.push( normalize(arguments[i]) );
@@ -86,10 +80,4 @@ function addSteal(loader) {
     }
     return loaderInstantiate.call(loader, load);
   };
-
-  return loader;
-}
-
-if (typeof System !== "undefined") {
-  addSteal(System);
-}
+});

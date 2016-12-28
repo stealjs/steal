@@ -34,4 +34,3 @@ addStealExtension(function (loader) {
     return normalize.call(this, name, parentName, parentAddress);
   };
 });
-
