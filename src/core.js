@@ -3,6 +3,16 @@ var cloneSteal = function(System){
 	return makeSteal(this.addSteal(loader.clone()));
 };
 
+var addStealExtension = function(extensionFn) {
+
+  if(typeof System !== "undefined" && isFunction(extensionFn)) {
+    if (System._extensions) {
+      System._extensions.push(extensionFn);
+    }
+    extensionFn(System);
+  }
+};
+
 var makeSteal = function(System){
 	System.set('@loader', System.newModule({
 		'default': System,
