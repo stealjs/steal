@@ -6,7 +6,6 @@
 		global.steal.dev = require("./ext/dev.js");
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
-		global.steal.addSteal = addSteal;
 
 	} else {
 		var oldSteal = global.steal;
