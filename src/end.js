@@ -21,7 +21,6 @@
 				}
 			});
 		global.steal.clone = cloneSteal;
-		global.steal.addSteal = addSteal;
 	}
 
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);

@@ -1,10 +1,9 @@
 var cloneSteal = function(System){
 	var loader = System || this.System;
-	return makeSteal(this.addSteal(loader.clone()));
+	return makeSteal(loader.clone());
 };
 
 var addStealExtension = function (extensionFn) {
-
 	if (typeof System !== "undefined" && isFunction(extensionFn)) {
 		if (System._extensions) {
 			System._extensions.push(extensionFn);
@@ -72,3 +71,4 @@ var makeSteal = function(System){
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
 	steal.relativeURI = relativeURI;
+	steal.addExtension = addStealExtension;
