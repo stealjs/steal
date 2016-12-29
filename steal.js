@@ -5164,6 +5164,9 @@ var $__curScript, __eval;
 			return "./" + result.join("") + uriParts.join("/");
 		},
 		fBind = Function.prototype.bind,
+    isFunction = function(obj) {
+    	return !!(obj && obj.constructor && obj.call && obj.apply);
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
@@ -5173,7 +5176,7 @@ var $__curScript, __eval;
 			} catch(e) {
 				return false;
 			}
-		})();
+		})(),
 		isNode = isNode && !isNW,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};
@@ -5237,7 +5240,16 @@ var $__curScript, __eval;
 
 var cloneSteal = function(System){
 	var loader = System || this.System;
-	return makeSteal(this.addSteal(loader.clone()));
+	return makeSteal(loader.clone());
+};
+
+var addStealExtension = function (extensionFn) {
+	if (typeof System !== "undefined" && isFunction(extensionFn)) {
+		if (System._extensions) {
+			System._extensions.push(extensionFn);
+		}
+		extensionFn(System);
+	}
 };
 
 var makeSteal = function(System){
@@ -5299,279 +5311,329 @@ var makeSteal = function(System){
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
 	steal.relativeURI = relativeURI;
+	steal.addExtension = addStealExtension;
 
-	// System-Ext
-	// This normalize-hook does 2 things.
-	// 1. with specify a extension in your config
-	// 		you can use the "!" (bang) operator to load
-	// 		that file with the extension
-	// 		System.ext = {bar: "path/to/bar"}
-	// 		foo.bar! -> foo.bar!path/to/bar
-	// 2. if you load a javascript file e.g. require("./foo.js")
-	// 		normalize will remove the ".js" to load the module
-	var addExt = function(loader) {
-		if (loader._extensions) {
-			loader._extensions.push(addExt);
-		}
+// System-Ext
+// This normalize-hook does 2 things.
+// 1. with specify a extension in your config
+// 		you can use the "!" (bang) operator to load
+// 		that file with the extension
+// 		System.ext = {bar: "path/to/bar"}
+// 		foo.bar! -> foo.bar!path/to/bar
+// 2. if you load a javascript file e.g. require("./foo.js")
+// 		normalize will remove the ".js" to load the module
+addStealExtension(function (loader) {
+  loader.ext = {};
 
-		loader.ext = {};
+  var normalize = loader.normalize,
+    endingExtension = /\.(\w+)!?$/;
 
-		var normalize = loader.normalize,
-			endingExtension = /\.(\w+)!?$/;
+  loader.normalize = function (name, parentName, parentAddress, pluginNormalize) {
+    if (pluginNormalize) {
+      return normalize.apply(this, arguments);
+    }
 
-		loader.normalize = function(name, parentName, parentAddress, pluginNormalize){
-			if(pluginNormalize) {
-				return normalize.apply(this, arguments);
-			}
+    var matches = name.match(endingExtension);
 
-			var matches = name.match(endingExtension);
+    if (matches) {
+      var hasBang = name[name.length - 1] === "!",
+        ext = matches[1];
+      // load js-files nodd-like
+      if (parentName && loader.configMain !== name && matches[0] === '.js') {
+        name = name.substr(0, name.lastIndexOf("."));
+        // matches ext mapping
+      } else if (loader.ext[ext]) {
+        name = name + (hasBang ? "" : "!") + loader.ext[ext];
+      }
+    }
+    return normalize.call(this, name, parentName, parentAddress);
+  };
+});
+// Steal Locate Extension
+// normalize a given path e.g.
+// "path/to/folder/" -> "path/to/folder/folder"
+addStealExtension(function (loader) {
+  var normalize = loader.normalize;
+  var npmLike = /@.+#.+/;
 
-			if(matches) {
-				var hasBang = name[name.length - 1] === "!",
-					ext = matches[1];
-				// load js-files nodd-like
-				if(parentName && loader.configMain !== name && matches[0] === '.js') {
-					name = name.substr(0, name.lastIndexOf("."));
-					// matches ext mapping
-				} else if(loader.ext[ext]) {
-					name = name + (hasBang ? "" : "!") + loader.ext[ext];
-				}
-			}
-			return normalize.call(this, name, parentName, parentAddress);
-		};
-	};
+  loader.normalize = function (name, parentName, parentAddress, pluginNormalize) {
+    var lastPos = name.length - 1,
+      secondToLast,
+      folderName;
 
-	if(typeof System){
-		addExt(System);
-	}
+    if (name[lastPos] === "/") {
+      secondToLast = name.substring(0, lastPos).lastIndexOf("/");
+      folderName = name.substring(secondToLast + 1, lastPos);
+      if (npmLike.test(folderName)) {
+        folderName = folderName.substr(folderName.lastIndexOf("#") + 1);
+      }
 
-
-
-	// "path/to/folder/" -> "path/to/folder/folder"
-	var addForwardSlash = function(loader) {
-		if (loader._extensions) {
-			loader._extensions.push(addForwardSlash);
-		}
-
-		var normalize = loader.normalize;
-		var npmLike = /@.+#.+/;
-
-		loader.normalize = function(name, parentName, parentAddress, pluginNormalize) {
-			var lastPos = name.length - 1,
-				secondToLast,
-				folderName;
-
-			if (name[lastPos] === "/") {
-				secondToLast = name.substring(0, lastPos).lastIndexOf("/");
-				folderName = name.substring(secondToLast + 1, lastPos);
-				if(npmLike.test(folderName)) {
-					folderName = folderName.substr(folderName.lastIndexOf("#") + 1);
-				}
-
-				name += folderName;
-			}
-			return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
-		};
-	};
-
-	if (typeof System) {
-		addForwardSlash(System);
-	}
-
+      name += folderName;
+    }
+    return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
+  };
+});
 // override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
 // in resources loaded by supporting plugins
+addStealExtension(function (loader) {
+  /**
+   * @hide
+   * @function normalizeAndLocate
+   * @description Run a module identifier through Normalize and Locate hooks.
+   * @param {String} moduleName The module to run through normalize and locate.
+   * @return {Promise} A promise to resolve when the address is found.
+   */
+  var normalizeAndLocate = function(moduleName, parentName){
+    var loader = this;
+    return Promise.resolve(loader.normalize(moduleName, parentName))
+      .then(function(name){
+        return loader.locate({name: name, metadata: {}});
+      }).then(function(address){
+        if(address.substr(address.length - 3) === ".js") {
+          address = address.substr(0, address.length - 3);
+        }
+        return address;
+      });
+  };
 
-var addLocate = function(loader){
-	/**
-	 * @hide
-	 * @function normalizeAndLocate
-	 * @description Run a module identifier through Normalize and Locate hooks.
-	 * @param {String} moduleName The module to run through normalize and locate.
-	 * @return {Promise} A promise to resolve when the address is found.
-	 */
-	var normalizeAndLocate = function(moduleName, parentName){
-		var loader = this;
-		return Promise.resolve(loader.normalize(moduleName, parentName))
-			.then(function(name){
-				return loader.locate({name: name, metadata: {}});
-			}).then(function(address){
-				if(address.substr(address.length - 3) === ".js") {
-					address = address.substr(0, address.length - 3);
-				}
-				return address;
-			});
-	};
+  var relative = function(base, path){
+    var uriParts = path.split("/"),
+      baseParts = base.split("/"),
+      result = [];
 
-	var relative = function(base, path){
-		var uriParts = path.split("/"),
-			baseParts = base.split("/"),
-			result = [];
+    while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
+      uriParts.shift();
+      baseParts.shift();
+    }
 
-		while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
-			uriParts.shift();
-			baseParts.shift();
-		}
+    for(var i = 0 ; i< baseParts.length-1; i++) {
+      result.push("../");
+    }
 
-		for(var i = 0 ; i< baseParts.length-1; i++) {
-			result.push("../");
-		}
+    return result.join("") + uriParts.join("/");
+  };
 
-		return result.join("") + uriParts.join("/");
-	};
+  var schemePattern = /(locate):\/\/([a-z0-9/._@-]*)/ig,
+    parsePathSchemes = function(source, parent) {
+      var locations = [];
+      source.replace(schemePattern, function(whole, scheme, path, index){
+        locations.push({
+          start: index,
+          end: index+whole.length,
+          name: path,
+          postLocate: function(address){
+            return relative(parent, address);
+          }
+        });
+      });
+      return locations;
+    };
 
-	var schemePattern = /(locate):\/\/([a-z0-9/._@-]*)/ig,
-		parsePathSchemes = function(source, parent) {
-			var locations = [];
-			source.replace(schemePattern, function(whole, scheme, path, index){
-				locations.push({
-					start: index,
-					end: index+whole.length,
-					name: path,
-					postLocate: function(address){
-						return relative(parent, address);
-					}
-				});
-			});
-			return locations;
-		};
+  var _translate = loader.translate;
+  loader.translate = function(load){
+    var loader = this;
 
-	var _translate = loader.translate;
-	loader.translate = function(load){
-		var loader = this;
+    // This only applies to plugin resources.
+    if(!load.metadata.plugin) {
+      return _translate.call(this, load);
+    }
 
-		// This only applies to plugin resources.
-		if(!load.metadata.plugin) {
-			return _translate.call(this, load);
-		}
+    // Use the translator if this file path scheme is supported by the plugin
+    var locateSupport = load.metadata.plugin.locateScheme;
+    if(!locateSupport) {
+      return _translate.call(this, load);
+    }
 
-		// Use the translator if this file path scheme is supported by the plugin
-		var locateSupport = load.metadata.plugin.locateScheme;
-		if(!locateSupport) {
-			return _translate.call(this, load);
-		}
+    // Parse array of module names
+    var locations = parsePathSchemes(load.source, load.address);
 
-		// Parse array of module names
-		var locations = parsePathSchemes(load.source, load.address);
+    // no locations found
+    if(!locations.length) {
+      return _translate.call(this, load);
+    }
 
-		// no locations found
-		if(!locations.length) {
-			return _translate.call(this, load);
-		}
+    // normalize and locate all of the modules found and then replace those instances in the source.
+    var promises = [];
+    for(var i = 0, len = locations.length; i < len; i++) {
+      promises.push(
+        normalizeAndLocate.call(this, locations[i].name, load.name)
+      );
+    }
+    return Promise.all(promises).then(function(addresses){
+      for(var i = locations.length - 1; i >= 0; i--) {
+        load.source = load.source.substr(0, locations[i].start)
+          + locations[i].postLocate(addresses[i])
+          + load.source.substr(locations[i].end, load.source.length);
+      }
+      return _translate.call(loader, load);
+    });
+  };
+});
+addStealExtension(function (loader) {
+  loader._contextualModules = {};
 
-		// normalize and locate all of the modules found and then replace those instances in the source.
-		var promises = [];
-		for(var i = 0, len = locations.length; i < len; i++) {
-			promises.push(
-				normalizeAndLocate.call(this, locations[i].name, load.name)
-			);
-		}
-		return Promise.all(promises).then(function(addresses){
-			for(var i = locations.length - 1; i >= 0; i--) {
-				load.source = load.source.substr(0, locations[i].start)
-					+ locations[i].postLocate(addresses[i])
-					+ load.source.substr(locations[i].end, load.source.length);
-			}
-			return _translate.call(loader, load);
-		});
-	};
-};
+  loader.setContextual = function(moduleName, definer){
+    this._contextualModules[moduleName] = definer;
+  };
 
-if(typeof System !== "undefined") {
-	addLocate(System);
-}
+  var normalize = loader.normalize;
+  loader.normalize = function(name, parentName){
+    var loader = this;
 
-function addContextual(loader){
-	if(loader._extensions) {
-		loader._extensions.push(addContextual);
-	}
-	loader._contextualModules = {};
+    if (parentName) {
+      var definer = this._contextualModules[name];
 
-	loader.setContextual = function(moduleName, definer){
-		this._contextualModules[moduleName] = definer;
-	};
+      // See if `name` is a contextual module
+      if (definer) {
+        name = name + '/' + parentName;
 
-	var normalize = loader.normalize;
-	loader.normalize = function(name, parentName){
-		var loader = this;
+        if(!loader.has(name)) {
+          // `definer` could be a function or could be a moduleName
+          if (typeof definer === 'string') {
+            definer = loader['import'](definer);
+          }
 
-		if (parentName) {
-			var definer = this._contextualModules[name];
+          return Promise.resolve(definer)
+            .then(function(definer) {
+              if (definer['default']) {
+                definer = definer['default'];
+              }
+              var definePromise = Promise.resolve(
+                definer.call(loader, parentName)
+              );
+              return definePromise;
+            })
+            .then(function(moduleDef){
+              loader.set(name, loader.newModule(moduleDef));
+              return name;
+            });
+        }
+        return Promise.resolve(name);
+      }
+    }
 
-			// See if `name` is a contextual module
-			if (definer) {
-				name = name + '/' + parentName;
-
-				if(!loader.has(name)) {
-					// `definer` could be a function or could be a moduleName
-					if (typeof definer === 'string') {
-						definer = loader['import'](definer);
-					}
-
-					return Promise.resolve(definer)
-					.then(function(definer) {
-						if (definer['default']) {
-							definer = definer['default'];
-						}
-						var definePromise = Promise.resolve(
-							definer.call(loader, parentName)
-						);
-						return definePromise;
-					})
-					.then(function(moduleDef){
-						loader.set(name, loader.newModule(moduleDef));
-						return name;
-					});
-				}
-				return Promise.resolve(name);
-			}
-		}
-
-		return normalize.apply(this, arguments);
-	};
-}
-
-if(typeof System !== "undefined") {
-  addContextual(System);
-}
-
-var addScriptModule = function(loader) {
+    return normalize.apply(this, arguments);
+  };
+});
+// Steam Script-Module Extension
+// Add a steal-module script to the page and it will run after Steal has been configured
+// <script type="text/steal-module">...</script>
+addStealExtension(function (loader) {
 	// stolen from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
+  function completed() {
+    document.removeEventListener( "DOMContentLoaded", completed, false );
+    window.removeEventListener( "load", completed, false );
+    ready();
+  }
 
-	function completed() {
-		document.removeEventListener( "DOMContentLoaded", completed, false );
-		window.removeEventListener( "load", completed, false );
-		ready();
-	}
+  function ready() {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+      var script = scripts[i];
+      if (script.type == 'text/steal-module') {
+        var source = script.innerHTML;
+        if(/\S/.test(source)){
+          loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
+        }
+      }
+    }
+  }
 
-	function ready() {
-		var scripts = document.getElementsByTagName('script');
-		for (var i = 0; i < scripts.length; i++) {
-			var script = scripts[i];
-			if (script.type == 'text/steal-module') {
-				var source = script.innerHTML;
-				if(/\S/.test(source)){
-					loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
-				}
-			}
-		}
-	}
+  loader.loadScriptModules = function(){
+    if(isBrowserWithWindow) {
+      if (document.readyState === 'complete') {
+        setTimeout(ready);
+      } else if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', completed, false);
+        window.addEventListener('load', completed, false);
+      }
+    }
 
-	loader.loadScriptModules = function(){
-		if(isBrowserWithWindow) {
-			if (document.readyState === 'complete') {
-				setTimeout(ready);
-			} else if (document.addEventListener) {
-				document.addEventListener('DOMContentLoaded', completed, false);
-				window.addEventListener('load', completed, false);
-			}
-		}
+  };
+});
+// SystemJS Steal Format
+// Provides the Steal module format definition.
+addStealExtension(function (loader) {
+  // Steal Module Format Detection RegEx
+  // steal(module, ...)
+  var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
 
-	};
-};
+  // What we stole.
+  var stealInstantiateResult;
 
-if(typeof System !== "undefined") {
-	addScriptModule(System);
-}
+  function createSteal(loader) {
+    stealInstantiateResult = null;
+
+    // ensure no NodeJS environment detection
+    loader.global.module = undefined;
+    loader.global.exports = undefined;
+
+    function steal() {
+      var deps = [];
+      var factory;
+
+      for( var i = 0; i < arguments.length; i++ ) {
+        if (typeof arguments[i] === 'string') {
+          deps.push( normalize(arguments[i]) );
+        } else {
+          factory = arguments[i];
+        }
+      }
+
+      if (typeof factory !== 'function') {
+        factory = (function(factory) {
+          return function() { return factory; };
+        })(factory);
+      }
+
+      stealInstantiateResult = {
+        deps: deps,
+        execute: function(require, exports, moduleName) {
+
+          var depValues = [];
+          for (var i = 0; i < deps.length; i++) {
+            depValues.push(require(deps[i]));
+          }
+
+          var output = factory.apply(loader.global, depValues);
+
+          if (typeof output !== 'undefined') {
+            return output;
+          }
+        }
+      };
+    }
+
+    loader.global.steal = steal;
+  }
+
+  var loaderInstantiate = loader.instantiate;
+  loader.instantiate = function(load) {
+    var loader = this;
+
+    if (load.metadata.format === 'steal' || !load.metadata.format && load.source.match(stealRegEx)) {
+      load.metadata.format = 'steal';
+
+      var oldSteal = loader.global.steal;
+
+      createSteal(loader);
+
+      loader.__exec(load);
+
+      loader.global.steal = oldSteal;
+
+      if (!stealInstantiateResult) {
+        throw "Steal module " + load.name + " did not call steal";
+      }
+
+      if (stealInstantiateResult) {
+        load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(stealInstantiateResult.deps) : stealInstantiateResult.deps;
+        load.metadata.execute = stealInstantiateResult.execute;
+      }
+    }
+    return loaderInstantiate.call(loader, load);
+  };
+});
 function applyTraceExtension(loader){
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -5778,94 +5840,84 @@ if(typeof System !== "undefined") {
 	applyTraceExtension(System);
 }
 
-/*
-  SystemJS JSON Format
-  Provides the JSON module format definition.
-*/
-function _SYSTEM_addJSON(loader) {
-	var jsonTest = /^[\s\n\r]*[\{\[]/;
-	var jsonExt = /\.json$/i;
-	var jsExt = /\.js$/i;
+// Steal JSON Format
+// Provides the JSON module format definition.
+addStealExtension(function (loader) {
+  var jsonTest = /^[\s\n\r]*[\{\[]/;
+  var jsonExt = /\.json$/i;
+  var jsExt = /\.js$/i;
 
-	// Add the extension to _extensions so that it can be cloned.
-	loader._extensions.push(_SYSTEM_addJSON);
+  // if someone has a moduleName that is .json, make sure it loads a json file
+  // no matter what paths might do
+  var loaderLocate = loader.locate;
+  loader.locate = function(load){
+    return loaderLocate.apply(this, arguments).then(function(address){
+      if(jsonExt.test(load.name)) {
+        return address.replace(jsExt, "");
+      }
 
-	// if someone has a moduleName that is .json, make sure it loads a json file
-	// no matter what paths might do
-	var loaderLocate = loader.locate;
-	loader.locate = function(load){
-	  return loaderLocate.apply(this, arguments).then(function(address){
-		if(jsonExt.test(load.name)) {
-			return address.replace(jsExt, "");
-		}
+      return address;
+    });
+  };
 
-	    return address;
-	  });
-	};
+  var transform = function(loader, load, data){
+    var fn = loader.jsonOptions && loader.jsonOptions.transform;
+    if(!fn) return data;
+    return fn.call(loader, load, data);
+  };
 
-	var transform = function(loader, load, data){
-		var fn = loader.jsonOptions && loader.jsonOptions.transform;
-		if(!fn) return data;
-		return fn.call(loader, load, data);
-	};
+  // If we are in a build we should convert to CommonJS instead.
+  if(isNode) {
+    var loaderTranslate = loader.translate;
+    loader.translate = function(load){
+      var address = load.metadata.address || load.address;
+      if(jsonExt.test(address) && load.name.indexOf('!') === -1) {
+        var parsed = parse(load);
+        if(parsed) {
+          parsed = transform(this, load, parsed);
+          return "def" + "ine([], function(){\n" +
+            "\treturn " + JSON.stringify(parsed) + "\n});";
+        }
+      }
 
-	// If we are in a build we should convert to CommonJS instead.
-	if(isNode) {
-		var loaderTranslate = loader.translate;
-		loader.translate = function(load){
-			var address = load.metadata.address || load.address;
-			if(jsonExt.test(address) && load.name.indexOf('!') === -1) {
-				var parsed = parse(load);
-				if(parsed) {
-					parsed = transform(this, load, parsed);
-					return "def" + "ine([], function(){\n" +
-						"\treturn " + JSON.stringify(parsed) + "\n});";
-				}
-			}
+      return loaderTranslate.call(this, load);
+    };
+    return;
+  }
 
-			return loaderTranslate.call(this, load);
-		};
-		return;
-	}
+  var loaderInstantiate = loader.instantiate;
+  loader.instantiate = function(load) {
+    var loader = this,
+      parsed;
 
-	var loaderInstantiate = loader.instantiate;
-	loader.instantiate = function(load) {
-		var loader = this,
-			parsed;
+    parsed = parse(load);
+    if(parsed) {
+      parsed = transform(loader, load, parsed);
+      load.metadata.format = 'json';
 
-		parsed = parse(load);
-		if(parsed) {
-			parsed = transform(loader, load, parsed);
-			load.metadata.format = 'json';
+      load.metadata.execute = function(){
+        return parsed;
+      };
+    }
 
-			load.metadata.execute = function(){
-				return parsed;
-			};
-		}
+    return loaderInstantiate.call(loader, load);
+  };
 
-		return loaderInstantiate.call(loader, load);
-	};
+  return loader;
 
-	return loader;
+  // Attempt to parse a load as json.
+  function parse(load){
+    if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
+      try {
+        return JSON.parse(load.source);
+      } catch(e) {
+        warn("Error parsing " + load.address + ":", e);
+        return {};
+      }
+    }
 
-	// Attempt to parse a load as json.
-	function parse(load){
-		if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
-			try {
-				return JSON.parse(load.source);
-			} catch(e) {
-				warn("Error parsing " + load.address + ":", e);
-				return {};
-			}
-		}
-
-	}
-}
-
-if (typeof System !== "undefined") {
-	_SYSTEM_addJSON(System);
-}
-
+  }
+});
 	// Overwrites System.config with setter hooks
 	var setterConfig = function(loader, configOrder, configSpecial){
 		var oldConfig = loader.config;
@@ -6538,102 +6590,6 @@ function addEnv(loader){
 	return steal;
 
 };
-/*
-  SystemJS Steal Format
-  Provides the Steal module format definition.
-*/
-function addSteal(loader) {
-	if (loader._extensions) {
-		loader._extensions.push(addSteal);
-	}
-
-  // Steal Module Format Detection RegEx
-  // steal(module, ...)
-  var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
-
-  // What we stole.
-  var stealInstantiateResult;
-  
-  function createSteal(loader) {
-    stealInstantiateResult = null;
-
-    // ensure no NodeJS environment detection
-    loader.global.module = undefined;
-    loader.global.exports = undefined;
-
-    function steal() {
-      var deps = [];
-      var factory;
-      
-      for( var i = 0; i < arguments.length; i++ ) {
-        if (typeof arguments[i] === 'string') {
-          deps.push( normalize(arguments[i]) );
-        } else {
-          factory = arguments[i];
-        }
-      }
-
-      if (typeof factory !== 'function') {
-        factory = (function(factory) {
-          return function() { return factory; };
-        })(factory);
-      }
-
-      stealInstantiateResult = {
-        deps: deps,
-        execute: function(require, exports, moduleName) {
-
-          var depValues = [];
-          for (var i = 0; i < deps.length; i++) {
-            depValues.push(require(deps[i]));
-          }
-
-          var output = factory.apply(loader.global, depValues);
-
-          if (typeof output !== 'undefined') {
-            return output;
-          }
-        }
-      };
-    }
-
-    loader.global.steal = steal;
-  }
-
-  var loaderInstantiate = loader.instantiate;
-  loader.instantiate = function(load) {
-    var loader = this;
-
-    if (load.metadata.format === 'steal' || !load.metadata.format && load.source.match(stealRegEx)) {
-      load.metadata.format = 'steal';
-
-      var oldSteal = loader.global.steal;
-
-      createSteal(loader);
-
-      loader.__exec(load);
-
-      loader.global.steal = oldSteal;
-
-      if (!stealInstantiateResult) {
-        throw "Steal module " + load.name + " did not call steal";
-      }
-
-      if (stealInstantiateResult) {
-        load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(stealInstantiateResult.deps) : stealInstantiateResult.deps;
-        load.metadata.execute = stealInstantiateResult.execute;
-      }
-    }
-    return loaderInstantiate.call(loader, load);
-  };
-
-  return loader;
-}
-
-if (typeof System !== "undefined") {
-  addSteal(System);
-}
-
 	if( isNode && !isNW ) {
 		require('steal-systemjs');
 
@@ -6642,7 +6598,6 @@ if (typeof System !== "undefined") {
 		global.steal.dev = require("./ext/dev.js");
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
-		global.steal.addSteal = addSteal;
 
 	} else {
 		var oldSteal = global.steal;
@@ -6657,7 +6612,6 @@ if (typeof System !== "undefined") {
 				}
 			});
 		global.steal.clone = cloneSteal;
-		global.steal.addSteal = addSteal;
 	}
 
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);
