@@ -1667,12 +1667,13 @@ function logloads(loads) {
       var loader = stepState.loader;
       var name = stepState.moduleName;
       var step = stepState.step;
+      var importingModuleName = stepState.moduleMetadata.importingModuleName;
 
       if (loader.modules[name])
         throw new TypeError('"' + name + '" already exists in the module table');
 
       // adjusted to pick up existing loads
-      var existingLoad;
+      var existingLoad, firstLinkSet;
       for (var i = 0, l = loader.loads.length; i < l; i++) {
         if (loader.loads[i].name == name) {
           existingLoad = loader.loads[i];
@@ -1682,19 +1683,32 @@ function logloads(loads) {
             proceedToTranslate(loader, existingLoad, Promise.resolve(stepState.moduleSource));
           }
 
-          return existingLoad.linkSets[0].done.then(function() {
+          // If the module importing this is part of the same linkSet, create
+          // a new one for this import.
+          firstLinkSet = existingLoad.linkSets[0];
+          if(importingModuleName && firstLinkSet.loads[importingModuleName]) {
+            continue;
+          }
+
+          return firstLinkSet.done.then(function() {
             resolve(existingLoad);
           });
         }
       }
 
-      var load = createLoad(name);
-
-      load.metadata = stepState.moduleMetadata;
+      var load;
+      if(existingLoad) {
+        load = existingLoad;
+      } else {
+        load = createLoad(name);
+        load.metadata = stepState.moduleMetadata;
+      }
 
       var linkSet = createLinkSet(loader, load);
 
-      loader.loads.push(load);
+      if(!existingLoad) {
+        loader.loads.push(load);
+      }
 
       resolve(linkSet.done);
 
@@ -1741,6 +1755,7 @@ function logloads(loads) {
         return;
 
     linkSet.loads.push(load);
+    linkSet.loads[load.name] = true;
     load.linkSets.push(linkSet);
 
     // adjustment, see https://bugs.ecmascript.org/show_bug.cgi?id=2603
@@ -4738,7 +4753,9 @@ function plugins(loader) {
       // load the plugin module
       // NB ideally should use pluginLoader.load for normalized,
       //    but not currently working for some reason
-      return pluginLoader['import'](pluginName)
+      return pluginLoader['import'](pluginName, {
+        metadata: { importingModuleName: name }
+      })
       .then(function() {
         var plugin = pluginLoader.get(pluginName);
         plugin = plugin['default'] || plugin;
