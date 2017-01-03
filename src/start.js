@@ -108,6 +108,9 @@
 			return "./" + result.join("") + uriParts.join("/");
 		},
 		fBind = Function.prototype.bind,
+    isFunction = function(obj) {
+    	return !!(obj && obj.constructor && obj.call && obj.apply);
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
@@ -117,7 +120,7 @@
 			} catch(e) {
 				return false;
 			}
-		})();
+		})(),
 		isNode = isNode && !isNW,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};
