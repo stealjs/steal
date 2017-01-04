@@ -47,7 +47,7 @@ var crawl = {
 		});
 	},
 
-	dep: function(context, pkg, childPkg, isRoot) {
+	dep: function(context, pkg, refPkg, childPkg, isRoot) {
 		var versionAndRange = childPkg.name+"@"+childPkg.version;
 		if(context.fetchCache[versionAndRange]) {
 			return context.fetchCache[versionAndRange];
@@ -73,6 +73,12 @@ var crawl = {
 
 			convert.forPackage(context, childPkg);
 			
+			// When progressively fetching package.jsons, we need to save
+			// the 'resolutions' so in production we get the *correct*
+			// version of a dependency.
+			if(refPkg) {
+				utils.pkg.saveResolution(context, refPkg, localPkg);
+			}
 
 			// Save package.json!npm load
 			npmModuleLoad.saveLoadIfNeeded(context);
