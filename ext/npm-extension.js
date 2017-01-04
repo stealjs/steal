@@ -180,7 +180,7 @@ exports.addExtension = function(System){
 				return oldNormalize.call(this, name, parentName, parentAddress,
 										 pluginNormalize);
 			}
-			return crawl.dep(this.npmContext, parentPkg, depPkg, isRoot)
+			return crawl.dep(this.npmContext, parentPkg, refPkg, depPkg, isRoot)
 				.then(createModuleNameAndNormalize);
 		} else {
 			return createModuleNameAndNormalize(depPkg);
