@@ -6,7 +6,6 @@
 		global.steal.dev = require("./ext/dev.js");
 		steal.clone = cloneSteal;
 		module.exports = global.steal;
-		global.steal.addSteal = addSteal;
 
 	} else {
 		var oldSteal = global.steal;
@@ -21,7 +20,6 @@
 				}
 			});
 		global.steal.clone = cloneSteal;
-		global.steal.addSteal = addSteal;
 	}
 
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);

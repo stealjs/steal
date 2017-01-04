@@ -26,6 +26,7 @@ module.exports = function (grunt) {
 					"src/system-extension-locate.js",
 					"src/system-extension-contextual.js",
 					"src/system-extension-script-module.js",
+					"src/system-extension-steal.js",
 					"node_modules/system-trace/trace.js",
 					"src/json/json.js",
 					"src/config.js",
@@ -33,7 +34,6 @@ module.exports = function (grunt) {
 					"src/startup.js",
 					"src/import.js",
 					"src/make-steal-end.js", // ends makeSteal
-					"src/system-format-steal.js",
 					"src/end.js"
 				],
 				dest: "<%= pkg.name %>.js"
@@ -48,6 +48,7 @@ module.exports = function (grunt) {
 					"src/system-extension-locate.js",
 					"src/system-extension-contextual.js",
 					"src/system-extension-script-module.js",
+					"src/system-extension-steal.js",
 					"node_modules/system-trace/trace.js",
 					"src/json/json.js",
 					"src/config.js",
@@ -56,7 +57,6 @@ module.exports = function (grunt) {
 					"src/node-require.js",
 					"src/import.js",
 					"src/make-steal-end.js", // ends makeSteal
-					"src/system-format-steal.js",
 					"src/end.js"
 				],
 				dest: "main.js"
