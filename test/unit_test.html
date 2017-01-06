@@ -19,7 +19,7 @@
 			base-url="./"></script>
 		<script>
 		QUnit.config.autostart = false;
-		steal.import("config/config_test").then(function(){
+		steal.import("config/config_test", "clone/clone_test").then(function(){
 			QUnit.start();
 		});
 		</script>
