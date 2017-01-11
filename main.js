@@ -1159,11 +1159,12 @@ addStealExtension(function (loader) {
 						parts.pop();
 						if(last(parts) === "node_modules") {
 							this.configMain = "package.json!npm";
-							addProductionBundles.call(this);
 							parts.pop();
 						}
 					}
-
+					if(this.isEnv("production") || this.loadBundles) {
+						addProductionBundles.call(this);
+					}
 				} else {
 					// make sure we don't set baseURL if it already set
 					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
