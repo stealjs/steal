@@ -22,6 +22,18 @@ describe("default configuration", function () {
 			done();
 		},done);
 	});
+
+	it("works in production", function(done){
+		var steal = makeSteal({
+			env: "server-production",
+			config: __dirname + "/node-prod/stealconfig.js",
+			main: "app/app"
+		});
+
+		steal.startup().then(function(main){
+			assert.equal(main.hello, "world");
+		}).then(done, done);
+	});
 });
 
 describe("plugins", function(){
