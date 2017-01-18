@@ -1,24 +1,2 @@
-<!doctype html>
-<html>
-	<head>
-		<title>Steal tests</title>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<link rel="stylesheet" type="text/css" href="../node_modules/qunitjs/qunit/qunit.css"/>
-	</head>
-	<body>
-
-		<h1 id="qunit-header">Steal Test Suite</h1>
-
-		<h2 id="qunit-banner"></h2>
-		<div id="qunit-testrunner-toolbar"></div>
-		<h2 id="qunit-userAgent"></h2>
-		<ol id="qunit-tests"></ol>
-		<div id="qunit-test-area"></div>
-
-		<script src="../steal.js" config-main="@empty" main="@empty"></script>
-		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
-
-		<script src="test.js"></script>
-		<script src="../src/json/json_test.js"></script>
-	</body>
-</html>
+<title>Steal Test Suite</title>
+<script src="../steal.js" config="../package.json!npm" main="test/test"></script>

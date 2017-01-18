@@ -1,18 +1,20 @@
+var QUnit = require("steal-qunit");
+
 QUnit.module("JSON support");
 
-asyncTest("Basics works", function(){
-	System["import"]("src/json/tests/my.json").then(function(my){
-		equal(my.name, "foo", "name is right");
+QUnit.asyncTest("Basics works", function(assert){
+	steal.import("src/json/tests/my.json").then(function(my){
+		assert.equal(my.name, "foo", "name is right");
 	}).then(start);
 });
 
-asyncTest("Still resolves when we fail to parse", function(){
-	System["import"]("src/json/tests/bad.json").then(function(){
-		ok(true);
+QUnit.asyncTest("Still resolves when we fail to parse", function(assert){
+	steal.import("src/json/tests/bad.json").then(function(){
+		assert.ok(true);
 	}).then(start);
 });
 
-asyncTest("jsonOptions transform allows you to transform the json object", function(){
+QUnit.asyncTest("jsonOptions transform allows you to transform the json object", function(assert){
 	System.jsonOptions = {
 		transform: function(load, data){
 			delete data.priv;
@@ -20,7 +22,7 @@ asyncTest("jsonOptions transform allows you to transform the json object", funct
 		}
 	};
 
-	System["import"]("src/json/tests/another.json").then(function(a){
-		ok(!a.priv, "Private field excluded");
+	steal.import("src/json/tests/another.json").then(function(a){
+		assert.ok(!a.priv, "Private field excluded");
 	}).then(start);
 });

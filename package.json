@@ -102,7 +102,7 @@
     "_stream_transform": "./ext/builtin/_stream_transform.js",
     "_stream_passthrough": "./ext/builtin/_stream_passthrough.js"
   },
-  "system": {
+  "steal": {
     "npmDependencies": [
       "console-browserify",
       "constants-browserify",
@@ -120,7 +120,8 @@
       "string_decoder",
       "tty-browserify",
       "process",
-      "punycode"
+      "punycode",
+      "steal-qunit"
     ]
   },
   "repository": {
