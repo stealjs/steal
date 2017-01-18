@@ -235,8 +235,28 @@ exports.addExistingPackages = function(context, existingPackages){
 					return p.name === pkg.name && p.version === pkg.version;
 				})[0];
 				if(!curPkg) return;
-				utils.extend(curPkg.resolutions || {}, pkg.resolutions || {});
+				deeplyExtendPkg(curPkg, pkg);
 			}
 		});
 	}
 };
+
+// Deeply extend the configuration that needs to be kept from
+// a previous bundle that runs through the build process.
+// This makes sure that if we load different configuration for different
+// bundles, all of it is retained for use in production.
+function deeplyExtendPkg(a, b) {
+	if(!a.resolutions) {
+		a.resolutions = {};
+	}
+	utils.extend(a.resolutions, b.resolutions || {});
+
+	if(!a.steal) {
+		a.steal = {};
+	}
+	if(!b.steal) {
+		b.steal = {};
+	}
+
+	utils.extend(a.steal, b.steal, true);
+}
