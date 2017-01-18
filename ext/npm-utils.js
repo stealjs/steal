@@ -350,7 +350,7 @@ var utils = {
 				} else {
 					main = pkg.browser;
 				}
-			} else if(typeof pkg.jam === "object") {
+			} else if(typeof pkg.jam === "object" && pkg.jam.main) {
 				main = pkg.jam.main;
 			} else if(pkg.main) {
 				main = pkg.main;
