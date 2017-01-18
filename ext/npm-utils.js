@@ -47,7 +47,7 @@ var utils = {
 			if(deep) {
 				if(utils.isArray(val)) {
 					d[prop] = slice.call(val);
-				} else if(utils.isObject(val)) {
+				} else if(utils.isPlainObject(val)) {
 					d[prop] = utils.extend({}, val, deep, set);
 				} else {
 					d[prop] = s[prop];
@@ -83,6 +83,10 @@ var utils = {
 	},
 	isObject: function(obj){
 		return typeof obj === "object";
+	},
+	isPlainObject: function(obj){
+		// A plain object has a proto that is the Object
+		return utils.isObject(obj) && (!obj || obj.__proto__ === Object.prototype);
 	},
 	isArray: Array.isArray || function(arr){
 		return Object.prototype.toString.call(arr) === "[object Array]";
