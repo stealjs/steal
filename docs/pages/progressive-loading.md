@@ -216,7 +216,7 @@ import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
 
 $("body").append(`
-	<div class='container'>
+	<div class="container">
 		<h1>Goodbye script tags!</h1>
     </div>
 `);
@@ -350,16 +350,17 @@ import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
 import repos from "./repos/repos";
 
-$("body").append(
-    "<div class='container'>"+
-    "<h1>Goodbye script tags!</h1>"+
-    "<div id='repos'/>"+
-    "</div>");
+$("body").append(`
+	<div class="container">
+		<h1>Goodbye script tags!</h1>
+		<div id="repos"></div>
+    </div>
+`);
 
 repos('#repos');
 ```
 
-@highlight 4,9,12
+@highlight 4,9,13
 
 ## Create test with dependency injection
 
@@ -552,13 +553,9 @@ module.exports = function(selector) {
 
 @highlight 2,5-24
 
-## Build a production app
-
-Now that we've created our application we need to share it with the public. To do this we'll create a build that will concat our JavaScript and styles down to only one file, each, for faster page loads in production.
-
 ### Update app to change pages
 
-Before we do that, let's update the app so that we can toggle between the *repos* and *puppies* page depending on the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
+Now that we've created this new page, let's update the app so that we can toggle between the *repos* and *puppies* pages depending on the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
 
 Update _myhub.js_ to:
 
@@ -595,6 +592,10 @@ updatePage();
 ```
 
 @highlight 5,8-29
+
+## Build a production app
+
+Now that we've created our application we need to share it with the public. To do this we'll create a build that will concat our JavaScript and styles down to only one file, each, for faster page loads in production.
 
 ### Build the app and switch to production
 
@@ -808,7 +809,7 @@ Create _export.js_ with:
 ```js
 var stealTools = require("steal-tools");
 stealTools.export({
-  system: {
+  steal: {
     main: "myhub/repos/repos",
     config: __dirname+"/package.json!npm"
   },
