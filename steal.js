@@ -5765,19 +5765,18 @@ function applyTraceExtension(loader){
 
 	var esImportDepsExp = /import [\s\S]*?["'](.+)["']/g;
 	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
-	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var commentRegEx = /(?:(?:^|\s)\/\/(.+?)$)|(?:\/\*([\S\s]*?)\*\/)/gm;
 	var stringRegEx = /(?:("|')[^\1\\\n\r]*(?:\\.[^\1\\\n\r]*)*\1|`[^`]*`)/g;
 
 	function getESDeps(source) {
+		var cleanSource = source.replace(commentRegEx, "");
+
 		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
 			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
 
-		var deps = [];
-
 		var match;
-
-		// track string and comment locations for unminified source
-		var stringLocations = [], commentLocations = [];
+		var deps = [];
+		var stringLocations = []; // track string for unminified source
 
 		function inLocation(locations, match) {
 		  for (var i = 0; i < locations.length; i++)
@@ -5787,24 +5786,18 @@ function applyTraceExtension(loader){
 		}
 
 		function addDeps(exp) {
-			while (match = exp.exec(source)) {
-			  // ensure we're not within a string or comment location
-			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
-				var dep = match[1];//.substr(1, match[1].length - 2);
+			while (match = exp.exec(cleanSource)) {
+			  // ensure we're not within a string location
+			  if (!inLocation(stringLocations, match)) {
+				var dep = match[1];
 				deps.push(dep);
 			  }
 			}
 		}
 
 		if (source.length / source.split('\n').length < 200) {
-		  while (match = stringRegEx.exec(source))
+		  while (match = stringRegEx.exec(cleanSource))
 			stringLocations.push([match.index, match.index + match[0].length]);
-
-		  while (match = commentRegEx.exec(source)) {
-			// only track comments not starting in strings
-			if (!inLocation(stringLocations, match))
-			  commentLocations.push([match.index, match.index + match[0].length]);
-		  }
 		}
 
 		addDeps(esImportDepsExp);
