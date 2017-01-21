@@ -15,7 +15,7 @@ addStealExtension(function (loader) {
 	loader.fetch = function(load) {
 		var loader = this;
 
-		if(!isBuildEnvironment() && loader.cachebust) {
+		if(!isBuildEnvironment() && loader.cachebust && !loader.cachebust === false) {
 			var cacheVersion = isProduction() ? loader.cachebust.version || timestamp : timestamp,
 				cacheKey = loader.cachebust.key || "version",
 				cacheKeyVersion = cacheKey + "=" + cacheVersion;

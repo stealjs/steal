@@ -33,7 +33,30 @@ var loader = require("@loader");
 			}
 		}, function () {
 
-			QUnit.test("cache", function (assert) {
+			QUnit.test("cache by default", function (assert) {
+				QUnit.expect(2);
+				QUnit.stop();
+
+				wrapFetch(this.loader, function (address) {
+					var query = getQuery(address);
+					var cachebust = query.split("=");
+
+					assert.equal(cachebust.length, 1);
+					assert.equal(query, cachebust[0]);
+				});
+
+				this.loader.import("src/cache-bust/test/basics/foo")
+					.then(this.loader.unwrap)
+					.then(function () {
+						QUnit.start();
+					});
+			});
+
+			QUnit.test("cache explicit", function (assert) {
+				this.loader.config({
+					cachebust: false
+				});
+
 				QUnit.expect(2);
 				QUnit.stop();
 
@@ -57,7 +80,7 @@ var loader = require("@loader");
 			setup: function () {
 				this.loader = loader.clone();
 				this.loader.config({
-					cachebust: {}
+					cachebust: true
 				});
 			},
 			teardown: function () {
