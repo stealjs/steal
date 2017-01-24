@@ -5671,7 +5671,7 @@ addStealExtension(function (loader) {
     return loaderInstantiate.call(loader, load);
   };
 });
-function applyTraceExtension(loader){
+addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
 	}
@@ -5745,7 +5745,6 @@ function applyTraceExtension(loader){
 	var emptyExecute = function(){
 		return loader.newModule({});
 	};
-
 
 	var passThroughModules = {
 		traceur: true,
@@ -5864,11 +5863,7 @@ function applyTraceExtension(loader){
 			cb.call(this, moduleName, this.get(moduleName));
 		}
 	};
-}
-
-if(typeof System !== "undefined") {
-	applyTraceExtension(System);
-}
+});
 
 // Steal JSON Format
 // Provides the JSON module format definition.
