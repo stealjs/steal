@@ -27,7 +27,7 @@ module.exports = function (grunt) {
 					"src/system-extension-contextual.js",
 					"src/system-extension-script-module.js",
 					"src/system-extension-steal.js",
-					"src/system-trace/system-trace.js",
+					"src/trace/trace.js",
 					"src/json/json.js",
 					"src/config.js",
 					"node_modules/steal-env/env.js",
@@ -49,7 +49,7 @@ module.exports = function (grunt) {
 					"src/system-extension-contextual.js",
 					"src/system-extension-script-module.js",
 					"src/system-extension-steal.js",
-					"src/system-trace/system-trace.js",
+					"src/trace/trace.js",
 					"src/json/json.js",
 					"src/config.js",
 					"node_modules/steal-env/env.js",
@@ -164,7 +164,7 @@ module.exports = function (grunt) {
 					"test/test.html",
 					"test/unit_test.html",
 					"test/system_trace_test.html",
-					"src/system-trace/system-trace_test.html"
+					"src/trace/trace_test.html"
 				]
 			}
 		},
