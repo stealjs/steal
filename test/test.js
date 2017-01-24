@@ -460,6 +460,14 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("ext-steal-clone/config-separation/index.html");
 	});
 
+	asyncTest("allows you to override a module with a default export", function() {
+		makeIframe("ext-steal-clone/default-export-usedefault/index.html");
+	});
+
+	asyncTest("allows you to override a module with a default export without setting __useDefault", function() {
+		makeIframe("ext-steal-clone/default-export/index.html");
+	});
+
 	asyncTest("caches source of parent modules to avoid duplicate downloads", function() {
 		makeIframe("ext-steal-clone/fetch-cache/index.html");
 	});
