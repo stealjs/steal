@@ -1,2 +1,36 @@
-<title>Steal Cache-Busting</title>
-<script src="../../../steal.js" config="../../../package.json!npm" main="src/cache-bust/test/test"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cache-busting extension tests</title>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script>
+	var steal = {
+		paths: {
+			"steal-qunit": "node_modules/steal-qunit/steal-qunit.js"
+		},
+		map: {
+			"qunitjs": "node_modules/qunitjs"
+		},
+		ext: {
+			css: "node_modules/steal-css/css.js"
+		}
+	}
+</script>
+<script
+        src="../../../steal.js"
+        main="src/cache-bust/test/"
+        config-main="../../../package.json!npm"
+>
+</script>
+<script>
+	steal.done().then(function () {
+		QUnit.config.hidepassed = true;
+		QUnit.start()
+	});
+</script>
+</body>
+</html>

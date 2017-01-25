@@ -2,7 +2,6 @@ var QUnit = require("steal-qunit");
 var loader = require("@loader");
 
 (function() {
-	var test = QUnit.test;
 
 	function wrapFetch(loader, callback) {
 		var fetch = loader.fetch;
@@ -26,14 +25,16 @@ var loader = require("@loader");
 
 		}
 	}, function () {
-		QUnit.module("disabled", {
+		QUnit.module("development-mode", {
 			setup: function () {
 				this.loader = loader.clone();
-				delete this.loader.cachebust;
+				this.loader.config({
+					env: "window-development"
+				})
 			}
 		}, function () {
 
-			QUnit.test("cache by default", function (assert) {
+			QUnit.test("do not cachebust on development-mode", function (assert) {
 				QUnit.expect(2);
 				QUnit.stop();
 
@@ -42,30 +43,8 @@ var loader = require("@loader");
 					var cachebust = query.split("=");
 
 					assert.equal(cachebust.length, 1);
-					assert.equal(query, cachebust[0]);
-				});
+					assert.equal(query, cachebust);
 
-				this.loader.import("src/cache-bust/test/basics/foo")
-					.then(this.loader.unwrap)
-					.then(function () {
-						QUnit.start();
-					});
-			});
-
-			QUnit.test("cache explicit", function (assert) {
-				this.loader.config({
-					cachebust: false
-				});
-
-				QUnit.expect(2);
-				QUnit.stop();
-
-				wrapFetch(this.loader, function (address) {
-					var query = getQuery(address);
-					var cachebust = query.split("=");
-
-					assert.equal(cachebust.length, 1);
-					assert.equal(query, cachebust[0]);
 				});
 
 				this.loader.import("src/cache-bust/test/basics/foo")
@@ -76,11 +55,11 @@ var loader = require("@loader");
 			});
 		});
 
-		QUnit.module("enabled", {
+		QUnit.module("production-mode", {
 			setup: function () {
 				this.loader = loader.clone();
 				this.loader.config({
-					cachebust: true
+					env: "window-production"
 				});
 			},
 			teardown: function () {
@@ -88,11 +67,34 @@ var loader = require("@loader");
 			}
 		}, function () {
 
-			QUnit.test("default cachebust", function (assert) {
-				QUnit.expect(4);
+			QUnit.test("no cachebust with default", function (assert) {
+
+				QUnit.expect(2);
 				QUnit.stop();
 
-				var timestamp = new Date('2017-01-01').getTime();
+				wrapFetch(this.loader, function (address) {
+					var query = getQuery(address);
+					var cachebust = query.split("=");
+
+					assert.equal(cachebust.length, 1);
+					assert.equal(query, cachebust);
+				});
+				this.loader.import("src/cache-bust/test/basics/foo")
+					.then(this.loader.unwrap)
+					.then(function () {
+						QUnit.start();
+					});
+
+			});
+
+			QUnit.test("cachebust", function (assert) {
+
+				this.loader.config({
+					cacheVersion: 100
+				});
+
+				QUnit.expect(3);
+				QUnit.stop();
 
 				wrapFetch(this.loader, function (address) {
 					var query = getQuery(address);
@@ -102,45 +104,7 @@ var loader = require("@loader");
 
 					assert.equal(cachebust.length, 2);
 					assert.equal(cacheKey, 'version');
-					assert.ok(!isNaN(parseInt(cacheVersion, 10)), 'default version is a number');
-					assert.ok(cacheVersion > timestamp, 'default version is a timestamp');
-				});
-
-				this.loader.import("src/cache-bust/test/basics/foo")
-					.then(this.loader.unwrap)
-					.then(function () {
-						QUnit.start();
-					});
-
-			});
-
-			QUnit.test("cachebust key and version in development-mode", function (assert) {
-				var that = this;
-				this.loader.config({
-					env: "window-development",
-					cachebust: {
-						key: 'foo',
-						version: 'bar'
-					}
-				});
-
-				QUnit.expect(5);
-				QUnit.stop();
-
-				var timestamp = new Date('2017-01-01').getTime();
-
-				wrapFetch(this.loader, function (address) {
-					var query = getQuery(address);
-					var cachebust = query.split("=");
-					var cacheKey = cachebust[0];
-					var cacheVersion = cachebust[1];
-
-					assert.equal(cacheKey, 'foo');
-					assert.notEqual(cacheVersion, 'bar');
-					assert.ok(!isNaN(parseInt(cacheVersion, 10)), 'version is a number');
-					assert.ok(cacheVersion > timestamp, 'version in dev-mode is a timestamp');
-
-					assert.ok(that.loader.isEnv("development"));
+					assert.equal(cacheVersion, '100');
 				});
 
 				this.loader.import("src/cache-bust/test/basics/foo")
@@ -156,10 +120,8 @@ var loader = require("@loader");
 
 				this.loader.config({
 					env: "window-production",
-					cachebust: {
-						key: 'foo',
-						version: 'bar'
-					}
+					cacheKey: "foo",
+					cacheVersion: 200
 				});
 
 
@@ -173,7 +135,7 @@ var loader = require("@loader");
 					var cacheVersion = cachebust[1];
 
 					assert.equal(cacheKey, 'foo');
-					assert.equal(cacheVersion, 'bar');
+					assert.equal(cacheVersion, '200');
 
 					assert.ok(that.loader.isEnv("production"));
 				});
@@ -190,10 +152,8 @@ var loader = require("@loader");
 
 				this.loader.config({
 					env: "window-production",
-					cachebust: {
-						key: 'someKey',
-						version: 1
-					}
+					cacheKey: "somekey",
+					cacheVersion: 1
 				});
 				QUnit.expect(3 * 2);
 				QUnit.stop();
@@ -204,7 +164,7 @@ var loader = require("@loader");
 						var parts = query.split("=");
 
 						assert.equal(parts.length, 2);
-						assert.equal(parts[0], 'someKey');
+						assert.equal(parts[0], 'somekey');
 						assert.equal(parts[1], '1');
 
 					}
