@@ -30,7 +30,7 @@ module.exports = function (grunt) {
 					"src/trace/trace.js",
 					"src/json/json.js",
 					"src/config.js",
-					"node_modules/steal-env/env.js",
+					"src/env/env.js",
 					"src/startup.js",
 					"src/import.js",
 					"src/make-steal-end.js", // ends makeSteal
@@ -52,7 +52,7 @@ module.exports = function (grunt) {
 					"src/trace/trace.js",
 					"src/json/json.js",
 					"src/config.js",
-					"node_modules/steal-env/env.js",
+					"src/env/env.js",
 					"src/startup.js",
 					"src/node-require.js",
 					"src/import.js",
@@ -163,8 +163,8 @@ module.exports = function (grunt) {
 				src: [
 					"test/test.html",
 					"test/unit_test.html",
-					"test/system_trace_test.html",
-					"src/trace/trace_test.html"
+					"src/trace/trace_test.html",
+					"src/env/test/test.html"
 				]
 			}
 		},
