@@ -1,8 +1,3 @@
-var QUnit = require("steal-qunit");
-
-require('src/cache-bust/test/');
-require('src/json/json_test');
-
 QUnit.module("steal via system import");
 
 QUnit.config.testTimeout = 30000;
