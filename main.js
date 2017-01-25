@@ -184,7 +184,13 @@
 
 var cloneSteal = function(System){
 	var loader = System || this.System;
-	return makeSteal(loader.clone());
+	var steal = makeSteal(loader.clone());
+	steal.loader.set("@steal", steal.loader.newModule({
+		"default": steal,
+		__useDefault: true
+	}));
+	steal.clone = cloneSteal;
+	return steal;
 };
 
 var makeSteal = function(System){
@@ -248,6 +254,20 @@ var makeSteal = function(System){
 		"default": steal,
 		__useDefault:true
 	}));
+
+	var loaderClone = System.clone;
+	System.clone = function(){
+		var loader = loaderClone.apply(this, arguments);
+		loader.set("@loader", loader.newModule({
+			"default": loader,
+			__useDefault: true
+		}));
+		loader.set("@steal", loader.newModule({
+			"default": steal,
+			__useDefault: true
+		}));
+		return loader;
+	};
 
 	// steal.System remains for backwards compat only
 	steal.System = steal.loader = System;
@@ -578,7 +598,7 @@ addStealExtension(function (loader) {
     return loaderInstantiate.call(loader, load);
   };
 });
-function applyTraceExtension(loader){
+addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
 	}
@@ -653,7 +673,6 @@ function applyTraceExtension(loader){
 		return loader.newModule({});
 	};
 
-
 	var passThroughModules = {
 		traceur: true,
 		babel: true
@@ -672,19 +691,18 @@ function applyTraceExtension(loader){
 
 	var esImportDepsExp = /import [\s\S]*?["'](.+)["']/g;
 	var esExportDepsExp = /export .+ from ["'](.+)["']/g;
-	var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
+	var commentRegEx = /(?:(?:^|\s)\/\/(.+?)$)|(?:\/\*([\S\s]*?)\*\/)/gm;
 	var stringRegEx = /(?:("|')[^\1\\\n\r]*(?:\\.[^\1\\\n\r]*)*\1|`[^`]*`)/g;
 
 	function getESDeps(source) {
+		var cleanSource = source.replace(commentRegEx, "");
+
 		esImportDepsExp.lastIndex = commentRegEx.lastIndex =
 			esExportDepsExp.lastIndex = stringRegEx.lastIndex = 0;
 
-		var deps = [];
-
 		var match;
-
-		// track string and comment locations for unminified source
-		var stringLocations = [], commentLocations = [];
+		var deps = [];
+		var stringLocations = []; // track string for unminified source
 
 		function inLocation(locations, match) {
 		  for (var i = 0; i < locations.length; i++)
@@ -694,24 +712,18 @@ function applyTraceExtension(loader){
 		}
 
 		function addDeps(exp) {
-			while (match = exp.exec(source)) {
-			  // ensure we're not within a string or comment location
-			  if (!inLocation(stringLocations, match) && !inLocation(commentLocations, match)) {
-				var dep = match[1];//.substr(1, match[1].length - 2);
+			while (match = exp.exec(cleanSource)) {
+			  // ensure we're not within a string location
+			  if (!inLocation(stringLocations, match)) {
+				var dep = match[1];
 				deps.push(dep);
 			  }
 			}
 		}
 
 		if (source.length / source.split('\n').length < 200) {
-		  while (match = stringRegEx.exec(source))
+		  while (match = stringRegEx.exec(cleanSource))
 			stringLocations.push([match.index, match.index + match[0].length]);
-
-		  while (match = commentRegEx.exec(source)) {
-			// only track comments not starting in strings
-			if (!inLocation(stringLocations, match))
-			  commentLocations.push([match.index, match.index + match[0].length]);
-		  }
 		}
 
 		addDeps(esImportDepsExp);
@@ -778,11 +790,7 @@ function applyTraceExtension(loader){
 			cb.call(this, moduleName, this.get(moduleName));
 		}
 	};
-}
-
-if(typeof System !== "undefined") {
-	applyTraceExtension(System);
-}
+});
 
 // Steal JSON Format
 // Provides the JSON module format definition.

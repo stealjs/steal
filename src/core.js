@@ -1,6 +1,12 @@
 var cloneSteal = function(System){
 	var loader = System || this.System;
-	return makeSteal(loader.clone());
+	var steal = makeSteal(loader.clone());
+	steal.loader.set("@steal", steal.loader.newModule({
+		"default": steal,
+		__useDefault: true
+	}));
+	steal.clone = cloneSteal;
+	return steal;
 };
 
 var makeSteal = function(System){
@@ -64,6 +70,20 @@ var makeSteal = function(System){
 		"default": steal,
 		__useDefault:true
 	}));
+
+	var loaderClone = System.clone;
+	System.clone = function(){
+		var loader = loaderClone.apply(this, arguments);
+		loader.set("@loader", loader.newModule({
+			"default": loader,
+			__useDefault: true
+		}));
+		loader.set("@steal", loader.newModule({
+			"default": steal,
+			__useDefault: true
+		}));
+		return loader;
+	};
 
 	// steal.System remains for backwards compat only
 	steal.System = steal.loader = System;
