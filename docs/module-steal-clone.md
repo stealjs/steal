@@ -42,7 +42,9 @@ clone({
       return 'moduleBOverride';
     }
   }
-}).import('moduleA', function(moduleA) {
+})
+.import('moduleA')
+.then(function(moduleA) {
   moduleA(); // moduleA moduleBOverride
 });
 ```

@@ -4,10 +4,15 @@ function setModule(moduleName, parentName, moduleOverrides) {
 	return new Promise(function(resolve) {
 		newLoader.normalize(moduleName, parentName)
 		.then(function(normalizedModuleName) {
+			var moduleObject = moduleOverrides[moduleName];
+
+			// if overriding default export, make sure __useDefault is set
+			if (moduleObject.hasOwnProperty('default') && !moduleObject.hasOwnProperty('__useDefault')) {
+				moduleObject.__useDefault = true;
+			}
+
 			// set module overrides
-			newLoader.set(normalizedModuleName, newLoader.newModule(
-				moduleOverrides[moduleName]
-			));
+			newLoader.set(normalizedModuleName, newLoader.newModule(moduleObject));
 			resolve();
 		});
 	});

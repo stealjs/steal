@@ -51,13 +51,15 @@ exports.translate = function(load){
 	pkgVersion[pkg.version] = context.versions.__default = pkg;
 
 	// backwards compatible for < npm 3
-	var steal = utils.pkg.config(pkg);
-	if(steal && steal.npmAlgorithm === "nested") {
+	var steal = utils.pkg.config(pkg) || {};
+
+	if(steal.npmAlgorithm === "nested"){
 		context.isFlatFileStructure = false;
-	} else {
-		pkg.steal = steal = steal || {};
+	}else{
 		steal.npmAlgorithm = "flat";
 	}
+
+	pkg.steal = steal;
 
 	return crawl.root(context, pkg, true).then(function(){
 		// clean up packages so everything is unique
@@ -69,7 +71,6 @@ exports.translate = function(load){
 					delete pkg.browser.transform;
 				}
 				pkg = utils.json.transform(loader, load, pkg);
-				var steal = utils.pkg.config(pkg);
 
 				packages.push({
 					name: pkg.name,
@@ -78,7 +79,7 @@ exports.translate = function(load){
 						pkg.fileUrl :
 						utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
-					steal: convert.steal(context, pkg, steal, index === 0),
+					steal: convert.steal(context, pkg, pkg.steal, index === 0),
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
 					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
 					jspm: convert.jspm(pkg, pkg.jspm),
