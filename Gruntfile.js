@@ -163,7 +163,6 @@ module.exports = function (grunt) {
 				src: [
 					"test/test.html",
 					"test/unit_test.html",
-					"test/system_trace_test.html",
 					"src/trace/trace_test.html",
 					"src/env/test/test.html"
 				]
