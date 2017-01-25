@@ -1,5 +1,3 @@
-var QUnit = require("steal-qunit");
-
 QUnit.module("JSON support");
 
 QUnit.asyncTest("Basics works", function(assert){
