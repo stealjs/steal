@@ -119,8 +119,7 @@
       "string_decoder",
       "tty-browserify",
       "process",
-      "punycode",
-      "steal-qunit"
+      "punycode"
     ]
   },
   "repository": {
