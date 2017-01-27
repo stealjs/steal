@@ -60,7 +60,7 @@
     "testee": "^0.3.0",
     "traceur": "0.0.111",
     "traceur-runtime": "jmcriffey/bower-traceur-runtime#0.0.91",
-    "wd": "^1.0.0"
+    "wd": "^1.1.3"
   },
   "globalBrowser": {
     "console": "console-browserify",
