@@ -167,7 +167,7 @@ module.exports = function (grunt) {
 					"test/unit_test.html",
 					"src/trace/trace_test.html",
 					"src/env/test/test.html",
-					"src/cachebust/test/test.html"
+					"src/cache-bust/test/test.html"
 				]
 			}
 		},
