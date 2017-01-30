@@ -3978,12 +3978,33 @@ function global(loader) {
 
     loader.set('@@global-helpers', loader.newModule({
       prepareGlobal: function(moduleName, deps, exportName) {
+        var globals;
+
+        // handle function signature when an object is passed instead of
+        // individual arguments
+        if (typeof moduleName === "object") {
+          var options = moduleName;
+
+          deps = options.deps;
+          globals = options.globals;
+          exportName = options.exportName;
+          moduleName = options.moduleName;
+        }
+
         // first, we add all the dependency modules to the global
-        for (var i = 0; i < deps.length; i++) {
-          var moduleGlobal = moduleGlobals[deps[i]];
-          if (moduleGlobal)
-            for (var m in moduleGlobal)
-              loader.global[m] = moduleGlobal[m];
+        if (deps) {
+          for (var i = 0; i < deps.length; i++) {
+            var moduleGlobal = moduleGlobals[deps[i]];
+            if (moduleGlobal)
+              for (var m in moduleGlobal)
+                loader.global[m] = moduleGlobal[m];
+          }
+        }
+
+        if (globals) {
+          for (var j in globals) {
+            loader.global[j] = globals[j];
+          }
         }
 
         // If an exportName is defined there is no need to perform the next
@@ -4066,11 +4087,33 @@ function global(loader) {
     if (!load.metadata.format)
       load.metadata.format = 'global';
 
+
+    // add globals as dependencies
+    var loadMeta = loader.meta[load.name];
+    if (loadMeta && loadMeta.globals) {
+      for (var g in loadMeta.globals) {
+        load.metadata.deps.push(loadMeta.globals[g]);
+      }
+    }
+
     // global is a fallback module format
     if (load.metadata.format == 'global') {
       load.metadata.execute = function(require, exports, module) {
+        var globals;
 
-        loader.get('@@global-helpers').prepareGlobal(module.id, load.metadata.deps, exportName);
+        var loadMeta = loader.meta[load.name];
+        if (loadMeta && loadMeta.globals) {
+          globals = {};
+          for (var g in loadMeta.globals)
+            globals[g] = require(loadMeta.globals[g]);
+        }
+
+        loader.get('@@global-helpers').prepareGlobal({
+          globals: globals,
+          moduleName: module.id,
+          exportName: exportName,
+          deps: load.metadata.deps
+        });
 
         if (exportName)
           load.source += '\nthis["' + exportName + '"] = ' + exportName + ';';
