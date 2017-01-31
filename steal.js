@@ -3979,6 +3979,7 @@ function global(loader) {
     loader.set('@@global-helpers', loader.newModule({
       prepareGlobal: function(moduleName, deps, exportName) {
         var globals;
+        var require;
 
         // handle function signature when an object is passed instead of
         // individual arguments
@@ -3989,6 +3990,7 @@ function global(loader) {
           globals = options.globals;
           exportName = options.exportName;
           moduleName = options.moduleName;
+          require = options.require;
         }
 
         // first, we add all the dependency modules to the global
@@ -4001,9 +4003,9 @@ function global(loader) {
           }
         }
 
-        if (globals) {
+        if (globals && require) {
           for (var j in globals) {
-            loader.global[j] = globals[j];
+            loader.global[j] = require(globals[j]);
           }
         }
 
@@ -4087,32 +4089,22 @@ function global(loader) {
     if (!load.metadata.format)
       load.metadata.format = 'global';
 
-
     // add globals as dependencies
-    var loadMeta = loader.meta[load.name];
-    if (loadMeta && loadMeta.globals) {
-      for (var g in loadMeta.globals) {
-        load.metadata.deps.push(loadMeta.globals[g]);
+    if (load.metadata.globals) {
+      for (var g in load.metadata.globals) {
+        load.metadata.deps.push(load.metadata.globals[g]);
       }
     }
 
     // global is a fallback module format
     if (load.metadata.format == 'global') {
       load.metadata.execute = function(require, exports, module) {
-        var globals;
-
-        var loadMeta = loader.meta[load.name];
-        if (loadMeta && loadMeta.globals) {
-          globals = {};
-          for (var g in loadMeta.globals)
-            globals[g] = require(loadMeta.globals[g]);
-        }
-
         loader.get('@@global-helpers').prepareGlobal({
-          globals: globals,
+          require: require,
           moduleName: module.id,
           exportName: exportName,
-          deps: load.metadata.deps
+          deps: load.metadata.deps,
+          globals: load.metadata.globals
         });
 
         if (exportName)
@@ -6390,19 +6382,16 @@ addStealExtension(function (loader) {
 		}
 	};
 
-if(typeof System !== "undefined") {
-	addEnv(System);
-}
-
-function addEnv(loader){
-	// Add the extension to _extensions so that it can be cloned.
-	loader._extensions.push(addEnv);
+// Steal Env Extension
+// adds some special environment functions to the loader
+addStealExtension(function (loader) {
 
 	loader.getEnv = function(){
 		var envParts = (this.env || "").split("-");
 		// Fallback to this.env for legacy
 		return envParts[1] || this.env;
 	};
+
 	loader.getPlatform = function(){
 		var envParts = (this.env || "").split("-");
 		return envParts.length === 2 ? envParts[0] : undefined;
@@ -6415,8 +6404,7 @@ function addEnv(loader){
 	loader.isPlatform = function(name){
 		return this.getPlatform() === name;
 	};
-}
-
+});
 	// get config by the URL query
 	// like ?main=foo&env=production
 	// formally used for Webworkers

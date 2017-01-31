@@ -1274,19 +1274,16 @@ addStealExtension(function (loader) {
 		}
 	};
 
-if(typeof System !== "undefined") {
-	addEnv(System);
-}
-
-function addEnv(loader){
-	// Add the extension to _extensions so that it can be cloned.
-	loader._extensions.push(addEnv);
+// Steal Env Extension
+// adds some special environment functions to the loader
+addStealExtension(function (loader) {
 
 	loader.getEnv = function(){
 		var envParts = (this.env || "").split("-");
 		// Fallback to this.env for legacy
 		return envParts[1] || this.env;
 	};
+
 	loader.getPlatform = function(){
 		var envParts = (this.env || "").split("-");
 		return envParts.length === 2 ? envParts[0] : undefined;
@@ -1299,8 +1296,7 @@ function addEnv(loader){
 	loader.isPlatform = function(name){
 		return this.getPlatform() === name;
 	};
-}
-
+});
 	// get config by the URL query
 	// like ?main=foo&env=production
 	// formally used for Webworkers
