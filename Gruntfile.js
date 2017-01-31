@@ -29,6 +29,7 @@ module.exports = function (grunt) {
 					"src/system-extension-steal.js",
 					"src/trace/trace.js",
 					"src/json/json.js",
+					"src/cache-bust/cache-bust.js",
 					"src/config.js",
 					"src/env/env.js",
 					"src/startup.js",
@@ -51,6 +52,7 @@ module.exports = function (grunt) {
 					"src/system-extension-steal.js",
 					"src/trace/trace.js",
 					"src/json/json.js",
+					"src/cache-bust/cache-bust.js",
 					"src/config.js",
 					"src/env/env.js",
 					"src/startup.js",
@@ -164,7 +166,8 @@ module.exports = function (grunt) {
 					"test/test.html",
 					"test/unit_test.html",
 					"src/trace/trace_test.html",
-					"src/env/test/test.html"
+					"src/env/test/test.html",
+					"src/cache-bust/test/test.html"
 				]
 			}
 		},
