@@ -1,7 +1,7 @@
 {
   "name": "steal",
   "description": "Gets JavaScript.",
-  "version": "1.1.0",
+  "version": "1.2.0-pre.1",
   "author": {
     "name": "Bitovi",
     "email": "contact@bitovi.com",
@@ -29,7 +29,7 @@
     "process": "~0.11.9",
     "punycode": "~2.0.1",
     "resolve": "^1.1.7",
-    "steal-systemjs": "0.18.6",
+    "steal-systemjs": "0.19.1",
     "string_decoder": "~0.10.31",
     "tty-browserify": "~0.0.0",
     "vm-browserify": "~0.0.4",
@@ -101,7 +101,7 @@
     "_stream_transform": "./ext/builtin/_stream_transform.js",
     "_stream_passthrough": "./ext/builtin/_stream_passthrough.js"
   },
-  "system": {
+  "steal": {
     "npmDependencies": [
       "console-browserify",
       "constants-browserify",

@@ -409,6 +409,10 @@ QUnit.config.testTimeout = 30000;
 		makeIframe("meta-deep/index.html");
 	});
 
+	asyncTest("meta globals config works", function() {
+		makeIframe("globals/index.html");
+	});
+
 	QUnit.module("Bower extension");
 
 	asyncTest("Basics work", function(){
