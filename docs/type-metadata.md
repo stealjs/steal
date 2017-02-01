@@ -108,3 +108,30 @@ In this situation, the default `new Function` method of evaluation will not work
 ```
 
 This will use `<script>` elements for evaluation and the `Foo` property will be set.
+
+@option {{}} globals A map of globals to module names expected to be present for the execution of this module.
+
+This is useful for legacy code that relies on globals being defined during execution; the module names
+referenced are automatically turned into dependencies of this module.
+
+If you have a global module `foo`, that looks like this:
+
+```
+var something = $$$;
+```
+
+Use the following configuration to make sure the global variable `$$$` is defined before `foo`
+is executed:
+
+```
+"steal": {
+	"meta": {
+		"foo": {
+			"format": "global",	
+			"globals": {
+				"$$$": "bar"
+			}
+		}
+	}
+}
+```
