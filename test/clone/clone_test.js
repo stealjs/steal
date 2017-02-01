@@ -1,3 +1,4 @@
+var QUnit = require("steal-qunit");
 
 QUnit.module("steal.clone()");
 

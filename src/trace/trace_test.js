@@ -3,7 +3,12 @@ var _loader = require("@loader");
 
 function makeLoader(){
 	this.loader = _loader.clone();
-	this.loader.baseURL = "./";
+	if(_loader.main == "src/trace/trace_test") {
+		this.loader.baseURL = "./";
+	}else {
+		this.loader.baseURL = _loader.baseURL + "src/trace";
+	}
+
 	this.loader.paths = _loader.paths;
 }
 
@@ -199,7 +204,7 @@ QUnit.module("production", {
 	setup: function(assert){
 		makeLoader.call(this);
 
-		this.loader.baseURL = "./tests/production";
+		this.loader.baseURL = this.loader.baseURL + "/tests/production";
 		this.loader.bundles = {"bundles/main":["main"]};
 		this.loader.loadBundles = true;
 

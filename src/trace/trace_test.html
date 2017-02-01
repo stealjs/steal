@@ -10,7 +10,7 @@
 	<script>
 			var steal = {
 				paths: {
-					"steal-qunit": "node_modules/steal-qunit/steal-qunit.js",
+					"steal-qunit": "node_modules/steal-qunit/steal-qunit.js"
 				},
 				map: {
 					"qunitjs": "node_modules/qunitjs"
@@ -31,11 +31,6 @@
 		main="src/trace/trace_test"
 		config-main="../../package.json!npm"
 	>
-	</script>
-	<script>
-			steal.done().then(function () {
-				QUnit.config.hidepassed = true;
-			});
 	</script>
 </body>
 </html>

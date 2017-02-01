@@ -163,11 +163,7 @@ module.exports = function (grunt) {
 					browsers: ["firefox"]
 				},
 				src: [
-					"test/test.html",
-					"test/unit_test.html",
-					"src/trace/trace_test.html",
-					"src/env/test/test.html",
-					"src/cache-bust/test/test.html"
+					"test/test.html"
 				]
 			}
 		},
