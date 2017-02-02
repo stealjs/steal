@@ -82,7 +82,7 @@ exports.addExtension = function(System){
 				name = name + "index";
 			}
 		}
-		
+
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
 																 name,
@@ -132,7 +132,7 @@ exports.addExtension = function(System){
 					depPkg = utils.pkg.findDepWalking(this, refPkg,
 													  parsedModuleName.packageName);
 				} else {
-					depPkg = utils.pkg.findDep(this, refPkg, 
+					depPkg = utils.pkg.findDep(this, refPkg,
 											   parsedModuleName.packageName);
 				}
 			}
@@ -292,13 +292,17 @@ exports.addExtension = function(System){
 
 		if(utils.moduleName.isNpm(load.name)) {
 			fetchPromise = fetchPromise.then(null, function(err){
+				if(err.statusCode !== 404) {
+					return Promise.reject(err);
+				}
+
 				// Begin attempting retries. `retryTypes` defines different
 				// types of retries to do, currently retrying on the
 				// /index and /package.json conventions.
 				var types = [].slice.call(retryTypes);
 
 				return retryAll(types, err);
-				
+
 				function retryAll(types, err){
 					if(!types.length) {
 						throw err;
