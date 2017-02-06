@@ -5002,8 +5002,9 @@ var $__curScript, __eval;
   var doEval;
   var isWorker = typeof window == 'undefined' && typeof self != 'undefined' && typeof importScripts != 'undefined';
   var isBrowser = typeof window != 'undefined' && typeof document != 'undefined';
-  var isChromeExtension = isBrowser && window.chrome && window.chrome.extension;
   var isNode = typeof process === 'object' && {}.toString.call(process) === '[object process]';
+  var isNW = !!(isNode && global.nw && global.nw.process);
+  var isChromeExtension = isBrowser && !isNW && window.chrome && window.chrome.extension;
   var scriptEval;
 
   doEval = function(source, address, context) {
@@ -5017,7 +5018,7 @@ var $__curScript, __eval;
 
   if(isWorker) {
     $__global.upgradeSystemLoader();
-  } else if (isBrowser && !isChromeExtension) {
+  } else if ((isBrowser || isNW) && !isChromeExtension) {
     var head;
 
     var scripts = document.getElementsByTagName('script');
