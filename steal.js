@@ -4271,15 +4271,17 @@ function amd(loader) {
   var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:(?!\\)]|^)\/\/(.*)$)/mg;
   var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
-  var cjsRequirePre = "(?:^|[^$_a-zA-Z\\xA0-\\uFFFF.])";
-  var cjsRequirePost = "\\s*\\(\\s*(\"([^\"]+)\"|'([^']+)')\\s*\\)";
+  var cjsRequirePre = "(?:^\\uFEFF?|[^$_a-zA-Z\\xA0-\\uFFFF.\"\'])";
+  var cjsRequirePost = "\\s*\\(\\s*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*\')\\s*\\)";
+
   var fnBracketRegEx = /\(([^\)]*)\)/;
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
 
   function getCJSDeps(source, requireIndex) {
-    var stringLocations = [];
+    commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
+    var stringLocations = [], commentLocations = [];
 
     var match;
 
@@ -4293,14 +4295,11 @@ function amd(loader) {
     while (match = stringRegEx.exec(source))
       stringLocations.push([match.index, match.index + match[0].length]);
 
-    // remove comments
-    source = source.replace(commentRegEx, function(match, a, b, c, d, offset){
-      if(inLocation(stringLocations, offset + 1)) {
-        return match;
-      } else {
-        return '';
-      }
-    });
+    while (match = commentRegEx.exec(source)) {
+      // only track comments not starting in strings
+      if (!inLocation(stringLocations, match.index + 1))
+        commentLocations.push([match.index, match.index + match[0].length]);
+    }
 
     // determine the require alias
     var params = source.match(fnBracketRegEx);
@@ -4313,9 +4312,14 @@ function amd(loader) {
 
     var deps = [];
 
-    var match;
-    while (match = requireRegEx.exec(source))
-      deps.push(match[2] || match[3]);
+    while (match = requireRegEx.exec(source)) {
+      if(!inLocation(stringLocations, match.index) &&
+        !inLocation(commentLocations, match.index)) {
+        var dep = match[1].substr(1, match[1].length - 2);
+        if(dep)
+          deps.push(dep);
+      }
+    }
 
     return deps;
   }
