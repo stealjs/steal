@@ -10,11 +10,12 @@ var crawl = {
 	/**
 	 * Adds the properties read from a package's source to the `pkg` object.
 	 * @param {Object} context
-	 * @param {NpmPackage} pkg - 
+	 * @param {NpmPackage} pkg -
 	 * @param {String} source
 	 * @return {NpmPackage}
 	 */
 	processPkgSource: function(context, pkg, source) {
+		source = source || "{}";
 		var packageJSON = JSON.parse(source);
 		utils.extend(pkg, packageJSON);
 		context.packages.push(pkg);
@@ -137,7 +138,7 @@ var crawl = {
 			childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
 		} else {
 			// npm 2
-			childPkg.origFileUrl = childPkg.nestedFileUrl = 
+			childPkg.origFileUrl = childPkg.nestedFileUrl =
 				utils.path.depPackage(pkg.fileUrl, childPkg.name);
 
 			if(isFlat) {
@@ -147,12 +148,12 @@ var crawl = {
 			}
 		}
 
-		// check if childPkg matches a parent's version ... if it 
+		// check if childPkg matches a parent's version ... if it
 		// does ... do nothing
 		if(crawl.hasParentPackageThatMatches(context, childPkg)) {
 			return;
 		}
-		
+
 		if(crawl.isSameRequestedVersionFound(context, childPkg)) {
 			return;
 		}
@@ -204,12 +205,12 @@ var crawl = {
 	 */
 	getDependencies: function(loader, packageJSON, isRoot){
 		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
-		
+
 		var dependencies = [];
 		for(var name in deps) {
 			dependencies.push(deps[name]);
 		}
-		
+
 		return dependencies;
 	},
 	/**
@@ -241,7 +242,7 @@ var crawl = {
 			config.npmDependencies = convertToMap(npmDependencies);
 		}
 		npmIgnore = npmIgnore || {};
-		
+
 		var deps = {};
 
 		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
@@ -268,13 +269,13 @@ var crawl = {
 			context.versions[childPkg.name] = {};
 		}
 		var versions = context.versions[childPkg.name];
-		
+
 		var requestedRange = childPkg.version;
-		
+
 		if( !SemVer.validRange(childPkg.version) ) {
-			
+
 			if(/^[\w_\-]+\/[\w_\-]+(#[\w_\-]+)?$/.test(requestedRange)  ) {
-							
+
 				requestedRange = "git+https://github.com/"+requestedRange;
 				if(!/(#[\w_\-]+)?$/.test(requestedRange)) {
 					requestedRange += "#master";
@@ -282,7 +283,7 @@ var crawl = {
 			}
 		}
 		var version = versions[requestedRange];
-		
+
 		if(!version) {
 			versions[requestedRange] = childPkg;
 		} else {
@@ -293,14 +294,14 @@ var crawl = {
 	},
 	hasParentPackageThatMatches: function(context, childPkg){
 		// check paths
-		var parentAddress = childPkg._isPeerDependency ? 
+		var parentAddress = childPkg._isPeerDependency ?
 			utils.path.peerNodeModuleAddress(childPkg.origFileUrl) :
 			utils.path.parentNodeModuleAddress(childPkg.origFileUrl);
 		while( parentAddress ) {
 			var packageAddress = parentAddress+"/"+childPkg.name+"/package.json";
 			var parentPkg = context.paths[packageAddress];
 			if(parentPkg) {
-				if(SemVer.valid(parentPkg.version) && 
+				if(SemVer.valid(parentPkg.version) &&
 				   SemVer.satisfies(parentPkg.version, childPkg.version)) {
 					return parentPkg;
 				}
@@ -438,7 +439,7 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 
 		return !!(!npmIgnore || !npmIgnore[name]);
 	}
-	
+
 	defaultProps = defaultProps || {};
 	var val;
 	for(var name in dependencies) {
@@ -519,7 +520,7 @@ utils.extend(FetchTask.prototype, {
 		var pkg = pkg || this.getPackage();
 		var requestedVersion = this.requestedVersion;
 
-		return SemVer.validRange(requestedVersion) && 
+		return SemVer.validRange(requestedVersion) &&
 			SemVer.valid(pkg.version) ?
 			SemVer.satisfies(pkg.version, requestedVersion) : true;
 	},

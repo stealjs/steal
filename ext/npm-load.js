@@ -50,7 +50,7 @@ exports.makeSource = function(context, pkg){
 		(pkgMain ? "if(!loader.main){ loader.main = " +
 		 JSON.stringify(pkgMain) + "; }\n" : "") +
 		"loader._npmExtensions = [].slice.call(arguments, 2);\n" +
-		"("+ translateConfig.toString() + ")(loader, " + 
+		"("+ translateConfig.toString() + ")(loader, " +
 		JSON.stringify(context.pkgInfo, null, " ") + ", " +
 		JSON.stringify(options, null, " ") + ");\n" +
 	"});";
@@ -153,20 +153,6 @@ var translateConfig = function(loader, packages, options){
 			fn.call(arr, arr[i]);
 		}
 	};
-	var setupLiveReload = function(){
-		var hasLiveReload = !!(loader.liveReloadInstalled || loader._liveMap);
-		if(hasLiveReload) {
-			loader["import"]("live-reload", { name: module.id }).then(function(reload){
-				reload.dispose(function(){
-					// Remove state created by the config.
-					delete loader.npm;
-					delete loader.npmPaths;
-					delete loader.npmParentMap;
-					delete loader.npmContext;
-				});
-			});
-		}
-	};
 
 	var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
 	packages.reverse();
@@ -215,7 +201,6 @@ var translateConfig = function(loader, packages, options){
 			loader.config(ext.systemConfig);
 		}
 	});
-	setupLiveReload();
 };
 
 /**
