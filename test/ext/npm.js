@@ -16,7 +16,7 @@ var isNode = typeof process === "object" &&
  */
 exports.translate = function(load){
 	var loader = this;
-	
+
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
