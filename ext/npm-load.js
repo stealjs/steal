@@ -150,7 +150,28 @@ var translateConfig = function(loader, packages, options){
 	var forEach = function(arr, fn){
 		var i = 0, len = arr.length;
 		for(; i < len; i++) {
-			fn.call(arr, arr[i]);
+			res = fn.call(arr, arr[i], i);
+			if(res === false) break;
+		}
+	};
+	var setupLiveReload = function(){
+		if(loader.liveReloadInstalled) {
+			loader["import"]("live-reload", { name: module.id })
+			.then(function(reload){
+				reload.dispose(function(){
+					var pkgInfo = loader.npmContext.pkgInfo;
+					delete pkgInfo[rootPkg.name+"@"+rootPkg.version];
+					var idx = -1;
+					forEach(pkgInfo, function(pkg, i){
+						if(pkg.name === rootPkg.name &&
+							pkg.version === rootPkg.version) {
+							idx = i;
+							return false;
+						}
+					});
+					pkgInfo.splice(idx, 1);
+				});
+			});
 		}
 	};
 
@@ -195,6 +216,7 @@ var translateConfig = function(loader, packages, options){
 		var pkgAddress = pkg.fileUrl.replace(/\/package\.json.*/, "");
 		loader.npmPaths[pkgAddress] = pkg;
 	});
+	setupLiveReload();
 	forEach(loader._npmExtensions || [], function(ext){
 		// If there is a systemConfig use that as configuration
 		if(ext.systemConfig) {
