@@ -14,10 +14,31 @@ module.exports = function (grunt) {
 		},
 		release: {},
 		concat: {
+			system: {
+				src: [
+					"src/base/lib/banner.js",
+					"src/base/lib/polyfill-wrapper-start.js",
+					"src/base/lib/util.js",
+					"src/base/lib/extension-core.js",
+					"src/base/lib/extension-meta.js",
+					"src/base/lib/extension-register.js",
+					"src/base/lib/extension-es6.js",
+					"src/base/lib/extension-global.js",
+					"src/base/lib/extension-cjs.js",
+					"src/base/lib/extension-amd.js",
+					"src/base/lib/extension-map.js",
+					"src/base/lib/extension-plugins.js",
+					"src/base/lib/extension-bundles.js",
+					"src/base/lib/extension-depCache.js",
+					"src/base/lib/register-extensions.js",
+					"src/base/lib/polyfill-wrapper-end.js"
+				],
+				dest: "src/base/base.js"
+			},
 			dist: {
 				src: [
 					"node_modules/steal-es6-module-loader/dist/es6-module-loader.src.js",
-					"node_modules/steal-systemjs/dist/system.src.js",
+					"src/base/base.js",
 					"src/start.js",
 					"src/normalize.js",
 					"src/core.js",		// starts makeSteal
@@ -59,6 +80,7 @@ module.exports = function (grunt) {
 					"src/node-require.js",
 					"src/import.js",
 					"src/make-steal-end.js", // ends makeSteal
+					"src/base/base.js",
 					"src/end.js"
 				],
 				dest: "main.js"
@@ -142,7 +164,7 @@ module.exports = function (grunt) {
 
 		},
 		watch: {
-			files: ["src/*.js", "node_modules/systemjs/dist/**"],
+			files: ["src/*.js"],
 			tasks: "default"
 		},
 		jshint: {
@@ -163,7 +185,8 @@ module.exports = function (grunt) {
 					browsers: ["firefox"]
 				},
 				src: [
-					"test/test.html"
+					"test/test.html",
+					"src/base/base_test.html"
 				]
 			}
 		},
