@@ -52,7 +52,7 @@
     "qunitjs": "^1.17.1",
     "saucelabs": "^1.3.0",
     "steal-env": "^1.0.0",
-    "steal-es6-module-loader": "0.17.16",
+    "steal-es6-module-loader": "0.17.17",
     "steal-npm": "1.0.10",
     "steal-qunit": "^1.0.0",
     "system-bower": "stealjs/system-bower#v0.2.1",
