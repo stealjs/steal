@@ -1,5 +1,4 @@
 	if( isNode && !isNW ) {
-		require('steal-systemjs');
 
 		global.steal = makeSteal(System);
 		global.steal.System = System;
