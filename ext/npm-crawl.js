@@ -477,6 +477,8 @@ utils.extend(FetchTask.prototype, {
 		var pkg = this.pkg;
 		var fileUrl = pkg.fileUrl = pkg.nextFileUrl || pkg.origFileUrl;
 
+		this.fileUrl = fileUrl;
+
 		var promise = this.handleCurrentlyLoading() ||
 			this.handleAlreadyLoaded();
 
@@ -502,6 +504,8 @@ utils.extend(FetchTask.prototype, {
 
 			if(!task.isCompatibleVersion()) {
 				task.failed = true;
+				task.error = new Error("Incompatible package version requested");
+
 			}
 			delete context.loadingPaths[fileUrl];
 		}, function(err){
@@ -552,20 +556,37 @@ utils.extend(FetchTask.prototype, {
 		// If a task is currently loading this fileUrl,
 		// wait for it to complete
 		var loadingTask = this.context.loadingPaths[this.fileUrl];
-		if(loadingTask) {
-			var task = this;
-			return loadingTask.promise.then(function(){
-				if(loadingTask.hadErrorLoading()) {
-					task.error = loadingTask.error;
-					task.failed = true;
-				} else {
-					task._fetchedPackage = loadingTask.getPackage();
-					if(!task.isCompatibleVersion()) {
-						task.failed = true;
-					}
-				}
-			});
-		}
+		if (!loadingTask) return;
+
+		var task = this;
+		return loadingTask.promise.then(function() {
+			task._fetchedPackage = loadingTask.getPackage();
+
+			var firstTaskFailed = loadingTask.hadErrorLoading();
+			var currentTaskIsCompatible = task.isCompatibleVersion();
+			var firstTaskIsNotCompatible = !loadingTask.isCompatibleVersion();
+
+			// Do not flag the current task as failed if:
+			//
+			//	- Current task fetches a version in rage and
+			//	- First task had no error loading at all or
+			//	- First task fetched an incompatible version
+			//
+			// otherwise, assume current task will fail for the same reason as
+			// the first did
+			if (currentTaskIsCompatible && (!firstTaskFailed || firstTaskIsNotCompatible)) {
+				task.failed = false;
+				task.error = null;
+			}
+			else if (!currentTaskIsCompatible) {
+				task.failed = true;
+				task.error = new Error("Incompatible package version requested");
+			}
+			else if (firstTaskFailed) {
+				task.failed = true;
+				task.error = loadingTask.error;
+			}
+		});
 	},
 
 	/**
