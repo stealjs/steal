@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+		System.import("package.json!npm").then(function(){
+			System.import(System.main);
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

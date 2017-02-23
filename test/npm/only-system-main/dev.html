@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+	<script>
+		var steal = {
+			paths: {
+				"npm": "../../ext/npm.js",
+				"npm-utils": "../../ext/npm-utils.js",
+				"npm-extension": "../../ext/npm-extension.js",
+				"npm-crawl": "../../ext/npm-crawl.js",
+				"npm-load": "../../ext/npm-load.js",
+				"npm-convert": "../../ext/npm-convert.js",
+				"semver": "../../ext/semver.js",
+				"@traceur": "../../node_modules/steal/ext/traceur.js",
+				"css": "../../node_modules/steal/ext/css.js"
+			}
+		}
+	</script>
+	<script src="../../../steal.js"
+		config="package.json!npm"></script>
+</body>
+</html>

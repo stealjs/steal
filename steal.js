@@ -1265,7 +1265,6 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
-//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -6296,7 +6295,6 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
-//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -7989,8 +7987,6 @@ var $__curScript, __eval;
     $__global.upgradeSystemLoader();
   }
   else if(isNode) {
-    // $__global.System = System;
-    // $__global.Loader = LoaderPolyfill;
     $__global.upgradeSystemLoader();
     module.exports = $__global.System;
 

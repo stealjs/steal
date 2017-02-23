@@ -391,39 +391,6 @@ QUnit.module("steal via system import");
 		makeIframe("json/dev.html");
 	});
 
-	QUnit.module("npm");
-
-	asyncTest("default-main", function(){
-		makeIframe("npm/default-main.html");
-	});
-
-	asyncTest("alt-main", function(){
-		makeIframe("npm/alt-main.html");
-	});
-
-	// This test uses jQuery 2.x
-	if(supportsES) {
-		asyncTest("production", function(){
-			makeIframe("npm/prod.html");
-		});
-	}
-
-	asyncTest("with bower", function(){
-		makeIframe("npm/bower/index.html");
-	});
-
-	asyncTest("forward slash with npm", function(){
-		makeIframe("npm-deep/dev.html");
-	});
-
-	asyncTest("meta config is deep", function(){
-		makeIframe("meta-deep/index.html");
-	});
-
-	asyncTest("meta globals config works", function() {
-		makeIframe("globals/index.html");
-	});
-
 	QUnit.module("Bower extension");
 
 	asyncTest("Basics work", function(){

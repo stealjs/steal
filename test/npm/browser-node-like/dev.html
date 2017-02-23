@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../node_modules/steal/steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+		
+		System.import("package.json!npm").then(function(){
+			System.import(System.main).then(function(main){
+				if(window.QUnit) {
+					QUnit.equal(main, "browser", "index.js loaded");
+					removeMyself();
+				} else {
+					console.log(main);
+				}
+				
+			}, function(e){
+				if(window.QUnit) {
+					QUnit.ok(false, e);
+					removeMyself();
+				} else {
+					console.log(e);
+					setTimeout(function(){
+						throw e;
+					});
+				}
+				
+			});
+			
+			
+		}).then(null, function(err){
+			console.error("Oh no, error!", err, err.stack);
+		});
+	</script>
+</body>
+</html>
