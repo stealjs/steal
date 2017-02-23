@@ -252,8 +252,8 @@ define(function(require) {
 	}
 
 	function hasMutationObserver () {
-	    return (typeof MutationObserver !== 'undefined' && MutationObserver) ||
-			(typeof WebKitMutationObserver !== 'undefined' && WebKitMutationObserver);
+		return (typeof MutationObserver === 'function' && MutationObserver) ||
+			(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver);
 	}
 
 	function initMutationObserver(MutationObserver) {
@@ -1220,28 +1220,6 @@ define(function() {
 
 		function noop() {}
 
-		function hasCustomEvent() {
-			if(typeof CustomEvent === 'function') {
-				try {
-					var ev = new CustomEvent('unhandledRejection');
-					return ev instanceof CustomEvent;
-				} catch (ignoredException) {}
-			}
-			return false;
-		}
-
-		function hasInternetExplorerCustomEvent() {
-			if(typeof document !== 'undefined' && typeof document.createEvent === 'function') {
-				try {
-					// Try to create one event to make sure it's supported
-					var ev = document.createEvent('CustomEvent');
-					ev.initCustomEvent('eventType', false, true, {});
-					return true;
-				} catch (ignoredException) {}
-			}
-			return false;
-		}
-
 		function initEmitRejection() {
 			/*global process, self, CustomEvent*/
 			if(typeof process !== 'undefined' && process !== null
@@ -1255,9 +1233,15 @@ define(function() {
 						? process.emit(type, rejection.value, rejection)
 						: process.emit(type, rejection);
 				};
-			} else if(typeof self !== 'undefined' && hasCustomEvent()) {
-				return (function (self, CustomEvent) {
-					return function (type, rejection) {
+			} else if(typeof self !== 'undefined' && typeof CustomEvent === 'function') {
+				return (function(noop, self, CustomEvent) {
+					var hasCustomEvent = false;
+					try {
+						var ev = new CustomEvent('unhandledRejection');
+						hasCustomEvent = ev instanceof CustomEvent;
+					} catch (e) {}
+
+					return !hasCustomEvent ? noop : function(type, rejection) {
 						var ev = new CustomEvent(type, {
 							detail: {
 								reason: rejection.value,
@@ -1269,19 +1253,7 @@ define(function() {
 
 						return !self.dispatchEvent(ev);
 					};
-				}(self, CustomEvent));
-			} else if(typeof self !== 'undefined' && hasInternetExplorerCustomEvent()) {
-				return (function(self, document) {
-					return function(type, rejection) {
-						var ev = document.createEvent('CustomEvent');
-						ev.initCustomEvent(type, false, true, {
-							reason: rejection.value,
-							key: rejection
-						});
-
-						return !self.dispatchEvent(ev);
-					};
-				}(self, document));
+				}(noop, self, CustomEvent));
 			}
 
 			return noop;
@@ -1293,7 +1265,6 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
-//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;
@@ -5311,8 +5282,8 @@ define(function(require) {
 	}
 
 	function hasMutationObserver () {
-	    return (typeof MutationObserver !== 'undefined' && MutationObserver) ||
-			(typeof WebKitMutationObserver !== 'undefined' && WebKitMutationObserver);
+		return (typeof MutationObserver === 'function' && MutationObserver) ||
+			(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver);
 	}
 
 	function initMutationObserver(MutationObserver) {
@@ -6279,28 +6250,6 @@ define(function() {
 
 		function noop() {}
 
-		function hasCustomEvent() {
-			if(typeof CustomEvent === 'function') {
-				try {
-					var ev = new CustomEvent('unhandledRejection');
-					return ev instanceof CustomEvent;
-				} catch (ignoredException) {}
-			}
-			return false;
-		}
-
-		function hasInternetExplorerCustomEvent() {
-			if(typeof document !== 'undefined' && typeof document.createEvent === 'function') {
-				try {
-					// Try to create one event to make sure it's supported
-					var ev = document.createEvent('CustomEvent');
-					ev.initCustomEvent('eventType', false, true, {});
-					return true;
-				} catch (ignoredException) {}
-			}
-			return false;
-		}
-
 		function initEmitRejection() {
 			/*global process, self, CustomEvent*/
 			if(typeof process !== 'undefined' && process !== null
@@ -6314,9 +6263,15 @@ define(function() {
 						? process.emit(type, rejection.value, rejection)
 						: process.emit(type, rejection);
 				};
-			} else if(typeof self !== 'undefined' && hasCustomEvent()) {
-				return (function (self, CustomEvent) {
-					return function (type, rejection) {
+			} else if(typeof self !== 'undefined' && typeof CustomEvent === 'function') {
+				return (function(noop, self, CustomEvent) {
+					var hasCustomEvent = false;
+					try {
+						var ev = new CustomEvent('unhandledRejection');
+						hasCustomEvent = ev instanceof CustomEvent;
+					} catch (e) {}
+
+					return !hasCustomEvent ? noop : function(type, rejection) {
 						var ev = new CustomEvent(type, {
 							detail: {
 								reason: rejection.value,
@@ -6328,19 +6283,7 @@ define(function() {
 
 						return !self.dispatchEvent(ev);
 					};
-				}(self, CustomEvent));
-			} else if(typeof self !== 'undefined' && hasInternetExplorerCustomEvent()) {
-				return (function(self, document) {
-					return function(type, rejection) {
-						var ev = document.createEvent('CustomEvent');
-						ev.initCustomEvent(type, false, true, {
-							reason: rejection.value,
-							key: rejection
-						});
-
-						return !self.dispatchEvent(ev);
-					};
-				}(self, document));
+				}(noop, self, CustomEvent));
 			}
 
 			return noop;
@@ -6352,7 +6295,6 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}]},{},[1])
-//# sourceMappingURL=Promise.js.map
 (1)
 });
 ;

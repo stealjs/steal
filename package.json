@@ -70,7 +70,7 @@
     "traceur": "0.0.111",
     "traceur-runtime": "jmcriffey/bower-traceur-runtime#0.0.91",
     "wd": "^1.0.0",
-    "when": "^3.7.7"
+    "when": "3.7.5"
   },
   "globalBrowser": {
     "console": "console-browserify",
