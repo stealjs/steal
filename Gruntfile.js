@@ -12,9 +12,45 @@ module.exports = function (grunt) {
 			" *  Copyright (c) <%= grunt.template.today('yyyy') %> <%= pkg.author.name %>;" +
 			" Licensed <%= _.map(pkg.licenses, 'type').join(', ') %>\n */"
 		},
-		release: {},
+		esnext: {
+			dist: {
+				src: [
+					"src/loader/lib/loader.js",
+					"src/loader/lib/transpiler.js",
+					"src/loader/lib/system.js"
+				],
+				dest: "src/loader/loader-esnext.js"
+			}
+		},
+		"string-replace": {
+			dist: {
+				files: {
+					"src/loader/loader-esnext.js": "src/loader/loader-esnext.js"
+				},
+				options: {
+					replacements:[{
+						pattern: "var $__Object$getPrototypeOf = Object.getPrototypeOf;\n" +
+							"var $__Object$defineProperty = Object.defineProperty;\n" +
+							"var $__Object$create = Object.create;",
+						replacement: ""
+					}, {
+						pattern: "$__Object$getPrototypeOf(SystemLoader.prototype).constructor",
+						replacement: "$__super"
+					}]
+				}
+			}
+		},
 		concat: {
-			system: {
+			loader: {
+				src: [
+					"node_modules/when/es6-shim/Promise.js",
+					"src/loader/lib/polyfill-wrapper-start.js",
+					"src/loader/loader-esnext.js",
+					"src/loader/lib/polyfill-wrapper-end.js"
+				],
+				dest: "src/loader/loader.js"
+			},
+			base: {
 				src: [
 					"src/base/lib/banner.js",
 					"src/base/lib/polyfill-wrapper-start.js",
@@ -31,13 +67,15 @@ module.exports = function (grunt) {
 					"src/base/lib/extension-bundles.js",
 					"src/base/lib/extension-depCache.js",
 					"src/base/lib/register-extensions.js",
+					"src/base/lib/polyfill-wrapper-closing-curly.js",
+					"src/loader/loader.js",
 					"src/base/lib/polyfill-wrapper-end.js"
 				],
 				dest: "src/base/base.js"
 			},
 			dist: {
 				src: [
-					"node_modules/steal-es6-module-loader/dist/es6-module-loader.src.js",
+					"src/loader/loader.js",
 					"src/base/base.js",
 					"src/start.js",
 					"src/normalize.js",
@@ -186,7 +224,9 @@ module.exports = function (grunt) {
 				},
 				src: [
 					"test/test.html",
-					"src/base/base_test.html"
+					"src/base/base_test.html",
+					"src/loader/babel_test.html",
+					"src/loader/traceur_test.html"
 				]
 			}
 		},
@@ -200,17 +240,19 @@ module.exports = function (grunt) {
 		}
 	});
 
+	grunt.loadNpmTasks('grunt-string-replace');
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-simple-mocha");
-	grunt.loadNpmTasks("grunt-release");
+	grunt.loadNpmTasks('grunt-esnext');
 	grunt.loadNpmTasks("testee");
 
 	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
 	grunt.registerTask("test-windows", ["build", /*"testee:windows",*/ "simplemocha"]);
-	grunt.registerTask("build", [/*"jshint", */"concat", "uglify", "copy:extensions", "copy:toTest"]);
+	grunt.registerTask("loader", ["esnext", "string-replace"]);
+	grunt.registerTask("build", ["loader", "concat", "uglify", "copy:extensions", "copy:toTest"]);
 	grunt.registerTask("default", ["build"]);
 };

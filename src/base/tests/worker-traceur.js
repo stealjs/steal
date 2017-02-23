@@ -1,5 +1,4 @@
-importScripts('../../node_modules/steal-es6-module-loader/dist/es6-module-loader.js',
-              '../../dist/system.js');
+importScripts('../../loader/loader.js', '../base.js');
 
 System.baseURL = '../';
 System.paths['traceur'] = '../node_modules/traceur/bin/traceur.js';

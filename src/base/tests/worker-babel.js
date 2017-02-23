@@ -1,5 +1,4 @@
-importScripts('../../../node_modules/steal-es6-module-loader/dist/es6-module-loader.js',
-              '../base.js');
+importScripts('../../loader/loader.js', '../base.js');
 
 System.baseURL = '../';
 System.paths['babel'] = '../../node_modules/babel-core/browser.js';
