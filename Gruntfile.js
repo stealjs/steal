@@ -143,13 +143,6 @@ module.exports = function (grunt) {
 			// copy plugins that steal should contain
 			extensions: {
 				files: [
-					{src: ["node_modules/steal-npm/npm.js"], dest: "ext/npm.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-convert.js"], dest: "ext/npm-convert.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-load.js"], dest: "ext/npm-load.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/semver.js"], dest: "ext/semver.js", filter: "isFile"},
 					{src: ["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: "isFile"},
@@ -223,10 +216,11 @@ module.exports = function (grunt) {
 					browsers: ["firefox"]
 				},
 				src: [
-					"test/test.html",
-					"src/base/base_test.html",
 					"src/loader/babel_test.html",
-					"src/loader/traceur_test.html"
+					"src/loader/traceur_test.html",
+					"src/base/base_test.html",
+					"test/npm/test.html",
+					"test/test.html"
 				]
 			}
 		},

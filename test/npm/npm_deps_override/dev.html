@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+
+		var fetch = System.fetch;
+		System.fetch = function(load){
+			if(/two/.test(load.name)) {
+				if(window.QUnit) {
+					QUnit.ok(false, "loading file we shouldn't load");
+				}
+			}
+			return fetch.call(this, load);
+		};
+
+		System.import("package.json!npm").then(function(){
+			System.import(System.main).then(function(main){
+				if(window.QUnit) {
+					QUnit.equal(main.name, "main", "got the main");
+					QUnit.equal(main.one.name, "one", "got one");
+					QUnit.equal(main.one.three.name, "three", "got three");
+					removeMyself();
+				} else {
+					console.log(main);
+				}
+
+			}, function(e){
+				if(window.QUnit) {
+					QUnit.ok(false, e);
+					removeMyself();
+				} else {
+					console.log(e);
+					setTimeout(function(){
+						throw e;
+					});
+				}
+
+			});
+
+
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

@@ -12,7 +12,7 @@ describe("default configuration", function () {
 
 	it("with a npm configuration", function (done) {
 		var steal = makeSteal({
-			config: __dirname+"/npm-deep/package.json!npm"
+			config: __dirname + "/npm/npm-deep/package.json!npm"
 		});
 		steal.startup().then(function(main){
 			assert.ok(main, 'main');

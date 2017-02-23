@@ -115,7 +115,7 @@ function convertPropertyNamesAndValues (context, pkg, map, root, waiting) {
 	var clone = {}, val, name;
 	for(var property in map ) {
 		val = map[property];
-		name = convertName(context, pkg, map, root, property, waiting); 
+		name = convertName(context, pkg, map, root, property, waiting);
 		val = typeof val === "object"
 			? convertPropertyNamesAndValues(context, pkg, val, root, waiting)
 			: convertName(context, pkg, map, root, val, waiting);
@@ -259,7 +259,7 @@ function convertBrowserProperty(map, pkg, fromName, toName) {
 	} else if(utils.isArray(toName)) {
 		toResult = toName;
 	}
-	
+
 	map[utils.moduleName.create(fromParsed)] = toResult;
 }
 
@@ -344,7 +344,7 @@ function convertLater(context, waiting, fn) {
 /**
  * When progressively loading package.jsons we need to convert any config
  * that is waiting on a package.json to load. This function is called after
- * a package is loaded and will call all of the callbacks that cause the 
+ * a package is loaded and will call all of the callbacks that cause the
  * config to be applied.
  */
 function convertForPackage(context, pkg) {

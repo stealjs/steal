@@ -1,0 +1,12 @@
+{
+  "name": "npm-live-reload",
+  "main": "main",
+  "version": "1.0.0",
+  "dependencies": {
+  },
+  "system": {
+    "configDependencies": [
+      "live-reload"
+    ]
+  }
+}

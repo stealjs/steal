@@ -14,3 +14,5 @@ test/bower/as_config/vendor/steal/
 !test/nested-npm-algorithm/node_modules/some/node_modules/
 !test/import-js-file/node_modules/
 src/loader/loader-esnext.js
+test/npm/live-reload/node_modules/
+test/npm/conditionals/node_modules/steal-conditional

@@ -1,0 +1,9 @@
+{
+  "name": "in_worker",
+  "version": "0.0.0",
+  "main": "main.js",
+  "dependencies": {
+  },
+  "system": {
+  }
+}

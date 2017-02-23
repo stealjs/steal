@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+	<title>steal-conditional and system-npm tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js" config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+
+	<script>
+		System.import("package.json!npm")
+			.then(function() {
+				return System.import(System.main)
+			})
+			.catch(function(e) {
+				if (window.QUnit) {
+					QUnit.ok(false, e);
+					removeMyself();
+				} else {
+					console.log("error ", e);
+					setTimeout(function(){
+						throw e;
+					});
+				}
+			});
+	</script>
+</body>
+</html>

@@ -285,12 +285,12 @@ var utils = {
 							parsedModuleName.modulePath = utils.pkg.main(refPkg);
 							makePathRelative = false;
 						} else {
-							parsedModuleName.modulePath = name + 
+							parsedModuleName.modulePath = name +
 								(utils.path.endsWithSlash(name) ? "" : "/") +
 								"index";
 						}
-					} 
-					
+					}
+
 					if(makePathRelative) {
 						// Make the path relative to the parentName's path.
 						parsedModuleName.modulePath = utils.path.makeRelative(
@@ -493,7 +493,7 @@ var utils = {
 			var steal = utils.pkg.config(pkg);
 			var lib = steal && steal.directories && steal.directories.lib;
 			var ignores = [".", "/"], ignore;
-			
+
 			if(!lib) return undefined;
 
 			while(!!(ignore = ignores.shift())) {

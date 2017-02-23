@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+
+		System.import("package.json!npm").then(function(){
+			System.import(System.main).then(function(main){
+				if(window.QUnit) {
+					QUnit.equal(main.name, "my-moment", "Got the stub moment");
+					QUnit.equal(main.dep.name, "dep", "Got the dep");
+					QUnit.equal(main.dep.moment, "real", "Dep got the real moment");
+					QUnit.equal(main.moment, "real", "my-moment got the real moment too");
+					removeMyself();
+				} else {
+					console.log(main);
+				}
+
+			}, function(e){
+				if(window.QUnit) {
+					QUnit.ok(false, e);
+					removeMyself();
+				} else {
+					console.log(e);
+					setTimeout(function(){
+						throw e;
+					});
+				}
+
+			});
+
+
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

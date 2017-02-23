@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+		function hasQUnit() {
+			return typeof QUnit !== "undefined";
+		}
+
+		System.import("package.json!npm").then(function(){
+			return System.normalize("dep");
+		}).then(function(){
+			if(hasQUnit()) {
+				QUnit.equal(System.paths["dep@1.2.2#other"], "other.js");
+			} else {
+				console.log(System.paths["dep@1.2.2#other"]);
+			}
+
+			System.config({
+				map: {
+					"dep/dep": "dep"
+				},
+				paths: {
+					"dep": "util.js"
+				}
+			});
+
+			if(hasQUnit()) {
+				QUnit.equal(System.map["dep@1.2.2#dep"], "dep@1.2.2#main");
+				QUnit.equal(System.paths["dep@1.2.2#main"], "util.js");
+
+				removeMyself();
+			} else {
+				console.log(System.map["dep@1.2.2#dep"],
+					System.paths["dep@1.2.2#main"]);
+			}
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>
