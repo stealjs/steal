@@ -1,0 +1,11 @@
+{
+	"name": "ignorer",
+	"main": "main.js",
+	"dependencies": {
+		"ignoreme": "1.0.0"
+	},
+	"system": {
+		"bowerIgnore": [ "ignoreme" ]
+		
+	}
+}

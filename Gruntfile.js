@@ -146,8 +146,7 @@ module.exports = function (grunt) {
 					{src: ["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: "isFile"},
-					{src: ["node_modules/system-bower/bower.js"], dest: "ext/bower.js", filter: "isFile"},
-					{src: ["node_modules/babel-standalone/babel.js"], dest: "ext/babel.js", filter: "isFile"},
+					{src: ["node_modules/babel-standalone/babel.js"], dest: "ext/babel.js", filter: "isFile"}
 				]
 			},
 			toTest: {
@@ -161,35 +160,7 @@ module.exports = function (grunt) {
 					{expand: true, src: core, dest: "test/steal-module-script/node_modules/steal/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/bower/bower_components/steal/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/bower/npm/bower_components/steal/", filter: "isFile"},
-					{expand: true, src: ["node_modules/jquery/**"], dest: "test/npm/", filter: "isFile"},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower_components/system-bower/",
-						filter: "isFile"
-					},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower/bower_components/system-bower/",
-						filter: "isFile"
-					},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower/with_paths/bower_components/system-bower/",
-						filter: "isFile"
-					},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower/as_config/vendor/system-bower/",
-						filter: "isFile"
-					}
+					{expand: true, src: ["node_modules/jquery/**"], dest: "test/npm/", filter: "isFile"}
 				]
 			},
 
@@ -219,6 +190,7 @@ module.exports = function (grunt) {
 					"src/loader/babel_test.html",
 					"src/loader/traceur_test.html",
 					"src/base/base_test.html",
+					"test/bower/test.html",
 					"test/npm/test.html",
 					"test/test.html"
 				]

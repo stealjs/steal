@@ -1,0 +1,7 @@
+{
+	"name": "system_main",
+	"main": "first.js",
+	"system": {
+		"main": "second"
+	}
+}

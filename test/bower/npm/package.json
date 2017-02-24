@@ -1,8 +1,0 @@
-{
-  "name": "bower-with-npm",
-  "main": "main",
-  "version": "1.0.0",
-  "dependencies": {
-    "bar": ">2.0"
-  }
-}

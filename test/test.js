@@ -391,23 +391,6 @@ QUnit.module("steal via system import");
 		makeIframe("json/dev.html");
 	});
 
-	QUnit.module("Bower extension");
-
-	asyncTest("Basics work", function(){
-		makeIframe("bower/site.html");
-	});
-	asyncTest("Works in place of @config", function(){
-		makeIframe("bower/as_config/site.html");
-	});
-
-	asyncTest("Loads config automatically", function(){
-		makeIframe("bower/default-config.html");
-	});
-
-	asyncTest("with npm", function(){
-		makeIframe("bower/npm/index.html");
-	});
-
 	QUnit.module("Web Workers");
 
 	if(window.Worker) {
