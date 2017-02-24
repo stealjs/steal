@@ -64,7 +64,6 @@
     "steal-conditional": "^0.3.2",
     "steal-env": "^1.0.0",
     "steal-qunit": "^1.0.0",
-    "system-bower": "stealjs/system-bower#v0.2.1",
     "system-live-reload": "1.5.3",
     "testee": "^0.3.0",
     "traceur": "0.0.111",
