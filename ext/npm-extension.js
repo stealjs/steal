@@ -1,5 +1,6 @@
 "format cjs";
 
+var steal = require("@steal");
 var utils = require("./npm-utils");
 exports.includeInBuild = true;
 
@@ -389,23 +390,24 @@ exports.addExtension = function(System){
 		oldConfig.apply(loader, arguments);
 	};
 
-	if (typeof steal !== undefined) {
-		steal.addNpmPackages = function(packages) {
-			packages = packages || [];
 
-			for (var pkg of packages) {
-				var path = pkg && pkg.fileUrl;
+	steal.addNpmPackages = function(packages) {
+		packages = packages || [];
+		var loader = this.loader;
 
-				if (path) {
-					System.npmContext.paths[path] = pkg;
-				}
+		for (var i = 0; i < packages.length; i += 1) {
+			var pkg = packages[i];
+			var path = pkg && pkg.fileUrl;
+
+			if (path) {
+				loader.npmContext.paths[path] = pkg;
 			}
-		};
-
-		steal.getNpmPackages = function() {
-			var context = System.npmContext;
-			return context ? (context.packages || []) : [];
 		}
+	};
+
+	steal.getNpmPackages = function() {
+		var context = this.loader.npmContext;
+		return context ? (context.packages || []) : [];
 	}
 
 	function retryFetch(load, type) {
