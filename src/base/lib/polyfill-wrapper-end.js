@@ -1,3 +1,5 @@
+};
+
 var $__curScript, __eval;
 
 (function() {
@@ -49,6 +51,9 @@ var $__curScript, __eval;
     $__global.upgradeSystemLoader();
   }
   else if(isNode) {
+    var es6ModuleLoader = require('./src/loader');
+    $__global.System = es6ModuleLoader.System;
+    $__global.Loader = es6ModuleLoader.Loader;
     $__global.upgradeSystemLoader();
     module.exports = $__global.System;
 

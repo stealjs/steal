@@ -67,8 +67,6 @@ module.exports = function (grunt) {
 					"src/base/lib/extension-bundles.js",
 					"src/base/lib/extension-depCache.js",
 					"src/base/lib/register-extensions.js",
-					"src/base/lib/polyfill-wrapper-closing-curly.js",
-					"src/loader/loader.js",
 					"src/base/lib/polyfill-wrapper-end.js"
 				],
 				dest: "src/base/base.js"
