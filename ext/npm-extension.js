@@ -389,6 +389,25 @@ exports.addExtension = function(System){
 		oldConfig.apply(loader, arguments);
 	};
 
+	if (typeof steal !== undefined) {
+		steal.addNpmPackages = function(packages) {
+			packages = packages || [];
+
+			for (var pkg of packages) {
+				var path = pkg && pkg.fileUrl;
+
+				if (path) {
+					System.npmContext.paths[path] = pkg;
+				}
+			}
+		};
+
+		steal.getNpmPackages = function() {
+			var context = System.npmContext;
+			return context ? (context.packages || []) : [];
+		}
+	}
+
 	function retryFetch(load, type) {
 		var loader = this;
 
