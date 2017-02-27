@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script base-url="./" config-main="@empty" src="../../../steal.js"></script>
+	<script src="../system_test_config.js"></script>
+
+	<script>
+		System.import("package.json!npm").then(function() {
+			if (window.QUnit) {
+				QUnit.ok(typeof steal !== "undefined", "steal should be defined");
+				QUnit.equal(typeof steal.addNpmPackages, "function", "steal.addNpmPackages should be a function");
+				QUnit.equal(typeof steal.getNpmPackages, "function", "steal.getNpmPackages should be a function");
+				removeMyself();
+			} else {
+				console.log("addNpmPackages: ", steal.addNpmPackages);
+				console.log("getNpmPackages: ", steal.addNpmPackages);
+			}
+		}).then(null, function(err) {
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

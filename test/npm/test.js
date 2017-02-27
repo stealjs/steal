@@ -321,4 +321,8 @@ asyncTest("meta globals config works", function() {
 	makeIframe("globals/dev.html");
 });
 
+asyncTest("npm extension helpers to add/get packages", function() {
+	makeIframe("steal_npm_helpers/dev.html");
+});
+
 QUnit.start();
