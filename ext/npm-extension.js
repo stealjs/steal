@@ -120,9 +120,12 @@ exports.addExtension = function(System){
 				if(parentPkg) {
 					wantedPkg = crawl.getDependencyMap(this, parentPkg, isRoot)[parsedModuleName.packageName];
 					if(wantedPkg) {
+						var wantedVersion = (refPkg.resolutions &&
+							refPkg.resolutions[wantedPkg.name]) || wantedPkg.version;
+
 						var foundPkg = crawl.matchedVersion(this.npmContext,
 															wantedPkg.name,
-															wantedPkg.version);
+															wantedVersion);
 						if(foundPkg) {
 							depPkg = utils.pkg.findByUrl(this, foundPkg.fileUrl);
 						}
