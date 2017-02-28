@@ -248,12 +248,11 @@ var crawl = {
 		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
 				"peerDependencies", {_isPeerDependency: true});
 
-		addDeps(packageJSON, packageJSON.dependencies || {}, deps, "dependencies");
+		addDeps(packageJSON, packageJSON.dependencies || {}, deps,
+			"dependencies");
 
-		if(isRoot) {
-			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
-				   "devDependencies");
-		}
+		addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+			"devDependencies");
 
 		return deps;
 	},
