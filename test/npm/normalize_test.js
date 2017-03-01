@@ -851,6 +851,47 @@ QUnit.test("A package's steal.main is retained when loading dependant packages",
 	.then(done, helpers.fail(assert, done));
 });
 
+QUnit.test("A dependency can load its devDependencies if they happen to exist", function(assert){
+	var done = assert.async();
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				foo: "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "foo",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					bar: "1.0.0"
+				}
+			},
+			{
+				name: "bar",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])
+		.loader;
+
+	helpers.init(loader)
+	.then(function(){
+		return loader.normalize("foo", "app@1.0.0#main");
+	})
+	.then(function(){
+		return loader.normalize("bar", "foo@1.0.0#main");
+	})
+	.then(function(name){
+		assert.equal(name, "bar@1.0.0#main");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
 QUnit.module("plugins configuration");
 
 QUnit.test("Works from the root package", function(assert){
