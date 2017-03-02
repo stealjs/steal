@@ -121,6 +121,7 @@
 				return false;
 			}
 		})(),
-		isNode = isNode && !isNW,
+		isElectron = isNode && !!process.versions["electron"],
+		isNode = isNode && !isNW && !isElectron,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};

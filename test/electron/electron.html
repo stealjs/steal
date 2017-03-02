@@ -7,14 +7,13 @@
 		nextTick: function(fn){
 			setTimeout(fn, 0);
 		},
-		platform: "web",
-		versions: {}
+		versions: {
+			electron: "1.0.0"
+		},
+		platform: "eletron"
 	};
 
 	global = window;
-	global.nw = { process: process };
-
-	require = function(){ return {}; };
 
 	var oldToString = Object.prototype.toString;
 	Object.prototype.toString = function(){

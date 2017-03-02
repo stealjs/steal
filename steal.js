@@ -5265,7 +5265,8 @@ var $__curScript, __eval;
 				return false;
 			}
 		})(),
-		isNode = isNode && !isNW,
+		isElectron = isNode && !!process.versions["electron"],
+		isNode = isNode && !isNW && !isElectron,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};
 
@@ -6530,7 +6531,7 @@ addStealExtension(function (loader) {
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
-			} else if(isBrowserWithWindow || isNW) {
+			} else if(isBrowserWithWindow || isNW || isElectron) {
 				// if the browser supports currentScript, us it!
 				if (document.currentScript) {
 					// get options from script tag and query
@@ -6702,7 +6703,7 @@ addStealExtension(function (loader) {
 	return steal;
 
 };
-	if( isNode && !isNW ) {
+	if( isNode && !isNW && !isElectron ) {
 
 		global.steal = makeSteal(System);
 		global.steal.System = System;

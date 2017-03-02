@@ -1,4 +1,4 @@
-	if( isNode && !isNW ) {
+	if( isNode && !isNW && !isElectron ) {
 
 		global.steal = makeSteal(System);
 		global.steal.System = System;

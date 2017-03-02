@@ -68,7 +68,7 @@
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
-			} else if(isBrowserWithWindow || isNW) {
+			} else if(isBrowserWithWindow || isNW || isElectron) {
 				// if the browser supports currentScript, us it!
 				if (document.currentScript) {
 					// get options from script tag and query
