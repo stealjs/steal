@@ -469,6 +469,12 @@ QUnit.module("steal via system import");
 		makeIframe("nw/nw.html");
 	});
 
+	QUnit.module("Electron");
+
+	asyncTest("steal is able to load", function(){
+		makeIframe("electron/electron.html");
+	});
+
 	QUnit.module("Service Workers");
 
 	if("serviceWorker" in navigator) {
