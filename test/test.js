@@ -10,7 +10,6 @@ require('src/trace/trace_test');
 require('test/config/config_test');
 require('test/clone/clone_test');
 
-
 QUnit.module("steal via system import");
 
 (function(){
@@ -482,4 +481,14 @@ QUnit.module("steal via system import");
 			makeIframe("service-worker/dev.html");
 		});
 	}
+
+	QUnit.module("development bundles");
+
+	asyncTest("deps bundle loads AFTER configMain", function() {
+		makeIframe("dev_bundles/deps.html");
+	});
+
+	asyncTest("dev bundle loads BEFORE configMain", function() {
+		makeIframe("dev_bundles/dev.html");
+	});
 })();
