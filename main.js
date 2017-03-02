@@ -1475,8 +1475,47 @@ addStealExtension(function (loader) {
 				});
 
 			} else {
-				loader["import"](loader.configMain)
-				.then(configResolve, configReject);
+				var configMainPromise;
+
+				// depsBundle includes the dependencies in the node_modules folder so
+				// it has to be loaded after configMain finished loading
+				if (loader.depsBundle) {
+					var depsBundlePath = (function() {
+						var dest = loader.depsBundleDest || "";
+						var endsWithSlash = dest[dest.length - 1] === "/";
+						var separator = dest && !endsWithSlash ? "/" : "";
+
+						return dest + separator + "dev-bundle";
+					}());
+
+					configMainPromise = loader["import"](loader.configMain)
+						.then(function() {
+							return loader["import"](depsBundlePath);
+						});
+				}
+				// devBundle includes the same modules as "depsBundle and it also includes
+				// the @config graph, so it should be loaded before of configMain
+				else if (loader.devBundle) {
+					var devBundlePath = (function() {
+						var dest = loader.devBundleDest || "";
+						var endsWithSlash = dest[dest.length - 1] === "/";
+						var separator = dest && !endsWithSlash ? "/" : "";
+
+						return dest + separator + "dev-bundle";
+					}());
+
+					configMainPromise = loader["import"](devBundlePath)
+						.then(function() {
+							return loader["import"](loader.configMain);
+						});
+				}
+				// no development bundle needs to be loaded, go ahead and load configMain
+				else {
+					configMainPromise = loader["import"](loader.configMain);
+				}
+
+				// resolve/reject outer configPromise
+				configMainPromise.then(configResolve, configReject);
 
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(loader);
@@ -1495,7 +1534,7 @@ addStealExtension(function (loader) {
 				return devPromise.then(function () {
 					// if there's a main, get it, otherwise, we are just loading
 					// the config.
-					if (!loader.main || loader.env === "build") {
+					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
 					var main = loader.main;
