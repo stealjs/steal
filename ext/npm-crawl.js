@@ -201,10 +201,11 @@ var crawl = {
 	 * @param {Object} loader
 	 * @param {NpmPackage} packageJSON
 	 * @param {Boolean} [isRoot]
+	 * @param {Boolean} [includeDev]
 	 * @return {Array<String>}
 	 */
 	getDependencies: function(loader, packageJSON, isRoot){
-		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
+		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot, includeDev);
 
 		var dependencies = [];
 		for(var name in deps) {
@@ -218,9 +219,10 @@ var crawl = {
 	 * @param {Object} loader
 	 * @param {Object} packageJSON
 	 * @param {Boolean} isRoot
+	 * @param {Boolean} includeDevDependenciesIfNotRoot
 	 * @return {Object<String,Range>} A map of dependency names and requested version ranges.
 	 */
-	getDependencyMap: function(loader, packageJSON, isRoot){
+	getDependencyMap: function(loader, packageJSON, isRoot, includeDevDependenciesIfNotRoot){
 		var config = utils.pkg.config(packageJSON);
 		var hasConfig = !!config;
 
@@ -251,8 +253,10 @@ var crawl = {
 		addDeps(packageJSON, packageJSON.dependencies || {}, deps,
 			"dependencies");
 
-		addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
-			"devDependencies");
+		if(isRoot || includeDevDependenciesIfNotRoot) {
+			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+				"devDependencies");
+		}
 
 		return deps;
 	},
