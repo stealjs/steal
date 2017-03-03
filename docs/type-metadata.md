@@ -70,6 +70,36 @@ the module is:
     }
     ```
 
+@option {Boolean} [useLocalDeps=false] Include module dependencies in the development bundle.
+```
+"meta": {
+  "MODULENAME": {
+    "useLocalDeps": true
+  }
+}
+```
+In this example all dependencies imported by `MODULENAME` will be included in the bundle during build.
+
+This option can be used alongside [environment dependant configuration](http://stealjs.com/docs/config.envs.html) to make sure a specific version of a module is used during build time but the original (local) module dependencies are included in the development bundle.
+
+```
+"steal": {
+  "meta": {
+    "steal-less/less": {
+      "useLocalDeps: true
+    }
+  },
+  "envs": {
+    "bundle-build": {
+      "map" {
+        "steal-less/less-engine": "steal-less/less-engine-node"
+      }
+    }
+  }
+}
+```
+The configuration above makes it so the NodeJS version of [less](http://lesscss.org/#using-less) is loaded while the application is built but `useLocalDeps` forces the local dependencies of `steal-less#less` to be included in the bundle.
+
 @option {String} [eval=function] Specify the type of *eval* that should be applied to this module.
 
 Most modules are evaled using the Function constructor like: `new Function(source).call(context)`. However, if you have a global module that looks like:
