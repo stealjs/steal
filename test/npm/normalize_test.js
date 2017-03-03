@@ -867,7 +867,7 @@ QUnit.test("A dependency can load its devDependencies if they happen to exist", 
 				name: "foo",
 				main: "main.js",
 				version: "1.0.0",
-				dependencies: {
+				devDependencies: {
 					bar: "1.0.0"
 				}
 			},
