@@ -16,8 +16,14 @@ nodeModules.forEach(function(mod) {
 	);
 });
 
-// copy test/conditionals dependencies
+// copy test/npm/conditionals dependencies
 fs.copySync(
 	path.join(root, "node_modules", "steal-conditional"),
 	path.join(root, "test", "npm", "conditionals", "node_modules", "steal-conditional")
+);
+
+// copy test/conditionals dependencies
+fs.copySync(
+	path.join(root, "node_modules", "steal-conditional"),
+	path.join(root, "test", "conditionals", "node_modules", "steal-conditional")
 );
