@@ -867,7 +867,7 @@ QUnit.test("A dependency can load its devDependencies if they happen to exist", 
 				name: "foo",
 				main: "main.js",
 				version: "1.0.0",
-				dependencies: {
+				devDependencies: {
 					bar: "1.0.0"
 				}
 			},
@@ -888,6 +888,48 @@ QUnit.test("A dependency can load its devDependencies if they happen to exist", 
 	})
 	.then(function(name){
 		assert.equal(name, "bar@1.0.0#main");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
+QUnit.test("A dependency's devDependencies are not fetched when in 'plugins'", function(assert){
+	var done = assert.async();
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				foo: "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "foo",
+				main: "main.js",
+				version: "1.0.0",
+				devDependencies: {
+					bar: "1.0.0"
+				},
+				steal: {
+					plugins: ["bar"]
+				}
+			},
+			{
+				name: "bar",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])
+		.loader;
+
+	helpers.init(loader)
+	.then(function(){
+		return loader.normalize("foo", "app@1.0.0#main");
+	})
+	.then(function(name){
+		var pkg = loader.npmPaths["./node_modules/bar"];
+		assert.equal(pkg, undefined, "This should not be fetched");
 	})
 	.then(done, helpers.fail(assert, done));
 });
