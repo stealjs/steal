@@ -482,4 +482,10 @@ QUnit.module("steal via system import");
 			makeIframe("service-worker/dev.html");
 		});
 	}
+
+	QUnit.module("conditional extension");
+
+	asyncTest("works fine with '/' and '.' in module names", function() {
+		makeIframe("conditionals/dev.html");
+	});
 })();
