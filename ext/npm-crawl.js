@@ -222,7 +222,7 @@ var crawl = {
 	 * @param {Boolean} includeDevDependenciesIfNotRoot
 	 * @return {Object<String,Range>} A map of dependency names and requested version ranges.
 	 */
-	getDependencyMap: function(loader, packageJSON, isRoot, includeDevDependenciesIfNotRoot){
+	getDependencyMap: function(loader, packageJSON, isRoot){
 		var config = utils.pkg.config(packageJSON);
 		var hasConfig = !!config;
 
@@ -253,11 +253,21 @@ var crawl = {
 		addDeps(packageJSON, packageJSON.dependencies || {}, deps,
 			"dependencies");
 
-		if(isRoot || includeDevDependenciesIfNotRoot) {
+		if(isRoot) {
 			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
 				"devDependencies");
 		}
 
+		return deps;
+	},
+	/**
+	 * Return a map of all dependencies from a package.json, including
+	 * devDependencies
+	 */
+	getFullDependencyMap: function(loader, packageJSON, isRoot){
+		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
+		addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+			"devDependencies");
 		return deps;
 	},
 	getPlugins: function(packageJSON, deps) {

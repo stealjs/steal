@@ -118,7 +118,8 @@ exports.addExtension = function(System){
 					crawl.matchedVersion(context, refPkg.name,
 										 refPkg.version);
 				if(parentPkg) {
-					wantedPkg = crawl.getDependencyMap(this, parentPkg, isRoot, true)[parsedModuleName.packageName];
+					var depMap = crawl.getFullDependencyMap(this, parentPkg, isRoot);
+					wantedPkg = depMap[parsedModuleName.packageName];
 					if(wantedPkg) {
 						var wantedVersion = (refPkg.resolutions &&
 							refPkg.resolutions[wantedPkg.name]) || wantedPkg.version;
@@ -190,7 +191,8 @@ exports.addExtension = function(System){
 				var parentPkg = crawl.matchedVersion(this.npmContext, refPkg.name,
 													 refPkg.version);
 				if(parentPkg) {
-					depPkg = crawl.getDependencyMap(this, parentPkg, isRoot, true)[parsedModuleName.packageName];
+					var depMap = crawl.getFullDependencyMap(this, parentPkg, isRoot);
+					depPkg = depMap[parsedModuleName.packageName];
 				}
 			}
 
