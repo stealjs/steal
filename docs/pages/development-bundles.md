@@ -4,11 +4,13 @@
 
 @body
 
-<!-- hack! -->
-<style>.contents { display: none; }</style>
-
 In this guide we'll go through the steps required to set up `steal-tools` development bundles and
 speed up your application development process.
+
+> This guide assumes the reader has a working application that can benefit from
+> using development bundles; if that's not your case, please go check out the 
+> [Progressive Loading](./StealJS.guides.progressive_loading) guide and follow 
+> this guide once you get the `myhub` app up and running.
 
 ## Install Dependencies
 
@@ -48,6 +50,9 @@ Save the changes and run the `deps-bundle` script:
 This should create a file `dev-bundle.js` at the root folder of your project. If StealJS is also loading your CSS
 files there should be a `dev-bundle.css` file, too.
 
+> It is possible to provide an alternative destination folder using the `--dest`
+> option, run `steal-tools bundle --help` to see all the options available.
+
 ## Modify the StealJS script tag
 
 Add the `deps-bundle` attribute to your StealJS script tag like this:
@@ -55,6 +60,10 @@ Add the `deps-bundle` attribute to your StealJS script tag like this:
 ```html
 <script src="./node_modules/steal/steal.js" deps-bundle></script>
 ```
+
+> If the `--dest` option was provided, `deps-bundle` needs to be a string with the
+> path to the `dev-bundle` file. E.g: if `dest` is set to `foo/bar`, `deps-bundle`
+> should be set to `foo/bar/dev-bundle`.
 
 and that's it! Load your `index.html` page in the browser, check the network tab and you should note a
 decreased number of outgoing requests along with faster load times.
@@ -89,5 +98,8 @@ A different attribute is needed to setup StealJS so it loads the bundle before [
 ```html
 <script src="./node_modules/steal/steal.js" dev-bundle></script>
 ```
+
+> If the `--dest` option of `steal-tools bundle` was provided, please make sure to pass 
+> the path to the bundle through the `dev-bundle` attribute. 
 
 and you're all set! Reload your browser window, fast isn't it?
