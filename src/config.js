@@ -33,6 +33,8 @@
 
 	// steal.js's default configuration values
 	System.configMain = "@config";
+	System.devBundle = "@empty";
+	System.depsBundle = "@empty";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = {};
@@ -361,8 +363,30 @@
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 			}
+		},
+		devBundle: {
+			order: 16,
+
+			set: function(dirname, cfg) {
+				var path = (dirname === true) ? "dev-bundle" : dirname;
+
+				if (path) {
+					this.devBundle = path;
+				}
+			}
+		},
+		depsBundle: {
+			order: 17,
+
+			set: function(dirname, cfg) {
+				var path = (dirname === true) ? "dev-bundle" : dirname;
+
+				if (path) {
+					this.depsBundle = path;
+				}
+			}
 		}
-	}
+	};
 
 	/*
 	 make a setter order

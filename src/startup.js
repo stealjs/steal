@@ -156,8 +156,20 @@
 				});
 
 			} else {
-				loader["import"](loader.configMain)
-				.then(configResolve, configReject);
+				// devBundle includes the same modules as "depsBundle and it also
+				// includes the @config graph, so it should be loaded before of
+				// configMain
+				loader["import"](loader.devBundle)
+					.then(function() {
+						return loader["import"](loader.configMain);
+					})
+					.then(function() {
+						// depsBundle includes the dependencies in the node_modules
+						// folder so it has to be loaded after configMain finished
+						// loading
+						return loader["import"](loader.depsBundle);
+					})
+					.then(configResolve, configReject);
 
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(loader);
@@ -176,7 +188,7 @@
 				return devPromise.then(function () {
 					// if there's a main, get it, otherwise, we are just loading
 					// the config.
-					if (!loader.main || loader.env === "build") {
+					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
 					var main = loader.main;

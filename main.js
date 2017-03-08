@@ -925,6 +925,8 @@ addStealExtension(function (loader) {
 
 	// steal.js's default configuration values
 	System.configMain = "@config";
+	System.devBundle = "@empty";
+	System.depsBundle = "@empty";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = {};
@@ -1253,8 +1255,30 @@ addStealExtension(function (loader) {
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
 
 			}
+		},
+		devBundle: {
+			order: 16,
+
+			set: function(dirname, cfg) {
+				var path = (dirname === true) ? "dev-bundle" : dirname;
+
+				if (path) {
+					this.devBundle = path;
+				}
+			}
+		},
+		depsBundle: {
+			order: 17,
+
+			set: function(dirname, cfg) {
+				var path = (dirname === true) ? "dev-bundle" : dirname;
+
+				if (path) {
+					this.depsBundle = path;
+				}
+			}
 		}
-	}
+	};
 
 	/*
 	 make a setter order
@@ -1475,8 +1499,20 @@ addStealExtension(function (loader) {
 				});
 
 			} else {
-				loader["import"](loader.configMain)
-				.then(configResolve, configReject);
+				// devBundle includes the same modules as "depsBundle and it also
+				// includes the @config graph, so it should be loaded before of
+				// configMain
+				loader["import"](loader.devBundle)
+					.then(function() {
+						return loader["import"](loader.configMain);
+					})
+					.then(function() {
+						// depsBundle includes the dependencies in the node_modules
+						// folder so it has to be loaded after configMain finished
+						// loading
+						return loader["import"](loader.depsBundle);
+					})
+					.then(configResolve, configReject);
 
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(loader);
@@ -1495,7 +1531,7 @@ addStealExtension(function (loader) {
 				return devPromise.then(function () {
 					// if there's a main, get it, otherwise, we are just loading
 					// the config.
-					if (!loader.main || loader.env === "build") {
+					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
 					var main = loader.main;
