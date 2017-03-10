@@ -66,6 +66,7 @@ QUnit.module("steal via system import");
 				"</head>\
 				<body>\
 					<script "+src+"></script>"+
+
 					(code ? "<script>\n"+code+"</script>" :"") +
 				"</body></html>";
 
@@ -360,6 +361,10 @@ QUnit.module("steal via system import");
 
 	asyncTest("script tag wins against global steal object", function(){
 		makeIframe("script-tag_wins/index.html");
+	});
+
+	asyncTest("steal tag detection", function(){
+		makeIframe("last_script_tag/index.html");
 	});
 
 	if(supportsTypedArrays) {
