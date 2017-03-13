@@ -2,121 +2,125 @@
  * Traceur and Babel transpile hook for Loader
  */
 (function(Loader) {
-  var g = __global;
+	var g = __global;
 
-  function getTranspilerModule(loader, globalName) {
-    return loader.newModule({ 'default': g[globalName], __useDefault: true });
-  }
+	function getTranspilerModule(loader, globalName) {
+		return loader.newModule({ 'default': g[globalName], __useDefault: true });
+	}
 
-  // use Traceur by default
-  Loader.prototype.transpiler = 'babel';
+	// use Traceur by default
+	Loader.prototype.transpiler = 'babel';
 
-  Loader.prototype.transpile = function(load) {
-    var self = this;
+	Loader.prototype.transpile = function(load) {
+		var self = this;
 
-    // pick up Transpiler modules from existing globals on first run if set
-    if (!self.transpilerHasRun) {
-      if (g.traceur && !self.has('traceur'))
-        self.set('traceur', getTranspilerModule(self, 'traceur'));
-      if (g.babel && !self.has('babel'))
-        self.set('babel', getTranspilerModule(self, 'babel'));
-      self.transpilerHasRun = true;
-    }
+		// pick up Transpiler modules from existing globals on first run if set
+		if (!self.transpilerHasRun) {
+			if (g.traceur && !self.has('traceur'))
+				self.set('traceur', getTranspilerModule(self, 'traceur'));
+			if (g.babel && !self.has('babel'))
+				self.set('babel', getTranspilerModule(self, 'babel'));
+			self.transpilerHasRun = true;
+		}
 
-    return self['import'](self.transpiler).then(function(transpiler) {
-      if (transpiler.__useDefault)
-        transpiler = transpiler['default'];
-      return 'var __moduleAddress = "' + load.address + '";' + (transpiler.Compiler ? traceurTranspile : babelTranspile).call(self, load, transpiler);
-    });
-  };
+		return self['import'](self.transpiler).then(function(transpiler) {
+			if (transpiler.__useDefault) {
+				transpiler = transpiler['default'];
+			}
 
-  Loader.prototype.instantiate = function(load) {
-    var self = this;
-    return Promise.resolve(self.normalize(self.transpiler))
-    .then(function(transpilerNormalized) {
-      // load transpiler as a global (avoiding System clobbering)
-      if (load.name === transpilerNormalized) {
-        return {
-          deps: [],
-          execute: function() {
-            var curSystem = g.System;
-            var curLoader = g.Reflect.Loader;
-            // ensure not detected as CommonJS
-            __eval('(function(require,exports,module){' + load.source + '})();', g, load);
-            g.System = curSystem;
-            g.Reflect.Loader = curLoader;
-            return getTranspilerModule(self, load.name);
-          }
-        };
-      }
-    });
-  };
+			return 'var __moduleAddress = "' + load.address + '";' +
+				(transpiler.Compiler ? traceurTranspile : babelTranspile)
+					.call(self, load, transpiler);
+		});
+	};
 
-  function traceurTranspile(load, traceur) {
-    var options = this.traceurOptions || {};
-    options.modules = 'instantiate';
-    options.script = false;
-    options.sourceMaps = 'inline';
-    options.filename = load.address;
-    options.inputSourceMap = load.metadata.sourceMap;
-    options.moduleName = false;
+	Loader.prototype.instantiate = function(load) {
+		var self = this;
+		return Promise.resolve(self.normalize(self.transpiler))
+			.then(function(transpilerNormalized) {
+				// load transpiler as a global (avoiding System clobbering)
+				if (load.name === transpilerNormalized) {
+					return {
+						deps: [],
+						execute: function() {
+							var curSystem = g.System;
+							var curLoader = g.Reflect.Loader;
+							// ensure not detected as CommonJS
+							__eval('(function(require,exports,module){' + load.source + '})();', g, load);
+							g.System = curSystem;
+							g.Reflect.Loader = curLoader;
+							return getTranspilerModule(self, load.name);
+						}
+					};
+				}
+			});
+	};
 
-    var compiler = new traceur.Compiler(options);
-    var source = doTraceurCompile(load.source, compiler, options.filename);
+	function traceurTranspile(load, traceur) {
+		var options = this.traceurOptions || {};
+		options.modules = 'instantiate';
+		options.script = false;
+		options.sourceMaps = 'inline';
+		options.filename = load.address;
+		options.inputSourceMap = load.metadata.sourceMap;
+		options.moduleName = false;
 
-    // add "!eval" to end of Traceur sourceURL
-    // I believe this does something?
-    source += '!eval';
+		var compiler = new traceur.Compiler(options);
+		var source = doTraceurCompile(load.source, compiler, options.filename);
 
-    return source;
-  }
-  function doTraceurCompile(source, compiler, filename) {
-    try {
-      return compiler.compile(source, filename);
-    }
-    catch(e) {
-      // traceur throws an error array
-      throw e[0];
-    }
-  }
+		// add "!eval" to end of Traceur sourceURL
+		// I believe this does something?
+		source += '!eval';
 
-  function babelTranspile(load, babel) {
-    babel = babel.Babel || babel.babel || babel;
-    var options = this.babelOptions || {};
-    options.sourceMap = 'inline';
-    options.filename = load.address;
-    options.code = true;
-    options.ast = false;
+		return source;
+	}
+	function doTraceurCompile(source, compiler, filename) {
+		try {
+			return compiler.compile(source, filename);
+		}
+		catch(e) {
+			// traceur throws an error array
+			throw e[0];
+		}
+	}
 
-    var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
-    if(!babelVersion) babelVersion = 6;
+	function babelTranspile(load, babel) {
+		babel = babel.Babel || babel.babel || babel;
+		var options = this.babelOptions || {};
+		options.sourceMap = 'inline';
+		options.filename = load.address;
+		options.code = true;
+		options.ast = false;
 
-    if(babelVersion >= 6) {
-      // delete the old babel options if they are present in config
-      delete options.optional;
-      delete options.whitelist;
-      delete options.blacklist;
-      // If the user didn't provide presets/plugins, use the defaults
-      if(!options.presets && !options.plugins) {
-        options.presets = [
-          "es2015-no-commonjs", "react", "stage-0"
-        ];
-        options.plugins = [
-          "transform-es2015-modules-systemjs"
-        ];
-      }
-    } else {
-      options.modules = 'system';
-      if (!options.blacklist)
-        options.blacklist = ['react'];
-    }
+		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+		if(!babelVersion) babelVersion = 6;
 
-    var source = babel.transform(load.source, options).code;
+		if(babelVersion >= 6) {
+			// delete the old babel options if they are present in config
+			delete options.optional;
+			delete options.whitelist;
+			delete options.blacklist;
+			// If the user didn't provide presets/plugins, use the defaults
+			if(!options.presets && !options.plugins) {
+				options.presets = [
+					"es2015-no-commonjs", "react", "stage-0"
+				];
+				options.plugins = [
+					"transform-es2015-modules-systemjs"
+				];
+			}
+		} else {
+			options.modules = 'system';
+			if (!options.blacklist)
+				options.blacklist = ['react'];
+		}
 
-    // add "!eval" to end of Babel sourceURL
-    // I believe this does something?
-    return source + '\n//# sourceURL=' + load.address + '!eval';
-  }
+		var source = babel.transform(load.source, options).code;
+
+		// add "!eval" to end of Babel sourceURL
+		// I believe this does something?
+		return source + '\n//# sourceURL=' + load.address + '!eval';
+	}
 
 
 })(__global.LoaderPolyfill);
