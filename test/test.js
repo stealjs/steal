@@ -31,7 +31,7 @@ QUnit.module("steal via system import");
 	// Babel uses __proto__
 	var supportsES = (function(){
 		var foo = {};
-		foo.__proto = { bar: "baz" };
+		foo.__proto__ = { bar: "baz" };
 		return foo.bar === "baz";
 	})();
 
@@ -187,12 +187,6 @@ QUnit.module("steal via system import");
 				'src="../steal.js?main=basics/basics"'));
 		});
 
-		asyncTest("default config path", function(){
-			writeIframe(makeStealHTML(
-				"basics/basics.html",
-				'src="../steal/steal.js?main=basics/basics"'));
-		});
-
 		asyncTest("jsx is enabled by default", function(){
 			makeIframe("jsx/dev.html");
 		});
@@ -334,6 +328,18 @@ QUnit.module("steal via system import");
 
 		asyncTest("inline code works without line breaks", function(){
 			makeIframe("basics/inline_code_no_break.html");
+		});
+
+		asyncTest("babel plugins works", function() {
+			makeIframe("babel_plugins/dev.html");
+		});
+
+		asyncTest("passing options to babel plugins works", function() {
+			makeIframe("babel_plugin_options/dev.html");
+		});
+
+		asyncTest("babel plugins on npm work", function() {
+			makeIframe("babel_npm_plugins/dev.html");
 		});
 	}
 

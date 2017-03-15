@@ -21,3 +21,9 @@ fs.copySync(
 	path.join(root, "node_modules", "steal-conditional"),
 	path.join(root, "test", "npm", "conditionals", "node_modules", "steal-conditional")
 );
+
+// copy test/babel_npm_plugins dependencies
+fs.copySync(
+	path.join(root, "node_modules", "babel-plugin-steal-test"),
+	path.join(root, "test", "babel_npm_plugins", "node_modules", "babel-plugin-steal-test")
+);

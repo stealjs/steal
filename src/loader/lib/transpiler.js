@@ -23,15 +23,18 @@
 			self.transpilerHasRun = true;
 		}
 
-		return self['import'](self.transpiler).then(function(transpiler) {
-			if (transpiler.__useDefault) {
-				transpiler = transpiler['default'];
-			}
+		return self['import'](self.transpiler)
+			.then(function(transpiler) {
+				if (transpiler.__useDefault) {
+					transpiler = transpiler['default'];
+				}
 
-			return 'var __moduleAddress = "' + load.address + '";' +
-				(transpiler.Compiler ? traceurTranspile : babelTranspile)
+				return (transpiler.Compiler ? traceurTranspile : babelTranspile)
 					.call(self, load, transpiler);
-		});
+			})
+			.then(function(code) {
+				return 'var __moduleAddress = "' + load.address + '";' + code;
+			});
 	};
 
 	Loader.prototype.instantiate = function(load) {
@@ -84,43 +87,199 @@
 		}
 	}
 
-	function babelTranspile(load, babel) {
-		babel = babel.Babel || babel.babel || babel;
+	/**
+	 * Whether the plugin name is already registered in babel-standalone
+	 *
+	 * @param {{}} babel The babel object exported by babel-standalone
+	 * @param {string} pluginName The plugin name to be checked
+	 * @return {boolean}
+	 */
+	function isPluginRegistered(babel, pluginName) {
+		var availablePlugins = babel.availablePlugins || {};
+
+		return !!availablePlugins[pluginName];
+	}
+
+	/**
+	 * Returns babel full plugin name if shorthand was used or the path provided
+	 *
+	 * @param {string} name The entry in the plugin array
+	 * @return {string} Relative/absolute path to plugin or babel npm plugin name
+	 *
+	 * If a babel plugin is on npm, it can be set in the `plugins` array using
+	 * one of the following forms:
+	 *
+	 * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
+	 * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
+	 * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
+	 *
+	 * Since plugins are loaded through steal, we need to make sure the full
+	 * plugin name is passed to `steal.import` so the npm extension can locate
+	 * the babel plugin. Relative/absolute paths should be loaded as any other
+	 * module.
+	 */
+	function getBabelPluginPath(name) {
+		var isPath = /\//;
+		var isBabelPluginName = /^(?:babel-plugin-)/;
+
+		return isPath.test(name) || isBabelPluginName.test(name) ?
+			name : "babel-plugin-" + name;
+	}
+
+	/**
+	 * Register the custom plugins found in `babelOptions` object
+	 *
+	 * babel-standalone requires custom plugins to be registered in order to
+	 * be used, see https://github.com/babel/babel-standalone#customisation
+	 *
+	 * @param {{}} load The loader load
+	 * @param {{}} babel The babel object exported by babel-standalone
+	 * @param {array} plugins The babel plugins array
+	 * @return {Promise} Promise that resolves to the plugins array to be used
+	 *                   to transpile the load source code
+	 */
+	function registerCustomPlugins(load, babel, plugins) {
+		var self = this;
+		var promises = [];
+		var clonedPlugins = plugins.slice(0)
+
+		plugins.forEach(function(plugin, index) {
+			/**
+			 * `plugin` can be either a string or an array:
+			 *
+			 * ```
+			 * {
+			 *   plugins: [
+			 *     "pluginName",
+			 *     [ "pluginName", { ...pluginOptions }
+			 *   ]
+			 * }
+			 * ```
+			 */
+			var name = typeof plugin === "string" ? plugin : plugin[0];
+			var parent = self.configMain || "package.json!npm";
+
+			if (!isPluginRegistered(babel, name)) {
+				var pluginPromise = self.normalize(getBabelPluginPath(name), parent)
+					.then(function(name) {
+						// check if the load corresponds to a babel plugin,
+						// otherwise a loading plugin could try to load itself
+						if (load.name !== name) {
+							return self["import"](name);
+						}
+						// do not use the plugin while transpiling its own source code
+						else {
+							clonedPlugins.splice(index, 1);
+						}
+					})
+					.then(function(module) {
+						if (module) {
+							// handle ES2015 default exports
+							var exported = typeof module === "function" ?
+								module : module.default;
+
+							babel.registerPlugin(name, exported);
+						}
+					});
+
+				promises.push(pluginPromise);
+			}
+		});
+
+		return Promise.all(promises)
+			.then(function() {
+				return clonedPlugins;
+			});
+	}
+
+	function getBabelPlugins(current) {
+		var plugins = current || [];
+		var required = "transform-es2015-modules-systemjs";
+
+		if (plugins.indexOf(required) === -1) {
+			plugins.unshift(required);
+		}
+
+		return plugins;
+	}
+
+	function getBabelPresets(current) {
+		var presets = current || [];
+		var defaults = ["es2015-no-commonjs", "react", "stage-0"];
+
+		if (presets.length) {
+			for (var i = defaults.length - 1; i >=0; i -= 1) {
+				var preset = defaults[i];
+
+				if (presets.indexOf(preset) === -1) {
+					presets.unshift(preset);
+				}
+			}
+		}
+		else {
+			presets = defaults;
+		}
+
+		return presets;
+	}
+
+	function getBabelOptions(load, babel) {
 		var options = this.babelOptions || {};
+
 		options.sourceMap = 'inline';
 		options.filename = load.address;
 		options.code = true;
 		options.ast = false;
 
 		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
-		if(!babelVersion) babelVersion = 6;
+		if (!babelVersion) babelVersion = 6;
 
-		if(babelVersion >= 6) {
+		if (babelVersion >= 6) {
 			// delete the old babel options if they are present in config
 			delete options.optional;
 			delete options.whitelist;
 			delete options.blacklist;
-			// If the user didn't provide presets/plugins, use the defaults
-			if(!options.presets && !options.plugins) {
-				options.presets = [
-					"es2015-no-commonjs", "react", "stage-0"
-				];
-				options.plugins = [
-					"transform-es2015-modules-systemjs"
-				];
-			}
-		} else {
+
+			// make sure presents and plugins needed for Steal to work
+			// correctly are set
+			options.presets = getBabelPresets(options.presets);
+			options.plugins = getBabelPlugins(options.plugins);
+		}
+		else {
 			options.modules = 'system';
-			if (!options.blacklist)
+
+			if (!options.blacklist) {
 				options.blacklist = ['react'];
+			}
 		}
 
-		var source = babel.transform(load.source, options).code;
-
-		// add "!eval" to end of Babel sourceURL
-		// I believe this does something?
-		return source + '\n//# sourceURL=' + load.address + '!eval';
+		return options;
 	}
 
+	function babelTranspile(load, babel) {
+		babel = babel.Babel || babel.babel || babel;
+
+		var options = getBabelOptions.call(this, load, babel);
+		var plugins = (options.plugins || []).slice(0);
+
+		return registerCustomPlugins.call(this, load, babel, plugins)
+			.then(function(registered) {
+				// use the plugins array coming from the promise; custom plugins
+				// loaded by Steal can't be used to tranpile the plugin's own code
+				if (options.plugins && registered.length) {
+					options.plugins = registered;
+				}
+				var source = babel.transform(load.source, options).code;
+
+				// restore original plugins configuration
+				if (options.plugins) {
+					options.plugins = plugins;
+				}
+
+				// add "!eval" to end of Babel sourceURL
+				// I believe this does something?
+				return source + '\n//# sourceURL=' + load.address + '!eval';
+			});
+	}
 
 })(__global.LoaderPolyfill);
