@@ -5,6 +5,7 @@ QUnit.module("System", function() {
 
 	function notSupposedToFail(err) {
 		if (err) {
+			console.log(err);
 			throw new Error("should not fail");
 		}
 	}

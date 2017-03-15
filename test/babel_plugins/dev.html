@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>StealJS and babel plugins</title>
+</head>
+<body>
+	<script type="text/javascript">
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script
+		src="../../steal.js"
+		config-main="test/babel_plugins/package.json!npm"
+	>
+	</script>
+</body>
+</html>

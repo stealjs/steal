@@ -8,7 +8,7 @@
     "web": "http://bitovi.com/"
   },
   "scripts": {
-    "ui": "grunt build && node test/test-sauce-labs.js",
+    "ui": "npm run npm-copy && grunt build && node test/test-sauce-labs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
     "test": "npm run npm-copy && grunt test --stack && npm run test:live-reload",
@@ -40,6 +40,7 @@
   "devDependencies": {
     "async": "^2.1.4",
     "babel-core": "^4.7.16",
+    "babel-plugin-steal-test": "0.0.1",
     "babel-standalone": "6.23.1",
     "fs-extra": "^2.0.0",
     "grunt": "~0.4.1",
