@@ -163,6 +163,26 @@ QUnit.module("steal via system import");
 		});
 	});
 
+	QUnit.test("babel decorators plugin work", function(assert) {
+		var done = assert.async();
+
+		System["import"]("test/decorators/package.json!npm")
+			.then(function() {
+				return System["import"]("test/decorators/cellphone");
+			})
+			.then(function(mod) {
+				var Cellphone = mod.default;
+				var foo = new Cellphone();
+
+				assert.equal(foo.brand, "Bitovi", "decorators should work");
+				done();
+			})
+			.catch(function(err) {
+				assert.notOk(err, "should not fail");
+				done();
+			});
+	});
+
 	QUnit.module("steal via html");
 
 	if(supportsES) {
