@@ -294,6 +294,102 @@ QUnit.test("Works with modules that use process.argv", function(assert){
 	.then(done, helpers.fail(assert, done));
 });
 
+
+QUnit.test("importing a package with a dependency not in its package.json", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				"dep": "1.0.0",
+				"dep2": "2.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0"
+			},
+			{
+				name: "dep2",
+				main: "main.js",
+				version: "2.0.0"
+			}
+		])
+		.withModule("dep2@2.0.0#main", "module.exports={}")
+		.withModule("dep@1.0.0#main", "require('dep2');")
+		.loader;
+
+		loader["import"]("dep")
+			.then(function(app) {
+				assert.ok(app);
+			})
+			.then(done, helpers.fail(assert, done));
+});
+
+QUnit.test("importing a global with an npm dependency", function(assert) {
+	var done = assert.async();
+
+	var runner = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				"dep": "1.0.0",
+				"dep2": "2.0.0"
+			},
+			steal: {
+				meta: {
+					"dep": {
+						format: "global",
+						deps: ["dep2"]
+					}
+				}
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				version: "1.0.0",
+				main: "main.js"
+			},
+			{
+				name: "dep2",
+				version: "2.0.0",
+				main: "main.js"
+			}
+		])
+		.withModule("dep2@2.0.0#main", "window.$ = function() {};")
+		.withModule("dep@1.0.0#main", "var foo = $('.foo');");
+
+	var loader = runner.loader;
+
+	function removeDollar() {
+		delete window.$;
+	}
+
+	helpers.init(loader)
+	.then(function(){
+		return loader["import"]("dep");
+	})
+	.then(function(app) {
+		assert.ok(app);
+	})
+	.then(function(){
+		removeDollar();
+		done();
+	}, function(err){
+		removeDollar();
+		assert.ok(false, err.message && err.stack || err);
+		done(err);
+	});
+});
+
 QUnit.module("Importing npm modules with tilde operator");
 
 QUnit.test("Import module with the ~ operator", function (assert) {

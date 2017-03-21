@@ -207,7 +207,6 @@ function convertName (context, pkg, map, root, name, waiting) {
 	}
 }
 
-
 /**
  * Converts browser names into actual module names.
  *
