@@ -868,3 +868,50 @@ QUnit.test("importing a module using the 'globals' option", function(assert) {
 			assert.ok(!err, err.stack || err);
 		});
 });
+
+QUnit.only("importing a global with an npm dependency", function(assert) {
+	var done = assert.async();
+
+	var runner = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				"dep": "1.0.0",
+				"dep2": "2.0.0"
+			},
+			steal: {
+				meta: {
+					"app/dep": {
+						format: "global",
+						deps: ["dep2"]
+					}
+				}
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				version: "1.0.0",
+				main: "main.js"
+			},
+			{
+				name: "dep2",
+				version: "2.0.0",
+				main: "main.js"
+			}
+		])
+		.withModule("dep2@2.0.0#main", "window.$ = function() {};")
+		.withModule("dep@1.0.0#main", "var foo = $('.foo');");
+
+	var loader = runner.loader;
+
+	loader["import"]("dep")
+		.then(function(app) {
+			assert.ok(app);
+		})
+		.then(done, function(err) {
+			assert.ok(!err, err.stack || err);
+		});
+});
