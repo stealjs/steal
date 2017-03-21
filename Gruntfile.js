@@ -50,6 +50,14 @@ module.exports = function (grunt) {
 				],
 				dest: "src/loader/loader.js"
 			},
+			"loader-no-promises": {	// use native promises instead of shim
+				src: [
+					"src/loader/lib/polyfill-wrapper-start.js",
+					"src/loader/loader-esnext.js",
+					"src/loader/lib/polyfill-wrapper-end.js"
+				],
+				dest: "src/loader/loader-sans-promises.js"
+			},
 			base: {
 				src: [
 					"src/base/lib/banner.js",
@@ -96,6 +104,31 @@ module.exports = function (grunt) {
 				],
 				dest: "<%= pkg.name %>.js"
 			},
+			"dist-no-promises": {
+				src: [
+					"src/loader/loader-sans-promises.js",
+					"src/base/base.js",
+					"src/start.js",
+					"src/normalize.js",
+					"src/core.js",		// starts makeSteal
+					"src/system-extension-ext.js",
+					"src/system-extension-forward-slash.js",
+					"src/system-extension-locate.js",
+					"src/system-extension-contextual.js",
+					"src/system-extension-script-module.js",
+					"src/system-extension-steal.js",
+					"src/trace/trace.js",
+					"src/json/json.js",
+					"src/cache-bust/cache-bust.js",
+					"src/config.js",
+					"src/env/env.js",
+					"src/startup.js",
+					"src/import.js",
+					"src/make-steal-end.js", // ends makeSteal
+					"src/end.js"
+				],
+				dest: "<%= pkg.name %>-sans-promises.js"
+			},
 			nodeMain: {
 				src: [
 					"src/start.js",
@@ -130,11 +163,12 @@ module.exports = function (grunt) {
 				}
 			},
 			dist: {
-				options: {
-					banner: "<%= meta.banner %>\n"
-				},
 				src: "<%= pkg.name %>.js",
 				dest: "<%= pkg.name %>.production.js"
+			},
+			"dist-no-promises": {
+				src: "<%= pkg.name %>-sans-promises.js",
+				dest: "<%= pkg.name %>-sans-promises.production.js"
 			}
 		},
 		copy: {
@@ -211,12 +245,16 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-simple-mocha");
-	grunt.loadNpmTasks('grunt-esnext');
+	grunt.loadNpmTasks("grunt-esnext");
 	grunt.loadNpmTasks("testee");
 
 	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
 	grunt.registerTask("test-windows", ["build", /*"testee:windows",*/ "simplemocha"]);
+
 	grunt.registerTask("loader", ["esnext", "string-replace"]);
-	grunt.registerTask("build", ["loader", "concat", "uglify", "copy:extensions", "copy:toTest"]);
-	grunt.registerTask("default", ["build"]);
+	grunt.registerTask("copy-to", ["copy:extensions", "copy:toTest"]);
+	grunt.registerTask("build", ["loader", "concat", "uglify:dist", "copy-to"]);
+	grunt.registerTask("build-no-promises", ["loader", "concat", "uglify:dist-no-promises", "copy-to"]);
+
+	grunt.registerTask("default", ["build", "build-no-promises"]);
 };
