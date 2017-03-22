@@ -429,7 +429,7 @@ var crawl = {
 	 * Find a package and its parents.
 	 * [package:{}, parent1, parent2, ...]
 	 * @param {Object} context
-	 * @parent {String} name the package name
+	 * @param {String} name the package name
 	 */
 	findPackageAndParents: function(context, name) {
 		return context.packageParents[name];
