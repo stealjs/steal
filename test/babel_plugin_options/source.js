@@ -1,7 +1,7 @@
-import secret from "./secret";
+"format es6";
 
 if (window.assert) {
-	assert.equal(window.foo, "option value", "custom plugin should receive options");
+	assert.equal(window.foo, "option value", "plugin should receive options");
 	done();
 }
 else {

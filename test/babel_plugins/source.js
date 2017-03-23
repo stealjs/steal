@@ -1,7 +1,7 @@
-import secret from "./secret";
+"format es6";
 
 if (window.assert) {
-	assert.equal(window.foo, "bar", "custom plugin should add `foo`");
+	assert.equal(window.foo, "default", "babel plugin should add `window.foo`");
 	done();
 }
 else {

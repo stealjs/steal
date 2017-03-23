@@ -4,13 +4,15 @@
   "description": "",
   "main": "source.js",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-plugin-steal-test": "0.0.2"
+  },
   "author": "",
   "license": "ISC",
   "steal": {
     "babelOptions": {
       "plugins": [
-        ["./plugin", { "text": "option value" }]
+        ["babel-plugin-steal-test", { "text": "option value" }]
       ]
     }
   }
