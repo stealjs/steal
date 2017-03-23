@@ -9,6 +9,7 @@ require('src/trace/trace_test');
 
 require('test/config/config_test');
 require('test/clone/clone_test');
+require("test/babel_plugins_test");
 
 QUnit.module("steal via system import");
 
@@ -348,18 +349,6 @@ QUnit.module("steal via system import");
 
 		asyncTest("inline code works without line breaks", function(){
 			makeIframe("basics/inline_code_no_break.html");
-		});
-
-		asyncTest("babel plugins works", function() {
-			makeIframe("babel_plugins/dev.html");
-		});
-
-		asyncTest("passing options to babel plugins works", function() {
-			makeIframe("babel_plugin_options/dev.html");
-		});
-
-		asyncTest("babel plugins on npm work", function() {
-			makeIframe("babel_npm_plugins/dev.html");
 		});
 	}
 
