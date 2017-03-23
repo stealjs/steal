@@ -4,11 +4,15 @@
 (function(Loader) {
 	var g = __global;
 
+	var isNode = typeof self === "undefined" &&
+		typeof process !== "undefined" &&
+		{}.toString.call(process) === '[object process]'
+
 	function getTranspilerModule(loader, globalName) {
 		return loader.newModule({ 'default': g[globalName], __useDefault: true });
 	}
 
-	// use Traceur by default
+	// Use Babel by default
 	Loader.prototype.transpiler = 'babel';
 
 	Loader.prototype.transpile = function(load) {
@@ -87,6 +91,16 @@
 		}
 	}
 
+	function getBabelEnv() {
+		var env;
+
+		if (isNode) {
+			env =  process.env.BABEL_ENV || process.env.NODE_ENV;
+		}
+
+		return env || this.getEnv();
+	}
+
 	/**
 	 * Whether the plugin name is already registered in babel-standalone
 	 *
@@ -95,9 +109,15 @@
 	 * @return {boolean}
 	 */
 	function isPluginRegistered(babel, pluginName) {
+		var isBabelPluginName = /^(?:babel-plugin-)/;
 		var availablePlugins = babel.availablePlugins || {};
 
-		return !!availablePlugins[pluginName];
+		// babel-standalone registers its bundled plugins using the shorthand name
+		var shorthand = isBabelPluginName.test(pluginName) ?
+			pluginName.replace("babel-plugin-", "") :
+			pluginName;
+
+		return !!availablePlugins[shorthand] || !!availablePlugins[pluginName];
 	}
 
 	/**
@@ -132,64 +152,48 @@
 	 * babel-standalone requires custom plugins to be registered in order to
 	 * be used, see https://github.com/babel/babel-standalone#customisation
 	 *
-	 * @param {{}} load The loader load
 	 * @param {{}} babel The babel object exported by babel-standalone
-	 * @param {array} plugins The babel plugins array
+	 * @param {array} plugins An array of objects with plugin names, and
+	 *				  options/env if available
 	 * @return {Promise} Promise that resolves to the plugins array to be used
 	 *                   to transpile the load source code
 	 */
-	function registerCustomPlugins(load, babel, plugins) {
-		var self = this;
+	function registerCustomPlugins(babel, plugins) {
 		var promises = [];
-		var clonedPlugins = plugins.slice(0)
+		var registered = [];
 
-		plugins.forEach(function(plugin, index) {
-			/**
-			 * `plugin` can be either a string or an array:
-			 *
-			 * ```
-			 * {
-			 *   plugins: [
-			 *     "pluginName",
-			 *     [ "pluginName", { ...pluginOptions }
-			 *   ]
-			 * }
-			 * ```
-			 */
-			var name = typeof plugin === "string" ? plugin : plugin[0];
-			var parent = self.configMain || "package.json!npm";
+		var babelEnv = getBabelEnv.call(this);
 
-			if (!isPluginRegistered(babel, name)) {
-				var pluginPromise = self.normalize(getBabelPluginPath(name), parent)
-					.then(function(name) {
-						// check if the load corresponds to a babel plugin,
-						// otherwise a loading plugin could try to load itself
-						if (load.name !== name) {
-							return self["import"](name);
-						}
-						// do not use the plugin while transpiling its own source code
-						else {
-							clonedPlugins.splice(index, 1);
-						}
-					})
-					.then(function(module) {
-						if (module) {
-							// handle ES2015 default exports
-							var exported = typeof module === "function" ?
-								module : module.default;
+		plugins.forEach(function(plugin) {
+			var canUsePlugin = plugin.env == null || plugin.env === babelEnv;
 
-							babel.registerPlugin(name, exported);
-						}
-					});
+			if (canUsePlugin) {
+				var name = plugin.name;
+				var parent = this.configMain || "package.json!npm";
 
-				promises.push(pluginPromise);
+				registered.push(plugin.options ?
+					[plugin.name, plugin.options] : plugin.name);
+
+				if (!isPluginRegistered(babel, name)) {
+					var path = getBabelPluginPath(name);
+
+					promises.push(this["import"](path, { name: parent })
+						.then(function(module) {
+							if (module) {
+								// handle ES2015 default exports
+								var exported = typeof module === "function" ?
+									module : module.default;
+
+								babel.registerPlugin(name, exported);
+							}
+						}));
+				}
 			}
-		});
+		}, this);
 
-		return Promise.all(promises)
-			.then(function() {
-				return clonedPlugins;
-			});
+		return Promise.all(promises).then(function() {
+			return registered;
+		});
 	}
 
 	function getBabelPlugins(current) {
@@ -256,25 +260,77 @@
 		return options;
 	}
 
+	/**
+	 * An object with babel plugin properties
+	 *
+	 * @typedef {Object} PluginData
+	 * @property {string} name The plugin name
+	 * @property {?string} env The environment name
+	 * @property {?object} options Options object pass to babel plugin
+	 */
+
+	/**
+	 * Ruturns an object with babel plugin properties
+	 *
+	 * @param {string|array} plugin The plugin entry found in babelOptions
+	 * @param {?string} env The environment name if defined
+	 * @return {PluginData}
+	 */
+	function collectPluginData(plugin, env) {
+		var data = {};
+
+		if (typeof plugin === "string") {
+			data.name = plugin;
+		}
+		else {
+			data.name = plugin[0];
+			data.options = plugin[1];
+		}
+
+		data.env = env;
+		return data;
+	}
+
+	/**
+	 * Returns an array of plugin data objects
+	 *
+	 * Collects the plugins found in `babelOptions.env` concatenated with the
+	 * plugin defined in `babelOptions.plugins`
+	 *
+	 * @param {{}} babelOptions The babel configuration object
+	 * @return {Array.<PluginData>}
+	 */
+	function collectBabelPlugins(babelOptions) {
+		var plugins = [];
+		var env = babelOptions.env || {};
+
+		(babelOptions.plugins || []).forEach(function(p) {
+			plugins.push(collectPluginData(p));
+		});
+
+		for (var envName in env) {
+			(env[envName].plugins || []).forEach(function(p) {
+				plugins.push(collectPluginData(p, envName));
+			});
+		}
+
+		return plugins;
+	}
+
 	function babelTranspile(load, babel) {
 		babel = babel.Babel || babel.babel || babel;
 
 		var options = getBabelOptions.call(this, load, babel);
-		var plugins = (options.plugins || []).slice(0);
+		var plugins = collectBabelPlugins(options);
 
-		return registerCustomPlugins.call(this, load, babel, plugins)
+		return registerCustomPlugins.call(this, babel, plugins)
 			.then(function(registered) {
 				// use the plugins array coming from the promise; custom plugins
 				// loaded by Steal can't be used to tranpile the plugin's own code
-				if (options.plugins && registered.length) {
+				if (registered.length) {
 					options.plugins = registered;
 				}
 				var source = babel.transform(load.source, options).code;
-
-				// restore original plugins configuration
-				if (options.plugins) {
-					options.plugins = plugins;
-				}
 
 				// add "!eval" to end of Babel sourceURL
 				// I believe this does something?

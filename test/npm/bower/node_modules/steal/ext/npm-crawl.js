@@ -27,6 +27,7 @@ var crawl = {
 	 */
 	root: function(context, pkg){
 		var deps = crawl.getDependencyMap(context.loader, pkg, true);
+		crawl.setParent(context, pkg, true);
 
 		var pluginsPromise = crawl.loadPlugins(context, pkg, true, deps, true);
 		var stealPromise = crawl.loadSteal(context, pkg, true, deps);
@@ -58,7 +59,6 @@ var crawl = {
 			});
 		});
 	},
-
 	dep: function(context, pkg, refPkg, childPkg, isRoot, skipSettingConfig) {
 		var versionAndRange = childPkg.name + "@" + childPkg.version;
 		if(context.fetchCache[versionAndRange]) {
@@ -162,6 +162,7 @@ var crawl = {
 		return npmLoad(context, childPkg, requestedVersion)
 		.then(function(pkg){
 			crawl.setVersionsConfig(context, pkg, requestedVersion);
+			crawl.setParent(context, pkg, isRoot);
 			return pkg;
 		});
 	},
@@ -201,11 +202,10 @@ var crawl = {
 	 * @param {Object} loader
 	 * @param {NpmPackage} packageJSON
 	 * @param {Boolean} [isRoot]
-	 * @param {Boolean} [includeDev]
 	 * @return {Array<String>}
 	 */
 	getDependencies: function(loader, packageJSON, isRoot){
-		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot, includeDev);
+		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
 
 		var dependencies = [];
 		for(var name in deps) {
@@ -407,6 +407,32 @@ var crawl = {
 		}
 		var versions = context.versions[pkg.name];
 		versions[versionRange] = pkg;
+	},
+	/**
+	 * Set this package's dependencies, marking itself as a parent.
+	 * { childPkg: [parent1, parent2] }
+	 */
+	setParent: function(context, pkg, isRoot) {
+		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
+		deps.forEach(function(childDep){
+			var name = childDep.name;
+			var parents = context.packageParents[name]
+			if(!parents) {
+				parents = context.packageParents[name] = [];
+				parents.package = childDep;
+			}
+			parents.push(pkg);
+		});
+	},
+	/**
+	 * @function findPackageAndParents
+	 * Find a package and its parents.
+	 * [package:{}, parent1, parent2, ...]
+	 * @param {Object} context
+	 * @param {String} name the package name
+	 */
+	findPackageAndParents: function(context, name) {
+		return context.packageParents[name];
 	},
 	pkgSatisfies: function(pkg, versionRange) {
 		return SemVer.validRange(versionRange) &&

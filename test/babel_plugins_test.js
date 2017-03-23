@@ -11,7 +11,7 @@ var supportsES = require("./supports_proto")();
 		makeIframe("babel_plugin_options/dev.html", assert);
 	});
 
-	QUnit.test("babel plugins on npm work", function(assert) {
-		makeIframe("babel_npm_plugins/dev.html", assert);
+	QUnit.test("environment dependant plugins work", function(assert) {
+		makeIframe("babel_env_plugins/dev.html", assert);
 	});
 });
