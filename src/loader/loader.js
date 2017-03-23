@@ -2703,7 +2703,7 @@ function logloads(loads) {
 	 *
 	 * @param {string|array} plugin The plugin entry found in babelOptions
 	 * @param {string|undefined} env The environment name if defined
-	 * return {{
+	 * @return {{
 	 *	name: string,
 	 *	env: string|undefined,
 	 *	options: object|undefined
