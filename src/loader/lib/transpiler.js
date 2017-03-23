@@ -261,15 +261,20 @@
 	}
 
 	/**
+	 * An object with babel plugin properties
+	 *
+	 * @typedef {Object} PluginData
+	 * @property {string} name The plugin name
+	 * @property {?string} env The environment name
+	 * @property {?object} options Options object pass to babel plugin
+	 */
+
+	/**
 	 * Ruturns an object with babel plugin properties
 	 *
 	 * @param {string|array} plugin The plugin entry found in babelOptions
-	 * @param {string|undefined} env The environment name if defined
-	 * @return {{
-	 *	name: string,
-	 *	env: string|undefined,
-	 *	options: object|undefined
-	 * }}
+	 * @param {?string} env The environment name if defined
+	 * @return {PluginData}
 	 */
 	function collectPluginData(plugin, env) {
 		var data = {};
@@ -293,7 +298,7 @@
 	 * plugin defined in `babelOptions.plugins`
 	 *
 	 * @param {{}} babelOptions The babel configuration object
-	 * @return {array<PluginData>}
+	 * @return {Array.<PluginData>}
 	 */
 	function collectBabelPlugins(babelOptions) {
 		var plugins = [];
