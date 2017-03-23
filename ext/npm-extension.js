@@ -184,15 +184,26 @@ exports.addExtension = function(System){
 									 parentName, parentAddress, pluginNormalize);
 		}
 
-		// TODO Here is where we should progressively load the package.json files.
+		// This is the beginning of progressively loading package.json
 		var loader = this;
 		if(!depPkg) {
 			if(crawl) {
 				var parentPkg = crawl.matchedVersion(this.npmContext, refPkg.name,
 													 refPkg.version);
+
 				if(parentPkg) {
 					var depMap = crawl.getFullDependencyMap(this, parentPkg, isRoot);
 					depPkg = depMap[parsedModuleName.packageName];
+
+					// If we still haven't found a package, try to find it by
+					// name, we'll take whatever we can get.
+					if(!depPkg) {
+						var parents = crawl.findPackageAndParents(this.npmContext,
+							parsedModuleName.packageName);
+						if(parents) {
+							depPkg = parents.package;
+						}
+					}
 				}
 			}
 
