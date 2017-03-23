@@ -16,7 +16,7 @@ var isNode = typeof process === "object" &&
  */
 exports.translate = function(load){
 	var loader = this;
-	
+
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
@@ -34,6 +34,11 @@ exports.translate = function(load){
 		// paths that are currently be loaded
 		loadingPaths: {},
 		versions: {},
+		// A map of packages to its parents. This is used so that
+		// we can find a package by name and get its parent packages,
+		// in order to load bare module specifiers that refer to packages
+		// that are not listed as dependencies
+		packageParents: {},
 		fetchCache: {},
 		deferredConversions: {},
 		npmLoad: npmLoad,

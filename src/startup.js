@@ -68,40 +68,21 @@
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
-			} else if(isBrowserWithWindow || isNW) {
-				// if the browser supports currentScript, us it!
+			} else if(isBrowserWithWindow || isNW || isElectron) {
+				// if the browser supports currentScript, use it!
 				if (document.currentScript) {
 					// get options from script tag and query
 					resolve(getScriptOptions(document.currentScript));
 					return;
 				}
+				// assume the last script on the page is the one loading steal.js
+				else {
+					var scripts = document.scripts;
 
-				// dealing with async & deferred scripts
-				// set an onload handler for all script tags and the first one which executes
-				// is your stealjs
-				var scripts = document.scripts;
-				var isStealSrc = /steal/;
-				function onLoad(e) {
-					var target = e.target || event.target;
-					if(target.src && isStealSrc.test(target.src)) {
-						for (var i = 0; i < scripts.length; ++i) {
-							scripts[i].removeEventListener('load', onLoad, false);
-						}
-
-						resolve(getScriptOptions(target));
+					if (scripts.length) {
+						resolve(getScriptOptions(scripts[scripts.length - 1]));
 					}
 				}
-				var script;
-				var finishedReadyStates = { "complete": true, "interactive": true };
-				for (var i = 0; i < scripts.length; ++i) {
-					script = scripts[i];
-					if(finishedReadyStates[script.readyState]) {
-						onLoad({ target: script });
-					} else {
-						script.addEventListener('load', onLoad, false);
-					}
-				}
-
 			} else {
 				// or the only option is where steal is.
 				resolve({
@@ -156,8 +137,20 @@
 				});
 
 			} else {
-				loader["import"](loader.configMain)
-				.then(configResolve, configReject);
+				// devBundle includes the same modules as "depsBundle and it also
+				// includes the @config graph, so it should be loaded before of
+				// configMain
+				loader["import"](loader.devBundle)
+					.then(function() {
+						return loader["import"](loader.configMain);
+					})
+					.then(function() {
+						// depsBundle includes the dependencies in the node_modules
+						// folder so it has to be loaded after configMain finished
+						// loading
+						return loader["import"](loader.depsBundle);
+					})
+					.then(configResolve, configReject);
 
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(loader);
@@ -176,7 +169,7 @@
 				return devPromise.then(function () {
 					// if there's a main, get it, otherwise, we are just loading
 					// the config.
-					if (!loader.main || loader.env === "build") {
+					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
 					var main = loader.main;

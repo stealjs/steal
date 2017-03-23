@@ -1,24 +1,36 @@
-<!doctype html>
-<html>
-	<head>
-		<title>Steal tests</title>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<link rel="stylesheet" type="text/css" href="../node_modules/qunitjs/qunit/qunit.css"/>
-	</head>
-	<body>
-
-		<h1 id="qunit-header">Steal Test Suite</h1>
-
-		<h2 id="qunit-banner"></h2>
-		<div id="qunit-testrunner-toolbar"></div>
-		<h2 id="qunit-userAgent"></h2>
-		<ol id="qunit-tests"></ol>
-		<div id="qunit-test-area"></div>
-
-		<script src="../steal.js" config-main="@empty" main="@empty"></script>
-		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
-
-		<script src="test.js"></script>
-		<script src="../src/json/json_test.js"></script>
-	</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>steal tests</title>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script>
+	var steal = {
+		paths: {
+			"steal-qunit": "node_modules/steal-qunit/steal-qunit.js"
+		},
+		map: {
+			"qunitjs": "node_modules/qunitjs"
+		},
+		meta: {
+			"node_modules/qunitjs/qunit/qunit": {
+				"format": "global",
+				"exports": "QUnit"
+			}
+		},
+		ext: {
+			"css": "node_modules/steal-css/css.js"
+		}
+	}
+</script>
+<script
+		src="../steal.js"
+		main="test/test"
+		config-main="../package.json!npm"
+>
+</script>
+</body>
 </html>

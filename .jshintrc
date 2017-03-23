@@ -17,7 +17,11 @@
     "start": true,
     "stop": true,
     "System": true,
-    "Promise": true
+    "Promise": true,
+	"describe": true,
+	"afterEach": true,
+	"it": true,
+	"customLoader": true
   },
 
   "curly": true,
@@ -39,6 +43,7 @@
   "smarttabs": true,
   "maxerr" : 200,
 
+  "node": true,
   "browser": true,
   "phantom": true
 }

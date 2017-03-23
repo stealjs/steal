@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+	<title>Steal tests</title>
+	<link rel="stylesheet" type="text/css" href="../../../bower_components/qunit/qunit/qunit.css"/>
+</head>
+<body>
+	<h1 id="qunit-header">bower extension test ssuite</h1>
+
+	<h2 id="qunit-banner"></h2>
+	<div id="qunit-testrunner-toolbar"></div>
+	<h2 id="qunit-userAgent"></h2>
+	<ol id="qunit-tests"></ol>
+	<div id="qunit-test-area"></div>
+
+	<script src="../../../bower_components/qunit/qunit/qunit.js"></script>
+	<script>
+		QUnit.config.autostart = false;
+
+		steal = {
+			paths: {
+				bower: "../../../ext/bower.js"
+			}
+		};
+	</script>
+	<script
+		data-bower-dev="true"
+		data-main="test/bower/test"
+		data-config="../../../bower.json!bower"
+		src="../../../bower_components/steal/steal.js"
+	>
+	</script>
+</body>
+</html>

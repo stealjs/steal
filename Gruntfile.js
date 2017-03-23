@@ -12,12 +12,69 @@ module.exports = function (grunt) {
 			" *  Copyright (c) <%= grunt.template.today('yyyy') %> <%= pkg.author.name %>;" +
 			" Licensed <%= _.map(pkg.licenses, 'type').join(', ') %>\n */"
 		},
-		release: {},
-		concat: {
+		esnext: {
 			dist: {
 				src: [
-					"node_modules/steal-es6-module-loader/dist/es6-module-loader.src.js",
-					"node_modules/steal-systemjs/dist/system.src.js",
+					"src/loader/lib/loader.js",
+					"src/loader/lib/transpiler.js",
+					"src/loader/lib/system.js"
+				],
+				dest: "src/loader/loader-esnext.js"
+			}
+		},
+		"string-replace": {
+			dist: {
+				files: {
+					"src/loader/loader-esnext.js": "src/loader/loader-esnext.js"
+				},
+				options: {
+					replacements:[{
+						pattern: "var $__Object$getPrototypeOf = Object.getPrototypeOf;\n" +
+							"var $__Object$defineProperty = Object.defineProperty;\n" +
+							"var $__Object$create = Object.create;",
+						replacement: ""
+					}, {
+						pattern: "$__Object$getPrototypeOf(SystemLoader.prototype).constructor",
+						replacement: "$__super"
+					}]
+				}
+			}
+		},
+		concat: {
+			loader: {
+				src: [
+					"node_modules/when/es6-shim/Promise.js",
+					"src/loader/lib/polyfill-wrapper-start.js",
+					"src/loader/loader-esnext.js",
+					"src/loader/lib/polyfill-wrapper-end.js"
+				],
+				dest: "src/loader/loader.js"
+			},
+			base: {
+				src: [
+					"src/base/lib/banner.js",
+					"src/base/lib/polyfill-wrapper-start.js",
+					"src/base/lib/util.js",
+					"src/base/lib/extension-core.js",
+					"src/base/lib/extension-meta.js",
+					"src/base/lib/extension-register.js",
+					"src/base/lib/extension-es6.js",
+					"src/base/lib/extension-global.js",
+					"src/base/lib/extension-cjs.js",
+					"src/base/lib/extension-amd.js",
+					"src/base/lib/extension-map.js",
+					"src/base/lib/extension-plugins.js",
+					"src/base/lib/extension-bundles.js",
+					"src/base/lib/extension-depCache.js",
+					"src/base/lib/register-extensions.js",
+					"src/base/lib/polyfill-wrapper-end.js"
+				],
+				dest: "src/base/base.js"
+			},
+			dist: {
+				src: [
+					"src/loader/loader.js",
+					"src/base/base.js",
 					"src/start.js",
 					"src/normalize.js",
 					"src/core.js",		// starts makeSteal
@@ -29,6 +86,7 @@ module.exports = function (grunt) {
 					"src/system-extension-steal.js",
 					"src/trace/trace.js",
 					"src/json/json.js",
+					"src/cache-bust/cache-bust.js",
 					"src/config.js",
 					"src/env/env.js",
 					"src/startup.js",
@@ -51,12 +109,14 @@ module.exports = function (grunt) {
 					"src/system-extension-steal.js",
 					"src/trace/trace.js",
 					"src/json/json.js",
+					"src/cache-bust/cache-bust.js",
 					"src/config.js",
 					"src/env/env.js",
 					"src/startup.js",
 					"src/node-require.js",
 					"src/import.js",
 					"src/make-steal-end.js", // ends makeSteal
+					"src/base/base.js",
 					"src/end.js"
 				],
 				dest: "main.js"
@@ -81,18 +141,10 @@ module.exports = function (grunt) {
 			// copy plugins that steal should contain
 			extensions: {
 				files: [
-					{src: ["node_modules/steal-npm/npm.js"], dest: "ext/npm.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-extension.js"], dest: "ext/npm-extension.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-utils.js"], dest: "ext/npm-utils.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-crawl.js"], dest: "ext/npm-crawl.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-convert.js"], dest: "ext/npm-convert.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/npm-load.js"], dest: "ext/npm-load.js", filter: "isFile"},
-					{src: ["node_modules/steal-npm/semver.js"], dest: "ext/semver.js", filter: "isFile"},
 					{src: ["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: "isFile"},
-					{src: ["node_modules/system-bower/bower.js"], dest: "ext/bower.js", filter: "isFile"},
-					{src: ["node_modules/babel-standalone/babel.js"], dest: "ext/babel.js", filter: "isFile"},
+					{src: ["node_modules/babel-standalone/babel.js"], dest: "ext/babel.js", filter: "isFile"}
 				]
 			},
 			toTest: {
@@ -106,41 +158,13 @@ module.exports = function (grunt) {
 					{expand: true, src: core, dest: "test/steal-module-script/node_modules/steal/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/bower/bower_components/steal/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/bower/npm/bower_components/steal/", filter: "isFile"},
-					{expand: true, src: ["node_modules/jquery/**"], dest: "test/npm/", filter: "isFile"},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower_components/system-bower/",
-						filter: "isFile"
-					},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower/bower_components/system-bower/",
-						filter: "isFile"
-					},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower/with_paths/bower_components/system-bower/",
-						filter: "isFile"
-					},
-					{
-						expand: true,
-						cwd: "node_modules/system-bower/",
-						src: ["*"],
-						dest: "test/bower/as_config/vendor/system-bower/",
-						filter: "isFile"
-					}
+					{expand: true, src: ["node_modules/jquery/**"], dest: "test/npm/", filter: "isFile"}
 				]
 			},
 
 		},
 		watch: {
-			files: ["src/*.js", "node_modules/systemjs/dist/**"],
+			files: ["src/*.js"],
 			tasks: "default"
 		},
 		jshint: {
@@ -161,10 +185,12 @@ module.exports = function (grunt) {
 					browsers: ["firefox"]
 				},
 				src: [
-					"test/test.html",
-					"test/unit_test.html",
-					"src/trace/trace_test.html",
-					"src/env/test/test.html"
+					"src/loader/babel_test.html",
+					"src/loader/traceur_test.html",
+					"src/base/base_test.html",
+					"test/bower/test.html",
+					"test/npm/test.html",
+					"test/test.html"
 				]
 			}
 		},
@@ -178,17 +204,19 @@ module.exports = function (grunt) {
 		}
 	});
 
+	grunt.loadNpmTasks('grunt-string-replace');
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-simple-mocha");
-	grunt.loadNpmTasks("grunt-release");
+	grunt.loadNpmTasks('grunt-esnext');
 	grunt.loadNpmTasks("testee");
 
 	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
 	grunt.registerTask("test-windows", ["build", /*"testee:windows",*/ "simplemocha"]);
-	grunt.registerTask("build", [/*"jshint", */"concat", "uglify", "copy:extensions", "copy:toTest"]);
+	grunt.registerTask("loader", ["esnext", "string-replace"]);
+	grunt.registerTask("build", ["loader", "concat", "uglify", "copy:extensions", "copy:toTest"]);
 	grunt.registerTask("default", ["build"]);
 };

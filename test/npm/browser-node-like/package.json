@@ -1,0 +1,6 @@
+{
+  "name": "browser-node-like",
+  "main": "main",
+  "version": "1.0.0",
+  "browser": "lib/"
+}

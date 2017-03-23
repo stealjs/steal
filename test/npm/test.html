@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+	<title>Steal tests</title>
+	<link rel="stylesheet" type="text/css" href="../../../node_modules/qunitjs/qunit/qunit.css"/>
+</head>
+<body>
+	<h1 id="qunit-header">npm extension test suite</h1>
+
+	<h2 id="qunit-banner"></h2>
+	<div id="qunit-testrunner-toolbar"></div>
+	<h2 id="qunit-userAgent"></h2>
+	<ol id="qunit-tests"></ol>
+	<div id="qunit-test-area"></div>
+	<script src="../../../node_modules/qunitjs/qunit/qunit.js"></script>
+	<script>
+		steal = {
+			paths: {
+				"npm": "../../ext/npm.js",
+				"npm-convert": "../../ext/npm-convert.js",
+				"npm-extension": "../../ext/npm-extension.js",
+				"npm-load": "../../ext/npm-load.js",
+				"npm-crawl": "../../ext/npm-crawl.js",
+				"npm-utils": "../../ext/npm-utils.js",
+				"npm-load": "../../ext/npm-load.js",
+				"npm-convert": "../../ext/npm-convert.js",
+				"semver": "../../ext/semver.js"
+			}
+		};
+	</script>
+	<script src="../../../steal.js" main="@empty" config-main="@empty"></script>
+	<script>
+		QUnit.config.autostart = false;
+
+		System.import("test/npm/package.json!npm").then(function(){
+			System.import("test/npm/test");
+		});
+	</script>
+</body>
+</html>

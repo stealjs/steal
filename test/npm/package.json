@@ -1,8 +1,20 @@
 {
-  "name": "npm-test",
-  "version": "1.0.0",
-  "main": "main",
-  "dependencies": {
-    "jquery": ">1.10"
+  "name": "steal-npm",
+  "description": "Gets node_modules",
+  "version": "0.0.1",
+  "main": "example-main",
+  "dependencies": {},
+  "devDependencies": {
+    "jquery": "^3.1.1",
+    "jquery-ui": "1.10.5",
+    "live-reload-testing": "^6.0.0"
+  },
+  "steal": {
+    "meta": {
+      "./meta": {
+        "format": "global",
+        "exports": "foo"
+      }
+    }
   }
 }

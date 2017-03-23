@@ -15,8 +15,14 @@
 		map: {
 			"qunitjs": "node_modules/qunitjs"
 		},
-		ext : {
-			css : "node_modules/steal-css/css.js"
+		meta: {
+			"node_modules/qunitjs/qunit/qunit": {
+				"format": "global",
+				"exports": "QUnit"
+			}
+		},
+		ext: {
+			"css": "node_modules/steal-css/css.js"
 		}
 	}
 </script>

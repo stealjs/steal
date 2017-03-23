@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+		System.configDependencies = [ "global" ];
+	</script>
+	<script>
+		function hasQUnit() {
+			return typeof QUnit !== "undefined";
+		}
+
+		System["import"]("package.json!npm").then(function(){
+			var rootPkg = System.npmPaths.__default;
+			if(hasQUnit()) {
+				QUnit.equal(window.DEP, "this is a config dep");
+				QUnit.notEqual(System.configDependencies[0], "my-dep", "An npm dependency's configDependencies should not be part of the configDependencies array.");
+				QUnit.ok(rootPkg.steal.configDependencies, "there are config deps in the pkg");
+			} else {
+				console.log(window.DEP);
+			}
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		}).then(function(){
+			window.removeMyself && removeMyself();
+		});
+	</script>
+</body>
+</html>

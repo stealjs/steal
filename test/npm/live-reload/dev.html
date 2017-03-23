@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script type="text/javascript" src='../../../steal.js' base-url="." config="package.json!npm"></script>
+	<script>
+		System.paths["live-reload-testing"] = "../../../node_modules/live-reload-testing/client.js";
+
+		System.import(System.configMain).then(function(){
+			System.import(System.main).then(function(main){
+				return System.import("live-reload-testing").then(function(liveReloadTest){
+					function doWait(ms){
+						return function(){
+							return new Promise(function(resolve){
+								setTimeout(resolve, ms);
+							});
+						};
+					}
+
+					function doInstall(){
+						return liveReloadTest.install("jquery", "--save")
+							.then(doWait(200));
+					}
+
+					function doChangeMain(){
+						var address = "main.js";
+						var content = "module.exports = require('jquery');";
+						return liveReloadTest.put(address, content)
+							.then(doWait(200));
+					}
+
+					function doReset() {
+						return liveReloadTest.reset();
+					}
+
+					doInstall().then(doChangeMain).then(function(){
+						// main should be right;
+						var main = System.get(System.main)["default"];
+						if(window.QUnit) {
+							QUnit.ok(main.fn.jquery, "jquery it is!");
+						} else {
+							console.log("got jquery:", main.fn.jquery);
+						}
+						return doReset();
+					}, doReset).then(function(){
+						if(window.QUnit) {
+							QUnit.start();
+						}
+					});
+				});
+			});
+		});
+	</script>
+</body>
+</html>

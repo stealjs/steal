@@ -7,11 +7,14 @@
 		nextTick: function(fn){
 			setTimeout(fn, 0);
 		},
-		platform: "web"
+		platform: "web",
+		versions: {}
 	};
 
+	global = window;
+	global.nw = { process: process };
+
 	require = function(){ return {}; };
-	module = { exports: {} };
 
 	var oldToString = Object.prototype.toString;
 	Object.prototype.toString = function(){

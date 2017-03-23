@@ -1,0 +1,16 @@
+{
+	"name": "npm-app",
+	"version": "1.0.0",
+	"main": "main.js",
+	"dependencies": {
+		"dep1": "1.0.0"
+	},
+	"browser": {
+		"./util" : "./browser_util",
+		"transform": []
+	},
+	"steal": {
+		"someConfig": true
+	},
+	"foo": "bar"
+}

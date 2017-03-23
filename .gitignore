@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 test/bower_components/
 test/dev.js
 test/steal.js
@@ -13,3 +13,9 @@ test/bower/as_config/vendor/steal/
 !test/nested-npm-algorithm/node_modules/
 !test/nested-npm-algorithm/node_modules/some/node_modules/
 !test/import-js-file/node_modules/
+src/loader/loader-esnext.js
+test/npm/bower/node_modules/steal/
+
+!test/npm/*/node_modules
+test/npm/live-reload/node_modules/
+test/npm/conditionals/node_modules/steal-conditional

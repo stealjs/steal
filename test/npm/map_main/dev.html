@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./" main="@empty"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+
+		System.import("package.json!npm").then(function(){
+			return System.normalize("dep", "map_main@1.0.0#main");
+		}).then(function(){
+			QUnit.equal(System.map["dep@1.2.2#dep"], "dep@1.2.2#main");
+
+			removeMyself();
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

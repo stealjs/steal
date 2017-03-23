@@ -108,8 +108,8 @@
 			return "./" + result.join("") + uriParts.join("/");
 		},
 		fBind = Function.prototype.bind,
-    isFunction = function(obj) {
-    	return !!(obj && obj.constructor && obj.call && obj.apply);
+		isFunction = function(obj) {
+			return !!(obj && obj.constructor && obj.call && obj.apply);
 		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
@@ -121,6 +121,7 @@
 				return false;
 			}
 		})(),
-		isNode = isNode && !isNW,
+		isElectron = isNode && !!process.versions["electron"],
+		isNode = isNode && !isNW && !isElectron,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};

@@ -1,5 +1,6 @@
 "format cjs";
 
+var steal = require("@steal");
 var utils = require("./npm-utils");
 exports.includeInBuild = true;
 
@@ -82,7 +83,7 @@ exports.addExtension = function(System){
 				name = name + "index";
 			}
 		}
-		
+
 		// Using the current package, get info about what it is probably asking for
 		var parsedModuleName = utils.moduleName.parseFromPackage(this, refPkg,
 																 name,
@@ -117,11 +118,15 @@ exports.addExtension = function(System){
 					crawl.matchedVersion(context, refPkg.name,
 										 refPkg.version);
 				if(parentPkg) {
-					wantedPkg = crawl.getDependencyMap(this, parentPkg, isRoot)[parsedModuleName.packageName];
+					var depMap = crawl.getFullDependencyMap(this, parentPkg, isRoot);
+					wantedPkg = depMap[parsedModuleName.packageName];
 					if(wantedPkg) {
+						var wantedVersion = (refPkg.resolutions &&
+							refPkg.resolutions[wantedPkg.name]) || wantedPkg.version;
+
 						var foundPkg = crawl.matchedVersion(this.npmContext,
 															wantedPkg.name,
-															wantedPkg.version);
+															wantedVersion);
 						if(foundPkg) {
 							depPkg = utils.pkg.findByUrl(this, foundPkg.fileUrl);
 						}
@@ -132,7 +137,7 @@ exports.addExtension = function(System){
 					depPkg = utils.pkg.findDepWalking(this, refPkg,
 													  parsedModuleName.packageName);
 				} else {
-					depPkg = utils.pkg.findDep(this, refPkg, 
+					depPkg = utils.pkg.findDep(this, refPkg,
 											   parsedModuleName.packageName);
 				}
 			}
@@ -179,14 +184,26 @@ exports.addExtension = function(System){
 									 parentName, parentAddress, pluginNormalize);
 		}
 
-		// TODO Here is where we should progressively load the package.json files.
+		// This is the beginning of progressively loading package.json
 		var loader = this;
 		if(!depPkg) {
 			if(crawl) {
 				var parentPkg = crawl.matchedVersion(this.npmContext, refPkg.name,
 													 refPkg.version);
+
 				if(parentPkg) {
-					depPkg = crawl.getDependencyMap(this, parentPkg, isRoot)[parsedModuleName.packageName];
+					var depMap = crawl.getFullDependencyMap(this, parentPkg, isRoot);
+					depPkg = depMap[parsedModuleName.packageName];
+
+					// If we still haven't found a package, try to find it by
+					// name, we'll take whatever we can get.
+					if(!depPkg) {
+						var parents = crawl.findPackageAndParents(this.npmContext,
+							parsedModuleName.packageName);
+						if(parents) {
+							depPkg = parents.package;
+						}
+					}
 				}
 			}
 
@@ -292,13 +309,17 @@ exports.addExtension = function(System){
 
 		if(utils.moduleName.isNpm(load.name)) {
 			fetchPromise = fetchPromise.then(null, function(err){
+				if(err.statusCode !== 404) {
+					return Promise.reject(err);
+				}
+
 				// Begin attempting retries. `retryTypes` defines different
 				// types of retries to do, currently retrying on the
 				// /index and /package.json conventions.
 				var types = [].slice.call(retryTypes);
 
 				return retryAll(types, err);
-				
+
 				function retryAll(types, err){
 					if(!types.length) {
 						throw err;
@@ -384,6 +405,26 @@ exports.addExtension = function(System){
 		}
 		oldConfig.apply(loader, arguments);
 	};
+
+
+	steal.addNpmPackages = function(packages) {
+		packages = packages || [];
+		var loader = this.loader;
+
+		for (var i = 0; i < packages.length; i += 1) {
+			var pkg = packages[i];
+			var path = pkg && pkg.fileUrl;
+
+			if (path) {
+				loader.npmContext.paths[path] = pkg;
+			}
+		}
+	};
+
+	steal.getNpmPackages = function() {
+		var context = this.loader.npmContext;
+		return context ? (context.packages || []) : [];
+	}
 
 	function retryFetch(load, type) {
 		var loader = this;

@@ -10,11 +10,12 @@ var crawl = {
 	/**
 	 * Adds the properties read from a package's source to the `pkg` object.
 	 * @param {Object} context
-	 * @param {NpmPackage} pkg - 
+	 * @param {NpmPackage} pkg -
 	 * @param {String} source
 	 * @return {NpmPackage}
 	 */
 	processPkgSource: function(context, pkg, source) {
+		source = source || "{}";
 		var packageJSON = JSON.parse(source);
 		utils.extend(pkg, packageJSON);
 		context.packages.push(pkg);
@@ -26,6 +27,7 @@ var crawl = {
 	 */
 	root: function(context, pkg){
 		var deps = crawl.getDependencyMap(context.loader, pkg, true);
+		crawl.setParent(context, pkg, true);
 
 		var pluginsPromise = crawl.loadPlugins(context, pkg, true, deps, true);
 		var stealPromise = crawl.loadSteal(context, pkg, true, deps);
@@ -57,7 +59,6 @@ var crawl = {
 			});
 		});
 	},
-
 	dep: function(context, pkg, refPkg, childPkg, isRoot, skipSettingConfig) {
 		var versionAndRange = childPkg.name + "@" + childPkg.version;
 		if(context.fetchCache[versionAndRange]) {
@@ -137,7 +138,7 @@ var crawl = {
 			childPkg.origFileUrl = utils.path.depPackage(pkg.fileUrl, childPkg.name);
 		} else {
 			// npm 2
-			childPkg.origFileUrl = childPkg.nestedFileUrl = 
+			childPkg.origFileUrl = childPkg.nestedFileUrl =
 				utils.path.depPackage(pkg.fileUrl, childPkg.name);
 
 			if(isFlat) {
@@ -147,12 +148,12 @@ var crawl = {
 			}
 		}
 
-		// check if childPkg matches a parent's version ... if it 
+		// check if childPkg matches a parent's version ... if it
 		// does ... do nothing
 		if(crawl.hasParentPackageThatMatches(context, childPkg)) {
 			return;
 		}
-		
+
 		if(crawl.isSameRequestedVersionFound(context, childPkg)) {
 			return;
 		}
@@ -161,6 +162,7 @@ var crawl = {
 		return npmLoad(context, childPkg, requestedVersion)
 		.then(function(pkg){
 			crawl.setVersionsConfig(context, pkg, requestedVersion);
+			crawl.setParent(context, pkg, isRoot);
 			return pkg;
 		});
 	},
@@ -204,12 +206,12 @@ var crawl = {
 	 */
 	getDependencies: function(loader, packageJSON, isRoot){
 		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
-		
+
 		var dependencies = [];
 		for(var name in deps) {
 			dependencies.push(deps[name]);
 		}
-		
+
 		return dependencies;
 	},
 	/**
@@ -217,6 +219,7 @@ var crawl = {
 	 * @param {Object} loader
 	 * @param {Object} packageJSON
 	 * @param {Boolean} isRoot
+	 * @param {Boolean} includeDevDependenciesIfNotRoot
 	 * @return {Object<String,Range>} A map of dependency names and requested version ranges.
 	 */
 	getDependencyMap: function(loader, packageJSON, isRoot){
@@ -241,19 +244,30 @@ var crawl = {
 			config.npmDependencies = convertToMap(npmDependencies);
 		}
 		npmIgnore = npmIgnore || {};
-		
+
 		var deps = {};
 
 		addDeps(packageJSON, packageJSON.peerDependencies || {}, deps,
 				"peerDependencies", {_isPeerDependency: true});
 
-		addDeps(packageJSON, packageJSON.dependencies || {}, deps, "dependencies");
+		addDeps(packageJSON, packageJSON.dependencies || {}, deps,
+			"dependencies");
 
 		if(isRoot) {
 			addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
-				   "devDependencies");
+				"devDependencies");
 		}
 
+		return deps;
+	},
+	/**
+	 * Return a map of all dependencies from a package.json, including
+	 * devDependencies
+	 */
+	getFullDependencyMap: function(loader, packageJSON, isRoot){
+		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
+		addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
+			"devDependencies");
 		return deps;
 	},
 	getPlugins: function(packageJSON, deps) {
@@ -268,13 +282,13 @@ var crawl = {
 			context.versions[childPkg.name] = {};
 		}
 		var versions = context.versions[childPkg.name];
-		
+
 		var requestedRange = childPkg.version;
-		
+
 		if( !SemVer.validRange(childPkg.version) ) {
-			
+
 			if(/^[\w_\-]+\/[\w_\-]+(#[\w_\-]+)?$/.test(requestedRange)  ) {
-							
+
 				requestedRange = "git+https://github.com/"+requestedRange;
 				if(!/(#[\w_\-]+)?$/.test(requestedRange)) {
 					requestedRange += "#master";
@@ -282,7 +296,7 @@ var crawl = {
 			}
 		}
 		var version = versions[requestedRange];
-		
+
 		if(!version) {
 			versions[requestedRange] = childPkg;
 		} else {
@@ -293,14 +307,14 @@ var crawl = {
 	},
 	hasParentPackageThatMatches: function(context, childPkg){
 		// check paths
-		var parentAddress = childPkg._isPeerDependency ? 
+		var parentAddress = childPkg._isPeerDependency ?
 			utils.path.peerNodeModuleAddress(childPkg.origFileUrl) :
 			utils.path.parentNodeModuleAddress(childPkg.origFileUrl);
 		while( parentAddress ) {
 			var packageAddress = parentAddress+"/"+childPkg.name+"/package.json";
 			var parentPkg = context.paths[packageAddress];
 			if(parentPkg) {
-				if(SemVer.valid(parentPkg.version) && 
+				if(SemVer.valid(parentPkg.version) &&
 				   SemVer.satisfies(parentPkg.version, childPkg.version)) {
 					return parentPkg;
 				}
@@ -394,6 +408,32 @@ var crawl = {
 		var versions = context.versions[pkg.name];
 		versions[versionRange] = pkg;
 	},
+	/**
+	 * Set this package's dependencies, marking itself as a parent.
+	 * { childPkg: [parent1, parent2] }
+	 */
+	setParent: function(context, pkg, isRoot) {
+		var deps = crawl.getDependencies(context.loader, pkg, isRoot);
+		deps.forEach(function(childDep){
+			var name = childDep.name;
+			var parents = context.packageParents[name]
+			if(!parents) {
+				parents = context.packageParents[name] = [];
+				parents.package = childDep;
+			}
+			parents.push(pkg);
+		});
+	},
+	/**
+	 * @function findPackageAndParents
+	 * Find a package and its parents.
+	 * [package:{}, parent1, parent2, ...]
+	 * @param {Object} context
+	 * @param {String} name the package name
+	 */
+	findPackageAndParents: function(context, name) {
+		return context.packageParents[name];
+	},
 	pkgSatisfies: function(pkg, versionRange) {
 		return SemVer.validRange(versionRange) &&
 			SemVer.valid(pkg.version) ?
@@ -438,7 +478,7 @@ function addDeps(packageJSON, dependencies, deps, type, defaultProps){
 
 		return !!(!npmIgnore || !npmIgnore[name]);
 	}
-	
+
 	defaultProps = defaultProps || {};
 	var val;
 	for(var name in dependencies) {
@@ -476,6 +516,8 @@ utils.extend(FetchTask.prototype, {
 		var pkg = this.pkg;
 		var fileUrl = pkg.fileUrl = pkg.nextFileUrl || pkg.origFileUrl;
 
+		this.fileUrl = fileUrl;
+
 		var promise = this.handleCurrentlyLoading() ||
 			this.handleAlreadyLoaded();
 
@@ -501,6 +543,8 @@ utils.extend(FetchTask.prototype, {
 
 			if(!task.isCompatibleVersion()) {
 				task.failed = true;
+				task.error = new Error("Incompatible package version requested");
+
 			}
 			delete context.loadingPaths[fileUrl];
 		}, function(err){
@@ -519,7 +563,7 @@ utils.extend(FetchTask.prototype, {
 		var pkg = pkg || this.getPackage();
 		var requestedVersion = this.requestedVersion;
 
-		return SemVer.validRange(requestedVersion) && 
+		return SemVer.validRange(requestedVersion) &&
 			SemVer.valid(pkg.version) ?
 			SemVer.satisfies(pkg.version, requestedVersion) : true;
 	},
@@ -551,20 +595,37 @@ utils.extend(FetchTask.prototype, {
 		// If a task is currently loading this fileUrl,
 		// wait for it to complete
 		var loadingTask = this.context.loadingPaths[this.fileUrl];
-		if(loadingTask) {
-			var task = this;
-			return loadingTask.promise.then(function(){
-				if(loadingTask.hadErrorLoading()) {
-					task.error = loadingTask.error;
-					task.failed = true;
-				} else {
-					task._fetchedPackage = loadingTask.getPackage();
-					if(!task.isCompatibleVersion()) {
-						task.failed = true;
-					}
-				}
-			});
-		}
+		if (!loadingTask) return;
+
+		var task = this;
+		return loadingTask.promise.then(function() {
+			task._fetchedPackage = loadingTask.getPackage();
+
+			var firstTaskFailed = loadingTask.hadErrorLoading();
+			var currentTaskIsCompatible = task.isCompatibleVersion();
+			var firstTaskIsNotCompatible = !loadingTask.isCompatibleVersion();
+
+			// Do not flag the current task as failed if:
+			//
+			//	- Current task fetches a version in rage and
+			//	- First task had no error loading at all or
+			//	- First task fetched an incompatible version
+			//
+			// otherwise, assume current task will fail for the same reason as
+			// the first did
+			if (currentTaskIsCompatible && (!firstTaskFailed || firstTaskIsNotCompatible)) {
+				task.failed = false;
+				task.error = null;
+			}
+			else if (!currentTaskIsCompatible) {
+				task.failed = true;
+				task.error = new Error("Incompatible package version requested");
+			}
+			else if (firstTaskFailed) {
+				task.failed = true;
+				task.error = loadingTask.error;
+			}
+		});
 	},
 
 	/**

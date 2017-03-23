@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script src="../../../steal.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+
+		var fourOhFours = 0;
+		(function(){
+			var fetch = System.fetch;
+			System.fetch = function(load){
+				return fetch.apply(this, arguments)
+					.catch(function(err){
+						fourOhFours++;
+						throw err;
+					});
+			};
+		})();
+
+		System.import("package.json!npm")
+			.then(function(){
+				return System.import(System.main);
+			})
+			.then(function(){
+				if(window.QUnit) {
+					QUnit.equal(fourOhFours, 0, "there were no 404s");
+					removeMyself();
+				}
+			})
+			.catch(function(e){
+				if(window.QUnit) {
+					QUnit.ok(false, e);
+					removeMyself();
+				} else {
+					console.log(e);
+					setTimeout(function(){
+						throw e;
+					});
+				}
+			});
+	</script>
+</body>
+</html>

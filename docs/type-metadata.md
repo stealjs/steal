@@ -70,6 +70,36 @@ the module is:
     }
     ```
 
+@option {Boolean} [useLocalDeps=false] Include module dependencies in the development bundle.
+```
+"meta": {
+  "MODULENAME": {
+    "useLocalDeps": true
+  }
+}
+```
+In this example all dependencies imported by `MODULENAME` will be included in the bundle during build.
+
+This option can be used alongside [environment dependant configuration](http://stealjs.com/docs/config.envs.html) to make sure a specific version of a module is used during build time but the original (local) module dependencies are included in the development bundle.
+
+```
+"steal": {
+  "meta": {
+    "steal-less/less": {
+      "useLocalDeps: true
+    }
+  },
+  "envs": {
+    "bundle-build": {
+      "map" {
+        "steal-less/less-engine": "steal-less/less-engine-node"
+      }
+    }
+  }
+}
+```
+The configuration above makes it so the NodeJS version of [less](http://lesscss.org/#using-less) is loaded while the application is built but `useLocalDeps` forces the local dependencies of `steal-less#less` to be included in the bundle.
+
 @option {String} [eval=function] Specify the type of *eval* that should be applied to this module.
 
 Most modules are evaled using the Function constructor like: `new Function(source).call(context)`. However, if you have a global module that looks like:
@@ -108,3 +138,30 @@ In this situation, the default `new Function` method of evaluation will not work
 ```
 
 This will use `<script>` elements for evaluation and the `Foo` property will be set.
+
+@option {{}} globals A map of globals to module names expected to be present for the execution of this module.
+
+This is useful for legacy code that relies on globals being defined during execution; the module names
+referenced are automatically turned into dependencies of this module.
+
+If you have a global module `foo`, that looks like this:
+
+```
+var something = $$$;
+```
+
+Use the following configuration to make sure the global variable `$$$` is defined before `foo`
+is executed:
+
+```
+"steal": {
+	"meta": {
+		"foo": {
+			"format": "global",	
+			"globals": {
+				"$$$": "bar"
+			}
+		}
+	}
+}
+```

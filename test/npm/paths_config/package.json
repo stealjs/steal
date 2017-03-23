@@ -1,0 +1,14 @@
+{
+	"name": "mod",
+	"main": "main",
+	"version": "1.0.0",
+	"dependencies": {
+		"can": "1.0.0"
+	},
+	"system": {
+		"paths": {
+			"can": "node_modules/can/dist/amd/can.js",
+			"can/*": "node_modules/can/dist/amd/can/*.js"
+		}
+	}
+}

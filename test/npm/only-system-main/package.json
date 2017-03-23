@@ -1,0 +1,7 @@
+{
+	"name": "npm-test",
+	"version": "3.0.0",
+	"system": {
+		"main": "main"
+	}
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+	<title>Steal live-reload tests</title>
+	<link rel="stylesheet" type="text/css" href="../../../node_modules/qunitjs/qunit/qunit.css"/>
+</head>
+<body>
+	<h1 id="qunit-header">system-npm Steal live-reload Test Suite</h1>
+
+	<h2 id="qunit-banner"></h2>
+	<div id="qunit-testrunner-toolbar"></div>
+	<h2 id="qunit-userAgent"></h2>
+	<ol id="qunit-tests"></ol>
+	<div id="qunit-test-area"></div>
+	<script src="../../../node_modules/qunitjs/qunit/qunit.js"></script>
+	<script>
+		steal = {
+			paths: {
+				"npm": "../../ext/npm.js",
+				"npm-extension": "../../ext/npm-extension.js",
+				"npm-convert": "../../ext/npm-convert.js",
+				"npm-load": "../../ext/npm-load.js",
+				"npm-utils": "../../ext/npm-utils.js"
+			}
+		};
+	</script>
+	<script src="../../../steal.js" main="@empty"></script>
+	<script>
+		QUnit.config.autostart = false;
+
+		System.import("package.json!npm").then(function(){
+			System.import("test/npm/test-live-reload");
+		});
+	</script>
+</body>
+</html>

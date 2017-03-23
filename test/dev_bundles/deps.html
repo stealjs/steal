@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>StealJS development bundles</title>
+</head>
+<body>
+	<script
+		main="@empty"
+		src="../../steal.js"
+		deps-bundle="test/dev_bundles/dev-bundle"
+		config-main="test/dev_bundles/stealconfig"
+	>
+	</script>
+
+	<script type="text/javascript">
+		window.QUnit = window.parent.QUnit;
+		window.removeMyself = window.parent.removeMyself;
+	</script>
+
+	<script type="text/javascript">
+		steal.done().then(function() {
+			if (window.QUnit != null) {
+				QUnit.equal(window.first, "configMain", "config should load first");
+				QUnit.equal(window.last, "bundle", "dev bundle should load after config");
+				QUnit.start();
+				removeMyself();
+			}
+			else {
+				console.log("first loaded: ", window.first);
+				console.log("last loaded: ", window.last);
+			}
+		});
+	</script>
+</body>
+</html>

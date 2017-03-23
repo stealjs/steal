@@ -1,0 +1,8 @@
+{
+  "name": "@scoped/package",
+  "main": "main",
+  "version": "1.0.0",
+  "dependencies": {
+    "@foo/bar": "1.0.0"
+  }
+}
