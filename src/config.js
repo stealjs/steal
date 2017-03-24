@@ -37,7 +37,7 @@
 	System.depsBundle = "@empty";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
-	System.ext = {};
+	System.ext = Object.create(null);
 	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
