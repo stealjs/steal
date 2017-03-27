@@ -1,9 +1,9 @@
-/* jshint esversion: 6 */
 'use strict';
 
 var series = require('async/series');
 var webdriver = require('wd');
 var SauceLabs = require('saucelabs');
+var testPagesUrls = require("./test-pages-urls");
 
 // status of tests on all platforms
 var allPlatformsPassed = true;
@@ -93,9 +93,20 @@ platforms.forEach((platform) => {
 // array of test functions
 var tests = [];
 
-platforms.forEach((platform) => {
-	tests.push(makeTest(platform));
-});
+testPagesUrls
+	.map(({ url, description }) => {
+		return { description, url: `http://localhost:3000/${url}?hidepassed`};
+	})
+	.forEach(({ url, description }) => {
+		platforms.forEach(platform => {
+			// override platform name to improve saucelabs dashboard output
+			var clonedPlatform = Object.assign({}, platform, {
+				name: platform.name.replace("qunit tests", description)
+			});
+
+			tests.push(makeTest(url, clonedPlatform));
+		});
+	});
 
 var url = `http://${process.env.SAUCE_USERNAME}:${process.env.SAUCE_ACCESS_KEY}@ondemand.saucelabs.com:80/wd/hub`;
 var driver = webdriver.remote(url);
@@ -109,9 +120,8 @@ series(tests, () => {
 });
 
 // return a function that will run tests on a given platform
-function makeTest(platform) {
+function makeTest(url, platform) {
 	return function(cb) {
-		var url = 'http://localhost:3000/test/test.html?hidepassed';
 		var jobTimeoutId, initTimeoutId;
 
 		console.log(`Running ${platform.name}`);

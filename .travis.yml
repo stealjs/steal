@@ -12,6 +12,8 @@ matrix:
       addons:
         sauce_connect: true
       before_script:
+        - npm install -g bower
+        - bower install
         - npm run http-server &
         - sleep 2
       script: npm run ui

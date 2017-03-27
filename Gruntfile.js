@@ -174,24 +174,13 @@ module.exports = function (grunt) {
 			lib: ["src/**/*.js"]
 		},
 		testee: {
-			windows: {
-				options: {
-					browsers: ["ie"]
-				},
-				src: ["test/test.html"]
-			},
 			tests: {
 				options: {
 					browsers: ["firefox"]
 				},
-				src: [
-					"src/loader/babel_test.html",
-					"src/loader/traceur_test.html",
-					"src/base/base_test.html",
-					"test/bower/test.html",
-					"test/npm/test.html",
-					"test/test.html"
-				]
+				src: require("./test/test-pages-urls").map(function(o) {
+					return o.url;
+				})
 			}
 		},
 		simplemocha: {
@@ -215,7 +204,6 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("testee");
 
 	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
-	grunt.registerTask("test-windows", ["build", /*"testee:windows",*/ "simplemocha"]);
 	grunt.registerTask("loader", ["esnext", "string-replace"]);
 	grunt.registerTask("build", ["loader", "concat", "uglify", "copy:extensions", "copy:toTest"]);
 	grunt.registerTask("default", ["build"]);

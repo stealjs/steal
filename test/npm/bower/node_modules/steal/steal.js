@@ -2529,14 +2529,24 @@ function logloads(loads) {
 		}
 	}
 
+	/**
+	 * Gets the babel environment name
+	 * return {string} The babel environment name
+	 */
 	function getBabelEnv() {
-		var env;
+		var loader = this;
+		var defaultEnv = "development";
+		var loaderEnv = typeof loader.getEnv === "function" && loader.getEnv();
 
 		if (isNode) {
-			env =  process.env.BABEL_ENV || process.env.NODE_ENV;
+			return process.env.BABEL_ENV ||
+				process.env.NODE_ENV ||
+				loaderEnv ||
+				defaultEnv;
 		}
-
-		return env || this.getEnv();
+		else {
+			return loaderEnv || defaultEnv;
+		}
 	}
 
 	/**
