@@ -2,13 +2,14 @@ var QUnit = require("steal-qunit");
 
 QUnit.config.testTimeout = 30000;
 
-require('src/cache-bust/test/');
-require('src/env/test/');
-require('src/json/test/');
-require('src/trace/trace_test');
+require("./saucelabs-qunit-report");
+require("src/cache-bust/test/");
+require("src/env/test/");
+require("src/json/test/");
+require("src/trace/trace_test");
 
-require('test/config/config_test');
-require('test/clone/clone_test');
+require("test/config/config_test");
+require("test/clone/clone_test");
 require("test/babel_plugins_test");
 
 QUnit.module("steal via system import");

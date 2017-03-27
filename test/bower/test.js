@@ -1,3 +1,5 @@
+require("../saucelabs-qunit-report");
+
 QUnit.module("system-bower plugin");
 
 QUnit.test("Basics works", function(assert) {
