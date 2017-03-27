@@ -95,16 +95,27 @@ var tests = [];
 
 testPagesUrls
 	.map(({ url, description }) => {
-		return { description, url: `http://localhost:3000/${url}?hidepassed`};
-	})
-	.forEach(({ url, description }) => {
-		platforms.forEach(platform => {
-			// override platform name to improve saucelabs dashboard output
-			var clonedPlatform = Object.assign({}, platform, {
-				name: platform.name.replace("qunit tests", description)
-			});
+		return {
+			url: `http://localhost:3000/${url}?hidepassed`,
+			platforms: platforms
+				.filter(function(platform) {
+					var isFirefox =  platform.browserName === "firefox";
 
-			tests.push(makeTest(url, clonedPlatform));
+					// run the main test page in all platforms AND
+					// run the other tests only in firefox
+					return (url === "test/test.html") ? true : isFirefox;
+				})
+				.map(function(platform) {
+					// override platform name to improve saucelabs dashboard output
+					return Object.assign({}, platform, {
+						name: platform.name.replace("qunit tests", description)
+					});
+				})
+		};
+	})
+	.forEach(({ url, platforms }) => {
+		platforms.forEach(platform => {
+			tests.push(makeTest(url, platform));
 		});
 	});
 
