@@ -1,5 +1,6 @@
 var GlobalSystem = window.System;
 
+require("../saucelabs-qunit-report");
 require("./utils_test");
 require("./crawl_test");
 require("./normalize_test");

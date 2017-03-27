@@ -1,5 +1,22 @@
 "use strict";
 module.exports = function (grunt) {
+	var browsers = [{
+		browserName: 'firefox',
+		platform: 'OS X 10.11',
+		version: '50.0',
+	}];
+
+	var baseSauceLabsOptions = {
+		tunneled: false,
+		maxTimeout: 1800,
+		browsers: browsers,
+		pollInterval: 10000,
+		build: process.env.TRAVIS_JOB_ID,
+		sauceConfig: {
+			"video-upload-on-pass": false,
+			"tunnel-identifier": process.env.TRAVIS_JOB_NUMBER
+		}
+	};
 
 	var core = ["<%= pkg.name %>.js", "<%= pkg.name %>.production.js", "ext/**"];
 
@@ -201,6 +218,22 @@ module.exports = function (grunt) {
 					"test/steal_import/test.js"
 				]
 			}
+		},
+
+		"saucelabs-qunit": {
+			options: baseSauceLabsOptions,
+			bower: {
+				options: {
+					testname: "bower extension tests",
+					urls: ["http://127.0.0.1:3000/test/bower/test.html?hidepassed"]
+				}
+			},
+			steal: {
+				options: {
+					testname: "steal tests",
+					urls: ["http://127.0.0.1:3000/test/test.html?hidepassed"]
+				}
+			}
 		}
 	});
 
@@ -212,8 +245,10 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-simple-mocha");
 	grunt.loadNpmTasks('grunt-esnext');
+	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.loadNpmTasks("testee");
 
+	grunt.registerTask("saucelabs", ["build", "saucelabs-qunit"]);
 	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
 	grunt.registerTask("test-windows", ["build", /*"testee:windows",*/ "simplemocha"]);
 	grunt.registerTask("loader", ["esnext", "string-replace"]);
