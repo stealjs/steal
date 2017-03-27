@@ -16,6 +16,7 @@ test/bower/as_config/vendor/steal/
 src/loader/loader-esnext.js
 test/npm/bower/node_modules/steal/
 
-!test/npm/*/node_modules
+!test/npm/**/node_modules
+test/npm/node_modules/
 test/npm/live-reload/node_modules/
 test/npm/conditionals/node_modules/steal-conditional

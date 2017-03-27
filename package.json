@@ -12,7 +12,6 @@
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
     "test": "npm run npm-copy && grunt test --stack && npm run test:live-reload",
-    "test-windows": "grunt test-windows --stack",
     "test-node": "grunt simplemocha",
     "live-reload-test": "cd test/npm/live-reload && live-reload-test",
     "test:live-reload": "npm run live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
