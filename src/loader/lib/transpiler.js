@@ -237,6 +237,17 @@
 		return presets;
 	}
 
+	/**
+	 * Returns the babel version
+	 * @param {Object} babel The babel object
+	 * @return {number} The babel version
+	 */
+	function getBabelVersion(babel) {
+		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+
+		return babelVersion || 6;
+	}
+
 	function getBabelOptions(load, babel) {
 		var options = this.babelOptions || {};
 
@@ -245,10 +256,7 @@
 		options.code = true;
 		options.ast = false;
 
-		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
-		if (!babelVersion) babelVersion = 6;
-
-		if (babelVersion >= 6) {
+		if (getBabelVersion(babel) >= 6) {
 			// delete the old babel options if they are present in config
 			delete options.optional;
 			delete options.whitelist;
@@ -359,10 +367,15 @@
 
 		var options = getBabelOptions.call(this, load, babel);
 		var plugins = collectBabelPlugins(options);
+		var babelVersion = getBabelVersion(babel);
 
 		return registerCustomPlugins.call(this, babel, plugins)
 			.then(function(registered) {
-				options.plugins = [addESModuleFlagPlugin].concat(registered);
+				// might be running on an old babel that throws if there is a
+				// plugins array in the options object
+				if (babelVersion >= 6) {
+					options.plugins = [addESModuleFlagPlugin].concat(registered);
+				}
 
 				var source = babel.transform(load.source, options).code;
 
