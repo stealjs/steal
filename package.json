@@ -11,10 +11,9 @@
     "ui": "npm run npm-copy && grunt build && node test/test-sauce-labs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
-    "test": "npm run npm-copy && grunt test --stack && npm run test:live-reload",
+    "test": "npm run npm-copy && grunt test --stack && npm run test:npm-live-reload",
     "test-node": "grunt simplemocha",
-    "live-reload-test": "cd test/npm/live-reload && live-reload-test",
-    "test:live-reload": "npm run live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
+    "test:npm-live-reload": "cd test/npm/live-reload && live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
   },
   "dependencies": {
     "assert": "~1.4.1",
