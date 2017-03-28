@@ -327,6 +327,33 @@
 		return plugins;
 	}
 
+	/**
+	 * Babel plugins that adds sets __esModule to true
+	 *
+	 * This flag is needed to interop the SystemJS format used by steal on the
+	 * browser in development with the CJS format used for built modules.
+	 *
+	 * With dev bundles is possible to load a part of the app already built while
+	 * other modules are being transpiled on the fly, with this flag, transpiled
+	 * amd modules will be able to load the modules transpiled on the browser.
+	 */
+	function addESModuleFlagPlugin(babel) {
+		var t = babel.types;
+
+		return {
+			visitor: {
+				Program: function(path, state) {
+					path.unshiftContainer("body", [
+						t.exportNamedDeclaration(null, [
+							t.exportSpecifier(t.identifier("true"),
+								t.identifier("__esModule"))
+						])
+					]);
+				}
+			}
+		};
+	}
+
 	function babelTranspile(load, babel) {
 		babel = babel.Babel || babel.babel || babel;
 
@@ -335,11 +362,8 @@
 
 		return registerCustomPlugins.call(this, babel, plugins)
 			.then(function(registered) {
-				// use the plugins array coming from the promise; custom plugins
-				// loaded by Steal can't be used to tranpile the plugin's own code
-				if (registered.length) {
-					options.plugins = registered;
-				}
+				options.plugins = [addESModuleFlagPlugin].concat(registered);
+
 				var source = babel.transform(load.source, options).code;
 
 				// add "!eval" to end of Babel sourceURL
