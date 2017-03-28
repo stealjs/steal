@@ -11,10 +11,10 @@
     "ui": "npm run npm-copy && grunt build && node test/test-sauce-labs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
-    "test": "npm run npm-copy && grunt test --stack && npm run test:live-reload",
     "test-node": "grunt simplemocha",
-    "live-reload-test": "cd test/npm/live-reload && live-reload-test",
-    "test:live-reload": "npm run live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
+    "test": "npm run npm-copy && grunt test --stack",
+    "test:live-reload": "cd test/live_reload && live-reload-test & testee test/live_reload/unit.html --browsers firefox --reporter Spec",
+    "test:npm-live-reload": "cd test/npm/live-reload && live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
   },
   "dependencies": {
     "assert": "~1.4.1",
@@ -62,7 +62,6 @@
     "saucelabs": "^1.3.0",
     "steal-conditional": "^0.3.2",
     "steal-qunit": "^1.0.0",
-    "system-live-reload": "1.5.3",
     "testee": "^0.3.0",
     "traceur": "0.0.111",
     "traceur-runtime": "jmcriffey/bower-traceur-runtime#0.0.91",

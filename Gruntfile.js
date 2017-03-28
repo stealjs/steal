@@ -141,7 +141,6 @@ module.exports = function (grunt) {
 			// copy plugins that steal should contain
 			extensions: {
 				files: [
-					{src: ["node_modules/system-live-reload/live.js"], dest: "ext/live-reload.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur.js"], dest: "ext/traceur.js", filter: "isFile"},
 					{src: ["node_modules/traceur/bin/traceur-runtime.js"], dest: "ext/traceur-runtime.js", filter: "isFile"},
 					{src: ["node_modules/babel-standalone/babel.js"], dest: "ext/babel.js", filter: "isFile"}

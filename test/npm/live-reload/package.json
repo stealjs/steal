@@ -3,6 +3,7 @@
   "main": "main",
   "version": "1.0.0",
   "dependencies": {
+    "jquery": "^3.2.1"
   },
   "system": {
     "configDependencies": [

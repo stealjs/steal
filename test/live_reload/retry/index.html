@@ -1,0 +1,37 @@
+<script>
+	window.QUnit = window.parent.QUnit;
+	window.removeMyself = window.parent.removeMyself;
+
+	var __count = 0;
+	var __WebSocket = window.WebSocket;
+	window.WebSocket = function(a, b){
+		var ws = new __WebSocket(a, b);
+
+		ws.addEventListener("close", function(){
+			__count++;
+			if(__count === 3) {
+				QUnit.ok(true, "Retried after a failure");
+				QUnit.start();
+				window.removeMyself();
+			} else if(__count > 3) {
+				QUnit.ok(false, "attempted too many times");
+			}
+		});
+
+		return ws;
+	};
+
+	steal = {
+		liveReloadAttempts: 3,
+
+		// Some port we aren't really using
+		liveReloadPort: 8112,
+
+		configDependencies: ["live-reload"],
+		paths: {
+			"live-reload": "live.js"
+		}
+	};
+</script>
+<script src="../../node_modules/steal/steal.js" main="test/retry/main"></script>
+<div id="app"></div>
