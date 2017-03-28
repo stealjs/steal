@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+	<title>Steal live-reload tests</title>
+	<link rel="stylesheet" type="text/css" href="../../../node_modules/qunitjs/qunit/qunit.css"/>
+</head>
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+
+	<script src="../../../node_modules/qunitjs/qunit/qunit.js"></script>
+	<script>
+		steal = {
+			paths: {
+				"npm": "../../ext/npm.js",
+				"npm-extension": "../../ext/npm-extension.js",
+				"npm-convert": "../../ext/npm-convert.js",
+				"npm-load": "../../ext/npm-load.js",
+				"npm-utils": "../../ext/npm-utils.js"
+			}
+		};
+	</script>
+	<script src="../../../steal.js" main="@empty" config-main="@empty"></script>
+	<script>
+		QUnit.config.autostart = false;
+
+		steal.import("package.json!npm").then(function(){
+			System.import("test/live_reload/unit");
+		});
+	</script>
+</body>
+</html>
