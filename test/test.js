@@ -165,6 +165,34 @@ QUnit.module("steal via system import");
 		});
 	});
 
+	QUnit.test("__esModule flag is added by babel plugin", function(assert) {
+		var done = assert.async();
+
+		return System["import"]("test/babel/other")
+			.then(function(mod) {
+				assert.ok(mod.__esModule, "flag should have been added");
+				done();
+			})
+			.then(null, function(err) {
+				assert.notOk(err, "should not fail");
+				done();
+			});
+	});
+
+	QUnit.test("__esModule flag only set to ES6 modules", function(assert) {
+		var done = assert.async();
+
+		return System["import"]("test/tests/module")
+			.then(function(mod) {
+				assert.notOk(mod.__esModule, "not an ES6 module");
+				done();
+			})
+			.then(null, function(err) {
+				assert.notOk(err, "should not fail");
+				done();
+			});
+	});
+
 	QUnit.test("babel decorators plugin work", function(assert) {
 		var done = assert.async();
 

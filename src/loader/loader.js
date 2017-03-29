@@ -2675,6 +2675,17 @@ function logloads(loads) {
 		return presets;
 	}
 
+	/**
+	 * Returns the babel version
+	 * @param {Object} babel The babel object
+	 * @return {number} The babel version
+	 */
+	function getBabelVersion(babel) {
+		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+
+		return babelVersion || 6;
+	}
+
 	function getBabelOptions(load, babel) {
 		var options = this.babelOptions || {};
 
@@ -2683,10 +2694,7 @@ function logloads(loads) {
 		options.code = true;
 		options.ast = false;
 
-		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
-		if (!babelVersion) babelVersion = 6;
-
-		if (babelVersion >= 6) {
+		if (getBabelVersion(babel) >= 6) {
 			// delete the old babel options if they are present in config
 			delete options.optional;
 			delete options.whitelist;
@@ -2765,19 +2773,48 @@ function logloads(loads) {
 		return plugins;
 	}
 
+	/**
+	 * Babel plugins that adds sets __esModule to true
+	 *
+	 * This flag is needed to interop the SystemJS format used by steal on the
+	 * browser in development with the CJS format used for built modules.
+	 *
+	 * With dev bundles is possible to load a part of the app already built while
+	 * other modules are being transpiled on the fly, with this flag, transpiled
+	 * amd modules will be able to load the modules transpiled on the browser.
+	 */
+	function addESModuleFlagPlugin(babel) {
+		var t = babel.types;
+
+		return {
+			visitor: {
+				Program: function(path, state) {
+					path.unshiftContainer("body", [
+						t.exportNamedDeclaration(null, [
+							t.exportSpecifier(t.identifier("true"),
+								t.identifier("__esModule"))
+						])
+					]);
+				}
+			}
+		};
+	}
+
 	function babelTranspile(load, babel) {
 		babel = babel.Babel || babel.babel || babel;
 
 		var options = getBabelOptions.call(this, load, babel);
 		var plugins = collectBabelPlugins(options);
+		var babelVersion = getBabelVersion(babel);
 
 		return registerCustomPlugins.call(this, babel, plugins)
 			.then(function(registered) {
-				// use the plugins array coming from the promise; custom plugins
-				// loaded by Steal can't be used to tranpile the plugin's own code
-				if (registered.length) {
-					options.plugins = registered;
+				// might be running on an old babel that throws if there is a
+				// plugins array in the options object
+				if (babelVersion >= 6) {
+					options.plugins = [addESModuleFlagPlugin].concat(registered);
 				}
+
 				var source = babel.transform(load.source, options).code;
 
 				// add "!eval" to end of Babel sourceURL
