@@ -10,6 +10,7 @@ require('src/trace/trace_test');
 require('test/config/config_test');
 require('test/clone/clone_test');
 require("test/babel_plugins_test");
+require("test/steal_clone_test");
 
 QUnit.module("steal via system import");
 
@@ -432,54 +433,6 @@ QUnit.module("steal via system import");
 
 	asyncTest("Basics work", function(){
 		makeIframe("contextual/test.html");
-	});
-
-	QUnit.module("ext-steal-clone")
-
-	asyncTest("basics work", function() {
-		makeIframe("ext-steal-clone/basics/index.html");
-	});
-
-	asyncTest("does not share the module registry and extensions with cloned loader", function() {
-		makeIframe("ext-steal-clone/config-separation/index.html");
-	});
-
-	asyncTest("allows you to override a module with a default export", function() {
-		makeIframe("ext-steal-clone/default-export-usedefault/index.html");
-	});
-
-	asyncTest("allows you to override a module with a default export without setting __useDefault", function() {
-		makeIframe("ext-steal-clone/default-export/index.html");
-	});
-
-	asyncTest("caches source of parent modules to avoid duplicate downloads", function() {
-		makeIframe("ext-steal-clone/fetch-cache/index.html");
-	});
-
-	asyncTest("works when overriding multiple modules", function() {
-		makeIframe("ext-steal-clone/multiple-overrides/index.html");
-	});
-
-	if(supportsES) {
-		asyncTest("works when using the npm extensions", function() {
-			makeIframe("ext-steal-clone/npm-extension/index.html");
-		});
-	}
-
-	asyncTest("works when a parent of injected dependency has been imported", function() {
-		makeIframe("ext-steal-clone/prior-import/index.html");
-	});
-
-	asyncTest("works when using relative imports", function() {
-		makeIframe("ext-steal-clone/relative-import/index.html");
-	});
-
-	asyncTest("works when using relative overrides", function() {
-		makeIframe("ext-steal-clone/relative-override/index.html");
-	});
-
-	asyncTest("what happens within a cloned loader should not leak", function(){
-		makeIframe("ext-steal-clone/leak/index.html");
 	});
 
 	QUnit.module("nw.js");

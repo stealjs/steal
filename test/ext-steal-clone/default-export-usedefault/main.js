@@ -10,18 +10,17 @@ clone({
 })
 .import('fooBarBaz')
 .then(function(fooBarBaz) {
-	if (typeof window !== "undefined" && window.QUnit) {
-		QUnit.ok(fooBarBaz === moduleObject, 'default export should be the passed object');
+	if (typeof window !== "undefined" && window.assert) {
+		assert.ok(fooBarBaz === moduleObject, 'default export should be the passed object');
 
 		try {
 			fooBarBaz.def = 'uvw';
-			QUnit.equal(fooBarBaz.def, 'uvw', 'should be able to set a property on the default export object');
+			assert.equal(fooBarBaz.def, 'uvw', 'should be able to set a property on the default export object');
 		} catch(e) {
-			QUnit.ok(false, 'error setting a property on the default export object: ' + e);
+			assert.ok(false, 'error setting a property on the default export object: ' + e);
 		}
 
-		QUnit.start();
-		removeMyself();
+		done();
 	} else {
 		console.log('fooBarBaz === moduleObject:', fooBarBaz === moduleObject);
 
