@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
 	</script>
 
 	<script src="../../../steal.js"
@@ -31,15 +31,15 @@
 				return System.import(System.main);
 			})
 			.then(function(){
-				if(window.QUnit) {
-					QUnit.equal(fourOhFours, 0, "there were no 404s");
-					removeMyself();
+				if(window.assert) {
+					assert.equal(fourOhFours, 0, "there were no 404s");
+					done();
 				}
 			})
 			.catch(function(e){
-				if(window.QUnit) {
-					QUnit.ok(false, e);
-					removeMyself();
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

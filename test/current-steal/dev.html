@@ -1,7 +1,16 @@
-<script>
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script src="../bower_components/steal/steal.js"
-		data-config="../stealconfig.js"
-		data-main="current-steal/main"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script src="../bower_components/steal/steal.js"
+			data-config="../stealconfig.js"
+			data-main="current-steal/main"></script>
+</body>
+</html>

@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -18,17 +18,17 @@
 			System.import(System.main).then(function(main){
 				var result = main();
 
-				if(window.QUnit) {
-					QUnit.equal(result, "fake");
-					removeMyself();
+				if(window.assert) {
+					assert.equal(result, "fake");
+					done();
 				} else {
 					console.log("result:", result);
 				}
 
 			}, function(e){
-				if(window.QUnit) {
-					QUnit.ok(false, e);
-					removeMyself();
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -16,20 +16,20 @@
 
 		System.import("package.json!npm").then(function(){
 			System.import(System.main).then(function(main){
-				if(window.QUnit) {
-					QUnit.equal(main.name, "my-moment", "Got the stub moment");
-					QUnit.equal(main.dep.name, "dep", "Got the dep");
-					QUnit.equal(main.dep.moment, "real", "Dep got the real moment");
-					QUnit.equal(main.moment, "real", "my-moment got the real moment too");
-					removeMyself();
+				if(window.assert) {
+					assert.equal(main.name, "my-moment", "Got the stub moment");
+					assert.equal(main.dep.name, "dep", "Got the dep");
+					assert.equal(main.dep.moment, "real", "Dep got the real moment");
+					assert.equal(main.moment, "real", "my-moment got the real moment too");
+					done();
 				} else {
 					console.log(main);
 				}
 
 			}, function(e){
-				if(window.QUnit) {
-					QUnit.ok(false, e);
-					removeMyself();
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

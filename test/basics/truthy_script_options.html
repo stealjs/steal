@@ -1,19 +1,23 @@
-<script>
-	if(window.parent) {
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
-	}
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
 
-<script src="../steal.js" data-foo></script>
-
-<script>
-	steal.done().then(function(){
-		if(window.QUnit) {
-			QUnit.ok(steal.config("foo") === true,
-				"config's foo should be truthy");
-			QUnit.start();
-			removeMyself();
-		}
-	});
-</script>
+	<script src="../steal.js" data-foo></script>
+	<script>
+		steal.done().then(function(){
+			if (window.assert) {
+				assert.ok(steal.config("foo") === true, "config's foo should be truthy");
+				done();
+			}
+		});
+	</script>
+</body>
+</html>

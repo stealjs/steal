@@ -4,10 +4,15 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <head>
 <body>
-<script>
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script type="text/javascript" src='../../steal.js' main='basics/basics' data-config="../config.js"></script>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script
+		type="text/javascript"
+		src="../../steal.js"
+		main="basics/basics"
+		data-config="../config.js"
+	></script>
 </body>
 </html>

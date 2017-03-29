@@ -917,7 +917,7 @@ QUnit.test("Doesn't retry fetch fails for non-404s", function(assert){
 		return loader["import"]("app/foo!some-plug");
 	})
 	.then(null, function(err){
-		QUnit.ok(/It failed/.test(err), "Failed for the right reason");
+		assert.ok(/It failed/.test(err), "Failed for the right reason");
 	})
 	.then(done, helpers.fail(assert, done));
 });

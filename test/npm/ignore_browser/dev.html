@@ -5,32 +5,30 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
 		config-main="@empty" base-url="./" main="@empty"></script>
 	<script src="../system_test_config.js"></script>
 	<script>
-		System.import("package.json!npm").then(function(){
-			System.import("main").then(function(main){
-				if(window.QUnit) {
-					QUnit.equal(main.default.util.name, "util");
-					removeMyself();
+		System.import("package.json!npm")
+			.then(function(){
+				return System.import("main");
+			})
+			.then(function(main){
+				if(window.assert) {
+					assert.equal(main.default.util.name, "util");
 				} else {
 					console.log(main)
 				}
-
-			}, function(e){
-				QUnit.ok(false, e);
-				removeMyself();
+			})
+			.then(done, function(err){
+				console.error("Oh no, error!", err);
+				assert.notOk(err, "should not fail");
+				done();
 			});
-
-
-		}).then(null, function(err){
-			console.error("Oh no, error!", err);
-		});
 	</script>
 </body>
 </html>

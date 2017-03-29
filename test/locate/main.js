@@ -1,16 +1,14 @@
 define(["resources/template.stache!"], function(template){
-	
-	if(typeof window !== "undefined" && window.QUnit) {
+	if(typeof window !== "undefined" && window.assert) {
 		template = template.split("\n");
 
-		QUnit.deepEqual(template, [
+		assert.deepEqual(template, [
 			"../node_modules/bootstrap/hello-world.png",
 			"../steal.svg",
 			'deep/deep.less'
 		], 'locate:// works as expected from importing file in a directory');
 
-		QUnit.start();
-		removeMyself();
+		done();
 	} else {
 		console.log("basics loaded", template);
 	}

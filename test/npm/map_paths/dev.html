@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -14,14 +14,14 @@
 	<script src="../system_test_config.js"></script>
 	<script>
 		function hasQUnit() {
-			return typeof QUnit !== "undefined";
+			return typeof window.assert !== "undefined";
 		}
 
 		System.import("package.json!npm").then(function(){
 			return System.normalize("dep");
 		}).then(function(){
 			if(hasQUnit()) {
-				QUnit.equal(System.paths["dep@1.2.2#other"], "other.js");
+				assert.equal(System.paths["dep@1.2.2#other"], "other.js");
 			} else {
 				console.log(System.paths["dep@1.2.2#other"]);
 			}
@@ -36,10 +36,10 @@
 			});
 
 			if(hasQUnit()) {
-				QUnit.equal(System.map["dep@1.2.2#dep"], "dep@1.2.2#main");
-				QUnit.equal(System.paths["dep@1.2.2#main"], "util.js");
+				assert.equal(System.map["dep@1.2.2#dep"], "dep@1.2.2#main");
+				assert.equal(System.paths["dep@1.2.2#main"], "util.js");
 
-				removeMyself();
+				done();
 			} else {
 				console.log(System.map["dep@1.2.2#dep"],
 					System.paths["dep@1.2.2#main"]);

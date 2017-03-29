@@ -1,14 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
 <body>
-<script>
-    window.QUnit = window.parent.QUnit;
-    window.removeMyself = window.parent.removeMyself;
-</script>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
 
-<script>
-    var steal = {
-        "configPath": "ssd/js/stealconfig.js",
-        "main": "main"
-    };
-</script>
-<script type="text/javascript" src='../../steal.js'></script>
+	<script>
+		var steal = {
+			"configPath": "ssd/js/stealconfig.js",
+			"main": "main"
+		};
+	</script>
+	<script type="text/javascript" src="../../steal.js"></script>
 </body>
+</html>

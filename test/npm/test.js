@@ -7,18 +7,7 @@ require("./import_test");
 require("./load_test");
 require("./locate_test");
 
-var makeIframe = function(src){
-	var iframe = document.createElement('iframe');
-
-	window.removeMyself = function(){
-		delete window.removeMyself;
-		document.body.removeChild(iframe);
-		QUnit.start();
-	};
-
-	document.body.appendChild(iframe);
-	iframe.src = src;
-};
+var makeIframe = require("../helpers").makeIframe;
 
 QUnit.module("npm extension");
 
@@ -195,135 +184,135 @@ QUnit.test("Support cloned loader", function(assert) {
 		.then(done);
 });
 
-asyncTest("module names", function(){
-	makeIframe("not_relative_main/dev.html");
+QUnit.test("module names", function(assert) {
+	makeIframe("not_relative_main/dev.html", assert);
 });
 
-asyncTest("main does not include .js in map", function(){
-	makeIframe("map_main/dev.html");
+QUnit.test("main does not include .js in map", function(assert) {
+	makeIframe("map_main/dev.html", assert);
 });
 
-asyncTest("ignoreBrowser", function(){
-	makeIframe("ignore_browser/dev.html");
+QUnit.test("ignoreBrowser", function(assert) {
+	makeIframe("ignore_browser/dev.html", assert);
 });
 
-asyncTest("directories.lib", function(){
-	makeIframe("directories_lib/dev.html");
+QUnit.test("directories.lib", function(assert) {
+	makeIframe("directories_lib/dev.html", assert);
 });
 
-asyncTest("github ranges as requested versions are matched", function(){
-	makeIframe("git_ranges/dev.html");
+QUnit.test("github ranges as requested versions are matched", function(assert) {
+	makeIframe("git_ranges/dev.html", assert);
 });
 
-asyncTest("works with packages that have multiple versions of the same dependency", function(){
-	makeIframe("mult_dep/dev.html");
+QUnit.test("works with packages that have multiple versions of the same dependency", function(assert) {
+	makeIframe("mult_dep/dev.html", assert);
 });
 
-asyncTest("works when System.map and System.paths are provided", function(){
-	makeIframe("map_paths/dev.html");
+QUnit.test("works when System.map and System.paths are provided", function(assert) {
+	makeIframe("map_paths/dev.html", assert);
 });
 
-asyncTest("browser config pointing to an alt main", function(){
-	makeIframe("browser/dev.html");
+QUnit.test("browser config pointing to an alt main", function(assert) {
+	makeIframe("browser/dev.html", assert);
 });
 
-asyncTest("browser config to ignore a module", function(){
-	makeIframe("browser-false/dev.html");
+QUnit.test("browser config to ignore a module", function(assert) {
+	makeIframe("browser-false/dev.html", assert);
 });
 
-asyncTest("configDependencies combined from loader and pkg.system", function(){
-	makeIframe("config_deps/dev.html");
+QUnit.test("configDependencies combined from loader and pkg.system", function(assert) {
+	makeIframe("config_deps/dev.html", assert);
 });
 
-asyncTest("Converting name of git versions works", function(){
-	makeIframe("git_config/dev.html");
+QUnit.test("Converting name of git versions works", function(assert) {
+	makeIframe("git_config/dev.html", assert);
 });
 
-asyncTest("contextual maps work", function(){
-	makeIframe("contextual_map/dev.html");
+QUnit.test("contextual maps work", function(assert) {
+	makeIframe("contextual_map/dev.html", assert);
 });
 
-asyncTest("configDependencies can override config with systemConfig export", function(){
-	makeIframe("ext_config/dev.html");
+QUnit.test("configDependencies can override config with systemConfig export", function(assert) {
+	makeIframe("ext_config/dev.html", assert);
 });
 
-asyncTest("transform the JSON with jsonOptions", function(){
-	makeIframe("json-options/dev.html");
+QUnit.test("transform the JSON with jsonOptions", function(assert) {
+	makeIframe("json-options/dev.html", assert);
 });
 
 QUnit.module("npmDependencies");
 
-asyncTest("are used exclusively if npmIgnore is not provided", function(){
-	makeIframe("npm_deps_only/dev.html");
+QUnit.test("are used exclusively if npmIgnore is not provided", function(assert) {
+	makeIframe("npm_deps_only/dev.html", assert);
 });
 
-asyncTest("override npmIgnore when npmIgnore is provided", function(){
-	makeIframe("npm_deps_override/dev.html");
+QUnit.test("override npmIgnore when npmIgnore is provided", function(assert) {
+	makeIframe("npm_deps_override/dev.html", assert);
 });
 
-asyncTest("ignores devDependencies when no npmDependencies is provided", function(){
-	makeIframe("npm_deps_devignore/dev.html");
+QUnit.test("ignores devDependencies when no npmDependencies is provided", function(assert) {
+	makeIframe("npm_deps_devignore/dev.html", assert);
 });
 
-asyncTest("npmIgnore a single module works", function(){
-	makeIframe("npm_deps_ignore/dev.html");
+QUnit.test("npmIgnore a single module works", function(assert) {
+	makeIframe("npm_deps_ignore/dev.html", assert);
 });
 
-asyncTest("use paths configured, including wildcards, for modules when provided", function(){
-	makeIframe("paths_config/dev.html");
+QUnit.test("use paths configured, including wildcards, for modules when provided", function(assert) {
+	makeIframe("paths_config/dev.html", assert);
 });
 
-asyncTest("scoped packages work", function(){
-	makeIframe("scoped/dev.html");
+QUnit.test("scoped packages work", function(assert) {
+	makeIframe("scoped/dev.html", assert);
 });
 
-asyncTest("works with npm 3's flat file structure", function(){
-	makeIframe("npm3/dev.html");
+QUnit.test("works with npm 3's flat file structure", function(assert) {
+	makeIframe("npm3/dev.html", assert);
 });
 
-asyncTest("works with child packages with version ranges", function(){
-	makeIframe("parent/dev.html");
+QUnit.test("works with child packages with version ranges", function(assert) {
+	makeIframe("parent/dev.html", assert);
 });
 
-asyncTest("With npm3 traversal starts by going to the mosted nested position", function(){
-	makeIframe("nested_back/dev.html");
+QUnit.test("With npm3 traversal starts by going to the mosted nested position", function(assert) {
+	makeIframe("nested_back/dev.html", assert);
 });
 
 // TODO: Fix this test
-QUnit.skip("peerDependencies are matched against parent that has a matching version", function(){
-	makeIframe("peer_deps/dev.html");
+QUnit.skip("peerDependencies are matched against parent that has a matching version", function(assert){
+	makeIframe("peer_deps/dev.html", assert);
 });
 
-asyncTest("Able to load dependencies using /index convention", function(){
-	makeIframe("folder_index/dev.html");
+QUnit.test("Able to load dependencies using /index convention", function(assert) {
+	makeIframe("folder_index/dev.html", assert);
 });
 
-asyncTest("load in a webworker", function(){
-	makeIframe("worker/dev.html");
+QUnit.test("load in a webworker", function(assert) {
+	makeIframe("worker/dev.html", assert);
 });
 
-asyncTest("works with steal-conditional", function() {
-	makeIframe("conditionals/dev.html");
+QUnit.test("works with steal-conditional", function(assert) {
+	makeIframe("conditionals/dev.html", assert);
 });
 
-asyncTest("works if only system.main is defined", function() {
-	makeIframe("only-system-main/dev.html");
+QUnit.test("works if only system.main is defined", function(assert) {
+	makeIframe("only-system-main/dev.html", assert);
 });
 
-asyncTest("forward slash with npm", function(){
-	makeIframe("npm-deep/dev.html");
+QUnit.test("forward slash with npm", function(assert) {
+	makeIframe("npm-deep/dev.html", assert);
 });
 
-asyncTest("meta config is deep", function(){
-	makeIframe("meta-deep/dev.html");
+QUnit.test("meta config is deep", function(assert) {
+	makeIframe("meta-deep/dev.html", assert);
 });
 
-asyncTest("meta globals config works", function() {
-	makeIframe("globals/dev.html");
+QUnit.test("meta globals config works", function(assert) {
+	makeIframe("globals/dev.html", assert);
 });
 
-asyncTest("npm extension helpers to add/get packages", function() {
-	makeIframe("steal_npm_helpers/dev.html");
+QUnit.test("npm extension helpers to add/get packages", function(assert) {
+	makeIframe("steal_npm_helpers/dev.html", assert);
 });
 
 QUnit.start();

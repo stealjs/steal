@@ -1,11 +1,8 @@
-
 steal.done().then(function() {
-	if (window.QUnit) {
-		QUnit.equal(steal.config("bar"), "bar",
+	if (window.assert) {
+		assert.equal(steal.config("bar"), "bar",
 			"should get options from last script tag");
-
-		QUnit.start();
-		removeMyself();
+		done();
 	}
 	else {
 		console.log("config bar: ", steal.config("bar"));

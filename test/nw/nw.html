@@ -1,27 +1,36 @@
-<script>
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script>
-	process = {
-		nextTick: function(fn){
-			setTimeout(fn, 0);
-		},
-		platform: "web",
-		versions: {}
-	};
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script>
+		process = {
+			nextTick: function(fn){
+				setTimeout(fn, 0);
+			},
+			platform: "web",
+			versions: {}
+		};
 
-	global = window;
-	global.nw = { process: process };
+		global = window;
+		global.nw = { process: process };
 
-	require = function(){ return {}; };
+		require = function(){ return {}; };
 
-	var oldToString = Object.prototype.toString;
-	Object.prototype.toString = function(){
-		if(this === process) {
-			return "[object process]";
-		}
-		return oldToString.apply(this, arguments);
-	};
-</script>
-<script src="../../steal.js" config-main="@empty" base-url="./" main="main"></script>
+		var oldToString = Object.prototype.toString;
+		Object.prototype.toString = function(){
+			if(this === process) {
+				return "[object process]";
+			}
+			return oldToString.apply(this, arguments);
+		};
+	</script>
+	<script src="../../steal.js" config-main="@empty" base-url="./" main="main"></script>
+</body>
+</html>

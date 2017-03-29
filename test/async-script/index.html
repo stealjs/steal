@@ -1,9 +1,9 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 	<script>
 		setTimeout(function(){
@@ -12,7 +12,10 @@
 			document.head.appendChild(s);
 		}, 1);
 	</script>
-	<script src='../../steal.js' main="main" config="./stealconfig.js" foo="bar"></script>
+	<script src="../../steal.js"
+			main="main"
+			config="./stealconfig.js"
+			foo="bar"></script>
 </head>
 <body>
 </body>

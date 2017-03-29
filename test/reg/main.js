@@ -12,9 +12,7 @@ export function foo() {
 
 var result = foo();
 
-if(typeof window !== "undefined" && window.QUnit) {
-	QUnit.equal(result, "bar result", "it worked yo");
-
-	QUnit.start();
-	removeMyself();
+if(typeof window !== "undefined" && window.assert) {
+	assert.equal(result, "bar result", "it worked yo");
+	done();
 }
