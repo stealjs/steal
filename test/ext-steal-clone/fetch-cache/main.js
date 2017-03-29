@@ -1,5 +1,4 @@
 var stealClone = require('steal-clone');
-var loader = require('@loader');
 
 // test when parent of injected module has been imported prior to cloning
 var origModuleA = require('ext-steal-clone/fetch-cache/moduleA');
@@ -22,12 +21,11 @@ clone.normalize('ext-steal-clone/fetch-cache/moduleA')
 
 	clone.import(normalizedName)
 	.then(function(moduleA) {
-		if (typeof window !== "undefined" && window.QUnit) {
-			QUnit.equal(moduleA.getName(), 'foo mockModuleB', 'import should use source from cache');
-			QUnit.equal(origModuleA.getName(), 'moduleA moduleB', 'prior import should use original dependency');
+		if (typeof window !== "undefined" && window.assert) {
+			assert.equal(moduleA.getName(), 'foo mockModuleB', 'import should use source from cache');
+			assert.equal(origModuleA.getName(), 'moduleA moduleB', 'prior import should use original dependency');
 
-			QUnit.start();
-			removeMyself();
+			done();
 		} else {
 			console.log('moduleA.getName():', moduleA.getName());
 			console.log('origModuleA.getName():', origModuleA.getName());

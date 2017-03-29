@@ -21,7 +21,9 @@
 	"describe": true,
 	"afterEach": true,
 	"it": true,
-	"customLoader": true
+	"customLoader": true,
+	"assert": true,
+	"done": true
   },
 
   "curly": true,
