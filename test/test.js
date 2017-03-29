@@ -164,7 +164,7 @@ QUnit.module("steal via system import");
 		});
 	});
 
-	QUnit.test("__esModule flag is added by when using babel", function(assert) {
+	QUnit.test("__esModule flag is added by babel plugin", function(assert) {
 		var done = assert.async();
 
 		return System["import"]("test/babel/other")

@@ -336,7 +336,7 @@
 	}
 
 	/**
-	 * Babel plugins that adds sets __esModule to true
+	 * Babel plugin that sets `__esModule` to true
 	 *
 	 * This flag is needed to interop the SystemJS format used by steal on the
 	 * browser in development with the CJS format used for built modules.
