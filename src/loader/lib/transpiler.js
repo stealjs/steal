@@ -130,6 +130,7 @@
 		return !!availablePlugins[shorthand] || !!availablePlugins[pluginName];
 	}
 
+
 	/**
 	 * Returns babel full plugin name if shorthand was used or the path provided
 	 *
@@ -155,6 +156,8 @@
 		return isPath.test(name) || isBabelPluginName.test(name) ?
 			name : "babel-plugin-" + name;
 	}
+
+
 
 	/**
 	 * Register the custom plugins found in `babelOptions` object
@@ -336,6 +339,144 @@
 	}
 
 	/**
+	 * A Babel preset as defined in `babelOptions.presets`
+	 * @typedef {string|Function|Object|<string, Object>[]|<Function, Object>[]|<Object, Object>} BabelPreset
+	 */
+
+	var processBabelPresets = (function() {
+		/**
+		 * Returns a list of babel presets to be used during transpilation
+		 *
+		 * Collects the babel presets defined in `babelOptions.presets` plugs
+		 * the environment dependant presets.
+		 *
+		 * @param {Object} babel The babel object exported by babel-standalone
+		 * @param {babelOptions} babelOptions The babel configuration object
+		 * @return {Promise.<BabelPreset[]>} Promise that resolves to a list of babel presets
+		 */
+		return function processBabelPresets(babel, babelOptions) {
+			var babelEnv = getBabelEnv.call(this);
+			var babelEnvConfig = babelOptions.env || {};
+
+			var presetsPromises = [
+				doProcessPresets.call(this, babel, babelOptions.presets)
+			];
+
+			for (var envName in babelEnvConfig) {
+				// do not process presets if the current environment does not match
+				// the environment in which the presets are set to be used
+				if (babelEnv === envName) {
+					var presets = babelEnvConfig[envName].presets || [];
+					presetsPromises.push(doProcessPresets.call(this, babel, presets));
+				}
+			}
+
+			return Promise.all(presetsPromises)
+				.then(function(results) {
+					var presets = [];
+
+					// results is an array of arrays, flatten it out!
+					results.forEach(function(processedPresets) {
+						presets = presets.concat(processedPresets);
+					});
+
+					return presets;
+				});
+		};
+
+		/**
+		 * Collects builtin presets names and non builtins objects/functions
+		 *
+		 * @param {Object} babel The babel object exported by babel-standalone
+		 * @param {BabelPreset[]} presets A list of babel presets
+		 * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
+		 *		of babel-standalone builtin preset names and non-builtin preset
+		 *		definitions (object or function).
+		 */
+		function doProcessPresets(babel, presets) {
+			var promises = [];
+
+			presets = presets || [];
+
+			presets.forEach(function(preset) {
+				var name = getPresetName(preset);
+
+				if (!includesPresetName(preset) || isBuiltinPreset(babel, name)) {
+					promises.push(preset);
+				}
+				else if (!isBuiltinPreset(babel, name)) {
+					var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
+
+					// import the preset!
+					promises.push(this["import"](npmPresetNameOrPath)
+						.then(function(mod) {
+							var exported = mod.__esModule ? mod.default : mod;
+
+							if (typeof preset === "string") {
+								return exported;
+							}
+							// assume the array form was provided
+							else {
+								// [ presetDefinition, presetOptions ]
+								return [exported, preset[1]];
+							}
+						}));
+				}
+			}, this);
+
+			return Promise.all(promises);
+		}
+
+		/**
+		 * Gets the preset name
+		 * @param {BabelPreset} preset An item inside of `babelOptions.presets`
+		 * @return {?string} The preset name
+		 */
+		function getPresetName(preset) {
+			if (includesPresetName(preset)) {
+				return typeof preset === "string" ? preset : preset[0];
+			}
+			else {
+				return null;
+			}
+		}
+
+		function includesPresetName(preset) {
+			return typeof preset === "string" ||
+				preset.length && typeof preset[0] === "string";
+		}
+
+		/**
+		 * Whether the preset is built in babel-standalone
+		 * @param {Object} babel The babel object exported by babel-standalone
+		 * @param {string} pluginName The plugin name to be checked
+		 * @return {boolean}
+		 */
+		function isBuiltinPreset(babel, presetName) {
+			var isNpmPresetName = /^(?:babel-preset-)/;
+			var availablePresets = babel.availablePresets || {};
+
+			// babel-standalone registers its builtin presets using the shorthand name
+			var shorthand = isNpmPresetName.test(presetName) ?
+				presetName.replace("babel-preset-", "") :
+				presetName;
+
+			return !!availablePresets[shorthand];
+		}
+
+		function getNpmPresetNameOrPath(name) {
+			var isPath = /\//;
+			var isNpmPresetName = /^(?:babel-preset-)/;
+
+			if (!isPath.test(name) && !isNpmPresetName.test(name)) {
+				return "babel-preset-" + name;
+			}
+
+			return name;
+		}
+	}());
+
+	/**
 	 * Babel plugin that sets `__esModule` to true
 	 *
 	 * This flag is needed to interop the SystemJS format used by steal on the
@@ -369,20 +510,24 @@
 		var plugins = collectBabelPlugins(options);
 		var babelVersion = getBabelVersion(babel);
 
-		return registerCustomPlugins.call(this, babel, plugins)
-			.then(function(registered) {
-				// might be running on an old babel that throws if there is a
-				// plugins array in the options object
-				if (babelVersion >= 6) {
-					options.plugins = [addESModuleFlagPlugin].concat(registered);
-				}
+		return Promise.all([
+			registerCustomPlugins.call(this, babel, plugins),
+			processBabelPresets.call(this, babel, options)
+		])
+		.then(function(results) {
+			// might be running on an old babel that throws if there is a
+			// plugins array in the options object
+			if (babelVersion >= 6) {
+				options.plugins = [addESModuleFlagPlugin].concat(results[0]);
+				options.presets = results[1];
+			}
 
-				var source = babel.transform(load.source, options).code;
+			var source = babel.transform(load.source, options).code;
 
-				// add "!eval" to end of Babel sourceURL
-				// I believe this does something?
-				return source + '\n//# sourceURL=' + load.address + '!eval';
-			});
+			// add "!eval" to end of Babel sourceURL
+			// I believe this does something?
+			return source + '\n//# sourceURL=' + load.address + '!eval';
+		});
 	}
 
 })(__global.LoaderPolyfill);

@@ -1,0 +1,17 @@
+{
+  "name": "babel-builtin-presets-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "source.js",
+  "author": "Bitovi",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-preset-steal-test": "^0.0.1"
+  },
+  "steal": {
+    "babelOptions": {
+      "presets": ["babel-preset-steal-test"]
+    }
+  }
+}
