@@ -2550,102 +2550,165 @@ function logloads(loads) {
 	}
 
 	/**
-	 * Whether the plugin name is already registered in babel-standalone
+	 * Gets the babel preset or plugin name
+	 * @param {BabelPreset|BabelPlugin} presetOrPlugin A babel plugin or preset
+	 * @return {?string} The preset/plugin name
+	 */
+	function getPresetOrPluginName(presetOrPlugin) {
+		if (includesPresetOrPluginName(presetOrPlugin)) {
+			return typeof presetOrPlugin === "string" ? presetOrPlugin : presetOrPlugin[0];
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Whether the babel plugin/preset name was provided
 	 *
-	 * @param {{}} babel The babel object exported by babel-standalone
-	 * @param {string} pluginName The plugin name to be checked
+	 * @param {BabelPreset|BabelPlugin} presetOrPlugin
 	 * @return {boolean}
 	 */
-	function isPluginRegistered(babel, pluginName) {
-		var isBabelPluginName = /^(?:babel-plugin-)/;
-		var availablePlugins = babel.availablePlugins || {};
-
-		// babel-standalone registers its bundled plugins using the shorthand name
-		var shorthand = isBabelPluginName.test(pluginName) ?
-			pluginName.replace("babel-plugin-", "") :
-			pluginName;
-
-		return !!availablePlugins[shorthand] || !!availablePlugins[pluginName];
+	function includesPresetOrPluginName(presetOrPlugin) {
+		return typeof presetOrPlugin === "string" ||
+			presetOrPlugin.length && typeof presetOrPlugin[0] === "string";
 	}
 
-
 	/**
-	 * Returns babel full plugin name if shorthand was used or the path provided
-	 *
-	 * @param {string} name The entry in the plugin array
-	 * @return {string} Relative/absolute path to plugin or babel npm plugin name
-	 *
-	 * If a babel plugin is on npm, it can be set in the `plugins` array using
-	 * one of the following forms:
-	 *
-	 * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
-	 * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
-	 * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
-	 *
-	 * Since plugins are loaded through steal, we need to make sure the full
-	 * plugin name is passed to `steal.import` so the npm extension can locate
-	 * the babel plugin. Relative/absolute paths should be loaded as any other
-	 * module.
+	 * A Babel plugins as defined in `babelOptions.plugins`
+	 * @typedef {string|Function|<string, Object>[]|<Function, Object>[]} BabelPlugin
 	 */
-	function getBabelPluginPath(name) {
-		var isPath = /\//;
-		var isBabelPluginName = /^(?:babel-plugin-)/;
 
-		return isPath.test(name) || isBabelPluginName.test(name) ?
-			name : "babel-plugin-" + name;
-	}
+	var processBabelPlugins = (function() {
+		/**
+		 * Returns a list of babel plugins to be used during transpilation
+		 *
+		 * Collects the babel plugins defined in `babelOptions.plugins` plus
+		 * the environment dependant plugins.
+		 *
+		 * @param {Object} babel The babel object exported by babel-standalone
+		 * @param {babelOptions} babelOptions The babel configuration object
+		 * @return {Promise.<BabelPlugin[]>} Promise that resolves to a list of babel plugins
+		 */
+		return function processBabelPlugins(babel, babelOptions) {
+			var babelEnv = getBabelEnv.call(this);
+			var babelEnvConfig = babelOptions.env || {};
 
+			var pluginsPromises = [
+				doProcessPlugins.call(this, babel, babelOptions.plugins)
+			];
 
+			for (var envName in babelEnvConfig) {
+				// do not process plugins if the current environment does not match
+				// the environment in which the plugins are set to be used
+				if (babelEnv === envName) {
+					var plugins = babelEnvConfig[envName].plugins || [];
+					pluginsPromises.push(doProcessPlugins.call(this, babel, plugins));
+				}
+			}
 
-	/**
-	 * Register the custom plugins found in `babelOptions` object
-	 *
-	 * babel-standalone requires custom plugins to be registered in order to
-	 * be used, see https://github.com/babel/babel-standalone#customisation
-	 *
-	 * @param {{}} babel The babel object exported by babel-standalone
-	 * @param {array} plugins An array of objects with plugin names, and
-	 *				  options/env if available
-	 * @return {Promise} Promise that resolves to the plugins array to be used
-	 *                   to transpile the load source code
-	 */
-	function registerCustomPlugins(babel, plugins) {
-		var promises = [];
-		var registered = [];
+			return Promise.all(pluginsPromises)
+				.then(function(results) {
+					var plugins = [];
 
-		var babelEnv = getBabelEnv.call(this);
+					// results is an array of arrays, flatten it out!
+					results.forEach(function(processedPlugins) {
+						plugins = plugins.concat(processedPlugins);
+					});
 
-		plugins.forEach(function(plugin) {
-			var canUsePlugin = plugin.env == null || plugin.env === babelEnv;
+					return plugins;
+				});
+		}
 
-			if (canUsePlugin) {
-				var name = plugin.name;
-				var parent = this.configMain || "package.json!npm";
+		/**
+		 * Collects builtin plugin names and non builtins functions
+		 *
+		 * @param {Object} babel The babel object exported by babel-standalone
+		 * @param {BabelPlugin[]} plugins A list of babel plugins
+		 * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
+		 *		of babel-standalone builtin plugin names and non-builtin plugin
+		 *		functions
+		 */
+		function doProcessPlugins(babel, plugins) {
+			var promises = [];
 
-				registered.push(plugin.options ?
-					[plugin.name, plugin.options] : plugin.name);
+			plugins = plugins || [];
 
-				if (!isPluginRegistered(babel, name)) {
-					var path = getBabelPluginPath(name);
+			plugins.forEach(function(plugin) {
+				var name = getPresetOrPluginName(plugin);
 
-					promises.push(this["import"](path, { name: parent })
-						.then(function(module) {
-							if (module) {
-								// handle ES2015 default exports
-								var exported = typeof module === "function" ?
-									module : module.default;
+				if (!includesPresetOrPluginName(plugin) || isBuiltinPlugin(babel, name)) {
+					promises.push(plugin);
+				}
+				else if (!isBuiltinPlugin(babel, name)) {
+					var parent = this.configMain || "package.json!npm";
+					var npmPluginNameOrPath = getNpmPluginNameOrPath(name);
 
-								babel.registerPlugin(name, exported);
+					// import the plugin!
+					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
+						.then(function(mod) {
+							var exported = mod.__esModule ? mod.default : mod;
+
+							if (typeof plugin === "string") {
+								return exported;
+							}
+							// assume the array form was provided
+							else {
+								// [ pluginFunction, pluginOptions ]
+								return [exported, plugin[1]];
 							}
 						}));
 				}
-			}
-		}, this);
+			}, this);
 
-		return Promise.all(promises).then(function() {
-			return registered;
-		});
-	}
+			return Promise.all(promises);
+		}
+
+		/**
+		 * Whether the plugin is built in babel-standalone
+		 *
+		 * @param {Object} babel The babel object exported by babel-standalone
+		 * @param {string} pluginName The plugin name to be checked
+		 * @return {boolean}
+		 */
+		function isBuiltinPlugin(babel, pluginName) {
+			var isNpmPluginName = /^(?:babel-plugin-)/;
+			var availablePlugins = babel.availablePlugins || {};
+
+			// babel-standalone registers its bundled plugins using the shorthand name
+			var shorthand = isNpmPluginName.test(pluginName) ?
+				pluginName.replace("babel-plugin-", "") :
+				pluginName;
+
+			return !!availablePlugins[shorthand];
+		}
+
+		/**
+		 * Returns babel full plugin name if shorthand was used or the path provided
+		 *
+		 * @param {string} name The entry in the plugin array
+		 * @return {string} Relative/absolute path to plugin or babel npm plugin name
+		 *
+		 * If a babel plugin is on npm, it can be set in the `plugins` array using
+		 * one of the following forms:
+		 *
+		 * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
+		 * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
+		 * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
+		 *
+		 * Since plugins are loaded through steal, we need to make sure the full
+		 * plugin name is passed to `steal.import` so the npm extension can locate
+		 * the babel plugin. Relative/absolute paths should be loaded as any other
+		 * module.
+		 */
+		function getNpmPluginNameOrPath(name) {
+			var isPath = /\//;
+			var isBabelPluginName = /^(?:babel-plugin-)/;
+
+			return isPath.test(name) || isBabelPluginName.test(name) ?
+				name : "babel-plugin-" + name;
+		}
+	}());
 
 	function getBabelPlugins(current) {
 		var plugins = current || [];
@@ -2719,64 +2782,7 @@ function logloads(loads) {
 		return options;
 	}
 
-	/**
-	 * An object with babel plugin properties
-	 *
-	 * @typedef {Object} PluginData
-	 * @property {string} name The plugin name
-	 * @property {?string} env The environment name
-	 * @property {?object} options Options object pass to babel plugin
-	 */
-
-	/**
-	 * Ruturns an object with babel plugin properties
-	 *
-	 * @param {string|array} plugin The plugin entry found in babelOptions
-	 * @param {?string} env The environment name if defined
-	 * @return {PluginData}
-	 */
-	function collectPluginData(plugin, env) {
-		var data = {};
-
-		if (typeof plugin === "string") {
-			data.name = plugin;
-		}
-		else {
-			data.name = plugin[0];
-			data.options = plugin[1];
-		}
-
-		data.env = env;
-		return data;
-	}
-
-	/**
-	 * Returns an array of plugin data objects
-	 *
-	 * Collects the plugins found in `babelOptions.env` concatenated with the
-	 * plugin defined in `babelOptions.plugins`
-	 *
-	 * @param {{}} babelOptions The babel configuration object
-	 * @return {Array.<PluginData>}
-	 */
-	function collectBabelPlugins(babelOptions) {
-		var plugins = [];
-		var env = babelOptions.env || {};
-
-		(babelOptions.plugins || []).forEach(function(p) {
-			plugins.push(collectPluginData(p));
-		});
-
-		for (var envName in env) {
-			(env[envName].plugins || []).forEach(function(p) {
-				plugins.push(collectPluginData(p, envName));
-			});
-		}
-
-		return plugins;
-	}
-
-	/**
+	/**presets
 	 * A Babel preset as defined in `babelOptions.presets`
 	 * @typedef {string|Function|Object|<string, Object>[]|<Function, Object>[]|<Object, Object>} BabelPreset
 	 */
@@ -2785,7 +2791,7 @@ function logloads(loads) {
 		/**
 		 * Returns a list of babel presets to be used during transpilation
 		 *
-		 * Collects the babel presets defined in `babelOptions.presets` plugs
+		 * Collects the babel presets defined in `babelOptions.presets` plus
 		 * the environment dependant presets.
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
@@ -2837,16 +2843,17 @@ function logloads(loads) {
 			presets = presets || [];
 
 			presets.forEach(function(preset) {
-				var name = getPresetName(preset);
+				var name = getPresetOrPluginName(preset);
 
-				if (!includesPresetName(preset) || isBuiltinPreset(babel, name)) {
+				if (!includesPresetOrPluginName(preset) || isBuiltinPreset(babel, name)) {
 					promises.push(preset);
 				}
 				else if (!isBuiltinPreset(babel, name)) {
+					var parent = this.configMain || "package.json!npm";
 					var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
 
 					// import the preset!
-					promises.push(this["import"](npmPresetNameOrPath)
+					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
 						.then(function(mod) {
 							var exported = mod.__esModule ? mod.default : mod;
 
@@ -2863,25 +2870,6 @@ function logloads(loads) {
 			}, this);
 
 			return Promise.all(promises);
-		}
-
-		/**
-		 * Gets the preset name
-		 * @param {BabelPreset} preset An item inside of `babelOptions.presets`
-		 * @return {?string} The preset name
-		 */
-		function getPresetName(preset) {
-			if (includesPresetName(preset)) {
-				return typeof preset === "string" ? preset : preset[0];
-			}
-			else {
-				return null;
-			}
-		}
-
-		function includesPresetName(preset) {
-			return typeof preset === "string" ||
-				preset.length && typeof preset[0] === "string";
 		}
 
 		/**
@@ -2944,12 +2932,11 @@ function logloads(loads) {
 	function babelTranspile(load, babel) {
 		babel = babel.Babel || babel.babel || babel;
 
-		var options = getBabelOptions.call(this, load, babel);
-		var plugins = collectBabelPlugins(options);
 		var babelVersion = getBabelVersion(babel);
+		var options = getBabelOptions.call(this, load, babel);
 
 		return Promise.all([
-			registerCustomPlugins.call(this, babel, plugins),
+			processBabelPlugins.call(this, babel, options),
 			processBabelPresets.call(this, babel, options)
 		])
 		.then(function(results) {
