@@ -38,3 +38,26 @@ fs.copySync(
 		);
 	});
 }());
+
+// copy babel presets tests dependencies
+(function() {
+	var paths = [
+		"babel_presets",
+		"babel_env_presets",
+		"babel_presets_options"
+	];
+
+	var deps = [
+		"babel-preset-steal-test",
+		"babel-plugin-steal-test"
+	];
+
+	paths.forEach(function(folder) {
+		deps.forEach(function(dep) {
+			fs.copySync(
+				path.join(root, "node_modules", dep),
+				path.join(root, "test", folder, "node_modules", dep)
+			);
+		});
+	});
+}());

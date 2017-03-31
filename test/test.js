@@ -10,6 +10,7 @@ require('src/trace/trace_test');
 require('test/config/config_test');
 require('test/clone/clone_test');
 require("test/babel_plugins_test");
+require("test/babel_presets_test");
 require("test/steal_clone_test");
 
 QUnit.module("steal via system import");

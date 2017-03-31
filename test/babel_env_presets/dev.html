@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>babel environment dependant presets</title>
+</head>
+<body>
+	<script type="text/javascript">
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+
+	<script
+		data-env="test"
+		src="../../steal.js"
+		config-main="test/babel_env_presets/package.json!npm"
+	>
+	</script>
+</body>
+</html>
