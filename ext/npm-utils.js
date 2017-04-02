@@ -554,7 +554,7 @@ var utils = {
 			return  path.substr(0,1) === ".";
 		},
 		startsWithTildeSlash: function( path ) {
-			return path.substr(0,2) === "~/";
+			return path.substr(0,2) === "~/" || path.substr(0,2) === "@/";
 		},
 		joinURIs: function(base, href) {
 			function removeDotSegments(input) {

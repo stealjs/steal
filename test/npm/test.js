@@ -86,6 +86,19 @@ QUnit.test("meta", function(assert) {
 		});
 });
 
+QUnit.test("@/ works the same as ~/", function(assert) {
+	var done = assert.async();
+
+	GlobalSystem["import"]("@/meta")
+		.then(function(meta) {
+			assert.equal(meta, "123", "got 123");
+		})
+		.then(done, function(err) {
+			assert.notOk(err, "should not fail");
+			done();
+		});
+});
+
 QUnit.test("module names that start with @", function(assert) {
 	var done = assert.async();
 
