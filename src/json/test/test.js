@@ -26,3 +26,18 @@ QUnit.asyncTest("jsonOptions transform allows you to transform the json object",
 		assert.ok(!a.priv, "Private field excluded");
 	}).then(start);
 });
+
+QUnit.test("json extension should not parse css files", function(assert) {
+	var done = assert.async();
+
+	steal.import("src/json/test/css-attr-selector.css!src/json/test/css")
+		.then(function() {
+			assert.ok(false, "steal.import should not resolve without css plugin");
+			done();
+		})
+		.catch(function(err) {
+			assert.ok(/SyntaxError: Unexpected token {/.test(err.message),
+				"without css plugin, css files are evaluated as js files");
+			done();
+		});
+});
