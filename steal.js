@@ -5986,6 +5986,7 @@ addStealExtension(function (loader) {
   var normalize = loader.normalize;
   loader.normalize = function(name, parentName){
     var loader = this;
+	var pluginLoader = loader.pluginLoader || loader;
 
     if (parentName) {
       var definer = this._contextualModules[name];
@@ -5997,7 +5998,7 @@ addStealExtension(function (loader) {
         if(!loader.has(name)) {
           // `definer` could be a function or could be a moduleName
           if (typeof definer === 'string') {
-            definer = loader['import'](definer);
+            definer = pluginLoader['import'](definer);
           }
 
           return Promise.resolve(definer)
@@ -6022,6 +6023,7 @@ addStealExtension(function (loader) {
     return normalize.apply(this, arguments);
   };
 });
+
 // Steam Script-Module Extension
 // Add a steal-module script to the page and it will run after Steal has been configured
 // <script type="text/steal-module">...</script>
