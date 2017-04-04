@@ -390,6 +390,47 @@ QUnit.test("importing a global with an npm dependency", function(assert) {
 	});
 });
 
+QUnit.test("A child dependency's devDependency doesn't interfere with normal loading",
+	function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			version: "1.0.0",
+			main: "main",
+			dependencies: {
+				dep: "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				version: "1.0.0",
+				main: "main",
+				devDependencies: {
+					other: "1.0.0"
+				}
+			}
+		])
+		.withModule("app@1.0.0#main", "require('dep');")
+		.withModule("dep@1.0.0#main", "module.exports='dep';")
+		.withModule("other", "module.exports='works';")
+		.loader;
+
+	helpers.init(loader)
+	.then(function(){
+		return loader.import("app");
+	})
+	.then(function(){
+		return loader.import("other");
+	})
+	.then(function(def){
+		assert.equal(def, "works", "got the right module");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
 QUnit.module("Importing npm modules with tilde operator");
 
 QUnit.test("Import module with the ~ operator", function (assert) {
