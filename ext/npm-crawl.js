@@ -162,7 +162,7 @@ var crawl = {
 		return npmLoad(context, childPkg, requestedVersion)
 		.then(function(pkg){
 			crawl.setVersionsConfig(context, pkg, requestedVersion);
-			crawl.setParent(context, pkg, isRoot);
+			crawl.setParent(context, pkg, false);
 			return pkg;
 		});
 	},
