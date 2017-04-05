@@ -6340,9 +6340,19 @@ addStealExtension(function applyTraceExtension(loader) {
 // Steal JSON Format
 // Provides the JSON module format definition.
 addStealExtension(function (loader) {
-  var jsonTest = /^[\s\n\r]*[\{\[]/;
   var jsonExt = /\.json$/i;
   var jsExt = /\.js$/i;
+
+  // taken from prototypejs
+  // https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/string.js#L682-L706
+  function isJSON(str) {
+    if (!str) return false;
+
+    str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+    str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+    str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+    return (/^[\],:{}\s]*$/).test(str);
+  }
 
   // if someone has a moduleName that is .json, make sure it loads a json file
   // no matter what paths might do
@@ -6404,7 +6414,7 @@ addStealExtension(function (loader) {
 
   // Attempt to parse a load as json.
   function parse(load){
-    if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
+    if ((load.metadata.format === 'json' || !load.metadata.format) && isJSON(load.source)) {
       try {
         return JSON.parse(load.source);
       } catch(e) {
@@ -6415,6 +6425,7 @@ addStealExtension(function (loader) {
 
   }
 });
+
 // Steal Cache-Bust Extension
 // if enabled, Steal Cache-Bust will add a
 // cacheKey and cacheVersion to the required file address
