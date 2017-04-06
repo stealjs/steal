@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
 	</script>
 
 	<script src="../../../steal.js" config-main="@empty"
@@ -23,10 +23,10 @@
 
 		System.import("package.json!npm").then(function(){
 			System.import("main").then(function(mod){
-				if(window.QUnit) {
-					QUnit.equal(typeof mod, "object", "module was fetched successfully");
-					QUnit.equal(mod.name, "folder", "correct name");
-					QUnit.equal(mod.other, "other", "got other module");
+				if(window.assert) {
+					assert.equal(typeof mod, "object", "module was fetched successfully");
+					assert.equal(mod.name, "folder", "correct name");
+					assert.equal(mod.other, "other", "got other module");
 
 					// See if we got the expected log message.
 					var str, found = false;
@@ -37,16 +37,16 @@
 							break;
 						}
 					}
-					QUnit.equal(found, true, "The expected log warning was printed");
+					assert.equal(found, true, "The expected log warning was printed");
 
-					removeMyself();
+					done();
 				} else {
 					console.log("Got module", mod);
 				}
 			}, function(e){
-				if(window.QUnit) {
-					QUnit.ok(false, e);
-					removeMyself();
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

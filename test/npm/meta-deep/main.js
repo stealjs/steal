@@ -1,11 +1,11 @@
-if (typeof window !== "undefined" && window.QUnit) {
+if (typeof window !== "undefined" && window.assert) {
 	var cfg = steal.config("meta").foo;
-	QUnit.equal(cfg.format, "global");
-	QUnit.ok(cfg.deps, "has deps");
-	QUnit.equal(cfg.deps.length, 1, "has 1 dep");
-	QUnit.equal(cfg.deps[0], "bar", "has correct dep");
+	assert.equal(cfg.format, "global");
+	assert.ok(cfg.deps, "has deps");
+	assert.equal(cfg.deps.length, 1, "has 1 dep");
+	assert.equal(cfg.deps[0], "bar", "has correct dep");
 
-	removeMyself();
+	done();
 } else {
 	console.log(steal.config("meta"));
 }

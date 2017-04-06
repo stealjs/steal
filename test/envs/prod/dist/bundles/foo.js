@@ -19,23 +19,17 @@ define("bar", ["jquerty"],function(jquerty){
 	};
 });
 define("foo",["bar", "@loader"], function(bar, loader){
-	if(typeof window !== "undefined" && window.QUnit) {
-		QUnit.ok(bar, "got basics/module");
-		QUnit.equal(bar.name, "bar", "module name is right");
-
-		QUnit.equal(bar.jquerty.name, "jQuerty", "got global");
+	if(typeof window !== "undefined" && window.assert) {
+		assert.ok(bar, "got basics/module");
+		assert.equal(bar.name, "bar", "module name is right");
+		assert.equal(bar.jquerty.name, "jQuerty", "got global");
 
 		// envs
-		QUnit.equal(loader.isEnv("production"), true, "This is production");
-		QUnit.equal(loader.isPlatform("window"), true, "This is the window");
-
-		QUnit.start();
-		removeMyself();
+		assert.equal(loader.isEnv("production"), true, "This is production");
+		assert.equal(loader.isPlatform("window"), true, "This is the window");
+		done();
 		return {};
 	} else {
 		console.log("basics loaded", bar);
 	}
 });
-
-
-

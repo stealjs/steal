@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -18,16 +18,16 @@
 
 			// package name works
 			var packageName = System.import("directories_lib").then(function(main){
-				if(window.QUnit) {
-					QUnit.equal(main.default.util.name, "util");
+				if(window.assert) {
+					assert.equal(main.default.util.name, "util");
 				} else {
 					console.log(main);
 				}
 			});
 
 			var packageUtil = System.import("directories_lib/util").then(function(util){
-				if(window.QUnit) {
-					QUnit.equal(util.name, "util");
+				if(window.assert) {
+					assert.equal(util.name, "util");
 				} else {
 					console.log(util.name);
 				}
@@ -35,30 +35,30 @@
 
 			var test = System.import("test/test").then(function(test){
 				test = test["default"];
-				if(window.QUnit) {
-					QUnit.equal(test.name, "test/test","got name");
-					QUnit.equal(test.foo.name, "foo");
-					QUnit.equal(test.directories_lib.util.name, "util");
-					QUnit.equal(test.other, "bar");
+				if(window.assert) {
+					assert.equal(test.name, "test/test","got name");
+					assert.equal(test.foo.name, "foo");
+					assert.equal(test.directories_lib.util.name, "util");
+					assert.equal(test.other, "bar");
 				} else {
 					console.log(test);
 				}
 			});
 
 			var main = System.import(System.main).then(function(main){
-				if(window.QUnit) {
-					QUnit.equal(main.default.util.name, "util");
+				if(window.assert) {
+					assert.equal(main.default.util.name, "util");
 				} else {
 					console.log(main);
 				}
 			});
 
 			Promise.all([packageName,packageUtil,test,main]).then(function(){
-				removeMyself && removeMyself();
+				done();
 			}, function(e){
-				if(window.QUnit) {
-					QUnit.ok(false, e);
-					removeMyself();
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

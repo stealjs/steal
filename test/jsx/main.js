@@ -9,11 +9,9 @@ var React = {
 
 var out = <div>Hello <strong>world!</strong></div>;
 
-if(typeof window !== "undefined" && window.QUnit) {
-	QUnit.equal(out, "it worked!", "transpiled jsx by default");
-
-	QUnit.start();
-	removeMyself();
+if(typeof window !== "undefined" && window.assert) {
+	assert.equal(out, "it worked!", "transpiled jsx by default");
+	done();
 } else {
 	console.log("jsx loaded:", out);
 }

@@ -5,13 +5,13 @@ function basic() {
 				return parentName + ' bar';
 			},
 			__useDefault: true
-		}
+		};
 	});
 
 	return steal.import('contextual/moduleA')
 	.then(function(moduleA) {
-		if (typeof window !== "undefined" && window.QUnit) {
-			QUnit.equal(moduleA.default(), 'contextual/moduleA bar');
+		if (typeof window !== "undefined" && window.assert) {
+			assert.equal(moduleA.default(), 'contextual/moduleA bar');
 		} else {
 			console.log(moduleA.default());
 		}
@@ -23,8 +23,8 @@ function definer() {
 
 	return steal.import('contextual/moduleB')
 	.then(function(moduleA) {
-		if (typeof window !== "undefined" && window.QUnit) {
-			QUnit.equal(moduleA.default(), 'contextual/moduleB baz');
+		if (typeof window !== "undefined" && window.assert) {
+			assert.equal(moduleA.default(), 'contextual/moduleB baz');
 		} else {
 			console.log(moduleA.default());
 		}
@@ -34,8 +34,7 @@ function definer() {
 basic()
 .then(definer)
 .then(function() {
-	if (typeof window !== "undefined" && window.QUnit) {
-		QUnit.start();
-		removeMyself();
+	if (typeof window !== "undefined" && window.done) {
+		done();
 	}
 });

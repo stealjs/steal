@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
 	</script>
 
 	<script base-url="./" config-main="@empty" src="../../../steal.js"></script>
@@ -14,11 +14,11 @@
 
 	<script>
 		System.import("package.json!npm").then(function() {
-			if (window.QUnit) {
-				QUnit.ok(typeof steal !== "undefined", "steal should be defined");
-				QUnit.equal(typeof steal.addNpmPackages, "function", "steal.addNpmPackages should be a function");
-				QUnit.equal(typeof steal.getNpmPackages, "function", "steal.getNpmPackages should be a function");
-				removeMyself();
+			if (window.assert) {
+				assert.ok(typeof steal !== "undefined", "steal should be defined");
+				assert.equal(typeof steal.addNpmPackages, "function", "steal.addNpmPackages should be a function");
+				assert.equal(typeof steal.getNpmPackages, "function", "steal.getNpmPackages should be a function");
+				done();
 			} else {
 				console.log("addNpmPackages: ", steal.addNpmPackages);
 				console.log("getNpmPackages: ", steal.addNpmPackages);

@@ -1,15 +1,17 @@
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
 	</script>
 	<script src="../../steal.js" config="./no-config-found.js"></script>
 	<script>
-		steal.done().then(null, function() {
-			QUnit.ok(true);
-			QUnit.start();
-
-			removeMyself();
-		});
+		steal.done()
+			.then(function() {
+				assert.ok(false, "promise should have been rejected");
+			})
+			.then(done, function() {
+				assert.ok(true, "promise should be rejected");
+				done();
+			});
 	</script>
 </body>

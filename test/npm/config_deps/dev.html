@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -17,22 +17,22 @@
 	</script>
 	<script>
 		function hasQUnit() {
-			return typeof QUnit !== "undefined";
+			return typeof window.assert !== "undefined";
 		}
 
 		System["import"]("package.json!npm").then(function(){
 			var rootPkg = System.npmPaths.__default;
 			if(hasQUnit()) {
-				QUnit.equal(window.DEP, "this is a config dep");
-				QUnit.notEqual(System.configDependencies[0], "my-dep", "An npm dependency's configDependencies should not be part of the configDependencies array.");
-				QUnit.ok(rootPkg.steal.configDependencies, "there are config deps in the pkg");
+				assert.equal(window.DEP, "this is a config dep");
+				assert.notEqual(System.configDependencies[0], "my-dep", "An npm dependency's configDependencies should not be part of the configDependencies array.");
+				assert.ok(rootPkg.steal.configDependencies, "there are config deps in the pkg");
 			} else {
 				console.log(window.DEP);
 			}
 		}).then(null, function(err){
 			console.error("Oh no, error!", err);
 		}).then(function(){
-			window.removeMyself && removeMyself();
+			window.done && done();
 		});
 	</script>
 </body>

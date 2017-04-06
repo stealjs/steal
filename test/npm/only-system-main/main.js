@@ -1,6 +1,6 @@
-if(window.QUnit) {
-	QUnit.ok(true, "main loaded");
-	removeMyself();
+if(window.assert) {
+	assert.ok(true, "main loaded");
+	done();
 } else {
 	console.log("main loaded");
 }

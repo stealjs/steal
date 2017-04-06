@@ -1,10 +1,8 @@
 var my = require("json/my.json");
 
-if (typeof window !== "undefined" && window.QUnit) {
-	QUnit.equal(my.foo,"bar", "module returned" );
-
-	QUnit.start();
-	removeMyself();
+if (typeof window !== "undefined" && window.assert) {
+	assert.equal(my.foo, "bar", "module returned");
+	done();
 } else {
 	console.log("my ", my);
 }

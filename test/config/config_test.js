@@ -1,12 +1,12 @@
 var QUnit = require("steal-qunit");
 
 QUnit.module("meta configuration", {
-	teardown: function(){
+	afterEach: function(assert) {
 		delete steal.config("meta").foo;
 	}
 });
 
-QUnit.test("is set deep", function(){
+QUnit.test("is set deep", function(assert) {
 	steal.config({
 		meta: {
 			foo: {
@@ -25,10 +25,10 @@ QUnit.test("is set deep", function(){
 	});
 
 	var cfg = steal.config("meta").foo;
-	QUnit.equal(cfg.deps.length, 1, "still have the one dep");
+	assert.equal(cfg.deps.length, 1, "still have the one dep");
 });
 
-QUnit.test("added deps get added", function(){
+QUnit.test("added deps get added", function(assert) {
 	steal.config({
 		meta: {
 			foo: {
@@ -48,10 +48,10 @@ QUnit.test("added deps get added", function(){
 	});
 
 	var cfg = steal.config("meta").foo;
-	QUnit.equal(cfg.deps.length, 1, "still have the one dep");
+	assert.equal(cfg.deps.length, 1, "still have the one dep");
 });
 
-QUnit.test("setting deps to empty removes them", function(){
+QUnit.test("setting deps to empty removes them", function(assert) {
 	steal.config({
 		meta: {
 			foo: {
@@ -71,10 +71,10 @@ QUnit.test("setting deps to empty removes them", function(){
 	});
 
 	var cfg = steal.config("meta").foo;
-	QUnit.equal(cfg.deps.length, 0, "deps were removed");
+	assert.equal(cfg.deps.length, 0, "deps were removed");
 });
 
-QUnit.test("Can provide a string as the meta value", function(){
+QUnit.test("Can provide a string as the meta value", function(assert) {
 	steal.config({
 		meta: {
 			foo: "bar"
@@ -88,6 +88,6 @@ QUnit.test("Can provide a string as the meta value", function(){
 	});
 
 	var cfg = steal.config("meta").foo;
-	QUnit.equal(cfg, "qux", "meta was set");
+	assert.equal(cfg, "qux", "meta was set");
 });
 

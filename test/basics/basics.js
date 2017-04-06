@@ -1,17 +1,12 @@
-steal('basics/module', function(module){
-
+steal('basics/module', function(module) {
 	var isNode = typeof process === "object" && {}.toString.call(process) === "[object process]";
 
-	if(typeof window !== "undefined" && window.QUnit) {
-		QUnit.ok(module, "got basics/module");
-		QUnit.equal(module.name, "module", "module name is right");
-
-		QUnit.equal(module.es6module.name, "es6Module", "steal loads ES6");
-
-		QUnit.equal(module.es6module.amdModule.name, "amdmodule", "ES6 loads amd");
-
-		QUnit.start();
-		removeMyself();
+	if(typeof window !== "undefined" && window.assert) {
+		assert.ok(module, "got basics/module");
+		assert.equal(module.name, "module", "module name is right");
+		assert.equal(module.es6module.name, "es6Module", "steal loads ES6");
+		assert.equal(module.es6module.amdModule.name, "amdmodule", "ES6 loads amd");
+		done();
 	} else {
 		if(typeof console === "object") {
 			console.log("basics loaded", module.name, module.es6module.name, module.es6module.amdModule.name);
@@ -33,5 +28,4 @@ steal('basics/module', function(module){
 			document.body.appendChild(host);
 		}
 	}
-
 });

@@ -1,21 +1,27 @@
-<!doctype html>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<script>
-	steal = {
-		env: "production"
-	};
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script type="text/javascript" src='../../steal.js' config-main="@empty"></script>
-<script>
-	steal.done().then(function(){
-		if(window.QUnit) {
-			QUnit.equal(steal.config('env'), "production","configed to production");
-			QUnit.start();
-			removeMyself();
-		} else {
-			console.log(steal.config('env'));
-		}
-	});
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		steal = {
+			env: "production"
+		};
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script type="text/javascript" src="../../steal.js" config-main="@empty"></script>
+	<script>
+		steal.done().then(function(){
+			if(window.assert) {
+				assert.equal(steal.config('env'), "production","configed to production");
+				done();
+			} else {
+				console.log(steal.config('env'));
+			}
+		});
+	</script>
+</body>
+</html>

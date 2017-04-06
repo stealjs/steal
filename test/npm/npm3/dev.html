@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
 	</script>
 
 	<script src="../../../steal.js"
@@ -18,10 +18,10 @@
 			System.import(System.main).then(function(main){
 				// Tests are in the main.
 			}, function(e){
-				if(window.QUnit) {
+				if(window.assert) {
 					console.log(e, e.stack);
-					QUnit.ok(false, e.message);
-					removeMyself();
+					assert.ok(false, e.message);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

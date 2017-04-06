@@ -1,10 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
 <body>
-
-
-<script>
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script src='../../steal.js' main='main' data-config="./config.js"
-	env="window-staging"></script>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script src="../../steal.js"
+			data-main="main"
+			data-config="./config.js"
+			data-env="window-staging"></script>
 </body>
+</html>

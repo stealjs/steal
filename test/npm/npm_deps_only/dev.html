@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -17,8 +17,8 @@
 		var fetch = System.fetch;
 		System.fetch = function(load){
 			if(/two/.test(load.name)) {
-				if(window.QUnit) {
-					QUnit.ok(false, "loading file we shouldn't load");
+				if(window.assert) {
+					assert.ok(false, "loading file we shouldn't load");
 				}
 			}
 			return fetch.call(this, load);
@@ -26,19 +26,19 @@
 
 		System.import("package.json!npm").then(function(){
 			System.import(System.main).then(function(main){
-				if(window.QUnit) {
-					QUnit.equal(main.name, "main", "got the main");
-					QUnit.equal(main.one.name, "one", "got one");
-					QUnit.equal(main.one.three.name, "three", "got three");
-					removeMyself();
+				if(window.assert) {
+					assert.equal(main.name, "main", "got the main");
+					assert.equal(main.one.name, "one", "got one");
+					assert.equal(main.one.three.name, "three", "got three");
+					done();
 				} else {
 					console.log(main);
 				}
 
 			}, function(e){
-				if(window.QUnit) {
-					QUnit.ok(false, e);
-					removeMyself();
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
 				} else {
 					console.log(e);
 					setTimeout(function(){

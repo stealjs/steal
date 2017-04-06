@@ -33,9 +33,8 @@ function assertFailure(reason){
 
 
 QUnit.module("getDependencies", {
-	setup: setupBasics
+	beforeEach: setupBasics
 });
-
 
 QUnit.test("Gets the dependencies of a module", function(assert) {
 	var loader = this.loader;
@@ -113,7 +112,7 @@ QUnit.test("gets dependencies when there are comments between them #21", functio
 });
 
 QUnit.module("getDependants", {
-	setup: setupBasics
+	beforeEach: setupBasics
 });
 
 QUnit.test("Gets modules that are dependants", function(assert) {
@@ -129,7 +128,7 @@ QUnit.test("Gets modules that are dependants", function(assert) {
 });
 
 QUnit.module("getModuleLoad", {
-	setup: setupBasics
+	beforeEach: setupBasics
 });
 
 QUnit.test("Gets the module's load object", function(assert) {
@@ -141,7 +140,7 @@ QUnit.test("Gets the module's load object", function(assert) {
 });
 
 QUnit.module("preventModuleExecution", {
-	setup: function(assert){
+	beforeEach: function(assert){
 		makeLoader.call(this);
 
 		var done = assert.async();
@@ -169,7 +168,7 @@ QUnit.test("Prevents a module from executing", function(assert) {
 });
 
 QUnit.module("preventModuleExecution with babel", {
-	setup: function(assert){
+	beforeEach: function(assert){
 		makeLoader.call(this);
 
 		var done = assert.async();
@@ -190,7 +189,7 @@ QUnit.test("Prevents a module from executing", function(assert) {
 });
 
 QUnit.module("getBundles", {
-	setup: setupBasics
+	beforeEach: setupBasics
 });
 
 QUnit.test("Gets the top-level module", function(assert) {
@@ -201,7 +200,7 @@ QUnit.test("Gets the top-level module", function(assert) {
 });
 
 QUnit.module("production", {
-	setup: function(assert){
+	beforeEach: function(assert){
 		makeLoader.call(this);
 
 		this.loader.baseURL = this.loader.baseURL + "/tests/production";
@@ -219,7 +218,7 @@ QUnit.test("Loads normally", function(assert) {
 });
 
 QUnit.module("eachModule", {
-	setup: function() {
+	beforeEach: function() {
 		makeLoader.call(this);
 
 		this.loader.set('module1', System.newModule({'default': function() { return 'foo'; }, __useDefault: true }));

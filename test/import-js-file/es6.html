@@ -1,11 +1,14 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
 <body>
-
-<script>
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script type="text/javascript" src='../../steal.js' main="es6" config="stealconfig.js"></script>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script type="text/javascript" src="../../steal.js" main="es6" config="stealconfig.js"></script>
 </body>
 </html>

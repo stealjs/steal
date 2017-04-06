@@ -5,8 +5,8 @@
 </head>
 <body>
 	<script>
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 	</script>
 
 	<script src="../../../steal.js"
@@ -14,15 +14,18 @@
 	<script src="../system_test_config.js"></script>
 	<script>
 
-		System.import("package.json!npm").then(function(){
-			return System.normalize("dep", "map_main@1.0.0#main");
-		}).then(function(){
-			QUnit.equal(System.map["dep@1.2.2#dep"], "dep@1.2.2#main");
-
-			removeMyself();
-		}).then(null, function(err){
-			console.error("Oh no, error!", err);
-		});
+		System.import("package.json!npm")
+			.then(function(){
+				return System.normalize("dep", "map_main@1.0.0#main");
+			})
+			.then(function(){
+				assert.equal(System.map["dep@1.2.2#dep"], "dep@1.2.2#main");
+			})
+			.then(done, function(err){
+				console.error("Oh no, error!", err);
+				assert.notOk(err, "should not fail");
+				done();
+			});
 	</script>
 </body>
 </html>
