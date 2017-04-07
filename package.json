@@ -26,7 +26,7 @@
     "domain-browser": "~1.1.2",
     "events": "~1.1.1",
     "http-browserify": "~1.7.0",
-    "https-browserify": "~0.0.0",
+    "https-browserify": "~1.0.0",
     "os-browserify": "~0.2.1",
     "path-browserify": "~0.0.0",
     "process": "~0.11.9",
