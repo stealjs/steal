@@ -32,7 +32,7 @@
     "process": "~0.11.9",
     "punycode": "~2.0.1",
     "resolve": "^1.1.7",
-    "string_decoder": "~0.10.31",
+    "string_decoder": "~1.0.0",
     "tty-browserify": "~0.0.0",
     "vm-browserify": "~0.0.4",
     "zlib-browserify": "~0.0.3"
