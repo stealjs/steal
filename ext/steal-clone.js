@@ -26,6 +26,8 @@ var excludedConfigProps = {
 // Recursively copy a config object
 function cloneConfig(obj, isTopLevel) {
 	var clone;
+	var toString = Object.prototype.toString;
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 	if (obj == null || typeof obj !== "object" || obj['isCloned']) {
 		return obj;
@@ -39,11 +41,12 @@ function cloneConfig(obj, isTopLevel) {
 		return clone;
 	}
 
-	if (obj instanceof Object) {
+	// instanceof fails to catch objects created with `null` as prototype
+	if (obj instanceof Object || toString.call(obj) === "[object Object]") {
 		clone = {};
 		for (var attr in obj) {
 			obj['isCloned'] = true; // prevent infinite recursion
-			if (obj.hasOwnProperty(attr)) {
+			if (hasOwnProperty.call(obj, attr)) {
 				if (isTopLevel) {
 					// exclude specific props and functions from top-level of config
 					if (typeof obj[attr] !== 'function' &&
