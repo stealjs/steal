@@ -45,7 +45,9 @@
     });
     return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
   }
-  function toAbsoluteURL(base, href) {
+  function toAbsoluteURL(inBase, inHref) {
+    var href = inHref;
+    var base = inBase
 
     if (isWindows)
       href = href.replace(/\\/g, '/');
@@ -115,11 +117,11 @@
   }
   else if (typeof require != 'undefined') {
     var fs, fourOhFourFS = /ENOENT/;
-    fetchTextFromURL = function(url, fulfill, reject) {
-      if (url.substr(0, 5) != 'file:')
+    fetchTextFromURL = function(rawUrl, fulfill, reject) {
+      if (rawUrl.substr(0, 5) != 'file:')
         throw 'Only file URLs of the form file: allowed running in Node.';
       fs = fs || require('fs');
-      url = url.substr(5);
+      var url = rawUrl.substr(5);
       if (isWindows)
         url = url.replace(/\//g, '\\');
       return fs.readFile(url, function(err, data) {

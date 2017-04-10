@@ -5,9 +5,9 @@ matrix:
     - node_js: 0.12
       script: npm run test-node
     - node_js: 4
-      script: npm run test-node
+      script: npm run test-node:ci
     - node_js: 6
-      script: npm run test-node
+      script: npm run test-node:ci
     - node_js: node
       addons:
         sauce_connect: true

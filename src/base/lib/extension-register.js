@@ -28,8 +28,9 @@ function register(loader) {
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
   var curSystem;
-  function exec(load, context) {
+  function exec(load, execContext) {
     var loader = this;
+    var context = execContext;
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
     var lastLineIndex = load.source.lastIndexOf('\n');
@@ -70,7 +71,11 @@ function register(loader) {
   // loader.register sets loader.defined for declarative modules
   var anonRegister;
   var calledRegister;
-  function registerModule(name, deps, declare, execute) {
+  function registerModule(regName, regDeps, regDeclare, regExecute) {
+    var name = regName;
+    var deps = regDeps;
+    var declare = regDeclare;
+    var execute = regExecute;
     if (typeof name != 'string') {
       execute = declare;
       declare = deps;

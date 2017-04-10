@@ -1568,7 +1568,9 @@ function logloads(loads) {
             // Hijack System.register to set declare function
             var curSystem = __global.System;
             var curRegister = curSystem.register;
-            curSystem.register = function(name, deps, declare) {
+            curSystem.register = function(name, regDeps, regDeclare) {
+              var declare = regDeclare;
+              var deps = regDeps;
               if (typeof name != 'string') {
                 declare = deps;
                 deps = name;
@@ -1577,7 +1579,7 @@ function logloads(loads) {
               // store the deps as load.deps
               load.declare = declare;
               load.depsList = deps;
-            }
+            };
             __eval(transpiled, __global, load);
             curSystem.register = curRegister;
           });
@@ -1847,8 +1849,9 @@ function logloads(loads) {
   }
 
   // 15.2.5.2.4
-  function linkSetFailed(linkSet, load, exc) {
+  function linkSetFailed(linkSet, load, linkExc) {
     var loader = linkSet.loader;
+    var exc = linkExc;
 
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
@@ -2214,7 +2217,8 @@ function logloads(loads) {
     return err;
   }
 
-  function addToError(err, msg) {
+  function addToError(error, msg) {
+    var err = error;
     if (err instanceof Error)
       err.message = msg + err.message;
     else
@@ -2466,7 +2470,8 @@ function logloads(loads) {
 		}
 
 		return self['import'](self.transpiler)
-			.then(function(transpiler) {
+			.then(function(transpilerMod) {
+				var transpiler = transpilerMod;
 				if (transpiler.__useDefault) {
 					transpiler = transpiler['default'];
 				}
@@ -2624,15 +2629,15 @@ function logloads(loads) {
 		 * Collects builtin plugin names and non builtins functions
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPlugin[]} plugins A list of babel plugins
+		 * @param {BabelPlugin[]} babelPlugins A list of babel plugins
 		 * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
 		 *		of babel-standalone builtin plugin names and non-builtin plugin
 		 *		functions
 		 */
-		function doProcessPlugins(babel, plugins) {
+		function doProcessPlugins(babel, babelPlugins) {
 			var promises = [];
 
-			plugins = plugins || [];
+			var plugins = babelPlugins || [];
 
 			plugins.forEach(function(plugin) {
 				var name = getPresetOrPluginName(plugin);
@@ -2832,15 +2837,14 @@ function logloads(loads) {
 		 * Collects builtin presets names and non builtins objects/functions
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPreset[]} presets A list of babel presets
+		 * @param {BabelPreset[]} babelPresets A list of babel presets
 		 * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
 		 *		of babel-standalone builtin preset names and non-builtin preset
 		 *		definitions (object or function).
 		 */
-		function doProcessPresets(babel, presets) {
+		function doProcessPresets(babel, babelPresets) {
 			var promises = [];
-
-			presets = presets || [];
+			var presets = babelPresets || [];
 
 			presets.forEach(function(preset) {
 				var name = getPresetOrPluginName(preset);
@@ -2929,8 +2933,8 @@ function logloads(loads) {
 		};
 	}
 
-	function babelTranspile(load, babel) {
-		babel = babel.Babel || babel.babel || babel;
+	function babelTranspile(load, babelMod) {
+		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
 		var babelVersion = getBabelVersion(babel);
 		var options = getBabelOptions.call(this, load, babel);
@@ -3006,7 +3010,9 @@ function logloads(loads) {
     return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
   }
 
-  function toAbsoluteURL(base, href) {
+  function toAbsoluteURL(inBase, inHref) {
+    var href = inHref;
+    var base = inBase
 
     if (isWindows)
       href = href.replace(/\\/g, '/');
@@ -3077,11 +3083,11 @@ function logloads(loads) {
   }
   else if (typeof require != 'undefined') {
     var fs, fourOhFourFS = /ENOENT/;
-    fetchTextFromURL = function(url, fulfill, reject) {
-      if (url.substr(0, 5) != 'file:')
+    fetchTextFromURL = function(rawUrl, fulfill, reject) {
+      if (rawUrl.substr(0, 5) != 'file:')
         throw 'Only file URLs of the form file: allowed running in Node.';
       fs = fs || require('fs');
-      url = url.substr(5);
+      var url = rawUrl.substr(5);
       if (isWindows)
         url = url.replace(/\//g, '\\');
       return fs.readFile(url, function(err, data) {
@@ -3343,7 +3349,9 @@ $__global.upgradeSystemLoader = function() {
       hash     : m[8] || ''
     } : null);
   }
-  function toAbsoluteURL(base, href) {
+  function toAbsoluteURL(inBase, inHref) {
+	var base = inBase;
+	var href = inHref;
     function removeDotSegments(input) {
       var output = [];
       input.replace(/^(\.\.?(\/|$))+/, '')
@@ -3385,8 +3393,6 @@ $__global.upgradeSystemLoader = function() {
     $__global.SystemJS = System;
     $__global.System = System.originalSystem;
   }
-
-  
 
 var getOwnPropertyDescriptor = true;
 try {
@@ -3709,8 +3715,9 @@ function register(loader) {
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
   var curSystem;
-  function exec(load, context) {
+  function exec(load, execContext) {
     var loader = this;
+    var context = execContext;
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
     var lastLineIndex = load.source.lastIndexOf('\n');
@@ -3751,7 +3758,11 @@ function register(loader) {
   // loader.register sets loader.defined for declarative modules
   var anonRegister;
   var calledRegister;
-  function registerModule(name, deps, declare, execute) {
+  function registerModule(regName, regDeps, regDeclare, regExecute) {
+    var name = regName;
+    var deps = regDeps;
+    var declare = regDeclare;
+    var execute = regExecute;
     if (typeof name != 'string') {
       execute = declare;
       declare = deps;
@@ -4373,8 +4384,9 @@ function global(loader) {
 
   loader._extensions.push(global);
 
-  function readGlobalProperty(p, value) {
+  function readGlobalProperty(p, propValue) {
     var pParts = p.split('.');
+    var value = propValue;
     while (pParts.length)
       value = value[pParts.shift()];
     return value;
@@ -4399,9 +4411,12 @@ function global(loader) {
     }
 
     loader.set('@@global-helpers', loader.newModule({
-      prepareGlobal: function(moduleName, deps, exportName) {
+      prepareGlobal: function(globalModuleName, globalDeps, globalExportName) {
         var globals;
         var require;
+        var moduleName = globalModuleName;
+        var deps = globalDeps;
+        var exportName = globalExportName;
 
         // handle function signature when an object is passed instead of
         // individual arguments
@@ -4798,7 +4813,10 @@ function amd(loader) {
       }
     }
 
-    function define(name, deps, factory) {
+    function define(modName, modDeps, modFactory) {
+      var name = modName;
+      var deps = modDeps;
+      var factory = modFactory;
       if (typeof name != 'string') {
         factory = deps;
         deps = name;
@@ -4991,7 +5009,7 @@ function amd(loader) {
 
 /*
   SystemJS map support
-  
+
   Provides map configuration through
     System.map['jquery'] = 'some/module/map'
 
@@ -5052,7 +5070,7 @@ function map(loader) {
     var tmpParentLength, tmpPrefixLength;
     var subPath;
     var nameParts;
-    
+
     // first find most specific contextual match
     if (parentName) {
       for (var p in loader.map) {
@@ -5113,8 +5131,9 @@ function map(loader) {
   }
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
+  loader.normalize = function(identifier, parentName, parentAddress) {
     var loader = this;
+    var name = identifier;
     if (!loader.map)
       loader.map = {};
 
@@ -5125,8 +5144,8 @@ function map(loader) {
     }
 
     return Promise.resolve(loaderNormalize.call(loader, name, parentName, parentAddress))
-    .then(function(name) {
-      name = applyMap(name, parentName, loader);
+    .then(function(normalizedName) {
+      var name = applyMap(normalizedName, parentName, loader);
 
       // Normalize "module/" into "module/module"
       // Convenient for packages
@@ -5159,8 +5178,9 @@ function plugins(loader) {
   loader._extensions.push(plugins);
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
+  loader.normalize = function(name, parentModuleName, parentAddress) {
     var loader = this;
+    var parentName = parentModuleName;
     // if parent is a plugin, normalize against the parent plugin argument only
     var parentPluginIndex;
     if (parentName && (parentPluginIndex = parentName.indexOf('!')) != -1)
@@ -5523,7 +5543,8 @@ var $__curScript, __eval;
     return newErr;
   }
 
-  __eval = function(source, address, context, sourceMap, evalType) {
+  __eval = function(inSource, address, context, sourceMap, evalType) {
+	var source = inSource;
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
 
 
@@ -5676,7 +5697,7 @@ var $__curScript, __eval;
 		var matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
-	
+
 	var ext = function(uri){
 		var fn = filename(uri);
 		var dot = fn.lastIndexOf(".");
@@ -5688,8 +5709,9 @@ var $__curScript, __eval;
 	};
 
 	var pluginCache = {};
-	
-	var normalize = function(name, loader){
+
+	var normalize = function(unnormalizedName, loader){
+		var name = unnormalizedName;
 
 		// Detech if this name contains a plugin part like: app.less!steal/less
 		// and catch the plugin name so that when it is normalized we do not perform
@@ -5704,8 +5726,8 @@ var $__curScript, __eval;
 
 			// Set the name to the argument name so that we can normalize it alone.
 			name = argumentName;
-		} 
-		
+		}
+
 		var last = filename(name),
 			extension = ext(name);
 		// if the name ends with /
@@ -5713,7 +5735,7 @@ var $__curScript, __eval;
 			return name+filename( name.substr(0, name.length-1) ) + pluginPart;
 		} else if(	!/^(\w+(?:s)?:\/\/|\.|file|\/)/.test(name) &&
 			// and doesn't end with a dot
-			 last.indexOf(".") === -1 
+			 last.indexOf(".") === -1
 			) {
 			return name+"/"+last + pluginPart;
 		} else {
@@ -5841,21 +5863,23 @@ addStealExtension(function (loader) {
     }
 
     var matches = name.match(endingExtension);
+	var outName = name;
 
     if (matches) {
       var hasBang = name[name.length - 1] === "!",
         ext = matches[1];
       // load js-files nodd-like
       if (parentName && loader.configMain !== name && matches[0] === '.js') {
-        name = name.substr(0, name.lastIndexOf("."));
+        outName = name.substr(0, name.lastIndexOf("."));
         // matches ext mapping
       } else if (loader.ext[ext]) {
-        name = name + (hasBang ? "" : "!") + loader.ext[ext];
+        outName = name + (hasBang ? "" : "!") + loader.ext[ext];
       }
     }
-    return normalize.call(this, name, parentName, parentAddress);
+    return normalize.call(this, outName, parentName, parentAddress);
   };
 });
+
 // Steal Locate Extension
 // normalize a given path e.g.
 // "path/to/folder/" -> "path/to/folder/folder"
@@ -5866,7 +5890,8 @@ addStealExtension(function (loader) {
   loader.normalize = function (name, parentName, parentAddress, pluginNormalize) {
     var lastPos = name.length - 1,
       secondToLast,
-      folderName;
+      folderName,
+	  newName = name;
 
     if (name[lastPos] === "/") {
       secondToLast = name.substring(0, lastPos).lastIndexOf("/");
@@ -5875,11 +5900,12 @@ addStealExtension(function (loader) {
         folderName = folderName.substr(folderName.lastIndexOf("#") + 1);
       }
 
-      name += folderName;
+      newName += folderName;
     }
-    return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
+    return normalize.call(this, newName, parentName, parentAddress, pluginNormalize);
   };
 });
+
 // override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
 // in resources loaded by supporting plugins
 addStealExtension(function (loader) {
@@ -5896,10 +5922,11 @@ addStealExtension(function (loader) {
       .then(function(name){
         return loader.locate({name: name, metadata: {}});
       }).then(function(address){
+		var outAddress = address;
         if(address.substr(address.length - 3) === ".js") {
-          address = address.substr(0, address.length - 3);
+          outAddress = address.substr(0, address.length - 3);
         }
-        return address;
+        return outAddress;
       });
   };
 
@@ -5976,6 +6003,7 @@ addStealExtension(function (loader) {
     });
   };
 });
+
 addStealExtension(function (loader) {
   loader._contextualModules = {};
 
@@ -5993,7 +6021,7 @@ addStealExtension(function (loader) {
 
       // See if `name` is a contextual module
       if (definer) {
-        name = name + '/' + parentName;
+        var localName = name + '/' + parentName;
 
         if(!loader.has(name)) {
           // `definer` could be a function or could be a moduleName
@@ -6002,7 +6030,8 @@ addStealExtension(function (loader) {
           }
 
           return Promise.resolve(definer)
-            .then(function(definer) {
+            .then(function(modDefiner) {
+				var definer = modDefiner;
               if (definer['default']) {
                 definer = definer['default'];
               }
@@ -6012,11 +6041,11 @@ addStealExtension(function (loader) {
               return definePromise;
             })
             .then(function(moduleDef){
-              loader.set(name, loader.newModule(moduleDef));
-              return name;
+              loader.set(localName, loader.newModule(moduleDef));
+              return localName;
             });
         }
-        return Promise.resolve(name);
+        return Promise.resolve(localName);
       }
     }
 
@@ -6166,8 +6195,8 @@ addStealExtension(function applyTraceExtension(loader) {
 	loader.getModuleLoad = function(moduleName){
 		return this._traceData.loads[moduleName];
 	};
-	loader.getBundles = function(moduleName, visited){
-		visited = visited || {};
+	loader.getBundles = function(moduleName, argVisited){
+		var visited = argVisited || {};
 		visited[moduleName] = true;
 		var loader = this;
 		var parentMap = loader._traceData.parentMap;
@@ -6345,7 +6374,8 @@ addStealExtension(function (loader) {
 
   // taken from prototypejs
   // https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/string.js#L682-L706
-  function isJSON(str) {
+  function isJSON(json) {
+	var str = json;
     if (!str) return false;
 
     str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
@@ -6533,7 +6563,8 @@ addStealExtension(function (loader) {
 		};
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
-	var envPath = function(val) {
+	var envPath = function(pathVal) {
+		var val = pathVal;
 		if(isNode && !/^file:/.test(val)) {
 			// If relative join with the current working directory
 			if(val[0] === "." && (val[1] === "/" ||
@@ -6714,8 +6745,8 @@ addStealExtension(function (loader) {
 		// directly called from steal-tools
 		stealPath: {
 			order: 14,
-			set: function(dirname, cfg) {
-				dirname = envPath(dirname);
+			set: function(identifier, cfg) {
+				var dirname = envPath(identifier);
 				var parts = dirname.split("/");
 
 				// steal keeps this around to make things easy no matter how you are using it.
@@ -6992,7 +7023,7 @@ addStealExtension(function (loader) {
 
 	// configure and startup steal
 	// load the main module(s) if everything is configured
-	steal.startup = function(config){
+	steal.startup = function(startupConfig){
 		var steal = this;
 		var loader = this.loader;
 		var configResolve;
@@ -7004,10 +7035,11 @@ addStealExtension(function (loader) {
 		});
 
 		appPromise = getUrlOptions().then(function(urlOptions) {
+			var config;
 
-			if (typeof config === 'object') {
+			if (typeof startupConfig === 'object') {
 				// the url options are the source of truth
-				config = extend(config, urlOptions);
+				config = extend(startupConfig, urlOptions);
 			} else {
 				config = urlOptions;
 			}

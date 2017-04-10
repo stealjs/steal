@@ -36,8 +36,8 @@ exports.saveLoadIfNeeded = function(context){
  * @param {Package} pkg The root package.json
  * @return {String} The source representation of the `package.json!npm` module.
  */
-exports.makeSource = function(context, pkg){
-	pkg = pkg || utils.pkg.getDefault(context.loader);
+exports.makeSource = function(context, npmPkg){
+	var pkg = npmPkg || utils.pkg.getDefault(context.loader);
 	var configDependencies = ["@loader","npm-extension","module"].concat(
 		exports.configDeps(context, pkg)
 	);

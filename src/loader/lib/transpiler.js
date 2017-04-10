@@ -28,7 +28,8 @@
 		}
 
 		return self['import'](self.transpiler)
-			.then(function(transpiler) {
+			.then(function(transpilerMod) {
+				var transpiler = transpilerMod;
 				if (transpiler.__useDefault) {
 					transpiler = transpiler['default'];
 				}
@@ -186,15 +187,15 @@
 		 * Collects builtin plugin names and non builtins functions
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPlugin[]} plugins A list of babel plugins
+		 * @param {BabelPlugin[]} babelPlugins A list of babel plugins
 		 * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
 		 *		of babel-standalone builtin plugin names and non-builtin plugin
 		 *		functions
 		 */
-		function doProcessPlugins(babel, plugins) {
+		function doProcessPlugins(babel, babelPlugins) {
 			var promises = [];
 
-			plugins = plugins || [];
+			var plugins = babelPlugins || [];
 
 			plugins.forEach(function(plugin) {
 				var name = getPresetOrPluginName(plugin);
@@ -394,15 +395,14 @@
 		 * Collects builtin presets names and non builtins objects/functions
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPreset[]} presets A list of babel presets
+		 * @param {BabelPreset[]} babelPresets A list of babel presets
 		 * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
 		 *		of babel-standalone builtin preset names and non-builtin preset
 		 *		definitions (object or function).
 		 */
-		function doProcessPresets(babel, presets) {
+		function doProcessPresets(babel, babelPresets) {
 			var promises = [];
-
-			presets = presets || [];
+			var presets = babelPresets || [];
 
 			presets.forEach(function(preset) {
 				var name = getPresetOrPluginName(preset);
@@ -491,8 +491,8 @@
 		};
 	}
 
-	function babelTranspile(load, babel) {
-		babel = babel.Babel || babel.babel || babel;
+	function babelTranspile(load, babelMod) {
+		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
 		var babelVersion = getBabelVersion(babel);
 		var options = getBabelOptions.call(this, load, babel);

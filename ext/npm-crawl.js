@@ -11,11 +11,11 @@ var crawl = {
 	 * Adds the properties read from a package's source to the `pkg` object.
 	 * @param {Object} context
 	 * @param {NpmPackage} pkg -
-	 * @param {String} source
+	 * @param {String} src
 	 * @return {NpmPackage}
 	 */
-	processPkgSource: function(context, pkg, source) {
-		source = source || "{}";
+	processPkgSource: function(context, pkg, src) {
+		var source = src || "{}";
 		var packageJSON = JSON.parse(source);
 		utils.extend(pkg, packageJSON);
 		context.packages.push(pkg);
@@ -59,7 +59,8 @@ var crawl = {
 			});
 		});
 	},
-	dep: function(context, pkg, refPkg, childPkg, isRoot, skipSettingConfig) {
+	dep: function(context, pkg, refPkg, childNpmPkg, isRoot, skipSettingConfig) {
+		var childPkg = childNpmPkg;
 		var versionAndRange = childPkg.name + "@" + childPkg.version;
 		if(context.fetchCache[versionAndRange]) {
 			return context.fetchCache[versionAndRange];
@@ -455,7 +456,8 @@ function truthy(x) {
 
 var alwaysIgnore = {"steal-tools":1,"bower":1,"grunt":1,"grunt-cli":1};
 
-function addDeps(packageJSON, dependencies, deps, type, defaultProps){
+function addDeps(packageJSON, dependencies, deps, type, defProps){
+	var defaultProps = defProps;
 	var config = utils.pkg.config(packageJSON);
 
 	// convert an array to a map

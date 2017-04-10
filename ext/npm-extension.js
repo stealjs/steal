@@ -26,7 +26,9 @@ exports.addExtension = function(System){
 	 *   "can-slider" //-> "can-slider#path/to/main"
 	 */
 	var oldNormalize = System.normalize;
-	System.normalize = function(name, parentName, parentAddress, pluginNormalize){
+	System.normalize = function(identifier, parentModuleName, parentAddress, pluginNormalize){
+		var name = identifier;
+		var parentName = parentModuleName;
 		if(parentName && this.npmParentMap && this.npmParentMap[parentName]) {
 			parentName = this.npmParentMap[parentName];
 		}
@@ -260,7 +262,8 @@ exports.addExtension = function(System){
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
 			var pkg = this.npm[utils.moduleName.nameAndVersion(parsedModuleName)];
 			if(pkg) {
-				return oldLocate.call(this, load).then(function(address){
+				return oldLocate.call(this, load).then(function(locatedAddress){
+					var address = locatedAddress;
 					var expectedAddress = utils.path.joinURIs(
 						System.baseURL, load.name
 					);
@@ -407,8 +410,8 @@ exports.addExtension = function(System){
 	};
 
 
-	steal.addNpmPackages = function(packages) {
-		packages = packages || [];
+	steal.addNpmPackages = function(npmPackages) {
+		var packages = npmPackages || [];
 		var loader = this.loader;
 
 		for (var i = 0; i < packages.length; i += 1) {

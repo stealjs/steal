@@ -94,7 +94,7 @@
 
 	// configure and startup steal
 	// load the main module(s) if everything is configured
-	steal.startup = function(config){
+	steal.startup = function(startupConfig){
 		var steal = this;
 		var loader = this.loader;
 		var configResolve;
@@ -106,10 +106,11 @@
 		});
 
 		appPromise = getUrlOptions().then(function(urlOptions) {
+			var config;
 
-			if (typeof config === 'object') {
+			if (typeof startupConfig === 'object') {
 				// the url options are the source of truth
-				config = extend(config, urlOptions);
+				config = extend(startupConfig, urlOptions);
 			} else {
 				config = urlOptions;
 			}

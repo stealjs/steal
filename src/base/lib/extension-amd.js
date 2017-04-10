@@ -131,7 +131,10 @@ function amd(loader) {
       }
     }
 
-    function define(name, deps, factory) {
+    function define(modName, modDeps, modFactory) {
+      var name = modName;
+      var deps = modDeps;
+      var factory = modFactory;
       if (typeof name != 'string') {
         factory = deps;
         deps = name;

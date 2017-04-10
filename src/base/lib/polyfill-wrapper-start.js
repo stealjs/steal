@@ -29,7 +29,9 @@ $__global.upgradeSystemLoader = function() {
       hash     : m[8] || ''
     } : null);
   }
-  function toAbsoluteURL(base, href) {
+  function toAbsoluteURL(inBase, inHref) {
+	var base = inBase;
+	var href = inHref;
     function removeDotSegments(input) {
       var output = [];
       input.replace(/^(\.\.?(\/|$))+/, '')
@@ -71,5 +73,3 @@ $__global.upgradeSystemLoader = function() {
     $__global.SystemJS = System;
     $__global.System = System.originalSystem;
   }
-
-  

@@ -98,7 +98,8 @@ var $__curScript, __eval;
     return newErr;
   }
 
-  __eval = function(source, address, context, sourceMap, evalType) {
+  __eval = function(inSource, address, context, sourceMap, evalType) {
+	var source = inSource;
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
 
 

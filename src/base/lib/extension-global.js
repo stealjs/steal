@@ -13,8 +13,9 @@ function global(loader) {
 
   loader._extensions.push(global);
 
-  function readGlobalProperty(p, value) {
+  function readGlobalProperty(p, propValue) {
     var pParts = p.split('.');
+    var value = propValue;
     while (pParts.length)
       value = value[pParts.shift()];
     return value;
@@ -39,9 +40,12 @@ function global(loader) {
     }
 
     loader.set('@@global-helpers', loader.newModule({
-      prepareGlobal: function(moduleName, deps, exportName) {
+      prepareGlobal: function(globalModuleName, globalDeps, globalExportName) {
         var globals;
         var require;
+        var moduleName = globalModuleName;
+        var deps = globalDeps;
+        var exportName = globalExportName;
 
         // handle function signature when an object is passed instead of
         // individual arguments

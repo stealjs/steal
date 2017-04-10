@@ -262,7 +262,9 @@ function logloads(loads) {
             // Hijack System.register to set declare function
             var curSystem = __global.System;
             var curRegister = curSystem.register;
-            curSystem.register = function(name, deps, declare) {
+            curSystem.register = function(name, regDeps, regDeclare) {
+              var declare = regDeclare;
+              var deps = regDeps;
               if (typeof name != 'string') {
                 declare = deps;
                 deps = name;
@@ -271,7 +273,7 @@ function logloads(loads) {
               // store the deps as load.deps
               load.declare = declare;
               load.depsList = deps;
-            }
+            };
             __eval(transpiled, __global, load);
             curSystem.register = curRegister;
           });
@@ -541,8 +543,9 @@ function logloads(loads) {
   }
 
   // 15.2.5.2.4
-  function linkSetFailed(linkSet, load, exc) {
+  function linkSetFailed(linkSet, load, linkExc) {
     var loader = linkSet.loader;
+    var exc = linkExc;
 
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
@@ -908,7 +911,8 @@ function logloads(loads) {
     return err;
   }
 
-  function addToError(err, msg) {
+  function addToError(error, msg) {
+    var err = error;
     if (err instanceof Error)
       err.message = msg + err.message;
     else

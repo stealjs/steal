@@ -19,18 +19,19 @@ addStealExtension(function (loader) {
     }
 
     var matches = name.match(endingExtension);
+	var outName = name;
 
     if (matches) {
       var hasBang = name[name.length - 1] === "!",
         ext = matches[1];
       // load js-files nodd-like
       if (parentName && loader.configMain !== name && matches[0] === '.js') {
-        name = name.substr(0, name.lastIndexOf("."));
+        outName = name.substr(0, name.lastIndexOf("."));
         // matches ext mapping
       } else if (loader.ext[ext]) {
-        name = name + (hasBang ? "" : "!") + loader.ext[ext];
+        outName = name + (hasBang ? "" : "!") + loader.ext[ext];
       }
     }
-    return normalize.call(this, name, parentName, parentAddress);
+    return normalize.call(this, outName, parentName, parentAddress);
   };
 });
