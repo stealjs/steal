@@ -15,7 +15,7 @@ addStealExtension(function (loader) {
 
       // See if `name` is a contextual module
       if (definer) {
-        name = name + '/' + parentName;
+        var localName = name + '/' + parentName;
 
         if(!loader.has(name)) {
           // `definer` could be a function or could be a moduleName
@@ -24,7 +24,8 @@ addStealExtension(function (loader) {
           }
 
           return Promise.resolve(definer)
-            .then(function(definer) {
+            .then(function(modDefiner) {
+				var definer = modDefiner;
               if (definer['default']) {
                 definer = definer['default'];
               }
@@ -34,11 +35,11 @@ addStealExtension(function (loader) {
               return definePromise;
             })
             .then(function(moduleDef){
-              loader.set(name, loader.newModule(moduleDef));
-              return name;
+              loader.set(localName, loader.newModule(moduleDef));
+              return localName;
             });
         }
-        return Promise.resolve(name);
+        return Promise.resolve(localName);
       }
     }
 

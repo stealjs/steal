@@ -13,8 +13,9 @@ function plugins(loader) {
   loader._extensions.push(plugins);
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
+  loader.normalize = function(name, parentModuleName, parentAddress) {
     var loader = this;
+    var parentName = parentModuleName;
     // if parent is a plugin, normalize against the parent plugin argument only
     var parentPluginIndex;
     if (parentName && (parentPluginIndex = parentName.indexOf('!')) != -1)

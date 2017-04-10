@@ -8,7 +8,8 @@ addStealExtension(function (loader) {
   loader.normalize = function (name, parentName, parentAddress, pluginNormalize) {
     var lastPos = name.length - 1,
       secondToLast,
-      folderName;
+      folderName,
+	  newName = name;
 
     if (name[lastPos] === "/") {
       secondToLast = name.substring(0, lastPos).lastIndexOf("/");
@@ -17,8 +18,8 @@ addStealExtension(function (loader) {
         folderName = folderName.substr(folderName.lastIndexOf("#") + 1);
       }
 
-      name += folderName;
+      newName += folderName;
     }
-    return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
+    return normalize.call(this, newName, parentName, parentAddress, pluginNormalize);
   };
 });

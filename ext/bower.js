@@ -42,7 +42,7 @@ var getDeps = function(loader, bower){
 		}
 	};
 	addDeps(bower.dependencies || {});
-	// Only get the devDependencies if this is the root bower and the 
+	// Only get the devDependencies if this is the root bower and the
 	// `bowerDev` option is enabled
 	if(loader.bowerDev && !loader._bowerMainLoaded) {
 		addDeps(bower.devDependencies || {});
@@ -64,8 +64,9 @@ var getMainDir = function(bowerPath, name, main){
 };
 
 // Set paths for this dependency
-var setPaths = function(config, bowerPath, name, main) {
-	// Get the main directory, that is the directory including the 
+var setPaths = function(config, bowerPath, name, argMain) {
+	var main = argMain;
+	// Get the main directory, that is the directory including the
 	// bowerPath, the package name, and the path to the main file.
 	var mainDir = bowerPath + "/" + name + "/";
 	if(!config.paths[name] && main) {
@@ -180,4 +181,3 @@ exports.translate = function(load){
 	return "define(" + JSON.stringify(amdDeps) + ", function(loader){\n" +
 		"loader.config(" +JSON.stringify(config, null, " ") + ");" + "\n});";
 };
-

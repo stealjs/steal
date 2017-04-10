@@ -14,8 +14,9 @@ var gitUrlEx = /(git|http(s?)):\/\//;
 var supportsSet = typeof Set === "function";
 
 var utils = {
-	extend: function(d, s, deep, set){
+	extend: function(d, s, deep, existingSet){
 		var val;
+		var set = existingSet;
 
 		if(deep) {
 			if(!set) {
@@ -485,8 +486,8 @@ var utils = {
 		},
 		findByUrl: function(loader, url) {
 			if(loader.npm) {
-				url = utils.pkg.folderAddress(url);
-				return loader.npmPaths[url];
+				var fullUrl = utils.pkg.folderAddress(url);
+				return loader.npmPaths[fullUrl];
 			}
 		},
 		directoriesLib: function(pkg) {
@@ -556,7 +557,7 @@ var utils = {
 		startsWithTildeSlash: function( path ) {
 			return path.substr(0,2) === "~/";
 		},
-		joinURIs: function(base, href) {
+		joinURIs: function(baseUri, rel) {
 			function removeDotSegments(input) {
 				var output = [];
 				input.replace(/^(\.\.?(\/|$))+/, '')
@@ -572,8 +573,8 @@ var utils = {
 				return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
 			}
 
-			href = parseURI(href || '');
-			base = parseURI(base || '');
+			var href = parseURI(rel || '');
+			var base = parseURI(baseUri || '');
 
 			return !href || !base ? null : (href.protocol || base.protocol) +
 				(href.protocol || href.authority ? href.authority : base.authority) +

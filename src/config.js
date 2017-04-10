@@ -86,7 +86,8 @@
 		};
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
-	var envPath = function(val) {
+	var envPath = function(pathVal) {
+		var val = pathVal;
 		if(isNode && !/^file:/.test(val)) {
 			// If relative join with the current working directory
 			if(val[0] === "." && (val[1] === "/" ||
@@ -267,8 +268,8 @@
 		// directly called from steal-tools
 		stealPath: {
 			order: 14,
-			set: function(dirname, cfg) {
-				dirname = envPath(dirname);
+			set: function(identifier, cfg) {
+				var dirname = envPath(identifier);
 				var parts = dirname.split("/");
 
 				// steal keeps this around to make things easy no matter how you are using it.

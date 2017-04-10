@@ -6,7 +6,8 @@ addStealExtension(function (loader) {
 
   // taken from prototypejs
   // https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/string.js#L682-L706
-  function isJSON(str) {
+  function isJSON(json) {
+	var str = json;
     if (!str) return false;
 
     str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');

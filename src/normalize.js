@@ -6,7 +6,7 @@
 		var matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
-	
+
 	var ext = function(uri){
 		var fn = filename(uri);
 		var dot = fn.lastIndexOf(".");
@@ -18,8 +18,9 @@
 	};
 
 	var pluginCache = {};
-	
-	var normalize = function(name, loader){
+
+	var normalize = function(unnormalizedName, loader){
+		var name = unnormalizedName;
 
 		// Detech if this name contains a plugin part like: app.less!steal/less
 		// and catch the plugin name so that when it is normalized we do not perform
@@ -34,8 +35,8 @@
 
 			// Set the name to the argument name so that we can normalize it alone.
 			name = argumentName;
-		} 
-		
+		}
+
 		var last = filename(name),
 			extension = ext(name);
 		// if the name ends with /
@@ -43,7 +44,7 @@
 			return name+filename( name.substr(0, name.length-1) ) + pluginPart;
 		} else if(	!/^(\w+(?:s)?:\/\/|\.|file|\/)/.test(name) &&
 			// and doesn't end with a dot
-			 last.indexOf(".") === -1 
+			 last.indexOf(".") === -1
 			) {
 			return name+"/"+last + pluginPart;
 		} else {

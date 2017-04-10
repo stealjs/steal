@@ -14,10 +14,11 @@ addStealExtension(function (loader) {
       .then(function(name){
         return loader.locate({name: name, metadata: {}});
       }).then(function(address){
+		var outAddress = address;
         if(address.substr(address.length - 3) === ".js") {
-          address = address.substr(0, address.length - 3);
+          outAddress = address.substr(0, address.length - 3);
         }
-        return address;
+        return outAddress;
       });
   };
 

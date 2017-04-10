@@ -78,8 +78,9 @@ loader._liveEmitter = new E();
 // Put a hook on `normalize` so we can keep a reverse map of modules to parents.
 // We'll use this to recursively reload modules.
 var normalize = loader.normalize;
-loader.normalize = function(name, parentName){
+loader.normalize = function(identifier, parentName){
 	var loader = this;
+	var name = identifier;
 
 	if(name === "live-reload") {
 		name = "live-reload/" + parentName;
@@ -95,8 +96,8 @@ loader.normalize = function(name, parentName){
 	return normalize.apply(this, arguments);
 };
 
-function disposeModule(moduleName, emitter, moduleList){
-	moduleList = moduleList || {};
+function disposeModule(moduleName, emitter, inModList){
+	var moduleList = inModList || {};
 
 	var mod = loader.get(moduleName);
 	if(mod) {
@@ -154,7 +155,9 @@ function makeReload(moduleName, listeners){
 	reload.once = bind(e.once, e);
 
 	// This allows modules to dispose themselves
-	reload.dispose = function(name, callback){
+	reload.dispose = function(moduleName, cb){
+		var name = moduleName;
+		var callback = cb;
 		if(!callback) {
 			callback = name;
 			name = moduleName;

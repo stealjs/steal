@@ -8,12 +8,14 @@
     "web": "http://bitovi.com/"
   },
   "scripts": {
+    "lint": "eslint \"{src,ext}/**/*.js\"",
     "gh-release": "release",
-    "ui": "npm run npm-copy && grunt build && node test/test-sauce-labs.js",
+    "ui": "npm run npm-copy && grunt build && npm run lint && node test/test-sauce-labs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
     "test-node": "grunt simplemocha",
-    "test": "npm run npm-copy && grunt test --stack",
+    "test-node:ci": "npm run lint && npm run test-node",
+    "test": "npm run npm-copy && npm run lint && grunt test --stack",
     "test:live-reload": "cd test/live_reload && live-reload-test & testee test/live_reload/unit.html --browsers firefox --reporter Spec",
     "test:npm-live-reload": "cd test/npm/live-reload && live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
   },
@@ -43,6 +45,7 @@
     "babel-plugin-steal-test": "0.0.2",
     "babel-preset-steal-test": "0.0.1",
     "babel-standalone": "6.24.0",
+    "eslint": "^3.19.0",
     "fs-extra": "^2.0.0",
     "grunt": "~0.4.1",
     "grunt-cli": "^1.2.0",

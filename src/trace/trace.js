@@ -21,8 +21,8 @@ addStealExtension(function applyTraceExtension(loader) {
 	loader.getModuleLoad = function(moduleName){
 		return this._traceData.loads[moduleName];
 	};
-	loader.getBundles = function(moduleName, visited){
-		visited = visited || {};
+	loader.getBundles = function(moduleName, argVisited){
+		var visited = argVisited || {};
 		visited[moduleName] = true;
 		var loader = this;
 		var parentMap = loader._traceData.parentMap;

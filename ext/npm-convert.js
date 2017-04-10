@@ -273,7 +273,8 @@ function convertJspm(pkg, jspm){
 }
 
 
-function convertToPackage(context, pkg, index) {
+function convertToPackage(context, npmPkg, index) {
+	var pkg = npmPkg;
 	var packages = context.pkgInfo;
 	var nameAndVersion = pkg.name+"@"+pkg.version;
 	var localPkg;

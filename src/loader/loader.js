@@ -1568,7 +1568,9 @@ function logloads(loads) {
             // Hijack System.register to set declare function
             var curSystem = __global.System;
             var curRegister = curSystem.register;
-            curSystem.register = function(name, deps, declare) {
+            curSystem.register = function(name, regDeps, regDeclare) {
+              var declare = regDeclare;
+              var deps = regDeps;
               if (typeof name != 'string') {
                 declare = deps;
                 deps = name;
@@ -1577,7 +1579,7 @@ function logloads(loads) {
               // store the deps as load.deps
               load.declare = declare;
               load.depsList = deps;
-            }
+            };
             __eval(transpiled, __global, load);
             curSystem.register = curRegister;
           });
@@ -1847,8 +1849,9 @@ function logloads(loads) {
   }
 
   // 15.2.5.2.4
-  function linkSetFailed(linkSet, load, exc) {
+  function linkSetFailed(linkSet, load, linkExc) {
     var loader = linkSet.loader;
+    var exc = linkExc;
 
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
@@ -2214,7 +2217,8 @@ function logloads(loads) {
     return err;
   }
 
-  function addToError(err, msg) {
+  function addToError(error, msg) {
+    var err = error;
     if (err instanceof Error)
       err.message = msg + err.message;
     else
@@ -2466,7 +2470,8 @@ function logloads(loads) {
 		}
 
 		return self['import'](self.transpiler)
-			.then(function(transpiler) {
+			.then(function(transpilerMod) {
+				var transpiler = transpilerMod;
 				if (transpiler.__useDefault) {
 					transpiler = transpiler['default'];
 				}
@@ -2624,15 +2629,15 @@ function logloads(loads) {
 		 * Collects builtin plugin names and non builtins functions
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPlugin[]} plugins A list of babel plugins
+		 * @param {BabelPlugin[]} babelPlugins A list of babel plugins
 		 * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
 		 *		of babel-standalone builtin plugin names and non-builtin plugin
 		 *		functions
 		 */
-		function doProcessPlugins(babel, plugins) {
+		function doProcessPlugins(babel, babelPlugins) {
 			var promises = [];
 
-			plugins = plugins || [];
+			var plugins = babelPlugins || [];
 
 			plugins.forEach(function(plugin) {
 				var name = getPresetOrPluginName(plugin);
@@ -2832,15 +2837,14 @@ function logloads(loads) {
 		 * Collects builtin presets names and non builtins objects/functions
 		 *
 		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPreset[]} presets A list of babel presets
+		 * @param {BabelPreset[]} babelPresets A list of babel presets
 		 * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
 		 *		of babel-standalone builtin preset names and non-builtin preset
 		 *		definitions (object or function).
 		 */
-		function doProcessPresets(babel, presets) {
+		function doProcessPresets(babel, babelPresets) {
 			var promises = [];
-
-			presets = presets || [];
+			var presets = babelPresets || [];
 
 			presets.forEach(function(preset) {
 				var name = getPresetOrPluginName(preset);
@@ -2929,8 +2933,8 @@ function logloads(loads) {
 		};
 	}
 
-	function babelTranspile(load, babel) {
-		babel = babel.Babel || babel.babel || babel;
+	function babelTranspile(load, babelMod) {
+		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
 		var babelVersion = getBabelVersion(babel);
 		var options = getBabelOptions.call(this, load, babel);
@@ -3006,7 +3010,9 @@ function logloads(loads) {
     return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
   }
 
-  function toAbsoluteURL(base, href) {
+  function toAbsoluteURL(inBase, inHref) {
+    var href = inHref;
+    var base = inBase
 
     if (isWindows)
       href = href.replace(/\\/g, '/');
@@ -3077,11 +3083,11 @@ function logloads(loads) {
   }
   else if (typeof require != 'undefined') {
     var fs, fourOhFourFS = /ENOENT/;
-    fetchTextFromURL = function(url, fulfill, reject) {
-      if (url.substr(0, 5) != 'file:')
+    fetchTextFromURL = function(rawUrl, fulfill, reject) {
+      if (rawUrl.substr(0, 5) != 'file:')
         throw 'Only file URLs of the form file: allowed running in Node.';
       fs = fs || require('fs');
-      url = url.substr(5);
+      var url = rawUrl.substr(5);
       if (isWindows)
         url = url.replace(/\//g, '\\');
       return fs.readFile(url, function(err, data) {

@@ -37,7 +37,9 @@ $__global.upgradeSystemLoader = function() {
       hash     : m[8] || ''
     } : null);
   }
-  function toAbsoluteURL(base, href) {
+  function toAbsoluteURL(inBase, inHref) {
+	var base = inBase;
+	var href = inHref;
     function removeDotSegments(input) {
       var output = [];
       input.replace(/^(\.\.?(\/|$))+/, '')
@@ -79,8 +81,6 @@ $__global.upgradeSystemLoader = function() {
     $__global.SystemJS = System;
     $__global.System = System.originalSystem;
   }
-
-  
 
 var getOwnPropertyDescriptor = true;
 try {
@@ -403,8 +403,9 @@ function register(loader) {
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
   var curSystem;
-  function exec(load, context) {
+  function exec(load, execContext) {
     var loader = this;
+    var context = execContext;
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
     var lastLineIndex = load.source.lastIndexOf('\n');
@@ -445,7 +446,11 @@ function register(loader) {
   // loader.register sets loader.defined for declarative modules
   var anonRegister;
   var calledRegister;
-  function registerModule(name, deps, declare, execute) {
+  function registerModule(regName, regDeps, regDeclare, regExecute) {
+    var name = regName;
+    var deps = regDeps;
+    var declare = regDeclare;
+    var execute = regExecute;
     if (typeof name != 'string') {
       execute = declare;
       declare = deps;
@@ -1067,8 +1072,9 @@ function global(loader) {
 
   loader._extensions.push(global);
 
-  function readGlobalProperty(p, value) {
+  function readGlobalProperty(p, propValue) {
     var pParts = p.split('.');
+    var value = propValue;
     while (pParts.length)
       value = value[pParts.shift()];
     return value;
@@ -1093,9 +1099,12 @@ function global(loader) {
     }
 
     loader.set('@@global-helpers', loader.newModule({
-      prepareGlobal: function(moduleName, deps, exportName) {
+      prepareGlobal: function(globalModuleName, globalDeps, globalExportName) {
         var globals;
         var require;
+        var moduleName = globalModuleName;
+        var deps = globalDeps;
+        var exportName = globalExportName;
 
         // handle function signature when an object is passed instead of
         // individual arguments
@@ -1492,7 +1501,10 @@ function amd(loader) {
       }
     }
 
-    function define(name, deps, factory) {
+    function define(modName, modDeps, modFactory) {
+      var name = modName;
+      var deps = modDeps;
+      var factory = modFactory;
       if (typeof name != 'string') {
         factory = deps;
         deps = name;
@@ -1685,7 +1697,7 @@ function amd(loader) {
 
 /*
   SystemJS map support
-  
+
   Provides map configuration through
     System.map['jquery'] = 'some/module/map'
 
@@ -1746,7 +1758,7 @@ function map(loader) {
     var tmpParentLength, tmpPrefixLength;
     var subPath;
     var nameParts;
-    
+
     // first find most specific contextual match
     if (parentName) {
       for (var p in loader.map) {
@@ -1807,8 +1819,9 @@ function map(loader) {
   }
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
+  loader.normalize = function(identifier, parentName, parentAddress) {
     var loader = this;
+    var name = identifier;
     if (!loader.map)
       loader.map = {};
 
@@ -1819,8 +1832,8 @@ function map(loader) {
     }
 
     return Promise.resolve(loaderNormalize.call(loader, name, parentName, parentAddress))
-    .then(function(name) {
-      name = applyMap(name, parentName, loader);
+    .then(function(normalizedName) {
+      var name = applyMap(normalizedName, parentName, loader);
 
       // Normalize "module/" into "module/module"
       // Convenient for packages
@@ -1853,8 +1866,9 @@ function plugins(loader) {
   loader._extensions.push(plugins);
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
+  loader.normalize = function(name, parentModuleName, parentAddress) {
     var loader = this;
+    var parentName = parentModuleName;
     // if parent is a plugin, normalize against the parent plugin argument only
     var parentPluginIndex;
     if (parentName && (parentPluginIndex = parentName.indexOf('!')) != -1)
@@ -2217,7 +2231,8 @@ var $__curScript, __eval;
     return newErr;
   }
 
-  __eval = function(source, address, context, sourceMap, evalType) {
+  __eval = function(inSource, address, context, sourceMap, evalType) {
+	var source = inSource;
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
 
 

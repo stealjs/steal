@@ -22,11 +22,12 @@ function setupBasics(assert){
 
 function assertFailure(reason){
 	var doAssert = function(reason, error){
+		var theReason;
 		if(error) {
-			reason = reason + "\n" + error;
+			theReason = reason + "\n" + error;
 		}
 
-		QUnit.ok(false, reason);
+		QUnit.ok(false, theReason);
 	};
 	return reason ? doAssert.bind(null, "Failure") : doAssert(reason);
 }

@@ -1,6 +1,6 @@
 /*
   SystemJS map support
-  
+
   Provides map configuration through
     System.map['jquery'] = 'some/module/map'
 
@@ -61,7 +61,7 @@ function map(loader) {
     var tmpParentLength, tmpPrefixLength;
     var subPath;
     var nameParts;
-    
+
     // first find most specific contextual match
     if (parentName) {
       for (var p in loader.map) {
@@ -122,8 +122,9 @@ function map(loader) {
   }
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentName, parentAddress) {
+  loader.normalize = function(identifier, parentName, parentAddress) {
     var loader = this;
+    var name = identifier;
     if (!loader.map)
       loader.map = {};
 
@@ -134,8 +135,8 @@ function map(loader) {
     }
 
     return Promise.resolve(loaderNormalize.call(loader, name, parentName, parentAddress))
-    .then(function(name) {
-      name = applyMap(name, parentName, loader);
+    .then(function(normalizedName) {
+      var name = applyMap(normalizedName, parentName, loader);
 
       // Normalize "module/" into "module/module"
       // Convenient for packages
