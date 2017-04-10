@@ -36,8 +36,7 @@ function es6(loader) {
         setConfig(self, 'traceur-runtime', 'traceur/bin/traceur-runtime.js');
       }
       else if (self.transpiler == 'babel') {
-        setConfig(self, 'babel', 'babel-core/browser.js');
-        setConfig(self, 'babel-runtime', 'babel-core/external-helpers.js');
+        setConfig(self, 'babel', 'babel-standalone/babel.js');
       }
       firstLoad = false;
     }

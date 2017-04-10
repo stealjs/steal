@@ -13,8 +13,11 @@
 	<script src="../loader/loader.js"></script>
 	<script src="./base.js"></script>
 
+	<!-- Needed for the Async functions tests -->
+	<script src="../../node_modules/regenerator-runtime/runtime.js"></script>
+
 	<script>
-		System.paths["babel"] = "../../node_modules/babel-core/browser.js";
+		System.paths["babel"] = "../../node_modules/babel-standalone/babel.js";
 		System.transpiler = "babel";
 	</script>
 	<script src="./base_test.js"></script>

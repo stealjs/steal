@@ -1,7 +1,7 @@
 importScripts('../../loader/loader.js', '../base.js');
 
 System.baseURL = '../';
-System.paths['babel'] = '../../node_modules/babel-core/browser.js';
+System.paths['babel'] = '../../node_modules/babel-standalone/babel.js';
 
 System.transpiler = 'babel';
 

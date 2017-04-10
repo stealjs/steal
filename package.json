@@ -41,7 +41,6 @@
   },
   "devDependencies": {
     "async": "^2.1.4",
-    "babel-core": "^4.7.16",
     "babel-plugin-steal-test": "0.0.2",
     "babel-preset-steal-test": "0.0.1",
     "babel-standalone": "6.24.0",

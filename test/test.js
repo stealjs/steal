@@ -12,7 +12,7 @@ require("test/clone/clone_test");
 require("test/babel_plugins_test");
 require("test/babel_presets_test");
 require("test/steal_clone_test");
-require("test/steal_import_test.js");
+require("test/steal_import_test");
 
 var helpers = require("./helpers");
 var makeIframe = helpers.makeIframe;
