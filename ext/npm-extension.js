@@ -26,7 +26,7 @@ exports.addExtension = function(System){
 	 *   "can-slider" //-> "can-slider#path/to/main"
 	 */
 	var oldNormalize = System.normalize;
-	System.normalize = function(identifier, parentModuleName, parentAddress, pluginNormalize){
+	var npmNormalize = function(identifier, parentModuleName, parentAddress, pluginNormalize){
 		var name = identifier;
 		var parentName = parentModuleName;
 		if(parentName && this.npmParentMap && this.npmParentMap[parentName]) {
@@ -253,6 +253,8 @@ exports.addExtension = function(System){
 
 		}
 	};
+
+	System._addCacheNormalize(npmNormalize);
 
 	var oldLocate = System.locate;
 	System.locate = function(load){

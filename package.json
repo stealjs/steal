@@ -8,6 +8,7 @@
     "web": "http://bitovi.com/"
   },
   "scripts": {
+    "build": "grunt",
     "lint": "eslint \"{src,ext}/**/*.js\"",
     "gh-release": "release",
     "ui": "npm run npm-copy && grunt build && npm run lint && node test/test-sauce-labs.js",

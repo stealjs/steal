@@ -266,6 +266,10 @@ if(supportsTypedArrays) {
 	});
 }
 
+QUnit.test("Uses the normalize cache on duplicate imports", function(assert){
+	makeIframe("cache-normalize/npm.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
