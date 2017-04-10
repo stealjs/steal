@@ -4,10 +4,11 @@ importScripts(
 );
 
 System.transpiler = "babel";
-System.paths["babel"] = "../../../../node_modules/babel-core/browser.js";
+System.paths["babel"] = "../../../../node_modules/babel-standalone/babel.js";
 
-System["import"]("es6").then(function(m) {
-  postMessage(m.p);
-}, function(err) {
-  console.error(err, err.stack);
-});
+System["import"]("es6")
+	.then(function(m) {
+		postMessage(m.p);
+	}, function(err) {
+		console.error(err, err.stack);
+	});

@@ -6,10 +6,17 @@
 
 	var isNode = typeof self === "undefined" &&
 		typeof process !== "undefined" &&
-		{}.toString.call(process) === '[object process]'
+		{}.toString.call(process) === '[object process]';
 
 	function getTranspilerModule(loader, globalName) {
-		return loader.newModule({ 'default': g[globalName], __useDefault: true });
+		return loader.newModule({
+			__useDefault: true,
+			"default": g[globalName]
+		});
+	}
+
+	function getTranspilerGlobalName(loadName) {
+		return loadName === "babel" ? "Babel" : loadName;
 	}
 
 	// Use Babel by default
@@ -20,10 +27,12 @@
 
 		// pick up Transpiler modules from existing globals on first run if set
 		if (!self.transpilerHasRun) {
-			if (g.traceur && !self.has('traceur'))
+			if (g.traceur && !self.has('traceur')) {
 				self.set('traceur', getTranspilerModule(self, 'traceur'));
-			if (g.babel && !self.has('babel'))
-				self.set('babel', getTranspilerModule(self, 'babel'));
+			}
+			if (g.Babel && !self.has("babel")) {
+				self.set("babel", getTranspilerModule(self, "Babel"));
+			}
 			self.transpilerHasRun = true;
 		}
 
@@ -57,7 +66,7 @@
 							__eval('(function(require,exports,module){' + load.source + '})();', g, load);
 							g.System = curSystem;
 							g.Reflect.Loader = curLoader;
-							return getTranspilerModule(self, load.name);
+							return getTranspilerModule(self, getTranspilerGlobalName(load.name));
 						}
 					};
 				}

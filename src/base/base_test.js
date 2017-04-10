@@ -799,23 +799,11 @@ System.parser = "babel";
 
 	QUnit.test("Async functions", function(assert) {
 		var done = assert.async();
-		System.babelOptions = { experimental: true };
 		System.traceurOptions = { asyncFunctions: true };
 		System["import"]("tests/async").then(function(m) {
 			assert.ok(true);
 			done();
 		});
-	});
-
-	QUnit.test("Wrapper module support", function(assert) {
-		var done = assert.async();
-		System["import"]("tests/wrapper").then(
-			function(m) {
-				assert.ok(m["default"] == "default1", "Wrapper module not defined.");
-				done();
-			},
-			err
-		);
 	});
 
 	QUnit.test("ES6 plugin", function(assert) {
@@ -968,17 +956,6 @@ System.parser = "babel";
 			function(m) {
 				assert.ok(m.amd_module == "AMD Module");
 				assert.ok(m.es6_module == "ES6 Module");
-				done();
-			},
-			err
-		);
-	});
-
-	QUnit.test("Module Name meta", function(assert) {
-		var done = assert.async();
-		System["import"]("tests/reflection").then(
-			function(m) {
-				assert.ok(m.myname == "tests/reflection", "Module name not returned");
 				done();
 			},
 			err

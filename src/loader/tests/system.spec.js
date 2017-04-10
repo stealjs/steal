@@ -378,25 +378,6 @@ QUnit.module("System", function() {
 					.then(done, notSupposedToFail);
 			});
 		});
-
-		//
-		QUnit.module("a script with metas", function() {
-			// TODO: Investigate failing test with Traceur
-			// skipping this test for Traceur, getting an error with $__moduleContext
-			// being undefined, might be because steal depends on a traceur version
-			// newer than the one in the es6-module-loader repo in StealJS org.
-			(System.transpiler === "traceur" ? QUnit.skip : QUnit.test)("should support module name meta", function(assert) {
-				var done = assert.async();
-
-				System.import("tests/loader/moduleName")
-					.then(function(m) {
-						assert.equal(m.name, "tests/loader/moduleName");
-						assert.equal(m.address, System.baseURL + "tests/loader/moduleName.js");
-					})
-					.then(done, notSupposedToFail);
-			});
-		});
-
 	});
 
 	QUnit.module("#paths", function() {
