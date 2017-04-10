@@ -32,6 +32,6 @@ addStealExtension(function (loader) {
         outName = name + (hasBang ? "" : "!") + loader.ext[ext];
       }
     }
-    return normalize.call(this, name, parentName, parentAddress);
+    return normalize.call(this, outName, parentName, parentAddress);
   };
 });

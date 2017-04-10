@@ -70,7 +70,8 @@ exports.translate = function(load){
 		// clean up packages so everything is unique
 		var names = {};
 		var packages = context.pkgInfo;
-		utils.forEach(context.packages, function(pkg, index){
+		utils.forEach(context.packages, function(npmPkg, index){
+			var pkg = npmPkg;
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){
 					delete pkg.browser.transform;
