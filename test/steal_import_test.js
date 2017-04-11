@@ -121,3 +121,11 @@ QUnit.test("babel decorators plugin work", function(assert) {
 			done();
 		});
 });
+
+// or any module using Object.defineProperty to set `module.exports`
+QUnit.test("can import babel-generated CJS modules", function(assert) {
+	return System["import"]("test/basics/babel_cjs")
+		.then(function(mod) {
+			assert.equal(mod, "foo", "should detect CJS module");
+		});
+});
