@@ -16,6 +16,9 @@ module.exports = [{
 	description: "base extension tests",
 	url: "src/base/base_test.html"
 }, {
+	description: "live-reload tests",
+	url: "test/live_reload/unit.html"
+}, {
 	description: "bower extension tests",
 	url: "test/bower/test.html"
 }, {
@@ -25,4 +28,3 @@ module.exports = [{
 	description: "steal tests",
 	url: "test/test.html"
 }];
-
