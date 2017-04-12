@@ -2,7 +2,7 @@ var reloader = require("live-reload");
 var loader = require("@loader");
 
 QUnit.module("Unit tests", {
-	setup: function(){
+	beforeEach: function(){
 		var fetch = this.oldFetch = loader.fetch;
 		loader.fetch = function(load){
 			if(load.name === "foo") {
@@ -12,7 +12,7 @@ QUnit.module("Unit tests", {
 			}
 		};
 	},
-	teardown: function(){
+	afterEach: function(){
 		loader.fetch = this.oldFetch;
 		loader.delete("foo");
 		loader.delete("bar");
@@ -161,7 +161,7 @@ QUnit.test("are not removed if they have another parent", function(assert){
 });
 
 QUnit.module("reload.dispose", {
-	setup: function(assert){
+	beforeEach: function(assert){
 		var test = this;
 
 		var fetch = this.oldFetch = loader.fetch;
@@ -175,7 +175,7 @@ QUnit.module("reload.dispose", {
 			}
 		};
 	},
-	teardown: function(){
+	afterEach: function(){
 		loader.fetch = this.oldFetch;
 		loader.delete("foo");
 		loader.delete("bar");

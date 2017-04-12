@@ -282,6 +282,11 @@ function setup(){
 		reloadAll(moduleName);
 	};
 
+	var onerror = ws.onerror = function(){
+		console.error("live-reload:", "There was an error connecting to", url,
+		". That's all we know.");
+	};
+
 	var attempts = typeof loader.liveReloadAttempts !== "undefined" ?
 		loader.liveReloadAttempts - 1 : 0;
 	var onclose = ws.onclose = function(ev){
@@ -292,6 +297,7 @@ function setup(){
 				ws = new WebSocket(url);
 				ws.open = onopen;
 				ws.onmessage = onmessage;
+				ws.onerror = onerror;
 				ws.onclose = onclose;
 			}, loader.liveReloadRetryTimeout || 500);
 		}
