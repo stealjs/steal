@@ -7,24 +7,24 @@
  * @type {Object.<string, string>[]}
  */
 module.exports = [{
-	description: "loader babel tests",
+	name: "loader babel tests",
 	url: "src/loader/babel_test.html"
 }, {
-	description: "loader traceur tests",
+	name: "loader traceur tests",
 	url: "src/loader/traceur_test.html"
 }, {
-	description: "base extension tests",
+	name: "base extension tests",
 	url: "src/base/base_test.html"
 }, {
-	description: "live-reload tests",
+	name: "live-reload tests",
 	url: "test/live_reload/unit.html"
 }, {
-	description: "bower extension tests",
+	name: "bower extension tests",
 	url: "test/bower/test.html"
 }, {
-	description: "npm extension tests",
+	name: "npm extension tests",
 	url: "test/npm/test.html"
 }, {
-	description: "steal tests",
+	name: "steal tests",
 	url: "test/test.html"
 }];
