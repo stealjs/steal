@@ -62,6 +62,7 @@ QUnit.test("Configuration is reapplied after a live-reload", function(assert){
 		.allowFetch("live-reload");
 
 	var loader = runner.loader;
+	loader.paths["live-reload"] = "ext/live-reload.js";
 
 	helpers.init(loader)
 	.then(function(){

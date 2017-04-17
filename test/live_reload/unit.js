@@ -182,6 +182,22 @@ QUnit.module("reload.dispose", {
 	}
 });
 
+QUnit.test("allows modules to dispose themselves", function(assert){
+	var done = assert.async();
+
+	loader.set("foo", loader.newModule({}));
+
+	loader.import("live-reload", { name: "foo" })
+	.then(function(reload){
+		reload.dispose(function(){
+			assert.ok(true, "this dispose was called");
+		});
+
+		return reloader("foo");
+	})
+	.then(done, done);
+});
+
 QUnit.test("disposes only the modules that it should", function(assert){
 	var done = assert.async();
 
