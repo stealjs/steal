@@ -292,7 +292,6 @@ function setup(){
 				ws = new WebSocket(url);
 				ws.open = onopen;
 				ws.onmessage = onmessage;
-				ws.onerror = onerror;
 				ws.onclose = onclose;
 			}, loader.liveReloadRetryTimeout || 500);
 		}
