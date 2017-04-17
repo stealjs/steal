@@ -6,53 +6,66 @@ Thank you for contributing!
 ## Bugs and Feature Requests
 
 Bugs and feature requests should be submitted to 
-[steal](http://github.com/bitovi/steal/issues/new) for issues
-with module loading and [steal-tools](http://github.com/bitovi/steal-tools/issues/new)
-for issues building.  
+[steal](https://github.com/stealjs/steal/issues/new) for issues
+with module loading and [steal-tools](https://github.com/stealjs/steal-tools/issues/new)
+for issues building.
 
 The best issues are those submitted with tests.  Learn about how 
 to setup a test in the "Developing" sections below.
 
 ## Developing steal
 
-To develop steal, fork and clone [steal](http://github.com/bitovi/steal). Make
+To develop steal, fork and clone [steal](https://github.com/stealjs/steal). Make
 sure you have NodeJS installed. Then:
 
-1.  Install npm modules
+1. Install npm modules
   
         > npm install
  
 2. Install bower modules
   
         > bower install
-    
-3. Setup grunt watch
+
+3. Run tests (this will run other scripts needed to set up tests correctly)
+
+		> npm test
+
+4. Setup grunt watch
   
         > grunt watch
-    
+
 This will automatically build `steal.js` and `steal.production.js`
-when anything in `src` changes.  
-  
-To __test__, open `test/test.html`, and make sure everything passes.
+when anything in `src` changes.
 
 ## Understanding steal's code
 
-`steal.js` packages two other projects:
+`steal.js` core files are located in the `src` folder, two important folders are:
 
- - [ES6ModuleLoader](https://github.com/ModuleLoader/es6-module-loader) - Provides the [Loader](steal#section_LoaderandSystemnamespaces) and [System](steal#section_LoaderandSystemnamespaces) Polyfill.
- - [SystemJS](https://github.com/systemjs/systemjs) - Provides most System extensions 
-   like [config.paths], [config.map] and the [syntax.amd AMD] and [syntax.CommonJS CommonJS] syntaxes.
+ - `src/loader` - which Provides the [ES6ModuleLoader](steal) Polyfill.
+ - `src/base` - Provides most `steal.js` extensions like [config.paths], [config.map],
+	[syntax.amd AMD] and [syntax.CommonJS CommonJS] syntaxes.
 
-And `steal.js` includes everything in the `src` folder.  On a high level, steal.js is
-organized like:
+Other core extensions can be found in this folder:
 
-    /* ES6ModuleLoader */
+ - `src/json` - Provides the JSON module format definition
+ - `src/env` - Adds some special environment functions to the loader
+
+Each of this folders is self contained, meaning, each folder include their own test files;
+in order to run the tests just find the test html page which should be located at the root of the
+folder and open it in your browser.
+
+E.g: to run the tests of the `src/base` extension just open `src/base/base_test.html` and make
+sure everything passes.
+
+> Please note that when running invidivual test pages you might need to re-build some files to see your changes, run `grunt build` after saving your changes to update the files.
+
+On a high level, `steal.js` is organized like:
+
+	/* ES6ModuleLoader */
         /* - Promise polyfill */
     !function(e){"object"==typeof ...}
-        /* - Loader Polyfill */
-        /* - System Polyfill */
     
-    /* SystemJS */
+    /* StealJS core extensions */
     (function(__$global) {
       /* meta, register, core, global, cjs, amd, map, 
          plugins, bundles, versions, depCache extensions */
@@ -120,11 +133,10 @@ organized like:
 
 ## Writing a steal test
 
-All tests are in `test/test.js`.  Most tests
-create an iframe that opens another page like:
+Most tests create an iframe that opens another page like:
 
-    asyncTest("test description", function(){
-        makeIframe("path/to/page.html");
+    QUnit.test("test description", function(assert) {
+        makeIframe("path/to/page.html", assert);
     });
 
 That page typically uses steal to import some 
@@ -133,13 +145,14 @@ QUnit assertion methods.  For example:
 
     <!-- page.html -->
     <html>
-       <script src='../../steal/steal.js'
-               main='test-module'
+       <script src="../../steal/steal.js"
+               main="test-module">
+	   </script>
     </html>
 
-    //test-module.js
-    window.parent.QUnit.ok(true, "test-module-loaded");
-    window.parent.QUnit.start();
+    // test-module.js
+    window.parent.assert.ok(true, "test-module-loaded");
+    window.parent.done();
 
 ## Developing steal-tools
 
@@ -153,7 +166,7 @@ sure you have NodeJS installed. Then:
 2. Install bower modules
   
         > bower install
-  
+
 3. Install mocha
 
         > npm install -g mocha
@@ -217,7 +230,7 @@ Here's an example:
           source: "define(['jquery'], function($){ ... })" 
         },
         dependencies: ["jquery"],
-        bundles: ["profile","login"]
+        bundles: ["profile", "login"]
       }
     }
 
@@ -254,29 +267,26 @@ graphs.  Bundle graphs look like:
 
 ## Website and Documentation
 
-[steal's gh-pages branch](https://github.com/bitovi/steal/tree/gh-pages)
+[steal's gh-pages branch](https://github.com/stealjs/stealjs/tree/gh-pages)
 contains [stealjs.com](http://stealjs.com)'s code. It 
 uses [DocumentJS](http://github.com/bitovi/documentjs) to produce the 
-website.  To edit the docs:
+website. To edit the docs:
 
-1. Fork/Clone https://github.com/bitovi/steal/tree/gh-pages:
+1. Edit markdown files in `steal/docs` or `steal-tools/doc`
+
+2. Fork/Clone https://github.com/stealjs/stealjs:
   
-        > git clone git@github.com:bitovi/steal -b gh-pages
+        > git clone https://github.com/stealjs/stealjs.git
 
-2. Install NPM dependencies:
+3. Install NPM dependencies:
 
         > npm install
-        
-3. Install steal and steal-tools submodules:
-  
-        > git submodule init
-        > git submodule update
-        
-4. Edit markdown files in `steal/docs` or `steal-tools/doc`
-  
-5. Regenerate site and check changes
 
-        > ./node_modules/.bin/documentjs
+4. Regenerate site and check changes
 
-6. Checkin and push markdown changes to steal or steal-tools.
-7. Checkin and push gh-pages branch changes.  
+        > npm run document
+
+5. Checkin and push gh-pages branch changes.
+
+This workflow requires that the markdown changes to steal or steal-tools made in the
+first step were published to npm; if the changes are only local, you could use [npm link](https://docs.npmjs.com/cli/link) to use the steal with the updated markdown files.
