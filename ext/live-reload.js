@@ -114,8 +114,8 @@ function disposeModule(moduleName, emitter, inModList){
 }
 
 // Teardown a module name by deleting it and all of its parent modules.
-function teardown(moduleName, e, moduleNames) {
-	var moduleNames = moduleNames || {};
+function teardown(moduleName, e, inModuleNames) {
+	var moduleNames = inModuleNames || {};
 
 	if(disposeModule(moduleName, e, moduleNames)) {
 		// Delete the module and call teardown on its parents as well.
@@ -155,8 +155,8 @@ function makeReload(moduleName, listeners){
 	reload.once = bind(e.once, e);
 
 	// This allows modules to dispose themselves
-	reload.dispose = function(moduleName, cb){
-		var name = moduleName;
+	reload.dispose = function(disposingModuleName, cb){
+		var name = disposingModuleName;
 		var callback = cb;
 		if(!callback) {
 			callback = name;
