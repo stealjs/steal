@@ -236,70 +236,198 @@ Here we're going to create a modlet to show how this workflow can be beneficial:
 
 ### Create the demo page
 
-Create _repos/repos.html_ with:
+Create _weather/weather.html_ with:
 
 ```html
 <!doctype html>
 <html lang="en">
   <head>
-	  <meta charset="utf-8">
-	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	  <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div id="repos"></div>
+    <div id="weather"></div>
     <script src="../node_modules/steal/steal.js" main="@empty"></script>
-	<script type="text/steal-module">
-        import repos from "myhub/repos/repos";
-        repos("#repos");
-	</script>
+    <script type="text/steal-module">
+        import weather from "myhub/weather/weather";
+        weather("#weather");
+    </script>
   </body>
 </html>
 ```
 
+### Add the weather styles
+
+create _weather/weather.css_ with:
+
+```css
+@@font-face {
+  font-family: 'weather-widget';
+  src: url("data:application/x-font-ttf;charset=utf-8;base64,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") format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.forecast ul {
+  padding: 0;
+  margin: 0;
+}
+.forecast ul li {
+  border: 1px solid rgba(167, 207, 250, 0.7);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style-type: none;
+  padding: 10px 8px;
+}
+.forecast ul li:last-of-type {
+  border-bottom: 1px solid rgba(167, 207, 250, 0.7);
+}
+.forecast .date {
+  display: inline-block;
+  color: #A7CFFA;
+  font-size: 0.7em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: 20%;
+  margin-right: 4%;
+}
+.forecast .description {
+  display: inline-block;
+  padding-left: 40px;
+  margin-right: 5%;
+  width: 33%;
+  position: relative;
+}
+.forecast .description:before {
+  font-family: 'weather-widget';
+  font-size: 1.4em;
+  left: 0;
+  position: absolute;
+}
+.forecast .description.snow:before {
+  content: "\e902";
+}
+.forecast .description.thunderstorms:before {
+  content: "\e901";
+}
+.forecast .description.rain:before {
+  content: "\e903";
+}
+.forecast .description.rain-and-snow:before {
+  content: "\e90c";
+}
+.forecast .description.scattered-showers:before {
+  content: "\e90b";
+}
+.forecast .description.showers:before {
+  content: "\e904";
+}
+.forecast .description.scattered-thunderstorms:before {
+  content: "\e905";
+}
+.forecast .description.cloudy:before {
+  content: "\e90a";
+}
+.forecast .description.partly-cloudy:before {
+  content: "\e906";
+}
+.forecast .description.mostly-cloudy:before {
+  content: "\e902";
+}
+.forecast .description.sunny:before {
+  content: "\e907";
+}
+.forecast .description.mostly-sunny:before {
+  content: "\e908";
+}
+.forecast .description.breezy:before {
+  content: "\e90d";
+}
+.forecast .description.windy:before {
+  content: "\e909";
+}
+.forecast .low-temp,
+.forecast .high-temp {
+  display: inline-block;
+  font-weight: 300;
+  font-size: 1.2em;
+  width: 10%;
+  margin-left: 3%;
+}
+.forecast .low-temp sup,
+.forecast .high-temp sup {
+  font-size: 60%;
+  margin-left: 3px;
+}
+.forecast .low-temp:before,
+.forecast .high-temp:before {
+  font-size: 0.6em;
+  margin-right: 3px;
+  color: #A7CFFA;
+}
+.forecast .high-temp:before {
+  content: "\2191";
+  color: #FD6565;
+}
+.forecast .low-temp:before {
+  content: "\2193";
+  color: #23e0ae;
+}
+```
+
 ### Create the module implementation
 
-Create _repos/repos.js_ with the following code. Update `{user}` with your GitHub user name. This will display your repos:
+Create _weather/weather.js_ with the following code. Update the `city` variable with your city. This will display your city's weather:
 
 ```js
 import $ from "jquery";
 import "bootstrap/dist/css/bootstrap.css";
+import "./weather.css";
 
 export default function(selector){
+    var city = "chicago il";
     $(selector).html("Loading...")
     $.ajax({
-        url: "https://api.github.com/users/matthewp/repos",
-        jsonp: "callback",
-        dataType: "jsonp",
-        success: function( response ) {
-            var defs = response.data.map(function(repo){
-                return `
-                <dt>
-                  <a href="${repo.url}">
-                    ${repo.name}
-                  </a>
-                </dt>
-                <dd>${repo.description}</dt>
-                `;
-            });
-            $(selector).html(`
-              <dl class='dl-horizontal'>
-                ${defs.join("")}
-              </dl>
-            `);
-        }
+        url: `https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places%20where%20text%3D%22${city}%22)&format=json&diagnostics=true&callback=`,
+    }).then(function(response){
+      var weather = response.query.results.channel;
+      var forecast = weather.item.forecast;
+      var defs = forecast.map(function(day){
+        return `
+          <li>
+            <span class='date'>${day.date}</span>
+            <span class='description ${toClassName(day.text)}'>${day.text}</span>
+            <span class='high-temp'>${day.high}<sup>&deg;</sup></span>
+            <span class='low-temp'>${day.low}<sup>&deg;</sup></span>
+          </li>
+        `;
+      });
+      $(selector).html(`
+        <div class="forecast">
+          <ul>
+            ${defs.join("")}
+          </ul>
+        </div>
+      `)
     });
+
+    function toClassName(txt) {
+      return txt.toLowerCase().replace(/ /g, "-");
+    }
 };
 ```
 
 ### Create the test page
 
-Create _repos/repos-test.html_ with:
+Create _weather/weather-test.html_ with:
 
 ```html
-<title>myhub/repos/repos</title>
-<script src="../node_modules/steal/steal.js" 
-        main="myhub/repos/repos-test"></script>
+<title>myhub/weather/weather</title>
+<script src="../node_modules/steal/steal.js"
+        main="myhub/weather/weather-test"></script>
 <div id="qunit-fixture"></div>
 ```
 
@@ -311,30 +439,30 @@ Install `steal-qunit` with:
 > npm install steal-qunit --save-dev
 ```
 
-Create _repos/repos-test.js_ with:
+Create _weather/weather-test.js_ with:
 
 ```js
 import QUnit from "steal-qunit";
-import repos from "./repos";
+import weather from "./weather";
 
-QUnit.module("myhub/repos/");
+QUnit.module("myhub/weather/");
 
 QUnit.test("basics", function(assert){
-	var done = assert.async();
+    var done = assert.async();
     var fixtureEl = document.getElementById("qunit-fixture");
 
-    repos(fixtureEl);
+    weather(fixtureEl);
 
     assert.equal(
         fixtureEl.innerHTML,
         "Loading...", "starts with loading");
 
     var interval = setInterval(function(){
-        var dl = fixtureEl.getElementsByTagName("dl");
-        if(dl.length === 1) {
-            assert.ok(true, "inserted a dl");
+        var ul = fixtureEl.getElementsByTagName("ul");
+        if(ul.length === 1) {
+            assert.ok(true, "inserted a ul");
             clearInterval(interval);
-			done();
+            done();
         }
     },100);
 });
@@ -348,16 +476,16 @@ Update _myhub.js_ to:
 import $ from "jquery";
 import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
-import repos from "./repos/repos";
+import weather from "./weather/weather";
 
 $("body").append(`
 	<div class="container">
 		<h1>Goodbye script tags!</h1>
-		<div id="repos"></div>
+		<div id="weather"></div>
     </div>
 `);
 
-repos('#repos');
+weather('#weather');
 ```
 
 @highlight 4,9,13
@@ -366,32 +494,32 @@ repos('#repos');
 
 Dependency injection is a technique used to improve testing in your application. Steal provides dependency injection through its module system using [steal.steal-clone]. steal-clone allows you to create a cloned loader with stubs for modules that you want to fake.
 
-Here we'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request so that we can test that the rest of our app behaviors correctly; in this case it should list the one repo that we give it.
+Here we'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request so that we can test that the rest of our app behaviors correctly; in this case it should list the one forecast we give it.
 
-Update _repos/repos-test.js_ with:
+Update weather/weather-test.js_ with:
 
 ```js
 import QUnit from "steal-qunit";
-import repos from "./repos";
+import weather from "./weather";
 import clone from "steal-clone";
 import $ from "jquery";
 
-QUnit.module("myhub/repos/");
+QUnit.module("myhub/weather/");
 
 QUnit.test("basics", function(assert){
 	var done = assert.async();
     var fixtureEl = document.getElementById("qunit-fixture");
 
-    repos(fixtureEl);
+    weather(fixtureEl);
 
     assert.equal(
         fixtureEl.innerHTML,
         "Loading...", "starts with loading");
 
     var interval = setInterval(function(){
-        var dl = fixtureEl.getElementsByTagName("dl");
-        if(dl.length === 1) {
-            assert.ok(true, "inserted a dl");
+        var ul = fixtureEl.getElementsByTagName("ul");
+        if(ul.length === 1) {
+            assert.ok(true, "inserted a ul");
             clearInterval(interval);
 			done();
         }
@@ -405,35 +533,46 @@ QUnit.test("basics with dependency injection", function(assert){
         return $(selector)
     };
     jQuery.ajax = function(options){
+        var dfd = new $.Deferred();
         setTimeout(function(){
-            options.success({
-                data: [{
-                    url: "http://stealjs.com",
-                    name: "StealJS",
-                    description: "Futuristic Module Loader"
-                }]
+            dfd.resolve({
+    			query: {
+    				results: {
+    					channel: {
+    						item: {
+    							forecast: [{
+    								date: new Date(),
+    								text: "Sunny",
+    								high: "72",
+    								low: "58"
+    							}]
+    						}
+    					}
+    				}
+    			}
+            }).then(function(){
+              var html = $("#qunit-fixture").html();
+
+              assert.ok(/Sunny/.test(html),
+                "updated with request");
+              done();
             });
-
-            var html = $("#qunit-fixture").html();
-
-            assert.ok(/href="http:\/\/stealjs.com"/.test(html),
-              "updated with request");
-			done();
         },1);
+        return dfd;
     };
 
     clone({
         "jquery": {"default": jQuery}
-    }).import("myhub/repos/repos").then(function(module){
-        var repos = module["default"];
+    }).import("myhub/weather/weather").then(function(module){
+        var weather = module["default"];
 
         var fixtureEl = document.getElementById("qunit-fixture");
-        repos(fixtureEl);
+        weather(fixtureEl);
     });
 });
 ```
 
-@highlight 3-4,28-58
+@highlight 3-4,28-71
 
 ## Import a global script in a CommonJS modlet
 
@@ -483,7 +622,7 @@ Create _puppies/puppies.js_:
 require("justifiedGallery");
 
 module.exports = function(selector) {
-    
+
 };
 ```
 
@@ -546,18 +685,20 @@ module.exports = function(selector) {
 				'<img alt="'+item.title+'" src="'+item.media.m+'"/>'+
 				'</a>'
 			}).join("");
+      var root = $("<div>").html(html);
 
-			$(selector).html(html).justifiedGallery();
+      $(selector).html(root);
+      root.justifiedGallery();
 		}
 	});
 };
 ```
 
-@highlight 2,5-24
+@highlight 2,5-26
 
 ### Update app to change pages
 
-Now that we've created this new page, let's update the app so that we can toggle between the *repos* and *puppies* pages depending on the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
+Now that we've created this new page, let's update the app so that we can toggle between the *weather* and *puppies* pages depending on the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
 
 Update _myhub.js_ to:
 
@@ -565,18 +706,18 @@ Update _myhub.js_ to:
 import $ from "jquery";
 import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
-import repos from "./repos/repos";
+import weather from "./weather/weather";
 import puppies from "./puppies/puppies";
 
 $("body").append(`
     <div class='container'>
         <h1>Goodbye script tags!</h1>
-        <a href="#repos">Repos</a> <a href="#puppies">Puppies</a>
+        <a href="#weather">Weather</a> <a href="#puppies">Puppies</a>
         <div id='main'/>
     </div>`);
 
 var modules = {
-    repos: repos,
+    weather: weather,
     puppies: puppies,
     "": function(selector){
         $(selector).html("Welcome home");
@@ -672,7 +813,7 @@ Now if you restart your server with `npm start` and reload the page you'll notic
 ### Bundle steal.js
 
 You'll notice in the above screenshot that we are loading two JavaScript files. *myhub.js* and *steal.production.js*. We can avoid loading both by bundling Steal along with your app's main bundle.
- 
+
 Update your `build` script to add the `--bundle-steal` flag:
 
 ```json
@@ -727,7 +868,7 @@ import "bootstrap/dist/css/bootstrap.css";
 $("body").append(`
     <div class='container'>
         <h1>Goodbye script tags!</h1>
-        <a href="#repos">Repos</a> <a href="#puppies">Puppies</a>
+        <a href="#weather">Weather</a> <a href="#puppies">Puppies</a>
         <div id='main'/>
     </div>`);
 
@@ -751,7 +892,7 @@ updatePage();
 
 @highlight 3,13-22
 
-In the above code we have a div `#main` that each page renders into. Based on the location.hash, dynamically import the page being requested. So when the hash is `#repos` use [steal.import] to import the repos modlet; if the hash is `#puppies` use steal.import to import the puppies modlet.
+In the above code we have a div `#main` that each page renders into. Based on the location.hash, dynamically import the page being requested. So when the hash is `#weather` use [steal.import] to import the weather modlet; if the hash is `#puppies` use steal.import to import the puppies modlet.
 
 ### Update bundles to build
 
@@ -768,7 +909,7 @@ Update _package.json_ to:
 
     "bundle": [
       "myhub/puppies/puppies",
-      "myhub/repos/repos"
+      "myhub/weather/weather"
     ]
   }
 }
@@ -810,9 +951,10 @@ Create _export.js_ with:
 
 ```js
 var stealTools = require("steal-tools");
+
 stealTools.export({
   steal: {
-    main: "myhub/repos/repos",
+    main: "myhub/weather/weather",
     config: __dirname+"/package.json!npm"
   },
   options: {
@@ -822,13 +964,17 @@ stealTools.export({
     "+amd": {},
     "+global-js": {
         exports: {
-            "myhub/repos/repos":"repos",
+            "myhub/weather/weather":"weather",
             "jquery": "jQuery"
         },
-        dest: __dirname+"/dist/global/repos.js"
+        dest: __dirname+"/dist/global/weather.js"
+    },
+    "+global-css": {
+      dest: __dirname+"/dist/global/weather.css"
     }
   }
 });
+
 ```
 
 Run:
@@ -839,7 +985,7 @@ Run:
 
 ### Test the standalone module
 
-Create _repos/repos-standalone.html_ with:
+Create _weather/weather-standalone.html_ with:
 
 ```html
 <!doctype html>
@@ -849,16 +995,15 @@ Create _repos/repos-standalone.html_ with:
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+      <link rel="stylesheet" href="../dist/global/weather.css">
   </head>
   <body>
-    <div id='git-repos'/>
+    <div id='forecast'/>
     <script src="//code.jquery.com/jquery-3.0.0.js"></script>
-    <script src="../dist/global/repos.js"></script>
+    <script src="../dist/global/weather.js"></script>
     <script>
-        repos("#git-repos");
+        weather("#forecast");
     </script>
   </body>
 </html>
 ```
-
-
