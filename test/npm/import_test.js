@@ -431,7 +431,7 @@ QUnit.test("A child dependency's devDependency doesn't interfere with normal loa
 	.then(done, helpers.fail(assert, done));
 });
 
-QUnit.module("Importing npm modules with tilde operator");
+QUnit.module("Importing npm modules with tilde & homeAlias operators");
 
 QUnit.test("Import module with the ~ operator", function (assert) {
 	var done = assert.async();
@@ -449,6 +449,41 @@ QUnit.test("Import module with the ~ operator", function (assert) {
 			version: "1.0.0",
 			system: {
 				main: "main"
+			}
+		})
+		.withModule("app@1.0.0#foo/foobar", "module.exports = 'module foobar';")
+		.withModule("app@1.0.0#bar/barfoo", "module.exports = 'module barfoo';")
+		.withModule("app@1.0.0#main", app);
+
+	var loader = runner.loader;
+
+	loader["import"]("app")
+		.then(function(app){
+			assert.equal(app.foobar, "module foobar", "foobar module loaded");
+			assert.equal(app.barfoo, "module barfoo", "barfoo module loaded");
+		})
+		.then(done, function(err){
+			assert.ok(!err, err.stack || err);
+		});
+});
+
+QUnit.test("Import module with the homeAlias operator", function (assert) {
+	var done = assert.async();
+
+	var app = "var foobar = require('@/foo/foobar');" +
+						"var barfoo = require('@/./bar/barfoo');" +
+						"module.exports = {" +
+							"foobar: foobar," +
+							"barfoo: barfoo" +
+						"};";
+
+	var runner = helpers.clone()
+		.rootPackage({
+			name: "app",
+			version: "1.0.0",
+			system: {
+				main: "main",
+				homeAlias: "@"
 			}
 		})
 		.withModule("app@1.0.0#foo/foobar", "module.exports = 'module foobar';")
