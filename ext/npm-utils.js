@@ -186,7 +186,7 @@ var utils = {
 		 *
 		 * @return {system-npm/parsed_npm}
 		 */
-		parse: function (moduleName, currentPackageName, global) {
+		parse: function (moduleName, currentPackageName, global, context) {
 			var pluginParts = moduleName.split('!');
 			var modulePathParts = pluginParts[0].split("#");
 			var versionParts = modulePathParts[0].split("@");
@@ -210,7 +210,7 @@ var utils = {
 
 				// if the module name starts with the ~ (tilde) operator
 				// use the currentPackageName
-			} else if (currentPackageName && utils.path.startsWithTildeSlash(moduleName)) {
+			} else if (currentPackageName && utils.path.isInHomeDir(moduleName, context)) {
 				packageName = currentPackageName;
 				modulePath = versionParts[0].split("/").slice(1).join("/");
 
@@ -261,7 +261,7 @@ var utils = {
 		parseFromPackage: function(loader, refPkg, name, parentName) {
 			// Get the name of the
 			var packageName = utils.pkg.name(refPkg),
-			    parsedModuleName = utils.moduleName.parse(name, packageName),
+			    parsedModuleName = utils.moduleName.parse(name, packageName, undefined, {loader: loader}),
 				isRelative = utils.path.isRelative(parsedModuleName.modulePath);
 
 			if(isRelative && !parentName) {
@@ -386,6 +386,9 @@ var utils = {
 		isRoot: function(loader, pkg) {
 			var root = utils.pkg.getDefault(loader);
 			return pkg.name === root.name && pkg.version === root.version;
+		},
+		homeAlias: function (context) {
+			return context && context.loader && context.loader.homeAlias || '~';
 		},
 		getDefault: function(loader) {
 			return loader.npmPaths.__default;
@@ -554,8 +557,8 @@ var utils = {
 		isRelative: function(path) {
 			return  path.substr(0,1) === ".";
 		},
-		startsWithTildeSlash: function( path ) {
-			return path.substr(0,2) === "~/";
+		isInHomeDir: function( path, context ) {
+			return path.substr(0,2) === utils.pkg.homeAlias(context) + "/";
 		},
 		joinURIs: function(baseUri, rel) {
 			function removeDotSegments(input) {
