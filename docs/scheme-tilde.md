@@ -1,4 +1,4 @@
-@property tilde ~
+@property tilde ~ or @
 @parent StealJS.schemes
 
 A lookup scheme that roots module lookup to your project's base folder, either your `steal.directories.lib` folder or the [config.baseURL].
@@ -7,9 +7,10 @@ This syntax is supported by all module formats.
 
 ## Use
 
-Prepend lookups with `~/` such as:
+Prepend lookups with `~/` or `@/` such as:
 
     var tabs = require("~/components/tabs/tabs");
+    var tabs = require("@/components/tabs/tabs");
 
 This will load the module from `BASE/components/tabs/tabs.js`. If your package.json has:
 
@@ -26,7 +27,7 @@ Then it will be loaded from `BASE/src/components/tabs/tabs.js`.
 
 ## Alternatives
 
-The **~** scheme is an alternative to using the package name for look up, such as:
+The **~** or **@** scheme is an alternative to using the package name for look up, such as:
 
      {
 	   "name": "app"
