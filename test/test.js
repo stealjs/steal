@@ -170,6 +170,12 @@ QUnit.test("steal.production.js doesn't require setting env", function(assert) {
 	makeIframe("production/prod-env.html", assert);
 });
 
+if(System.promisesSupported) {
+	QUnit.test("Production bundle works with steal-sans-promises", function(assert) {
+		makeIframe("production/prod.html", assert);
+	});
+}
+
 if (hasConsole) {
 	QUnit.test("steal.production.js logs errors", function(assert) {
 		makeIframe("production_err/prod.html", assert);

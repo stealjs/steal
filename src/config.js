@@ -353,7 +353,9 @@
 				// if steal is bundled or we are loading steal.production
 				// we always are in production environment
 				if((this.stealBundled && this.stealBundled === true) ||
-					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
+					((lastPart.indexOf("steal.production") > -1) ||
+						(lastPart.indexOf("steal-sans-promises.production") > -1)
+					 	&& !cfg.env)) {
 					this.config({ env: platform+"-production" });
 				}
 
