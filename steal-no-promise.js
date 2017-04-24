@@ -1,1273 +1,3 @@
-!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.Promise=e():"undefined"!=typeof global?global.Promise=e():"undefined"!=typeof self&&(self.Promise=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-/**
- * ES6 global Promise shim
- */
-var unhandledRejections = require('../lib/decorators/unhandledRejection');
-var PromiseConstructor = unhandledRejections(require('../lib/Promise'));
-
-module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstructor)
-	           : typeof self   != 'undefined' ? (self.Promise   = PromiseConstructor)
-	           : PromiseConstructor;
-
-},{"../lib/Promise":2,"../lib/decorators/unhandledRejection":4}],2:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function (require) {
-
-	var makePromise = require('./makePromise');
-	var Scheduler = require('./Scheduler');
-	var async = require('./env').asap;
-
-	return makePromise({
-		scheduler: new Scheduler(async)
-	});
-
-});
-})(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
-
-},{"./Scheduler":3,"./env":5,"./makePromise":7}],3:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function() {
-
-	// Credit to Twisol (https://github.com/Twisol) for suggesting
-	// this type of extensible queue + trampoline approach for next-tick conflation.
-
-	/**
-	 * Async task scheduler
-	 * @param {function} async function to schedule a single async function
-	 * @constructor
-	 */
-	function Scheduler(async) {
-		this._async = async;
-		this._running = false;
-
-		this._queue = this;
-		this._queueLen = 0;
-		this._afterQueue = {};
-		this._afterQueueLen = 0;
-
-		var self = this;
-		this.drain = function() {
-			self._drain();
-		};
-	}
-
-	/**
-	 * Enqueue a task
-	 * @param {{ run:function }} task
-	 */
-	Scheduler.prototype.enqueue = function(task) {
-		this._queue[this._queueLen++] = task;
-		this.run();
-	};
-
-	/**
-	 * Enqueue a task to run after the main task queue
-	 * @param {{ run:function }} task
-	 */
-	Scheduler.prototype.afterQueue = function(task) {
-		this._afterQueue[this._afterQueueLen++] = task;
-		this.run();
-	};
-
-	Scheduler.prototype.run = function() {
-		if (!this._running) {
-			this._running = true;
-			this._async(this.drain);
-		}
-	};
-
-	/**
-	 * Drain the handler queue entirely, and then the after queue
-	 */
-	Scheduler.prototype._drain = function() {
-		var i = 0;
-		for (; i < this._queueLen; ++i) {
-			this._queue[i].run();
-			this._queue[i] = void 0;
-		}
-
-		this._queueLen = 0;
-		this._running = false;
-
-		for (i = 0; i < this._afterQueueLen; ++i) {
-			this._afterQueue[i].run();
-			this._afterQueue[i] = void 0;
-		}
-
-		this._afterQueueLen = 0;
-	};
-
-	return Scheduler;
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],4:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var setTimer = require('../env').setTimer;
-	var format = require('../format');
-
-	return function unhandledRejection(Promise) {
-
-		var logError = noop;
-		var logInfo = noop;
-		var localConsole;
-
-		if(typeof console !== 'undefined') {
-			// Alias console to prevent things like uglify's drop_console option from
-			// removing console.log/error. Unhandled rejections fall into the same
-			// category as uncaught exceptions, and build tools shouldn't silence them.
-			localConsole = console;
-			logError = typeof localConsole.error !== 'undefined'
-				? function (e) { localConsole.error(e); }
-				: function (e) { localConsole.log(e); };
-
-			logInfo = typeof localConsole.info !== 'undefined'
-				? function (e) { localConsole.info(e); }
-				: function (e) { localConsole.log(e); };
-		}
-
-		Promise.onPotentiallyUnhandledRejection = function(rejection) {
-			enqueue(report, rejection);
-		};
-
-		Promise.onPotentiallyUnhandledRejectionHandled = function(rejection) {
-			enqueue(unreport, rejection);
-		};
-
-		Promise.onFatalRejection = function(rejection) {
-			enqueue(throwit, rejection.value);
-		};
-
-		var tasks = [];
-		var reported = [];
-		var running = null;
-
-		function report(r) {
-			if(!r.handled) {
-				reported.push(r);
-				logError('Potentially unhandled rejection [' + r.id + '] ' + format.formatError(r.value));
-			}
-		}
-
-		function unreport(r) {
-			var i = reported.indexOf(r);
-			if(i >= 0) {
-				reported.splice(i, 1);
-				logInfo('Handled previous rejection [' + r.id + '] ' + format.formatObject(r.value));
-			}
-		}
-
-		function enqueue(f, x) {
-			tasks.push(f, x);
-			if(running === null) {
-				running = setTimer(flush, 0);
-			}
-		}
-
-		function flush() {
-			running = null;
-			while(tasks.length > 0) {
-				tasks.shift()(tasks.shift());
-			}
-		}
-
-		return Promise;
-	};
-
-	function throwit(e) {
-		throw e;
-	}
-
-	function noop() {}
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"../env":5,"../format":6}],5:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-/*global process,document,setTimeout,clearTimeout,MutationObserver,WebKitMutationObserver*/
-(function(define) { 'use strict';
-define(function(require) {
-	/*jshint maxcomplexity:6*/
-
-	// Sniff "best" async scheduling option
-	// Prefer process.nextTick or MutationObserver, then check for
-	// setTimeout, and finally vertx, since its the only env that doesn't
-	// have setTimeout
-
-	var MutationObs;
-	var capturedSetTimeout = typeof setTimeout !== 'undefined' && setTimeout;
-
-	// Default env
-	var setTimer = function(f, ms) { return setTimeout(f, ms); };
-	var clearTimer = function(t) { return clearTimeout(t); };
-	var asap = function (f) { return capturedSetTimeout(f, 0); };
-
-	// Detect specific env
-	if (isNode()) { // Node
-		asap = function (f) { return process.nextTick(f); };
-
-	} else if (MutationObs = hasMutationObserver()) { // Modern browser
-		asap = initMutationObserver(MutationObs);
-
-	} else if (!capturedSetTimeout) { // vert.x
-		var vertxRequire = require;
-		var vertx = vertxRequire('vertx');
-		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
-		clearTimer = vertx.cancelTimer;
-		asap = vertx.runOnLoop || vertx.runOnContext;
-	}
-
-	return {
-		setTimer: setTimer,
-		clearTimer: clearTimer,
-		asap: asap
-	};
-
-	function isNode () {
-		return typeof process !== 'undefined' &&
-			Object.prototype.toString.call(process) === '[object process]';
-	}
-
-	function hasMutationObserver () {
-		return (typeof MutationObserver === 'function' && MutationObserver) ||
-			(typeof WebKitMutationObserver === 'function' && WebKitMutationObserver);
-	}
-
-	function initMutationObserver(MutationObserver) {
-		var scheduled;
-		var node = document.createTextNode('');
-		var o = new MutationObserver(run);
-		o.observe(node, { characterData: true });
-
-		function run() {
-			var f = scheduled;
-			scheduled = void 0;
-			f();
-		}
-
-		var i = 0;
-		return function (f) {
-			scheduled = f;
-			node.data = (i ^= 1);
-		};
-	}
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{}],6:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function() {
-
-	return {
-		formatError: formatError,
-		formatObject: formatObject,
-		tryStringify: tryStringify
-	};
-
-	/**
-	 * Format an error into a string.  If e is an Error and has a stack property,
-	 * it's returned.  Otherwise, e is formatted using formatObject, with a
-	 * warning added about e not being a proper Error.
-	 * @param {*} e
-	 * @returns {String} formatted string, suitable for output to developers
-	 */
-	function formatError(e) {
-		var s = typeof e === 'object' && e !== null && (e.stack || e.message) ? e.stack || e.message : formatObject(e);
-		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
-	}
-
-	/**
-	 * Format an object, detecting "plain" objects and running them through
-	 * JSON.stringify if possible.
-	 * @param {Object} o
-	 * @returns {string}
-	 */
-	function formatObject(o) {
-		var s = String(o);
-		if(s === '[object Object]' && typeof JSON !== 'undefined') {
-			s = tryStringify(o, s);
-		}
-		return s;
-	}
-
-	/**
-	 * Try to return the result of JSON.stringify(x).  If that fails, return
-	 * defaultValue
-	 * @param {*} x
-	 * @param {*} defaultValue
-	 * @returns {String|*} JSON.stringify(x) or defaultValue
-	 */
-	function tryStringify(x, defaultValue) {
-		try {
-			return JSON.stringify(x);
-		} catch(e) {
-			return defaultValue;
-		}
-	}
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],7:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function() {
-
-	return function makePromise(environment) {
-
-		var tasks = environment.scheduler;
-		var emitRejection = initEmitRejection();
-
-		var objectCreate = Object.create ||
-			function(proto) {
-				function Child() {}
-				Child.prototype = proto;
-				return new Child();
-			};
-
-		/**
-		 * Create a promise whose fate is determined by resolver
-		 * @constructor
-		 * @returns {Promise} promise
-		 * @name Promise
-		 */
-		function Promise(resolver, handler) {
-			this._handler = resolver === Handler ? handler : init(resolver);
-		}
-
-		/**
-		 * Run the supplied resolver
-		 * @param resolver
-		 * @returns {Pending}
-		 */
-		function init(resolver) {
-			var handler = new Pending();
-
-			try {
-				resolver(promiseResolve, promiseReject, promiseNotify);
-			} catch (e) {
-				promiseReject(e);
-			}
-
-			return handler;
-
-			/**
-			 * Transition from pre-resolution state to post-resolution state, notifying
-			 * all listeners of the ultimate fulfillment or rejection
-			 * @param {*} x resolution value
-			 */
-			function promiseResolve (x) {
-				handler.resolve(x);
-			}
-			/**
-			 * Reject this promise with reason, which will be used verbatim
-			 * @param {Error|*} reason rejection reason, strongly suggested
-			 *   to be an Error type
-			 */
-			function promiseReject (reason) {
-				handler.reject(reason);
-			}
-
-			/**
-			 * @deprecated
-			 * Issue a progress event, notifying all progress listeners
-			 * @param {*} x progress event payload to pass to all listeners
-			 */
-			function promiseNotify (x) {
-				handler.notify(x);
-			}
-		}
-
-		// Creation
-
-		Promise.resolve = resolve;
-		Promise.reject = reject;
-		Promise.never = never;
-
-		Promise._defer = defer;
-		Promise._handler = getHandler;
-
-		/**
-		 * Returns a trusted promise. If x is already a trusted promise, it is
-		 * returned, otherwise returns a new trusted Promise which follows x.
-		 * @param  {*} x
-		 * @return {Promise} promise
-		 */
-		function resolve(x) {
-			return isPromise(x) ? x
-				: new Promise(Handler, new Async(getHandler(x)));
-		}
-
-		/**
-		 * Return a reject promise with x as its reason (x is used verbatim)
-		 * @param {*} x
-		 * @returns {Promise} rejected promise
-		 */
-		function reject(x) {
-			return new Promise(Handler, new Async(new Rejected(x)));
-		}
-
-		/**
-		 * Return a promise that remains pending forever
-		 * @returns {Promise} forever-pending promise.
-		 */
-		function never() {
-			return foreverPendingPromise; // Should be frozen
-		}
-
-		/**
-		 * Creates an internal {promise, resolver} pair
-		 * @private
-		 * @returns {Promise}
-		 */
-		function defer() {
-			return new Promise(Handler, new Pending());
-		}
-
-		// Transformation and flow control
-
-		/**
-		 * Transform this promise's fulfillment value, returning a new Promise
-		 * for the transformed result.  If the promise cannot be fulfilled, onRejected
-		 * is called with the reason.  onProgress *may* be called with updates toward
-		 * this promise's fulfillment.
-		 * @param {function=} onFulfilled fulfillment handler
-		 * @param {function=} onRejected rejection handler
-		 * @param {function=} onProgress @deprecated progress handler
-		 * @return {Promise} new promise
-		 */
-		Promise.prototype.then = function(onFulfilled, onRejected, onProgress) {
-			var parent = this._handler;
-			var state = parent.join().state();
-
-			if ((typeof onFulfilled !== 'function' && state > 0) ||
-				(typeof onRejected !== 'function' && state < 0)) {
-				// Short circuit: value will not change, simply share handler
-				return new this.constructor(Handler, parent);
-			}
-
-			var p = this._beget();
-			var child = p._handler;
-
-			parent.chain(child, parent.receiver, onFulfilled, onRejected, onProgress);
-
-			return p;
-		};
-
-		/**
-		 * If this promise cannot be fulfilled due to an error, call onRejected to
-		 * handle the error. Shortcut for .then(undefined, onRejected)
-		 * @param {function?} onRejected
-		 * @return {Promise}
-		 */
-		Promise.prototype['catch'] = function(onRejected) {
-			return this.then(void 0, onRejected);
-		};
-
-		/**
-		 * Creates a new, pending promise of the same type as this promise
-		 * @private
-		 * @returns {Promise}
-		 */
-		Promise.prototype._beget = function() {
-			return begetFrom(this._handler, this.constructor);
-		};
-
-		function begetFrom(parent, Promise) {
-			var child = new Pending(parent.receiver, parent.join().context);
-			return new Promise(Handler, child);
-		}
-
-		// Array combinators
-
-		Promise.all = all;
-		Promise.race = race;
-		Promise._traverse = traverse;
-
-		/**
-		 * Return a promise that will fulfill when all promises in the
-		 * input array have fulfilled, or will reject when one of the
-		 * promises rejects.
-		 * @param {array} promises array of promises
-		 * @returns {Promise} promise for array of fulfillment values
-		 */
-		function all(promises) {
-			return traverseWith(snd, null, promises);
-		}
-
-		/**
-		 * Array<Promise<X>> -> Promise<Array<f(X)>>
-		 * @private
-		 * @param {function} f function to apply to each promise's value
-		 * @param {Array} promises array of promises
-		 * @returns {Promise} promise for transformed values
-		 */
-		function traverse(f, promises) {
-			return traverseWith(tryCatch2, f, promises);
-		}
-
-		function traverseWith(tryMap, f, promises) {
-			var handler = typeof f === 'function' ? mapAt : settleAt;
-
-			var resolver = new Pending();
-			var pending = promises.length >>> 0;
-			var results = new Array(pending);
-
-			for (var i = 0, x; i < promises.length && !resolver.resolved; ++i) {
-				x = promises[i];
-
-				if (x === void 0 && !(i in promises)) {
-					--pending;
-					continue;
-				}
-
-				traverseAt(promises, handler, i, x, resolver);
-			}
-
-			if(pending === 0) {
-				resolver.become(new Fulfilled(results));
-			}
-
-			return new Promise(Handler, resolver);
-
-			function mapAt(i, x, resolver) {
-				if(!resolver.resolved) {
-					traverseAt(promises, settleAt, i, tryMap(f, x, i), resolver);
-				}
-			}
-
-			function settleAt(i, x, resolver) {
-				results[i] = x;
-				if(--pending === 0) {
-					resolver.become(new Fulfilled(results));
-				}
-			}
-		}
-
-		function traverseAt(promises, handler, i, x, resolver) {
-			if (maybeThenable(x)) {
-				var h = getHandlerMaybeThenable(x);
-				var s = h.state();
-
-				if (s === 0) {
-					h.fold(handler, i, void 0, resolver);
-				} else if (s > 0) {
-					handler(i, h.value, resolver);
-				} else {
-					resolver.become(h);
-					visitRemaining(promises, i+1, h);
-				}
-			} else {
-				handler(i, x, resolver);
-			}
-		}
-
-		Promise._visitRemaining = visitRemaining;
-		function visitRemaining(promises, start, handler) {
-			for(var i=start; i<promises.length; ++i) {
-				markAsHandled(getHandler(promises[i]), handler);
-			}
-		}
-
-		function markAsHandled(h, handler) {
-			if(h === handler) {
-				return;
-			}
-
-			var s = h.state();
-			if(s === 0) {
-				h.visit(h, void 0, h._unreport);
-			} else if(s < 0) {
-				h._unreport();
-			}
-		}
-
-		/**
-		 * Fulfill-reject competitive race. Return a promise that will settle
-		 * to the same state as the earliest input promise to settle.
-		 *
-		 * WARNING: The ES6 Promise spec requires that race()ing an empty array
-		 * must return a promise that is pending forever.  This implementation
-		 * returns a singleton forever-pending promise, the same singleton that is
-		 * returned by Promise.never(), thus can be checked with ===
-		 *
-		 * @param {array} promises array of promises to race
-		 * @returns {Promise} if input is non-empty, a promise that will settle
-		 * to the same outcome as the earliest input promise to settle. if empty
-		 * is empty, returns a promise that will never settle.
-		 */
-		function race(promises) {
-			if(typeof promises !== 'object' || promises === null) {
-				return reject(new TypeError('non-iterable passed to race()'));
-			}
-
-			// Sigh, race([]) is untestable unless we return *something*
-			// that is recognizable without calling .then() on it.
-			return promises.length === 0 ? never()
-				 : promises.length === 1 ? resolve(promises[0])
-				 : runRace(promises);
-		}
-
-		function runRace(promises) {
-			var resolver = new Pending();
-			var i, x, h;
-			for(i=0; i<promises.length; ++i) {
-				x = promises[i];
-				if (x === void 0 && !(i in promises)) {
-					continue;
-				}
-
-				h = getHandler(x);
-				if(h.state() !== 0) {
-					resolver.become(h);
-					visitRemaining(promises, i+1, h);
-					break;
-				} else {
-					h.visit(resolver, resolver.resolve, resolver.reject);
-				}
-			}
-			return new Promise(Handler, resolver);
-		}
-
-		// Promise internals
-		// Below this, everything is @private
-
-		/**
-		 * Get an appropriate handler for x, without checking for cycles
-		 * @param {*} x
-		 * @returns {object} handler
-		 */
-		function getHandler(x) {
-			if(isPromise(x)) {
-				return x._handler.join();
-			}
-			return maybeThenable(x) ? getHandlerUntrusted(x) : new Fulfilled(x);
-		}
-
-		/**
-		 * Get a handler for thenable x.
-		 * NOTE: You must only call this if maybeThenable(x) == true
-		 * @param {object|function|Promise} x
-		 * @returns {object} handler
-		 */
-		function getHandlerMaybeThenable(x) {
-			return isPromise(x) ? x._handler.join() : getHandlerUntrusted(x);
-		}
-
-		/**
-		 * Get a handler for potentially untrusted thenable x
-		 * @param {*} x
-		 * @returns {object} handler
-		 */
-		function getHandlerUntrusted(x) {
-			try {
-				var untrustedThen = x.then;
-				return typeof untrustedThen === 'function'
-					? new Thenable(untrustedThen, x)
-					: new Fulfilled(x);
-			} catch(e) {
-				return new Rejected(e);
-			}
-		}
-
-		/**
-		 * Handler for a promise that is pending forever
-		 * @constructor
-		 */
-		function Handler() {}
-
-		Handler.prototype.when
-			= Handler.prototype.become
-			= Handler.prototype.notify // deprecated
-			= Handler.prototype.fail
-			= Handler.prototype._unreport
-			= Handler.prototype._report
-			= noop;
-
-		Handler.prototype._state = 0;
-
-		Handler.prototype.state = function() {
-			return this._state;
-		};
-
-		/**
-		 * Recursively collapse handler chain to find the handler
-		 * nearest to the fully resolved value.
-		 * @returns {object} handler nearest the fully resolved value
-		 */
-		Handler.prototype.join = function() {
-			var h = this;
-			while(h.handler !== void 0) {
-				h = h.handler;
-			}
-			return h;
-		};
-
-		Handler.prototype.chain = function(to, receiver, fulfilled, rejected, progress) {
-			this.when({
-				resolver: to,
-				receiver: receiver,
-				fulfilled: fulfilled,
-				rejected: rejected,
-				progress: progress
-			});
-		};
-
-		Handler.prototype.visit = function(receiver, fulfilled, rejected, progress) {
-			this.chain(failIfRejected, receiver, fulfilled, rejected, progress);
-		};
-
-		Handler.prototype.fold = function(f, z, c, to) {
-			this.when(new Fold(f, z, c, to));
-		};
-
-		/**
-		 * Handler that invokes fail() on any handler it becomes
-		 * @constructor
-		 */
-		function FailIfRejected() {}
-
-		inherit(Handler, FailIfRejected);
-
-		FailIfRejected.prototype.become = function(h) {
-			h.fail();
-		};
-
-		var failIfRejected = new FailIfRejected();
-
-		/**
-		 * Handler that manages a queue of consumers waiting on a pending promise
-		 * @constructor
-		 */
-		function Pending(receiver, inheritedContext) {
-			Promise.createContext(this, inheritedContext);
-
-			this.consumers = void 0;
-			this.receiver = receiver;
-			this.handler = void 0;
-			this.resolved = false;
-		}
-
-		inherit(Handler, Pending);
-
-		Pending.prototype._state = 0;
-
-		Pending.prototype.resolve = function(x) {
-			this.become(getHandler(x));
-		};
-
-		Pending.prototype.reject = function(x) {
-			if(this.resolved) {
-				return;
-			}
-
-			this.become(new Rejected(x));
-		};
-
-		Pending.prototype.join = function() {
-			if (!this.resolved) {
-				return this;
-			}
-
-			var h = this;
-
-			while (h.handler !== void 0) {
-				h = h.handler;
-				if (h === this) {
-					return this.handler = cycle();
-				}
-			}
-
-			return h;
-		};
-
-		Pending.prototype.run = function() {
-			var q = this.consumers;
-			var handler = this.handler;
-			this.handler = this.handler.join();
-			this.consumers = void 0;
-
-			for (var i = 0; i < q.length; ++i) {
-				handler.when(q[i]);
-			}
-		};
-
-		Pending.prototype.become = function(handler) {
-			if(this.resolved) {
-				return;
-			}
-
-			this.resolved = true;
-			this.handler = handler;
-			if(this.consumers !== void 0) {
-				tasks.enqueue(this);
-			}
-
-			if(this.context !== void 0) {
-				handler._report(this.context);
-			}
-		};
-
-		Pending.prototype.when = function(continuation) {
-			if(this.resolved) {
-				tasks.enqueue(new ContinuationTask(continuation, this.handler));
-			} else {
-				if(this.consumers === void 0) {
-					this.consumers = [continuation];
-				} else {
-					this.consumers.push(continuation);
-				}
-			}
-		};
-
-		/**
-		 * @deprecated
-		 */
-		Pending.prototype.notify = function(x) {
-			if(!this.resolved) {
-				tasks.enqueue(new ProgressTask(x, this));
-			}
-		};
-
-		Pending.prototype.fail = function(context) {
-			var c = typeof context === 'undefined' ? this.context : context;
-			this.resolved && this.handler.join().fail(c);
-		};
-
-		Pending.prototype._report = function(context) {
-			this.resolved && this.handler.join()._report(context);
-		};
-
-		Pending.prototype._unreport = function() {
-			this.resolved && this.handler.join()._unreport();
-		};
-
-		/**
-		 * Wrap another handler and force it into a future stack
-		 * @param {object} handler
-		 * @constructor
-		 */
-		function Async(handler) {
-			this.handler = handler;
-		}
-
-		inherit(Handler, Async);
-
-		Async.prototype.when = function(continuation) {
-			tasks.enqueue(new ContinuationTask(continuation, this));
-		};
-
-		Async.prototype._report = function(context) {
-			this.join()._report(context);
-		};
-
-		Async.prototype._unreport = function() {
-			this.join()._unreport();
-		};
-
-		/**
-		 * Handler that wraps an untrusted thenable and assimilates it in a future stack
-		 * @param {function} then
-		 * @param {{then: function}} thenable
-		 * @constructor
-		 */
-		function Thenable(then, thenable) {
-			Pending.call(this);
-			tasks.enqueue(new AssimilateTask(then, thenable, this));
-		}
-
-		inherit(Pending, Thenable);
-
-		/**
-		 * Handler for a fulfilled promise
-		 * @param {*} x fulfillment value
-		 * @constructor
-		 */
-		function Fulfilled(x) {
-			Promise.createContext(this);
-			this.value = x;
-		}
-
-		inherit(Handler, Fulfilled);
-
-		Fulfilled.prototype._state = 1;
-
-		Fulfilled.prototype.fold = function(f, z, c, to) {
-			runContinuation3(f, z, this, c, to);
-		};
-
-		Fulfilled.prototype.when = function(cont) {
-			runContinuation1(cont.fulfilled, this, cont.receiver, cont.resolver);
-		};
-
-		var errorId = 0;
-
-		/**
-		 * Handler for a rejected promise
-		 * @param {*} x rejection reason
-		 * @constructor
-		 */
-		function Rejected(x) {
-			Promise.createContext(this);
-
-			this.id = ++errorId;
-			this.value = x;
-			this.handled = false;
-			this.reported = false;
-
-			this._report();
-		}
-
-		inherit(Handler, Rejected);
-
-		Rejected.prototype._state = -1;
-
-		Rejected.prototype.fold = function(f, z, c, to) {
-			to.become(this);
-		};
-
-		Rejected.prototype.when = function(cont) {
-			if(typeof cont.rejected === 'function') {
-				this._unreport();
-			}
-			runContinuation1(cont.rejected, this, cont.receiver, cont.resolver);
-		};
-
-		Rejected.prototype._report = function(context) {
-			tasks.afterQueue(new ReportTask(this, context));
-		};
-
-		Rejected.prototype._unreport = function() {
-			if(this.handled) {
-				return;
-			}
-			this.handled = true;
-			tasks.afterQueue(new UnreportTask(this));
-		};
-
-		Rejected.prototype.fail = function(context) {
-			this.reported = true;
-			emitRejection('unhandledRejection', this);
-			Promise.onFatalRejection(this, context === void 0 ? this.context : context);
-		};
-
-		function ReportTask(rejection, context) {
-			this.rejection = rejection;
-			this.context = context;
-		}
-
-		ReportTask.prototype.run = function() {
-			if(!this.rejection.handled && !this.rejection.reported) {
-				this.rejection.reported = true;
-				emitRejection('unhandledRejection', this.rejection) ||
-					Promise.onPotentiallyUnhandledRejection(this.rejection, this.context);
-			}
-		};
-
-		function UnreportTask(rejection) {
-			this.rejection = rejection;
-		}
-
-		UnreportTask.prototype.run = function() {
-			if(this.rejection.reported) {
-				emitRejection('rejectionHandled', this.rejection) ||
-					Promise.onPotentiallyUnhandledRejectionHandled(this.rejection);
-			}
-		};
-
-		// Unhandled rejection hooks
-		// By default, everything is a noop
-
-		Promise.createContext
-			= Promise.enterContext
-			= Promise.exitContext
-			= Promise.onPotentiallyUnhandledRejection
-			= Promise.onPotentiallyUnhandledRejectionHandled
-			= Promise.onFatalRejection
-			= noop;
-
-		// Errors and singletons
-
-		var foreverPendingHandler = new Handler();
-		var foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
-
-		function cycle() {
-			return new Rejected(new TypeError('Promise cycle'));
-		}
-
-		// Task runners
-
-		/**
-		 * Run a single consumer
-		 * @constructor
-		 */
-		function ContinuationTask(continuation, handler) {
-			this.continuation = continuation;
-			this.handler = handler;
-		}
-
-		ContinuationTask.prototype.run = function() {
-			this.handler.join().when(this.continuation);
-		};
-
-		/**
-		 * Run a queue of progress handlers
-		 * @constructor
-		 */
-		function ProgressTask(value, handler) {
-			this.handler = handler;
-			this.value = value;
-		}
-
-		ProgressTask.prototype.run = function() {
-			var q = this.handler.consumers;
-			if(q === void 0) {
-				return;
-			}
-
-			for (var c, i = 0; i < q.length; ++i) {
-				c = q[i];
-				runNotify(c.progress, this.value, this.handler, c.receiver, c.resolver);
-			}
-		};
-
-		/**
-		 * Assimilate a thenable, sending it's value to resolver
-		 * @param {function} then
-		 * @param {object|function} thenable
-		 * @param {object} resolver
-		 * @constructor
-		 */
-		function AssimilateTask(then, thenable, resolver) {
-			this._then = then;
-			this.thenable = thenable;
-			this.resolver = resolver;
-		}
-
-		AssimilateTask.prototype.run = function() {
-			var h = this.resolver;
-			tryAssimilate(this._then, this.thenable, _resolve, _reject, _notify);
-
-			function _resolve(x) { h.resolve(x); }
-			function _reject(x)  { h.reject(x); }
-			function _notify(x)  { h.notify(x); }
-		};
-
-		function tryAssimilate(then, thenable, resolve, reject, notify) {
-			try {
-				then.call(thenable, resolve, reject, notify);
-			} catch (e) {
-				reject(e);
-			}
-		}
-
-		/**
-		 * Fold a handler value with z
-		 * @constructor
-		 */
-		function Fold(f, z, c, to) {
-			this.f = f; this.z = z; this.c = c; this.to = to;
-			this.resolver = failIfRejected;
-			this.receiver = this;
-		}
-
-		Fold.prototype.fulfilled = function(x) {
-			this.f.call(this.c, this.z, x, this.to);
-		};
-
-		Fold.prototype.rejected = function(x) {
-			this.to.reject(x);
-		};
-
-		Fold.prototype.progress = function(x) {
-			this.to.notify(x);
-		};
-
-		// Other helpers
-
-		/**
-		 * @param {*} x
-		 * @returns {boolean} true iff x is a trusted Promise
-		 */
-		function isPromise(x) {
-			return x instanceof Promise;
-		}
-
-		/**
-		 * Test just enough to rule out primitives, in order to take faster
-		 * paths in some code
-		 * @param {*} x
-		 * @returns {boolean} false iff x is guaranteed *not* to be a thenable
-		 */
-		function maybeThenable(x) {
-			return (typeof x === 'object' || typeof x === 'function') && x !== null;
-		}
-
-		function runContinuation1(f, h, receiver, next) {
-			if(typeof f !== 'function') {
-				return next.become(h);
-			}
-
-			Promise.enterContext(h);
-			tryCatchReject(f, h.value, receiver, next);
-			Promise.exitContext();
-		}
-
-		function runContinuation3(f, x, h, receiver, next) {
-			if(typeof f !== 'function') {
-				return next.become(h);
-			}
-
-			Promise.enterContext(h);
-			tryCatchReject3(f, x, h.value, receiver, next);
-			Promise.exitContext();
-		}
-
-		/**
-		 * @deprecated
-		 */
-		function runNotify(f, x, h, receiver, next) {
-			if(typeof f !== 'function') {
-				return next.notify(x);
-			}
-
-			Promise.enterContext(h);
-			tryCatchReturn(f, x, receiver, next);
-			Promise.exitContext();
-		}
-
-		function tryCatch2(f, a, b) {
-			try {
-				return f(a, b);
-			} catch(e) {
-				return reject(e);
-			}
-		}
-
-		/**
-		 * Return f.call(thisArg, x), or if it throws return a rejected promise for
-		 * the thrown exception
-		 */
-		function tryCatchReject(f, x, thisArg, next) {
-			try {
-				next.become(getHandler(f.call(thisArg, x)));
-			} catch(e) {
-				next.become(new Rejected(e));
-			}
-		}
-
-		/**
-		 * Same as above, but includes the extra argument parameter.
-		 */
-		function tryCatchReject3(f, x, y, thisArg, next) {
-			try {
-				f.call(thisArg, x, y, next);
-			} catch(e) {
-				next.become(new Rejected(e));
-			}
-		}
-
-		/**
-		 * @deprecated
-		 * Return f.call(thisArg, x), or if it throws, *return* the exception
-		 */
-		function tryCatchReturn(f, x, thisArg, next) {
-			try {
-				next.notify(f.call(thisArg, x));
-			} catch(e) {
-				next.notify(e);
-			}
-		}
-
-		function inherit(Parent, Child) {
-			Child.prototype = objectCreate(Parent.prototype);
-			Child.prototype.constructor = Child;
-		}
-
-		function snd(x, y) {
-			return y;
-		}
-
-		function noop() {}
-
-		function initEmitRejection() {
-			/*global process, self, CustomEvent*/
-			if(typeof process !== 'undefined' && process !== null
-				&& typeof process.emit === 'function') {
-				// Returning falsy here means to call the default
-				// onPotentiallyUnhandledRejection API.  This is safe even in
-				// browserify since process.emit always returns falsy in browserify:
-				// https://github.com/defunctzombie/node-process/blob/master/browser.js#L40-L46
-				return function(type, rejection) {
-					return type === 'unhandledRejection'
-						? process.emit(type, rejection.value, rejection)
-						: process.emit(type, rejection);
-				};
-			} else if(typeof self !== 'undefined' && typeof CustomEvent === 'function') {
-				return (function(noop, self, CustomEvent) {
-					var hasCustomEvent = false;
-					try {
-						var ev = new CustomEvent('unhandledRejection');
-						hasCustomEvent = ev instanceof CustomEvent;
-					} catch (e) {}
-
-					return !hasCustomEvent ? noop : function(type, rejection) {
-						var ev = new CustomEvent(type, {
-							detail: {
-								reason: rejection.value,
-								key: rejection
-							},
-							bubbles: false,
-							cancelable: true
-						});
-
-						return !self.dispatchEvent(ev);
-					};
-				}(noop, self, CustomEvent));
-			}
-
-			return noop;
-		}
-
-		return Promise;
-	};
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}]},{},[1])
-(1)
-});
-;
 (function(__global) {
 
 __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
@@ -1568,9 +298,7 @@ function logloads(loads) {
             // Hijack System.register to set declare function
             var curSystem = __global.System;
             var curRegister = curSystem.register;
-            curSystem.register = function(name, regDeps, regDeclare) {
-              var declare = regDeclare;
-              var deps = regDeps;
+            curSystem.register = function(name, deps, declare) {
               if (typeof name != 'string') {
                 declare = deps;
                 deps = name;
@@ -1579,7 +307,7 @@ function logloads(loads) {
               // store the deps as load.deps
               load.declare = declare;
               load.depsList = deps;
-            };
+            }
             __eval(transpiled, __global, load);
             curSystem.register = curRegister;
           });
@@ -1849,9 +577,8 @@ function logloads(loads) {
   }
 
   // 15.2.5.2.4
-  function linkSetFailed(linkSet, load, linkExc) {
+  function linkSetFailed(linkSet, load, exc) {
     var loader = linkSet.loader;
-    var exc = linkExc;
 
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
@@ -2217,8 +944,7 @@ function logloads(loads) {
     return err;
   }
 
-  function addToError(error, msg) {
-    var err = error;
+  function addToError(err, msg) {
     if (err instanceof Error)
       err.message = msg + err.message;
     else
@@ -2446,22 +1172,11 @@ function logloads(loads) {
 (function(Loader) {
 	var g = __global;
 
-	var isNode = typeof self === "undefined" &&
-		typeof process !== "undefined" &&
-		{}.toString.call(process) === '[object process]';
-
 	function getTranspilerModule(loader, globalName) {
-		return loader.newModule({
-			__useDefault: true,
-			"default": g[globalName]
-		});
+		return loader.newModule({ 'default': g[globalName], __useDefault: true });
 	}
 
-	function getTranspilerGlobalName(loadName) {
-		return loadName === "babel" ? "Babel" : loadName;
-	}
-
-	// Use Babel by default
+	// use Traceur by default
 	Loader.prototype.transpiler = 'babel';
 
 	Loader.prototype.transpile = function(load) {
@@ -2469,18 +1184,15 @@ function logloads(loads) {
 
 		// pick up Transpiler modules from existing globals on first run if set
 		if (!self.transpilerHasRun) {
-			if (g.traceur && !self.has('traceur')) {
+			if (g.traceur && !self.has('traceur'))
 				self.set('traceur', getTranspilerModule(self, 'traceur'));
-			}
-			if (g.Babel && !self.has("babel")) {
-				self.set("babel", getTranspilerModule(self, "Babel"));
-			}
+			if (g.babel && !self.has('babel'))
+				self.set('babel', getTranspilerModule(self, 'babel'));
 			self.transpilerHasRun = true;
 		}
 
 		return self['import'](self.transpiler)
-			.then(function(transpilerMod) {
-				var transpiler = transpilerMod;
+			.then(function(transpiler) {
 				if (transpiler.__useDefault) {
 					transpiler = transpiler['default'];
 				}
@@ -2508,7 +1220,7 @@ function logloads(loads) {
 							__eval('(function(require,exports,module){' + load.source + '})();', g, load);
 							g.System = curSystem;
 							g.Reflect.Loader = curLoader;
-							return getTranspilerModule(self, getTranspilerGlobalName(load.name));
+							return getTranspilerModule(self, load.name);
 						}
 					};
 				}
@@ -2544,185 +1256,109 @@ function logloads(loads) {
 	}
 
 	/**
-	 * Gets the babel environment name
-	 * return {string} The babel environment name
-	 */
-	function getBabelEnv() {
-		var loader = this;
-		var defaultEnv = "development";
-		var loaderEnv = typeof loader.getEnv === "function" && loader.getEnv();
-
-		if (isNode) {
-			return process.env.BABEL_ENV ||
-				process.env.NODE_ENV ||
-				loaderEnv ||
-				defaultEnv;
-		}
-		else {
-			return loaderEnv || defaultEnv;
-		}
-	}
-
-	/**
-	 * Gets the babel preset or plugin name
-	 * @param {BabelPreset|BabelPlugin} presetOrPlugin A babel plugin or preset
-	 * @return {?string} The preset/plugin name
-	 */
-	function getPresetOrPluginName(presetOrPlugin) {
-		if (includesPresetOrPluginName(presetOrPlugin)) {
-			return typeof presetOrPlugin === "string" ? presetOrPlugin : presetOrPlugin[0];
-		}
-		else {
-			return null;
-		}
-	}
-
-	/**
-	 * Whether the babel plugin/preset name was provided
+	 * Whether the plugin name is already registered in babel-standalone
 	 *
-	 * @param {BabelPreset|BabelPlugin} presetOrPlugin
+	 * @param {{}} babel The babel object exported by babel-standalone
+	 * @param {string} pluginName The plugin name to be checked
 	 * @return {boolean}
 	 */
-	function includesPresetOrPluginName(presetOrPlugin) {
-		return typeof presetOrPlugin === "string" ||
-			presetOrPlugin.length && typeof presetOrPlugin[0] === "string";
+	function isPluginRegistered(babel, pluginName) {
+		var availablePlugins = babel.availablePlugins || {};
+
+		return !!availablePlugins[pluginName];
 	}
 
 	/**
-	 * A Babel plugins as defined in `babelOptions.plugins`
-	 * @typedef {string|Function|<string, Object>[]|<Function, Object>[]} BabelPlugin
+	 * Returns babel full plugin name if shorthand was used or the path provided
+	 *
+	 * @param {string} name The entry in the plugin array
+	 * @return {string} Relative/absolute path to plugin or babel npm plugin name
+	 *
+	 * If a babel plugin is on npm, it can be set in the `plugins` array using
+	 * one of the following forms:
+	 *
+	 * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
+	 * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
+	 * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
+	 *
+	 * Since plugins are loaded through steal, we need to make sure the full
+	 * plugin name is passed to `steal.import` so the npm extension can locate
+	 * the babel plugin. Relative/absolute paths should be loaded as any other
+	 * module.
 	 */
+	function getBabelPluginPath(name) {
+		var isPath = /\//;
+		var isBabelPluginName = /^(?:babel-plugin-)/;
 
-	var processBabelPlugins = (function() {
-		/**
-		 * Returns a list of babel plugins to be used during transpilation
-		 *
-		 * Collects the babel plugins defined in `babelOptions.plugins` plus
-		 * the environment dependant plugins.
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {babelOptions} babelOptions The babel configuration object
-		 * @return {Promise.<BabelPlugin[]>} Promise that resolves to a list of babel plugins
-		 */
-		return function processBabelPlugins(babel, babelOptions) {
-			var babelEnv = getBabelEnv.call(this);
-			var babelEnvConfig = babelOptions.env || {};
+		return isPath.test(name) || isBabelPluginName.test(name) ?
+			name : "babel-plugin-" + name;
+	}
 
-			var pluginsPromises = [
-				doProcessPlugins.call(this, babel, babelOptions.plugins)
-			];
+	/**
+	 * Register the custom plugins found in `babelOptions` object
+	 *
+	 * babel-standalone requires custom plugins to be registered in order to
+	 * be used, see https://github.com/babel/babel-standalone#customisation
+	 *
+	 * @param {{}} load The loader load
+	 * @param {{}} babel The babel object exported by babel-standalone
+	 * @param {array} plugins The babel plugins array
+	 * @return {Promise} Promise that resolves to the plugins array to be used
+	 *                   to transpile the load source code
+	 */
+	function registerCustomPlugins(load, babel, plugins) {
+		var self = this;
+		var promises = [];
+		var clonedPlugins = plugins.slice(0)
 
-			for (var envName in babelEnvConfig) {
-				// do not process plugins if the current environment does not match
-				// the environment in which the plugins are set to be used
-				if (babelEnv === envName) {
-					var plugins = babelEnvConfig[envName].plugins || [];
-					pluginsPromises.push(doProcessPlugins.call(this, babel, plugins));
-				}
-			}
+		plugins.forEach(function(plugin, index) {
+			/**
+			 * `plugin` can be either a string or an array:
+			 *
+			 * ```
+			 * {
+			 *   plugins: [
+			 *     "pluginName",
+			 *     [ "pluginName", { ...pluginOptions }
+			 *   ]
+			 * }
+			 * ```
+			 */
+			var name = typeof plugin === "string" ? plugin : plugin[0];
+			var parent = self.configMain || "package.json!npm";
 
-			return Promise.all(pluginsPromises)
-				.then(function(results) {
-					var plugins = [];
+			if (!isPluginRegistered(babel, name)) {
+				var pluginPromise = self.normalize(getBabelPluginPath(name), parent)
+					.then(function(name) {
+						// check if the load corresponds to a babel plugin,
+						// otherwise a loading plugin could try to load itself
+						if (load.name !== name) {
+							return self["import"](name);
+						}
+						// do not use the plugin while transpiling its own source code
+						else {
+							clonedPlugins.splice(index, 1);
+						}
+					})
+					.then(function(module) {
+						if (module) {
+							// handle ES2015 default exports
+							var exported = typeof module === "function" ?
+								module : module.default;
 
-					// results is an array of arrays, flatten it out!
-					results.forEach(function(processedPlugins) {
-						plugins = plugins.concat(processedPlugins);
+							babel.registerPlugin(name, exported);
+						}
 					});
 
-					return plugins;
-				});
-		}
+				promises.push(pluginPromise);
+			}
+		});
 
-		/**
-		 * Collects builtin plugin names and non builtins functions
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPlugin[]} babelPlugins A list of babel plugins
-		 * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
-		 *		of babel-standalone builtin plugin names and non-builtin plugin
-		 *		functions
-		 */
-		function doProcessPlugins(babel, babelPlugins) {
-			var promises = [];
-
-			var plugins = babelPlugins || [];
-
-			plugins.forEach(function(plugin) {
-				var name = getPresetOrPluginName(plugin);
-
-				if (!includesPresetOrPluginName(plugin) || isBuiltinPlugin(babel, name)) {
-					promises.push(plugin);
-				}
-				else if (!isBuiltinPlugin(babel, name)) {
-					var parent = this.configMain || "package.json!npm";
-					var npmPluginNameOrPath = getNpmPluginNameOrPath(name);
-
-					// import the plugin!
-					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
-						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
-
-							if (typeof plugin === "string") {
-								return exported;
-							}
-							// assume the array form was provided
-							else {
-								// [ pluginFunction, pluginOptions ]
-								return [exported, plugin[1]];
-							}
-						}));
-				}
-			}, this);
-
-			return Promise.all(promises);
-		}
-
-		/**
-		 * Whether the plugin is built in babel-standalone
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {string} pluginName The plugin name to be checked
-		 * @return {boolean}
-		 */
-		function isBuiltinPlugin(babel, pluginName) {
-			var isNpmPluginName = /^(?:babel-plugin-)/;
-			var availablePlugins = babel.availablePlugins || {};
-
-			// babel-standalone registers its bundled plugins using the shorthand name
-			var shorthand = isNpmPluginName.test(pluginName) ?
-				pluginName.replace("babel-plugin-", "") :
-				pluginName;
-
-			return !!availablePlugins[shorthand];
-		}
-
-		/**
-		 * Returns babel full plugin name if shorthand was used or the path provided
-		 *
-		 * @param {string} name The entry in the plugin array
-		 * @return {string} Relative/absolute path to plugin or babel npm plugin name
-		 *
-		 * If a babel plugin is on npm, it can be set in the `plugins` array using
-		 * one of the following forms:
-		 *
-		 * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
-		 * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
-		 * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
-		 *
-		 * Since plugins are loaded through steal, we need to make sure the full
-		 * plugin name is passed to `steal.import` so the npm extension can locate
-		 * the babel plugin. Relative/absolute paths should be loaded as any other
-		 * module.
-		 */
-		function getNpmPluginNameOrPath(name) {
-			var isPath = /\//;
-			var isBabelPluginName = /^(?:babel-plugin-)/;
-
-			return isPath.test(name) || isBabelPluginName.test(name) ?
-				name : "babel-plugin-" + name;
-		}
-	}());
+		return Promise.all(promises)
+			.then(function() {
+				return clonedPlugins;
+			});
+	}
 
 	function getBabelPlugins(current) {
 		var plugins = current || [];
@@ -2755,17 +1391,6 @@ function logloads(loads) {
 		return presets;
 	}
 
-	/**
-	 * Returns the babel version
-	 * @param {Object} babel The babel object
-	 * @return {number} The babel version
-	 */
-	function getBabelVersion(babel) {
-		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
-
-		return babelVersion || 6;
-	}
-
 	function getBabelOptions(load, babel) {
 		var options = this.babelOptions || {};
 
@@ -2774,7 +1399,10 @@ function logloads(loads) {
 		options.code = true;
 		options.ast = false;
 
-		if (getBabelVersion(babel) >= 6) {
+		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+		if (!babelVersion) babelVersion = 6;
+
+		if (babelVersion >= 6) {
 			// delete the old babel options if they are present in config
 			delete options.optional;
 			delete options.whitelist;
@@ -2796,176 +1424,30 @@ function logloads(loads) {
 		return options;
 	}
 
-	/**presets
-	 * A Babel preset as defined in `babelOptions.presets`
-	 * @typedef {string|Function|Object|<string, Object>[]|<Function, Object>[]|<Object, Object>} BabelPreset
-	 */
+	function babelTranspile(load, babel) {
+		babel = babel.Babel || babel.babel || babel;
 
-	var processBabelPresets = (function() {
-		/**
-		 * Returns a list of babel presets to be used during transpilation
-		 *
-		 * Collects the babel presets defined in `babelOptions.presets` plus
-		 * the environment dependant presets.
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {babelOptions} babelOptions The babel configuration object
-		 * @return {Promise.<BabelPreset[]>} Promise that resolves to a list of babel presets
-		 */
-		return function processBabelPresets(babel, babelOptions) {
-			var babelEnv = getBabelEnv.call(this);
-			var babelEnvConfig = babelOptions.env || {};
-
-			var presetsPromises = [
-				doProcessPresets.call(this, babel, babelOptions.presets)
-			];
-
-			for (var envName in babelEnvConfig) {
-				// do not process presets if the current environment does not match
-				// the environment in which the presets are set to be used
-				if (babelEnv === envName) {
-					var presets = babelEnvConfig[envName].presets || [];
-					presetsPromises.push(doProcessPresets.call(this, babel, presets));
-				}
-			}
-
-			return Promise.all(presetsPromises)
-				.then(function(results) {
-					var presets = [];
-
-					// results is an array of arrays, flatten it out!
-					results.forEach(function(processedPresets) {
-						presets = presets.concat(processedPresets);
-					});
-
-					return presets;
-				});
-		};
-
-		/**
-		 * Collects builtin presets names and non builtins objects/functions
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPreset[]} babelPresets A list of babel presets
-		 * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
-		 *		of babel-standalone builtin preset names and non-builtin preset
-		 *		definitions (object or function).
-		 */
-		function doProcessPresets(babel, babelPresets) {
-			var promises = [];
-			var presets = babelPresets || [];
-
-			presets.forEach(function(preset) {
-				var name = getPresetOrPluginName(preset);
-
-				if (!includesPresetOrPluginName(preset) || isBuiltinPreset(babel, name)) {
-					promises.push(preset);
-				}
-				else if (!isBuiltinPreset(babel, name)) {
-					var parent = this.configMain || "package.json!npm";
-					var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
-
-					// import the preset!
-					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
-						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
-
-							if (typeof preset === "string") {
-								return exported;
-							}
-							// assume the array form was provided
-							else {
-								// [ presetDefinition, presetOptions ]
-								return [exported, preset[1]];
-							}
-						}));
-				}
-			}, this);
-
-			return Promise.all(promises);
-		}
-
-		/**
-		 * Whether the preset is built in babel-standalone
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {string} pluginName The plugin name to be checked
-		 * @return {boolean}
-		 */
-		function isBuiltinPreset(babel, presetName) {
-			var isNpmPresetName = /^(?:babel-preset-)/;
-			var availablePresets = babel.availablePresets || {};
-
-			// babel-standalone registers its builtin presets using the shorthand name
-			var shorthand = isNpmPresetName.test(presetName) ?
-				presetName.replace("babel-preset-", "") :
-				presetName;
-
-			return !!availablePresets[shorthand];
-		}
-
-		function getNpmPresetNameOrPath(name) {
-			var isPath = /\//;
-			var isNpmPresetName = /^(?:babel-preset-)/;
-
-			if (!isPath.test(name) && !isNpmPresetName.test(name)) {
-				return "babel-preset-" + name;
-			}
-
-			return name;
-		}
-	}());
-
-	/**
-	 * Babel plugin that sets `__esModule` to true
-	 *
-	 * This flag is needed to interop the SystemJS format used by steal on the
-	 * browser in development with the CJS format used for built modules.
-	 *
-	 * With dev bundles is possible to load a part of the app already built while
-	 * other modules are being transpiled on the fly, with this flag, transpiled
-	 * amd modules will be able to load the modules transpiled on the browser.
-	 */
-	function addESModuleFlagPlugin(babel) {
-		var t = babel.types;
-
-		return {
-			visitor: {
-				Program: function(path, state) {
-					path.unshiftContainer("body", [
-						t.exportNamedDeclaration(null, [
-							t.exportSpecifier(t.identifier("true"),
-								t.identifier("__esModule"))
-						])
-					]);
-				}
-			}
-		};
-	}
-
-	function babelTranspile(load, babelMod) {
-		var babel = babelMod.Babel || babelMod.babel || babelMod;
-
-		var babelVersion = getBabelVersion(babel);
 		var options = getBabelOptions.call(this, load, babel);
+		var plugins = (options.plugins || []).slice(0);
 
-		return Promise.all([
-			processBabelPlugins.call(this, babel, options),
-			processBabelPresets.call(this, babel, options)
-		])
-		.then(function(results) {
-			// might be running on an old babel that throws if there is a
-			// plugins array in the options object
-			if (babelVersion >= 6) {
-				options.plugins = [addESModuleFlagPlugin].concat(results[0]);
-				options.presets = results[1];
-			}
+		return registerCustomPlugins.call(this, load, babel, plugins)
+			.then(function(registered) {
+				// use the plugins array coming from the promise; custom plugins
+				// loaded by Steal can't be used to tranpile the plugin's own code
+				if (options.plugins && registered.length) {
+					options.plugins = registered;
+				}
+				var source = babel.transform(load.source, options).code;
 
-			var source = babel.transform(load.source, options).code;
+				// restore original plugins configuration
+				if (options.plugins) {
+					options.plugins = plugins;
+				}
 
-			// add "!eval" to end of Babel sourceURL
-			// I believe this does something?
-			return source + '\n//# sourceURL=' + load.address + '!eval';
-		});
+				// add "!eval" to end of Babel sourceURL
+				// I believe this does something?
+				return source + '\n//# sourceURL=' + load.address + '!eval';
+			});
 	}
 
 })(__global.LoaderPolyfill);
@@ -3019,9 +1501,7 @@ function logloads(loads) {
     return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
   }
 
-  function toAbsoluteURL(inBase, inHref) {
-    var href = inHref;
-    var base = inBase
+  function toAbsoluteURL(base, href) {
 
     if (isWindows)
       href = href.replace(/\\/g, '/');
@@ -3092,11 +1572,11 @@ function logloads(loads) {
   }
   else if (typeof require != 'undefined') {
     var fs, fourOhFourFS = /ENOENT/;
-    fetchTextFromURL = function(rawUrl, fulfill, reject) {
-      if (rawUrl.substr(0, 5) != 'file:')
+    fetchTextFromURL = function(url, fulfill, reject) {
+      if (url.substr(0, 5) != 'file:')
         throw 'Only file URLs of the form file: allowed running in Node.';
       fs = fs || require('fs');
-      var url = rawUrl.substr(5);
+      url = url.substr(5);
       if (isWindows)
         url = url.replace(/\//g, '\\');
       return fs.readFile(url, function(err, data) {
@@ -3358,9 +1838,7 @@ $__global.upgradeSystemLoader = function() {
       hash     : m[8] || ''
     } : null);
   }
-  function toAbsoluteURL(inBase, inHref) {
-	var base = inBase;
-	var href = inHref;
+  function toAbsoluteURL(base, href) {
     function removeDotSegments(input) {
       var output = [];
       input.replace(/^(\.\.?(\/|$))+/, '')
@@ -3402,6 +1880,8 @@ $__global.upgradeSystemLoader = function() {
     $__global.SystemJS = System;
     $__global.System = System.originalSystem;
   }
+
+  
 
 var getOwnPropertyDescriptor = true;
 try {
@@ -3724,9 +2204,8 @@ function register(loader) {
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
   var curSystem;
-  function exec(load, execContext) {
+  function exec(load, context) {
     var loader = this;
-    var context = execContext;
     // support sourceMappingURL (efficiently)
     var sourceMappingURL;
     var lastLineIndex = load.source.lastIndexOf('\n');
@@ -3767,11 +2246,7 @@ function register(loader) {
   // loader.register sets loader.defined for declarative modules
   var anonRegister;
   var calledRegister;
-  function registerModule(regName, regDeps, regDeclare, regExecute) {
-    var name = regName;
-    var deps = regDeps;
-    var declare = regDeclare;
-    var execute = regExecute;
+  function registerModule(name, deps, declare, execute) {
     if (typeof name != 'string') {
       execute = declare;
       declare = deps;
@@ -4324,7 +2799,8 @@ function es6(loader) {
         setConfig(self, 'traceur-runtime', 'traceur/bin/traceur-runtime.js');
       }
       else if (self.transpiler == 'babel') {
-        setConfig(self, 'babel', 'babel-standalone/babel.js');
+        setConfig(self, 'babel', 'babel-core/browser.js');
+        setConfig(self, 'babel-runtime', 'babel-core/external-helpers.js');
       }
       firstLoad = false;
     }
@@ -4392,9 +2868,8 @@ function global(loader) {
 
   loader._extensions.push(global);
 
-  function readGlobalProperty(p, propValue) {
+  function readGlobalProperty(p, value) {
     var pParts = p.split('.');
-    var value = propValue;
     while (pParts.length)
       value = value[pParts.shift()];
     return value;
@@ -4419,12 +2894,9 @@ function global(loader) {
     }
 
     loader.set('@@global-helpers', loader.newModule({
-      prepareGlobal: function(globalModuleName, globalDeps, globalExportName) {
+      prepareGlobal: function(moduleName, deps, exportName) {
         var globals;
         var require;
-        var moduleName = globalModuleName;
-        var deps = globalDeps;
-        var exportName = globalExportName;
 
         // handle function signature when an object is passed instead of
         // individual arguments
@@ -4582,8 +3054,8 @@ function cjs(loader) {
   loader._extensions.push(cjs);
 
   // CJS Module Format
-  // require('...') || exports[''] = ... || exports.asd = ... || module.exports = ... || Object.defineProperty(module, "exports" ...
-  var cjsExportsRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])(exports\s*(\[['"]|\.)|module(\.exports|\['exports'\]|\["exports"\])\s*(\[['"]|[=,\.])|Object.defineProperty\(\s*module\s*,\s*(?:'|")exports(?:'|"))/;
+  // require('...') || exports[''] = ... || exports.asd = ... || module.exports = ...
+  var cjsExportsRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])(exports\s*(\[['"]|\.)|module(\.exports|\['exports'\]|\["exports"\])\s*(\[['"]|[=,\.]))/;
   // RegEx adjusted from https://github.com/jbrantly/yabble/blob/master/lib/yabble.js#L339
   var cjsRequireRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF."'])require\s*\(\s*("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')\s*\)/g;
   var commentRegEx = /(^|[^\\])(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
@@ -4821,10 +3293,7 @@ function amd(loader) {
       }
     }
 
-    function define(modName, modDeps, modFactory) {
-      var name = modName;
-      var deps = modDeps;
-      var factory = modFactory;
+    function define(name, deps, factory) {
       if (typeof name != 'string') {
         factory = deps;
         deps = name;
@@ -5017,7 +3486,7 @@ function amd(loader) {
 
 /*
   SystemJS map support
-
+  
   Provides map configuration through
     System.map['jquery'] = 'some/module/map'
 
@@ -5078,7 +3547,7 @@ function map(loader) {
     var tmpParentLength, tmpPrefixLength;
     var subPath;
     var nameParts;
-
+    
     // first find most specific contextual match
     if (parentName) {
       for (var p in loader.map) {
@@ -5139,9 +3608,8 @@ function map(loader) {
   }
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(identifier, parentName, parentAddress) {
+  loader.normalize = function(name, parentName, parentAddress) {
     var loader = this;
-    var name = identifier;
     if (!loader.map)
       loader.map = {};
 
@@ -5152,8 +3620,8 @@ function map(loader) {
     }
 
     return Promise.resolve(loaderNormalize.call(loader, name, parentName, parentAddress))
-    .then(function(normalizedName) {
-      var name = applyMap(normalizedName, parentName, loader);
+    .then(function(name) {
+      name = applyMap(name, parentName, loader);
 
       // Normalize "module/" into "module/module"
       // Convenient for packages
@@ -5186,9 +3654,8 @@ function plugins(loader) {
   loader._extensions.push(plugins);
 
   var loaderNormalize = loader.normalize;
-  loader.normalize = function(name, parentModuleName, parentAddress) {
+  loader.normalize = function(name, parentName, parentAddress) {
     var loader = this;
-    var parentName = parentModuleName;
     // if parent is a plugin, normalize against the parent plugin argument only
     var parentPluginIndex;
     if (parentName && (parentPluginIndex = parentName.indexOf('!')) != -1)
@@ -5551,8 +4018,7 @@ var $__curScript, __eval;
     return newErr;
   }
 
-  __eval = function(inSource, address, context, sourceMap, evalType) {
-	var source = inSource;
+  __eval = function(source, address, context, sourceMap, evalType) {
     source += '\n//# sourceURL=' + address + (sourceMap ? '\n//# sourceMappingURL=' + sourceMap : '');
 
 
@@ -5705,7 +4171,7 @@ var $__curScript, __eval;
 		var matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
-
+	
 	var ext = function(uri){
 		var fn = filename(uri);
 		var dot = fn.lastIndexOf(".");
@@ -5717,9 +4183,8 @@ var $__curScript, __eval;
 	};
 
 	var pluginCache = {};
-
-	var normalize = function(unnormalizedName, loader){
-		var name = unnormalizedName;
+	
+	var normalize = function(name, loader){
 
 		// Detech if this name contains a plugin part like: app.less!steal/less
 		// and catch the plugin name so that when it is normalized we do not perform
@@ -5734,8 +4199,8 @@ var $__curScript, __eval;
 
 			// Set the name to the argument name so that we can normalize it alone.
 			name = argumentName;
-		}
-
+		} 
+		
 		var last = filename(name),
 			extension = ext(name);
 		// if the name ends with /
@@ -5743,7 +4208,7 @@ var $__curScript, __eval;
 			return name+filename( name.substr(0, name.length-1) ) + pluginPart;
 		} else if(	!/^(\w+(?:s)?:\/\/|\.|file|\/)/.test(name) &&
 			// and doesn't end with a dot
-			 last.indexOf(".") === -1
+			 last.indexOf(".") === -1 
 			) {
 			return name+"/"+last + pluginPart;
 		} else {
@@ -5871,23 +4336,21 @@ addStealExtension(function (loader) {
     }
 
     var matches = name.match(endingExtension);
-	var outName = name;
 
     if (matches) {
       var hasBang = name[name.length - 1] === "!",
         ext = matches[1];
       // load js-files nodd-like
       if (parentName && loader.configMain !== name && matches[0] === '.js') {
-        outName = name.substr(0, name.lastIndexOf("."));
+        name = name.substr(0, name.lastIndexOf("."));
         // matches ext mapping
       } else if (loader.ext[ext]) {
-        outName = name + (hasBang ? "" : "!") + loader.ext[ext];
+        name = name + (hasBang ? "" : "!") + loader.ext[ext];
       }
     }
-    return normalize.call(this, outName, parentName, parentAddress);
+    return normalize.call(this, name, parentName, parentAddress);
   };
 });
-
 // Steal Locate Extension
 // normalize a given path e.g.
 // "path/to/folder/" -> "path/to/folder/folder"
@@ -5898,8 +4361,7 @@ addStealExtension(function (loader) {
   loader.normalize = function (name, parentName, parentAddress, pluginNormalize) {
     var lastPos = name.length - 1,
       secondToLast,
-      folderName,
-	  newName = name;
+      folderName;
 
     if (name[lastPos] === "/") {
       secondToLast = name.substring(0, lastPos).lastIndexOf("/");
@@ -5908,12 +4370,11 @@ addStealExtension(function (loader) {
         folderName = folderName.substr(folderName.lastIndexOf("#") + 1);
       }
 
-      newName += folderName;
+      name += folderName;
     }
-    return normalize.call(this, newName, parentName, parentAddress, pluginNormalize);
+    return normalize.call(this, name, parentName, parentAddress, pluginNormalize);
   };
 });
-
 // override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
 // in resources loaded by supporting plugins
 addStealExtension(function (loader) {
@@ -5930,11 +4391,10 @@ addStealExtension(function (loader) {
       .then(function(name){
         return loader.locate({name: name, metadata: {}});
       }).then(function(address){
-		var outAddress = address;
         if(address.substr(address.length - 3) === ".js") {
-          outAddress = address.substr(0, address.length - 3);
+          address = address.substr(0, address.length - 3);
         }
-        return outAddress;
+        return address;
       });
   };
 
@@ -6011,7 +4471,6 @@ addStealExtension(function (loader) {
     });
   };
 });
-
 addStealExtension(function (loader) {
   loader._contextualModules = {};
 
@@ -6022,24 +4481,22 @@ addStealExtension(function (loader) {
   var normalize = loader.normalize;
   loader.normalize = function(name, parentName){
     var loader = this;
-	var pluginLoader = loader.pluginLoader || loader;
 
     if (parentName) {
       var definer = this._contextualModules[name];
 
       // See if `name` is a contextual module
       if (definer) {
-        var localName = name + '/' + parentName;
+        name = name + '/' + parentName;
 
         if(!loader.has(name)) {
           // `definer` could be a function or could be a moduleName
           if (typeof definer === 'string') {
-            definer = pluginLoader['import'](definer);
+            definer = loader['import'](definer);
           }
 
           return Promise.resolve(definer)
-            .then(function(modDefiner) {
-				var definer = modDefiner;
+            .then(function(definer) {
               if (definer['default']) {
                 definer = definer['default'];
               }
@@ -6049,18 +4506,17 @@ addStealExtension(function (loader) {
               return definePromise;
             })
             .then(function(moduleDef){
-              loader.set(localName, loader.newModule(moduleDef));
-              return localName;
+              loader.set(name, loader.newModule(moduleDef));
+              return name;
             });
         }
-        return Promise.resolve(localName);
+        return Promise.resolve(name);
       }
     }
 
     return normalize.apply(this, arguments);
   };
 });
-
 // Steam Script-Module Extension
 // Add a steal-module script to the page and it will run after Steal has been configured
 // <script type="text/steal-module">...</script>
@@ -6203,8 +4659,8 @@ addStealExtension(function applyTraceExtension(loader) {
 	loader.getModuleLoad = function(moduleName){
 		return this._traceData.loads[moduleName];
 	};
-	loader.getBundles = function(moduleName, argVisited){
-		var visited = argVisited || {};
+	loader.getBundles = function(moduleName, visited){
+		visited = visited || {};
 		visited[moduleName] = true;
 		var loader = this;
 		var parentMap = loader._traceData.parentMap;
@@ -6377,20 +4833,9 @@ addStealExtension(function applyTraceExtension(loader) {
 // Steal JSON Format
 // Provides the JSON module format definition.
 addStealExtension(function (loader) {
+  var jsonTest = /^[\s\n\r]*[\{\[]/;
   var jsonExt = /\.json$/i;
   var jsExt = /\.js$/i;
-
-  // taken from prototypejs
-  // https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/string.js#L682-L706
-  function isJSON(json) {
-	var str = json;
-    if (!str) return false;
-
-    str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
-    str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
-    str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
-    return (/^[\],:{}\s]*$/).test(str);
-  }
 
   // if someone has a moduleName that is .json, make sure it loads a json file
   // no matter what paths might do
@@ -6452,7 +4897,7 @@ addStealExtension(function (loader) {
 
   // Attempt to parse a load as json.
   function parse(load){
-    if ((load.metadata.format === 'json' || !load.metadata.format) && isJSON(load.source)) {
+    if ( (load.metadata.format === 'json' || !load.metadata.format) && jsonTest.test(load.source)  ) {
       try {
         return JSON.parse(load.source);
       } catch(e) {
@@ -6463,7 +4908,6 @@ addStealExtension(function (loader) {
 
   }
 });
-
 // Steal Cache-Bust Extension
 // if enabled, Steal Cache-Bust will add a
 // cacheKey and cacheVersion to the required file address
@@ -6522,7 +4966,7 @@ addStealExtension(function (loader) {
 	System.depsBundle = "@empty";
 	System.paths[System.configMain] = "stealconfig.js";
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
-	System.ext = Object.create(null);
+	System.ext = {};
 	System.logLevel = 0;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
@@ -6571,8 +5015,7 @@ addStealExtension(function (loader) {
 		};
 
 	// checks if we're running in node, then prepends the "file:" protocol if we are
-	var envPath = function(pathVal) {
-		var val = pathVal;
+	var envPath = function(val) {
 		if(isNode && !/^file:/.test(val)) {
 			// If relative join with the current working directory
 			if(val[0] === "." && (val[1] === "/" ||
@@ -6753,8 +5196,8 @@ addStealExtension(function (loader) {
 		// directly called from steal-tools
 		stealPath: {
 			order: 14,
-			set: function(identifier, cfg) {
-				var dirname = envPath(identifier);
+			set: function(dirname, cfg) {
+				dirname = envPath(dirname);
 				var parts = dirname.split("/");
 
 				// steal keeps this around to make things easy no matter how you are using it.
@@ -6838,9 +5281,7 @@ addStealExtension(function (loader) {
 				// if steal is bundled or we are loading steal.production
 				// we always are in production environment
 				if((this.stealBundled && this.stealBundled === true) ||
-					((lastPart.indexOf("steal.production") > -1) ||
-						(lastPart.indexOf("steal-sans-promises.production") > -1)
-					 	&& !cfg.env)) {
+					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
 					this.config({ env: platform+"-production" });
 				}
 
@@ -7033,7 +5474,7 @@ addStealExtension(function (loader) {
 
 	// configure and startup steal
 	// load the main module(s) if everything is configured
-	steal.startup = function(startupConfig){
+	steal.startup = function(config){
 		var steal = this;
 		var loader = this.loader;
 		var configResolve;
@@ -7045,11 +5486,10 @@ addStealExtension(function (loader) {
 		});
 
 		appPromise = getUrlOptions().then(function(urlOptions) {
-			var config;
 
-			if (typeof startupConfig === 'object') {
+			if (typeof config === 'object') {
 				// the url options are the source of truth
-				config = extend(startupConfig, urlOptions);
+				config = extend(config, urlOptions);
 			} else {
 				config = urlOptions;
 			}

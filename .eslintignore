@@ -3,6 +3,7 @@ src/core.js
 src/end.js
 src/loader/lib/polyfill-wrapper-end.js
 src/loader/lib/polyfill-wrapper-start.js
+src/loader/loader-no-promise.js
 src/base/lib/polyfill-wrapper-end.js
 src/base/lib/polyfill-wrapper-start.js
 src/make-steal-end.js
