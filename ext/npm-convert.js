@@ -127,7 +127,7 @@ function convertPropertyNamesAndValues (context, pkg, map, root, waiting) {
 }
 
 function convertName (context, pkg, map, root, name, waiting) {
-	var parsed = utils.moduleName.parse(name, pkg.name),
+	var parsed = utils.moduleName.parse(name, pkg.name, null, context),
 		depPkg, requestedVersion;
 	if( name.indexOf("#") >= 0 ) {
 		// If this is a fully converted name just return the name.
