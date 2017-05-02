@@ -52,11 +52,10 @@ To specify which plugins/presets you want to use, specify the [config.babelOptio
 }
 ```
 
-*__Note__ that currently only the presets/plugins provided by babel-standalone are supported, but the ability to use custom plugins is planned.*
-
 ### Defaults
 
-if no presets/plugins are provided in config the following options are used by default:
+Steal uses the following options by default even if custom presets/plugins are
+provided.
 
 ```js
 {
