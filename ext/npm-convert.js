@@ -279,6 +279,7 @@ function convertToPackage(context, npmPkg, index) {
 	var nameAndVersion = pkg.name+"@"+pkg.version;
 	var localPkg;
 	if(!packages[nameAndVersion]) {
+		crawl.setVersionsConfig(context, pkg, pkg.version);
 		if(pkg.browser){
 			delete pkg.browser.transform;
 		}

@@ -24,7 +24,10 @@ exports.translate = function(load){
 
 	var resavePackageInfo = isNode && loader.isEnv &&
 		!loader.isEnv("production");
+
 	var prevPackages = loader.npmContext && loader.npmContext.pkgInfo;
+	var versions = loader.npmContext && loader.npmContext.versions;
+
 	var context = {
 		packages: [],
 		pkgInfo: [],
@@ -33,7 +36,7 @@ exports.translate = function(load){
 		paths: {},
 		// paths that are currently be loaded
 		loadingPaths: {},
-		versions: {},
+		versions: utils.extend({}, versions),
 		// A map of packages to its parents. This is used so that
 		// we can find a package by name and get its parent packages,
 		// in order to load bare module specifiers that refer to packages
