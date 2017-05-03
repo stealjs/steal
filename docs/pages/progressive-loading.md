@@ -47,7 +47,7 @@ Create _myhub.html_ with:
 <html lang="en">
   <head></head>
   <body>
-    Hello World!
+    <div class='container'>Hello World.</div>
   </body>
 </html>
 ```
@@ -63,7 +63,7 @@ Next edit your `package.json` so that the start script looks like:
 ```json
 "scripts": {
   "start": "http-server -c-1 ."
-}
+},
 ```
 
 This allows us to start the server with:
@@ -74,7 +74,9 @@ This allows us to start the server with:
 
 Open [http://127.0.0.1:8080/myhub.html](http://127.0.0.1:8080/myhub.html). You should see the *Hello world!* test.
 
-> Before proceeding kill the development server so we can install some dependencies. Use cmd+c on Mac or ctrl+c on Windows or Linux/BSD.
+> Before proceeding open a new command-line
+> terminal that will be used for additional
+> `npm install` commands.
 
 ### Install steal, steal-tools, and jquery
 
@@ -83,12 +85,6 @@ Installing these 3 dependencies gives us everything we need to build our applica
 ```
 > npm install steal jquery --save-dev
 > npm install steal-tools steal-less steal-css --save-dev
-```
-
-Now restart your server; you can keep it on while you develop the rest of the application.
-
-```
-> npm start
 ```
 
 ## Import your first module
@@ -112,7 +108,7 @@ Update _myhub.html_ with:
 <html lang="en">
   <head></head>
   <body>
-    Hello World!
+    <div class='container'>Hello World.</div>
     <script src="./node_modules/steal/steal.js"></script>
   </body>
 </html>
@@ -182,8 +178,6 @@ Internally Steal resolves all module identifiers into [moduleName moduleNames], 
 
 ### Install and import bootstrap
 
-> Again kill your server using cmd+c on Mac or ctrl+c on Windows / Linux.
-
 Next install bootstrap with:
 
 ```
@@ -201,12 +195,12 @@ Update the _myhub.html_ to use bootstrap with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <div class='container'>Hello World.</div>
     <script src="./node_modules/steal/steal.js"></script>
   </body>
 </html>
 ```
-
-@highlight 4-6,9
+@highlight 4-6
 
 Import it and use it with the following updated _myhub.js_:
 
@@ -223,8 +217,6 @@ $("body").append(`
 ```
 
 @highlight 3,5-9
-
-Once you restart your server again (`npm start`) you'll be able to see your changes when you refresh.
 
 This shows Steal's ability to load modules from npm using its built-in [npm] plugin. For most modules all you need to do is install them and then import and use them.
 
@@ -387,9 +379,13 @@ import $ from "jquery";
 import "bootstrap/dist/css/bootstrap.css";
 import "./weather.css";
 
+function toClassName(txt) {
+  return txt.toLowerCase().replace(/ /g, "-");
+}
+
 export default function(selector){
     var city = "chicago il";
-    $(selector).html("Loading...")
+    $(selector).html("Loading...");
     $.ajax({
         url: `https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places%20where%20text%3D%22${city}%22)&format=json&diagnostics=true&callback=`,
     }).then(function(response){
@@ -411,14 +407,14 @@ export default function(selector){
             ${defs.join("")}
           </ul>
         </div>
-      `)
+      `);
     });
 
-    function toClassName(txt) {
-      return txt.toLowerCase().replace(/ /g, "-");
-    }
-};
+}
 ```
+
+Open [http://127.0.0.1:8080/weather/weather.html](http://127.0.0.1:8080/weather/weather.html) see
+the __weather__ widget's demo page.
 
 ### Create the test page
 
@@ -468,6 +464,9 @@ QUnit.test("basics", function(assert){
 });
 ```
 
+Open [http://127.0.0.1:8080/weather/weather-test.html](http://127.0.0.1:8080/weather/weather-test.html) to
+run the __weather__ tests.
+
 ### Use the module
 
 Update _myhub.js_ to:
@@ -490,13 +489,16 @@ weather('#weather');
 
 @highlight 4,9,13
 
+Open [http://127.0.0.1:8080/myhub.html](http://127.0.0.1:8080/myhub.html) to
+see the application using the __weather__ widget.
+
 ## Create test with dependency injection
 
 Dependency injection is a technique used to improve testing in your application. Steal provides dependency injection through its module system using [steal.steal-clone]. steal-clone allows you to create a cloned loader with stubs for modules that you want to fake.
 
 Here we'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request so that we can test that the rest of our app behaviors correctly; in this case it should list the one forecast we give it.
 
-Update weather/weather-test.js_ with:
+Update _weather/weather-test.js_ with:
 
 ```js
 import QUnit from "steal-qunit";
@@ -626,6 +628,9 @@ module.exports = function(selector) {
 };
 ```
 
+Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
+see that requiring `justifiedGallery` fails.
+
 ### Configure justifiedGallery to load
 
 Configuration in Steal is usually done in the `package.json` under the `steal` object.
@@ -669,7 +674,7 @@ require("justifiedGallery");
 var $ = require("jquery");
 
 module.exports = function(selector) {
-  $(selector).html("Loading...");
+	$(selector).html("Loading...");
 
 	$.ajax({
 		url: 'https://api.flickr.com/services/feeds/photos_public.gne',
@@ -681,18 +686,21 @@ module.exports = function(selector) {
 		},
 		success: function(response) {
 			var html = response.items.map(function(item, index) {
-				return '<a href="'+item.link+'">'+
-				'<img alt="'+item.title+'" src="'+item.media.m+'"/>'+
-				'</a>'
+				return '<a href="' + item.link + '">' +
+					'<img alt="' + item.title + '" src="' + item.media.m + '"/>' +
+					'</a>';
 			}).join("");
-      var root = $("<div>").html(html);
+			var root = $("<div>").html(html);
 
-      $(selector).html(root);
-      root.justifiedGallery();
+			$(selector).html(root);
+			root.justifiedGallery();
 		}
 	});
 };
 ```
+
+Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
+see the __puppies__ widget's demo page.
 
 @highlight 2,5-26
 
@@ -722,7 +730,7 @@ var modules = {
     "": function(selector){
         $(selector).html("Welcome home");
     }
-}
+};
 
 var updatePage = function(){
     var hash = window.location.hash.substr(1);
@@ -749,11 +757,12 @@ In your package.json `"scripts"` section add:
 ```json
 {
   "scripts": {
-    ...
+    "start": "http-server -c-1 .",
 	"build": "steal-tools"
   }
 }
 ```
+@highlight 4
 
 And then you can run:
 
@@ -774,6 +783,7 @@ Create _index.html_ with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <div class='container'>Hello World.</div>
     <script src="./dist/steal.production.js"></script>
   </body>
 </html>
@@ -799,6 +809,7 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
+    <div class='container'>Hello World.</div>
     <script src="./dist/steal.production.js"></script>
   </body>
 </html>
@@ -806,7 +817,7 @@ Update _index.html_ to:
 
 @highlight 7
 
-Now if you restart your server with `npm start` and reload the page you'll notice that only a few resources are downloaded.
+Now if you reload the page you'll notice that only a few resources are downloaded.
 
 <img width="744" alt="screen shot 2016-11-02 at 2 27 00 pm" src="https://cloud.githubusercontent.com/assets/361671/19943420/b0900d0c-a10d-11e6-99d6-8c1aea6632d5.png">
 
@@ -819,11 +830,12 @@ Update your `build` script to add the `--bundle-steal` flag:
 ```json
 {
   "scripts": {
-    ...
+    "start": "http-server -c-1 .",
 	"build": "steal-tools --bundle-steal"
   }
 }
 ```
+@highlight 4
 
 Run:
 
@@ -843,12 +855,13 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
+    <div class='container'>Hello World.</div>
     <script src="./dist/bundles/myhub/myhub.js"></script>
   </body>
 </html>
 ```
 
-@highlight 10
+@highlight 11
 
 ## Build a progressive loading production app
 
