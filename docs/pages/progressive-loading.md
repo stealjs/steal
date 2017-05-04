@@ -687,7 +687,7 @@ module.exports = function(selector) {
 Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
 see that requiring `justifiedGallery` fails.
 
-### Configure `package,json` to load the global justifiedGallery package
+### Configure `package.json` for loading the global justifiedGallery package
 
 Configuration in Steal is usually done in the `package.json`, under the `steal` object.
 
