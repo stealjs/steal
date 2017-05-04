@@ -178,13 +178,13 @@ Internally Steal resolves all module identifiers into [moduleName moduleNames], 
 
 ### Install and import bootstrap
 
-Next install bootstrap with:
+Next, install bootstrap:
 
 ```
 > npm install bootstrap --save-dev
 ```
 
-Update the _myhub.html_ to use bootstrap with:
+Update the _myhub.html_ to use bootstrap:
 
 ```html
 <!doctype html>
@@ -218,13 +218,23 @@ $("body").append(`
 
 @highlight 3,5-9
 
-Steal is able to load npm packages as modules thanks to the [npm] plugin that comes with Steal by default. Most npm packages can be used as a module in your application; all you need to do is use npm to install the package, and then import it in the javascript file(s) where the module is needed.
+Steal is able to load npm packages as modules thanks to the [npm] plugin that comes with Steal by default.
+
+If the package uses a module format, all you have to do is `import` in the `.js` file(s) where that module needs to be used.
 
 ## Create a modlet
 
-Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains an implementation file, test, demo page, test page, and documentation about a module. Using modlets is a useful development strategy because it helps to ensure your application is well tested.
+Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains:
 
-For example, instead of something like this:
+- an implementation file,
+- a test,
+- a test page,
+- a demo page,
+- and documentation about the modlet.
+
+Using modlets is a useful development strategy because it helps to ensure your application is well tested.
+
+For example, instead of something like:
 
 ```
 .
@@ -237,7 +247,7 @@ For example, instead of something like this:
 └── weather.html
 ```
 
-We will instead have this:
+With modlets we will have exactly this:
 
 ```
 .
@@ -259,7 +269,7 @@ We will instead have this:
     └── weather.js
 ```
 
-Let's create the `weather` modlet to demonstrate this workflow:
+Use this workflow to create the `weather` modlet:
 
 ### Create the demo page
 
