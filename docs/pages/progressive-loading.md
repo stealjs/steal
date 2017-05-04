@@ -224,7 +224,9 @@ If the package uses a module format, all you have to do is `import` in the `.js`
 
 ## Create a modlet
 
-Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains:
+Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application.
+
+A modlet is a folder that contains:
 
 - an implementation file,
 - a test,
@@ -232,7 +234,7 @@ Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflo
 - a demo page,
 - and documentation about the modlet.
 
-Using modlets is a useful development strategy because it helps to ensure your application is well tested.
+Using modlets helps to ensure that your application is well tested.
 
 For example, instead of something like:
 
