@@ -224,7 +224,42 @@ Steal is able to load npm packages as modules thanks to the [npm] plugin that co
 
 Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains an implementation file, test, demo page, test page, and documentation about a module. Using modlets is a useful development strategy because it helps to ensure your application is well tested.
 
-We're going to create a modlet to demonstrate how this workflow is beneficial:
+For example, instead of something like this:
+
+```
+.
+├── myhub.html
+├── myhub.js
+├── myhub.less
+├── package.json
+├── puppies.html
+├── test.js
+└── weather.html
+```
+
+We will instead have this:
+
+```
+.
+├── myhub.html
+├── myhub.js
+├── myhub.less
+├── package.json
+├── puppies
+│   ├── puppies-test.html
+│   ├── puppies-test.js
+│   ├── puppies.css
+│   ├── puppies.html
+│   └── puppies.js
+└── weather
+    ├── weather-test.html
+    ├── weather-test.js
+    ├── weather.css
+    ├── weather.html
+    └── weather.js
+```
+
+Let's create the `weather` modlet to demonstrate this workflow:
 
 ### Create the demo page
 
@@ -372,7 +407,7 @@ Create _weather/weather.css_ with:
 
 ### Create the module implementation
 
-Create _weather/weather.js_ with the following code. Update the `city` variable with your city. This will display your city's weather:
+Create _weather/weather.js_ with the following code:
 
 ```js
 import $ from "jquery";
@@ -412,6 +447,8 @@ export default function(selector){
 
 }
 ```
+
+Update the `city` variable with your city so the weather page will display your city's weather.
 
 Open [http://127.0.0.1:8080/weather/weather.html](http://127.0.0.1:8080/weather/weather.html) to see
 the __weather__ widget's demo page.
@@ -492,11 +529,17 @@ weather('#weather');
 Open [http://127.0.0.1:8080/myhub.html](http://127.0.0.1:8080/myhub.html) to
 see the application using the __weather__ widget.
 
-## Create test with dependency injection
+## Create a test with dependency injection
 
-Dependency injection is a technique used to improve testing in your application. Steal provides dependency injection through its module system using [steal.steal-clone]. steal-clone allows you to create a _cloned_ loader with stubs for modules that you want to fake.
+Dependency injection is a technique used to improve testing in your application.
 
-We'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request, so we can test that the rest of our app behaves correctly; in this case, it should list the one forecast we give it.
+Steal provides dependency injection through its module loading system using [steal.steal-clone].
+
+steal-clone allows you to create a _cloned_ loader with stubs for modules that you want to fake.
+
+We'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery that will let us simulate a service request, so we can test that the rest of our app behaves correctly.
+
+In the case of the test below, the app should list the single forecast it is given.
 
 Update _weather/weather-test.js_ with:
 
@@ -578,22 +621,23 @@ QUnit.test("basics with dependency injection", function(assert){
 
 ## Import a global script in a CommonJS modlet
 
-Steal supports all of the most common module formats: [syntax.es6 ES modules], [syntax.CommonJS], and [syntax.amd]. Your project can contain multiple formats; as is common when you are using ES modules but a dependency is using CommonJS, for example.
+Steal supports all of the most common module formats: [syntax.es6 ES modules], [syntax.CommonJS], and [syntax.amd]. This means your project can contain multiple formats which can be useful if, for example, you are using one module format in your project (like ES modules) but a package you want to depend on expects another module format (like CommonJS).
 
-Some libraries on the web are still distributed as [syntax.global globals]. These are modules that instead of exporting a value using one of the above module formats, instead set a property on the `window`.
+Some libraries on the web are still distributed as [syntax.global globals]. Including such a library sets a property on the global `window` object, instead of exporting a value for use with one of the module formats mentioned above.
 
-Steal is able to detect and deal with globals by default, but it's often necessary to configure globals for correctness. The [StealJS.configuration configuration guide] goes into greater depth on how to configure globals, but we'll do a simple version here.
+Steal is able to detect and deal with globals by default, but it's often necessary to add some configuration for correctness. The [StealJS.configuration configuration guide] goes into greater depth on how to configure globals in more complex situations, but configuring the globals will be simple for our example.
 
-### Install the global script
+### Install the package containing a global script
 
-First we'll install a library for displaying a gallery of images. This library is distributed as a global and we'll need to configure it.
+[Justified Gallery](http://miromannino.github.io/Justified-Gallery/) is a library for displaying a gallery of images. Unfortunately, the library is distributed as a global; so we'll need to add some configuration.
 
-Run:
+Use npm to get the `justifiedGallery` package into your project:
+
 ```
 > npm install justifiedGallery --save-dev
 ```
 
-### Create the modlet
+### Create a modlet for _puppies_
 
 Create _puppies/puppies.html_:
 
@@ -618,7 +662,7 @@ Create _puppies/puppies.html_:
 </html>
 ```
 
-Create _puppies/puppies.js_:
+Create _puppies/puppies.js_ in CommonJS format:
 
 ```js
 require("justifiedGallery");
@@ -631,13 +675,19 @@ module.exports = function(selector) {
 Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
 see that requiring `justifiedGallery` fails.
 
-### Configure justifiedGallery to load
+### Configure `package,json` to load the global justifiedGallery package
 
-Configuration in Steal is usually done in the `package.json` under the `steal` object.
+Configuration in Steal is usually done in the `package.json`, under the `steal` object.
 
-Here we are using [config.map] configuration to map the "justifiedGallery" [moduleIdentifier identifier] to the JavaScript file we need to actually load. Then we are using [config.meta] configuration to specify that this module is a global that depends on jQuery and its own styles.
+[config.map] maps the `"justifiedGallery"` [moduleIdentifier identifier] to the JavaScript file location.
 
-Change _package.json_ to:
+[config.meta] specifies that:
+
+- This module is in a global format (`format`).
+- This module depends on jQuery (`deps`)
+- This module depends on its own style code (`justifiedGallery.less`).
+
+Update _package.json_ to:
 
 ```json
 {
@@ -665,7 +715,7 @@ Change _package.json_ to:
 
 ### Use justifiedGallery
 
-Now that the library is installed and configured we only need to `require()` it in our CommonJS module.
+Now that justifiedGallery is installed _and configured_, we need to `require()` it in our _puppies_ CommonJS module.
 
 Change _puppies/puppies.js_ to:
 
@@ -699,14 +749,23 @@ module.exports = function(selector) {
 };
 ```
 
-Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
-see the __puppies__ widget's demo page.
-
 @highlight 2,5-26
+
+Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
+see the __puppies__ widget demo page.
+
+At this point, we've done the following:
+
+- Installed Justified Gallery.
+- Created a modlet for _puppies_.
+- Configured [config.map] and [config.meta] in `package.json`.
+- Required `justifiedGallery` in the _puppies_ CommonJS module.
+
+Getting functionality out of a global script from an npm package and into a modlet is easy as that, thanks to Steal.
 
 ### Update app to change pages
 
-Now that we've created this new page, let's update the app so that we can toggle between the *weather* and *puppies* pages depending on the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
+Now that we've created __puppies__, the app needs to be updated so that it will toggle between the _weather_ and _puppies_ pages when using the navigation. More specfically, we will do this by looking at the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
 
 Update _myhub.js_ to:
 
@@ -744,9 +803,11 @@ updatePage();
 
 @highlight 5,8-29
 
+There's a lot going on there, so you might want to re-read that file a couple of times to make sure you understand it.
+
 ## Build a production app
 
-Now that we've created our application we need to share it with the public. To do this we'll create a build that will concat our JavaScript and styles down to only one file, each, for faster page loads in production.
+Now that we've created our application, we need to share it with the public. To do this we'll create a build that will concat our JavaScript and styles down to only one file, each, for faster page loads in production.
 
 ### Build the app and switch to production
 
