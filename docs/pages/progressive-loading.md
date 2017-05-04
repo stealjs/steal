@@ -174,7 +174,7 @@ $("body").html("<h1>Goodbye script tags!</h1>");
 
 Each string used to import such as `"jquery"` and `"./myhub.less"` are called [moduleIdentifier module identifiers]. They identify a module to be imported within the context of the module that is importing them. That means that when you import a module like `"./myhub.less"` you are importing that module relative to the current module (in this case it is your myhub.js module).
 
-Internally Steal resolves all module identifiers into [moduleName moduleNames], which it uses as the **key** to look up modules. This allows you to load modules from many different places in the application and them all resolve to the same module.
+Internally Steal resolves all module identifiers into [moduleName moduleNames], which it uses as the **key** to look up modules. This allows you to load modules from many different places in the application and have them all resolve to the same module.
 
 ### Install and import bootstrap
 
@@ -202,7 +202,7 @@ Update the _myhub.html_ to use bootstrap with:
 ```
 @highlight 4-6
 
-Import it and use it with the following updated _myhub.js_:
+Import bootstrap and use it with the following updated _myhub.js_:
 
 ```js
 import $ from "jquery";
@@ -218,13 +218,13 @@ $("body").append(`
 
 @highlight 3,5-9
 
-This shows Steal's ability to load modules from npm using its built-in [npm] plugin. For most modules all you need to do is install them and then import and use them.
+Steal is able to load npm packages as modules thanks to the [npm] plugin that comes with Steal by default. Most npm packages can be used as a module in your application; all you need to do is use npm to install the package, and then import it in the javascript file(s) where the module is needed.
 
 ## Create a modlet
 
-Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains an implementation file, test, demo page, test page, and documentation about a module. It is a useful development strategy to ensure your application is well tested.
+Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains an implementation file, test, demo page, test page, and documentation about a module. Using modlets is a useful development strategy because it helps to ensure your application is well tested.
 
-Here we're going to create a modlet to show how this workflow can be beneficial:
+We're going to create a modlet to demonstrate how this workflow is beneficial:
 
 ### Create the demo page
 
@@ -251,7 +251,7 @@ Create _weather/weather.html_ with:
 
 ### Add the weather styles
 
-create _weather/weather.css_ with:
+Create _weather/weather.css_ with:
 
 ```css
 @@font-face {
@@ -413,7 +413,7 @@ export default function(selector){
 }
 ```
 
-Open [http://127.0.0.1:8080/weather/weather.html](http://127.0.0.1:8080/weather/weather.html) see
+Open [http://127.0.0.1:8080/weather/weather.html](http://127.0.0.1:8080/weather/weather.html) to see
 the __weather__ widget's demo page.
 
 ### Create the test page
@@ -494,9 +494,9 @@ see the application using the __weather__ widget.
 
 ## Create test with dependency injection
 
-Dependency injection is a technique used to improve testing in your application. Steal provides dependency injection through its module system using [steal.steal-clone]. steal-clone allows you to create a cloned loader with stubs for modules that you want to fake.
+Dependency injection is a technique used to improve testing in your application. Steal provides dependency injection through its module system using [steal.steal-clone]. steal-clone allows you to create a _cloned_ loader with stubs for modules that you want to fake.
 
-Here we'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request so that we can test that the rest of our app behaviors correctly; in this case it should list the one forecast we give it.
+We'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request, so we can test that the rest of our app behaves correctly; in this case, it should list the one forecast we give it.
 
 Update _weather/weather-test.js_ with:
 
