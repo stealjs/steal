@@ -40,7 +40,7 @@ stealTools.build({
 
 ## Plugins / Presets
 
-Steal's bundled version of Babel comes with the presets and plugins provided by the babel-standalone project. You can see the full list [here](https://github.com/Daniel15/babel-standalone/blob/master/src/index.js#L112).
+Steal's bundled version of Babel comes with the presets and plugins provided by the babel-standalone project. You can see the full list [here](https://github.com/babel/babel-standalone/blob/38475316d32c8957e9887728597915f6bf61bd10/src/index.js#L112).
 
 To specify which plugins/presets you want to use, specify the [config.babelOptions] configuration like so:
 
