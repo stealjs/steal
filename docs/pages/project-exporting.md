@@ -269,10 +269,10 @@ tag for your project's css:
 	<head lang="en">
 		<link rel="stylesheet" type="text/css" href="dist/global/bit-tabs.css">
 
-		<script src='./node_modules/jquery/dist/jquery.js'></script>
-		<script src='./node_modules/can/dist/can.jquery.js'></script>
-		<script src='./node_modules/can/dist/can.stache.js'></script>
-		<script src='dist/global/bit-tabs.js'></script>
+		<script src="./node_modules/jquery/dist/jquery.js"></script>
+		<script src="./node_modules/can/dist/can.jquery.js"></script>
+		<script src="./node_modules/can/dist/can.stache.js"></script>
+		<script src="dist/global/bit-tabs.js"></script>
 		<script>
 			$(function(){
 				var frag = can.view("app-template", {});
@@ -282,7 +282,7 @@ tag for your project's css:
 	</head>
 	<body>
 
-	<script type='text/stache' id="app-template">
+	<script type="text/stache" id="app-template">
 	  <can-import from="bit-tabs"/>
 	  <bit-tabs>
 		<can-panel title="CanJS">
