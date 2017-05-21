@@ -654,14 +654,17 @@ Change _package.json_ to:
      "meta": {
          "justifiedGallery/src/js/justifiedGallery": {
              "format": "global",
-             "deps": ["jquery","justifiedGallery/src/less/justifiedGallery.less"]
+             "deps": [
+				"node_modules/jquery/dist/jquery.js",
+				"justifiedGallery/src/less/justifiedGallery.less"
+			 ]
          }
      }
   }
 }
 ```
 
-@highlight 9-17
+@highlight 9-20
 
 ### Use justifiedGallery
 
