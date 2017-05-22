@@ -47,7 +47,7 @@ Create _myhub.html_ with:
 <html lang="en">
   <head></head>
   <body>
-    <div class='container'>Hello World.</div>
+    <div class="container">Hello World.</div>
   </body>
 </html>
 ```
@@ -108,7 +108,7 @@ Update _myhub.html_ with:
 <html lang="en">
   <head></head>
   <body>
-    <div class='container'>Hello World.</div>
+    <div class="container">Hello World.</div>
     <script src="./node_modules/steal/steal.js"></script>
   </body>
 </html>
@@ -195,7 +195,7 @@ Update the _myhub.html_ to use bootstrap with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div class='container'>Hello World.</div>
+    <div class="container">Hello World.</div>
     <script src="./node_modules/steal/steal.js"></script>
   </body>
 </html>
@@ -394,10 +394,10 @@ export default function(selector){
       var defs = forecast.map(function(day){
         return `
           <li>
-            <span class='date'>${day.date}</span>
-            <span class='description ${toClassName(day.text)}'>${day.text}</span>
-            <span class='high-temp'>${day.high}<sup>&deg;</sup></span>
-            <span class='low-temp'>${day.low}<sup>&deg;</sup></span>
+            <span class="date">${day.date}</span>
+            <span class="description ${toClassName(day.text)}">${day.text}</span>
+            <span class="high-temp">${day.high}<sup>&deg;</sup></span>
+            <span class="low-temp">${day.low}<sup>&deg;</sup></span>
           </li>
         `;
       });
@@ -718,10 +718,10 @@ import weather from "./weather/weather";
 import puppies from "./puppies/puppies";
 
 $("body").append(`
-    <div class='container'>
+    <div class="container">
         <h1>Goodbye script tags!</h1>
         <a href="#weather">Weather</a> <a href="#puppies">Puppies</a>
-        <div id='main'/>
+        <div id="main"/>
     </div>`);
 
 var modules = {
@@ -783,7 +783,7 @@ Create _index.html_ with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div class='container'>Hello World.</div>
+    <div class="container">Hello World.</div>
     <script src="./dist/steal.production.js"></script>
   </body>
 </html>
@@ -809,7 +809,7 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
-    <div class='container'>Hello World.</div>
+    <div class="container">Hello World.</div>
     <script src="./dist/steal.production.js"></script>
   </body>
 </html>
@@ -855,7 +855,7 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
-    <div class='container'>Hello World.</div>
+    <div class="container">Hello World.</div>
     <script src="./dist/bundles/myhub/myhub.js"></script>
   </body>
 </html>
@@ -879,10 +879,10 @@ import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
 
 $("body").append(`
-    <div class='container'>
+    <div class="container">
         <h1>Goodbye script tags!</h1>
         <a href="#weather">Weather</a> <a href="#puppies">Puppies</a>
-        <div id='main'/>
+        <div id="main"/>
     </div>`);
 
 var updatePage = function(){
@@ -1011,7 +1011,7 @@ Create _weather/weather-standalone.html_ with:
       <link rel="stylesheet" href="../dist/global/weather.css">
   </head>
   <body>
-    <div id='forecast'/>
+    <div id="forecast"/>
     <script src="//code.jquery.com/jquery-3.0.0.js"></script>
     <script src="../dist/global/weather.js"></script>
     <script>
