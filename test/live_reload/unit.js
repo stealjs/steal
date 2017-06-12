@@ -54,6 +54,23 @@ QUnit.test("Can take an array of moduleNames to teardown", function(assert){
 	.then(done, done);
 });
 
+QUnit.module("Contextual live-reload module");
+
+QUnit.test("Can be cloned", function(assert){
+	var done = assert.async();
+
+	loader.import("live-reload", { name: "clone-test" })
+	.then(function(){
+		var clone = loader.clone();
+		return clone.import("live-reload", { name: "clone-test" });
+	})
+	.then(function(reload){
+		// Duck check that this is the contextual
+		assert.equal(typeof reload.isReloading, "function", "this function exists");
+	})
+	.then(done, done);
+});
+
 QUnit.module("reload.isReloading");
 
 QUnit.test("is false by default", function(assert){
