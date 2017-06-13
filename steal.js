@@ -2661,7 +2661,7 @@ function logloads(loads) {
 					// import the plugin!
 					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
+							var exported = mod.__esModule ? mod["default"] : mod;
 
 							if (typeof plugin === "string") {
 								return exported;
@@ -2868,7 +2868,7 @@ function logloads(loads) {
 					// import the preset!
 					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
+							var exported = mod.__esModule ? mod["default"] : mod;
 
 							if (typeof preset === "string") {
 								return exported;
