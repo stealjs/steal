@@ -460,7 +460,7 @@ addStealExtension(function (loader) {
       if (definer) {
         var localName = name + '/' + parentName;
 
-        if(!loader.has(name)) {
+        if(!loader.has(localName)) {
           // `definer` could be a function or could be a moduleName
           if (typeof definer === 'string') {
             definer = pluginLoader['import'](definer);
