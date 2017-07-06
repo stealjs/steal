@@ -266,6 +266,10 @@ QUnit.test("steal tag detection", function(assert) {
 	makeIframe("last_script_tag/index.html", assert);
 });
 
+QUnit.only("CJS/ESM interop", function(assert) {
+	makeIframe("cjs_esm/index.html", assert);
+});
+
 if(supportsTypedArrays) {
 	QUnit.test("Node builtins come for free when using npm", function(assert) {
 		makeIframe("builtins/dev.html", assert);
