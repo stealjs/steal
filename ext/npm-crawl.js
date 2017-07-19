@@ -347,8 +347,6 @@ var crawl = {
 			if(parentPkg && SemVer.valid(parentPkg.version)) {
 				if(SemVer.satisfies(parentPkg.version, childPkg.version)) {
 					return parentPkg.fileUrl;
-				} else {
-					return curAddress;
 				}
 			}
 			parentAddress = utils.path.parentNodeModuleAddress(packageAddress);
@@ -655,7 +653,6 @@ utils.extend(FetchTask.prototype, {
 
 		var isFlat = this.context.isFlatFileStructure;
 		var fileUrl = this.pkg.fileUrl;
-		var context = this.context;
 
 		if(isFlat && !pkg.__crawledNestedPosition) {
 			pkg.__crawledNestedPosition = true;
