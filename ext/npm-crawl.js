@@ -645,6 +645,24 @@ utils.extend(FetchTask.prototype, {
 	},
 
 	/**
+	 * Returns an array of the package parents names
+	 * @param {string} name - The child package name
+	 * @return {Array.<string>} The list of package names (includes the child name)
+	 */
+	getPackageParentsNames: function(name) {
+		var res = [];
+		var context = this.context || {};
+		var parents = context.packageParents ? context.packageParents[name] : [];
+
+		for (var i = 0; i < parents.length; i += 1) {
+			res.push(parents[i].name);
+		}
+
+		res.push(parents.package ? parents.package.name : name);
+		return res;
+	},
+
+	/**
 	 * Get the next package to look up by traversing up the node_modules.
 	 * Create a new pkg by extending the existing one
 	 */
@@ -662,7 +680,11 @@ utils.extend(FetchTask.prototype, {
 			// make sure we aren't loading something we've already loaded
 			var parentAddress = utils.path.parentNodeModuleAddress(fileUrl);
 			if(!parentAddress) {
-				throw new Error('Did not find ' + pkg.origFileUrl);
+				throw new Error([
+					"Did not find " + pkg.origFileUrl,
+					"Unable to find a compatible version of " + pkg.name + "@" + pkg.version,
+					"Deps: " + this.getPackageParentsNames(pkg.name).join(" -> ")
+				].join("\n"));
 			}
 			var nodeModuleAddress = parentAddress + "/" + pkg.name +
 				"/package.json";
