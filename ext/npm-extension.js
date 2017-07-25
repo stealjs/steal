@@ -341,7 +341,16 @@ exports.addExtension = function(System){
 			});
 		}
 
-		return fetchPromise;
+		return fetchPromise.catch(function(error) {
+			if (error.statusCode === 404 && utils.moduleName.isBareIdentifier(load.name)) {
+				throw new Error([
+					"Could not load '" + load.name + "'",
+					"Is this an NPM module not saved in your package.json?"
+				].join("\n"));
+			} else {
+				throw error;
+			}
+		});
 	};
 
 	// Given a moduleName convert it into a npm-style moduleName if it belongs

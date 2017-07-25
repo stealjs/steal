@@ -332,6 +332,18 @@ var utils = {
 		},
 		nameAndVersion: function(parsedModuleName){
 			return parsedModuleName.packageName + "@" + parsedModuleName.version;
+		},
+		/**
+		 * Whether the module identifier is not relative or a special module
+		 * @param {string} identifier - The module identifier to be checked
+		 * @return {boolean}
+		 */
+		isBareIdentifier: function(identifier) {
+			return (
+				identifier &&
+				identifier[0] !== "." &&
+				identifier[0] !== "@"
+			);
 		}
 	},
 	pkg: {
