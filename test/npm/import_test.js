@@ -294,7 +294,6 @@ QUnit.test("Works with modules that use process.argv", function(assert){
 	.then(done, helpers.fail(assert, done));
 });
 
-
 QUnit.test("importing a package with a dependency not in its package.json", function(assert){
 	var done = assert.async();
 
@@ -429,6 +428,37 @@ QUnit.test("A child dependency's devDependency doesn't interfere with normal loa
 		assert.equal(def, "works", "got the right module");
 	})
 	.then(done, helpers.fail(assert, done));
+});
+
+QUnit.test("importing a package with an unsaved dependency", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])
+		.loader;
+
+		loader["import"]("dep")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				assert.ok(/Could not load 'dep'/.test(err.message));
+				assert.ok(
+					/Is this an NPM module not saved/.test(err.message),
+					"should throw a descriptive error message"
+				);
+				done();
+			});
 });
 
 QUnit.module("Importing npm modules with tilde & homeAlias operators");

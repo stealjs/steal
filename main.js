@@ -3896,7 +3896,7 @@ var $__curScript, __eval;
 					// Hide from uglify
 					var c = console;
 					var type = c.error ? "error" : "log";
-					c[type](error, error.stack);
+					c[type](error);
 				}
 			});
 		global.steal.clone = cloneSteal;
