@@ -1070,3 +1070,51 @@ QUnit.test("importing a module using the 'globals' option", function(assert) {
 			assert.ok(!err, err.stack || err);
 		});
 });
+
+QUnit.test("package.json!npm throws if 'name' field is missing", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			version: "1.0.0",
+			main: "main.js"
+		})
+		.loader;
+
+	helpers.init(loader)
+	.then(function() {
+		assert.ok(false, "startup promise should not resolve");
+		done();
+	})
+	.catch(function(err) {
+		assert.ok(
+			/Missing 'name' field in package.json file/.test(err.message),
+			"should throw a nice error message"
+		);
+		done();
+	});
+});
+
+QUnit.test("package.json!npm throws if 'version' field is missing", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js"
+		})
+		.loader;
+
+	helpers.init(loader)
+	.then(function() {
+		assert.ok(false, "startup promise should not resolve");
+		done();
+	})
+	.catch(function(err) {
+		assert.ok(
+			/Missing 'version' field in package.json file/.test(err.message),
+			"should throw a nice error message"
+		);
+		done();
+	});
+});
