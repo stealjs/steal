@@ -210,6 +210,21 @@ var makeSteal = function(System){
 		__useDefault: true
 	}));
 
+
+	System.set("less", System.newModule({
+		__useDefault: true,
+		default: {
+			fetch: function() {
+				throw new Error(
+					[
+						"steal-less plugin must be installed and configured properly",
+						"See https://stealjs.com/docs/steal-less.html"
+					].join("\n")
+				);
+			}
+		}
+	}));
+
 	System.config({
 		map: {
 			"@loader/@loader": "@loader",
