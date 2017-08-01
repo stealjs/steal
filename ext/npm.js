@@ -58,6 +58,20 @@ exports.translate = function(load){
 	var pkgVersion = context.versions[pkg.name] = {};
 	pkgVersion[pkg.version] = context.versions.__default = pkg;
 
+	if (!pkg.name) {
+		throw new Error([
+			"Missing 'name' field in package.json file",
+			"See https://docs.npmjs.com/files/package.json#name"
+		].join("\n"));
+	}
+
+	if (!pkg.version) {
+		throw new Error([
+			"Missing 'version' field in package.json file",
+			"See https://docs.npmjs.com/files/package.json#version"
+		].join("\n"));
+	}
+
 	// backwards compatible for < npm 3
 	var steal = utils.pkg.config(pkg) || {};
 

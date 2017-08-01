@@ -1,4 +1,5 @@
 {
+  "name": "conditionals",
 	"main": "main",
 	"version": "1.0.0",
 	"dependencies": {
