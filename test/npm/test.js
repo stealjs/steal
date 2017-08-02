@@ -278,8 +278,7 @@ QUnit.test("With npm3 traversal starts by going to the mosted nested position", 
 	makeIframe("nested_back/dev.html", assert);
 });
 
-// TODO: Fix this test
-QUnit.skip("peerDependencies are matched against parent that has a matching version", function(assert){
+QUnit.test("peerDependencies are matched against parent that has a matching version", function(assert){
 	makeIframe("peer_deps/dev.html", assert);
 });
 
