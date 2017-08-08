@@ -267,9 +267,13 @@ var crawl = {
 	 */
 	getFullDependencyMap: function(loader, packageJSON, isRoot){
 		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
-		addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
-			"devDependencies");
-		return deps;
+
+		return addMissingDeps(
+			packageJSON,
+			packageJSON.devDependencies || {},
+			deps,
+			"devDependencies"
+		);
 	},
 	getPlugins: function(packageJSON, deps) {
 		var config = utils.pkg.config(packageJSON) || {};
@@ -488,6 +492,22 @@ function addDeps(packageJSON, dependencies, deps, type, defProps){
 			deps[name] = val;
 		}
 	}
+}
+
+/**
+ * Same as `addDeps` but it does not override dependencies already set
+ */
+function addMissingDeps(packageJson, dependencies, deps, type, defProps) {
+	var without = {};
+
+	for (var name in dependencies) {
+		if (!deps[name]) {
+			without[name] = dependencies[name];
+		}
+	}
+
+	addDeps(packageJson, without, deps, type, defProps);
+	return deps;
 }
 
 /**
