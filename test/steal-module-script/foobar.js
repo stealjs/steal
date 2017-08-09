@@ -1,7 +1,7 @@
-const foobar = "works";
-if (typeof window !== "undefined"){
-	window.MODULE = {
-		foobar: foobar
-	}
+const foobar = "foobar";
+
+if (window !== null) {
+	window.MODULE = { foobar: foobar };
 }
+
 export default foobar;

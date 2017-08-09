@@ -13,6 +13,7 @@ require("test/babel_plugins_test");
 require("test/babel_presets_test");
 require("test/steal_clone_test");
 require("test/steal_import_test");
+require("test/steal_module_script_test");
 
 var helpers = require("./helpers");
 var makeIframe = helpers.makeIframe;
