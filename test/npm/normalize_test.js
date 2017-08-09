@@ -828,8 +828,9 @@ QUnit.test("descriptive version mismatch error (#1176)", function(assert) {
 					err.message.split("\n"),
 					[
 						"Did not find ./node_modules/can-util/package.json",
-						"Unable to find a compatible version of can-util@^2.0.0",
-						"Deps: can -> can-util"
+						"Unable to find a compatible version of can-util",
+						"Wanted: ^2.0.0",
+						"Found: 1.0.0"
 					],
 					"should throw descriptive error message"
 				);
