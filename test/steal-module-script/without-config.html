@@ -1,15 +1,26 @@
-<script>
-    window.QUnit = window.parent.QUnit;
-    window.removeMyself = window.parent.removeMyself;
-</script>
-<script src=".node_modules/steal/steal.js" base-url="./" config-main="@empty"></script>
-<script type="text/steal-module" language="javascript">
-    import foobar from "foobar";
-    if(typeof window !== "undefined" && window.QUnit) {
-        QUnit.ok(foobar,"works");
-        QUnit.start();
-        removeMyself();
-    }else{
-        console.log(foobar);
-    }
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="../steal.js" base-url="./" config-main="@empty"></script>
+
+	<script type="text/steal-module">
+		import foobar from "foobar";
+
+		if (window != null && window.assert) {
+			assert.equal(foobar, "foobar", "should load foobar module");
+			done();
+		} else {
+			console.log("foobar: ", foobar);
+		}
+	</script>
+</body>
+</html>
