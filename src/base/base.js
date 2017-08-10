@@ -2142,6 +2142,7 @@ var $__curScript, __eval;
   var isNode = typeof process === 'object' && {}.toString.call(process) === '[object process]';
   var isNW = !!(isNode && global.nw && global.nw.process);
   var isChromeExtension = isBrowser && !isNW && window.chrome && window.chrome.extension;
+  var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
   var scriptEval;
 
   doEval = function(source, address, context) {
