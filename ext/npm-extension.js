@@ -258,6 +258,11 @@ exports.addExtension = function(System){
 	System.locate = function(load){
 		var parsedModuleName = utils.moduleName.parse(load.name),
 			loader = this;
+
+		if (load.metadata) {
+			load.metadata.parsedModuleName = parsedModuleName;
+		}
+
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
 			var pkg = this.npm[utils.moduleName.nameAndVersion(parsedModuleName)];
