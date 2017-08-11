@@ -259,9 +259,7 @@ exports.addExtension = function(System){
 		var parsedModuleName = utils.moduleName.parse(load.name),
 			loader = this;
 
-		if (load.metadata) {
-			load.metadata.parsedModuleName = parsedModuleName;
-		}
+		load.metadata.parsedModuleName = parsedModuleName;
 
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
