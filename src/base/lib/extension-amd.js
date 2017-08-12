@@ -214,6 +214,24 @@ function amd(loader) {
       }
       // named define
       else {
+		var parsedModuleName =
+		  currentLoad.metadata && currentLoad.metadata.parsedModuleName;
+
+		// register the full npm name otherwise named modules won't load
+		// when the npm extension is used
+		if (
+		  parsedModuleName &&
+		  (parsedModuleName.modulePath === name ||  // local module
+			parsedModuleName.packageName === name)  // from a dependency
+		) {
+		  loader.register(
+			parsedModuleName.moduleName,
+			define.deps,
+			false,
+			define.execute
+		  );
+		}
+
         // if it has no dependencies and we don't have any other
         // defines, then let this be an anonymous define
         if (deps.length == 0 && !anonDefine && !defineBundle)
@@ -243,15 +261,20 @@ function amd(loader) {
   // set to true if the current module turns out to be a named define bundle
   var defineBundle;
 
+  // set on the "instantiate" hook (by "createDefine") so it's available in
+  // the scope of the "define" function, it's set back to "undefined" after eval
+  var currentLoad;
+
   var oldModule, oldExports, oldDefine;
 
   // adds define as a global (potentially just temporarily)
-  function createDefine(loader) {
+  function createDefine(loader, load) {
     if (!loader.amdDefine)
       generateDefine(loader);
 
     anonDefine = null;
     defineBundle = null;
+	currentLoad = load;
 
     // ensure no NodeJS environment detection
     var global = loader.global;
@@ -274,6 +297,7 @@ function amd(loader) {
     global.define = oldDefine;
     global.module = oldModule;
     global.exports = oldExports;
+	currentLoad = undefined;
   }
 
   generateDefine(loader);
@@ -281,7 +305,7 @@ function amd(loader) {
   if (loader.scriptLoader) {
     var loaderFetch = loader.fetch;
     loader.fetch = function(load) {
-      createDefine(this);
+      createDefine(this, load);
       return loaderFetch.call(this, load);
     }
   }
@@ -304,7 +328,7 @@ function amd(loader) {
         load.metadata.format = 'amd';
 
         if (loader.execute !== false) {
-          createDefine(loader);
+          createDefine(loader, load);
 
           loader.__exec(load);
 

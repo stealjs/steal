@@ -461,6 +461,79 @@ QUnit.test("importing a package with an unsaved dependency", function(assert) {
 			});
 });
 
+QUnit.test("local named amd module that has deps", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.withModule("app@1.0.0#bar", "module.exports = 'bar';")
+		.withModule(
+			"app@1.0.0#foo",
+			"def" + "ine('foo', ['./bar'], function(bar) { return bar; })"
+		)
+		.withModule("app@1.0.0#main", "require('./foo');")
+		.loader;
+
+	loader["import"]("app")
+		.then(function(app) {
+			assert.ok(app, "import promise should resolve");
+		})
+		.then(done, function(error) {
+			assert.ok(!error, "import promise should not be rejected");
+			done();
+		});
+});
+
+QUnit.test("named amd module with deps from a nested dependency", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				"dep": "2.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				version: "2.0.0",
+				main: "main.js",
+				dependencies: {
+					"foo": "1.0.0"
+				}
+			},
+			{
+				name: "foo",
+				version: "1.0.0",
+				main: "main.js"
+			}
+		])
+		.withModule("foo@1.0.0#bar", "module.exports = 'bar';")
+		.withModule(
+			"foo@1.0.0#main",
+			"def" + "ine('foo', ['./bar'], function(bar) { return bar; })"
+		)
+		.withModule("dep@2.0.0#main", "require('foo');")
+		.withModule("app@1.0.0#main", "require('dep');")
+		.loader;
+
+	loader["import"]("app")
+		.then(function(app) {
+			assert.ok(app, "import promise should resolve");
+		})
+		.then(done, function(error) {
+			assert.ok(!error, "import promise should not be rejected");
+			done();
+		});
+});
+
 QUnit.module("Importing npm modules with tilde & homeAlias operators");
 
 QUnit.test("Import module with the ~ operator", function (assert) {

@@ -176,7 +176,13 @@ QUnit.test("Support cloned loader", function(assert) {
 
 	GlobalSystem.normalize(origDefault.name)
 		.then(function(normalizedName) {
-			return GlobalSystem.locate({ name: normalizedName });
+			return GlobalSystem.locate({
+				status: "loading",
+				name: normalizedName,
+				linkSets: [],
+				dependencies: [],
+				metadata: {}
+			});
 		})
 		.then(function(path) {
 			assert.ok(path);
