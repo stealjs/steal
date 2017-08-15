@@ -215,14 +215,15 @@ function amd(loader) {
       // named define
       else {
 		var parsedModuleName =
-		  currentLoad.metadata && currentLoad.metadata.parsedModuleName;
+		  currentLoad && currentLoad.metadata && currentLoad.metadata.parsedModuleName;
 
 		// register the full npm name otherwise named modules won't load
 		// when the npm extension is used
 		if (
 		  parsedModuleName &&
-		  (parsedModuleName.modulePath === name ||  // local module
-			parsedModuleName.packageName === name)  // from a dependency
+		  parsedModuleName.version &&              // verify it is an npm name
+		  (parsedModuleName.modulePath === name || // local module
+			parsedModuleName.packageName === name) // from a dependency
 		) {
 		  loader.register(
 			parsedModuleName.moduleName,
