@@ -3240,7 +3240,7 @@ function amd(loader) {
       // named define
       else {
 		var parsedModuleName =
-		  currentLoad.metadata && currentLoad.metadata.parsedModuleName;
+		  currentLoad && currentLoad.metadata && currentLoad.metadata.parsedModuleName;
 
 		// register the full npm name otherwise named modules won't load
 		// when the npm extension is used
