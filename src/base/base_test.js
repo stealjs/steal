@@ -360,6 +360,17 @@ System.parser = "babel";
 		);
 	});
 
+	QUnit.test("AMD cjs wrapper with inline regex", function(assert) {
+		var done = assert.async();
+		System["import"]("tests/amd-module-7-regex").then(
+			function(m) {
+				assert.ok(m.amd);
+				done();
+			},
+			err
+		);
+	});
+
 	QUnit.test("Not a AMD module", function(assert) {
 		var done = assert.async();
 		System["import"]("tests/not-amd-module").then(

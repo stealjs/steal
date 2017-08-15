@@ -1384,59 +1384,50 @@ function amd(loader) {
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
 
   var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:(?!\\)]|^)\/\/(.*)$)/mg;
-  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
-  var cjsRequirePre = "(?:^\\uFEFF?|[^$_a-zA-Z\\xA0-\\uFFFF.\"\'])";
-  var cjsRequirePost = "\\s*\\(\\s*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*\')\\s*\\)";
-
+  
   var fnBracketRegEx = /\(([^\)]*)\)/;
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
+  var chunkEndCounterpart = {
+    "/*": /[\s\S]*?\*\//g,
+    "//": /[^\r\n]+(?:\r?\n|$)/g,
+    '"': /(?:\\[\s\S]|[^\\])*?"/g,
+    "'": /(?:\\[\s\S]|[^\\])*?'/g,
+    "`": /(?:\\[\s\S]|[^\\])*?`/g,
+    "require": /\s*\(\s*(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1\s*\)/g,
+    "/regexp/": /\/(?:(?:\\\/|[^\/\r\n])+?)\//g
+  };
 
-  function getCJSDeps(source, requireIndex) {
-    commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
-    var stringLocations = [], commentLocations = [];
-
-    var match;
-
-    function inLocation(locations, index) {
-      for (var i = 0; i < locations.length; i++)
-        if (locations[i][0] < index && locations[i][1] > index)
-          return true;
-      return false;
-    }
-
-    while (match = stringRegEx.exec(source))
-      stringLocations.push([match.index, match.index + match[0].length]);
-
-    while (match = commentRegEx.exec(source)) {
-      // only track comments not starting in strings
-      if (!inLocation(stringLocations, match.index + 1))
-        commentLocations.push([match.index, match.index + match[0].length]);
-    }
-
+  function getCJSDeps (source, requireIndex) {
+    var deps = [];
     // determine the require alias
     var params = source.match(fnBracketRegEx);
     var requireAlias = (params[1].split(',')[requireIndex] || 'require').replace(wsRegEx, '');
+    var chunkStartRegex = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp("/\\*|//|\"|'|`|(?:^|[([=,;&|+-])\\s*(?=\/)|" + requireAlias, "g"));
+    chunkStartRegex.lastIndex = 0;
+    chunkEndCounterpart[requireAlias] = chunkEndCounterpart.require;
 
-    // find or generate the regex for this requireAlias
-    var requireRegEx = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp(cjsRequirePre + requireAlias + cjsRequirePost, 'g'));
+    var startExec, chunkStartKey, endRx, endExec;
+    while (startExec = chunkStartRegex.exec(source)) {
+      chunkStartKey = startExec[0];
+      endRx = chunkEndCounterpart[chunkStartKey];
+      if (!endRx) {
+        chunkStartKey = "/regexp/";
+        endRx = chunkEndCounterpart[chunkStartKey];
+      }
+      endRx.lastIndex = chunkStartRegex.lastIndex;
 
-    requireRegEx.lastIndex = 0;
+      endExec = endRx.exec(source);
 
-    var deps = [];
-
-    while (match = requireRegEx.exec(source)) {
-      if(!inLocation(stringLocations, match.index) &&
-        !inLocation(commentLocations, match.index)) {
-        var dep = match[1].substr(1, match[1].length - 2);
-        if(dep)
-          deps.push(dep);
+      if (endExec && endExec.index === chunkStartRegex.lastIndex) {
+        chunkStartRegex.lastIndex = endRx.lastIndex;
+        if (endRx === chunkEndCounterpart.require) {
+          deps.push(endExec[2]);
+        }
       }
     }
-
     return deps;
   }
 
