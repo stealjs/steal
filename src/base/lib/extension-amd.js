@@ -221,8 +221,9 @@ function amd(loader) {
 		// when the npm extension is used
 		if (
 		  parsedModuleName &&
-		  (parsedModuleName.modulePath === name ||  // local module
-			parsedModuleName.packageName === name)  // from a dependency
+		  parsedModuleName.version &&              // verify it is an npm name
+		  (parsedModuleName.modulePath === name || // local module
+			parsedModuleName.packageName === name) // from a dependency
 		) {
 		  loader.register(
 			parsedModuleName.moduleName,
