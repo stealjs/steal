@@ -4721,36 +4721,64 @@ function amd(loader) {
     "/regexp/": /\/(?:(?:\\\/|[^\/\r\n])+?)\//g
   };
 
+  /*
+    Find CJS Deps in valid javascript
+    Loops through the source once by progressivly identifying "chunks"
+    Chunks are:
+    multi-line comments, single line comments, strings using ", ', or `, regular expressions, and the special case of the requireAlias
+    When the start of a chunk is potentially identified, we grab the corresponding 'endRx' and execute it on source at the same spot
+    If the endRx matches correctly at that location, we advance the chunk start regex's lastIndex to the end of the chunk and continue.
+    If it's the requireAlias that successfully matched, then we pull the string ('./path') out of the match and push as a dep before continuing.
+  */
   function getCJSDeps (source, requireIndex) {
     var deps = [];
     // determine the require alias
     var params = source.match(fnBracketRegEx);
     var requireAlias = (params[1].split(',')[requireIndex] || 'require').replace(wsRegEx, '');
+
+    // Create a cache of the chunk start regex based on the require alias
     var chunkStartRegex = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp("/\\*|//|\"|'|`|(?:^|[([=,;&|+-])\\s*(?=\/)|" + requireAlias, "g"));
+    // Look for potential chunks from the start of source
     chunkStartRegex.lastIndex = 0;
+    // Make sure chunkEndCounterpart object has a key of requireAlias that points to the common 'require' ending rx for later
     chunkEndCounterpart[requireAlias] = chunkEndCounterpart.require;
 
     var startExec, chunkStartKey, endRx, endExec;
+    // Execute our starting regex search on source to identify where chunks start
     while (startExec = chunkStartRegex.exec(source)) {
+      // assume the match is a key for our chunkEndCounterpart object
+      // This will be strings like "//", "'", "require", etc
       chunkStartKey = startExec[0];
+      // and grab that chunk's ending regular expression
       endRx = chunkEndCounterpart[chunkStartKey];
+
       if (!endRx) {
+        // If what we grabbed doesn't have an entry on chunkEndCounterpart, that means we're identified where a regex might be.
+        // So just change our key to a common one used when identifying regular expressions in the js source
         chunkStartKey = "/regexp/";
+        // and grab the regex-type chunk's ending regular expression
         endRx = chunkEndCounterpart[chunkStartKey];
       }
+      // Set the endRx to start looking exactly where our chunkStartRegex loop ended the match
       endRx.lastIndex = chunkStartRegex.lastIndex;
-
+      // and execute it on source
       endExec = endRx.exec(source);
 
+      // if the endRx matched and it matched starting exactly where we told it to start
       if (endExec && endExec.index === chunkStartRegex.lastIndex) {
+        // Then we have identified a chunk correctly and we advance our loop of chunkStartRegex to continue after this chunk
         chunkStartRegex.lastIndex = endRx.lastIndex;
+        // if we are specifically identifying the requireAlias-type chunk at this point,
         if (endRx === chunkEndCounterpart.require) {
+          // then the second capture group of the endRx is what's inside the string, inside the ()'s, after requireAlias,
+          // which is the path of a dep that we want to return.
           deps.push(endExec[2]);
         }
       }
     }
     return deps;
   }
+
 
   /*
     AMD-compatible require
