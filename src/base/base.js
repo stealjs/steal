@@ -1397,7 +1397,7 @@ function amd(loader) {
     "'": /(?:\\[\s\S]|[^\\])*?'/g,
     "`": /(?:\\[\s\S]|[^\\])*?`/g,
     "require": /\s*\(\s*(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1\s*\)/g,
-    "/regexp/": /\/(?:(?:\\\/|[^\/\r\n])+?)\//g
+    "/regexp/": /\/(?:(?:\\.|[^\/\r\n])+?)\//g
   };
 
   /*
@@ -1416,7 +1416,7 @@ function amd(loader) {
     var requireAlias = (params[1].split(',')[requireIndex] || 'require').replace(wsRegEx, '');
 
     // Create a cache of the chunk start regex based on the require alias
-    var chunkStartRegex = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp("/\\*|//|\"|'|`|(?:^|[([=,;&|+-])\\s*(?=\/)|" + requireAlias, "g"));
+    var chunkStartRegex = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp("/\\*|//|\"|'|`|(?:^|\\breturn\\b|[([=,;:?><&|^*%~+-])\\s*(?=\/)|" + requireAlias, "g"));
     // Look for potential chunks from the start of source
     chunkStartRegex.lastIndex = 0;
     // Make sure chunkEndCounterpart object has a key of requireAlias that points to the common 'require' ending rx for later
@@ -1457,7 +1457,6 @@ function amd(loader) {
     }
     return deps;
   }
-
 
   /*
     AMD-compatible require
