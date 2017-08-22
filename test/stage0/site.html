@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<script>
+	window.done = window.parent.done;
+	window.assert = window.parent.assert;
+</script>
+
+<script>
+	steal = {
+		babelOptions: {
+			presets: [
+				"react"
+			]
+		}
+	};
+</script>
+<script src="../../steal.js" main="@empty" config-main="@empty"></script>
+<script type="steal-module">
+	export default function(){}
+
+	async function callMe(){
+	}
+
+	(async function(){
+		await callMe();
+
+		if(window.assert) {
+			assert.ok(true);
+			done();
+		} else {
+			console.log("yay it worked");
+		}
+	})();
+</script>

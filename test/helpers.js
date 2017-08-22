@@ -27,6 +27,16 @@ exports.supportsProto = function supportsProto() {
 	return foo.bar === "baz";
 };
 
+exports.supportsAsyncAwait = function(){
+	var fn = new Function("async function test() { }");
+	try {
+		fn();
+		return true;
+	} catch(ex) {
+		return false;
+	}
+};
+
 
 var makePassQUnitHTML =  function() {
 	return [
