@@ -32,7 +32,7 @@ exports.supportsAsyncAwait = function(){
 	try {
 		fn();
 		return true;
-	} else {
+	} catch(ex) {
 		return false;
 	}
 };
