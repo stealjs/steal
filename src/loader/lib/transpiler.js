@@ -295,11 +295,11 @@
 
 	function getBabelPresets(current) {
 		var presets = current || [];
-		var defaults = ["es2015-no-commonjs", "react", "stage-0"];
+		var required = ["es2015-no-commonjs"];
 
 		if (presets.length) {
-			for (var i = defaults.length - 1; i >=0; i -= 1) {
-				var preset = defaults[i];
+			for (var i = required.length - 1; i >=0; i -= 1) {
+				var preset = required[i];
 
 				if (presets.indexOf(preset) === -1) {
 					presets.unshift(preset);
@@ -307,7 +307,7 @@
 			}
 		}
 		else {
-			presets = defaults;
+			presets = ["es2015-no-commonjs", "react", "stage-0"];
 		}
 
 		return presets;
