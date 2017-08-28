@@ -7,6 +7,7 @@ require("src/env/test/");
 require("src/json/test/");
 require("src/trace/trace_test");
 
+require("test/joinuris_test");
 require("test/config/config_test");
 require("test/clone/clone_test");
 require("test/babel_plugins_test");
