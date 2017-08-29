@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="../steal.js" base-url="./" config-main="@empty"></script>
+
+	<script type="steal-module">
+		import foobar from "foobar";
+
+		if (window != null && window.assert) {
+			assert.equal(foobar, "foobar", "should load foobar module");
+			done();
+		} else {
+			console.log("foobar: ", foobar);
+		}
+	</script>
+</body>
+</html>

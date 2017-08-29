@@ -258,6 +258,9 @@ exports.addExtension = function(System){
 	System.locate = function(load){
 		var parsedModuleName = utils.moduleName.parse(load.name),
 			loader = this;
+
+		load.metadata.parsedModuleName = parsedModuleName;
+
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
 			var pkg = this.npm[utils.moduleName.nameAndVersion(parsedModuleName)];
@@ -341,7 +344,16 @@ exports.addExtension = function(System){
 			});
 		}
 
-		return fetchPromise;
+		return fetchPromise.catch(function(error) {
+			if (error.statusCode === 404 && utils.moduleName.isBareIdentifier(load.name)) {
+				throw new Error([
+					"Could not load '" + load.name + "'",
+					"Is this an NPM module not saved in your package.json?"
+				].join("\n"));
+			} else {
+				throw error;
+			}
+		});
 	};
 
 	// Given a moduleName convert it into a npm-style moduleName if it belongs

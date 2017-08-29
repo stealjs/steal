@@ -5,11 +5,11 @@ var testPagesUrls = require('./test-pages-urls');
 var platforms = [{
 	browserName: 'firefox',
 	platform: 'Windows 10',
-	version: '50.0'
+	version: '52.0'
 }, {
 	browserName: 'firefox',
 	platform: 'OS X 10.11',
-	version: '50.0'
+	version: '52.0'
 }, {
 	browserName: 'googlechrome',
 	platform: 'Windows 10'
@@ -37,7 +37,7 @@ var platforms = [{
 	version: '9'
 }, {
 	browserName: 'Safari',
-	'appium-version': '1.6.0',
+	'appium-version': '1.6.3',
 	platformName: 'iOS',
 	platformVersion: '10.0',
 	deviceName: 'iPhone 7 Simulator'

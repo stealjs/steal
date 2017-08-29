@@ -49,3 +49,8 @@ QUnit.test("works when using relative overrides", function(assert) {
 QUnit.test("what happens within a cloned loader should not leak", function(assert) {
 	makeIframe("ext-steal-clone/leak/index.html", assert);
 });
+
+
+QUnit.test("multiple clones can work at different paths", function(assert) {
+	makeIframe("ext-steal-clone/multiple/index.html", assert);
+});

@@ -2661,7 +2661,7 @@ function logloads(loads) {
 					// import the plugin!
 					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
+							var exported = mod.__esModule ? mod["default"] : mod;
 
 							if (typeof plugin === "string") {
 								return exported;
@@ -2737,11 +2737,11 @@ function logloads(loads) {
 
 	function getBabelPresets(current) {
 		var presets = current || [];
-		var defaults = ["es2015-no-commonjs", "react", "stage-0"];
+		var required = ["es2015-no-commonjs"];
 
 		if (presets.length) {
-			for (var i = defaults.length - 1; i >=0; i -= 1) {
-				var preset = defaults[i];
+			for (var i = required.length - 1; i >=0; i -= 1) {
+				var preset = required[i];
 
 				if (presets.indexOf(preset) === -1) {
 					presets.unshift(preset);
@@ -2749,7 +2749,7 @@ function logloads(loads) {
 			}
 		}
 		else {
-			presets = defaults;
+			presets = ["es2015-no-commonjs", "react", "stage-0"];
 		}
 
 		return presets;
@@ -2868,7 +2868,7 @@ function logloads(loads) {
 					// import the preset!
 					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
+							var exported = mod.__esModule ? mod["default"] : mod;
 
 							if (typeof preset === "string") {
 								return exported;

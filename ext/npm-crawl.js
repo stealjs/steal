@@ -267,9 +267,13 @@ var crawl = {
 	 */
 	getFullDependencyMap: function(loader, packageJSON, isRoot){
 		var deps = crawl.getDependencyMap(loader, packageJSON, isRoot);
-		addDeps(packageJSON, packageJSON.devDependencies || {}, deps,
-			"devDependencies");
-		return deps;
+
+		return addMissingDeps(
+			packageJSON,
+			packageJSON.devDependencies || {},
+			deps,
+			"devDependencies"
+		);
 	},
 	getPlugins: function(packageJSON, deps) {
 		var config = utils.pkg.config(packageJSON) || {};
@@ -347,8 +351,6 @@ var crawl = {
 			if(parentPkg && SemVer.valid(parentPkg.version)) {
 				if(SemVer.satisfies(parentPkg.version, childPkg.version)) {
 					return parentPkg.fileUrl;
-				} else {
-					return curAddress;
 				}
 			}
 			parentAddress = utils.path.parentNodeModuleAddress(packageAddress);
@@ -490,6 +492,22 @@ function addDeps(packageJSON, dependencies, deps, type, defProps){
 			deps[name] = val;
 		}
 	}
+}
+
+/**
+ * Same as `addDeps` but it does not override dependencies already set
+ */
+function addMissingDeps(packageJson, dependencies, deps, type, defProps) {
+	var without = {};
+
+	for (var name in dependencies) {
+		if (!deps[name]) {
+			without[name] = dependencies[name];
+		}
+	}
+
+	addDeps(packageJson, without, deps, type, defProps);
+	return deps;
 }
 
 /**
@@ -655,7 +673,6 @@ utils.extend(FetchTask.prototype, {
 
 		var isFlat = this.context.isFlatFileStructure;
 		var fileUrl = this.pkg.fileUrl;
-		var context = this.context;
 
 		if(isFlat && !pkg.__crawledNestedPosition) {
 			pkg.__crawledNestedPosition = true;
@@ -664,9 +681,24 @@ utils.extend(FetchTask.prototype, {
 		else {
 			// make sure we aren't loading something we've already loaded
 			var parentAddress = utils.path.parentNodeModuleAddress(fileUrl);
-			if(!parentAddress) {
-				throw new Error('Did not find ' + pkg.origFileUrl);
+
+			if (!parentAddress) {
+				var found = this.getPackage();
+
+				if (!parentAddress) {
+					var found = this.getPackage();
+
+					throw new Error(
+						[
+							"Did not find " + pkg.origFileUrl,
+							"Unable to find a compatible version of " + pkg.name,
+							"Wanted: " + pkg.version,
+							found ? "Found: " + found.version : ""
+						].join("\n")
+					);
+				}
 			}
+
 			var nodeModuleAddress = parentAddress + "/" + pkg.name +
 				"/package.json";
 

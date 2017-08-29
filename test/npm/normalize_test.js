@@ -429,7 +429,7 @@ QUnit.test("Race conditions in loading deps are resolved", function(assert){
 	});
 });
 
-QUnit.test("Normalizing a package that refers to itself", function(assert){
+QUnit.test("Normalizing a package that refers to itself", function(assert) {
 	var done = assert.async();
 
 	var loader = helpers.clone()
@@ -475,9 +475,10 @@ QUnit.test("Normalizing a package that refers to itself", function(assert){
 	.then(function(){
 		return loader.normalize("connect", "dep@1.0.0#main");
 	})
-	.then(function(){
-		return loader.normalize("connect/foo/bar", "connect@2.0.0#main")
-	}).then(function(name){
+	.then(function() {
+		return loader.normalize("connect/foo/bar", "connect@2.0.0#main");
+	})
+	.then(function(name) {
 		assert.equal(name, "connect@2.0.0#foo/bar");
 	})
 	.then(done, helpers.fail(assert, done));
@@ -708,6 +709,134 @@ QUnit.test("Configuration with circular references works", function(assert){
 		assert.ok(true, "no infinite recursion");
 	})
 	.then(done, helpers.fail(assert, done));
+});
+
+QUnit.test("normalizing a nested deep dependency (#1224)", function(assert) {
+	var done = assert.async();
+
+	var cloned = helpers.clone()
+		.npmVersion(3)
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				"client": "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "emitter",
+				main: "index.js",
+				version: "2.0.0"
+			},
+			{
+				name: "client",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					"parser": "1.0.0",
+					"emitter": "2.0.0"
+				}
+			},
+			new Package({
+				name: "parser",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					"emitter": "1.0.0"
+				}
+			}).deps([
+				{
+					name: "emitter",
+					main: "index.js",
+					version: "1.0.0"
+				}
+			])
+		]);
+
+	var loader = cloned.loader;
+
+	helpers.init(loader)
+		.then(function() {
+			return loader.normalize("client", "app@1.0.0#main")
+				.then(function() {
+					return loader.normalize("parser", "client@1.0.0#main");
+				});
+		})
+		.then(function() {
+			return Promise.all([
+				loader.normalize("emitter", "parser@1.0.0#main"),
+				loader.normalize("emitter", "client@1.0.0#main")
+			]);
+		})
+		.then(function() {
+			var data = loader.npm["emitter@2.0.0"];
+
+			assert.equal(
+				data.fileUrl,
+				"./node_modules/emitter/package.json"
+			);
+		})
+		.then(done, done);
+});
+
+QUnit.test("descriptive version mismatch error (#1176)", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.npmVersion(3)
+		.rootPackage({
+			name: "app",
+			version: "1.0.0",
+			main: "main.js",
+			dependencies: {
+				can: "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "can-util",
+				version: "1.0.0",
+				main: "main.js"
+			},
+			{
+				name: "can",
+				version: "1.0.0",
+				main: "main.js",
+				dependencies: {
+					"can-util": "^2.0.0"
+				}
+
+			}
+		])
+		.loader;
+
+	helpers.init(loader)
+		.then(function(name) {
+			return loader.normalize("can", name);
+		})
+		.then(function(name) {
+			return loader.normalize("can-util", name);
+		})
+		.then(
+			function(name) {
+				assert.ok(false, "it should fail");
+			},
+			function(err) {
+				assert.deepEqual(
+					err.message.split("\n"),
+					[
+						"Did not find ./node_modules/can-util/package.json",
+						"Unable to find a compatible version of can-util",
+						"Wanted: ^2.0.0",
+						"Found: 1.0.0"
+					],
+					"should throw descriptive error message"
+				);
+			}
+		)
+		.then(done, helpers.fail(assert, done));
 });
 
 QUnit.module("normalizing with main config");
@@ -1080,5 +1209,5 @@ QUnit.test("Works from a dependent package that is progressively loaded", functi
 		assert.equal(name, "dep@1.0.0#foo.txt!other@1.0.0#main");
 	})
 	.then(done, helpers.fail(assert, done));
-
 });
+

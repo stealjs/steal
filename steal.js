@@ -2661,7 +2661,7 @@ function logloads(loads) {
 					// import the plugin!
 					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
+							var exported = mod.__esModule ? mod["default"] : mod;
 
 							if (typeof plugin === "string") {
 								return exported;
@@ -2737,11 +2737,11 @@ function logloads(loads) {
 
 	function getBabelPresets(current) {
 		var presets = current || [];
-		var defaults = ["es2015-no-commonjs", "react", "stage-0"];
+		var required = ["es2015-no-commonjs"];
 
 		if (presets.length) {
-			for (var i = defaults.length - 1; i >=0; i -= 1) {
-				var preset = defaults[i];
+			for (var i = required.length - 1; i >=0; i -= 1) {
+				var preset = required[i];
 
 				if (presets.indexOf(preset) === -1) {
 					presets.unshift(preset);
@@ -2749,7 +2749,7 @@ function logloads(loads) {
 			}
 		}
 		else {
-			presets = defaults;
+			presets = ["es2015-no-commonjs", "react", "stage-0"];
 		}
 
 		return presets;
@@ -2868,7 +2868,7 @@ function logloads(loads) {
 					// import the preset!
 					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod.default : mod;
+							var exported = mod.__esModule ? mod["default"] : mod;
 
 							if (typeof preset === "string") {
 								return exported;
@@ -4705,59 +4705,77 @@ function amd(loader) {
   var amdRegEx = /(?:^\uFEFF?|[^$_a-zA-Z\xA0-\uFFFF.])define\s*\(\s*("[^"]+"\s*,\s*|'[^']+'\s*,\s*)?\s*(\[(\s*(("[^"]+"|'[^']+')\s*,|\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*(\s*("[^"]+"|'[^']+')\s*,?)?(\s*(\/\/.*\r?\n|\/\*(.|\s)*?\*\/))*\s*\]|function\s*|{|[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*\))/;
 
   var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm
-  var commentRegEx = /(\/\*([\s\S]*?)\*\/|([^:(?!\\)]|^)\/\/(.*)$)/mg;
-  var stringRegEx = /("[^"\\\n\r]*(\\.[^"\\\n\r]*)*"|'[^'\\\n\r]*(\\.[^'\\\n\r]*)*')/g;
   var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
-  var cjsRequirePre = "(?:^\\uFEFF?|[^$_a-zA-Z\\xA0-\\uFFFF.\"\'])";
-  var cjsRequirePost = "\\s*\\(\\s*(\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*\')\\s*\\)";
-
+  
   var fnBracketRegEx = /\(([^\)]*)\)/;
   var wsRegEx = /^\s+|\s+$/g;
 
   var requireRegExs = {};
+  var chunkEndCounterpart = {
+    "/*": /[\s\S]*?\*\//g,
+    "//": /[^\r\n]+(?:\r?\n|$)/g,
+    '"': /(?:\\[\s\S]|[^\\])*?"/g,
+    "'": /(?:\\[\s\S]|[^\\])*?'/g,
+    "`": /(?:\\[\s\S]|[^\\])*?`/g,
+    "require": /\s*\(\s*(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1\s*\)/g,
+    "/regexp/": /\/(?:(?:\\.|[^\/\r\n])+?)\//g
+  };
 
-  function getCJSDeps(source, requireIndex) {
-    commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
-    var stringLocations = [], commentLocations = [];
-
-    var match;
-
-    function inLocation(locations, index) {
-      for (var i = 0; i < locations.length; i++)
-        if (locations[i][0] < index && locations[i][1] > index)
-          return true;
-      return false;
-    }
-
-    while (match = stringRegEx.exec(source))
-      stringLocations.push([match.index, match.index + match[0].length]);
-
-    while (match = commentRegEx.exec(source)) {
-      // only track comments not starting in strings
-      if (!inLocation(stringLocations, match.index + 1))
-        commentLocations.push([match.index, match.index + match[0].length]);
-    }
-
+  /*
+    Find CJS Deps in valid javascript
+    Loops through the source once by progressivly identifying "chunks"
+    Chunks are:
+    multi-line comments, single line comments, strings using ", ', or `, regular expressions, and the special case of the requireAlias
+    When the start of a chunk is potentially identified, we grab the corresponding 'endRx' and execute it on source at the same spot
+    If the endRx matches correctly at that location, we advance the chunk start regex's lastIndex to the end of the chunk and continue.
+    If it's the requireAlias that successfully matched, then we pull the string ('./path') out of the match and push as a dep before continuing.
+  */
+  function getCJSDeps (source, requireIndex) {
+    var deps = [];
     // determine the require alias
     var params = source.match(fnBracketRegEx);
     var requireAlias = (params[1].split(',')[requireIndex] || 'require').replace(wsRegEx, '');
 
-    // find or generate the regex for this requireAlias
-    var requireRegEx = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp(cjsRequirePre + requireAlias + cjsRequirePost, 'g'));
+    // Create a cache of the chunk start regex based on the require alias
+    var chunkStartRegex = requireRegExs[requireAlias] || (requireRegExs[requireAlias] = new RegExp("/\\*|//|\"|'|`|(?:^|\\breturn\\b|[([=,;:?><&|^*%~+-])\\s*(?=\/)|\\b" + requireAlias + "(?=\\s*\\()", "g"));
+    // Look for potential chunks from the start of source
+    chunkStartRegex.lastIndex = 0;
+    // Make sure chunkEndCounterpart object has a key of requireAlias that points to the common 'require' ending rx for later
+    chunkEndCounterpart[requireAlias] = chunkEndCounterpart.require;
 
-    requireRegEx.lastIndex = 0;
+    var startExec, chunkStartKey, endRx, endExec;
+    // Execute our starting regex search on source to identify where chunks start
+    while (startExec = chunkStartRegex.exec(source)) {
+      // assume the match is a key for our chunkEndCounterpart object
+      // This will be strings like "//", "'", "require", etc
+      chunkStartKey = startExec[0];
+      // and grab that chunk's ending regular expression
+      endRx = chunkEndCounterpart[chunkStartKey];
 
-    var deps = [];
+      if (!endRx) {
+        // If what we grabbed doesn't have an entry on chunkEndCounterpart, that means we're identified where a regex might be.
+        // So just change our key to a common one used when identifying regular expressions in the js source
+        chunkStartKey = "/regexp/";
+        // and grab the regex-type chunk's ending regular expression
+        endRx = chunkEndCounterpart[chunkStartKey];
+      }
+      // Set the endRx to start looking exactly where our chunkStartRegex loop ended the match
+      endRx.lastIndex = chunkStartRegex.lastIndex;
+      // and execute it on source
+      endExec = endRx.exec(source);
 
-    while (match = requireRegEx.exec(source)) {
-      if(!inLocation(stringLocations, match.index) &&
-        !inLocation(commentLocations, match.index)) {
-        var dep = match[1].substr(1, match[1].length - 2);
-        if(dep)
-          deps.push(dep);
+      // if the endRx matched and it matched starting exactly where we told it to start
+      if (endExec && endExec.index === chunkStartRegex.lastIndex) {
+        // Then we have identified a chunk correctly and we advance our loop of chunkStartRegex to continue after this chunk
+        chunkStartRegex.lastIndex = endRx.lastIndex;
+        // if we are specifically identifying the requireAlias-type chunk at this point,
+        if (endRx === chunkEndCounterpart.require) {
+          // then the second capture group of the endRx is what's inside the string, inside the ()'s, after requireAlias,
+          // which is the path of a dep that we want to return.
+          deps.push(endExec[2]);
+        }
       }
     }
-
     return deps;
   }
 
@@ -4904,6 +4922,25 @@ function amd(loader) {
       }
       // named define
       else {
+		var parsedModuleName =
+		  currentLoad && currentLoad.metadata && currentLoad.metadata.parsedModuleName;
+
+		// register the full npm name otherwise named modules won't load
+		// when the npm extension is used
+		if (
+		  parsedModuleName &&
+		  parsedModuleName.version &&              // verify it is an npm name
+		  (parsedModuleName.modulePath === name || // local module
+			parsedModuleName.packageName === name) // from a dependency
+		) {
+		  loader.register(
+			parsedModuleName.moduleName,
+			define.deps,
+			false,
+			define.execute
+		  );
+		}
+
         // if it has no dependencies and we don't have any other
         // defines, then let this be an anonymous define
         if (deps.length == 0 && !anonDefine && !defineBundle)
@@ -4933,15 +4970,20 @@ function amd(loader) {
   // set to true if the current module turns out to be a named define bundle
   var defineBundle;
 
+  // set on the "instantiate" hook (by "createDefine") so it's available in
+  // the scope of the "define" function, it's set back to "undefined" after eval
+  var currentLoad;
+
   var oldModule, oldExports, oldDefine;
 
   // adds define as a global (potentially just temporarily)
-  function createDefine(loader) {
+  function createDefine(loader, load) {
     if (!loader.amdDefine)
       generateDefine(loader);
 
     anonDefine = null;
     defineBundle = null;
+	currentLoad = load;
 
     // ensure no NodeJS environment detection
     var global = loader.global;
@@ -4964,6 +5006,7 @@ function amd(loader) {
     global.define = oldDefine;
     global.module = oldModule;
     global.exports = oldExports;
+	currentLoad = undefined;
   }
 
   generateDefine(loader);
@@ -4971,7 +5014,7 @@ function amd(loader) {
   if (loader.scriptLoader) {
     var loaderFetch = loader.fetch;
     loader.fetch = function(load) {
-      createDefine(this);
+      createDefine(this, load);
       return loaderFetch.call(this, load);
     }
   }
@@ -4994,7 +5037,7 @@ function amd(loader) {
         load.metadata.format = 'amd';
 
         if (loader.execute !== false) {
-          createDefine(loader);
+          createDefine(loader, load);
 
           loader.__exec(load);
 
@@ -5463,6 +5506,7 @@ var $__curScript, __eval;
   var isNode = typeof process === 'object' && {}.toString.call(process) === '[object process]';
   var isNW = !!(isNode && global.nw && global.nw.process);
   var isChromeExtension = isBrowser && !isNW && window.chrome && window.chrome.extension;
+  var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
   var scriptEval;
 
   doEval = function(source, address, context) {
@@ -5626,7 +5670,7 @@ var $__curScript, __eval;
 			return arr[arr.length - 1];
 		},
 		parseURI = function(url) {
-			var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@]*(?::[^:@]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+			var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/]*(?::[^:@\/]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
 				// authority = '//' + user + ':' + pass '@' + hostname + ':' port
 				return (m ? {
 				href     : m[0] || '',
@@ -5779,6 +5823,21 @@ var makeSteal = function(System){
 	System.set('@loader', System.newModule({
 		'default': System,
 		__useDefault: true
+	}));
+
+
+	System.set("less", System.newModule({
+		__useDefault: true,
+		default: {
+			fetch: function() {
+				throw new Error(
+					[
+						"steal-less plugin must be installed and configured properly",
+						"See https://stealjs.com/docs/steal-less.html"
+					].join("\n")
+				);
+			}
+		}
 	}));
 
 	System.config({
@@ -6031,7 +6090,7 @@ addStealExtension(function (loader) {
       if (definer) {
         var localName = name + '/' + parentName;
 
-        if(!loader.has(name)) {
+        if(!loader.has(localName)) {
           // `definer` could be a function or could be a moduleName
           if (typeof definer === 'string') {
             definer = pluginLoader['import'](definer);
@@ -6061,42 +6120,52 @@ addStealExtension(function (loader) {
   };
 });
 
-// Steam Script-Module Extension
-// Add a steal-module script to the page and it will run after Steal has been configured
-// <script type="text/steal-module">...</script>
-addStealExtension(function (loader) {
-	// stolen from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
-  function completed() {
-    document.removeEventListener( "DOMContentLoaded", completed, false );
-    window.removeEventListener( "load", completed, false );
-    ready();
-  }
+/**
+ * Steal Script-Module Extension
+ *
+ * Add a steal-module script to the page and it will run after Steal has been
+ * configured, e.g:
+ *
+ * <script type="text/steal-module">...</script>
+ * <script type="steal-module">...</script>
+ */
+addStealExtension(function(loader) {
+	// taken from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
+	function completed() {
+		document.removeEventListener("DOMContentLoaded", completed, false);
+		window.removeEventListener("load", completed, false);
+		ready();
+	}
 
-  function ready() {
-    var scripts = document.getElementsByTagName('script');
-    for (var i = 0; i < scripts.length; i++) {
-      var script = scripts[i];
-      if (script.type == 'text/steal-module') {
-        var source = script.innerHTML;
-        if(/\S/.test(source)){
-          loader.module(source)['catch'](function(err) { setTimeout(function() { throw err; }); });
-        }
-      }
-    }
-  }
+	function ready() {
+		var scripts = document.getElementsByTagName("script");
+		for (var i = 0; i < scripts.length; i++) {
+			var script = scripts[i];
+			if (script.type == "steal-module" || script.type == "text/steal-module") {
+				var source = script.innerHTML;
+				if (/\S/.test(source)) {
+					loader.module(source)["catch"](function(err) {
+						setTimeout(function() {
+							throw err;
+						});
+					});
+				}
+			}
+		}
+	}
 
-  loader.loadScriptModules = function(){
-    if(isBrowserWithWindow) {
-      if (document.readyState === 'complete') {
-        setTimeout(ready);
-      } else if (document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', completed, false);
-        window.addEventListener('load', completed, false);
-      }
-    }
-
-  };
+	loader.loadScriptModules = function() {
+		if (isBrowserWithWindow) {
+			if (document.readyState === "complete") {
+				setTimeout(ready);
+			} else if (document.addEventListener) {
+				document.addEventListener("DOMContentLoaded", completed, false);
+				window.addEventListener("load", completed, false);
+			}
+		}
+	};
 });
+
 // SystemJS Steal Format
 // Provides the Steal module format definition.
 addStealExtension(function (loader) {
@@ -6838,7 +6907,9 @@ addStealExtension(function (loader) {
 				// if steal is bundled or we are loading steal.production
 				// we always are in production environment
 				if((this.stealBundled && this.stealBundled === true) ||
-					(lastPart.indexOf("steal.production") > -1 && !cfg.env)) {
+					((lastPart.indexOf("steal.production") > -1) ||
+						(lastPart.indexOf("steal-sans-promises.production") > -1)
+					 	&& !cfg.env)) {
 					this.config({ env: platform+"-production" });
 				}
 
@@ -6973,11 +7044,12 @@ addStealExtension(function (loader) {
 		scriptOptions.stealURL = script.src;
 
 		each(script.attributes, function(attr){
+			var nodeName = attr.nodeName || attr.name;
 			// get option, remove "data" and camelize
 			var optionName =
-				camelize( attr.nodeName.indexOf("data-") === 0 ?
-					attr.nodeName.replace("data-","") :
-					attr.nodeName );
+				camelize( nodeName.indexOf("data-") === 0 ?
+					nodeName.replace("data-","") :
+					nodeName );
 			// make options uniform e.g. baseUrl => baseURL
 			optionName = optionName.replace(urlRegEx, "URL")
 			scriptOptions[optionName] = (attr.value === "") ? true : attr.value;
@@ -7188,7 +7260,7 @@ addStealExtension(function (loader) {
 					// Hide from uglify
 					var c = console;
 					var type = c.error ? "error" : "log";
-					c[type](error, error.stack);
+					c[type](error);
 				}
 			});
 		global.steal.clone = cloneSteal;

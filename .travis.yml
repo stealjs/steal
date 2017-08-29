@@ -2,8 +2,6 @@ sudo: false
 language: node_js
 matrix:
   include:
-    - node_js: 0.12
-      script: npm run test-node
     - node_js: 4
       script: npm run test-node:ci
     - node_js: 6

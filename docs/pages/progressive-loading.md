@@ -47,7 +47,7 @@ Create _myhub.html_ with:
 <html lang="en">
   <head></head>
   <body>
-    Hello World!
+    <div class="container">Hello World.</div>
   </body>
 </html>
 ```
@@ -63,7 +63,7 @@ Next edit your `package.json` so that the start script looks like:
 ```json
 "scripts": {
   "start": "http-server -c-1 ."
-}
+},
 ```
 
 This allows us to start the server with:
@@ -74,7 +74,9 @@ This allows us to start the server with:
 
 Open [http://127.0.0.1:8080/myhub.html](http://127.0.0.1:8080/myhub.html). You should see the *Hello world!* test.
 
-> Before proceeding kill the development server so we can install some dependencies. Use cmd+c on Mac or ctrl+c on Windows or Linux/BSD.
+> Before proceeding open a new command-line
+> terminal that will be used for additional
+> `npm install` commands.
 
 ### Install steal, steal-tools, and jquery
 
@@ -83,12 +85,6 @@ Installing these 3 dependencies gives us everything we need to build our applica
 ```
 > npm install steal jquery --save-dev
 > npm install steal-tools steal-less steal-css --save-dev
-```
-
-Now restart your server; you can keep it on while you develop the rest of the application.
-
-```
-> npm start
 ```
 
 ## Import your first module
@@ -112,7 +108,7 @@ Update _myhub.html_ with:
 <html lang="en">
   <head></head>
   <body>
-    Hello World!
+    <div class="container">Hello World.</div>
     <script src="./node_modules/steal/steal.js"></script>
   </body>
 </html>
@@ -178,19 +174,17 @@ $("body").html("<h1>Goodbye script tags!</h1>");
 
 Each string used to import such as `"jquery"` and `"./myhub.less"` are called [moduleIdentifier module identifiers]. They identify a module to be imported within the context of the module that is importing them. That means that when you import a module like `"./myhub.less"` you are importing that module relative to the current module (in this case it is your myhub.js module).
 
-Internally Steal resolves all module identifiers into [moduleName moduleNames], which it uses as the **key** to look up modules. This allows you to load modules from many different places in the application and them all resolve to the same module.
+Internally Steal resolves all module identifiers into [moduleName moduleNames], which it uses as the **key** to look up modules. This allows you to load modules from many different places in the application and have them all resolve to the same module.
 
 ### Install and import bootstrap
 
-> Again kill your server using cmd+c on Mac or ctrl+c on Windows / Linux.
-
-Next install bootstrap with:
+Next, install bootstrap:
 
 ```
 > npm install bootstrap --save-dev
 ```
 
-Update the _myhub.html_ to use bootstrap with:
+Update the _myhub.html_ to use bootstrap:
 
 ```html
 <!doctype html>
@@ -201,14 +195,14 @@ Update the _myhub.html_ to use bootstrap with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <div class="container">Hello World.</div>
     <script src="./node_modules/steal/steal.js"></script>
   </body>
 </html>
 ```
+@highlight 4-6
 
-@highlight 4-6,9
-
-Import it and use it with the following updated _myhub.js_:
+Import bootstrap and use it with the following updated _myhub.js_:
 
 ```js
 import $ from "jquery";
@@ -224,82 +218,261 @@ $("body").append(`
 
 @highlight 3,5-9
 
-Once you restart your server again (`npm start`) you'll be able to see your changes when you refresh.
+Steal is able to load npm packages as modules thanks to the [npm] plugin that comes with Steal by default.
 
-This shows Steal's ability to load modules from npm using its built-in [npm] plugin. For most modules all you need to do is install them and then import and use them.
+If the package uses a module format, all you have to do is `import` in the `.js` file(s) where that module needs to be used.
 
 ## Create a modlet
 
-Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application. A modlet is a folder that contains an implementation file, test, demo page, test page, and documentation about a module. It is a useful development strategy to ensure your application is well tested.
+Steal encourages the use of [modlets](https://www.bitovi.com/blog/modlet-workflows) as a unit of functionality in your application.
 
-Here we're going to create a modlet to show how this workflow can be beneficial:
+A modlet is a folder that contains:
+
+- an implementation file,
+- a test,
+- a test page,
+- a demo page,
+- and documentation about the modlet.
+
+Using modlets helps to ensure that your application is well tested.
+
+For example, instead of something like:
+
+```
+.
+├── myhub.html
+├── myhub.js
+├── myhub.less
+├── package.json
+├── puppies.html
+├── test.js
+└── weather.html
+```
+
+With modlets we will have exactly this:
+
+```
+.
+├── myhub.html
+├── myhub.js
+├── myhub.less
+├── package.json
+├── puppies
+│   ├── puppies-test.html
+│   ├── puppies-test.js
+│   ├── puppies.css
+│   ├── puppies.html
+│   └── puppies.js
+└── weather
+    ├── weather-test.html
+    ├── weather-test.js
+    ├── weather.css
+    ├── weather.html
+    └── weather.js
+```
+
+Use this workflow to create the `weather` modlet:
 
 ### Create the demo page
 
-Create _repos/repos.html_ with:
+Create _weather/weather.html_ with:
 
 ```html
 <!doctype html>
 <html lang="en">
   <head>
-	  <meta charset="utf-8">
-	  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	  <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div id="repos"></div>
+    <div id="weather"></div>
     <script src="../node_modules/steal/steal.js" main="@empty"></script>
-	<script type="text/steal-module">
-        import repos from "myhub/repos/repos";
-        repos("#repos");
-	</script>
+    <script type="text/steal-module">
+        import weather from "myhub/weather/weather";
+        weather("#weather");
+    </script>
   </body>
 </html>
 ```
 
+### Add the weather styles
+
+Create _weather/weather.css_ with:
+
+```css
+@@font-face {
+  font-family: 'weather-widget';
+  src: url("data:application/x-font-ttf;charset=utf-8;base64,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") format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.forecast ul {
+  padding: 0;
+  margin: 0;
+}
+.forecast ul li {
+  border: 1px solid rgba(167, 207, 250, 0.7);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style-type: none;
+  padding: 10px 8px;
+}
+.forecast ul li:last-of-type {
+  border-bottom: 1px solid rgba(167, 207, 250, 0.7);
+}
+.forecast .date {
+  display: inline-block;
+  color: #A7CFFA;
+  font-size: 0.7em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: 20%;
+  margin-right: 4%;
+}
+.forecast .description {
+  display: inline-block;
+  padding-left: 40px;
+  margin-right: 5%;
+  width: 33%;
+  position: relative;
+}
+.forecast .description:before {
+  font-family: 'weather-widget';
+  font-size: 1.4em;
+  left: 0;
+  position: absolute;
+}
+.forecast .description.snow:before {
+  content: "\e902";
+}
+.forecast .description.thunderstorms:before {
+  content: "\e901";
+}
+.forecast .description.rain:before {
+  content: "\e903";
+}
+.forecast .description.rain-and-snow:before {
+  content: "\e90c";
+}
+.forecast .description.scattered-showers:before {
+  content: "\e90b";
+}
+.forecast .description.showers:before {
+  content: "\e904";
+}
+.forecast .description.scattered-thunderstorms:before {
+  content: "\e905";
+}
+.forecast .description.cloudy:before {
+  content: "\e90a";
+}
+.forecast .description.partly-cloudy:before {
+  content: "\e906";
+}
+.forecast .description.mostly-cloudy:before {
+  content: "\e902";
+}
+.forecast .description.sunny:before {
+  content: "\e907";
+}
+.forecast .description.mostly-sunny:before {
+  content: "\e908";
+}
+.forecast .description.breezy:before {
+  content: "\e90d";
+}
+.forecast .description.windy:before {
+  content: "\e909";
+}
+.forecast .low-temp,
+.forecast .high-temp {
+  display: inline-block;
+  font-weight: 300;
+  font-size: 1.2em;
+  width: 10%;
+  margin-left: 3%;
+}
+.forecast .low-temp sup,
+.forecast .high-temp sup {
+  font-size: 60%;
+  margin-left: 3px;
+}
+.forecast .low-temp:before,
+.forecast .high-temp:before {
+  font-size: 0.6em;
+  margin-right: 3px;
+  color: #A7CFFA;
+}
+.forecast .high-temp:before {
+  content: "\2191";
+  color: #FD6565;
+}
+.forecast .low-temp:before {
+  content: "\2193";
+  color: #23e0ae;
+}
+```
+
 ### Create the module implementation
 
-Create _repos/repos.js_ with the following code. Update `{user}` with your GitHub user name. This will display your repos:
+Create _weather/weather.js_ with the following code:
 
 ```js
 import $ from "jquery";
 import "bootstrap/dist/css/bootstrap.css";
+import "./weather.css";
+
+function toClassName(txt) {
+  return txt.toLowerCase().replace(/ /g, "-");
+}
 
 export default function(selector){
-    $(selector).html("Loading...")
+    var city = "chicago il";
+    $(selector).html("Loading...");
     $.ajax({
-        url: "https://api.github.com/users/matthewp/repos",
-        jsonp: "callback",
-        dataType: "jsonp",
-        success: function( response ) {
-            var defs = response.data.map(function(repo){
-                return `
-                <dt>
-                  <a href="${repo.url}">
-                    ${repo.name}
-                  </a>
-                </dt>
-                <dd>${repo.description}</dt>
-                `;
-            });
-            $(selector).html(`
-              <dl class='dl-horizontal'>
-                ${defs.join("")}
-              </dl>
-            `);
-        }
+        url: `https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places%20where%20text%3D%22${city}%22)&format=json&diagnostics=true&callback=`,
+    }).then(function(response){
+      var weather = response.query.results.channel;
+      var forecast = weather.item.forecast;
+      var defs = forecast.map(function(day){
+        return `
+          <li>
+            <span class="date">${day.date}</span>
+            <span class="description ${toClassName(day.text)}">${day.text}</span>
+            <span class="high-temp">${day.high}<sup>&deg;</sup></span>
+            <span class="low-temp">${day.low}<sup>&deg;</sup></span>
+          </li>
+        `;
+      });
+      $(selector).html(`
+        <div class="forecast">
+          <ul>
+            ${defs.join("")}
+          </ul>
+        </div>
+      `);
     });
-};
+
+}
 ```
+
+Update the `city` variable with your city so the weather page will display your city's weather.
+
+Open [http://127.0.0.1:8080/weather/weather.html](http://127.0.0.1:8080/weather/weather.html) to see
+the __weather__ widget's demo page.
 
 ### Create the test page
 
-Create _repos/repos-test.html_ with:
+Create _weather/weather-test.html_ with:
 
 ```html
-<title>myhub/repos/repos</title>
-<script src="../node_modules/steal/steal.js" 
-        main="myhub/repos/repos-test"></script>
+<title>myhub/weather/weather</title>
+<script src="../node_modules/steal/steal.js"
+        main="myhub/weather/weather-test"></script>
 <div id="qunit-fixture"></div>
 ```
 
@@ -311,34 +484,37 @@ Install `steal-qunit` with:
 > npm install steal-qunit --save-dev
 ```
 
-Create _repos/repos-test.js_ with:
+Create _weather/weather-test.js_ with:
 
 ```js
 import QUnit from "steal-qunit";
-import repos from "./repos";
+import weather from "./weather";
 
-QUnit.module("myhub/repos/");
+QUnit.module("myhub/weather/");
 
 QUnit.test("basics", function(assert){
-	var done = assert.async();
+    var done = assert.async();
     var fixtureEl = document.getElementById("qunit-fixture");
 
-    repos(fixtureEl);
+    weather(fixtureEl);
 
     assert.equal(
         fixtureEl.innerHTML,
         "Loading...", "starts with loading");
 
     var interval = setInterval(function(){
-        var dl = fixtureEl.getElementsByTagName("dl");
-        if(dl.length === 1) {
-            assert.ok(true, "inserted a dl");
+        var ul = fixtureEl.getElementsByTagName("ul");
+        if(ul.length === 1) {
+            assert.ok(true, "inserted a ul");
             clearInterval(interval);
-			done();
+            done();
         }
     },100);
 });
 ```
+
+Open [http://127.0.0.1:8080/weather/weather-test.html](http://127.0.0.1:8080/weather/weather-test.html) to
+run the __weather__ tests.
 
 ### Use the module
 
@@ -348,50 +524,59 @@ Update _myhub.js_ to:
 import $ from "jquery";
 import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
-import repos from "./repos/repos";
+import weather from "./weather/weather";
 
 $("body").append(`
 	<div class="container">
 		<h1>Goodbye script tags!</h1>
-		<div id="repos"></div>
+		<div id="weather"></div>
     </div>
 `);
 
-repos('#repos');
+weather('#weather');
 ```
 
 @highlight 4,9,13
 
-## Create test with dependency injection
+Open [http://127.0.0.1:8080/myhub.html](http://127.0.0.1:8080/myhub.html) to
+see the application using the __weather__ widget.
 
-Dependency injection is a technique used to improve testing in your application. Steal provides dependency injection through its module system using [steal.steal-clone]. steal-clone allows you to create a cloned loader with stubs for modules that you want to fake.
+## Create a test with dependency injection
 
-Here we'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery. This lets us simulate a service request so that we can test that the rest of our app behaviors correctly; in this case it should list the one repo that we give it.
+Dependency injection is a technique used to improve testing in your application.
 
-Update _repos/repos-test.js_ with:
+Steal provides dependency injection through its module loading system using [steal.steal-clone].
+
+steal-clone allows you to create a _cloned_ loader with stubs for modules that you want to fake.
+
+We'll create a new test and use [steal.steal-clone] to provide our own fake version of jQuery that will let us simulate a service request, so we can test that the rest of our app behaves correctly.
+
+In the case of the test below, the app should list the single forecast it is given.
+
+Update _weather/weather-test.js_ with:
 
 ```js
 import QUnit from "steal-qunit";
-import repos from "./repos";
+import weather from "./weather";
 import clone from "steal-clone";
 import $ from "jquery";
 
-QUnit.module("myhub/repos/");
+QUnit.module("myhub/weather/");
 
 QUnit.test("basics", function(assert){
 	var done = assert.async();
     var fixtureEl = document.getElementById("qunit-fixture");
 
-    repos(fixtureEl);
+    weather(fixtureEl);
 
     assert.equal(
         fixtureEl.innerHTML,
         "Loading...", "starts with loading");
 
     var interval = setInterval(function(){
-        var dl = fixtureEl.getElementsByTagName("dl");
-        if(dl.length === 1) {
-            assert.ok(true, "inserted a dl");
+        var ul = fixtureEl.getElementsByTagName("ul");
+        if(ul.length === 1) {
+            assert.ok(true, "inserted a ul");
             clearInterval(interval);
 			done();
         }
@@ -405,54 +590,66 @@ QUnit.test("basics with dependency injection", function(assert){
         return $(selector)
     };
     jQuery.ajax = function(options){
+        var dfd = new $.Deferred();
         setTimeout(function(){
-            options.success({
-                data: [{
-                    url: "http://stealjs.com",
-                    name: "StealJS",
-                    description: "Futuristic Module Loader"
-                }]
+            dfd.resolve({
+    			query: {
+    				results: {
+    					channel: {
+    						item: {
+    							forecast: [{
+    								date: new Date(),
+    								text: "Sunny",
+    								high: "72",
+    								low: "58"
+    							}]
+    						}
+    					}
+    				}
+    			}
+            }).then(function(){
+              var html = $("#qunit-fixture").html();
+
+              assert.ok(/Sunny/.test(html),
+                "updated with request");
+              done();
             });
-
-            var html = $("#qunit-fixture").html();
-
-            assert.ok(/href="http:\/\/stealjs.com"/.test(html),
-              "updated with request");
-			done();
         },1);
+        return dfd;
     };
 
     clone({
         "jquery": {"default": jQuery}
-    }).import("myhub/repos/repos").then(function(module){
-        var repos = module["default"];
+    }).import("myhub/weather/weather").then(function(module){
+        var weather = module["default"];
 
         var fixtureEl = document.getElementById("qunit-fixture");
-        repos(fixtureEl);
+        weather(fixtureEl);
     });
 });
 ```
 
-@highlight 3-4,28-58
+@highlight 3-4,28-71
 
 ## Import a global script in a CommonJS modlet
 
-Steal supports all of the most common module formats: [syntax.es6 ES modules], [syntax.CommonJS], and [syntax.amd]. Your project can contain multiple formats; as is common when you are using ES modules but a dependency is using CommonJS, for example.
+Steal supports all of the most common module formats: [syntax.es6 ES modules], [syntax.CommonJS], and [syntax.amd]. This means your project can contain multiple formats which can be useful if, for example, you are using one module format in your project (like ES modules) but a package you want to depend on expects another module format (like CommonJS).
 
-Some libraries on the web are still distributed as [syntax.global globals]. These are modules that instead of exporting a value using one of the above module formats, instead set a property on the `window`.
+Some libraries on the web are still distributed as [syntax.global globals]. Including such a library sets a property on the global `window` object, instead of exporting a value for use with one of the module formats mentioned above.
 
-Steal is able to detect and deal with globals by default, but it's often necessary to configure globals for correctness. The [StealJS.configuration configuration guide] goes into greater depth on how to configure globals, but we'll do a simple version here.
+Steal is able to detect and deal with globals by default, but it's often necessary to add some configuration for correctness. The [StealJS.configuration configuration guide] goes into greater depth on how to configure globals in more complex situations, but configuring the globals will be simple for our example.
 
-### Install the global script
+### Install the package containing a global script
 
-First we'll install a library for displaying a gallery of images. This library is distributed as a global and we'll need to configure it.
+[Justified Gallery](http://miromannino.github.io/Justified-Gallery/) is a library for displaying a gallery of images. Unfortunately, the library is distributed as a global; so we'll need to add some configuration.
 
-Run:
+Use npm to get the `justifiedGallery` package into your project:
+
 ```
 > npm install justifiedGallery --save-dev
 ```
 
-### Create the modlet
+### Create a modlet for _puppies_
 
 Create _puppies/puppies.html_:
 
@@ -477,23 +674,32 @@ Create _puppies/puppies.html_:
 </html>
 ```
 
-Create _puppies/puppies.js_:
+Create _puppies/puppies.js_ in CommonJS format:
 
 ```js
 require("justifiedGallery");
 
 module.exports = function(selector) {
-    
+
 };
 ```
 
-### Configure justifiedGallery to load
+Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
+see that requiring `justifiedGallery` fails.
 
-Configuration in Steal is usually done in the `package.json` under the `steal` object.
+### Configure `package.json` for loading the global justifiedGallery package
 
-Here we are using [config.map] configuration to map the "justifiedGallery" [moduleIdentifier identifier] to the JavaScript file we need to actually load. Then we are using [config.meta] configuration to specify that this module is a global that depends on jQuery and its own styles.
+Configuration in Steal is usually done in the `package.json`, under the `steal` object.
 
-Change _package.json_ to:
+[config.map] maps the `"justifiedGallery"` [moduleIdentifier identifier] to the JavaScript file location.
+
+[config.meta] specifies that:
+
+- This module is in a global format (`format`).
+- This module depends on jQuery (`deps`)
+- This module depends on its own style code (`justifiedGallery.less`).
+
+Update _package.json_ to:
 
 ```json
 {
@@ -521,7 +727,7 @@ Change _package.json_ to:
 
 ### Use justifiedGallery
 
-Now that the library is installed and configured we only need to `require()` it in our CommonJS module.
+Now that justifiedGallery is installed _and configured_, we need to `require()` it in our _puppies_ CommonJS module.
 
 Change _puppies/puppies.js_ to:
 
@@ -530,7 +736,7 @@ require("justifiedGallery");
 var $ = require("jquery");
 
 module.exports = function(selector) {
-  $(selector).html("Loading...");
+	$(selector).html("Loading...");
 
 	$.ajax({
 		url: 'https://api.flickr.com/services/feeds/photos_public.gne',
@@ -542,22 +748,36 @@ module.exports = function(selector) {
 		},
 		success: function(response) {
 			var html = response.items.map(function(item, index) {
-				return '<a href="'+item.link+'">'+
-				'<img alt="'+item.title+'" src="'+item.media.m+'"/>'+
-				'</a>'
+				return '<a href="' + item.link + '">' +
+					'<img alt="' + item.title + '" src="' + item.media.m + '"/>' +
+					'</a>';
 			}).join("");
+			var root = $("<div>").html(html);
 
-			$(selector).html(html).justifiedGallery();
+			$(selector).html(root);
+			root.justifiedGallery();
 		}
 	});
 };
 ```
 
-@highlight 2,5-24
+@highlight 2,5-26
+
+Open [http://127.0.0.1:8080/puppies/puppies.html](http://127.0.0.1:8080/puppies/puppies.html) to
+see the __puppies__ widget demo page.
+
+At this point, we've done the following:
+
+- Installed Justified Gallery.
+- Created a modlet for _puppies_.
+- Configured [config.map] and [config.meta] in `package.json`.
+- Required `justifiedGallery` in the _puppies_ CommonJS module.
+
+Getting functionality out of a global script from an npm package and into a modlet is easy as that, thanks to Steal.
 
 ### Update app to change pages
 
-Now that we've created this new page, let's update the app so that we can toggle between the *repos* and *puppies* pages depending on the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
+Now that we've created __puppies__, the app needs to be updated so that it will toggle between the _weather_ and _puppies_ pages when using the navigation. More specfically, we will do this by looking at the [location.hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) of the page.
 
 Update _myhub.js_ to:
 
@@ -565,23 +785,23 @@ Update _myhub.js_ to:
 import $ from "jquery";
 import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
-import repos from "./repos/repos";
+import weather from "./weather/weather";
 import puppies from "./puppies/puppies";
 
 $("body").append(`
-    <div class='container'>
+    <div class="container">
         <h1>Goodbye script tags!</h1>
-        <a href="#repos">Repos</a> <a href="#puppies">Puppies</a>
-        <div id='main'/>
+        <a href="#weather">Weather</a> <a href="#puppies">Puppies</a>
+        <div id="main"/>
     </div>`);
 
 var modules = {
-    repos: repos,
+    weather: weather,
     puppies: puppies,
     "": function(selector){
         $(selector).html("Welcome home");
     }
-}
+};
 
 var updatePage = function(){
     var hash = window.location.hash.substr(1);
@@ -595,9 +815,11 @@ updatePage();
 
 @highlight 5,8-29
 
+There's a lot going on there, so you might want to re-read that file a couple of times to make sure you understand it.
+
 ## Build a production app
 
-Now that we've created our application we need to share it with the public. To do this we'll create a build that will concat our JavaScript and styles down to only one file, each, for faster page loads in production.
+Now that we've created our application, we need to share it with the public. To do this we'll create a build that will concat our JavaScript and styles down to only one file, each, for faster page loads in production.
 
 ### Build the app and switch to production
 
@@ -608,11 +830,12 @@ In your package.json `"scripts"` section add:
 ```json
 {
   "scripts": {
-    ...
+    "start": "http-server -c-1 .",
 	"build": "steal-tools"
   }
 }
 ```
+@highlight 4
 
 And then you can run:
 
@@ -633,6 +856,7 @@ Create _index.html_ with:
       <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <div class="container">Hello World.</div>
     <script src="./dist/steal.production.js"></script>
   </body>
 </html>
@@ -658,6 +882,7 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
+    <div class="container">Hello World.</div>
     <script src="./dist/steal.production.js"></script>
   </body>
 </html>
@@ -665,24 +890,25 @@ Update _index.html_ to:
 
 @highlight 7
 
-Now if you restart your server with `npm start` and reload the page you'll notice that only a few resources are downloaded.
+Now if you reload the page you'll notice that only a few resources are downloaded.
 
 <img width="744" alt="screen shot 2016-11-02 at 2 27 00 pm" src="https://cloud.githubusercontent.com/assets/361671/19943420/b0900d0c-a10d-11e6-99d6-8c1aea6632d5.png">
 
 ### Bundle steal.js
 
 You'll notice in the above screenshot that we are loading two JavaScript files. *myhub.js* and *steal.production.js*. We can avoid loading both by bundling Steal along with your app's main bundle.
- 
+
 Update your `build` script to add the `--bundle-steal` flag:
 
 ```json
 {
   "scripts": {
-    ...
+    "start": "http-server -c-1 .",
 	"build": "steal-tools --bundle-steal"
   }
 }
 ```
+@highlight 4
 
 Run:
 
@@ -702,12 +928,13 @@ Update _index.html_ to:
       <link href="./dist/bundles/myhub/myhub.css" rel="stylesheet">
   </head>
   <body>
+    <div class="container">Hello World.</div>
     <script src="./dist/bundles/myhub/myhub.js"></script>
   </body>
 </html>
 ```
 
-@highlight 10
+@highlight 11
 
 ## Build a progressive loading production app
 
@@ -725,10 +952,10 @@ import "./myhub.less";
 import "bootstrap/dist/css/bootstrap.css";
 
 $("body").append(`
-    <div class='container'>
+    <div class="container">
         <h1>Goodbye script tags!</h1>
-        <a href="#repos">Repos</a> <a href="#puppies">Puppies</a>
-        <div id='main'/>
+        <a href="#weather">Weather</a> <a href="#puppies">Puppies</a>
+        <div id="main"/>
     </div>`);
 
 var updatePage = function(){
@@ -751,7 +978,7 @@ updatePage();
 
 @highlight 3,13-22
 
-In the above code we have a div `#main` that each page renders into. Based on the location.hash, dynamically import the page being requested. So when the hash is `#repos` use [steal.import] to import the repos modlet; if the hash is `#puppies` use steal.import to import the puppies modlet.
+In the above code we have a div `#main` that each page renders into. Based on the location.hash, dynamically import the page being requested. So when the hash is `#weather` use [steal.import] to import the weather modlet; if the hash is `#puppies` use steal.import to import the puppies modlet.
 
 ### Update bundles to build
 
@@ -768,7 +995,7 @@ Update _package.json_ to:
 
     "bundle": [
       "myhub/puppies/puppies",
-      "myhub/repos/repos"
+      "myhub/weather/weather"
     ]
   }
 }
@@ -810,9 +1037,10 @@ Create _export.js_ with:
 
 ```js
 var stealTools = require("steal-tools");
+
 stealTools.export({
   steal: {
-    main: "myhub/repos/repos",
+    main: "myhub/weather/weather",
     config: __dirname+"/package.json!npm"
   },
   options: {
@@ -822,13 +1050,17 @@ stealTools.export({
     "+amd": {},
     "+global-js": {
         exports: {
-            "myhub/repos/repos":"repos",
+            "myhub/weather/weather":"weather",
             "jquery": "jQuery"
         },
-        dest: __dirname+"/dist/global/repos.js"
+        dest: __dirname+"/dist/global/weather.js"
+    },
+    "+global-css": {
+      dest: __dirname+"/dist/global/weather.css"
     }
   }
 });
+
 ```
 
 Run:
@@ -839,7 +1071,7 @@ Run:
 
 ### Test the standalone module
 
-Create _repos/repos-standalone.html_ with:
+Create _weather/weather-standalone.html_ with:
 
 ```html
 <!doctype html>
@@ -849,16 +1081,15 @@ Create _repos/repos-standalone.html_ with:
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+      <link rel="stylesheet" href="../dist/global/weather.css">
   </head>
   <body>
-    <div id='git-repos'/>
+    <div id="forecast"/>
     <script src="//code.jquery.com/jquery-3.0.0.js"></script>
-    <script src="../dist/global/repos.js"></script>
+    <script src="../dist/global/weather.js"></script>
     <script>
-        repos("#git-repos");
+        weather("#forecast");
     </script>
   </body>
 </html>
 ```
-
-

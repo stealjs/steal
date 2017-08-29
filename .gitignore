@@ -14,7 +14,7 @@ test/bower/as_config/vendor/steal/
 !test/nested-npm-algorithm/node_modules/some/node_modules/
 !test/import-js-file/node_modules/
 src/loader/loader-esnext.js
-test/npm/bower/node_modules/steal/
+test/npm/bower/node_modules/**
 
 !test/npm/**/node_modules
 test/npm/node_modules/

@@ -176,7 +176,13 @@ QUnit.test("Support cloned loader", function(assert) {
 
 	GlobalSystem.normalize(origDefault.name)
 		.then(function(normalizedName) {
-			return GlobalSystem.locate({ name: normalizedName });
+			return GlobalSystem.locate({
+				status: "loading",
+				name: normalizedName,
+				linkSets: [],
+				dependencies: [],
+				metadata: {}
+			});
 		})
 		.then(function(path) {
 			assert.ok(path);
@@ -278,8 +284,7 @@ QUnit.test("With npm3 traversal starts by going to the mosted nested position", 
 	makeIframe("nested_back/dev.html", assert);
 });
 
-// TODO: Fix this test
-QUnit.skip("peerDependencies are matched against parent that has a matching version", function(assert){
+QUnit.test("peerDependencies are matched against parent that has a matching version", function(assert){
 	makeIframe("peer_deps/dev.html", assert);
 });
 

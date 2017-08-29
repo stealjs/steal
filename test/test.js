@@ -7,12 +7,14 @@ require("src/env/test/");
 require("src/json/test/");
 require("src/trace/trace_test");
 
+require("test/joinuris_test");
 require("test/config/config_test");
 require("test/clone/clone_test");
 require("test/babel_plugins_test");
 require("test/babel_presets_test");
 require("test/steal_clone_test");
 require("test/steal_import_test");
+require("test/steal_module_script_test");
 
 var helpers = require("./helpers");
 var makeIframe = helpers.makeIframe;
@@ -170,6 +172,12 @@ QUnit.test("steal.production.js doesn't require setting env", function(assert) {
 	makeIframe("production/prod-env.html", assert);
 });
 
+if(System.promisesSupported) {
+	QUnit.test("Production bundle works with steal-sans-promises", function(assert) {
+		makeIframe("production/prod.html", assert);
+	});
+}
+
 if (hasConsole) {
 	QUnit.test("steal.production.js logs errors", function(assert) {
 		makeIframe("production_err/prod.html", assert);
@@ -258,6 +266,10 @@ QUnit.test("script tag wins against global steal object", function(assert) {
 
 QUnit.test("steal tag detection", function(assert) {
 	makeIframe("last_script_tag/index.html", assert);
+});
+
+QUnit.test("missing steal-less plugin error message", function(assert) {
+	makeIframe("missing_less_plugin/index.html", assert);
 });
 
 if(supportsTypedArrays) {
