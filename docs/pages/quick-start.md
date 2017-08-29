@@ -79,8 +79,8 @@ need it later.
 @highlight 8-9
 
 
-**index.js** is the entrypoint of the application. It should load import your
-app's other modules and kickoff the application. Write the following in **index.js**:
+**index.js** is the entrypoint of the application. It should import your app's 
+other modules and kickoff the application. Write the following in **index.js**:
 
     import $ from "jquery";
     $(document.body).append("<h1>Hello World!</h1>");
