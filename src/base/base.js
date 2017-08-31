@@ -1385,7 +1385,7 @@ function amd(loader) {
 
   var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm
   var beforeRegEx = /(function|var|let|const|return|export|\"|\'|\(|\=)$/i
-  
+
   var fnBracketRegEx = /\(([^\)]*)\)/;
   var wsRegEx = /^\s+|\s+$/g;
 
@@ -1451,7 +1451,10 @@ function amd(loader) {
         if (endRx === chunkEndCounterpart.require) {
           // then the second capture group of the endRx is what's inside the string, inside the ()'s, after requireAlias,
           // which is the path of a dep that we want to return.
-          deps.push(endExec[2]);
+		  if(endExec[2]) {
+			  deps.push(endExec[2]);
+		  }
+
         }
       }
     }
