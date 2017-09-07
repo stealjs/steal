@@ -20,10 +20,10 @@ By default, if [config.stealPath] points to steal.js within node_modules like:
 [config.configMain] will point to `"package.json!npm"`. The `npm` plugin
 reads `package.json` and sets a normalize and locate hook.
 
-**Note**: if you are using NPM 3 see the *npmAlgorithm* option below.
+**Note**: if you are using npm 3 see the *npmAlgorithm* option below.
 
 
-## NPM Module names
+## npm Module names
 
 Package dependency module names are converted to look like: 
 
@@ -107,7 +107,7 @@ imported.  This path that `my-main` will be found depends on the `directories.li
 ### package.steal.map
 
 The map config works similar to the base [config.map] behavior.  However, both the keys and values
-are converted to NPM module names.  The keys and values must:
+are converted to npm module names.  The keys and values must:
 
  - Start with `./` to map modules within the package like `"./src/util"`, or
  - Look like `packageName#./modulePath` to map direct dependencies of the package.
@@ -212,9 +212,9 @@ Even though `npmIgnore` is set to ignore all `devDependencies` the use of `npmDe
 
 Used to determine which algorithm is used to look up packages.
 
-The default algorithm is `flat`. **We assume that you are using NPM 3 or higher.** See [here](https://github.com/npm/npm/releases/tag/v3.0.0) more about the flat file structure of NPM 3.
+The default algorithm is `flat`. **We assume that you are using npm 3 or higher.** See [here](https://github.com/npm/npm/releases/tag/v3.0.0) more about the flat file structure of npm 3.
 
-If you are using NPM 2 your dependencies of `node_modules` will be nested. StealJS can handle the lookup by setting `npmAlgorithm` to `nested`.
+If you are using npm 2 your dependencies of `node_modules` will be nested. StealJS can handle the lookup by setting `npmAlgorithm` to `nested`.
 
 ```js
 {

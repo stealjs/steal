@@ -66,7 +66,7 @@
 
 ### steal
 
-- Support added for [NPM 3](https://github.com/stealjs/steal/pull/522).
+- Support added for [npm 3](https://github.com/stealjs/steal/pull/522).
 - Support added for [scoped packages](https://github.com/stealjs/system-npm/pull/78).
 
 ## 0.12.0

@@ -77,7 +77,7 @@ Additionally, plugins make it possible to load ANY module type you might come up
 
 ## Extending `steal` with Plugins
 
-The StealJS organization maintains popular plugins that extend and enhance the module-loading capablitities of `steal` (and, subsequently, `steal-tools`) such as:
+The StealJS organization maintains popular plugins that extend and enhance the module-loading capabilities of `steal` (and, subsequently, `steal-tools`) such as:
 
   - [CSS](https://github.com/stealjs/steal-css)
   - [Less](https://github.com/stealjs/steal-less)

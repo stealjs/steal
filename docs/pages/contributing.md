@@ -278,7 +278,7 @@ website. To edit the docs:
   
         > git clone https://github.com/stealjs/stealjs.git
 
-3. Install NPM dependencies:
+3. Install npm dependencies:
 
         > npm install
 

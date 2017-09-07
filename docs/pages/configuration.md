@@ -3,7 +3,7 @@
 
 @body
 
-Steal allows you to configure module loading through a **steal** property in your package.json. If you're not using Steal through NPM (you should be) you can also configure using any of the options provided by [config.config].
+Steal allows you to configure module loading through a **steal** property in your package.json. If you're not using Steal through npm (you should be) you can also configure using any of the options provided by [config.config].
 
 A basic configuration might look like this:
 

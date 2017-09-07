@@ -275,7 +275,7 @@ exports.addExtension = function(System){
 					}
 
 					// If locate didn't do the expected thing then we're going
-					// to guess that we shouldn't perform NPM lookup on this
+					// to guess that we shouldn't perform npm lookup on this
 					// module as there might be a wildcard path.
 					if(address !== expectedAddress + ".js" &&
 					  address !== expectedAddress) {
@@ -348,7 +348,7 @@ exports.addExtension = function(System){
 			if (error.statusCode === 404 && utils.moduleName.isBareIdentifier(load.name)) {
 				throw new Error([
 					"Could not load '" + load.name + "'",
-					"Is this an NPM module not saved in your package.json?"
+					"Is this an npm module not saved in your package.json?"
 				].join("\n"));
 			} else {
 				throw error;

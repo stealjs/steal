@@ -58,7 +58,7 @@ The old Steal was chainable using `.then`, but this produced numerous problems t
 
 The old Steal always produced a `production.js` file, but this is no longer the case. Though configurable, by default the new Steal will place the production file in `dist/bundles` and it will be named after your main module.
 
-You will also need to add the following to your `stealconfig.js` file to be able to build the CanJS projects (note if you are using NPM this isn't necessary):
+You will also need to add the following to your `stealconfig.js` file to be able to build the CanJS projects (note if you are using npm this isn't necessary):
 
 ```js
 steal.config({
