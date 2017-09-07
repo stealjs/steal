@@ -454,7 +454,7 @@ QUnit.test("importing a package with an unsaved dependency", function(assert) {
 			}, function(err) {
 				assert.ok(/Could not load 'dep'/.test(err.message));
 				assert.ok(
-					/Is this an NPM module not saved/.test(err.message),
+					/Is this an npm module not saved/.test(err.message),
 					"should throw a descriptive error message"
 				);
 				done();

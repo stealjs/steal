@@ -4,7 +4,7 @@
 StealJS is a dependency loader and build tool that solves the most difficult parts of building large JavaScript applications. With it's focus on simplified workflows and highly efficient production builds, we hope that StealJS is the last module loader you'll ever need. If you haven't checked out StealJS yet, we provide:
 
 *   A [production bundler and optimizer][2] that speeds up application load times by balancing caching and resource requests.
-*   [Easy workflows][3] for use with NPM and/or Bower. Less and CSS are supported out of the box.
+*   [Easy workflows][3] for use with npm and/or Bower. Less and CSS are supported out of the box.
 *   A powerful [exporting tool][4] for library authors so your module can reach users regardless of whether they are using StealJS, Browserify, RequireJS, SystemJS or WebPack.
 *   A module loader based on ES6, but providing compatibility with CommonJS and AMD.
 
@@ -36,7 +36,7 @@ For more traditional sites (not single page applications) you might have your ap
 
 ### Package Managers
 
-The rise of package managers like NPM and Bower has changed the way developers write applications today. Unfortunately this alone didn't make it easier to use your dependencies in your projects. In traditional module loaders like RequireJS you would have to configure these dependencies one-by-one.
+The rise of package managers like npm and Bower has changed the way developers write applications today. Unfortunately this alone didn't make it easier to use your dependencies in your projects. In traditional module loaders like RequireJS you would have to configure these dependencies one-by-one.
 
     require.config({
       paths: {
@@ -48,9 +48,9 @@ The rise of package managers like NPM and Bower has changed the way developers w
 
 This is tedious and error-prone. Once apps scale your config becomes more complex and harder to read. If any of the packages have their own dependencies you'll have to configure those as well. The result is that most client-side libraries have between 0 and 1 dependency.
 
-Some newer loaders like Webpack and Browserify side-step this problem by requiring you use NPM with a build script. This solves the dependency problem but creates new ones. In large applications where you might have many demo and test pages you now have to create separate bundles for each of these.
+Some newer loaders like Webpack and Browserify side-step this problem by requiring you use npm with a build script. This solves the dependency problem but creates new ones. In large applications where you might have many demo and test pages you now have to create separate bundles for each of these.
 
-We think it can be better than this. The user shouldn't have to configure their loader but they also shouldn't be forced to start off a project by writing a build script. So we built Bower and NPM plugins that allow you to use these package managers but still have the convenience that browser-based module loaders provide.
+We think it can be better than this. The user shouldn't have to configure their loader but they also shouldn't be forced to start off a project by writing a build script. So we built Bower and npm plugins that allow you to use these package managers but still have the convenience that browser-based module loaders provide.
 
 Consider you are starting a new three.js project. With npm you would install Three like so:
 
@@ -62,7 +62,7 @@ What this does in the background is save an entry in "dependencies" inside of yo
     <script src="node_modules/steal/steal.js"></script>
     
 
-StealJS will know that you're using NPM and look up your package.json for metadata. For you it's as simple as saving and then using:
+StealJS will know that you're using npm and look up your package.json for metadata. For you it's as simple as saving and then using:
 
     import THREE from "three";
     

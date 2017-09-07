@@ -23,11 +23,11 @@ There are four basic steps when using Steal:
 Steal works slightly differently depending on how it is installed.  There
 are three ways to install Steal:
 
- - [npm](#section_NPMbasics)
+ - [npm](#section_npmbasics)
  - [bower](#section_Bowerbasics)
  - [download](#section_Downloadbasics)
 
-## NPM basics
+## npm basics
 
 The following details how to use steal installed via [npm](https://www.npmjs.com/) to make
 a simple jQuery app.
@@ -100,7 +100,7 @@ $("body").append("<h1>Hello World</h1>")
 
 ### Importing in your app
 
-From here using packages is the same as if you used NPM, just import them into
+From here using packages is the same as if you used npm, just import them into
 _myapp.js_ and do what you need:
 
 ```js

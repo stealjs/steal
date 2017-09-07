@@ -5,7 +5,7 @@ StealJS can export your project into commonly used formats and platforms
 which can be used to create distributables that can be used in almost any situation:
 
  - [syntax.amd] and Bower
- - [syntax.CommonJS] and NPM for [Browserify](http://browserify.org/)
+ - [syntax.CommonJS] and npm for [Browserify](http://browserify.org/)
  - [syntax.es6 ES Syntax] and StealJS, SystemJS, or JSPM
  - [syntax.global global format] and `<script>` tags
 
@@ -167,7 +167,7 @@ with the files needed to use your project AMD, CommonJS and  `<script>` tags res
 For now, you should inspect these files and make sure they work. Eventually,
 we may release helpers that make it easy to test your distributables.
 
-### To NPM
+### To npm
 
 Run:
 
@@ -219,7 +219,7 @@ Once bower is setup, publishing to bower just means pushing a
 Developers need to know how to use your project. The following demonstrates what you need to tell them
 depending on how they are using your project.
 
-### NPM and StealJS
+### npm and StealJS
 
 Simply import, require, or use define to load your project.
 
@@ -230,7 +230,7 @@ define(["bit-tabs"], function(){});
 ```
 
 
-### NPM and CJS
+### npm and CJS
 
 Simply require your project.
 
