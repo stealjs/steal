@@ -12,13 +12,16 @@ A basic configuration might look like this:
   ...
   "steal": {
     "meta": {
-	  "jquery-plugin": {
+      "jquery-plugin": {
         "deps": ["jquery"]
       }
-	},
-	"paths": {
+    },
+    "paths": {
       "some-dep": "lib/some/dep.js"
-	}
+    },
+    "plugins": [
+      "steal-css"
+    ]
   }
 }
 ```
@@ -70,6 +73,32 @@ import foo from "foo";
 ```
 
 Will get the `FOO` global.
+
+## Plugins
+
+Plugins (such as [steal-css](https://www.npmjs.com/package/steal-css)) should be installed as `devDependencies` and added to the `plugins` configuration in your `package.json`.
+
+For example, to use `steal-css`, first install it with npm:
+
+```
+npm install steal-css --save-dev
+```
+
+Then update the `plugins` configuration in your `package.json`:
+
+```json
+{
+  ...
+  "devDependencies": {
+    ...
+    "steal-css": "^1.0.0"
+  },
+  "steal": {
+    ...
+    "plugins": ["steal-css"]
+  }
+}
+```
 
 ## Progressively loaded bundles
 
