@@ -61,10 +61,22 @@ Next install and run a local fileserver. [http-server](https://www.npmjs.com/pac
 Next edit your `package.json` so that the start script looks like:
 
 ```json
-"scripts": {
-  "start": "http-server -c-1 ."
-},
+{
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -c-1 ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.10.0"
+  }
+}
 ```
+@highlight 6-8,only
 
 This allows us to start the server with:
 
@@ -121,12 +133,29 @@ Update _package.json_ to:
 
 ```json
 {
-  ...
-  "main": "myhub.js",
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -c-1 ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.10.0",
+    "jquery": "^3.2.1",
+    "steal": "^1.5.13",
+    "steal-css": "^1.3.1",
+    "steal-less": "^1.2.0",
+    "steal-tools": "^1.8.4"
+  }
 }
 ```
+@highlight 5,only
 
-Reload _myhub.html_ to see your changes.
+
+Reload [http://127.0.0.1:8080/myhub.html](http://127.0.0.1:8080/myhub.html) to see your changes.
 
 ## Import styles
 
@@ -138,18 +167,32 @@ We need to update our package.json to specify the *plugins* that need to be load
 
 ```json
 {
-   ...
-
-   "steal": {
-     "plugins": [
-       "steal-css",
-       "steal-less"
-     ]
-   }
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "myhub.js",
+  "scripts": {
+    "start": "http-server -c-1 ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.10.0",
+    "jquery": "^3.2.1",
+    "steal": "^1.5.13",
+    "steal-css": "^1.3.1",
+    "steal-less": "^1.2.0",
+    "steal-tools": "^1.8.4"
+  },
+  "steal": {
+    "plugins": [
+      "steal-css",
+      "steal-less"
+    ]
+  }
 }
 ```
-
-@highlight 4-9
+@highlight 19-24,only
 
 ### Create and import a less file
 
@@ -703,27 +746,47 @@ Update _package.json_ to:
 
 ```json
 {
-  ...
-
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "myhub.js",
+  "scripts": {
+    "start": "http-server -c-1 ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bootstrap": "^3.3.7",
+    "http-server": "^0.10.0",
+    "jquery": "^3.2.1",
+    "justifiedGallery": "^3.6.2",
+    "steal": "^1.5.13",
+    "steal-css": "^1.3.1",
+    "steal-less": "^1.2.0",
+    "steal-qunit": "^1.0.1",
+    "steal-tools": "^1.8.4"
+  },
   "steal": {
     "plugins": [
       "steal-css",
       "steal-less"
-     ],
-     "map": {
-         "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
-     },
-     "meta": {
-         "justifiedGallery/src/js/justifiedGallery": {
-             "format": "global",
-             "deps": ["jquery","justifiedGallery/src/less/justifiedGallery.less"]
-         }
-     }
+    ],
+    "map": {
+      "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
+    },
+    "meta": {
+      "justifiedGallery/src/js/justifiedGallery": {
+        "format": "global",
+        "deps": [
+          "jquery",
+          "justifiedGallery/src/less/justifiedGallery.less"
+        ]
+      }
+    }
   }
 }
 ```
-
-@highlight 9-17
+@highlight 27-38,only
 
 ### Use justifiedGallery
 
@@ -829,13 +892,48 @@ In your package.json `"scripts"` section add:
 
 ```json
 {
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "myhub.js",
   "scripts": {
     "start": "http-server -c-1 .",
-	"build": "steal-tools"
+    "build": "steal-tools"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bootstrap": "^3.3.7",
+    "http-server": "^0.10.0",
+    "jquery": "^3.2.1",
+    "justifiedGallery": "^3.6.2",
+    "steal": "^1.5.13",
+    "steal-css": "^1.3.1",
+    "steal-less": "^1.2.0",
+    "steal-qunit": "^1.0.1",
+    "steal-tools": "^1.8.4"
+  },
+  "steal": {
+    "plugins": [
+      "steal-css",
+      "steal-less"
+    ],
+    "map": {
+      "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
+    },
+    "meta": {
+      "justifiedGallery/src/js/justifiedGallery": {
+        "format": "global",
+        "deps": [
+          "jquery",
+          "justifiedGallery/src/less/justifiedGallery.less"
+        ]
+      }
+    }
   }
 }
 ```
-@highlight 4
+@highlight 8,only
 
 And then you can run:
 
@@ -902,13 +1000,48 @@ Update your `build` script to add the `--bundle-steal` flag:
 
 ```json
 {
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "myhub.js",
   "scripts": {
     "start": "http-server -c-1 .",
-	"build": "steal-tools --bundle-steal"
+    "build": "steal-tools --bundle-steal"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bootstrap": "^3.3.7",
+    "http-server": "^0.10.0",
+    "jquery": "^3.2.1",
+    "justifiedGallery": "^3.6.2",
+    "steal": "^1.5.13",
+    "steal-css": "^1.3.1",
+    "steal-less": "^1.2.0",
+    "steal-qunit": "^1.0.1",
+    "steal-tools": "^1.8.4"
+  },
+  "steal": {
+    "plugins": [
+      "steal-css",
+      "steal-less"
+    ],
+    "map": {
+      "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
+    },
+    "meta": {
+      "justifiedGallery/src/js/justifiedGallery": {
+        "format": "global",
+        "deps": [
+          "jquery",
+          "justifiedGallery/src/less/justifiedGallery.less"
+        ]
+      }
+    }
   }
 }
 ```
-@highlight 4
+@highlight 8,only
 
 Run:
 
@@ -988,11 +1121,44 @@ Update _package.json_ to:
 
 ```json
 {
-  ...
-
+  "name": "myhub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "myhub.js",
+  "scripts": {
+    "start": "http-server -c-1 .",
+    "build": "steal-tools --bundle-steal"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "bootstrap": "^3.3.7",
+    "http-server": "^0.10.0",
+    "jquery": "^3.2.1",
+    "justifiedGallery": "^3.6.2",
+    "steal": "^1.5.13",
+    "steal-css": "^1.3.1",
+    "steal-less": "^1.2.0",
+    "steal-qunit": "^1.0.1",
+    "steal-tools": "^1.8.4"
+  },
   "steal": {
-    ...
-
+    "plugins": [
+      "steal-css",
+      "steal-less"
+    ],
+    "map": {
+      "justifiedGallery": "justifiedGallery/src/js/justifiedGallery"
+    },
+    "meta": {
+      "justifiedGallery/src/js/justifiedGallery": {
+        "format": "global",
+        "deps": [
+          "jquery",
+          "justifiedGallery/src/less/justifiedGallery.less"
+        ]
+      }
+    },
     "bundle": [
       "myhub/puppies/puppies",
       "myhub/weather/weather"
@@ -1000,8 +1166,7 @@ Update _package.json_ to:
   }
 }
 ```
-
-@highlight 7-10
+@highlight 40-43,only
 
 Run:
 
