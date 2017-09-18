@@ -214,8 +214,24 @@ exports.addExtension = function(System){
 					return oldNormalize.call(this, refPkg.browser[name], parentName,
 											 parentAddress, pluginNormalize);
 				}
-				return oldNormalize.call(this, name, parentName, parentAddress,
-										 pluginNormalize);
+				// Apply mappings, if they exist in the refPkg
+				var steal = utils.pkg.config(refPkg);
+				if (steal && steal.map && typeof steal.map[name] === "string") {
+					return loader.normalize(
+						steal.map[name],
+						parentName,
+						parentAddress,
+						pluginNormalize
+					);
+				} else {
+					return oldNormalize.call(
+						this,
+						name,
+						parentName,
+						parentAddress,
+						pluginNormalize
+					);
+				}
 			}
 			return crawl.dep(this.npmContext, parentPkg, refPkg, depPkg, isRoot)
 				.then(createModuleNameAndNormalize);
@@ -229,15 +245,14 @@ exports.addExtension = function(System){
 			if(!parsedModuleName.modulePath) {
 				parsedModuleName.modulePath = utils.pkg.main(depPkg);
 			}
-			var moduleName = utils.moduleName.create(parsedModuleName);
-			// Apply mappings, if they exist in the refPkg
-			var steal = utils.pkg.config(refPkg);
-			if(steal && steal.map &&
-			   typeof steal.map[moduleName] === "string") {
-				moduleName = steal.map[moduleName];
-			}
-			var p = oldNormalize.call(loader, moduleName, parentName,
-									  parentAddress, pluginNormalize);
+
+			var p = oldNormalize.call(
+				loader,
+				utils.moduleName.create(parsedModuleName),
+				parentName,
+				parentAddress,
+				pluginNormalize
+			);
 
 			// For identifiers like ./lib/ save this info as we might
 			// get a 404 and need to retry with lib/index.js

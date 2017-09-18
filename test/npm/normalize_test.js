@@ -841,7 +841,7 @@ QUnit.test("descriptive version mismatch error (#1176)", function(assert) {
 		.then(done, helpers.fail(assert, done));
 });
 
-QUnit.skip("'map' configuration where the right-hand identifier is an npm package but the left is not", function(assert){
+QUnit.test("'map' configuration where the right-hand identifier is an npm package but the left is not", function(assert){
 	var done = assert.async();
 
 	var loader = helpers.clone()
