@@ -1,6 +1,5 @@
 var helpers = require("./helpers")(System);
 var Package = helpers.Package;
-var utils = require("../../ext/npm-utils");
 
 require("./normalize_main-config_test");
 require("./normalize_plugins-config_test");

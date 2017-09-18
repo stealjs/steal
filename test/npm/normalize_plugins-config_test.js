@@ -1,3 +1,4 @@
+var helpers = require("./helpers")(System);
 
 QUnit.module("npm normalize - 'plugins' config");
 
