@@ -122,6 +122,10 @@ function convertPropertyNamesAndValues (context, pkg, map, root, waiting) {
 		if(typeof name !== 'undefined' && typeof val !== 'undefined') {
 			clone[name] = val;
 		}
+		// keep map entry if the key isn't a package but value might
+		if (name && typeof val === "undefined") {
+			clone[name] = map[property];
+		}
 	}
 	return clone;
 }
