@@ -242,6 +242,10 @@ if (hasConsole) {
 	QUnit.test("warn in production when main is not set (#537)", function(assert) {
 		makeIframe("basics/no_main_warning.html", assert);
 	});
+
+	QUnit.test("warns when module is loaded twice with different paths", function(assert) {
+		makeIframe("load_module_twice/dev.html", assert);
+	});
 }
 
 QUnit.test("can load a bundle with an amd module depending on a global", function(assert) {
