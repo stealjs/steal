@@ -6260,8 +6260,8 @@ addStealExtension(function (loader) {
 addStealExtension(function(loader) {
 	var superInstantiate = loader.instantiate;
 
-	var warn = console && typeof console.warn === "function" ?
-		console.warn.bind(console) :
+	var warn = typeof console === "object" ?
+		Function.prototype.bind.call(console.warn, console) :
 		null;
 
 	loader._instantiatedModules = loader._instantiatedModules || {};
