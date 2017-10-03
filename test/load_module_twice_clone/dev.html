@@ -16,15 +16,21 @@
 
 		window.console.warn = function(msg) {
 			window.assert.ok(
-				/is being instantiated twice/.test(msg),
-				"steal should warn users when module is instantiated twice"
+				false,
+				"Warning caused by using steal-clone"
 			);
-			window.WARN.apply(this, arguments);
-			window.done();
+			window.WARN(msg);
 		};
 	</script>
-	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm">
-
+	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"></script>
+	<script>
+		steal.done().then(function(){
+			// A promise that resolves when cloning is done.
+			return CLONE_DONE;
+		}).then(function(){
+			window.assert.ok(true, "No warnings");
+			window.done();
+		});
 	</script>
 </body>
 </html>

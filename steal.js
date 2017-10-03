@@ -6264,42 +6264,51 @@ addStealExtension(function(loader) {
 		Function.prototype.bind.call(console.warn, console) :
 		null;
 
-	loader._instantiatedModules = loader._instantiatedModules || {};
+	if(!loader._instantiatedModules) {
+		Object.defineProperty(loader, '_instantiatedModules', {
+			value: Object.create(null),
+			writable: false
+		});
+	}
 
 	loader.instantiate = function(load) {
+		var loader = this;
 		var instantiated = loader._instantiatedModules;
 
 		if (warn && instantiated[load.address]) {
 			var loads = (loader._traceData && loader._traceData.loads) || {};
 			var map = (loader._traceData && loader._traceData.parentMap) || {};
 
-			var parents = (map[load.name] ? Object.keys(map[load.name]) : [])
-				.map(function(parent) {
-					// module names might confuse people
-					return "\t " + loads[parent].address;
-				})
-				.join("\n");
+			var parentMods = instantiated[load.address].concat(load.name);
+			var parents = parentMods
+				.map(function(moduleName){
+					return "\t" + moduleName + "\n" +
 
-			warn(
-				[
-					"The module with address " + load.address +
-						" is being instantiated twice",
-					"This happens when module identifiers normalize to different module names.\n",
-					"HINT: Import the module using the ~/[modulePath] identifier" +
-						(parents ? " in " : ""),
-					(parents || "") + "\n",
-					"Learn more at https://stealjs.com/docs/moduleName.html and " +
-						"https://stealjs.com/docs/tilde.html"
-				].join("\n")
-			);
+					(map[moduleName] ? Object.keys(map[moduleName]) : [])
+					.map(function(parent) {
+						// module names might confuse people
+						return "\t\t - " + loads[parent].address;
+					})
+					.join("\n");
+				})
+				.join("\n\n");
+
+			warn([
+				"The module with address " + load.address +
+					" is being instantiated twice.",
+				"This happens when module identifiers normalize to different module names.\n",
+				"Modules:\n" + (parents || "") + "\n",
+				"HINT: Import the module using the ~/[modulePath] identifier.\n" +
+				"Learn more at https://stealjs.com/docs/moduleName.html and " +
+					"https://stealjs.com/docs/tilde.html"
+			].join("\n"));
 		} else {
-			instantiated[load.address] = load;
+			instantiated[load.address] = [load.name];
 		}
 
 		return superInstantiate.apply(loader, arguments);
 	};
 });
-
 
 addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
