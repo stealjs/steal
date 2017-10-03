@@ -246,6 +246,10 @@ if (hasConsole) {
 	QUnit.test("warns when module is loaded twice with different paths", function(assert) {
 		makeIframe("load_module_twice/dev.html", assert);
 	});
+
+	QUnit.test("No false positive 'loaded twice' warnings with steal-clone", function(assert) {
+		makeIframe("load_module_twice_clone/dev.html", assert);
+	});
 }
 
 QUnit.test("can load a bundle with an amd module depending on a global", function(assert) {

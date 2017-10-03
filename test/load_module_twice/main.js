@@ -1,3 +1,4 @@
+require("./bar");
 var foo = require("./foo");
 var foo2 = require("foo");
 
