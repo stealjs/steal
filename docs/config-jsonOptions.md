@@ -35,7 +35,7 @@ var pkg = require("./package.json");
 
 Which will be imported by Steal. However the package.json contains metadata include paths on your filesystem that you likely don't want exposed by a web-server.
 
-Typically code only needs their version for a few properties, such as the **version**. Using the *transform* function we can remote all others:
+Typically code only needs their version for a few properties, such as the **version**. Using the *transform* function we can remove all others:
 
 ```
 steal.config({
