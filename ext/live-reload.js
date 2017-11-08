@@ -269,13 +269,15 @@ function addLiveReload(loader) {
 		if(loader.liveReload === "false" || loader.liveReload === false) {
 			return;
 		}
+		// Save this so we can use it outside the zone
+		var WS = WebSocket;
 
 		var port = loader.liveReloadPort || 8012;
 
 		var host = loader.liveReloadHost || window.document.location.host.replace(/:.*/, '');
 		var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		var url = protocol + "//" + host + ":" + port;
-		var ws = new WebSocket(url);
+		var ws = new WS(url);
 
 		// Let the server know about the main module
 		var onopen = ws.onopen = function(){
@@ -294,7 +296,7 @@ function addLiveReload(loader) {
 			if(ev.code === 1006 && attempts > 0) {
 				attempts--;
 				setTimeout(function(){
-					ws = new WebSocket(url);
+					ws = new WS(url);
 					ws.open = onopen;
 					ws.onmessage = onmessage;
 					ws.onclose = onclose;
