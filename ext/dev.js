@@ -67,7 +67,6 @@
 					opera.postError("steal.js WARNING: " + out);
 				}
 			}
-
 		},
 		/**
 		 * @function steal.dev.log

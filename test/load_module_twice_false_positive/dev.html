@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>module is loaded twice with different paths</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+
+		window.WARN = Function.prototype.bind.call(
+			window.console.warn,
+			window.console
+		);
+
+		window.console.warn = function(msg) {
+			window.assert.ok(
+				!/is being instantiated twice/.test(msg),
+				"steal should not warn users when verbose logging is not enabled"
+			);
+			window.WARN.apply(this, arguments);
+			window.done();
+		};
+	</script>
+	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"></script>
+	<script>
+		steal.done().then(function(){
+			window.assert.ok(true, 'finished without throwing');
+			window.done();
+		});
+	</script>
+</body>
+</html>

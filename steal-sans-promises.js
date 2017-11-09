@@ -4991,8 +4991,8 @@ addStealExtension(function(loader) {
 	var superInstantiate = loader.instantiate;
 
 	var warn = typeof console === "object" ?
-		Function.prototype.bind.call(console.warn, console) :
-		null;
+	Function.prototype.bind.call(console.warn, console) :
+	null;
 
 	if(!loader._instantiatedModules) {
 		Object.defineProperty(loader, '_instantiatedModules', {
@@ -5002,10 +5002,11 @@ addStealExtension(function(loader) {
 	}
 
 	loader.instantiate = function(load) {
+		var address = load.address;
 		var loader = this;
 		var instantiated = loader._instantiatedModules;
 
-		if (warn && instantiated[load.address]) {
+		if (warn && address && instantiated[address]) {
 			var loads = (loader._traceData && loader._traceData.loads) || {};
 			var map = (loader._traceData && loader._traceData.parentMap) || {};
 
@@ -5032,7 +5033,7 @@ addStealExtension(function(loader) {
 				"Learn more at https://stealjs.com/docs/moduleName.html and " +
 					"https://stealjs.com/docs/tilde.html"
 			].join("\n"));
-		} else {
+		} else if(loader._configLoaded && address) {
 			instantiated[load.address] = [load.name];
 		}
 
@@ -5945,6 +5946,7 @@ addStealExtension(function (loader) {
 
 				return configPromise.then(function (cfg) {
 					setEnvsConfig.call(loader);
+					loader._configLoaded = true;
 					return loader.main ? loader["import"](loader.main) : cfg;
 				});
 
@@ -5967,6 +5969,7 @@ addStealExtension(function (loader) {
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(loader);
 					setupLiveReload.call(loader);
+					loader._configLoaded = true;
 
 					// If a configuration was passed to startup we'll use that to overwrite
 					// what was loaded in stealconfig.js
