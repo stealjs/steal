@@ -5038,6 +5038,17 @@ addStealExtension(function(loader) {
 
 		return superInstantiate.apply(loader, arguments);
 	};
+
+	// When a module is deleted, remove its _instantiatedModules record as well.
+	var loaderDelete = loader["delete"];
+	loader["delete"] = function(moduleName){
+		var res = loaderDelete.apply(this, arguments);
+		var load = this.getModuleLoad(moduleName);
+		if(load) {
+			this._instantiatedModules[load.address] = undefined;
+		}
+		return res;
+	};
 });
 
 addStealExtension(function applyTraceExtension(loader) {
