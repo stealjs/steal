@@ -6,10 +6,6 @@
 addStealExtension(function(loader) {
 	var superInstantiate = loader.instantiate;
 
-	var warn = typeof console === "object" ?
-		Function.prototype.bind.call(console.warn, console) :
-		null;
-
 	if(!loader._instantiatedModules) {
 		Object.defineProperty(loader, '_instantiatedModules', {
 			value: Object.create(null),
@@ -21,7 +17,7 @@ addStealExtension(function(loader) {
 		var loader = this;
 		var instantiated = loader._instantiatedModules;
 
-		if (warn && instantiated[load.address]) {
+		if (steal.dev && instantiated[load.address]) {
 			var loads = (loader._traceData && loader._traceData.loads) || {};
 			var map = (loader._traceData && loader._traceData.parentMap) || {};
 
@@ -39,7 +35,7 @@ addStealExtension(function(loader) {
 				})
 				.join("\n\n");
 
-			warn([
+			steal.dev.verboseWarn([
 				"The module with address " + load.address +
 					" is being instantiated twice.",
 				"This happens when module identifiers normalize to different module names.\n",
