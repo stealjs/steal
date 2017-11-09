@@ -250,6 +250,10 @@ if (hasConsole) {
 	QUnit.test("No false positive 'loaded twice' warnings with steal-clone", function(assert) {
 		makeIframe("load_module_twice_clone/dev.html", assert);
 	});
+
+	QUnit.test("No 'loaded twice' warnings when verbose logging not enabled", function(assert){
+		makeIframe("load_module_twice_false_positive/dev.html", assert);
+	});
 }
 
 QUnit.test("can load a bundle with an amd module depending on a global", function(assert) {

@@ -14,7 +14,7 @@
 			window.console
 		);
 
-		window.console.warn = function(msg) {
+		window.console.warn = function(devMsg, msg) {
 			window.assert.ok(
 				/is being instantiated twice/.test(msg),
 				"steal should warn users when module is instantiated twice"
@@ -23,7 +23,8 @@
 			window.done();
 		};
 	</script>
-	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm">
+	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"
+		log-level="0">
 
 	</script>
 </body>

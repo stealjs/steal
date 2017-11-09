@@ -978,6 +978,7 @@ addStealExtension(function (loader) {
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = Object.create(null);
 	System.logLevel = 0;
+	System.logVerbose = false;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -1326,6 +1327,17 @@ addStealExtension(function (loader) {
 				if (path) {
 					this.depsBundle = path;
 				}
+			}
+		},
+		logLevel: {
+			order: 18,
+
+			set: function(val) {
+				var ll = +val;
+				if(ll === 0) {
+					this.logVerbose = true;
+				}
+				this.logLevel = ll;
 			}
 		}
 	};

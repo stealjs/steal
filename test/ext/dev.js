@@ -67,7 +67,15 @@
 					opera.postError("steal.js WARNING: " + out);
 				}
 			}
-
+		},
+		/* @function steal.dev.verboseWarn
+		 *
+		 */
+		verboseWarn: function(out){
+			var verbose = steal.config('logVerbose');
+			if(verbose) {
+				this.warn(out);
+			}
 		},
 		/**
 		 * @function steal.dev.log

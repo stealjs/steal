@@ -16,20 +16,17 @@
 
 		window.console.warn = function(msg) {
 			window.assert.ok(
-				false,
-				"Warning caused by using steal-clone"
+				!/is being instantiated twice/.test(msg),
+				"steal should not warn users when verbose logging is not enabled"
 			);
-			window.WARN(msg);
+			window.WARN.apply(this, arguments);
+			window.done();
 		};
 	</script>
-	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"
-		log-level="0"></script>
+	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"></script>
 	<script>
 		steal.done().then(function(){
-			// A promise that resolves when cloning is done.
-			return CLONE_DONE;
-		}).then(function(){
-			window.assert.ok(true, "No warnings");
+			window.assert.ok(true, 'finished without throwing');
 			window.done();
 		});
 	</script>
