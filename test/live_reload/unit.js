@@ -36,6 +36,21 @@ QUnit.test("Can take a moduleName to teardown", function(assert){
 	.then(done, done);
 });
 
+if(window.console) {
+	QUnit.test("Doesn't produce 'loaded twice' warning", function(assert){
+		var done = assert.async();
+		var testContext = this;
+
+		loader.import("foo")
+		.then(function(){
+			assert.equal(loader.get("foo").default.foo, 'bar', "initial value is right");
+
+			return reloader("foo");
+		})
+		.then(done, done);
+	});
+}
+
 QUnit.test("Can take an array of moduleNames to teardown", function(assert){
 	var done = assert.async();
 
