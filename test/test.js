@@ -252,6 +252,10 @@ if (hasConsole) {
 	});
 }
 
+QUnit.test("can add implicit deps to ES and CJS modules", function(assert) {
+	makeIframe("meta_deps/dev.html", assert);
+});
+
 QUnit.test("can load a bundle with an amd module depending on a global", function(assert) {
 	makeIframe("prod_define/prod.html", assert);
 });

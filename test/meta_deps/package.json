@@ -1,0 +1,15 @@
+{
+  "name": "meta_deps",
+  "main": "main.js",
+  "version": "1.0.0",
+  "steal": {
+    "meta": {
+      "meta_deps/a": {
+        "deps": ["meta_deps/b"]
+      },
+      "meta_deps/c": {
+        "deps": ["meta_deps/d"]
+      }
+    }
+  }
+}
