@@ -1528,6 +1528,7 @@ addStealExtension(function (loader) {
 
 				return configPromise.then(function (cfg) {
 					setEnvsConfig.call(loader);
+					loader._configLoaded = true;
 					return loader.main ? loader["import"](loader.main) : cfg;
 				});
 
@@ -1550,6 +1551,7 @@ addStealExtension(function (loader) {
 				devPromise = configPromise.then(function () {
 					setEnvsConfig.call(loader);
 					setupLiveReload.call(loader);
+					loader._configLoaded = true;
 
 					// If a configuration was passed to startup we'll use that to overwrite
 					// what was loaded in stealconfig.js
