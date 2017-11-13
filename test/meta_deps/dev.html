@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>module is loaded twice with different paths</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm">
+
+	</script>
+</body>
+</html>
