@@ -294,6 +294,10 @@ if(supportsTypedArrays) {
 	});
 }
 
+QUnit.test("importing a module that exports the window object", function(assert){
+	makeIframe("import_cjs_global/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {

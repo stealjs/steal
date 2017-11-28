@@ -4093,9 +4093,13 @@ function register(loader) {
     if (exports && (exports.__esModule || exports instanceof Module))
       entry.esModule = exports;
     // set module as 'default' export, then fake named exports by iterating properties
-    else if (entry.esmExports && exports !== loader.global)
-      entry.esModule = getESModule(exports);
-    // just use the 'default' export
+    else if (entry.esmExports) {
+		if(exports === loader.global) {
+			entry.esModule = { 'default': exports, __useDefault: true };
+		} else {
+			entry.esModule = getESModule(exports);
+		}
+	}
     else
       entry.esModule = { 'default': exports };
   }
