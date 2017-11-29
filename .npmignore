@@ -1,6 +1,10 @@
-/test
-/scripts
-/src
-/.github
+bower_components
+test
+scripts
+.github
 Gruntfile.js
 .travis.yml
+src/**/*
+!src/loader/index.js
+!src/loader/loader.js
+!src/loader/loader-sans-promises.js
