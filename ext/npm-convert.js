@@ -55,7 +55,7 @@ function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInf
 	// needed for builds
 	if(steal.buildConfig) {
 		steal.buildConfig = convertSteal(context, pkg, steal.buildConfig,
-										  root, waiting);
+										  root, waiting, false);
 	}
 
 	// Push the waiting conversions down.
