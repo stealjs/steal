@@ -876,3 +876,43 @@ QUnit.test("'map' configuration where the right-hand identifier is an npm packag
 	.then(done, helpers.fail(assert, done));
 });
 
+QUnit.test("buildConfig that is late-loaded doesn't override outer config", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				dep: "1.0.0"
+			},
+			steal: {
+				map: {
+					"app/one": "app/two"
+				},
+				buildConfig: {
+					map: {
+						"app/one": "dep"
+					}
+				}
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])
+		.loader;
+
+	helpers.init(loader).then(function(){
+		loader.npmContext.resavePackageInfo = true;
+		return loader.normalize("dep", "app@1.0.0#main");
+	}).then(function(){
+		var pkg = loader.npmContext.pkgInfo[0];
+		assert.equal(pkg.steal.map["app@1.0.0#one"], "app@1.0.0#two", "Correct mapping in place");
+	})
+	.then(done, helpers.fail(assert, done));
+});
