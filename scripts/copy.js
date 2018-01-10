@@ -5,8 +5,7 @@ var root = path.join(__dirname, "..");
 
 // copy test node_modules dependencies
 var nodeModules = [
-	"jquery",
-	"jquery-ui"
+	"jquery"
 ];
 
 nodeModules.forEach(function(mod) {

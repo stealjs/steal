@@ -6,7 +6,6 @@
   "dependencies": {},
   "devDependencies": {
     "jquery": "^3.1.1",
-    "jquery-ui": "1.10.5",
     "live-reload-testing": "^6.0.0"
   },
   "steal": {
