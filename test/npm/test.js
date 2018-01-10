@@ -86,27 +86,6 @@ QUnit.test("module names that start with @", function(assert) {
 		.then(done);
 });
 
-QUnit.test("jquery-ui", function(assert) {
-	var done = assert.async();
-
-	GlobalSystem.paths["@foo"] = "test/foo.js";
-
-	var reqs = [
-		GlobalSystem["import"]("jquery"),
-		GlobalSystem["import"]("jquery-ui/draggable")
-	];
-
-	Promise.all(reqs)
-		.then(function(mods) {
-			var $ = mods[0];
-			assert.ok($.fn.draggable);
-		})
-		.then(done, function(err) {
-			assert.notOk(err, "should not fail");
-			done();
-		});
-});
-
 QUnit.test("import using package name", function(assert) {
 	var done = assert.async();
 
