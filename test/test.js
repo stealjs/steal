@@ -251,9 +251,13 @@ if (hasConsole) {
 		makeIframe("load_module_twice_clone/dev.html", assert);
 	});
 
-	QUnit.test("No 'loaded twice' warnings when verbose logging not enabled", function(assert){
+	QUnit.test("No 'loaded twice' warnings when a module was loaded before the config", function(assert){
 		makeIframe("load_module_twice_false_positive/dev.html", assert);
 	});
+
+	QUnit.test("No 'loaded twice' warnings when there is a loading error", function(assert){
+		makeIframe("load_module_twice_false_positive/on-error.html", assert);
+	})
 }
 
 QUnit.test("can add implicit deps to ES and CJS modules", function(assert) {

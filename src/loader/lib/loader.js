@@ -122,6 +122,7 @@ function logloads(loads) {
     return -1;
   };
   var defineProperty = $__Object$defineProperty;
+  var emptyArray = [];
 
   // 15.2.3 - Runtime Semantics: Loader State
 
@@ -188,6 +189,14 @@ function logloads(loads) {
           continue;
         console.assert(load.status == 'loading' || load.status == 'loaded', 'loading or loaded');
         return load;
+      }
+
+      var failedLoads = loader.loaderObj.failed || emptyArray;
+      for(var i = 0, l = failedLoads.length; i < l; i++) {
+        load = failedLoads[i];
+        if(load.name !== name)
+          continue;
+        return Promise.reject('The load ' + name + ' already failed.');
       }
 
       load = createLoad(name);
@@ -444,7 +453,8 @@ function logloads(loads) {
   }
   // 15.2.5.2.2
   function addLoadToLinkSet(linkSet, load) {
-    console.assert(load.status == 'loading' || load.status == 'loaded', 'loading or loaded on link set');
+    console.assert(load.status == 'loading' || load.status == 'loaded' || load.status === 'failed',
+		'loading or loaded on link set');
 
     for (var i = 0, l = linkSet.loads.length; i < l; i++)
       if (linkSet.loads[i] == load)
