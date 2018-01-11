@@ -17,20 +17,23 @@
 		window.console.warn = function(msg) {
 			window.assert.ok(
 				!/is being instantiated twice/.test(msg),
-				"steal should not warn users when a module was loaded before the config"
+				"steal should not warn users"
 			);
 			window.WARN.apply(this, arguments);
 			window.done();
 		};
 	</script>
-	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"></script>
+	<script src="../../../steal-sans-promises.js" data-base-url="."
+		data-config="package.json!npm" data-main="~/oops"></script>
 	<script>
-		steal.done().then(function(){
+		steal.done().then(null, function(err){
+			return steal.import('~/oops-two');
+		}).then(null, function(){
 			if(window.assert) {
-				window.assert.ok(true, 'finished without throwing');
+				window.assert.ok(true, 'finished without warning');
 				window.done();
 			} else {
-				console.log('Finished without throwing!');
+				console.log('Finished without warning!');
 			}
 		});
 	</script>
