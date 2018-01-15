@@ -496,7 +496,7 @@ exports.addExtension = function(System){
 		{
 			name: function(loader, load){
 				var context = loader.npmContext;
-				if(context.forwardSlashMap[load.name]) {
+				if(context && context.forwardSlashMap[load.name]) {
 					var parts = load.name.split("/");
 					parts.pop();
 					return parts.concat(["index"]).join("/");
