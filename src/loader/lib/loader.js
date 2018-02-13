@@ -568,8 +568,10 @@ function logloads(loads) {
 
       // store all failed load records
       loader.loaderObj.failed = loader.loaderObj.failed || [];
-      if (indexOf.call(loader.loaderObj.failed, load) == -1)
+      if (load.status === "failed" && indexOf.call(loader.loaderObj.failed, load) == -1)
         loader.loaderObj.failed.push(load);
+	  else if(loader.loaderObj._pendingState)
+	  	loader.loaderObj._pendingState(load);
 
       var linkIndex = indexOf.call(load.linkSets, linkSet);
       console.assert(linkIndex != -1, 'link not present');
