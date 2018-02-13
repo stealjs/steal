@@ -302,6 +302,10 @@ QUnit.test("importing a module that exports the window object", function(assert)
 	makeIframe("import_cjs_global/dev.html", assert);
 });
 
+QUnit.test("A module part of a failed linkset can still be loaded", function(assert){
+	makeIframe("load_after_fail/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {

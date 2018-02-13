@@ -604,8 +604,10 @@ function logloads(loads) {
 
       // store all failed load records
       loader.loaderObj.failed = loader.loaderObj.failed || [];
-      if (indexOf.call(loader.loaderObj.failed, load) == -1)
+      if (load.status === "failed" && indexOf.call(loader.loaderObj.failed, load) == -1)
         loader.loaderObj.failed.push(load);
+	  else if(loader.loaderObj._pendingState)
+	  	loader.loaderObj._pendingState(load);
 
       var linkIndex = indexOf.call(load.linkSets, linkSet);
       console.assert(linkIndex != -1, 'link not present');
@@ -5017,6 +5019,13 @@ addStealExtension(function(loader) {
 			writable: false
 		});
 	}
+
+	// When loads are part of a failed linkset they have been instantiated
+	// but might be re-instantiated if part of another linkset.
+	loader._pendingState = function(load){
+		var instantiated = loader._instantiatedModules;
+		delete instantiated[load.address];
+	};
 
 	loader.instantiate = function(load) {
 		var address = load.address;

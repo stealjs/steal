@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Loading a fail after it failed in another linkset</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script src="../../../steal-sans-promises.js" data-base-url="."
+		data-config="package.json!npm" data-main="~/oops"></script>
+	<script>
+		steal.done().then(null, function(err){
+			return steal.import('~/main');
+		}).then(function(){
+			if(window.assert) {
+				window.assert.ok(true, 'finished without warning');
+				window.done();
+			} else {
+				console.log('Finished without warning!');
+			}
+		}, function(err){
+			if(window.assert) {
+				window.assert.ok(false, err.toString());
+				window.done();
+			} else {
+				console.log("Uh oh", err);
+			}
+		});
+	</script>
+</body>
+</html>

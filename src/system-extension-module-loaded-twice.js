@@ -17,6 +17,13 @@ addStealExtension(function(loader) {
 		});
 	}
 
+	// When loads are part of a failed linkset they have been instantiated
+	// but might be re-instantiated if part of another linkset.
+	loader._pendingState = function(load){
+		var instantiated = loader._instantiatedModules;
+		delete instantiated[load.address];
+	};
+
 	loader.instantiate = function(load) {
 		var address = load.address;
 		var loader = this;
