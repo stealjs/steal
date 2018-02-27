@@ -26,9 +26,29 @@
 	<script src="../../../steal-sans-promises.js" data-base-url="."
 		data-config="package.json!npm" data-main="~/oops"></script>
 	<script>
-		steal.done().then(null, function(err){
-			return steal.import('~/oops-two');
-		}).then(null, function(){
+		function importAModuleThatImportsInvalidPackage() {
+			return steal.done().then(null, function(){
+				return steal.import('~/oops-two');
+			}).then(null, function(){
+				// We got here but that's ok.
+				return;
+			});
+		}
+
+		function importAModuleThatImportsAFileThatDoesntExist() {
+			return steal.done().then(null, function(){
+				return steal.import("~/oops-four");
+			}).then(null, function(error){
+				// We got here but that's ok.
+				return;
+			})
+		}
+
+		Promise.all([
+			importAModuleThatImportsInvalidPackage(),
+			importAModuleThatImportsAFileThatDoesntExist()
+		])
+		.then(function(){
 			if(window.assert) {
 				window.assert.ok(true, 'finished without warning');
 				window.done();

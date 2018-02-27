@@ -6305,8 +6305,15 @@ addStealExtension(function(loader) {
 		if (warn && address && instantiated[address]) {
 			var loads = (loader._traceData && loader._traceData.loads) || {};
 			var map = (loader._traceData && loader._traceData.parentMap) || {};
+			var instantiatedFromAddress = instantiated[load.address];
 
-			var parentMods = instantiated[load.address].concat(load.name);
+			// If we get here there might be a race condition from a failed linkset.
+			if(instantiatedFromAddress.length === 1 &&
+				instantiatedFromAddress[0] === load.name) {
+				return superInstantiate.apply(loader, arguments);
+			}
+
+			var parentMods = instantiatedFromAddress.concat(load.name);
 			var parents = parentMods
 				.map(function(moduleName){
 					return "\t" + moduleName + "\n" +
