@@ -457,6 +457,31 @@ QUnit.test("importing a package with an unsaved dependency", function(assert) {
 					/Is this an npm module not saved/.test(err.message),
 					"should throw a descriptive error message"
 				);
+				assert.equal(err.statusCode, 404, "Got a 404");
+				done();
+			});
+});
+
+QUnit.test("Importing a missing file doesn't give npm module error", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.loader;
+
+		loader["import"]("app/missing")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				assert.notOk(
+					/Is this an npm module not saved/.test(err.message),
+					"should not throw a npm module error message"
+				);
+				assert.equal(err.statusCode, 404, "got a 404");
 				done();
 			});
 });

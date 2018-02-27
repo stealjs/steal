@@ -397,7 +397,7 @@ var utils = {
 		 */
 		isRoot: function(loader, pkg) {
 			var root = utils.pkg.getDefault(loader);
-			return pkg.name === root.name && pkg.version === root.version;
+			return pkg && pkg.name === root.name && pkg.version === root.version;
 		},
 		homeAlias: function (context) {
 			return context && context.loader && context.loader.homeAlias || '~';

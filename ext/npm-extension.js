@@ -274,7 +274,9 @@ exports.addExtension = function(System){
 		var parsedModuleName = utils.moduleName.parse(load.name),
 			loader = this;
 
-		load.metadata.parsedModuleName = parsedModuleName;
+		var pmn = load.metadata.parsedModuleName = parsedModuleName;
+		load.metadata.npmPackage = utils.pkg.findByNameAndVersion(this,
+			pmn.packageName, pmn.version);
 
 		// @ is not the first character
 		if(parsedModuleName.version && this.npm && !loader.paths[load.name]) {
@@ -360,11 +362,15 @@ exports.addExtension = function(System){
 		}
 
 		return fetchPromise.catch(function(error) {
-			if (error.statusCode === 404 && utils.moduleName.isBareIdentifier(load.name)) {
-				throw new Error([
+			if (error.statusCode === 404 &&
+				utils.moduleName.isBareIdentifier(load.name) &&
+				!utils.pkg.isRoot(loader, load.metadata.npmPackage)) {
+				var newError = new Error([
 					"Could not load '" + load.name + "'",
 					"Is this an npm module not saved in your package.json?"
 				].join("\n"));
+				newError.statusCode = error.statusCode;
+				throw newError;
 			} else {
 				throw error;
 			}
