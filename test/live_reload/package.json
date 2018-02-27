@@ -6,7 +6,6 @@
   "author": "Bitovi",
   "license": "MIT",
   "devDependencies": {
-    "jquery": "^2.1.4",
     "live-reload-testing": "^5.1.0"
   }
 }
