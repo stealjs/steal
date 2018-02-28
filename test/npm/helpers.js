@@ -6,7 +6,10 @@ function Runner(System){
 	this.BaseSystem = System;
 	this.deps = [];
 	this.sources = {};
-	this.fetchAllowed = {};
+	this.fetchAllowed = {
+		"babel": true,
+		"@@babel-code-frame": true
+	};
 	this.fetchAll = false;
 }
 
@@ -24,6 +27,9 @@ Runner.prototype.clone = function(){
 	}));
 
 	loader.paths["live-reload"] = "node_modules/steal/ext/live-reload.js";
+	loader.paths["babel"] = "ext/babel.js";
+	loader.paths["@@babel-code-frame"] = "ext/babel-code-frame.js";
+	loader.meta["@@babel-code-frame"] = {"format":"global","exports":"BabelCodeFrame"};
 
 	var allow = {};
 	utils.forEach([

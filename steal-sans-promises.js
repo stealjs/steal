@@ -593,10 +593,12 @@ function logloads(loads) {
     var loader = linkSet.loader;
     var exc = linkExc;
 
+	/*
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
 
     exc = addToError(exc, 'Error loading "' + load.name + '" at ' + (load.address || '<unknown>') + '\n');
+	*/
 
     var loads = linkSet.loads.concat([]);
     for (var i = 0, l = loads.length; i < l; i++) {
@@ -1684,6 +1686,24 @@ function logloads(loads) {
 		};
 	}
 
+	function getImportSpecifierPositionsPlugin(load) {
+		load.metadata.importSpecifiers = Object.create(null);
+		return function(babel){
+			var t = babel.types;
+
+			return {
+				visitor: {
+					ImportDeclaration: function(path, state){
+						var node = path.node;
+						var specifier = node.source.value;
+						var loc = node.source.loc;
+						load.metadata.importSpecifiers[specifier] = loc;
+					}
+				}
+			};
+		};
+	}
+
 	function babelTranspile(load, babelMod) {
 		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
@@ -1698,11 +1718,13 @@ function logloads(loads) {
 			// might be running on an old babel that throws if there is a
 			// plugins array in the options object
 			if (babelVersion >= 6) {
-				options.plugins = [addESModuleFlagPlugin].concat(results[0]);
+				options.plugins = [getImportSpecifierPositionsPlugin(load),
+					addESModuleFlagPlugin].concat(results[0]);
 				options.presets = results[1];
 			}
 
-			var source = babel.transform(load.source, options).code;
+			var result = babel.transform(load.source, options);
+			var source = result.code;
 
 			// add "!eval" to end of Babel sourceURL
 			// I believe this does something?
@@ -1807,9 +1829,10 @@ function logloads(loads) {
         fulfill(xhr.responseText);
       }
       function error() {
-        var msg = xhr.statusText + ': ' + url || 'XHR error';
+		var s = xhr.status;
+        var msg = s + ' ' + xhr.statusText + ': ' + url + '\n' || 'XHR error';
         var err = new Error(msg);
-        err.statusCode = xhr.status;
+        err.statusCode = s;
         reject(err);
       }
 
@@ -1869,6 +1892,48 @@ function logloads(loads) {
   }
   else {
     throw new TypeError('No environment fetch API available.');
+  }
+
+  function transformError(err, load, loader) {
+	  if(typeof loader.getDependants === "undefined") {
+		  return Promise.resolve();
+	  }
+	  var dependants = loader.getDependants(load.name);
+	  if(Array.isArray(dependants) && dependants.length) {
+		  var StackTrace = loader.StackTrace;
+		  var isProd = loader.isEnv("production");
+
+		  return Promise.resolve()
+		  .then(function(){
+			  return isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
+		  })
+		  .then(function(codeFrame){
+			  var parentLoad = loader.getModuleLoad(dependants[0]);
+			  var pos = loader.getImportSpecifier(load.name, parentLoad) || {
+				  line: 1, column: 0
+			  };
+
+			  var detail = "The module [" + loader.prettyName(load) + "] couldn't be fetched.\n" +
+				"Clicking the link in the stack trace below takes you to the import.\n" +
+				"See https://stealjs.com/docs/StealJS.error-messages.html#404-not-found for more information.\n";
+			  var msg = err.message + "\n" + detail;
+
+			  if(!isProd) {
+				  var src = parentLoad.metadata.originalSource || parentLoad.source;
+				  var codeSample = codeFrame(src, pos.line, pos.column);
+				  msg += "\n" + codeSample + "\n";
+			  }
+
+			  err.message = msg;
+
+			  var stackTrace = new StackTrace(msg, [
+				  StackTrace.item(null, parentLoad.address, pos.line, pos.column)
+			  ]);
+
+			  err.stack = stackTrace.toString();
+		  })
+	  }
+	  return Promise.resolve();
   }
 
   var SystemLoader = function($__super) {
@@ -2022,9 +2087,15 @@ function logloads(loads) {
       value: function(load) {
         var self = this;
         return new Promise(function(resolve, reject) {
+          function onError(err) {
+              var r = reject.bind(null, err);
+              transformError(err, load, self)
+              .then(r, r);
+          }
+
           fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
             resolve(source);
-          }, reject);
+        }, onError);
         });
       },
 
@@ -3341,6 +3412,7 @@ function cjs(loader) {
 		cjsRequireRegEx.lastIndex = commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
 
 		var deps = [];
+		var info = {};
 
 		var match;
 
@@ -3373,10 +3445,40 @@ function cjs(loader) {
 				if (dep.match(/"|'/))
 					continue;
 				deps.push(dep);
+				info[dep] = match.index;
+
 			}
 		}
 
-		return deps;
+		return {
+			deps: deps,
+			info: info
+		};
+	}
+
+	function makeGetImportPosition(load, depInfo){
+		return function(specifier){
+			var source = load.source;
+			var matchIndex = (depInfo[specifier] || 0) + 1;
+			var idx = 0, line = 1, col = 1, len = source.length, char;
+			while(matchIndex && idx < len) {
+				char = source[idx];
+				if(matchIndex === idx) {
+					break;
+				} else if(char === "\n") {
+					idx++;
+					line++;
+					col = 1;
+					continue;
+				}
+				col++;
+				idx++;
+			}
+			return {
+				line: line,
+				column: col
+			};
+		};
 	}
 
 	var loaderInstantiate = loader.instantiate;
@@ -3392,7 +3494,10 @@ function cjs(loader) {
 		}
 
 		if (load.metadata.format == 'cjs') {
-			load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(getCJSDeps(load.source)) : getCJSDeps(load.source);
+			var depInfo = getCJSDeps(load.source);
+			load.metadata.deps = load.metadata.deps ?
+				load.metadata.deps.concat(depInfo.deps) : depInfo.deps;
+			load.metadata.getImportPosition = makeGetImportPosition(load, depInfo.info);
 
 			load.metadata.executingRequire = true;
 
@@ -4093,8 +4198,11 @@ function plugins(loader) {
     var loader = this;
     if (load.metadata.plugin && load.metadata.plugin.translate)
       return Promise.resolve(load.metadata.plugin.translate.call(loader, load)).then(function(result) {
-        if (typeof result == 'string')
-          load.source = result;
+        if (typeof result == 'string') {
+			load.metadata.originalSource = load.source;
+			load.source = result;
+		}
+
         return loaderTranslate.call(loader, load);
       });
     else
@@ -5120,6 +5228,55 @@ addStealExtension(function(loader) {
 	};
 });
 
+addStealExtension(function (loader) {
+	function StackTrace(message, items) {
+		this.message = message;
+		this.items = items;
+	}
+
+	StackTrace.prototype.toString = function(){
+		var arr = ["Error: " + this.message];
+		var t, desc;
+		for(var i = 0, len = this.items.length; i < len; i++) {
+			t = this.items[i];
+			desc = "    at ";
+			if(t.fnName) {
+				desc += (fnName + " ");
+			}
+			desc += StackTrace.positionLink(t);
+			arr.push(desc);
+		}
+		return arr.join("\n");
+	};
+
+	StackTrace.positionLink = function(t){
+		var line = t.line || 0;
+		var col = t.column || 0;
+		return "(" + t.url + ":" + line + ":" + col + ")";
+	};
+
+	StackTrace.item = function(fnName, url, line, column) {
+		return {
+			fnName: fnName,
+			url: url,
+			line: line,
+			column: column
+		}
+	};
+
+	loader.StackTrace = StackTrace;
+});
+
+addStealExtension(function(loader){
+	loader.prettyName = function(load){
+		var pnm = load.metadata.parsedModuleName;
+		if(pnm) {
+			return pnm.packageName + "/" + pnm.modulePath;
+		}
+		return load.name;
+	};
+});
+
 addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -5157,6 +5314,23 @@ addStealExtension(function applyTraceExtension(loader) {
 				bundles = bundles.concat(loader.getBundles(parentName, visited));
 		});
 		return bundles;
+	};
+	loader.getImportSpecifier = function(fullModuleName, load){
+		var idx = 0, specifier;
+		while(idx < load.metadata.dependencies.length) {
+			if(load.metadata.dependencies[idx] === fullModuleName) {
+				specifier = load.metadata.deps[idx];
+				break;
+			}
+			idx++;
+		}
+		if(specifier) {
+			if(load.metadata.importSpecifiers) {
+				return (load.metadata.importSpecifiers[specifier] || {}).start;
+			} else if(load.metadata.getImportPosition) {
+				return load.metadata.getImportPosition(specifier);
+			}
+		}
 	};
 	loader._allowModuleExecution = {};
 	loader.allowModuleExecution = function(name){
@@ -5713,7 +5887,9 @@ addStealExtension(function (loader) {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				this.paths["@@babel-code-frame"] = dirname+"/ext/babel-code-frame.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
+				setIfNotPresent(this.meta, "@@babel-code-frame", {"format":"global","exports":"BabelCodeFrame"});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');

@@ -669,6 +669,55 @@ addStealExtension(function(loader) {
 	};
 });
 
+addStealExtension(function (loader) {
+	function StackTrace(message, items) {
+		this.message = message;
+		this.items = items;
+	}
+
+	StackTrace.prototype.toString = function(){
+		var arr = ["Error: " + this.message];
+		var t, desc;
+		for(var i = 0, len = this.items.length; i < len; i++) {
+			t = this.items[i];
+			desc = "    at ";
+			if(t.fnName) {
+				desc += (fnName + " ");
+			}
+			desc += StackTrace.positionLink(t);
+			arr.push(desc);
+		}
+		return arr.join("\n");
+	};
+
+	StackTrace.positionLink = function(t){
+		var line = t.line || 0;
+		var col = t.column || 0;
+		return "(" + t.url + ":" + line + ":" + col + ")";
+	};
+
+	StackTrace.item = function(fnName, url, line, column) {
+		return {
+			fnName: fnName,
+			url: url,
+			line: line,
+			column: column
+		}
+	};
+
+	loader.StackTrace = StackTrace;
+});
+
+addStealExtension(function(loader){
+	loader.prettyName = function(load){
+		var pnm = load.metadata.parsedModuleName;
+		if(pnm) {
+			return pnm.packageName + "/" + pnm.modulePath;
+		}
+		return load.name;
+	};
+});
+
 addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -706,6 +755,23 @@ addStealExtension(function applyTraceExtension(loader) {
 				bundles = bundles.concat(loader.getBundles(parentName, visited));
 		});
 		return bundles;
+	};
+	loader.getImportSpecifier = function(fullModuleName, load){
+		var idx = 0, specifier;
+		while(idx < load.metadata.dependencies.length) {
+			if(load.metadata.dependencies[idx] === fullModuleName) {
+				specifier = load.metadata.deps[idx];
+				break;
+			}
+			idx++;
+		}
+		if(specifier) {
+			if(load.metadata.importSpecifiers) {
+				return (load.metadata.importSpecifiers[specifier] || {}).start;
+			} else if(load.metadata.getImportPosition) {
+				return load.metadata.getImportPosition(specifier);
+			}
+		}
 	};
 	loader._allowModuleExecution = {};
 	loader.allowModuleExecution = function(name){
@@ -1262,7 +1328,9 @@ addStealExtension(function (loader) {
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				this.paths["@@babel-code-frame"] = dirname+"/ext/babel-code-frame.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
+				setIfNotPresent(this.meta, "@@babel-code-frame", {"format":"global","exports":"BabelCodeFrame"});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');
@@ -2971,6 +3039,7 @@ function cjs(loader) {
 		cjsRequireRegEx.lastIndex = commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
 
 		var deps = [];
+		var info = {};
 
 		var match;
 
@@ -3003,10 +3072,40 @@ function cjs(loader) {
 				if (dep.match(/"|'/))
 					continue;
 				deps.push(dep);
+				info[dep] = match.index;
+
 			}
 		}
 
-		return deps;
+		return {
+			deps: deps,
+			info: info
+		};
+	}
+
+	function makeGetImportPosition(load, depInfo){
+		return function(specifier){
+			var source = load.source;
+			var matchIndex = (depInfo[specifier] || 0) + 1;
+			var idx = 0, line = 1, col = 1, len = source.length, char;
+			while(matchIndex && idx < len) {
+				char = source[idx];
+				if(matchIndex === idx) {
+					break;
+				} else if(char === "\n") {
+					idx++;
+					line++;
+					col = 1;
+					continue;
+				}
+				col++;
+				idx++;
+			}
+			return {
+				line: line,
+				column: col
+			};
+		};
 	}
 
 	var loaderInstantiate = loader.instantiate;
@@ -3022,7 +3121,10 @@ function cjs(loader) {
 		}
 
 		if (load.metadata.format == 'cjs') {
-			load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(getCJSDeps(load.source)) : getCJSDeps(load.source);
+			var depInfo = getCJSDeps(load.source);
+			load.metadata.deps = load.metadata.deps ?
+				load.metadata.deps.concat(depInfo.deps) : depInfo.deps;
+			load.metadata.getImportPosition = makeGetImportPosition(load, depInfo.info);
 
 			load.metadata.executingRequire = true;
 
@@ -3723,8 +3825,11 @@ function plugins(loader) {
     var loader = this;
     if (load.metadata.plugin && load.metadata.plugin.translate)
       return Promise.resolve(load.metadata.plugin.translate.call(loader, load)).then(function(result) {
-        if (typeof result == 'string')
-          load.source = result;
+        if (typeof result == 'string') {
+			load.metadata.originalSource = load.source;
+			load.source = result;
+		}
+
         return loaderTranslate.call(loader, load);
       });
     else

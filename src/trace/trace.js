@@ -36,6 +36,23 @@ addStealExtension(function applyTraceExtension(loader) {
 		});
 		return bundles;
 	};
+	loader.getImportSpecifier = function(fullModuleName, load){
+		var idx = 0, specifier;
+		while(idx < load.metadata.dependencies.length) {
+			if(load.metadata.dependencies[idx] === fullModuleName) {
+				specifier = load.metadata.deps[idx];
+				break;
+			}
+			idx++;
+		}
+		if(specifier) {
+			if(load.metadata.importSpecifiers) {
+				return (load.metadata.importSpecifiers[specifier] || {}).start;
+			} else if(load.metadata.getImportPosition) {
+				return load.metadata.getImportPosition(specifier);
+			}
+		}
+	};
 	loader._allowModuleExecution = {};
 	loader.allowModuleExecution = function(name){
 		var loader = this;

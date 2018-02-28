@@ -500,6 +500,24 @@
 		};
 	}
 
+	function getImportSpecifierPositionsPlugin(load) {
+		load.metadata.importSpecifiers = Object.create(null);
+		return function(babel){
+			var t = babel.types;
+
+			return {
+				visitor: {
+					ImportDeclaration: function(path, state){
+						var node = path.node;
+						var specifier = node.source.value;
+						var loc = node.source.loc;
+						load.metadata.importSpecifiers[specifier] = loc;
+					}
+				}
+			};
+		};
+	}
+
 	function babelTranspile(load, babelMod) {
 		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
@@ -514,11 +532,13 @@
 			// might be running on an old babel that throws if there is a
 			// plugins array in the options object
 			if (babelVersion >= 6) {
-				options.plugins = [addESModuleFlagPlugin].concat(results[0]);
+				options.plugins = [getImportSpecifierPositionsPlugin(load),
+					addESModuleFlagPlugin].concat(results[0]);
 				options.presets = results[1];
 			}
 
-			var source = babel.transform(load.source, options).code;
+			var result = babel.transform(load.source, options);
+			var source = result.code;
 
 			// add "!eval" to end of Babel sourceURL
 			// I believe this does something?

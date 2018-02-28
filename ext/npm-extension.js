@@ -341,7 +341,10 @@ exports.addExtension = function(System){
 				// /index and /package.json conventions.
 				var types = [].slice.call(retryTypes);
 
-				return retryAll(types, err);
+				return retryAll(types, err).then(null, function(e){
+					// Return the original error.
+					return Promise.reject(err);
+				});
 
 				function retryAll(types, err){
 					if(!types.length) {

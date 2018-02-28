@@ -430,61 +430,6 @@ QUnit.test("A child dependency's devDependency doesn't interfere with normal loa
 	.then(done, helpers.fail(assert, done));
 });
 
-QUnit.test("importing a package with an unsaved dependency", function(assert) {
-	var done = assert.async();
-
-	var loader = helpers.clone()
-		.rootPackage({
-			name: "app",
-			main: "main.js",
-			version: "1.0.0"
-		})
-		.withPackages([
-			{
-				name: "dep",
-				main: "main.js",
-				version: "1.0.0"
-			}
-		])
-		.loader;
-
-		loader["import"]("dep")
-			.then(function(app) {
-				assert.ok(false, "import call should not resolve");
-			}, function(err) {
-				assert.ok(/Could not load 'dep'/.test(err.message));
-				assert.ok(
-					/Is this an npm module not saved/.test(err.message),
-					"should throw a descriptive error message"
-				);
-				assert.equal(err.statusCode, 404, "Got a 404");
-				done();
-			});
-});
-
-QUnit.test("Importing a missing file doesn't give npm module error", function(assert){
-	var done = assert.async();
-
-	var loader = helpers.clone()
-		.rootPackage({
-			name: "app",
-			main: "main.js",
-			version: "1.0.0"
-		})
-		.loader;
-
-		loader["import"]("app/missing")
-			.then(function(app) {
-				assert.ok(false, "import call should not resolve");
-			}, function(err) {
-				assert.notOk(
-					/Is this an npm module not saved/.test(err.message),
-					"should not throw a npm module error message"
-				);
-				assert.equal(err.statusCode, 404, "got a 404");
-				done();
-			});
-});
 
 QUnit.test("local named amd module that has deps", function(assert) {
 	var done = assert.async();
@@ -557,6 +502,144 @@ QUnit.test("named amd module with deps from a nested dependency", function(asser
 			assert.ok(!error, "import promise should not be rejected");
 			done();
 		});
+});
+
+QUnit.module("Error messages and warnings");
+
+QUnit.test("importing a package with an unsaved dependency", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])
+		.loader;
+
+		loader["import"]("dep")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				assert.ok(/Could not load 'dep'/.test(err.message));
+				assert.ok(
+					/Is this an npm module not saved/.test(err.message),
+					"should throw a descriptive error message"
+				);
+				assert.equal(err.statusCode, 404, "Got a 404");
+				done();
+			});
+});
+
+QUnit.test("Importing a missing file doesn't give npm module error", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.loader;
+
+		loader["import"]("app/missing")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				assert.notOk(
+					/Is this an npm module not saved/.test(err.message),
+					"should not throw a npm module error message"
+				);
+				assert.equal(err.statusCode, 404, "got a 404");
+				done();
+			});
+});
+
+QUnit.test("Importing a missing file from an ES module provides the module file in the stack trace", function(assert){
+	var done = assert.async();
+
+	var src = "import './file-missing';"
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.allowFetch("app@1.0.0#file-missing")
+		.withModule("app@1.0.0#main", src)
+		.loader;
+
+		loader["import"]("app/main")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				var stack = err.stack;
+				assert.ok(/main.js/.test(stack), "main.js is in the stack");
+				done();
+			});
+});
+
+QUnit.test("Importing a missing file from a CommonJS module provides the module file in the stack trace", function(assert){
+	var done = assert.async();
+
+	var src = "require('./file-missing');"
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.allowFetch("app@1.0.0#file-missing")
+		.withModule("app@1.0.0#main", src)
+		.loader;
+
+		loader["import"]("app/main")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				console.error(err)
+				var stack = err.stack;
+				assert.ok(/main.js/.test(stack), "main.js is in the stack");
+				done();
+			});
+});
+
+QUnit.test("Importing a missing file from a plugin module provides the module file in the stack trace", function(assert){
+	var done = assert.async();
+
+	var src = "<some-import-tag from='./file-missing'/>\n<div>";
+	var plug = "exports.translate = function(l){l.metadata.importSpecifiers={'./file-missing':{start:{line:1,column:23}}};return 'require(\"./file-missing\");';};"
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.allowFetch("app@1.0.0#file-missing")
+		.withModule("app@1.0.0#plug", plug)
+		.withModule("app@1.0.0#mod.txt!app@1.0.0#plug",src)
+		.withModule("app@1.0.0#main", "require('./mod.txt!app/plug');")
+		.loader;
+
+		loader["import"]("app/main")
+			.then(function(app) {
+				assert.ok(false, "import call should not resolve");
+			}, function(err) {
+				console.error(err)
+				var stack = err.stack;
+				assert.ok(/mod.txt/.test(stack), "main.js is in the stack");
+				done();
+			});
 });
 
 QUnit.module("Importing npm modules with tilde & homeAlias operators");
