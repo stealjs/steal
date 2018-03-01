@@ -125,8 +125,11 @@ function plugins(loader) {
     var loader = this;
     if (load.metadata.plugin && load.metadata.plugin.translate)
       return Promise.resolve(load.metadata.plugin.translate.call(loader, load)).then(function(result) {
-        if (typeof result == 'string')
-          load.source = result;
+        if (typeof result == 'string') {
+			load.metadata.originalSource = load.source;
+			load.source = result;
+		}
+
         return loaderTranslate.call(loader, load);
       });
     else

@@ -593,10 +593,12 @@ function logloads(loads) {
     var loader = linkSet.loader;
     var exc = linkExc;
 
+	/*
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
 
     exc = addToError(exc, 'Error loading "' + load.name + '" at ' + (load.address || '<unknown>') + '\n');
+	*/
 
     var loads = linkSet.loads.concat([]);
     for (var i = 0, l = loads.length; i < l; i++) {
@@ -1684,6 +1686,24 @@ function logloads(loads) {
 		};
 	}
 
+	function getImportSpecifierPositionsPlugin(load) {
+		load.metadata.importSpecifiers = Object.create(null);
+		return function(babel){
+			var t = babel.types;
+
+			return {
+				visitor: {
+					ImportDeclaration: function(path, state){
+						var node = path.node;
+						var specifier = node.source.value;
+						var loc = node.source.loc;
+						load.metadata.importSpecifiers[specifier] = loc;
+					}
+				}
+			};
+		};
+	}
+
 	function babelTranspile(load, babelMod) {
 		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
@@ -1698,11 +1718,13 @@ function logloads(loads) {
 			// might be running on an old babel that throws if there is a
 			// plugins array in the options object
 			if (babelVersion >= 6) {
-				options.plugins = [addESModuleFlagPlugin].concat(results[0]);
+				options.plugins = [getImportSpecifierPositionsPlugin(load),
+					addESModuleFlagPlugin].concat(results[0]);
 				options.presets = results[1];
 			}
 
-			var source = babel.transform(load.source, options).code;
+			var result = babel.transform(load.source, options);
+			var source = result.code;
 
 			// add "!eval" to end of Babel sourceURL
 			// I believe this does something?
@@ -1807,9 +1829,10 @@ function logloads(loads) {
         fulfill(xhr.responseText);
       }
       function error() {
-        var msg = xhr.statusText + ': ' + url || 'XHR error';
+		var s = xhr.status;
+        var msg = s + ' ' + xhr.statusText + ': ' + url + '\n' || 'XHR error';
         var err = new Error(msg);
-        err.statusCode = xhr.status;
+        err.statusCode = s;
         reject(err);
       }
 
@@ -1869,6 +1892,48 @@ function logloads(loads) {
   }
   else {
     throw new TypeError('No environment fetch API available.');
+  }
+
+  function transformError(err, load, loader) {
+	  if(typeof loader.getDependants === "undefined") {
+		  return Promise.resolve();
+	  }
+	  var dependants = loader.getDependants(load.name);
+	  if(Array.isArray(dependants) && dependants.length) {
+		  var StackTrace = loader.StackTrace;
+		  var isProd = loader.isEnv("production");
+
+		  return Promise.resolve()
+		  .then(function(){
+			  return isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
+		  })
+		  .then(function(codeFrame){
+			  var parentLoad = loader.getModuleLoad(dependants[0]);
+			  var pos = loader.getImportSpecifier(load.name, parentLoad) || {
+				  line: 1, column: 0
+			  };
+
+			  var detail = "The module [" + loader.prettyName(load) + "] couldn't be fetched.\n" +
+				"Clicking the link in the stack trace below takes you to the import.\n" +
+				"See https://stealjs.com/docs/StealJS.error-messages.html#404-not-found for more information.\n";
+			  var msg = err.message + "\n" + detail;
+
+			  if(!isProd) {
+				  var src = parentLoad.metadata.originalSource || parentLoad.source;
+				  var codeSample = codeFrame(src, pos.line, pos.column);
+				  msg += "\n" + codeSample + "\n";
+			  }
+
+			  err.message = msg;
+
+			  var stackTrace = new StackTrace(msg, [
+				  StackTrace.item(null, parentLoad.address, pos.line, pos.column)
+			  ]);
+
+			  err.stack = stackTrace.toString();
+		  })
+	  }
+	  return Promise.resolve();
   }
 
   var SystemLoader = function($__super) {
@@ -2022,9 +2087,15 @@ function logloads(loads) {
       value: function(load) {
         var self = this;
         return new Promise(function(resolve, reject) {
+          function onError(err) {
+              var r = reject.bind(null, err);
+              transformError(err, load, self)
+              .then(r, r);
+          }
+
           fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
             resolve(source);
-          }, reject);
+        }, onError);
         });
       },
 

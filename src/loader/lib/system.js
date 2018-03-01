@@ -90,9 +90,10 @@
         fulfill(xhr.responseText);
       }
       function error() {
-        var msg = xhr.statusText + ': ' + url || 'XHR error';
+		var s = xhr.status;
+        var msg = s + ' ' + xhr.statusText + ': ' + url + '\n' || 'XHR error';
         var err = new Error(msg);
-        err.statusCode = xhr.status;
+        err.statusCode = s;
         reject(err);
       }
 
@@ -152,6 +153,48 @@
   }
   else {
     throw new TypeError('No environment fetch API available.');
+  }
+
+  function transformError(err, load, loader) {
+	  if(typeof loader.getDependants === "undefined") {
+		  return Promise.resolve();
+	  }
+	  var dependants = loader.getDependants(load.name);
+	  if(Array.isArray(dependants) && dependants.length) {
+		  var StackTrace = loader.StackTrace;
+		  var isProd = loader.isEnv("production");
+
+		  return Promise.resolve()
+		  .then(function(){
+			  return isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
+		  })
+		  .then(function(codeFrame){
+			  var parentLoad = loader.getModuleLoad(dependants[0]);
+			  var pos = loader.getImportSpecifier(load.name, parentLoad) || {
+				  line: 1, column: 0
+			  };
+
+			  var detail = "The module [" + loader.prettyName(load) + "] couldn't be fetched.\n" +
+				"Clicking the link in the stack trace below takes you to the import.\n" +
+				"See https://stealjs.com/docs/StealJS.error-messages.html#404-not-found for more information.\n";
+			  var msg = err.message + "\n" + detail;
+
+			  if(!isProd) {
+				  var src = parentLoad.metadata.originalSource || parentLoad.source;
+				  var codeSample = codeFrame(src, pos.line, pos.column);
+				  msg += "\n" + codeSample + "\n";
+			  }
+
+			  err.message = msg;
+
+			  var stackTrace = new StackTrace(msg, [
+				  StackTrace.item(null, parentLoad.address, pos.line, pos.column)
+			  ]);
+
+			  err.stack = stackTrace.toString();
+		  })
+	  }
+	  return Promise.resolve();
   }
 
   class SystemLoader extends __global.LoaderPolyfill {
@@ -281,9 +324,15 @@
     fetch(load) {
       var self = this;
       return new Promise(function(resolve, reject) {
+        function onError(err) {
+			var r = reject.bind(null, err);
+			transformError(err, load, self)
+			.then(r, r);
+		}
+
         fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
           resolve(source);
-        }, reject);
+	  }, onError);
       });
     }
 

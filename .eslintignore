@@ -14,6 +14,7 @@ src/base/tests/amd-module-4.js
 ext/babel-polyfill.js
 ext/babel-runtime.js
 ext/babel.js
+ext/babel-code-frame.js
 ext/traceur-runtime.js
 ext/traceur.js
 ext/semver.js

@@ -288,7 +288,9 @@
 				this.paths["traceur-runtime"] = dirname+"/ext/traceur-runtime.js";
 				this.paths["babel"] = dirname+"/ext/babel.js";
 				this.paths["babel-runtime"] = dirname+"/ext/babel-runtime.js";
+				this.paths["@@babel-code-frame"] = dirname+"/ext/babel-code-frame.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
+				setIfNotPresent(this.meta, "@@babel-code-frame", {"format":"global","exports":"BabelCodeFrame"});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');

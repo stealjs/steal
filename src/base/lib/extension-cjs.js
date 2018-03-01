@@ -18,6 +18,7 @@ function cjs(loader) {
 		cjsRequireRegEx.lastIndex = commentRegEx.lastIndex = stringRegEx.lastIndex = 0;
 
 		var deps = [];
+		var info = {};
 
 		var match;
 
@@ -50,10 +51,40 @@ function cjs(loader) {
 				if (dep.match(/"|'/))
 					continue;
 				deps.push(dep);
+				info[dep] = match.index;
+
 			}
 		}
 
-		return deps;
+		return {
+			deps: deps,
+			info: info
+		};
+	}
+
+	function makeGetImportPosition(load, depInfo){
+		return function(specifier){
+			var source = load.source;
+			var matchIndex = (depInfo[specifier] || 0) + 1;
+			var idx = 0, line = 1, col = 1, len = source.length, char;
+			while(matchIndex && idx < len) {
+				char = source[idx];
+				if(matchIndex === idx) {
+					break;
+				} else if(char === "\n") {
+					idx++;
+					line++;
+					col = 1;
+					continue;
+				}
+				col++;
+				idx++;
+			}
+			return {
+				line: line,
+				column: col
+			};
+		};
 	}
 
 	var loaderInstantiate = loader.instantiate;
@@ -69,7 +100,10 @@ function cjs(loader) {
 		}
 
 		if (load.metadata.format == 'cjs') {
-			load.metadata.deps = load.metadata.deps ? load.metadata.deps.concat(getCJSDeps(load.source)) : getCJSDeps(load.source);
+			var depInfo = getCJSDeps(load.source);
+			load.metadata.deps = load.metadata.deps ?
+				load.metadata.deps.concat(depInfo.deps) : depInfo.deps;
+			load.metadata.getImportPosition = makeGetImportPosition(load, depInfo.info);
 
 			load.metadata.executingRequire = true;
 
