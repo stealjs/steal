@@ -1,13 +1,13 @@
 /*
  * SystemJS Core
  * Code should be vaguely readable
- * 
+ *
  */
 var originalSystem = $__global.System.originalSystem;
 function core(loader) {
   /*
     __useDefault
-    
+
     When a module object looks like:
     newModule(
       __useDefault: true,
@@ -97,6 +97,28 @@ function core(loader) {
     }
 
     return Promise.resolve(loaderLocate.call(this, load));
+  };
+
+  loader._getLineAndColumnFromPosition = function(source, position) {
+	var matchIndex = (position || 0) + 1;
+	var idx = 0, line = 1, col = 0, len = source.length, char;
+	while(matchIndex && idx < len) {
+		char = source[idx];
+		if(matchIndex === idx) {
+			break;
+		} else if(char === "\n") {
+			idx++;
+			line++;
+			col = 0;
+			continue;
+		}
+		col++;
+		idx++;
+	}
+	return {
+		line: line,
+		column: col
+	};
   };
 
   function applyExtensions(extensions, loader) {

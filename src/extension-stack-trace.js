@@ -11,7 +11,7 @@ addStealExtension(function (loader) {
 			t = this.items[i];
 			desc = "    at ";
 			if(t.fnName) {
-				desc += (fnName + " ");
+				desc += (t.fnName + " ");
 			}
 			desc += StackTrace.positionLink(t);
 			arr.push(desc);
@@ -35,4 +35,38 @@ addStealExtension(function (loader) {
 	};
 
 	loader.StackTrace = StackTrace;
+
+	function getPositionOfError(txt) {
+		var res = /at position ([0-9]+)/.exec(txt);
+		if(res && res.length > 1) {
+			return Number(res[1]);
+		}
+	}
+
+	loader._parseJSONError = function(err, source){
+		var pos = getPositionOfError(err.message);
+		if(pos) {
+			return loader._getLineAndColumnFromPosition(source, pos);
+		} else {
+			return {line: 0, column: 0};
+		}
+	};
+
+	loader._addSourceInfoToError = function(err, pos, load, fnName){
+		var isProd = loader.isEnv("production");
+		var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
+
+		return p.then(function(codeFrame) {
+			if(codeFrame) {
+				var src = load.metadata.originalSource || load.source;
+				var codeSample = codeFrame(src, pos.line, pos.column);
+				err.message += "\n\n" + codeSample + "\n";
+			}
+			var stackTrace = new StackTrace(err.message, [
+				StackTrace.item(fnName, load.address, pos.line, pos.column)
+			]);
+			err.stack = stackTrace.toString();
+			return Promise.reject(err);
+		});
+	};
 });

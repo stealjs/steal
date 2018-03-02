@@ -16,7 +16,15 @@ var crawl = {
 	 */
 	processPkgSource: function(context, pkg, src) {
 		var source = src || "{}";
-		var packageJSON = JSON.parse(source);
+		var packageJSON;
+
+		try {
+			packageJSON = JSON.parse(source);
+		} catch(err) {
+			err.jsonSource = src;
+			throw err;
+		}
+
 		utils.extend(pkg, packageJSON);
 		context.packages.push(pkg);
 		return pkg;
@@ -717,14 +725,32 @@ crawl.FetchTask = FetchTask;
 function npmLoad(context, pkg){
 	var task = new FetchTask(context, pkg);
 
-	return task.load().then(function(){
+	return task.load()
+	.then(function(){
 		if(task.failed) {
 			// Recurse. Calling task.next gives us a new pkg object
 			// with the fileUrl being the parent node_modules folder.
 			return npmLoad(context, task.next());
 		}
 		return task.getPackage();
-	});
+	})
+	.then(null, function(err) {
+		if((err instanceof SyntaxError) && err.jsonSource) {
+			var src = err.jsonSource;
+			var loc = context.loader._parseJSONError(err, src);
+			var msg = "Unable to parse package.json for [" + pkg.name + "]\n" +
+				err.message;
+			var newError = new SyntaxError(msg);
+			return context.loader._addSourceInfoToError(newError, loc, {
+				name: pkg.name,
+				address: pkg.fileUrl,
+				metadata: {},
+				source: src
+			}, "parse");
+		} else {
+			throw err;
+		}
+	})
 }
 
 module.exports = crawl;

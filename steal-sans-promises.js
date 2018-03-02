@@ -2292,13 +2292,13 @@ function extend(a, b, prepend) {
 /*
  * SystemJS Core
  * Code should be vaguely readable
- * 
+ *
  */
 var originalSystem = $__global.System.originalSystem;
 function core(loader) {
   /*
     __useDefault
-    
+
     When a module object looks like:
     newModule(
       __useDefault: true,
@@ -2388,6 +2388,28 @@ function core(loader) {
     }
 
     return Promise.resolve(loaderLocate.call(this, load));
+  };
+
+  loader._getLineAndColumnFromPosition = function(source, position) {
+	var matchIndex = (position || 0) + 1;
+	var idx = 0, line = 1, col = 0, len = source.length, char;
+	while(matchIndex && idx < len) {
+		char = source[idx];
+		if(matchIndex === idx) {
+			break;
+		} else if(char === "\n") {
+			idx++;
+			line++;
+			col = 0;
+			continue;
+		}
+		col++;
+		idx++;
+	}
+	return {
+		line: line,
+		column: col
+	};
   };
 
   function applyExtensions(extensions, loader) {
@@ -3457,27 +3479,10 @@ function cjs(loader) {
 	}
 
 	function makeGetImportPosition(load, depInfo){
+		var loader = this;
 		return function(specifier){
-			var source = load.source;
-			var matchIndex = (depInfo[specifier] || 0) + 1;
-			var idx = 0, line = 1, col = 1, len = source.length, char;
-			while(matchIndex && idx < len) {
-				char = source[idx];
-				if(matchIndex === idx) {
-					break;
-				} else if(char === "\n") {
-					idx++;
-					line++;
-					col = 1;
-					continue;
-				}
-				col++;
-				idx++;
-			}
-			return {
-				line: line,
-				column: col
-			};
+			var position = depInfo[specifier];
+			return loader._getLineAndColumnFromPosition(load.source, position);
 		};
 	}
 
@@ -3497,7 +3502,8 @@ function cjs(loader) {
 			var depInfo = getCJSDeps(load.source);
 			load.metadata.deps = load.metadata.deps ?
 				load.metadata.deps.concat(depInfo.deps) : depInfo.deps;
-			load.metadata.getImportPosition = makeGetImportPosition(load, depInfo.info);
+			load.metadata.getImportPosition = makeGetImportPosition.call(this,
+				load, depInfo.info);
 
 			load.metadata.executingRequire = true;
 
@@ -5241,7 +5247,7 @@ addStealExtension(function (loader) {
 			t = this.items[i];
 			desc = "    at ";
 			if(t.fnName) {
-				desc += (fnName + " ");
+				desc += (t.fnName + " ");
 			}
 			desc += StackTrace.positionLink(t);
 			arr.push(desc);
@@ -5265,6 +5271,40 @@ addStealExtension(function (loader) {
 	};
 
 	loader.StackTrace = StackTrace;
+
+	function getPositionOfError(txt) {
+		var res = /at position ([0-9]+)/.exec(txt);
+		if(res && res.length > 1) {
+			return Number(res[1]);
+		}
+	}
+
+	loader._parseJSONError = function(err, source){
+		var pos = getPositionOfError(err.message);
+		if(pos) {
+			return loader._getLineAndColumnFromPosition(source, pos);
+		} else {
+			return {line: 0, column: 0};
+		}
+	};
+
+	loader._addSourceInfoToError = function(err, pos, load, fnName){
+		var isProd = loader.isEnv("production");
+		var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
+
+		return p.then(function(codeFrame) {
+			if(codeFrame) {
+				var src = load.metadata.originalSource || load.source;
+				var codeSample = codeFrame(src, pos.line, pos.column);
+				err.message += "\n\n" + codeSample + "\n";
+			}
+			var stackTrace = new StackTrace(err.message, [
+				StackTrace.item(fnName, load.address, pos.line, pos.column)
+			]);
+			err.stack = stackTrace.toString();
+			return Promise.reject(err);
+		});
+	};
 });
 
 addStealExtension(function(loader){
