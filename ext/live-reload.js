@@ -311,7 +311,7 @@ function addLiveReload(loader) {
 
 	if(!isBuildEnvironment) {
 		if(typeof steal !== "undefined") {
-			steal.done().then(setup);
+			steal.done().then(setup).then(null, Function.prototype);
 		} else {
 			setTimeout(setup);
 		}
