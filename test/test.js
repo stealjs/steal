@@ -306,6 +306,10 @@ QUnit.test("A module part of a failed linkset can still be loaded", function(ass
 	makeIframe("load_after_fail/dev.html", assert);
 });
 
+QUnit.test("Error messages in malformed package.jsons", function(assert){
+	makeIframe("bad_json/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {

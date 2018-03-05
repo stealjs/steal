@@ -1,0 +1,10 @@
+{
+  "name": "bad_json",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "dep1": "1.0.0",
+    "dep2": "1.0.0",
+    "dep3": "1.0.0"
+  }
+}

@@ -63,27 +63,10 @@ function cjs(loader) {
 	}
 
 	function makeGetImportPosition(load, depInfo){
+		var loader = this;
 		return function(specifier){
-			var source = load.source;
-			var matchIndex = (depInfo[specifier] || 0) + 1;
-			var idx = 0, line = 1, col = 1, len = source.length, char;
-			while(matchIndex && idx < len) {
-				char = source[idx];
-				if(matchIndex === idx) {
-					break;
-				} else if(char === "\n") {
-					idx++;
-					line++;
-					col = 1;
-					continue;
-				}
-				col++;
-				idx++;
-			}
-			return {
-				line: line,
-				column: col
-			};
+			var position = depInfo[specifier];
+			return loader._getLineAndColumnFromPosition(load.source, position);
 		};
 	}
 
@@ -103,7 +86,8 @@ function cjs(loader) {
 			var depInfo = getCJSDeps(load.source);
 			load.metadata.deps = load.metadata.deps ?
 				load.metadata.deps.concat(depInfo.deps) : depInfo.deps;
-			load.metadata.getImportPosition = makeGetImportPosition(load, depInfo.info);
+			load.metadata.getImportPosition = makeGetImportPosition.call(this,
+				load, depInfo.info);
 
 			load.metadata.executingRequire = true;
 

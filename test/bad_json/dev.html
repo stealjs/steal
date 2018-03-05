@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bad JSON</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+
+		window.WARN = Function.prototype.bind.call(
+			window.console.warn,
+			window.console
+		);
+
+		window.console.warn = function(msg) {
+			window.assert.ok(
+				false,
+				"Warning caused by using steal-clone"
+			);
+			window.WARN(msg);
+		};
+	</script>
+	<script src="../../../steal-sans-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"
+		data-main="@empty"></script>
+	<script>
+		function fail(err) {
+			if(window.assert) {
+				window.assert.ok(false, err);
+			} else {
+				console.error(err);
+			}
+		}
+
+		function testLoadingADepWithNoMain() {
+			return steal.import("~/load-no-main")
+			.then(function(val){
+				if(window.assert) {
+					window.assert.equal(val, "this is dep1", "Able to load a dep with no 'main'");
+				} else {
+					console.log("~load-no-main:", val);
+				}
+			}, fail);
+		}
+
+		function testLoadingAFileWithMalformedJSON() {
+			return steal.import("~/load-malformed-pkg")
+			.then(function(){
+				fail("Should not have resolved");
+			}, function(err){
+				var msg = err.message;
+				var stack = err.stack;
+				if(window.assert) {
+					assert.ok(/dependencies/.test(msg), "JSON shown in the error");
+					assert.ok(/dep2\/package\.json/.test(stack), "stack trace is right");
+				} else {
+					console.error(err);
+				}
+			});
+		}
+
+		Promise.all([
+			testLoadingADepWithNoMain(),
+			testLoadingAFileWithMalformedJSON()
+		])
+		.then(null, fail)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>
