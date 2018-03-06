@@ -1,5 +1,6 @@
 var reloader = require("live-reload");
 var loader = require("@loader");
+loader.liveReloadReload = false;
 
 QUnit.module("Unit tests", {
 	beforeEach: function(){
@@ -84,6 +85,38 @@ QUnit.test("Can be cloned", function(assert){
 		assert.equal(typeof reload.isReloading, "function", "this function exists");
 	})
 	.then(done, done);
+});
+
+QUnit.test("Returns an error when there is an error", function(assert){
+	var done = assert.async();
+	var loaded = false;
+
+	var fetch = loader.fetch;
+	loader.fetch = function(load){
+		if(load.name === "oops") {
+			if(loaded) {
+				return Promise.resolve("module.exports = {}; oops 'bad';");
+			} else {
+				return Promise.resolve("module.exports = {};");
+			}
+		}
+		return fetch.apply(this, arguments);
+	};
+
+	return loader.import("oops")
+	.then(function(){
+		loaded = true;
+		return loader.import("live-reload", { name: "error-in-tree" })
+	})
+	.then(function(reload){
+		reload(function(err){
+			assert.ok(err instanceof Error, "Got an error");
+			loader.fetch = fetch;
+			done();
+		});
+
+		reloader("oops");
+	});
 });
 
 QUnit.module("reload.isReloading");
