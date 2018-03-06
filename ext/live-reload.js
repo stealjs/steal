@@ -210,10 +210,16 @@ function addLiveReload(loader) {
 		for(var i = 0, len = moduleNames.length; i < len; i++) {
 			promises.push(reload(moduleNames[i]));
 		}
-		return Promise.all(promises).then(function(){
+		return Promise.all(promises)
+		.then(function(){
 			var e = loader._liveEmitter;
 			loader._inLiveReloadCycle = false;
 			e.emit("!cycleComplete");
+		}, function(err){
+			var error = err.originalErr || err;
+			var e = loader._liveEmitter;
+			loader._inLiveReloadCycle = false;
+			e.emit("!cycleComplete", error);
 		});
 	}
 
@@ -240,11 +246,14 @@ function addLiveReload(loader) {
 		return Promise.all(imports).then(function(){
 			// Remove any newly orphaned modules before declaring the cycle complete.
 			removeOrphans(moduleName, currentDeps);
-		}, function(){
+		}, function(err){
 			// There was an error re-importing modules
 			// Workers don't have a location and no way to refresh the page.
-			if(loader.global.location && loader.global.location.reload) {
+			var canReload = loader.global.location && loader.global.location.reload;
+			if(canReload && loader.liveReloadReload !== false) {
 				loader.global.location.reload();
+			} else {
+				return Promise.reject(err);
 			}
 		});
 	}
