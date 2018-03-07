@@ -120,7 +120,12 @@
 	});
 })(
 	{ "steal-code-frame-standalone": "BabelCodeFrame" },
-	typeof self == "object" && self.Object == Object ? self : window,
+	typeof self == "object" && self.Object == Object
+		? self
+		: typeof process === "object" &&
+			Object.prototype.toString.call(process) === "[object process]"
+			? global
+			: window,
 	function(__$source__, __$global__) {
 		// jshint ignore:line
 		eval("(function() { " + __$source__ + " \n }).call(__$global__);");
@@ -956,4 +961,4 @@ define('steal-code-frame-standalone', [
 	global._define = global.define;
 	global.define = global.define.orig;
 }
-)(typeof self == "object" && self.Object == Object ? self : window);
+)(typeof self == "object" && self.Object == Object ? self : (typeof process === "object" && Object.prototype.toString.call(process) === "[object process]") ? global : window);

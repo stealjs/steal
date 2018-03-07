@@ -62,19 +62,16 @@ describe("plugins", function(){
 describe("Modules that don't exist", function(){
 	it("should reject", function(done){
 		var steal = makeSteal({
-			config: __dirname + "/../package.json!npm",
-			main: "@empty"
+			config: __dirname + "/file_missing/package.json!npm"
 		});
 
 		steal.startup().then(function(){
-			steal.import("some/fake/module")
-			.then(function(){
-				assert.ok(false, "Promise resolved when it should have rejected");
-			}, function(err){
-				assert.ok(err instanceof Error, "Got an error");
-			})
-			.then(done, done);
-		});
+			assert.ok(false, "Promise resolved when it should have rejected");
+		}, function(err){
+			assert.ok(err instanceof Error, "Got an error");
+			assert.ok(/AwesomeButton/.test(err.message), "Code is inlined");
+		})
+		.then(done, done);
 	});
 });
 
