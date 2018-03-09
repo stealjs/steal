@@ -7,7 +7,7 @@ __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
 var $__Object$defineProperty;
 (function () {
   try {
-    if (!!Object.defineProperty({}, 'a', {})) {
+    if (Object.defineProperty({}, 'a', {})) {
       $__Object$defineProperty = Object.defineProperty;
     }
   } catch (e) {
@@ -25,7 +25,7 @@ __global.$__Object$create = Object.create || function(o, props) {
   F.prototype = o;
 
   if (typeof(props) === "object") {
-    for (prop in props) {
+    for (var prop in props) {
       if (props.hasOwnProperty((prop))) {
         F[prop] = props[prop];
       }
@@ -162,18 +162,6 @@ function logloads(loads) {
 
   // 15.2.3 - Runtime Semantics: Loader State
 
-  // 15.2.3.11
-  function createLoaderLoad(object) {
-    return {
-      // modules is an object for ES5 implementation
-      modules: {},
-      loads: [],
-      loaderObj: object
-    };
-  }
-
-  // 15.2.3.2 Load Records and LoadRequest Objects
-
   // 15.2.3.2.1
   function createLoad(name) {
     return {
@@ -205,12 +193,13 @@ function logloads(loads) {
   // 15.2.4.2
   function requestLoad(loader, request, refererName, refererAddress) {
     // 15.2.4.2.1 CallNormalize
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve(loader.loaderObj.normalize(request, refererName, refererAddress));
     })
     // 15.2.4.2.2 GetOrCreateLoad
     .then(function(name) {
-      var load;
+      var load, i, l;
+
       if (loader.modules[name]) {
         load = createLoad(name);
         load.status = 'linked';
@@ -219,7 +208,7 @@ function logloads(loads) {
         return load;
       }
 
-      for (var i = 0, l = loader.loads.length; i < l; i++) {
+      for (i = 0, l = loader.loads.length; i < l; i++) {
         load = loader.loads[i];
         if (load.name != name)
           continue;
@@ -228,7 +217,7 @@ function logloads(loads) {
       }
 
       var failedLoads = loader.loaderObj.failed || emptyArray;
-      for(var i = 0, l = failedLoads.length; i < l; i++) {
+      for(i = 0, l = failedLoads.length; i < l; i++) {
         load = failedLoads[i];
         if(load.name !== name)
           continue;
@@ -385,9 +374,8 @@ function logloads(loads) {
         for (var i = 0, l = linkSets.length; i < l; i++)
           updateLinkSetOnLoad(linkSets[i], load);
       });
-    })
-    // 15.2.4.5.4 LoadFailed
-    ['catch'](function(exc) {
+    })['catch'](function(exc) {
+      // 15.2.4.5.4 LoadFailed
       load.status = 'failed';
       load.exception = exc;
 
@@ -404,7 +392,7 @@ function logloads(loads) {
 
   // 15.2.4.7.1
   function asyncStartLoadPartwayThrough(stepState) {
-    return function(resolve, reject) {
+    return function(resolve) {
       var loader = stepState.loader;
       var name = stepState.moduleName;
       var step = stepState.step;
@@ -489,10 +477,11 @@ function logloads(loads) {
   }
   // 15.2.5.2.2
   function addLoadToLinkSet(linkSet, load) {
+    var i, l;
     console.assert(load.status == 'loading' || load.status == 'loaded' || load.status === 'failed',
 		'loading or loaded on link set');
 
-    for (var i = 0, l = linkSet.loads.length; i < l; i++)
+    for (i = 0, l = linkSet.loads.length; i < l; i++)
       if (linkSet.loads[i] == load)
         return;
 
@@ -507,7 +496,7 @@ function logloads(loads) {
 
     var loader = linkSet.loader;
 
-    for (var i = 0, l = load.dependencies.length; i < l; i++) {
+    for (i = 0, l = load.dependencies.length; i < l; i++) {
       var name = load.dependencies[i].value;
 
       if (loader.modules[name])
@@ -563,16 +552,16 @@ function logloads(loads) {
     if (linkSet.loader.loaderObj.execute === false) {
       var loads = [].concat(linkSet.loads);
       for (var i = 0, l = loads.length; i < l; i++) {
-        var load = loads[i];
-        load.module = !load.isDeclarative ? {
+        var _load = loads[i];
+        _load.module = !load.isDeclarative ? {
           module: _newModule({})
         } : {
-          name: load.name,
+          name: _load.name,
           module: _newModule({}),
           evaluated: true
         };
-        load.status = 'linked';
-        finishLoad(linkSet.loader, load);
+        _load.status = 'linked';
+        finishLoad(linkSet.loader, _load);
       }
       return linkSet.resolve(startingLoad);
     }
@@ -602,20 +591,20 @@ function logloads(loads) {
 
     var loads = linkSet.loads.concat([]);
     for (var i = 0, l = loads.length; i < l; i++) {
-      var load = loads[i];
+      var _load = loads[i];
 
       // store all failed load records
       loader.loaderObj.failed = loader.loaderObj.failed || [];
-      if (load.status === "failed" && indexOf.call(loader.loaderObj.failed, load) == -1)
-        loader.loaderObj.failed.push(load);
+      if (_load.status === "failed" && indexOf.call(loader.loaderObj.failed, _load) == -1)
+        loader.loaderObj.failed.push(_load);
 	  else if(loader.loaderObj._pendingState)
-	  	loader.loaderObj._pendingState(load);
+	  	loader.loaderObj._pendingState(_load);
 
-      var linkIndex = indexOf.call(load.linkSets, linkSet);
+      var linkIndex = indexOf.call(_load.linkSets, linkSet);
       console.assert(linkIndex != -1, 'link not present');
-      load.linkSets.splice(linkIndex, 1);
-      if (load.linkSets.length == 0) {
-        var globalLoadsIndex = indexOf.call(linkSet.loader.loads, load);
+      _load.linkSets.splice(linkIndex, 1);
+      if (_load.linkSets.length == 0) {
+        var globalLoadsIndex = indexOf.call(linkSet.loader.loads, _load);
         if (globalLoadsIndex != -1)
           linkSet.loader.loads.splice(globalLoadsIndex, 1);
       }
@@ -1086,12 +1075,13 @@ function logloads(loads) {
     },
     // 26.3.3.9 keys not implemented
     // 26.3.3.10
-    load: function(name, options) {
+    load: function(name) {
       if (this._loader.modules[name]) {
         doEnsureEvaluated(this._loader.modules[name], [], this._loader);
         return Promise.resolve(this._loader.modules[name].module);
       }
-      return this._loader.importPromises[name] || createImportPromise(this, name, loadModule(this._loader, name, {}));
+      return this._loader.importPromises[name] ||
+			createImportPromise(this, name, loadModule(this._loader, name, {}));
     },
     // 26.3.3.11
     module: function(source, options) {
@@ -1153,7 +1143,7 @@ function logloads(loads) {
     // 26.3.3.17 @@toStringTag not implemented
 
     // 26.3.3.18.1
-    normalize: function(name, referrerName, referrerAddress) {
+    normalize: function(name) {
       return name;
     },
     // 26.3.3.18.2
@@ -1161,7 +1151,7 @@ function logloads(loads) {
       return load.name;
     },
     // 26.3.3.18.3
-    fetch: function(load) {
+    fetch: function() {
       throw new TypeError('Fetch not implemented');
     },
     // 26.3.3.18.4
@@ -1169,7 +1159,7 @@ function logloads(loads) {
       return load.source;
     },
     // 26.3.3.18.5
-    instantiate: function(load) {
+    instantiate: function() {
     }
   };
 
@@ -1674,7 +1664,7 @@ function logloads(loads) {
 
 		return {
 			visitor: {
-				Program: function(path, state) {
+				Program: function(path) {
 					path.unshiftContainer("body", [
 						t.exportNamedDeclaration(null, [
 							t.exportSpecifier(t.identifier("true"),
@@ -1688,12 +1678,10 @@ function logloads(loads) {
 
 	function getImportSpecifierPositionsPlugin(load) {
 		load.metadata.importSpecifiers = Object.create(null);
-		return function(babel){
-			var t = babel.types;
-
+		return function() {
 			return {
 				visitor: {
-					ImportDeclaration: function(path, state){
+					ImportDeclaration: function(path){
 						var node = path.node;
 						var specifier = node.source.value;
 						var loc = node.source.loc;
@@ -1977,7 +1965,7 @@ function logloads(loads) {
     });
 
     $__Object$defineProperty(SystemLoader.prototype, "normalize", {
-      value: function(name, parentName, parentAddress) {
+      value: function(name, parentName) {
         if (typeof name != 'string')
           throw new TypeError('Module name must be a string');
 
@@ -2021,7 +2009,6 @@ function logloads(loads) {
         // build the full module name
         var normalizedParts = [];
         var parentParts = (parentName || '').split('/');
-        var normalizedLen = parentParts.length - 1 - dotdots;
 
         normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
         normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));
@@ -2124,7 +2111,7 @@ function __eval(__source, __global, __load) {
   }
   catch(e) {
     if (e.name == 'SyntaxError' || e.name == 'TypeError')
-      e.message = 'Evaluating ' + (__load.name || load.address) + '\n\t' + e.message;
+      e.message = 'Evaluating ' + (__load.name || __load.address) + '\n\t' + e.message;
     throw e;
   }
 }

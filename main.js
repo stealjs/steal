@@ -69,7 +69,7 @@
 				hash     : m[8] || ''
 			} : null);
 		},
-		joinURIs = function(base, href) {
+		joinURIs = function(_base, _href) {
 			function removeDotSegments(input) {
 				var output = [];
 				input.replace(/^(\.\.?(\/|$))+/, '')
@@ -85,8 +85,8 @@
 				return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
 			}
 
-			href = parseURI(href || '');
-			base = parseURI(base || '');
+			var href = parseURI(_href || '');
+			var base = parseURI(_base || '');
 
 			return !href || !base ? null : (href.protocol || base.protocol) +
 				(href.protocol || href.authority ? href.authority : base.authority) +
@@ -122,9 +122,9 @@
 			}
 		})(),
 		isElectron = isNode && !!process.versions["electron"],
-		isNode = isNode && !isNW && !isElectron,
+		isNode = isNode && !isNW && !isElectron, // eslint-disable-line no-redeclare
 		warn = typeof console === "object" ?
-			fBind.call(console.warn, console) : function(){};
+			fBind.call(console.warn, console) : function(){}; // eslint-disable-line no-console
 
 	var filename = function(uri){
 		var lastSlash = uri.lastIndexOf("/");
@@ -145,9 +145,7 @@
 		}
 	};
 
-	var pluginCache = {};
-
-	var normalize = function(unnormalizedName, loader){
+	var normalize = function(unnormalizedName){
 		var name = unnormalizedName;
 
 		// Detech if this name contains a plugin part like: app.less!steal/less
@@ -588,7 +586,7 @@ addStealExtension(function (loader) {
 
       stealInstantiateResult = {
         deps: deps,
-        execute: function(require, exports, moduleName) {
+        execute: function(require) {
 
           var depValues = [];
           for (var i = 0; i < deps.length; i++) {
@@ -634,6 +632,7 @@ addStealExtension(function (loader) {
     return loaderInstantiate.call(loader, load);
   };
 });
+
 addStealExtension(function(loader) {
 	var superTranspile = loader.transpile;
 	var superDetermineFormat = loader._determineFormat;
@@ -784,7 +783,7 @@ addStealExtension(function applyTraceExtension(loader) {
 		if(!parents) return [moduleName];
 
 		var bundles = [];
-		eachOf(parents, function(parentName, value){
+		eachOf(parents, function(parentName){
 			if(!visited[parentName])
 				bundles = bundles.concat(loader.getBundles(parentName, visited));
 		});
@@ -816,7 +815,7 @@ addStealExtension(function applyTraceExtension(loader) {
 	};
 
 	function eachOf(obj, callback){
-		var name, val;
+		var name;
 		for(name in obj) {
 			callback(name, obj[name]);
 		}
@@ -1175,18 +1174,6 @@ addStealExtension(function (loader) {
 		return val;
 	};
 
-	var setToSystem = function(prop){
-		return {
-			set: function(val){
-				if(typeof val === "object" && typeof steal.System[prop] === "object") {
-					this[prop] = extend(this[prop] || {},val || {});
-				} else {
-					this[prop] = val;
-				}
-			}
-		};
-	};
-
 	var pluginPart = function(name) {
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
@@ -1446,7 +1433,7 @@ addStealExtension(function (loader) {
 		devBundle: {
 			order: 16,
 
-			set: function(dirname, cfg) {
+			set: function(dirname) {
 				var path = (dirname === true) ? "dev-bundle" : dirname;
 
 				if (path) {
@@ -1457,7 +1444,7 @@ addStealExtension(function (loader) {
 		depsBundle: {
 			order: 17,
 
-			set: function(dirname, cfg) {
+			set: function(dirname) {
 				var path = (dirname === true) ? "dev-bundle" : dirname;
 
 				if (path) {
@@ -1535,12 +1522,8 @@ addStealExtension(function (loader) {
 		var queryOptions = {},
 			urlRegEx = /Url$/,
 			urlParts = url.split("?"),
-			path = urlParts.shift(),
 			search = urlParts.join("?"),
-			searchParts = search.split("&"),
-			paths = path.split("/"),
-			lastPart = paths.pop(),
-			stealPath = paths.join("/");
+			searchParts = search.split("&");
 
 		if(searchParts.length && searchParts[0].length) {
 				var searchPart;
@@ -1591,7 +1574,7 @@ addStealExtension(function (loader) {
 	// if we are in a browser, we need to know which script is steal
 	// to extract the script tag options => getScriptOptions()
 	var getUrlOptions = function (){
-		return new Promise(function(resolve, reject){
+		return new Promise(function(resolve) {
 
 			// for Workers get options from steal query
 			if (isWebWorker) {
@@ -1626,7 +1609,6 @@ addStealExtension(function (loader) {
 	// configure and startup steal
 	// load the main module(s) if everything is configured
 	steal.startup = function(startupConfig){
-		var steal = this;
 		var loader = this.loader;
 		var configResolve;
 		var configReject;
@@ -1888,8 +1870,9 @@ catch(e) {
 var defineProperty;
 (function () {
   try {
-    if (!!Object.defineProperty({}, 'a', {}))
+    if (Object.defineProperty({}, 'a', {})) {
       defineProperty = Object.defineProperty;
+	}
   }
   catch (e) {
     defineProperty = function(obj, prop, opt) {
@@ -1927,8 +1910,8 @@ function getESModule(exports) {
 
 function defineOrCopyProperty(targetObj, sourceObj, propName) {
   try {
-    var d;
-    if (d = Object.getOwnPropertyDescriptor(sourceObj, propName))
+    var d = Object.getOwnPropertyDescriptor(sourceObj, propName);
+    if (d)
       defineProperty(targetObj, propName, d);
   }
   catch (ex) {
@@ -2219,7 +2202,6 @@ function register(loader) {
 
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
-  var curSystem;
   function exec(load, execContext) {
     var loader = this;
     var context = execContext;
@@ -3057,7 +3039,7 @@ function global(loader) {
 
         // disable module detection
         var define = loader.global.define;
-        var require = loader.global.require;
+        var _require = loader.global.require;
 
         loader.global.define = undefined;
         loader.global.module = undefined;
@@ -3065,7 +3047,7 @@ function global(loader) {
 
         loader.__exec(load, loader.global);
 
-        loader.global.require = require;
+        loader.global.require = _require;
         loader.global.define = define;
 
         return loader.get('@@global-helpers').retrieveGlobal(module.id, exportName, load.metadata.init);
@@ -3177,7 +3159,7 @@ function cjs(loader) {
 				if (System._nodeRequire)
 					dirname = dirname.substr(5);
 
-				var globals = loader.global._g = {
+				loader.global._g = {
 					global: loader.global,
 					exports: exports,
 					module: module,
@@ -3333,7 +3315,7 @@ function amd(loader) {
 
     else
       throw new TypeError('Invalid require');
-  };
+  }
   loader.amdRequire = function() {
     return require.apply(this, arguments);
   };
@@ -3485,7 +3467,7 @@ function amd(loader) {
         // define the module through the register registry
         loader.register(name, define.deps, false, define.execute);
       }
-    };
+    }
     define.amd = {};
     loader.amdDefine = define;
   }
@@ -3642,14 +3624,12 @@ function map(loader) {
   function applyMap(name, parentName, loader) {
     var curMatch, curMatchLength = 0;
     var curParent, curParentMatchLength = 0;
-    var tmpParentLength, tmpPrefixLength;
-    var subPath;
-    var nameParts;
+    var tmpParentLength, tmpPrefixLength, p, curMap;
 
     // first find most specific contextual match
     if (parentName) {
-      for (var p in loader.map) {
-        var curMap = loader.map[p];
+      for (p in loader.map) {
+        curMap = loader.map[p];
         if (typeof curMap != 'object')
           continue;
 
@@ -3682,15 +3662,15 @@ function map(loader) {
       return doMap(name, curMatch.length, loader.map[curParent][curMatch]);
 
     // now do the global map
-    for (var p in loader.map) {
-      var curMap = loader.map[p];
+    for (p in loader.map) {
+      curMap = loader.map[p];
       if (typeof curMap != 'string')
         continue;
 
       if (!prefixMatch(name, p))
         continue;
 
-      var tmpPrefixLength = pathLen(p);
+      tmpPrefixLength = pathLen(p);
 
       if (tmpPrefixLength <= curMatchLength)
         continue;

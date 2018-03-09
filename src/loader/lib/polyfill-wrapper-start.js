@@ -7,7 +7,7 @@ __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
 var $__Object$defineProperty;
 (function () {
   try {
-    if (!!Object.defineProperty({}, 'a', {})) {
+    if (Object.defineProperty({}, 'a', {})) {
       $__Object$defineProperty = Object.defineProperty;
     }
   } catch (e) {
@@ -25,7 +25,7 @@ __global.$__Object$create = Object.create || function(o, props) {
   F.prototype = o;
 
   if (typeof(props) === "object") {
-    for (prop in props) {
+    for (var prop in props) {
       if (props.hasOwnProperty((prop))) {
         F[prop] = props[prop];
       }

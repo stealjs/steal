@@ -224,7 +224,7 @@
 
     get strict() { return true; }
 
-    normalize(name, parentName, parentAddress) {
+    normalize(name, parentName) {
       if (typeof name != 'string')
         throw new TypeError('Module name must be a string');
 
@@ -268,7 +268,6 @@
       // build the full module name
       var normalizedParts = [];
       var parentParts = (parentName || '').split('/');
-      var normalizedLen = parentParts.length - 1 - dotdots;
 
       normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
       normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));

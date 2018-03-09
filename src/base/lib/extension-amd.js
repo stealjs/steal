@@ -122,7 +122,7 @@ function amd(loader) {
 
     else
       throw new TypeError('Invalid require');
-  };
+  }
   loader.amdRequire = function() {
     return require.apply(this, arguments);
   };
@@ -274,7 +274,7 @@ function amd(loader) {
         // define the module through the register registry
         loader.register(name, define.deps, false, define.execute);
       }
-    };
+    }
     define.amd = {};
     loader.amdDefine = define;
   }

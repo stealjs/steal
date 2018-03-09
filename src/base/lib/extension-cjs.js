@@ -100,7 +100,7 @@ function cjs(loader) {
 				if (System._nodeRequire)
 					dirname = dirname.substr(5);
 
-				var globals = loader.global._g = {
+				loader.global._g = {
 					global: loader.global,
 					exports: exports,
 					module: module,

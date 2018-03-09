@@ -27,7 +27,6 @@ function register(loader) {
 
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
-  var curSystem;
   function exec(load, execContext) {
     var loader = this;
     var context = execContext;

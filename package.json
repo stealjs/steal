@@ -9,13 +9,13 @@
   },
   "scripts": {
     "build": "grunt",
-    "lint": "eslint \"{src,ext}/**/*.js\"",
+    "lint": "eslint steal-sans-promises.js",
     "ui": "npm run npm-copy && grunt build && npm run lint && node test/saucelabs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
     "test-node": "grunt simplemocha",
     "test-node:ci": "npm run lint && npm run test-node",
-    "test": "npm run npm-copy && npm run lint && grunt test --stack",
+    "test": "npm run npm-copy && npm run build && npm run lint && grunt test --stack",
     "test:live-reload": "cd test/live_reload && live-reload-test & testee test/live_reload/unit.html --browsers firefox --reporter Spec",
     "test:npm-live-reload": "cd test/npm/live-reload && live-reload-test & testee test/npm/steal-live-reload.html --browsers firefox --reporter Spec"
   },
@@ -50,7 +50,6 @@
     "grunt-cli": "^1.2.0",
     "grunt-contrib-concat": "~1.0.1",
     "grunt-contrib-copy": "~1.0.0",
-    "grunt-contrib-jshint": "~1.1.0",
     "grunt-contrib-uglify": "~3.0.0",
     "grunt-contrib-watch": "~1.0.0",
     "grunt-esnext": "0.0.3",

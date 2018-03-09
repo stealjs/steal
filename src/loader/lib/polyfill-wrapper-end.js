@@ -7,7 +7,7 @@ function __eval(__source, __global, __load) {
   }
   catch(e) {
     if (e.name == 'SyntaxError' || e.name == 'TypeError')
-      e.message = 'Evaluating ' + (__load.name || load.address) + '\n\t' + e.message;
+      e.message = 'Evaluating ' + (__load.name || __load.address) + '\n\t' + e.message;
     throw e;
   }
 }
