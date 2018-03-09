@@ -7,8 +7,8 @@ addStealExtension(function(loader) {
 	var superInstantiate = loader.instantiate;
 
 	var warn = typeof console === "object" ?
-	Function.prototype.bind.call(console.warn, console) :
-	null;
+		Function.prototype.bind.call(console.warn, console) : // eslint-disable-line no-console
+		null;
 
 	if(!loader._instantiatedModules) {
 		Object.defineProperty(loader, '_instantiatedModules', {

@@ -178,7 +178,7 @@ function global(loader) {
 
         // disable module detection
         var define = loader.global.define;
-        var require = loader.global.require;
+        var _require = loader.global.require;
 
         loader.global.define = undefined;
         loader.global.module = undefined;
@@ -186,7 +186,7 @@ function global(loader) {
 
         loader.__exec(load, loader.global);
 
-        loader.global.require = require;
+        loader.global.require = _require;
         loader.global.define = define;
 
         return loader.get('@@global-helpers').retrieveGlobal(module.id, exportName, load.metadata.init);

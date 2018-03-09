@@ -5,12 +5,8 @@
 		var queryOptions = {},
 			urlRegEx = /Url$/,
 			urlParts = url.split("?"),
-			path = urlParts.shift(),
 			search = urlParts.join("?"),
-			searchParts = search.split("&"),
-			paths = path.split("/"),
-			lastPart = paths.pop(),
-			stealPath = paths.join("/");
+			searchParts = search.split("&");
 
 		if(searchParts.length && searchParts[0].length) {
 				var searchPart;
@@ -61,7 +57,7 @@
 	// if we are in a browser, we need to know which script is steal
 	// to extract the script tag options => getScriptOptions()
 	var getUrlOptions = function (){
-		return new Promise(function(resolve, reject){
+		return new Promise(function(resolve) {
 
 			// for Workers get options from steal query
 			if (isWebWorker) {
@@ -96,7 +92,6 @@
 	// configure and startup steal
 	// load the main module(s) if everything is configured
 	steal.startup = function(startupConfig){
-		var steal = this;
 		var loader = this.loader;
 		var configResolve;
 		var configReject;

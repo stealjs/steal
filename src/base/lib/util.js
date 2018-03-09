@@ -9,8 +9,9 @@ catch(e) {
 var defineProperty;
 (function () {
   try {
-    if (!!Object.defineProperty({}, 'a', {}))
+    if (Object.defineProperty({}, 'a', {})) {
       defineProperty = Object.defineProperty;
+	}
   }
   catch (e) {
     defineProperty = function(obj, prop, opt) {
@@ -48,8 +49,8 @@ function getESModule(exports) {
 
 function defineOrCopyProperty(targetObj, sourceObj, propName) {
   try {
-    var d;
-    if (d = Object.getOwnPropertyDescriptor(sourceObj, propName))
+    var d = Object.getOwnPropertyDescriptor(sourceObj, propName);
+    if (d)
       defineProperty(targetObj, propName, d);
   }
   catch (ex) {

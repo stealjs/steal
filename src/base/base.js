@@ -93,8 +93,9 @@ catch(e) {
 var defineProperty;
 (function () {
   try {
-    if (!!Object.defineProperty({}, 'a', {}))
+    if (Object.defineProperty({}, 'a', {})) {
       defineProperty = Object.defineProperty;
+	}
   }
   catch (e) {
     defineProperty = function(obj, prop, opt) {
@@ -132,8 +133,8 @@ function getESModule(exports) {
 
 function defineOrCopyProperty(targetObj, sourceObj, propName) {
   try {
-    var d;
-    if (d = Object.getOwnPropertyDescriptor(sourceObj, propName))
+    var d = Object.getOwnPropertyDescriptor(sourceObj, propName);
+    if (d)
       defineProperty(targetObj, propName, d);
   }
   catch (ex) {
@@ -424,7 +425,6 @@ function register(loader) {
 
   // define exec for easy evaluation of a load record (load.name, load.source, load.address)
   // main feature is source maps support handling
-  var curSystem;
   function exec(load, execContext) {
     var loader = this;
     var context = execContext;
@@ -1262,7 +1262,7 @@ function global(loader) {
 
         // disable module detection
         var define = loader.global.define;
-        var require = loader.global.require;
+        var _require = loader.global.require;
 
         loader.global.define = undefined;
         loader.global.module = undefined;
@@ -1270,7 +1270,7 @@ function global(loader) {
 
         loader.__exec(load, loader.global);
 
-        loader.global.require = require;
+        loader.global.require = _require;
         loader.global.define = define;
 
         return loader.get('@@global-helpers').retrieveGlobal(module.id, exportName, load.metadata.init);
@@ -1382,7 +1382,7 @@ function cjs(loader) {
 				if (System._nodeRequire)
 					dirname = dirname.substr(5);
 
-				var globals = loader.global._g = {
+				loader.global._g = {
 					global: loader.global,
 					exports: exports,
 					module: module,
@@ -1538,7 +1538,7 @@ function amd(loader) {
 
     else
       throw new TypeError('Invalid require');
-  };
+  }
   loader.amdRequire = function() {
     return require.apply(this, arguments);
   };
@@ -1690,7 +1690,7 @@ function amd(loader) {
         // define the module through the register registry
         loader.register(name, define.deps, false, define.execute);
       }
-    };
+    }
     define.amd = {};
     loader.amdDefine = define;
   }
@@ -1847,14 +1847,12 @@ function map(loader) {
   function applyMap(name, parentName, loader) {
     var curMatch, curMatchLength = 0;
     var curParent, curParentMatchLength = 0;
-    var tmpParentLength, tmpPrefixLength;
-    var subPath;
-    var nameParts;
+    var tmpParentLength, tmpPrefixLength, p, curMap;
 
     // first find most specific contextual match
     if (parentName) {
-      for (var p in loader.map) {
-        var curMap = loader.map[p];
+      for (p in loader.map) {
+        curMap = loader.map[p];
         if (typeof curMap != 'object')
           continue;
 
@@ -1887,15 +1885,15 @@ function map(loader) {
       return doMap(name, curMatch.length, loader.map[curParent][curMatch]);
 
     // now do the global map
-    for (var p in loader.map) {
-      var curMap = loader.map[p];
+    for (p in loader.map) {
+      curMap = loader.map[p];
       if (typeof curMap != 'string')
         continue;
 
       if (!prefixMatch(name, p))
         continue;
 
-      var tmpPrefixLength = pathLen(p);
+      tmpPrefixLength = pathLen(p);
 
       if (tmpPrefixLength <= curMatchLength)
         continue;

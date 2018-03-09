@@ -58,14 +58,12 @@ function map(loader) {
   function applyMap(name, parentName, loader) {
     var curMatch, curMatchLength = 0;
     var curParent, curParentMatchLength = 0;
-    var tmpParentLength, tmpPrefixLength;
-    var subPath;
-    var nameParts;
+    var tmpParentLength, tmpPrefixLength, p, curMap;
 
     // first find most specific contextual match
     if (parentName) {
-      for (var p in loader.map) {
-        var curMap = loader.map[p];
+      for (p in loader.map) {
+        curMap = loader.map[p];
         if (typeof curMap != 'object')
           continue;
 
@@ -98,15 +96,15 @@ function map(loader) {
       return doMap(name, curMatch.length, loader.map[curParent][curMatch]);
 
     // now do the global map
-    for (var p in loader.map) {
-      var curMap = loader.map[p];
+    for (p in loader.map) {
+      curMap = loader.map[p];
       if (typeof curMap != 'string')
         continue;
 
       if (!prefixMatch(name, p))
         continue;
 
-      var tmpPrefixLength = pathLen(p);
+      tmpPrefixLength = pathLen(p);
 
       if (tmpPrefixLength <= curMatchLength)
         continue;

@@ -211,12 +211,6 @@ module.exports = function (grunt) {
 			files: ["src/*.js"],
 			tasks: "default"
 		},
-		jshint: {
-			options: {
-				jshintrc: ".jshintrc"
-			},
-			lib: ["src/**/*.js"]
-		},
 		testee: {
 			tests: {
 				options: {
@@ -240,14 +234,13 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-string-replace');
 	grunt.loadNpmTasks("grunt-contrib-watch");
 	grunt.loadNpmTasks("grunt-contrib-concat");
-	grunt.loadNpmTasks("grunt-contrib-jshint");
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-simple-mocha");
 	grunt.loadNpmTasks("grunt-esnext");
 	grunt.loadNpmTasks("testee");
 
-	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
+	grunt.registerTask("test", ["testee:tests", "simplemocha"]);
 	grunt.registerTask("loader", ["esnext", "string-replace"]);
 	grunt.registerTask("copy-to", ["copy:extensions", "copy:toTest"]);
 	grunt.registerTask("build", ["loader", "concat", "uglify:dist", "copy-to"]);

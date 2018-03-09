@@ -69,7 +69,7 @@
 				hash     : m[8] || ''
 			} : null);
 		},
-		joinURIs = function(base, href) {
+		joinURIs = function(_base, _href) {
 			function removeDotSegments(input) {
 				var output = [];
 				input.replace(/^(\.\.?(\/|$))+/, '')
@@ -85,8 +85,8 @@
 				return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
 			}
 
-			href = parseURI(href || '');
-			base = parseURI(base || '');
+			var href = parseURI(_href || '');
+			var base = parseURI(_base || '');
 
 			return !href || !base ? null : (href.protocol || base.protocol) +
 				(href.protocol || href.authority ? href.authority : base.authority) +
@@ -122,6 +122,6 @@
 			}
 		})(),
 		isElectron = isNode && !!process.versions["electron"],
-		isNode = isNode && !isNW && !isElectron,
+		isNode = isNode && !isNW && !isElectron, // eslint-disable-line no-redeclare
 		warn = typeof console === "object" ?
-			fBind.call(console.warn, console) : function(){};
+			fBind.call(console.warn, console) : function(){}; // eslint-disable-line no-console

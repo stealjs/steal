@@ -30,7 +30,7 @@ addStealExtension(function applyTraceExtension(loader) {
 		if(!parents) return [moduleName];
 
 		var bundles = [];
-		eachOf(parents, function(parentName, value){
+		eachOf(parents, function(parentName){
 			if(!visited[parentName])
 				bundles = bundles.concat(loader.getBundles(parentName, visited));
 		});
@@ -62,7 +62,7 @@ addStealExtension(function applyTraceExtension(loader) {
 	};
 
 	function eachOf(obj, callback){
-		var name, val;
+		var name;
 		for(name in obj) {
 			callback(name, obj[name]);
 		}

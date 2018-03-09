@@ -17,9 +17,7 @@
 		}
 	};
 
-	var pluginCache = {};
-
-	var normalize = function(unnormalizedName, loader){
+	var normalize = function(unnormalizedName){
 		var name = unnormalizedName;
 
 		// Detech if this name contains a plugin part like: app.less!steal/less

@@ -35,7 +35,7 @@ addStealExtension(function (loader) {
 
       stealInstantiateResult = {
         deps: deps,
-        execute: function(require, exports, moduleName) {
+        execute: function(require) {
 
           var depValues = [];
           for (var i = 0; i < deps.length; i++) {

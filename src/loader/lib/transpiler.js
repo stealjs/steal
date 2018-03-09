@@ -488,7 +488,7 @@
 
 		return {
 			visitor: {
-				Program: function(path, state) {
+				Program: function(path) {
 					path.unshiftContainer("body", [
 						t.exportNamedDeclaration(null, [
 							t.exportSpecifier(t.identifier("true"),
@@ -502,12 +502,10 @@
 
 	function getImportSpecifierPositionsPlugin(load) {
 		load.metadata.importSpecifiers = Object.create(null);
-		return function(babel){
-			var t = babel.types;
-
+		return function() {
 			return {
 				visitor: {
-					ImportDeclaration: function(path, state){
+					ImportDeclaration: function(path){
 						var node = path.node;
 						var specifier = node.source.value;
 						var loc = node.source.loc;

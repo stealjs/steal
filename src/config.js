@@ -101,18 +101,6 @@
 		return val;
 	};
 
-	var setToSystem = function(prop){
-		return {
-			set: function(val){
-				if(typeof val === "object" && typeof steal.System[prop] === "object") {
-					this[prop] = extend(this[prop] || {},val || {});
-				} else {
-					this[prop] = val;
-				}
-			}
-		};
-	};
-
 	var pluginPart = function(name) {
 		var bang = name.lastIndexOf("!");
 		if(bang !== -1) {
@@ -372,7 +360,7 @@
 		devBundle: {
 			order: 16,
 
-			set: function(dirname, cfg) {
+			set: function(dirname) {
 				var path = (dirname === true) ? "dev-bundle" : dirname;
 
 				if (path) {
@@ -383,7 +371,7 @@
 		depsBundle: {
 			order: 17,
 
-			set: function(dirname, cfg) {
+			set: function(dirname) {
 				var path = (dirname === true) ? "dev-bundle" : dirname;
 
 				if (path) {
