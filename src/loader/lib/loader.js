@@ -1006,6 +1006,16 @@ function logloads(loads) {
       var loader = this._loader;
       delete loader.importPromises[name];
       delete loader.moduleRecords[name];
+	  if(this.failed) {
+		  var load;
+		  for(var i = 0; i < this.failed.length; i++) {
+			  load = this.failed[i];
+			  if(load.name === name) {
+				  this.failed.splice(i, 1);
+				  break;
+			  }
+		  }
+	  }
       return loader.modules[name] ? delete loader.modules[name] : false;
     },
     // 26.3.3.4 entries not implemented

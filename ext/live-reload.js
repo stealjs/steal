@@ -114,6 +114,9 @@ function addLiveReload(loader) {
 				delete loader._liveListeners[moduleName];
 			}
 			return true;
+		} else {
+			// Delete it anyways to destroy extra state.
+			loader.delete(moduleName);
 		}
 		return false;
 	}
