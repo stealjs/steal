@@ -635,11 +635,36 @@ QUnit.test("Importing a missing file from a plugin module provides the module fi
 			.then(function(app) {
 				assert.ok(false, "import call should not resolve");
 			}, function(err) {
-				console.error(err)
 				var stack = err.stack;
 				assert.ok(/mod.txt/.test(stack), "main.js is in the stack");
 				done();
 			});
+});
+
+QUnit.test("Importing a module that throws an Error", function(assert) {
+	var done = assert.async();
+
+	var cjsSrc = "module.exports = {}; \nthrow new Error('oh no');\n\ndoStuff();";
+	var esSrc = "export default {}; \nthrow new Error('oh no');";
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0"
+		})
+		.withModule("app@1.0.0#cjs", cjsSrc)
+		.withModule("app@1.0.0#es", esSrc)
+		.loader;
+
+	loader["import"]("app/cjs")
+		.then(function(app) {
+			assert.ok(false, "import call should not resolve");
+		}, function(err) {
+			var stack = err.stack;
+			assert.ok(/throw new Error/.test(stack), "Contains the throw");
+			done();
+		});
 });
 
 QUnit.module("Importing npm modules with tilde & homeAlias operators");

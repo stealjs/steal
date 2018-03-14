@@ -2167,13 +2167,34 @@ function logloads(loads) {
    * See getOrCreateModuleRecord for all properties
    *
    */
-  function doExecute(module) {
+  function doExecute(module, loader) {
     try {
       module.execute.call(__global);
     }
     catch(e) {
+		e.onModuleExecution = true;
+		var load = loader.loaderObj.getModuleLoad(module.name);
+		if(load) {
+			return cleanupStack(e, load.address);
+		}
       return e;
     }
+  }
+
+  function cleanupStack(err, address) {
+	  if (!err.originalErr) {
+		var stack = (err.stack || err.message || err).toString().split('\n');
+		var newStack = [];
+		for (var i = 0; i < stack.length; i++) {
+		  if (stack[i].indexOf(address) !== -1)
+			newStack.push(stack[i]);
+		}
+
+		if(newStack.length) {
+			err.stack = newStack.join('\n\t');
+		}
+	  }
+	  return err;
   }
 
   // propogate execution errors
@@ -2216,7 +2237,7 @@ function logloads(loads) {
       return;
 
     module.evaluated = true;
-    err = doExecute(module);
+    err = doExecute(module, loader);
     if (err) {
       module.failed = true;
     }
@@ -2356,10 +2377,19 @@ function logloads(loads) {
           .then(function(load) {
             delete loader.importPromises[name];
             return evaluateLoadedModule(loader, load);
-          }, function(err){
+		  })
+		  .then(null, function(err){
             if(loaderObj.defined) {
               loaderObj.defined[name] = undefined;
             }
+
+			if(err.onModuleExecution) {
+				var load = loaderObj.getModuleLoad(name);
+				if(load) {
+					return loaderObj.rejectWithCodeFrame(err, load);
+				}
+			}
+
             return Promise.reject(err);
           }));
       });
