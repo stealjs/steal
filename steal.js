@@ -1270,6 +1270,10 @@ define(function() {
 ;
 (function(__global) {
 
+var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
+  && self instanceof WorkerGlobalScope;
+var isBrowser = typeof window != 'undefined' && !isWorker;
+
 __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
@@ -1411,12 +1415,18 @@ function logloads(loads) {
 (function() {
   var Promise = __global.Promise || require('when/es6-shim/Promise');
   var console;
+  var $__curScript;
   if (__global.console) {
     console = __global.console;
     console.assert = console.assert || function() {};
   } else {
     console = { assert: function() {} };
   }
+  if(isBrowser) {
+	  var scripts = document.getElementsByTagName("script");
+	  $__curScript = document.currentScript || scripts[scripts.length - 1];
+  }
+
 
   // IE8 support
   var indexOf = Array.prototype.indexOf || function(item) {
@@ -2167,13 +2177,31 @@ function logloads(loads) {
    * See getOrCreateModuleRecord for all properties
    *
    */
-  function doExecute(module) {
+  function doExecute(module, loader) {
     try {
       module.execute.call(__global);
     }
     catch(e) {
+		e.onModuleExecution = true;
+		cleanupStack(e);
       return e;
     }
+  }
+
+  function cleanupStack(err) {
+	  if (!err.originalErr) {
+		var stack = (err.stack || err.message || err).toString().split('\n');
+		var newStack = [];
+		for (var i = 0; i < stack.length; i++) {
+		  if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
+			newStack.push(stack[i]);
+		}
+
+		if(newStack.length) {
+			err.stack = newStack.join('\n\t');
+		}
+	  }
+	  return err;
   }
 
   // propogate execution errors
@@ -2216,7 +2244,7 @@ function logloads(loads) {
       return;
 
     module.evaluated = true;
-    err = doExecute(module);
+    err = doExecute(module, loader);
     if (err) {
       module.failed = true;
     }
@@ -2356,10 +2384,19 @@ function logloads(loads) {
           .then(function(load) {
             delete loader.importPromises[name];
             return evaluateLoadedModule(loader, load);
-          }, function(err){
+		  })
+		  .then(null, function(err){
             if(loaderObj.defined) {
               loaderObj.defined[name] = undefined;
             }
+
+			if(err.onModuleExecution && loaderObj.getModuleLoad) {
+				var load = loaderObj.getModuleLoad(name);
+				if(load) {
+					return loaderObj.rejectWithCodeFrame(err, load);
+				}
+			}
+
             return Promise.reject(err);
           }));
       });
@@ -3026,8 +3063,6 @@ function logloads(loads) {
 
 
 (function() {
-  var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
-  var isBrowser = typeof window != 'undefined' && !isWorker;
   var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
   var Promise = __global.Promise || require('when/es6-shim/Promise');
 
@@ -5660,7 +5695,7 @@ var $__curScript, __eval;
       new Function(source).call(context);
     }
     catch(e) {
-      throw addToError(e, 'Evaluating ' + address);
+      throw addToError(e, '');
     }
   };
 
@@ -5720,7 +5755,8 @@ var $__curScript, __eval;
       }
     }
 
-    var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
+    //var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
+	var newMsg = err.message + '\n\t' + msg;
 
     // Convert file:/// URLs to paths in Node
     if (!isBrowser)
@@ -5730,14 +5766,15 @@ var $__curScript, __eval;
 
     // Node needs stack adjustment for throw to show message
     if (!isBrowser)
-      newErr.stack = newMsg;
+      newErr.stack = newStack.join('\n\t');
     // Clearing the stack stops unnecessary loader lines showing
-    else
-      newErr.stack = null;
+    else if(newStack)
+      newErr.stack = newStack.join('\n\t');
 
     // track the original error
     newErr.originalErr = err.originalErr || err;
 
+	newErr.onModuleExecution = true;
     return newErr;
   }
 
@@ -6543,11 +6580,86 @@ addStealExtension(function (loader) {
 
 	StackTrace.item = function(fnName, url, line, column) {
 		return {
+			method: fnName,
 			fnName: fnName,
 			url: url,
 			line: line,
 			column: column
 		}
+	};
+
+	function parse(stack) {
+	  var rawLines = stack.split('\n');
+
+	  var v8Lines = compact(rawLines.map(parseV8Line));
+	  if (v8Lines.length > 0) return v8Lines;
+
+	  var geckoLines = compact(rawLines.map(parseGeckoLine));
+	  if (geckoLines.length > 0) return geckoLines;
+
+	  throw new Error('Unknown stack format: ' + stack);
+	}
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/Stack
+	var GECKO_LINE = /^(?:([^@]*)@)?(.*?):(\d+)(?::(\d+))?$/;
+
+	function parseGeckoLine(line) {
+	  var match = line.match(GECKO_LINE);
+	  if (!match) return null;
+	  var meth = match[1] || ''
+	  return {
+	    method:   meth,
+		fnName:   meth,
+	    url: match[2] || '',
+	    line:     parseInt(match[3]) || 0,
+	    column:   parseInt(match[4]) || 0,
+	  };
+	}
+
+	// https://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
+	var V8_OUTER1 = /^\s*(eval )?at (.*) \((.*)\)$/;
+	var V8_OUTER2 = /^\s*at()() (\S+)$/;
+	var V8_INNER  = /^\(?([^\(]+):(\d+):(\d+)\)?$/;
+
+	function parseV8Line(line) {
+	  var outer = line.match(V8_OUTER1) || line.match(V8_OUTER2);
+	  if (!outer) return null;
+	  var inner = outer[3].match(V8_INNER);
+	  if (!inner) return null;
+
+	  var method = outer[2] || '';
+	  if (outer[1]) method = 'eval at ' + method;
+	  return {
+	    method:   method,
+		fnName:   method,
+	    url: inner[1] || '',
+	    line:     parseInt(inner[2]) || 0,
+	    column:   parseInt(inner[3]) || 0,
+	  };
+	}
+
+	// Helpers
+
+	function compact(array) {
+	  var result = [];
+	  array.forEach(function(value) {
+	    if (value) {
+	      result.push(value);
+	    }
+	  });
+	  return result;
+	}
+
+	StackTrace.parse = function(error) {
+		try {
+			var lines = parse(error.stack || error);
+			if(lines.length) {
+				return new StackTrace(error.message, lines);
+			}
+		} catch(e) {
+			return undefined;
+		}
+
 	};
 
 	loader.StackTrace = StackTrace;
@@ -6559,20 +6671,24 @@ addStealExtension(function (loader) {
 		}
 	}
 
+	loader.loadCodeFrame = function(){
+		var isProd = this.isEnv("production");
+		var p = isProd ? Promise.resolve() : this["import"]("@@babel-code-frame");
+		return p;
+	};
+
 	loader._parseJSONError = function(err, source){
 		var pos = getPositionOfError(err.message);
 		if(pos) {
-			return loader._getLineAndColumnFromPosition(source, pos);
+			return this._getLineAndColumnFromPosition(source, pos);
 		} else {
 			return {line: 0, column: 0};
 		}
 	};
 
 	loader._addSourceInfoToError = function(err, pos, load, fnName){
-		var isProd = loader.isEnv("production");
-		var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
-
-		return p.then(function(codeFrame) {
+		return this.loadCodeFrame()
+		.then(function(codeFrame){
 			if(codeFrame) {
 				var src = load.metadata.originalSource || load.source;
 				var codeSample = codeFrame(src, pos.line, pos.column);
@@ -6584,6 +6700,48 @@ addStealExtension(function (loader) {
 			err.stack = stackTrace.toString();
 			return Promise.reject(err);
 		});
+	};
+
+	function findStackFromAddress(st, address) {
+		for(var i = 0; i < st.items.length; i++) {
+			if(st.items[i].url === address) {
+				return st.items[i];
+			}
+		}
+	}
+
+	loader.rejectWithCodeFrame = function(error, load) {
+		var st = StackTrace.parse(error);
+		var item = st && findStackFromAddress(st, load.address);
+		if(item) {
+			return this.loadCodeFrame()
+			.then(function(codeFrame){
+				if(codeFrame) {
+					var newError = new Error(error.message);
+
+					var line = item.line;
+					var column = item.column;
+
+					// CommonJS adds 3 function wrappers
+					if(load.metadata.format === "cjs") {
+						line = line - 3;
+					}
+
+					var src = load.metadata.originalSource || load.source;
+					var codeSample = codeFrame(src, line, column);
+					if(!codeSample) return Promise.reject(error);
+
+					newError.message += "\n\n" + codeSample + "\n";
+					st.message = newError.message;
+					newError.stack = st.toString();
+					return Promise.reject(newError);
+				} else {
+					return Promise.reject(error);
+				}
+			});
+		}
+
+		return Promise.reject(error);
 	};
 });
 

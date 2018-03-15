@@ -105,12 +105,18 @@ function logloads(loads) {
 (function() {
   var Promise = __global.Promise || require('when/es6-shim/Promise');
   var console;
+  var $__curScript;
   if (__global.console) {
     console = __global.console;
     console.assert = console.assert || function() {};
   } else {
     console = { assert: function() {} };
   }
+  if(isBrowser) {
+	  var scripts = document.getElementsByTagName("script");
+	  $__curScript = document.currentScript || scripts[scripts.length - 1];
+  }
+
 
   // IE8 support
   var indexOf = Array.prototype.indexOf || function(item) {
@@ -861,13 +867,31 @@ function logloads(loads) {
    * See getOrCreateModuleRecord for all properties
    *
    */
-  function doExecute(module) {
+  function doExecute(module, loader) {
     try {
       module.execute.call(__global);
     }
     catch(e) {
+		e.onModuleExecution = true;
+		cleanupStack(e);
       return e;
     }
+  }
+
+  function cleanupStack(err) {
+	  if (!err.originalErr) {
+		var stack = (err.stack || err.message || err).toString().split('\n');
+		var newStack = [];
+		for (var i = 0; i < stack.length; i++) {
+		  if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
+			newStack.push(stack[i]);
+		}
+
+		if(newStack.length) {
+			err.stack = newStack.join('\n\t');
+		}
+	  }
+	  return err;
   }
 
   // propogate execution errors
@@ -910,7 +934,7 @@ function logloads(loads) {
       return;
 
     module.evaluated = true;
-    err = doExecute(module);
+    err = doExecute(module, loader);
     if (err) {
       module.failed = true;
     }
@@ -1050,10 +1074,19 @@ function logloads(loads) {
           .then(function(load) {
             delete loader.importPromises[name];
             return evaluateLoadedModule(loader, load);
-          }, function(err){
+		  })
+		  .then(null, function(err){
             if(loaderObj.defined) {
               loaderObj.defined[name] = undefined;
             }
+
+			if(err.onModuleExecution && loaderObj.getModuleLoad) {
+				var load = loaderObj.getModuleLoad(name);
+				if(load) {
+					return loaderObj.rejectWithCodeFrame(err, load);
+				}
+			}
+
             return Promise.reject(err);
           }));
       });

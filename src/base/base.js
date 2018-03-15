@@ -2246,7 +2246,7 @@ var $__curScript, __eval;
       new Function(source).call(context);
     }
     catch(e) {
-      throw addToError(e, 'Evaluating ' + address);
+      throw addToError(e, '');
     }
   };
 
@@ -2306,7 +2306,8 @@ var $__curScript, __eval;
       }
     }
 
-    var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
+    //var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
+	var newMsg = err.message + '\n\t' + msg;
 
     // Convert file:/// URLs to paths in Node
     if (!isBrowser)
@@ -2316,14 +2317,15 @@ var $__curScript, __eval;
 
     // Node needs stack adjustment for throw to show message
     if (!isBrowser)
-      newErr.stack = newMsg;
+      newErr.stack = newStack.join('\n\t');
     // Clearing the stack stops unnecessary loader lines showing
-    else
-      newErr.stack = null;
+    else if(newStack)
+      newErr.stack = newStack.join('\n\t');
 
     // track the original error
     newErr.originalErr = err.originalErr || err;
 
+	newErr.onModuleExecution = true;
     return newErr;
   }
 

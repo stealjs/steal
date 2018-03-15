@@ -9,9 +9,6 @@
 */
 
 (function() {
-
-  var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
-  var isBrowser = typeof window != 'undefined' && !isWorker;
   var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
   var Promise = __global.Promise || require('when/es6-shim/Promise');
 
