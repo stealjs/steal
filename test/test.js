@@ -176,6 +176,10 @@ if(System.promisesSupported) {
 	QUnit.test("Production bundle works with steal-sans-promises", function(assert) {
 		makeIframe("production/prod.html", assert);
 	});
+
+	QUnit.test("When the dev-bundle is missing we get a nice message", function(assert){
+		makeIframe("dev_bundle_err/dev.html", assert);
+	});
 }
 
 if (hasConsole) {

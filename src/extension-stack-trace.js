@@ -119,6 +119,10 @@ addStealExtension(function (loader) {
 	}
 
 	loader.loadCodeFrame = function(){
+		if(!this.global.process) {
+			this.global.process = { argv: '', env: {} };
+		}
+
 		var isProd = this.isEnv("production");
 		var p = isProd ? Promise.resolve() : this["import"]("@@babel-code-frame");
 		return p;

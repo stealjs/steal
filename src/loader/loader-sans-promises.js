@@ -1877,6 +1877,7 @@ function logloads(loads) {
 		var s = xhr.status;
         var msg = s + ' ' + xhr.statusText + ': ' + url + '\n' || 'XHR error';
         var err = new Error(msg);
+		err.url = url;
         err.statusCode = s;
         reject(err);
       }
@@ -1915,6 +1916,7 @@ function logloads(loads) {
           // will know to retry.
           if(fourOhFourFS.test(err.message)) {
             err.statusCode = 404;
+			err.url = rawUrl;
           }
 
           return reject(err);
