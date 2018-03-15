@@ -1877,6 +1877,7 @@ function logloads(loads) {
 		var s = xhr.status;
         var msg = s + ' ' + xhr.statusText + ': ' + url + '\n' || 'XHR error';
         var err = new Error(msg);
+		err.url = url;
         err.statusCode = s;
         reject(err);
       }
@@ -1915,6 +1916,7 @@ function logloads(loads) {
           // will know to retry.
           if(fourOhFourFS.test(err.message)) {
             err.statusCode = 404;
+			err.url = rawUrl;
           }
 
           return reject(err);
@@ -5402,6 +5404,10 @@ addStealExtension(function (loader) {
 	}
 
 	loader.loadCodeFrame = function(){
+		if(!this.global.process) {
+			this.global.process = { argv: '', env: {} };
+		}
+
 		var isProd = this.isEnv("production");
 		var p = isProd ? Promise.resolve() : this["import"]("@@babel-code-frame");
 		return p;
@@ -6324,6 +6330,7 @@ addStealExtension(function (loader) {
 	// if we are in a browser, we need to know which script is steal
 	// to extract the script tag options => getScriptOptions()
 	var getUrlOptions = function (){
+		var steal = this;
 		return new Promise(function(resolve, reject){
 
 			// for Workers get options from steal query
@@ -6335,6 +6342,7 @@ addStealExtension(function (loader) {
 			} else if(isBrowserWithWindow || isNW || isElectron) {
 				// if the browser supports currentScript, use it!
 				if (document.currentScript) {
+					steal.script = document.currentScript;
 					// get options from script tag and query
 					resolve(getScriptOptions(document.currentScript));
 					return;
@@ -6344,7 +6352,9 @@ addStealExtension(function (loader) {
 					var scripts = document.scripts;
 
 					if (scripts.length) {
-						resolve(getScriptOptions(scripts[scripts.length - 1]));
+						var currentScript = scripts[scripts.length - 1];
+						steal.script = currentScript;
+						resolve(getScriptOptions(currentScript));
 					}
 				}
 			} else {
@@ -6369,7 +6379,7 @@ addStealExtension(function (loader) {
 			configReject = reject;
 		});
 
-		appPromise = getUrlOptions().then(function(urlOptions) {
+		appPromise = getUrlOptions.call(this).then(function(urlOptions) {
 			var config;
 
 			if (typeof startupConfig === 'object') {
@@ -6403,18 +6413,35 @@ addStealExtension(function (loader) {
 				});
 
 			} else {
+				function handleDevBundleError(err) {
+					if(err.statusCode === 404 && steal.script) {
+						var type = (loader.devBundle ? "dev-" : "deps-") + "bundle";
+						var msg = "This page has " + type + " enabled " +
+							"but " + err.url + " could not be retrieved.\nDid you " +
+							"forget to generate the bundle first?\n" +
+							"See https://stealjs.com/docs/StealJS.development-bundles.html for more information.";
+						var newError = new Error(msg);
+						// A stack is not useful here. Ideally we could get the line/column
+						// In the HTML, but there is no way to get this.
+						newError.stack = null;
+						return Promise.reject(newError);
+					}
+					return Promise.reject(err);
+				}
+
 				// devBundle includes the same modules as "depsBundle and it also
 				// includes the @config graph, so it should be loaded before of
 				// configMain
 				loader["import"](loader.devBundle)
 					.then(function() {
 						return loader["import"](loader.configMain);
-					})
+					}, handleDevBundleError)
 					.then(function() {
 						// depsBundle includes the dependencies in the node_modules
 						// folder so it has to be loaded after configMain finished
 						// loading
-						return loader["import"](loader.depsBundle);
+						return loader["import"](loader.depsBundle)
+						.then(null, handleDevBundleError);
 					})
 					.then(configResolve, configReject);
 
