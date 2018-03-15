@@ -1080,7 +1080,7 @@ function logloads(loads) {
               loaderObj.defined[name] = undefined;
             }
 
-			if(err.onModuleExecution) {
+			if(err.onModuleExecution && loaderObj.getModuleLoad) {
 				var load = loaderObj.getModuleLoad(name);
 				if(load) {
 					return loaderObj.rejectWithCodeFrame(err, load);

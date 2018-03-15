@@ -118,6 +118,12 @@ addStealExtension(function (loader) {
 		}
 	}
 
+	loader.loadCodeFrame = function(){
+		var isProd = this.isEnv("production");
+		var p = isProd ? Promise.resolve() : this["import"]("@@babel-code-frame");
+		return p;
+	};
+
 	loader._parseJSONError = function(err, source){
 		var pos = getPositionOfError(err.message);
 		if(pos) {
@@ -128,10 +134,8 @@ addStealExtension(function (loader) {
 	};
 
 	loader._addSourceInfoToError = function(err, pos, load, fnName){
-		var isProd = this.isEnv("production");
-		var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
-
-		return p.then(function(codeFrame) {
+		return this.loadCodeFrame()
+		.then(function(codeFrame){
 			if(codeFrame) {
 				var src = load.metadata.originalSource || load.source;
 				var codeSample = codeFrame(src, pos.line, pos.column);
@@ -157,10 +161,8 @@ addStealExtension(function (loader) {
 		var st = StackTrace.parse(error);
 		var item = st && findStackFromAddress(st, load.address);
 		if(item) {
-			var isProd = loader.isEnv("production");
-			var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
-
-			return p.then(function(codeFrame){
+			return this.loadCodeFrame()
+			.then(function(codeFrame){
 				if(codeFrame) {
 					var newError = new Error(error.message);
 

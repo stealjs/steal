@@ -2319,7 +2319,7 @@ var $__curScript, __eval;
     if (!isBrowser)
       newErr.stack = newStack.join('\n\t');
     // Clearing the stack stops unnecessary loader lines showing
-    else
+    else if(newStack)
       newErr.stack = newStack.join('\n\t');
 
     // track the original error
