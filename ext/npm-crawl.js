@@ -168,7 +168,7 @@ var crawl = {
 		}
 
 		var requestedVersion = childPkg.version;
-		return npmLoad(context, childPkg, requestedVersion)
+		return npmLoad(context, childPkg, parentPkg)
 		.then(function(pkg){
 			crawl.setVersionsConfig(context, pkg, requestedVersion);
 			crawl.setParent(context, pkg, false);
@@ -696,14 +696,9 @@ utils.extend(FetchTask.prototype, {
 				if (!parentAddress) {
 					var found = this.getPackage();
 
-					throw new Error(
-						[
-							"Did not find " + pkg.origFileUrl,
-							"Unable to find a compatible version of " + pkg.name,
-							"Wanted: " + pkg.version,
-							found ? "Found: " + found.version : ""
-						].join("\n")
-					);
+					var error = new Error("Unable to locate" + pkg.origFileUrl);
+					error.didNotFindPkg = true;
+					throw error;
 				}
 			}
 
@@ -722,7 +717,7 @@ crawl.FetchTask = FetchTask;
 // Loads package.json
 // if it finds one, it sets that package in paths
 // so it won't be loaded twice.
-function npmLoad(context, pkg){
+function npmLoad(context, pkg, parentPkg){
 	var task = new FetchTask(context, pkg);
 
 	return task.load()
@@ -730,7 +725,7 @@ function npmLoad(context, pkg){
 		if(task.failed) {
 			// Recurse. Calling task.next gives us a new pkg object
 			// with the fileUrl being the parent node_modules folder.
-			return npmLoad(context, task.next());
+			return npmLoad(context, task.next(), parentPkg);
 		}
 		return task.getPackage();
 	})
@@ -747,6 +742,29 @@ function npmLoad(context, pkg){
 				metadata: {},
 				source: src
 			}, "parse");
+		} else if(err.didNotFindPkg) {
+			var pkg = task.orig;
+			var found = task.getPackage();
+
+			var msg = "Unable to find [" + pkg.name + "] at " + pkg.origFileUrl + "\n\n" +
+				"The package [" + parentPkg.name + "] requested " + pkg.version +
+				(found ? " but we found " + found.version : "") + ".\n" +
+				"Running `npm install` should install the version listed in your package.json.\n\n" +
+				"See https://stealjs.com/docs/StealJS.error-messages.html#mismatched-package-version for more information.\n";
+
+			var error = new Error(msg);
+			error.stack = null;
+
+			var src = JSON.stringify(parentPkg, null, " ");
+			var idx = src.indexOf('"' + pkg.name + '"');
+			var pos = context.loader._getLineAndColumnFromPosition(src, idx);
+			var load = {
+				address: parentPkg.origFileUrl,
+				metadata: {},
+				source: src
+			};
+
+			return context.loader._addSourceInfoToError(error, pos, load, '');
 		} else {
 			throw err;
 		}
