@@ -606,7 +606,6 @@ QUnit.test("Importing a missing file from a CommonJS module provides the module 
 			.then(function(app) {
 				assert.ok(false, "import call should not resolve");
 			}, function(err) {
-				console.error(err)
 				var stack = err.stack;
 				assert.ok(/main.js/.test(stack), "main.js is in the stack");
 				done();
@@ -663,6 +662,42 @@ QUnit.test("Importing a module that throws an Error", function(assert) {
 		}, function(err) {
 			var stack = err.stack;
 			assert.ok(/throw new Error/.test(stack), "Contains the throw");
+			done();
+		});
+});
+
+QUnit.test("Importing a module when the dep throws an Error", function(assert) {
+	var done = assert.async();
+
+	var appSrc = "var dep = require('dep');\n\nfunction foo(){\n\treturn 'foo';\n}\n\ndep();\n\nfunction bar() {\n\treturn'bar';\n}\n";
+	var depSrc = "module.exports = function() {\n\tthrow new Error('Oops!');\n};";
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				dep: "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "dep.js",
+				version: "1.0.0"
+			}
+		])
+		.withModule("app@1.0.0#main", appSrc)
+		.withModule("dep@1.0.0#dep", depSrc)
+		.loader;
+
+	loader["import"]("app")
+		.then(function(app) {
+			assert.ok(false, "import call should not resolve");
+		}, function(err) {
+			var stack = err.stack;
+			assert.ok(/function bar/.test(stack), "Contains the code from the root module");
 			done();
 		});
 });

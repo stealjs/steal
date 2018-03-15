@@ -145,16 +145,24 @@ addStealExtension(function (loader) {
 		});
 	};
 
+	function findStackFromAddress(st, address) {
+		for(var i = 0; i < st.items.length; i++) {
+			if(st.items[i].url === address) {
+				return st.items[i];
+			}
+		}
+	}
+
 	loader.rejectWithCodeFrame = function(error, load) {
 		var st = StackTrace.parse(error);
-		if(st) {
+		var item = st && findStackFromAddress(st, load.address);
+		if(item) {
 			var isProd = loader.isEnv("production");
 			var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
 
 			return p.then(function(codeFrame){
 				if(codeFrame) {
 					var newError = new Error(error.message);
-					var item = st.items[0];
 
 					var line = item.line;
 					var column = item.column;

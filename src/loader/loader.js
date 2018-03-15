@@ -1270,6 +1270,10 @@ define(function() {
 ;
 (function(__global) {
 
+var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
+  && self instanceof WorkerGlobalScope;
+var isBrowser = typeof window != 'undefined' && !isWorker;
+
 __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
@@ -1411,12 +1415,18 @@ function logloads(loads) {
 (function() {
   var Promise = __global.Promise || require('when/es6-shim/Promise');
   var console;
+  var $__curScript;
   if (__global.console) {
     console = __global.console;
     console.assert = console.assert || function() {};
   } else {
     console = { assert: function() {} };
   }
+  if(isBrowser) {
+	  var scripts = document.getElementsByTagName("script");
+	  $__curScript = document.currentScript || scripts[scripts.length - 1];
+  }
+
 
   // IE8 support
   var indexOf = Array.prototype.indexOf || function(item) {
@@ -2173,20 +2183,17 @@ function logloads(loads) {
     }
     catch(e) {
 		e.onModuleExecution = true;
-		var load = loader.loaderObj.getModuleLoad(module.name);
-		if(load) {
-			return cleanupStack(e, load.address);
-		}
+		cleanupStack(e);
       return e;
     }
   }
 
-  function cleanupStack(err, address) {
+  function cleanupStack(err) {
 	  if (!err.originalErr) {
 		var stack = (err.stack || err.message || err).toString().split('\n');
 		var newStack = [];
 		for (var i = 0; i < stack.length; i++) {
-		  if (stack[i].indexOf(address) !== -1)
+		  if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
 			newStack.push(stack[i]);
 		}
 
@@ -3056,8 +3063,6 @@ function logloads(loads) {
 
 
 (function() {
-  var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
-  var isBrowser = typeof window != 'undefined' && !isWorker;
   var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
   var Promise = __global.Promise || require('when/es6-shim/Promise');
 

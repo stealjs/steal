@@ -1,5 +1,9 @@
 (function(__global) {
 
+var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
+  && self instanceof WorkerGlobalScope;
+var isBrowser = typeof window != 'undefined' && !isWorker;
+
 __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
