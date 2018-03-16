@@ -3,7 +3,6 @@
 addStealExtension(function (loader) {
   var jsonExt = /\.json$/i;
   var jsExt = /\.js$/i;
-  var errPos = /at position ([0-9]+)/;
 
   // taken from prototypejs
   // https://github.com/sstephenson/prototype/blob/master/src/prototype/lang/string.js#L682-L706
@@ -83,11 +82,9 @@ addStealExtension(function (loader) {
         return JSON.parse(load.source);
       } catch(e) {
 		if(e instanceof SyntaxError) {
-			var res = errPos.exec(e.message);
-			if(res.length === 2) {
-				var pos = Number(res[1]);
-				var loc = this._getLineAndColumnFromPosition(load.source, pos);
+			var loc = this._parseSyntaxErrorLocation(e, load);
 
+			if(loc) {
 				var msg = "Unable to parse " + load.address;
 				var newError = new SyntaxError(msg);
 				newError.promise = this._addSourceInfoToError(newError,

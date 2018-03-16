@@ -137,6 +137,26 @@ addStealExtension(function (loader) {
 		}
 	};
 
+	var errPos = /at position ([0-9]+)/;
+	var errLine = /at line ([0-9]+) column ([0-9]+)/;
+	loader._parseSyntaxErrorLocation = function(error, load){
+		// V8
+		var res = errPos.exec(error.message);
+		if(res && res.length === 2) {
+			var pos = Number(res[1]);
+			return this._getLineAndColumnFromPosition(load.source, pos);
+		}
+
+		// Firefox
+		res = errLine.exec(error.message);
+		if(res && res.length === 3) {
+			return {
+				line: Number(res[1]),
+				column: Number(res[2])
+			};
+		}
+	}
+
 	loader._addSourceInfoToError = function(err, pos, load, fnName){
 		return this.loadCodeFrame()
 		.then(function(codeFrame){
