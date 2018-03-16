@@ -6694,13 +6694,13 @@ addStealExtension(function (loader) {
 		}
 	};
 
-	var errPos = /at position ([0-9]+)/;
+	var errPos = /at position( |:)([0-9]+)/;
 	var errLine = /at line ([0-9]+) column ([0-9]+)/;
 	loader._parseSyntaxErrorLocation = function(error, load){
-		// V8
+		// V8 and Edge
 		var res = errPos.exec(error.message);
-		if(res && res.length === 2) {
-			var pos = Number(res[1]);
+		if(res && res.length === 3) {
+			var pos = Number(res[2]);
 			return this._getLineAndColumnFromPosition(load.source, pos);
 		}
 
