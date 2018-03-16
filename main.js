@@ -808,6 +808,26 @@ addStealExtension(function (loader) {
 		}
 	};
 
+	var errPos = /at position( |:)([0-9]+)/;
+	var errLine = /at line ([0-9]+) column ([0-9]+)/;
+	loader._parseSyntaxErrorLocation = function(error, load){
+		// V8 and Edge
+		var res = errPos.exec(error.message);
+		if(res && res.length === 3) {
+			var pos = Number(res[2]);
+			return this._getLineAndColumnFromPosition(load.source, pos);
+		}
+
+		// Firefox
+		res = errLine.exec(error.message);
+		if(res && res.length === 3) {
+			return {
+				line: Number(res[1]),
+				column: Number(res[2])
+			};
+		}
+	}
+
 	loader._addSourceInfoToError = function(err, pos, load, fnName){
 		return this.loadCodeFrame()
 		.then(function(codeFrame){
@@ -1131,7 +1151,7 @@ addStealExtension(function (loader) {
     loader.translate = function(load){
       var address = load.metadata.address || load.address;
       if(jsonExt.test(address) && load.name.indexOf('!') === -1) {
-        var parsed = parse(load);
+        var parsed = parse.call(this, load);
         if(parsed) {
           parsed = transform(this, load, parsed);
           return "def" + "ine([], function(){\n" +
@@ -1149,7 +1169,7 @@ addStealExtension(function (loader) {
     var loader = this,
       parsed;
 
-    parsed = parse(load);
+    parsed = parse.call(this, load);
     if(parsed) {
       parsed = transform(loader, load, parsed);
       load.metadata.format = 'json';
@@ -1166,10 +1186,22 @@ addStealExtension(function (loader) {
 
   // Attempt to parse a load as json.
   function parse(load){
-    if ((load.metadata.format === 'json' || !load.metadata.format) && isJSON(load.source)) {
+    if ((load.metadata.format === 'json' || !load.metadata.format) &&
+		(isJSON(load.source) || jsonExt.test(load.name))) {
       try {
         return JSON.parse(load.source);
       } catch(e) {
+		if(e instanceof SyntaxError) {
+			var loc = this._parseSyntaxErrorLocation(e, load);
+
+			if(loc) {
+				var msg = "Unable to parse " + load.address;
+				var newError = new SyntaxError(msg);
+				newError.promise = this._addSourceInfoToError(newError,
+					loc, load, "JSON.parse");
+				throw newError;
+			}
+		}
         warn("Error parsing " + load.address + ":", e);
         return {};
       }
