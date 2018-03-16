@@ -743,7 +743,6 @@ function npmLoad(context, pkg, parentPkg){
 				source: src
 			}, "parse");
 		} else if(err.didNotFindPkg) {
-			var pkg = task.orig;
 			var found = task.getPackage();
 
 			var msg = "Unable to find [" + pkg.name + "] at " + pkg.origFileUrl + "\n\n" +
@@ -768,7 +767,7 @@ function npmLoad(context, pkg, parentPkg){
 		} else {
 			throw err;
 		}
-	})
+	});
 }
 
 module.exports = crawl;
