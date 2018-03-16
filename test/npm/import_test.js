@@ -702,6 +702,48 @@ QUnit.test("Importing a module when the dep throws an Error", function(assert) {
 		});
 });
 
+QUnit.test("Good error message when there is a version mismatch", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				dep: "1.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					"canjs": "^4.0.0"
+				}
+			},
+			{
+				name: "canjs",
+				main: "main.js",
+				version: "5.0.0"
+			}
+		])
+		.withModule("app@1.0.0#main", "require('dep');")
+		.withModule("dep@1.0.0#main", "require('canjs');")
+		.loader;
+
+	loader["import"]("app")
+		.then(function(app) {
+			assert.ok(false, "import call should not resolve");
+		}, function(err) {
+			console.error(err);
+			var stack = err.stack;
+			assert.ok(/mismatch/.test(stack), "Good error message about the version mismatch");
+			done();
+		});
+});
+
 QUnit.module("Importing npm modules with tilde & homeAlias operators");
 
 QUnit.test("Import module with the ~ operator", function (assert) {

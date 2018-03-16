@@ -783,64 +783,6 @@ QUnit.test("normalizing a nested deep dependency (#1224)", function(assert) {
 		.then(done, done);
 });
 
-QUnit.test("descriptive version mismatch error (#1176)", function(assert) {
-	var done = assert.async();
-
-	var loader = helpers.clone()
-		.npmVersion(3)
-		.rootPackage({
-			name: "app",
-			version: "1.0.0",
-			main: "main.js",
-			dependencies: {
-				can: "1.0.0"
-			}
-		})
-		.withPackages([
-			{
-				name: "can-util",
-				version: "1.0.0",
-				main: "main.js"
-			},
-			{
-				name: "can",
-				version: "1.0.0",
-				main: "main.js",
-				dependencies: {
-					"can-util": "^2.0.0"
-				}
-
-			}
-		])
-		.loader;
-
-	helpers.init(loader)
-		.then(function(name) {
-			return loader.normalize("can", name);
-		})
-		.then(function(name) {
-			return loader.normalize("can-util", name);
-		})
-		.then(
-			function(name) {
-				assert.ok(false, "it should fail");
-			},
-			function(err) {
-				assert.deepEqual(
-					err.message.split("\n"),
-					[
-						"Did not find ./node_modules/can-util/package.json",
-						"Unable to find a compatible version of can-util",
-						"Wanted: ^2.0.0",
-						"Found: 1.0.0"
-					],
-					"should throw descriptive error message"
-				);
-			}
-		)
-		.then(done, helpers.fail(assert, done));
-});
-
 QUnit.test("'map' configuration where the right-hand identifier is an npm package but the left is not", function(assert){
 	var done = assert.async();
 
