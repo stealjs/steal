@@ -2395,6 +2395,8 @@ function logloads(loads) {
 				if(load) {
 					return loaderObj.rejectWithCodeFrame(err, load);
 				}
+			} else if(err.promise) {
+				return err.promise;
 			}
 
             return Promise.reject(err);

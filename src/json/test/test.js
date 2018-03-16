@@ -9,13 +9,6 @@ QUnit.test("Basics works", function(assert){
 		});
 });
 
-QUnit.test("Still resolves when we fail to parse", function(assert){
-	return steal.import("src/json/test/jsons/bad.json")
-		.then(function(){
-			assert.ok(true);
-		});
-});
-
 QUnit.test("jsonOptions transform allows you to transform the json object", function(assert){
 	System.jsonOptions = {
 		transform: function(load, data){

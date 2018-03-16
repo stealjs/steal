@@ -314,6 +314,10 @@ QUnit.test("Error messages in malformed package.jsons", function(assert){
 	makeIframe("bad_json/dev.html", assert);
 });
 
+QUnit.test("Error message in malformed JSON modules", function(assert){
+	makeIframe("json_syntax_err/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
