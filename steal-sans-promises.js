@@ -2943,6 +2943,9 @@ function register(loader) {
       return;
 
     var exports = {};
+	if(entry.isESModule) {
+		Object.defineProperty(exports, '__esModule', { value: true });
+	}
 
     var module = entry.module = { exports: exports, id: entry.name };
 
@@ -3629,6 +3632,7 @@ function amd(loader) {
     "require": /\s*\(\s*(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1\s*\)/g,
     "/regexp/": /\/(?:(?:\\.|[^\/\r\n])+?)\//g
   };
+  var esModuleDecl = new RegExp("Object.defineProperty\\(exports, '__esModule', { value: true }\\);");
 
   /*
     Find CJS Deps in valid javascript
@@ -3755,6 +3759,7 @@ function amd(loader) {
       var name = modName;
       var deps = modDeps;
       var factory = modFactory;
+	  var isESModule = false;
       if (typeof name != 'string') {
         factory = deps;
         deps = name;
@@ -3787,8 +3792,16 @@ function amd(loader) {
       }
 
 
-      if ((exportsIndex = indexOf.call(deps, 'exports')) != -1)
-        deps.splice(exportsIndex, 1);
+      if ((exportsIndex = indexOf.call(deps, 'exports')) != -1) {
+		  deps.splice(exportsIndex, 1);
+
+		  // Detect esModule
+		  if(!factoryText) {
+			  factoryText = factory.toString();
+			  isESModule = esModuleDecl.test(factoryText);
+		  }
+	  }
+
 
       if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
         deps.splice(moduleIndex, 1);
@@ -3873,6 +3886,9 @@ function amd(loader) {
         // define the module through the register registry
         loader.register(name, define.deps, false, define.execute);
       }
+	  if(loader.defined[name]) {
+		  loader.defined[name].isESModule = isESModule;
+	  }
     };
     define.amd = {};
     loader.amdDefine = define;
