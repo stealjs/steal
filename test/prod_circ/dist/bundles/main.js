@@ -29,7 +29,7 @@ define('session', [
     './portfolio'
 ], function (exports, _portfolio) {
     'use strict';
-    Object.defineProperty(exports, '__esModule', { value: true });
+	Object.defineProperty(exports, '__esModule', { value: true });
     var _portfolio2 = _interopRequireDefault(_portfolio);
     function _interopRequireDefault(obj) {
         return obj && obj.__esModule ? obj : { default: obj };
@@ -47,7 +47,8 @@ define("utils", [
 	"exports",
 	"./session"
 ], function(exports, _session){
-	Object.defineProperty(exports, '__esModule', { value: true });
+	var t = exports;
+	Object.defineProperty(t,"__esModule",{value:!0})
     var _session2 = _interopRequireDefault(_session);
     function _interopRequireDefault(obj) {
         return obj && obj.__esModule ? obj : { default: obj };

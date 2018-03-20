@@ -3632,8 +3632,7 @@ function amd(loader) {
     "require": /\s*\(\s*(['"`])((?:\\[\s\S]|(?!\1)[^\\])*?)\1\s*\)/g,
     "/regexp/": /\/(?:(?:\\.|[^\/\r\n])+?)\//g
   };
-  var esModuleDecl = new RegExp("Object.defineProperty\\(exports, '__esModule', { value: true }\\);");
-
+  var esModuleDecl = /Object\.defineProperty\([A-Za-z]+, ?['"]__esModule['"], ?{ ?value: ?(!0|true) ?}\)/;
   /*
     Find CJS Deps in valid javascript
     Loops through the source once by progressivly identifying "chunks"
