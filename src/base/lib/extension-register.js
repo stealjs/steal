@@ -363,6 +363,9 @@ function register(loader) {
       return;
 
     var exports = {};
+	if(entry.isESModule) {
+		Object.defineProperty(exports, '__esModule', { value: true });
+	}
 
     var module = entry.module = { exports: exports, id: entry.name };
 
