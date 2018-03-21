@@ -3028,6 +3028,7 @@ function logloads(loads) {
 
 		var babelVersion = getBabelVersion(babel);
 		var options = getBabelOptions.call(this, load, babel);
+		var loader = this;
 
 		return Promise.all([
 			processBabelPlugins.call(this, babel, options),
@@ -3042,12 +3043,25 @@ function logloads(loads) {
 				options.presets = results[1];
 			}
 
-			var result = babel.transform(load.source, options);
-			var source = result.code;
+			try {
+				var result = babel.transform(load.source, options);
+				var source = result.code;
 
-			// add "!eval" to end of Babel sourceURL
-			// I believe this does something?
-			return source + '\n//# sourceURL=' + load.address + '!eval';
+				// add "!eval" to end of Babel sourceURL
+				// I believe this does something?
+				return source + '\n//# sourceURL=' + load.address + '!eval';
+			} catch(ex) {
+				if(ex instanceof SyntaxError) {
+					var newError = new SyntaxError(ex.message);
+					var stack = new loader.StackTrace(ex.message, [
+						loader.StackTrace.item("", load.address,
+							ex.loc.line, ex.loc.column)
+					]);
+					newError.stack = stack.toString();
+					return Promise.reject(newError);
+				}
+				return Promise.reject(ex);
+			}
 		});
 	}
 
@@ -4858,7 +4872,21 @@ function cjs(loader) {
 																	'\n}).call(_g.exports, _g.global, _g.exports, _g.module, _g.require, _g.__filename, _g.__dirname);})();',
 					address: load.address
 				};
-				loader.__exec(execLoad);
+				try {
+					loader.__exec(execLoad);
+				} catch(ex) {
+					if(loader.StackTrace) {
+						var st = loader.StackTrace.parse(ex);
+						if(!st) {
+							ex.stack = new loader.StackTrace(ex.message, [
+								loader.StackTrace.item("<anonymous>", load.address, 1, 0)
+							]).toString();
+						}
+					}
+
+					throw ex;
+				}
+
 
 				loader.global.define = define;
 

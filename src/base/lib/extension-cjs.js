@@ -120,7 +120,21 @@ function cjs(loader) {
 																	'\n}).call(_g.exports, _g.global, _g.exports, _g.module, _g.require, _g.__filename, _g.__dirname);})();',
 					address: load.address
 				};
-				loader.__exec(execLoad);
+				try {
+					loader.__exec(execLoad);
+				} catch(ex) {
+					if(loader.StackTrace) {
+						var st = loader.StackTrace.parse(ex);
+						if(!st) {
+							ex.stack = new loader.StackTrace(ex.message, [
+								loader.StackTrace.item("<anonymous>", load.address, 1, 0)
+							]).toString();
+						}
+					}
+
+					throw ex;
+				}
+
 
 				loader.global.define = define;
 
