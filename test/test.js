@@ -322,6 +322,10 @@ QUnit.test("Error message in malformed JSON modules", function(assert){
 	makeIframe("json_syntax_err/dev.html", assert);
 });
 
+QUnit.test("Error message for syntax errors in ES and CJS modules", function(assert){
+	makeIframe("parse_errors/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
