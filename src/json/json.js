@@ -92,7 +92,11 @@ addStealExtension(function (loader) {
 				throw newError;
 			}
 		}
-        warn("Error parsing " + load.address + ":", e);
+		// Do not warn on empty string modules
+		else if(load.source.trim() > 0) {
+			warn("Error parsing " + load.address + ":", e);
+		}
+
         return {};
       }
     }
