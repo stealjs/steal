@@ -3605,11 +3605,13 @@ function cjs(loader) {
 				try {
 					loader.__exec(execLoad);
 				} catch(ex) {
-					var st = loader.StackTrace.parse(ex);
-					if(!st) {
-						ex.stack = new loader.StackTrace(ex.message, [
-							loader.StackTrace.item("<anonymous>", load.address, 1, 0)
-						]).toString();
+					if(loader.StackTrace) {
+						var st = loader.StackTrace.parse(ex);
+						if(!st) {
+							ex.stack = new loader.StackTrace(ex.message, [
+								loader.StackTrace.item("<anonymous>", load.address, 1, 0)
+							]).toString();
+						}
 					}
 
 					throw ex;
