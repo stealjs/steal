@@ -296,6 +296,23 @@ module.exports = function(System){
 			.then(function(){
 				loader._helperInited = true;
 			});
+		},
+		willWarn: function(exp){
+			var regExp = typeof exp === "string" ? new RegExp(exp) : exp;
+
+			var oldWarn = console.warn;
+			var count = 0;
+			console.warn = function(/* args */){
+				debugger;
+				var str = Array.prototype.slice.call(arguments).join("");
+				if(regExp.text(str)) {
+					count++;
+				}
+			};
+			return function(){
+				console.warn = oldWarn;
+				return count;
+			};
 		}
 	};
 

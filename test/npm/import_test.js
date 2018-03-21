@@ -737,11 +737,34 @@ QUnit.test("Good error message when there is a version mismatch", function(asser
 		.then(function(app) {
 			assert.ok(false, "import call should not resolve");
 		}, function(err) {
-			console.error(err);
 			var stack = err.stack;
 			assert.ok(/mismatch/.test(stack), "Good error message about the version mismatch");
 			done();
 		});
+});
+
+QUnit.test("A module that is empty space", function(assert) {
+	var done = assert.async();
+	var teardown = helpers.willWarn(/Error parsing/);
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				dep: "1.0.0"
+			}
+		})
+		.withModule("app@1.0.0#main", " ")
+		.loader;
+
+	loader["import"]("app")
+	.then(function(){
+		var count = teardown();
+		assert.equal(count, 0, "Did not warn about JSON");
+		done();
+	}, helpers.fail(assert, done));
 });
 
 QUnit.module("Importing npm modules with tilde & homeAlias operators");
