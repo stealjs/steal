@@ -94,6 +94,15 @@ exports.translate = function(load){
 					delete pkg.browser.transform;
 				}
 				pkg = utils.json.transform(loader, load, pkg);
+				var conv = convert.steal(context, pkg, pkg.steal,
+					index === 0);
+
+				debugger;
+
+				conv.deferUntilLoaded([
+					convert.createPackageSaver(context),
+					convert.applyConfig
+				]);
 
 				packages.push({
 					name: pkg.name,
@@ -102,7 +111,7 @@ exports.translate = function(load){
 						pkg.fileUrl :
 						utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
-					steal: convert.steal(context, pkg, pkg.steal, index === 0),
+					steal: conv.config,
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
 					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
 					jspm: convert.jspm(pkg, pkg.jspm),

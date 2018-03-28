@@ -12,6 +12,8 @@ exports.browserProperty = convertBrowserProperty;
 exports.jspm = convertJspm;
 exports.toPackage = convertToPackage;
 exports.forPackage = convertForPackage;
+exports.createPackageSaver = createPackageSaver;
+exports.applyConfig = applyConfig;
 
 /*
 {
@@ -32,14 +34,44 @@ exports.forPackage = convertForPackage;
 }
 */
 
+function StealConversion(context, pkg, config, isRoot, waiting) {
+	this.context = context;
+	this.pkg = pkg;
+	this.config = config;
+	this.isRoot = isRoot;
+	this.waiting = waiting;
+}
+
+StealConversion.prototype.cloneConfig = function(){
+	return utils.extend({}, this.config, true);
+};
+
+StealConversion.prototype.deferUntilLoaded = function(fns){
+	var context = this.context;
+	var pkg = this.pkg;
+
+	convertLater(context, this.waiting, function(){
+		var local = this.cloneConfig();
+		var conv = convertSteal(context, pkg, local, this.isRoot, true);
+		var config = conv.config;
+		fns.forEach(function(fn){
+			fn.call(context, config, pkg);
+		});
+	}.bind(this))
+};
+
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
 function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInfo) {
 	if(!steal) {
-		return steal;
+		return new StealConversion(context, pkg, steal, root, ignoreWaiting);
 	}
-	var copy = utils.extend({}, steal, true);
+
 	var waiting = utils.isArray(ignoreWaiting) ? ignoreWaiting : [];
+	var copy = utils.extend({}, steal, true);
+
+	var conv = new StealConversion(context, pkg, copy, root, waiting);
+
 	if(steal.meta) {
 		steal.meta = convertPropertyNames(context, pkg, steal.meta, root,
 										  waiting);
@@ -54,13 +86,39 @@ function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInf
 	}
 	// needed for builds
 	if(steal.buildConfig) {
-		steal.buildConfig = convertSteal(context, pkg, steal.buildConfig,
-										  root, waiting, false);
+		var conv = convertSteal(context, pkg, steal.buildConfig, root, [], false);
+		// Do the resaving stuff? Only in production.
+
+		// TODO somehow pass this stuff forward?
+
+		steal.buildConfig = conv.config;
 	}
+
+	var stuff = function(){
+		var context = this;
+		var local = utils.extend({}, copy, true);
+		var config = convertSteal(context, pkg, local, root, true);
+
+		// If we are building we need to resave the package's system
+		// configuration so that it will be written out into the build.
+		if(context.resavePackageInfo && resavePackageInfo !== false) {
+			var info = utils.pkg.findPackageInfo(context, pkg);
+			info.steal = info.system = config;
+		}
+
+		// Temporarily remove steal.main so that it doesn't set System.main
+		var stealMain = config.main;
+		delete config.main;
+		delete config.transpiler;
+		context.loader.config(config);
+		config.main = stealMain;
+	}
+
+
 
 	// Push the waiting conversions down.
 	if(ignoreWaiting !== true && waiting.length) {
-		convertLater(context, waiting, function(){
+		/*convertLater(context, waiting, function(){
 			var context = this;
 			var local = utils.extend({}, copy, true);
 			var config = convertSteal(context, pkg, local, root, true);
@@ -72,16 +130,30 @@ function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInf
 				info.steal = info.system = config;
 			}
 
-			// Temporarily remove steal.main so that it doesn't set System.main
-			var stealMain = config.main;
-			delete config.main;
-			delete config.transpiler;
-			context.loader.config(config);
-			config.main = stealMain;
-		});
+
+		});*/
 	}
 
-	return steal;
+	return conv;
+}
+
+function resavePackageInfo(config, pkg) {
+	var info = utils.pkg.findPackageInfo(context, pkg);
+	info.steal = info.system = config;
+}
+
+function applyConfig(config) {
+	var context = this;
+	// Temporarily remove steal.main so that it doesn't set System.main
+	var stealMain = config.main;
+	delete config.main;
+	delete config.transpiler;
+	context.loader.config(config);
+	config.main = stealMain;
+}
+
+function createPackageSaver(context) {
+	return context.resavePackageInfo ? resavePackageInfo : Function.prototype;
 }
 
 // converts only the property name
@@ -294,6 +366,8 @@ function convertToPackage(context, npmPkg, index) {
 			metadata: {}
 		}, pkg);
 		var steal = utils.pkg.config(pkg);
+		var stealConversion = convertSteal(context, pkg, steal, index === 0);
+		// TODO all of the waiting things
 
 		localPkg = {
 			name: pkg.name,
@@ -302,7 +376,7 @@ function convertToPackage(context, npmPkg, index) {
 				pkg.fileUrl :
 				utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 			main: pkg.main,
-			steal: convertSteal(context, pkg, steal, index === 0),
+			steal: stealConversion.config,
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
 			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
 			jspm: convertJspm(pkg, pkg.jspm),

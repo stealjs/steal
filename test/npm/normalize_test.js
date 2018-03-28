@@ -855,6 +855,9 @@ QUnit.test("buildConfig that is late-loaded doesn't override outer config", func
 	}).then(function(){
 		var pkg = loader.npmContext.pkgInfo[0];
 		assert.equal(pkg.steal.map["app@1.0.0#one"], "app@1.0.0#two", "Correct mapping in place");
+
+		console.log(loader.map);
+		assert.equal(loader.map["app@1.0.0#one"], "app@1.0.0#two", "Mapping not applied to the loader");
 	})
 	.then(done, helpers.fail(assert, done));
 });
