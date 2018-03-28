@@ -326,6 +326,10 @@ QUnit.test("Error message for syntax errors in ES and CJS modules", function(ass
 	makeIframe("parse_errors/dev.html", assert);
 });
 
+QUnit.test("If a module errors because a child module throws show the correct stack trace", function(assert){
+	makeIframe("init_error/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
