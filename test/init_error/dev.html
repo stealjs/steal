@@ -16,7 +16,8 @@
 <script>
 	steal.done().then(null, function(err){
 		if(window.assert) {
-			window.assert.ok(/two\.js/.test(err.stack), "got the source in the stack trace");
+			var worked = /two\.js/.test(err.stack) || /Function code/.test(err.stack);
+			window.assert.ok(worked, "got the source in the stack trace");
 			window.done();
 		} else {
 			console.error(err);
