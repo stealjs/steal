@@ -677,6 +677,9 @@ QUnit.test("Config applied before normalization will be reapplied after", functi
 	})
 	.then(function(name){
 		assert.equal(name, "dep@1.0.0#build");
+
+		var pkg = loader.npmContext.pkgInfo[0];
+-		assert.ok(!pkg.steal.map, "The map shoulded be applied to what saved into the build artifact");
 	})
 	.then(done, helpers.fail(assert, done));
 });
@@ -853,6 +856,7 @@ QUnit.test("buildConfig that is late-loaded doesn't override outer config", func
 	}).then(function(){
 		var pkg = loader.npmContext.pkgInfo[0];
 		assert.equal(pkg.steal.map["app@1.0.0#one"], "app@1.0.0#two", "Correct mapping in place");
+
 
 		assert.equal(loader.map["app@1.0.0#one"], "app@1.0.0#two", "Mapping not applied to the loader");
 	})
