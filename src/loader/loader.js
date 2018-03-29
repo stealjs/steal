@@ -2818,6 +2818,17 @@ function logloads(loads) {
 		return presets;
 	}
 
+	function getBabelOptionsFromLoad(load) {
+		var pkg = load.metadata.npmPackage;
+		if(pkg) {
+			var steal = pkg.steal || pkg.system;
+			if(steal && steal.babelOptions) {
+				return steal.babelOptions;
+			}
+		}
+		return this.babelOptions || {};
+	}
+
 	/**
 	 * Returns the babel version
 	 * @param {Object} babel The babel object
@@ -2830,7 +2841,7 @@ function logloads(loads) {
 	}
 
 	function getBabelOptions(load, babel) {
-		var options = this.babelOptions || {};
+		var options = getBabelOptionsFromLoad.call(this, load);
 
 		options.sourceMap = 'inline';
 		options.filename = load.address;

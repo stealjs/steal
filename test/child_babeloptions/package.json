@@ -1,0 +1,15 @@
+{
+  "name": "child_bopts",
+  "version": "1.0.0",
+  "main": "main.js",
+  "dependencies": {
+    "dep": "^1.0.0"
+  },
+  "steal": {
+    "babelOptions": {
+      "plugins": [
+        "transform-class-properties"
+      ]
+    }
+  }
+}
