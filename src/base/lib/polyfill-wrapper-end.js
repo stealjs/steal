@@ -67,19 +67,30 @@ var $__curScript, __eval;
 
   var errArgs = new Error(0, '_').fileName == '_';
 
+  function cleanStack(stack, newStack) {
+	  for (var i = 0; i < stack.length; i++) {
+		if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
+		  newStack.push(stack[i]);
+	  }
+  }
+
   function addToError(err, msg) {
     // parse the stack removing loader code lines for simplification
+	var newStack = [], stack;
     if (!err.originalErr) {
-      var stack = (err.stack || err.message || err).toString().split('\n');
-      var newStack = [];
-      for (var i = 0; i < stack.length; i++) {
-        if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
-          newStack.push(stack[i]);
-      }
+      stack = (err.stack || err.message || err).toString().split('\n');
+	  cleanStack(stack, newStack);
     }
 
-    //var newMsg = (newStack ? newStack.join('\n\t') : err.message) + '\n\t' + msg;
-	var newMsg = err.message + '\n\t' + msg;
+	if(err.originalErr && !newStack.length) {
+	  stack = err.originalErr.stack.toString().split('\n');
+	  cleanStack(stack, newStack);
+	}
+
+	var newMsg = err.message;
+	if(!err.onModuleExecution) {
+		newMsg = err.message + '\n\t' + msg;
+	}
 
     // Convert file:/// URLs to paths in Node
     if (!isBrowser)
