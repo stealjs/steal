@@ -13,33 +13,25 @@ exports.jspm = convertJspm;
 exports.toPackage = convertToPackage;
 exports.forPackage = convertForPackage;
 
-/*
-{
-  "system": {
-    "map": {
-      "package": {
-        "another": "one-more"
-	  }
-	},
-	"meta": {
-      "package": {
-        "deps": [
-          "jquery"
-		]
-	  }
-	}
-  }
+function StealConversion(context, pkg, steal, config, isRoot, waiting) {
+	this.context = context;
+	this.pkg = pkg;
+	this.steal = steal;
+	this.config = utils.extend({}, steal, true);
+	this.isRoot = isRoot;
+	this.waiting = [];
 }
-*/
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
 function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInfo) {
 	if(!steal) {
-		return steal;
+		return new StealConversion(context, pkg, steal, root);
 	}
-	var copy = utils.extend({}, steal, true);
-	var waiting = utils.isArray(ignoreWaiting) ? ignoreWaiting : [];
+
+	var conv = new StealConversion(context, pkg, steal, root);
+	var waiting = conv.waiting;
+
 	if(steal.meta) {
 		steal.meta = convertPropertyNames(context, pkg, steal.meta, root,
 										  waiting);
@@ -54,35 +46,67 @@ function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInf
 	}
 	// needed for builds
 	if(steal.buildConfig) {
-		steal.buildConfig = convertSteal(context, pkg, steal.buildConfig,
-										  root, waiting, false);
+		var buildConv = convertSteal(context, pkg, steal.buildConfig, root);
+		conv.buildConversion = buildConv;
+
+		steal.buildConfig = conv.config;
 	}
 
-	// Push the waiting conversions down.
-	if(ignoreWaiting !== true && waiting.length) {
-		convertLater(context, waiting, function(){
-			var context = this;
-			var local = utils.extend({}, copy, true);
-			var config = convertSteal(context, pkg, local, root, true);
-
-			// If we are building we need to resave the package's system
-			// configuration so that it will be written out into the build.
-			if(context.resavePackageInfo && resavePackageInfo !== false) {
-				var info = utils.pkg.findPackageInfo(context, pkg);
-				info.steal = info.system = config;
-			}
-
-			// Temporarily remove steal.main so that it doesn't set System.main
-			var stealMain = config.main;
-			delete config.main;
-			delete config.transpiler;
-			context.loader.config(config);
-			config.main = stealMain;
-		});
-	}
-
-	return steal;
+	return conv;
 }
+
+var lazyConfig = {
+	// Queue package reconfiguration whenever a package is first loaded.
+	// This is for progressively loaded package.jsons
+	updateConfigOnPackageLoad: function(conv, isPackageInfoSaved,
+		isConfigApplied, isBuildConfigApplied) {
+		var fns = [function(){return lazyConfig.cloneConversion.call(this, conv)}];
+		if(isPackageInfoSaved) {
+			fns.push(lazyConfig.resavePackageInfo);
+		}
+		if(isConfigApplied) {
+			fns.push(lazyConfig.applyConfig);
+		}
+		var fn = utils.flow(fns);
+
+		convertLater(conv.context, conv.waiting, fn);
+
+		if(isBuildConfigApplied && conv.buildConversion) {
+			var c = conv.buildConversion;
+			fn = utils.flow([
+				function(){return lazyConfig.cloneConversion.call(this, c)},
+				lazyConfig.resavePackageInfo,
+				lazyConfig.applyConfig
+			]);
+			convertLater(c.context, c.waiting, fn);
+		}
+	},
+	resavePackageInfo: function(conv) {
+		var info = utils.pkg.findPackageInfo(conv.context, conv.pkg);
+		info.steal = info.system = conv.steal;
+		return conv;
+	},
+	applyConfig: function(conv) {
+		var config = conv.steal;
+		var context = this;
+
+		// Temporarily remove steal.main so that it doesn't set System.main
+		var stealMain = config.main;
+		delete config.main;
+		delete config.transpiler;
+		context.loader.config(config);
+		config.main = stealMain;
+		return conv;
+	},
+	cloneConversion: function(conv) {
+		var context = this;
+		var local = utils.extend({}, conv.config, true);
+		var lConv = convertSteal(context, conv.pkg, local, conv.isRoot);
+		return lConv;
+	}
+};
+
+exports.updateConfigOnPackageLoad = lazyConfig.updateConfigOnPackageLoad;
 
 // converts only the property name
 function convertPropertyNames (context, pkg, map , root, waiting) {
@@ -294,6 +318,9 @@ function convertToPackage(context, npmPkg, index) {
 			metadata: {}
 		}, pkg);
 		var steal = utils.pkg.config(pkg);
+		var stealConversion = convertSteal(context, pkg, steal, index === 0);
+		lazyConfig.updateConfigOnPackageLoad(stealConversion, context.resavePackageInfo,
+			true, context.applyBuildConfig);
 
 		localPkg = {
 			name: pkg.name,
@@ -302,7 +329,7 @@ function convertToPackage(context, npmPkg, index) {
 				pkg.fileUrl :
 				utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 			main: pkg.main,
-			steal: convertSteal(context, pkg, steal, index === 0),
+			steal: stealConversion.steal,
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
 			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
 			jspm: convertJspm(pkg, pkg.jspm),
