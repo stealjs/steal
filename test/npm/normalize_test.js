@@ -214,7 +214,7 @@ QUnit.test("Configures a package when conflicting package.jsons are progressivel
 	.then(function(name){
 		assert.equal(name, "focha@2.0.0#other", "config applied");
 	})
-	.then(done, done);
+	.then(done, helpers.fail(assert, done));
 });
 
 QUnit.test("Progressively loaded configuration in the pluginLoader during the build is applied to the localLoader as well", function(assert){
@@ -666,6 +666,7 @@ QUnit.test("Config applied before normalization will be reapplied after", functi
 	.then(function(){
 		// The build applies config after configMain loads
 		loader.npmContext.resavePackageInfo = true;
+
 		loader.config({
 			map: {
 				dep: "dep/build"
@@ -676,9 +677,6 @@ QUnit.test("Config applied before normalization will be reapplied after", functi
 	})
 	.then(function(name){
 		assert.equal(name, "dep@1.0.0#build");
-
-		var pkg = loader.npmContext.pkgInfo[0];
-		assert.ok(!pkg.steal.map, "The map shoulded be applied to what saved into the build artifact");
 	})
 	.then(done, helpers.fail(assert, done));
 });
@@ -856,8 +854,51 @@ QUnit.test("buildConfig that is late-loaded doesn't override outer config", func
 		var pkg = loader.npmContext.pkgInfo[0];
 		assert.equal(pkg.steal.map["app@1.0.0#one"], "app@1.0.0#two", "Correct mapping in place");
 
-		console.log(loader.map);
 		assert.equal(loader.map["app@1.0.0#one"], "app@1.0.0#two", "Mapping not applied to the loader");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
+QUnit.test("late-loaded buildConfig is applied when in the build", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				dep: "1.0.0"
+			},
+			steal: {
+				map: {
+					"app/one": "app/two"
+				},
+				buildConfig: {
+					map: {
+						"app/one": "dep"
+					}
+				}
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])
+		.loader;
+
+	loader.env = "build-development";
+
+	helpers.init(loader).then(function(){
+		loader.npmContext.resavePackageInfo = true;
+		return loader.normalize("dep", "app@1.0.0#main");
+	}).then(function(){
+		var pkg = loader.npmContext.pkgInfo[0];
+		assert.equal(pkg.steal.map["app@1.0.0#one"], "dep@1.0.0#main", "Correct mapping in place");
+		assert.equal(loader.map["app@1.0.0#one"], "dep@1.0.0#main", "Mapping applied to the loader");
 	})
 	.then(done, helpers.fail(assert, done));
 });

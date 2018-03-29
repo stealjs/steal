@@ -82,6 +82,15 @@ var utils = {
 			fn.call(arr, arr[i], i);
 		}
 	},
+	flow: function(fns) {
+		return function(){
+			var res = fns[0].apply(this, arguments);
+			for(var i = 1; i < fns.length; i++) {
+				res = fns[i].call(this, res);
+			}
+			return res;
+		};
+	},
 	isObject: function(obj){
 		return typeof obj === "object";
 	},

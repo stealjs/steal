@@ -22,8 +22,8 @@ exports.translate = function(load){
 		return "define([]);";
 	}
 
-	var resavePackageInfo = isNode && loader.isEnv &&
-		!loader.isEnv("production");
+	var resavePackageInfo = isNode && !loader.isEnv("production");
+	var isBuild = loader.isPlatform("build");
 
 	var prevPackages = loader.npmContext && loader.npmContext.pkgInfo;
 	var versions = loader.npmContext && loader.npmContext.versions;
@@ -48,6 +48,7 @@ exports.translate = function(load){
 		crawl: crawl,
 		convert: convert,
 		resavePackageInfo: resavePackageInfo,
+		applyBuildConfig: isBuild,
 		forwardSlashMap: {},
 		// default file structure for npm 3 and higher
 		isFlatFileStructure: true
@@ -94,15 +95,12 @@ exports.translate = function(load){
 					delete pkg.browser.transform;
 				}
 				pkg = utils.json.transform(loader, load, pkg);
-				var conv = convert.steal(context, pkg, pkg.steal,
-					index === 0);
 
-				debugger;
+				var conv = convert.steal(context, pkg, pkg.steal, index === 0);
 
-				conv.deferUntilLoaded([
-					convert.createPackageSaver(context),
-					convert.applyConfig
-				]);
+				// When packages load, apply their configuration
+				convert.updateConfigOnPackageLoad(conv, resavePackageInfo,
+					true, isBuild);
 
 				packages.push({
 					name: pkg.name,
@@ -111,7 +109,7 @@ exports.translate = function(load){
 						pkg.fileUrl :
 						utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 					main: pkg.main,
-					steal: conv.config,
+					steal: conv.steal,
 					globalBrowser: convert.browser(pkg, pkg.globalBrowser),
 					browser: convert.browser(pkg, pkg.browser || pkg.browserify),
 					jspm: convert.jspm(pkg, pkg.jspm),
