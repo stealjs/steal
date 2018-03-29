@@ -433,7 +433,7 @@ exports.addExtension = function(System){
 			var context = loader.npmContext;
 			var pkg = context.versions.__default;
 			var conv = context.convert.steal(context, pkg, cfg, true);
-			context.convert.updateConfigOnPackageLoad(conv, context.resavePackageInfo,
+			context.convert.updateConfigOnPackageLoad(conv, false,
 				true, context.applyBuildConfig);
 			oldConfig.apply(loader, arguments);
 			return;
