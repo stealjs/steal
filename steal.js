@@ -5829,7 +5829,7 @@ var $__curScript, __eval;
 	if(isSourceOfSyntaxError) {
 		// Find the first true stack item
 		for(var i = 0; i < newStack.length; i++) {
-			if(newStack[i].indexOf("   at ") !== -1) {
+			if(/(    at )|(@http)/.test(newStack[i])) {
 				newStack.splice(i, 1, "    at eval (" + address + ":1:1)");
 				err.stack = newStack.join("\n\t");
 				break;
