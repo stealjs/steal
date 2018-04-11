@@ -696,6 +696,7 @@ QUnit.test("Importing a module when the dep throws an Error", function(assert) {
 		.then(function(app) {
 			assert.ok(false, "import call should not resolve");
 		}, function(err) {
+			console.log(err);
 			var stack = err.stack;
 			assert.ok(/function bar/.test(stack), "Contains the code from the root module");
 			done();

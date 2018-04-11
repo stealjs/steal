@@ -4554,7 +4554,8 @@ var $__curScript, __eval;
 	  cleanStack(stack, newStack);
 	}
 
-	var isSourceOfSyntaxError = address && (err instanceof SyntaxError) &&
+	var isSyntaxError = (err instanceof SyntaxError);
+	var isSourceOfSyntaxError = address && isSyntaxError &&
 	 	!err.originalErr && newStack.length && err.stack.indexOf(address) === -1;
 	if(isSourceOfSyntaxError) {
 		// Find the first true stack item
@@ -4589,6 +4590,9 @@ var $__curScript, __eval;
     newErr.originalErr = err.originalErr || err;
 
 	newErr.onModuleExecution = true;
+	if(isSyntaxError) {
+		newErr.onlyIncludeCodeFrameIfRootModule = true;
+	}
     return newErr;
   }
 
@@ -5540,9 +5544,24 @@ addStealExtension(function (loader) {
 		});
 	};
 
+	function findStackFromAddress(st, address) {
+		for(var i = 0; i < st.items.length; i++) {
+			if(st.items[i].url === address) {
+				return st.items[i];
+			}
+		}
+	}
+
 	loader.rejectWithCodeFrame = function(error, load) {
 		var st = StackTrace.parse(error);
-		var item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
+
+		var item;
+		if(error.onlyIncludeCodeFrameIfRootModule) {
+			item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
+		} else {
+			item = findStackFromAddress(st, load.address);
+		}
+
 		if(item) {
 			return this.loadCodeFrame()
 			.then(function(codeFrame){

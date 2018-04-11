@@ -2344,7 +2344,8 @@ var $__curScript, __eval;
 	  cleanStack(stack, newStack);
 	}
 
-	var isSourceOfSyntaxError = address && (err instanceof SyntaxError) &&
+	var isSyntaxError = (err instanceof SyntaxError);
+	var isSourceOfSyntaxError = address && isSyntaxError &&
 	 	!err.originalErr && newStack.length && err.stack.indexOf(address) === -1;
 	if(isSourceOfSyntaxError) {
 		// Find the first true stack item
@@ -2379,6 +2380,9 @@ var $__curScript, __eval;
     newErr.originalErr = err.originalErr || err;
 
 	newErr.onModuleExecution = true;
+	if(isSyntaxError) {
+		newErr.onlyIncludeCodeFrameIfRootModule = true;
+	}
     return newErr;
   }
 

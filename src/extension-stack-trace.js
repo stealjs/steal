@@ -173,9 +173,24 @@ addStealExtension(function (loader) {
 		});
 	};
 
+	function findStackFromAddress(st, address) {
+		for(var i = 0; i < st.items.length; i++) {
+			if(st.items[i].url === address) {
+				return st.items[i];
+			}
+		}
+	}
+
 	loader.rejectWithCodeFrame = function(error, load) {
 		var st = StackTrace.parse(error);
-		var item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
+
+		var item;
+		if(error.onlyIncludeCodeFrameIfRootModule) {
+			item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
+		} else {
+			item = findStackFromAddress(st, load.address);
+		}
+
 		if(item) {
 			return this.loadCodeFrame()
 			.then(function(codeFrame){
