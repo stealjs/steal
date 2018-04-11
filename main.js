@@ -844,17 +844,9 @@ addStealExtension(function (loader) {
 		});
 	};
 
-	function findStackFromAddress(st, address) {
-		for(var i = 0; i < st.items.length; i++) {
-			if(st.items[i].url === address) {
-				return st.items[i];
-			}
-		}
-	}
-
 	loader.rejectWithCodeFrame = function(error, load) {
 		var st = StackTrace.parse(error);
-		var item = st && findStackFromAddress(st, load.address);
+		var item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
 		if(item) {
 			return this.loadCodeFrame()
 			.then(function(codeFrame){
@@ -4248,7 +4240,7 @@ var $__curScript, __eval;
       new Function(source).call(context);
     }
     catch(e) {
-      throw addToError(e, '');
+      throw addToError(e, '', address);
     }
   };
 
@@ -4304,7 +4296,7 @@ var $__curScript, __eval;
 	  }
   }
 
-  function addToError(err, msg) {
+  function addToError(err, msg, address) {
     // parse the stack removing loader code lines for simplification
 	var newStack = [], stack;
     if (!err.originalErr) {
@@ -4315,6 +4307,19 @@ var $__curScript, __eval;
 	if(err.originalErr && !newStack.length) {
 	  stack = err.originalErr.stack.toString().split('\n');
 	  cleanStack(stack, newStack);
+	}
+
+	var isSourceOfSyntaxError = address && (err instanceof SyntaxError) &&
+	 	!err.originalErr && newStack.length && err.stack.indexOf(address) === -1;
+	if(isSourceOfSyntaxError) {
+		// Find the first true stack item
+		for(var i = 0; i < newStack.length; i++) {
+			if(newStack[i].indexOf("   at ") !== -1) {
+				newStack.splice(i, 1, "    at eval (" + address + ":1:1)");
+				err.stack = newStack.join("\n\t");
+				break;
+			}
+		}
 	}
 
 	var newMsg = err.message;
