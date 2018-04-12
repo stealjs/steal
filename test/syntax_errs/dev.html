@@ -17,7 +17,9 @@
 		steal.import("~/importer").then(null, function(err){
 			var isEdge = /Anonymous function/.test(err.stack);
 			if(window.assert) {
-				if(!isEdge) {
+				if(isEdge) {
+					window.assert.ok(true);
+				} else {
 					window.assert.ok(/breaking\.js/.test(err.stack), "Breaking file in the stack trace");
 				}
 
