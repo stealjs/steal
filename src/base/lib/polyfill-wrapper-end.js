@@ -18,7 +18,7 @@ var $__curScript, __eval;
       new Function(source).call(context);
     }
     catch(e) {
-      throw addToError(e, '', address);
+      throw handleError(e, source, address, context);
     }
   };
 
@@ -74,7 +74,7 @@ var $__curScript, __eval;
 	  }
   }
 
-  function addToError(err, msg, address) {
+  function handleError(err, source, address, context) {
     // parse the stack removing loader code lines for simplification
 	var newStack = [], stack;
     if (!err.originalErr) {
@@ -90,6 +90,7 @@ var $__curScript, __eval;
 	var isSyntaxError = (err instanceof SyntaxError);
 	var isSourceOfSyntaxError = address && isSyntaxError &&
 	 	!err.originalErr && newStack.length && err.stack.indexOf(address) === -1;
+
 	if(isSourceOfSyntaxError) {
 		// Find the first true stack item
 		for(var i = 0; i < newStack.length; i++) {
@@ -102,15 +103,14 @@ var $__curScript, __eval;
 	}
 
 	var newMsg = err.message;
-	if(!err.onModuleExecution) {
-		newMsg = err.message + '\n\t' + msg;
-	}
 
     // Convert file:/// URLs to paths in Node
     if (!isBrowser)
       newMsg = newMsg.replace(isWindows ? /file:\/\/\//g : /file:\/\//g, '');
 
-    var newErr = errArgs ? new Error(newMsg, err.fileName, err.lineNumber) : new Error(newMsg);
+	var ErrorType = err.constructor || Error;
+    var newErr = errArgs ? new ErrorType(newMsg, err.fileName, err.lineNumber) :
+		new ErrorType(newMsg);
 
     // Node needs stack adjustment for throw to show message
     if (!isBrowser)
@@ -121,12 +121,32 @@ var $__curScript, __eval;
 
     // track the original error
     newErr.originalErr = err.originalErr || err;
+	newErr.firstErr = err.firstErr || newErr;
 
 	newErr.onModuleExecution = true;
+
 	if(isSyntaxError) {
 		newErr.onlyIncludeCodeFrameIfRootModule = true;
+		return handleSyntaxError(newErr, source);
 	}
+
     return newErr;
+  }
+
+  function handleSyntaxError(fromError, source) {
+	  var logError = (fromError.firstErr && fromError.firstErr.logError) ||
+	  	logSyntaxError.bind(null, source);
+
+	  return Object.defineProperty(fromError, "logError", {
+		  enumerable: false,
+		  value: logError
+	  });
+  }
+
+  function logSyntaxError(source, c) {
+	  setTimeout(function(){
+		  new Function(source);
+	  });
   }
 
   __eval = function(inSource, address, context, sourceMap, evalType) {

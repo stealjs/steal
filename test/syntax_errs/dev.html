@@ -12,9 +12,9 @@
 	<script src="../../../steal-sans-promises.js"
 		data-base-url="."
 		data-config="package.json!npm"
-		data-main="@empty"></script>
+		data-main="~/importer"></script>
 	<script>
-		steal.import("~/importer").then(null, function(err){
+		steal.done().then(null, function(err){
 			var isEdge = /Anonymous function/.test(err.stack);
 			if(window.assert) {
 				if(isEdge) {
@@ -25,7 +25,6 @@
 
 				window.done();
 			} else {
-				console.error(err);
 				console.log('Did error!');
 			}
 		});
