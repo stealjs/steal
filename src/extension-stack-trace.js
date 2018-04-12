@@ -183,7 +183,14 @@ addStealExtension(function (loader) {
 
 	loader.rejectWithCodeFrame = function(error, load) {
 		var st = StackTrace.parse(error);
-		var item = st && findStackFromAddress(st, load.address);
+
+		var item;
+		if(error.onlyIncludeCodeFrameIfRootModule) {
+			item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
+		} else {
+			item = findStackFromAddress(st, load.address);
+		}
+
 		if(item) {
 			return this.loadCodeFrame()
 			.then(function(codeFrame){

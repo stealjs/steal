@@ -1817,7 +1817,9 @@ function logloads(loads) {
 *********************************************************************************************
 */
 
-
+var $__Object$getPrototypeOf = Object.getPrototypeOf;
+var $__Object$defineProperty = Object.defineProperty;
+var $__Object$create = Object.create;
 
 (function() {
   var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
@@ -2054,12 +2056,12 @@ function logloads(loads) {
       value: function(name, parentName, parentAddress) {
         if (typeof name != 'string')
           throw new TypeError('Module name must be a string');
-
+  
         var segments = name.split('/');
-
+  
         if (segments.length == 0)
           throw new TypeError('No module name provided');
-
+  
         // current segment
         var i = 0;
         // is the module name relative
@@ -2082,24 +2084,24 @@ function logloads(loads) {
             rel = true;
           dotdots = i;
         }
-
+  
         for (var j = i; j < segments.length; j++) {
           var segment = segments[j];
           if (segment == '' || segment == '.' || segment == '..')
             throw new TypeError('Illegal module name "' + name + '"');
         }
-
+  
         if (!rel)
           return name;
-
+  
         // build the full module name
         var normalizedParts = [];
         var parentParts = (parentName || '').split('/');
         var normalizedLen = parentParts.length - 1 - dotdots;
-
+  
         normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
         normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));
-
+  
         return normalizedParts.join('/');
       },
 
@@ -2110,18 +2112,18 @@ function logloads(loads) {
     $__Object$defineProperty(SystemLoader.prototype, "locate", {
       value: function(load) {
         var name = load.name;
-
+  
         // NB no specification provided for System.paths, used ideas discussed in https://github.com/jorendorff/js-loaders/issues/25
-
+  
         // most specific (longest) match wins
         var pathMatch = '', wildcard;
-
+  
         // check to see if we have a paths entry
         for (var p in this.paths) {
           var pathParts = p.split('*');
           if (pathParts.length > 2)
             throw new TypeError('Only one wildcard in a path is permitted');
-
+  
           // exact path match
           if (pathParts.length == 1) {
             if (name == p && p.length > pathMatch.length) {
@@ -2129,7 +2131,7 @@ function logloads(loads) {
               break;
             }
           }
-
+  
           // wildcard path match
           else {
             if (name.substr(0, pathParts[0].length) == pathParts[0] && name.substr(name.length - pathParts[1].length) == pathParts[1]) {
@@ -2138,18 +2140,18 @@ function logloads(loads) {
             }
           }
         }
-
+  
         var outPath = this.paths[pathMatch];
         if (wildcard)
           outPath = outPath.replace('*', wildcard);
-
+  
         // percent encode just '#' in module names
         // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
         // we should encode everything, but it breaks for servers that don't expect it
         // like in (https://github.com/systemjs/systemjs/issues/168)
         if (isBrowser)
           outPath = outPath.replace(/#/g, '%23');
-
+  
         return toAbsoluteURL(this.baseURL, outPath);
       },
 
@@ -2166,7 +2168,7 @@ function logloads(loads) {
               transformError(err, load, self)
               .then(r, r);
           }
-
+  
           fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
             resolve(source);
         }, onError);
@@ -4483,7 +4485,7 @@ var $__curScript, __eval;
       new Function(source).call(context);
     }
     catch(e) {
-      throw addToError(e, '');
+      throw addToError(e, '', address);
     }
   };
 
@@ -4539,7 +4541,7 @@ var $__curScript, __eval;
 	  }
   }
 
-  function addToError(err, msg) {
+  function addToError(err, msg, address) {
     // parse the stack removing loader code lines for simplification
 	var newStack = [], stack;
     if (!err.originalErr) {
@@ -4550,6 +4552,20 @@ var $__curScript, __eval;
 	if(err.originalErr && !newStack.length) {
 	  stack = err.originalErr.stack.toString().split('\n');
 	  cleanStack(stack, newStack);
+	}
+
+	var isSyntaxError = (err instanceof SyntaxError);
+	var isSourceOfSyntaxError = address && isSyntaxError &&
+	 	!err.originalErr && newStack.length && err.stack.indexOf(address) === -1;
+	if(isSourceOfSyntaxError) {
+		// Find the first true stack item
+		for(var i = 0; i < newStack.length; i++) {
+			if(/(    at )|(@http)/.test(newStack[i])) {
+				newStack.splice(i, 1, "    at eval (" + address + ":1:1)");
+				err.stack = newStack.join("\n\t");
+				break;
+			}
+		}
 	}
 
 	var newMsg = err.message;
@@ -4574,6 +4590,9 @@ var $__curScript, __eval;
     newErr.originalErr = err.originalErr || err;
 
 	newErr.onModuleExecution = true;
+	if(isSyntaxError) {
+		newErr.onlyIncludeCodeFrameIfRootModule = true;
+	}
     return newErr;
   }
 
@@ -5535,7 +5554,14 @@ addStealExtension(function (loader) {
 
 	loader.rejectWithCodeFrame = function(error, load) {
 		var st = StackTrace.parse(error);
-		var item = st && findStackFromAddress(st, load.address);
+
+		var item;
+		if(error.onlyIncludeCodeFrameIfRootModule) {
+			item = st && st.items[0] && st.items[0].url === load.address && st.items[0];
+		} else {
+			item = findStackFromAddress(st, load.address);
+		}
+
 		if(item) {
 			return this.loadCodeFrame()
 			.then(function(codeFrame){
