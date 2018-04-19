@@ -3087,9 +3087,7 @@ function logloads(loads) {
 *********************************************************************************************
 */
 
-var $__Object$getPrototypeOf = Object.getPrototypeOf;
-var $__Object$defineProperty = Object.defineProperty;
-var $__Object$create = Object.create;
+
 
 (function() {
   var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
@@ -3326,12 +3324,12 @@ var $__Object$create = Object.create;
       value: function(name, parentName, parentAddress) {
         if (typeof name != 'string')
           throw new TypeError('Module name must be a string');
-  
+
         var segments = name.split('/');
-  
+
         if (segments.length == 0)
           throw new TypeError('No module name provided');
-  
+
         // current segment
         var i = 0;
         // is the module name relative
@@ -3354,24 +3352,24 @@ var $__Object$create = Object.create;
             rel = true;
           dotdots = i;
         }
-  
+
         for (var j = i; j < segments.length; j++) {
           var segment = segments[j];
           if (segment == '' || segment == '.' || segment == '..')
             throw new TypeError('Illegal module name "' + name + '"');
         }
-  
+
         if (!rel)
           return name;
-  
+
         // build the full module name
         var normalizedParts = [];
         var parentParts = (parentName || '').split('/');
         var normalizedLen = parentParts.length - 1 - dotdots;
-  
+
         normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
         normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));
-  
+
         return normalizedParts.join('/');
       },
 
@@ -3382,18 +3380,18 @@ var $__Object$create = Object.create;
     $__Object$defineProperty(SystemLoader.prototype, "locate", {
       value: function(load) {
         var name = load.name;
-  
+
         // NB no specification provided for System.paths, used ideas discussed in https://github.com/jorendorff/js-loaders/issues/25
-  
+
         // most specific (longest) match wins
         var pathMatch = '', wildcard;
-  
+
         // check to see if we have a paths entry
         for (var p in this.paths) {
           var pathParts = p.split('*');
           if (pathParts.length > 2)
             throw new TypeError('Only one wildcard in a path is permitted');
-  
+
           // exact path match
           if (pathParts.length == 1) {
             if (name == p && p.length > pathMatch.length) {
@@ -3401,7 +3399,7 @@ var $__Object$create = Object.create;
               break;
             }
           }
-  
+
           // wildcard path match
           else {
             if (name.substr(0, pathParts[0].length) == pathParts[0] && name.substr(name.length - pathParts[1].length) == pathParts[1]) {
@@ -3410,18 +3408,18 @@ var $__Object$create = Object.create;
             }
           }
         }
-  
+
         var outPath = this.paths[pathMatch];
         if (wildcard)
           outPath = outPath.replace('*', wildcard);
-  
+
         // percent encode just '#' in module names
         // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
         // we should encode everything, but it breaks for servers that don't expect it
         // like in (https://github.com/systemjs/systemjs/issues/168)
         if (isBrowser)
           outPath = outPath.replace(/#/g, '%23');
-  
+
         return toAbsoluteURL(this.baseURL, outPath);
       },
 
@@ -3438,7 +3436,7 @@ var $__Object$create = Object.create;
               transformError(err, load, self)
               .then(r, r);
           }
-  
+
           fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
             resolve(source);
         }, onError);
