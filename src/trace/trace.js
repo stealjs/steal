@@ -53,6 +53,10 @@ addStealExtension(function applyTraceExtension(loader) {
 			}
 		}
 	};
+	loader.moduleSpecifierFromName = function(load, moduleName) {
+		var idx = load.metadata.dependencies.indexOf(moduleName);
+		return load.metadata.deps[idx];
+	};
 	loader._allowModuleExecution = {};
 	loader.allowModuleExecution = function(name){
 		var loader = this;

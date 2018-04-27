@@ -1748,20 +1748,70 @@ function logloads(loads) {
 
 	function getImportSpecifierPositionsPlugin(load) {
 		load.metadata.importSpecifiers = Object.create(null);
-		return function(babel){
-			var t = babel.types;
+		load.metadata.importNames = Object.create(null);
 
-			return {
-				visitor: {
-					ImportDeclaration: function(path, state){
-						var node = path.node;
-						var specifier = node.source.value;
-						var loc = node.source.loc;
-						load.metadata.importSpecifiers[specifier] = loc;
+		return {
+			visitor: {
+				ImportDeclaration: function(path, state){
+					var node = path.node;
+					var specifier = node.source.value;
+					var loc = node.source.loc;
+					load.metadata.importSpecifiers[specifier] = loc;
+					load.metadata.importNames[specifier] = (node.specifiers || [])
+					.map(function(spec){
+						return spec.imported && spec.imported.name;
+					});
+				}
+			}
+		};
+	}
+
+	var notShakable = {
+		exit: function(path, state) {
+			state.treeShakable = false;
+		}
+	};
+
+	var notShakeableVisitors = {
+		ImportDeclaration: notShakable,
+		FunctionDeclaration: notShakable,
+		VariableDeclaration: notShakable
+	};
+
+	function treeShakePlugin(loader, load) {
+		return {
+			visitor: {
+				Program: {
+					enter: function(path){
+						var state = {};
+						path.traverse(notShakeableVisitors, state);
+						load.metadata.treeShakable = state.treeShakable !== false;
+					}
+				},
+
+				ExportNamedDeclaration: function(path, state) {
+					if(load.metadata.treeShakable) {
+						var usedResult = loader.determineUsedExports(load)
+
+						var usedExports = usedResult.used;
+						var allUsed = usedResult.all;
+
+						if(!allUsed) {
+							path.get("specifiers").forEach(function(path){
+								var name = path.get("exported.name").node;
+								if(!usedExports.has(name) && name !== "__esModule") {
+									path.remove();
+								}
+							});
+
+							if(path.get("specifiers").length === 0) {
+								path.remove();
+							}
+						}
 					}
 				}
-			};
-		};
+			}
+		}
 	}
 
 	function babelTranspile(load, babelMod) {
@@ -1779,8 +1829,11 @@ function logloads(loads) {
 			// might be running on an old babel that throws if there is a
 			// plugins array in the options object
 			if (babelVersion >= 6) {
-				options.plugins = [getImportSpecifierPositionsPlugin(load),
-					addESModuleFlagPlugin].concat(results[0]);
+				options.plugins = [
+					getImportSpecifierPositionsPlugin.bind(null, load),
+					addESModuleFlagPlugin,
+					treeShakePlugin.bind(null, loader, load)
+				].concat(results[0]);
 				options.presets = results[1];
 			}
 
@@ -4809,13 +4862,30 @@ var cloneSteal = function(System){
 	return steal;
 };
 
+
+
+var ArraySet;
+if(typeof Set === "function") {
+	ArraySet = Set;
+} else {
+	ArraySet = function(){ this._items = []; };
+	ArraySet.prototype.has = function(item) {
+		return this._items.indexOf(item) !== -1;
+	};
+	ArraySet.prototype.add = function(item) {
+		if(!this.has(item)) {
+			this._items.push(item);
+		}
+	};
+}
+
 var makeSteal = function(System){
 	var addStealExtension = function (extensionFn) {
 		if (typeof System !== "undefined" && isFunction(extensionFn)) {
 			if (System._extensions) {
 				System._extensions.push(extensionFn);
 			}
-			extensionFn(System);
+			extensionFn(System, steal);
 		}
 	};
 
@@ -4885,6 +4955,7 @@ var makeSteal = function(System){
 		"default": steal,
 		__useDefault:true
 	}));
+	System.Set = ArraySet;
 
 	var loaderClone = System.clone;
 	System.clone = function(){
@@ -4897,8 +4968,11 @@ var makeSteal = function(System){
 			"default": steal,
 			__useDefault: true
 		}));
+		loader.Set = ArraySet;
 		return loader;
 	};
+
+
 
 	// steal.System remains for backwards compat only
 	steal.System = steal.loader = System;
@@ -5602,6 +5676,119 @@ addStealExtension(function(loader){
 	};
 });
 
+addStealExtension(function (loader) {
+	function determineUsedExports(load) {
+		var loader = this;
+
+		// 1. Get any new dependencies that haven't been accounted for.
+		var newDeps = newDependants.call(this, load);
+		var usedExports = new loader.Set();
+		var allUsed = false;
+		newDeps.forEach(function(depName) {
+			var depLoad = loader.getModuleLoad(depName);
+			var specifier = loader.moduleSpecifierFromName(depLoad, load.name);
+			if(depLoad.metadata.format !== "es6") {
+				allUsed = true;
+				return;
+			}
+
+			var usedNames = depLoad.metadata.importNames[specifier] || [];
+			usedNames.forEach(function(name){
+				usedExports.add(name);
+			});
+		});
+
+		// 2. Remove unused exports by traversing the AST
+		load.metadata.usedExports = usedExports;
+		load.metadata.allExportsUsed = allUsed;
+
+		return {
+			all: allUsed,
+			used: usedExports
+		};
+	}
+
+	// Determine if this load's dependants have changed,
+	function newDependants(load) {
+		var out = [];
+		var deps = this.getDependants(load.name);
+		var shakenParents = load.metadata.shakenParents;
+		if(!shakenParents) {
+			out = deps;
+		} else {
+			for(var i = 0; i < deps.length; i++) {
+				if(shakenParents.indexOf(deps[i]) === -1) {
+					out.push(deps[i]);
+				}
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * Look at a parent (dependant) module and get which exports it uses for a load.
+	 */
+	function getUsedExportsFromParent(load, parentName) {
+		var parentLoad = this.getModuleLoad(parentName);
+		var parentImportNames = parentLoad.metadata.importNames;
+		if(parentImportNames) {
+			var parentSpecifier = this.moduleSpecifierFromName(parentLoad, load.name);
+			var usedNames = parentImportNames[parentSpecifier];
+			return usedNames || [];
+		}
+		return [];
+	}
+
+	/**
+	 * Determine if the new parent has resulted in new used export names
+	 * If so, redefine this module so that it goes into the registry correctly.
+	 */
+	function reexecuteIfNecessary(load, parentName) {
+		var usedExports = getUsedExportsFromParent.call(this, load, parentName);
+
+		// Given the parent's used exports, loop over and see if any are not
+		// within the usedExports set.
+		var hasNewExports = false;
+		for(var i = 0; i < usedExports.length; i++) {
+			if(!load.metadata.usedExports.has(usedExports[i])) {
+				hasNewExports = true;
+			}
+		}
+
+		if(hasNewExports) {
+			this["delete"](load.name);
+			return loader.define(load.name, load.source, load);
+		}
+
+		return Promise.resolve();
+	}
+
+	// Wrap normalize to check if a module has already been tree-shaken
+	// And if so, re-execute it if there are new dependant modules.
+	var normalize = loader.normalize;
+	loader.normalize = function(name, parentName) {
+		var loader = this;
+		var p = Promise.resolve(normalize.apply(this, arguments));
+
+		return p.then(function(name) {
+			var load = loader.getModuleLoad(name);
+
+			// If this module is already marked as tree-shakable it means
+			// it has been loaded before. Determine if it needs to be reexecuted.
+			if(load && load.metadata.treeShakable) {
+				return reexecuteIfNecessary.call(loader, load, parentName)
+				.then(function(){
+					return name;
+				});
+			}
+			return name;
+		});
+	}
+
+	// determineUsedExports is used with a Babel tree-shaking plugin.
+	loader.determineUsedExports = determineUsedExports;
+});
+
 addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -5656,6 +5843,10 @@ addStealExtension(function applyTraceExtension(loader) {
 				return load.metadata.getImportPosition(specifier);
 			}
 		}
+	};
+	loader.moduleSpecifierFromName = function(load, moduleName) {
+		var idx = load.metadata.dependencies.indexOf(moduleName);
+		return load.metadata.deps[idx];
 	};
 	loader._allowModuleExecution = {};
 	loader.allowModuleExecution = function(name){
