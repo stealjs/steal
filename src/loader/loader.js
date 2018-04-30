@@ -3049,7 +3049,7 @@ function logloads(loads) {
 	};
 
 	function treeShakePlugin(loader, load) {
-		if(loader.determineUsedExports !== "function") {
+		if(typeof loader.determineUsedExports !== "function") {
 			return {};
 		}
 
