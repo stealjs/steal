@@ -8,17 +8,17 @@ var platforms = [{
 	version: '59.0'
 }, {
 	browserName: 'firefox',
-	platform: 'OS X 10.11',
+	platform: 'OS X 10.13',
 	version: '59.0'
 }, {
 	browserName: 'googlechrome',
 	platform: 'Windows 10'
 }, {
 	browserName: 'googlechrome',
-	platform: 'OS X 10.11'
+	platform: 'OS X 10.13'
 }, {
 	browserName: 'safari',
-	platform: 'OS X 10.11',
+	platform: 'OS X 10.13',
 	version: '10.0'
 }, {
 	browserName: 'MicrosoftEdge',
