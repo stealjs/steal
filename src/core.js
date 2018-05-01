@@ -9,13 +9,30 @@ var cloneSteal = function(System){
 	return steal;
 };
 
+
+
+var ArraySet;
+if(typeof Set === "function") {
+	ArraySet = Set;
+} else {
+	ArraySet = function(){ this._items = []; };
+	ArraySet.prototype.has = function(item) {
+		return this._items.indexOf(item) !== -1;
+	};
+	ArraySet.prototype.add = function(item) {
+		if(!this.has(item)) {
+			this._items.push(item);
+		}
+	};
+}
+
 var makeSteal = function(System){
 	var addStealExtension = function (extensionFn) {
 		if (typeof System !== "undefined" && isFunction(extensionFn)) {
 			if (System._extensions) {
 				System._extensions.push(extensionFn);
 			}
-			extensionFn(System);
+			extensionFn(System, steal);
 		}
 	};
 
@@ -85,6 +102,7 @@ var makeSteal = function(System){
 		"default": steal,
 		__useDefault:true
 	}));
+	System.Set = ArraySet;
 
 	var loaderClone = System.clone;
 	System.clone = function(){
@@ -97,8 +115,11 @@ var makeSteal = function(System){
 			"default": steal,
 			__useDefault: true
 		}));
+		loader.Set = ArraySet;
 		return loader;
 	};
+
+
 
 	// steal.System remains for backwards compat only
 	steal.System = steal.loader = System;

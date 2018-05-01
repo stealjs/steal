@@ -3018,20 +3018,74 @@ function logloads(loads) {
 
 	function getImportSpecifierPositionsPlugin(load) {
 		load.metadata.importSpecifiers = Object.create(null);
-		return function(babel){
-			var t = babel.types;
+		load.metadata.importNames = Object.create(null);
 
-			return {
-				visitor: {
-					ImportDeclaration: function(path, state){
-						var node = path.node;
-						var specifier = node.source.value;
-						var loc = node.source.loc;
-						load.metadata.importSpecifiers[specifier] = loc;
+		return {
+			visitor: {
+				ImportDeclaration: function(path, state){
+					var node = path.node;
+					var specifier = node.source.value;
+					var loc = node.source.loc;
+					load.metadata.importSpecifiers[specifier] = loc;
+					load.metadata.importNames[specifier] = (node.specifiers || [])
+					.map(function(spec){
+						return spec.imported && spec.imported.name;
+					});
+				}
+			}
+		};
+	}
+
+	var notShakable = {
+		exit: function(path, state) {
+			state.treeShakable = false;
+		}
+	};
+
+	var notShakeableVisitors = {
+		ImportDeclaration: notShakable,
+		FunctionDeclaration: notShakable,
+		VariableDeclaration: notShakable
+	};
+
+	function treeShakePlugin(loader, load) {
+		if(typeof loader.determineUsedExports !== "function") {
+			return {};
+		}
+
+		return {
+			visitor: {
+				Program: {
+					enter: function(path){
+						var state = {};
+						path.traverse(notShakeableVisitors, state);
+						load.metadata.treeShakable = state.treeShakable !== false;
+					}
+				},
+
+				ExportNamedDeclaration: function(path, state) {
+					if(load.metadata.treeShakable) {
+						var usedResult = loader.determineUsedExports(load)
+
+						var usedExports = usedResult.used;
+						var allUsed = usedResult.all;
+
+						if(!allUsed) {
+							path.get("specifiers").forEach(function(path){
+								var name = path.get("exported.name").node;
+								if(!usedExports.has(name) && name !== "__esModule") {
+									path.remove();
+								}
+							});
+
+							if(path.get("specifiers").length === 0) {
+								path.remove();
+							}
+						}
 					}
 				}
-			};
-		};
+			}
+		}
 	}
 
 	function babelTranspile(load, babelMod) {
@@ -3049,8 +3103,11 @@ function logloads(loads) {
 			// might be running on an old babel that throws if there is a
 			// plugins array in the options object
 			if (babelVersion >= 6) {
-				options.plugins = [getImportSpecifierPositionsPlugin(load),
-					addESModuleFlagPlugin].concat(results[0]);
+				options.plugins = [
+					getImportSpecifierPositionsPlugin.bind(null, load),
+					addESModuleFlagPlugin,
+					treeShakePlugin.bind(null, loader, load)
+				].concat(results[0]);
 				options.presets = results[1];
 			}
 
