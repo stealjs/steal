@@ -5869,6 +5869,12 @@ var $__curScript, __eval;
   }
 
   function handleSyntaxError(fromError, source) {
+	  // This trick only works in Chrome, detect that and just return the regular
+	  // error in other browsers.
+	  if(typeof Error.captureStackTrace !== "function") {
+		  return fromError;
+	  }
+
 	  var logError = (fromError.firstErr && fromError.firstErr.logError) ||
 	  	logSyntaxError.bind(null, source);
 
