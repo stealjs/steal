@@ -334,6 +334,10 @@ QUnit.test("Syntax error in child module shows up in the stack trace", function(
 	makeIframe("syntax_errs/dev.html", assert);
 });
 
+QUnit.test("Syntax errors bubble correctly during the build", function(assert){
+	makeIframe("syntax_errs/build.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {

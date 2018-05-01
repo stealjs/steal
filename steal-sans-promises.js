@@ -4737,6 +4737,8 @@ var $__curScript, __eval;
 		})(),
 		isElectron = isNode && !!process.versions["electron"],
 		isNode = isNode && !isNW && !isElectron,
+		hasAWindow = isBrowserWithWindow || isNW || isElectron,
+		stealScript = hasAWindow && document.currentScript,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};
 
@@ -5492,8 +5494,9 @@ addStealExtension(function (loader) {
 			this.global.process = { argv: '', env: {} };
 		}
 
-		var isProd = this.isEnv("production");
-		var p = isProd ? Promise.resolve() : this["import"]("@@babel-code-frame");
+		var loader = this.pluginLoader || this;
+		var isProd = loader.isEnv("production");
+		var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
 		return p;
 	};
 
@@ -6462,12 +6465,12 @@ addStealExtension(function (loader) {
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
-			} else if(isBrowserWithWindow || isNW || isElectron) {
+			} else if(hasAWindow) {
 				// if the browser supports currentScript, use it!
-				if (document.currentScript) {
-					steal.script = document.currentScript;
+				if (stealScript) {
+					steal.script = stealScript;
 					// get options from script tag and query
-					resolve(getScriptOptions(document.currentScript));
+					resolve(getScriptOptions(stealScript));
 					return;
 				}
 				// assume the last script on the page is the one loading steal.js

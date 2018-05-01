@@ -123,5 +123,7 @@
 		})(),
 		isElectron = isNode && !!process.versions["electron"],
 		isNode = isNode && !isNW && !isElectron,
+		hasAWindow = isBrowserWithWindow || isNW || isElectron,
+		stealScript = hasAWindow && document.currentScript,
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};

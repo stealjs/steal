@@ -70,12 +70,12 @@
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
-			} else if(isBrowserWithWindow || isNW || isElectron) {
+			} else if(hasAWindow) {
 				// if the browser supports currentScript, use it!
-				if (document.currentScript) {
-					steal.script = document.currentScript;
+				if (stealScript) {
+					steal.script = stealScript;
 					// get options from script tag and query
-					resolve(getScriptOptions(document.currentScript));
+					resolve(getScriptOptions(stealScript));
 					return;
 				}
 				// assume the last script on the page is the one loading steal.js
