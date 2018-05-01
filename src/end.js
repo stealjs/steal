@@ -10,15 +10,23 @@
 		var oldSteal = global.steal;
 		global.steal = makeSteal(System);
 		global.steal.startup(oldSteal && typeof oldSteal == 'object' && oldSteal)
-			.then(null, function(error){
-				if(typeof console !== "undefined") {
-					// Hide from uglify
-					var c = console;
+			.then(null, logErrors);
+		global.steal.clone = cloneSteal;
+
+		function logErrors(error) {
+			if(typeof console !== "undefined") {
+				// Hide from uglify
+				var c = console;
+
+				// if the error contains a logError function, defer to that.
+				if(typeof error.logError === "function") {
+					error.logError(c);
+				} else {
 					var type = c.error ? "error" : "log";
 					c[type](error);
 				}
-			});
-		global.steal.clone = cloneSteal;
+			}
+		}
 	}
 
 })(typeof window == "undefined" ? (typeof global === "undefined" ? this : global) : window);
