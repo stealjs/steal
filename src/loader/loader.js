@@ -2321,6 +2321,7 @@ function logloads(loads) {
   Loader.prototype = {
     // 26.3.3.1
     constructor: Loader,
+	anonymousCount: 0,
     // 26.3.3.2
     define: function(name, source, options) {
       // check if already defined
@@ -2414,7 +2415,8 @@ function logloads(loads) {
     },
     // 26.3.3.11
     module: function(source, options) {
-      var load = createLoad();
+	  var name = "<Anonymous" + (++this.anonymousCount) + ">";
+      var load = createLoad(name);
       load.address = options && options.address;
       var linkSet = createLinkSet(this._loader, load);
       var sourcePromise = Promise.resolve(source);

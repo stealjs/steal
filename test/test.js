@@ -336,6 +336,10 @@ QUnit.test("Syntax error in child module shows up in the stack trace", function(
 
 QUnit.test("Can tree-shake modules that only re-export from others", function(assert){
 	makeIframe("tree_shake/dev.html", assert);
+});
+
+QUnit.test("Can tree-shake anonymous modules", function(assert){
+	makeIframe("tree_shake/anon.html", assert);
 })
 
 QUnit.module("steal startup and config");
