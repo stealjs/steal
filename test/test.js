@@ -59,7 +59,7 @@ if (supportsES) {
 			makeStealHTML({
 				baseUrl: "basics/basics.html",
 				scriptTagAttrs: {
-					src: "../steal.js",
+					src: "../steal-with-promises.js",
 					main: "basics/basics"
 				}
 			}),
@@ -71,7 +71,7 @@ if (supportsES) {
 		makeIframe("jsx/dev.html", assert);
 	});
 
-	QUnit.test("default bower_components config path", function(assert) {
+	QUnit.skip("default bower_components config path", function(assert) {
 		writeIframe(
 			makeStealHTML({
 				baseUrl: "basics/basics.html",
@@ -191,7 +191,7 @@ QUnit.test("Using path's * qualifier", function(assert) {
 		makeStealHTML({
 			baseUrl: "basics/basics.html",
 			scriptTagAttrs: {
-				src: "../steal.js",
+				src: "../steal-with-promises.js",
 				main: "../paths",
 				config: "../paths/config.js"
 			}
