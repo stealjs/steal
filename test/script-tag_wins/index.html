@@ -14,7 +14,7 @@
 			foo: 'bar'
 		};
 	</script>
-	<script src="../steal.js" data-foo="foo"></script>
+	<script src="../steal-with-promises.js" data-foo="foo"></script>
 	<script>
 		steal.done().then(function(){
 			assert.ok(steal.config("foo"),"foo");
