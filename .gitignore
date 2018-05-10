@@ -1,15 +1,11 @@
 node_modules
 package-lock.json
-test/bower_components/
 test/dev.js
 test/steal.js
 test/steal.production.js
 test/steal/
-bower_components/
 test/ext/
-test/bower/as_config/vendor/system-bower/
 test/npm-deep/node_modules/steal/
-test/bower/as_config/vendor/steal/
 !test/default-npm-algorithm/node_modules/
 !test/nested-npm-algorithm/node_modules/
 !test/nested-npm-algorithm/node_modules/some/node_modules/
