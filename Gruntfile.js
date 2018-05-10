@@ -202,12 +202,8 @@ module.exports = function (grunt) {
 				files: [
 					{expand: true, src: core, dest: "test/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/steal/", filter: "isFile"},
-					{expand: true, src: core, dest: "test/bower_components/steal/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/npm/node_modules/steal/", filter: "isFile"},
 					{expand: true, src: core, dest: "test/npm-deep/node_modules/steal/", filter: "isFile"},
-					{expand: true, src: core, dest: "test/npm/bower/node_modules/steal/", filter: "isFile"},
-					{expand: true, src: core, dest: "test/bower/bower_components/steal/", filter: "isFile"},
-					{expand: true, src: core, dest: "test/bower/npm/bower_components/steal/", filter: "isFile"},
 					{expand: true, src: ["node_modules/jquery/**"], dest: "test/npm/", filter: "isFile"}
 				]
 			},

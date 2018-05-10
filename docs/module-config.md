@@ -7,7 +7,7 @@ production.
 
 If `paths["@config"]` is not specified, its default path will obey the following rules:
 
- - If `steal.js` is in <i>ROOT/bower_components/steal/steal.js</i>, `@config` will be looked for in
+ - If `steal.js` is in <i>ROOT/node_modules/steal/steal.js</i>, `@config` will be looked for in
    <i>ROOT/stealconfig.js</i>.
  - Otherwise, it will be looked for in _[config.baseURL baseURL]/stealconfig.js_.
 

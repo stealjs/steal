@@ -38,7 +38,7 @@ QUnit.test("crawl.getDependencyMap", function(assert) {
 	GlobalSystem["import"]("npm-crawl")
 		.then(function(crawl){
 			var deps = crawl.getDependencyMap({}, {
-				dependencies: {"bower": "1.2.3", "can": "2.2.2"}
+				dependencies: { "can": "2.2.2" }
 			});
 			assert.deepEqual(deps, { "can": {name: "can", version: "2.2.2"}});
 
