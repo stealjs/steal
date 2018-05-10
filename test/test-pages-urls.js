@@ -19,9 +19,6 @@ module.exports = [{
 	name: "live-reload tests",
 	url: "test/live_reload/unit.html"
 }, {
-	name: "bower extension tests",
-	url: "test/bower/test.html"
-}, {
 	name: "npm extension tests",
 	url: "test/npm/test.html"
 }, {

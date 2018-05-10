@@ -12,7 +12,7 @@
 		window.done = window.parent.done;
 		window.assert = window.parent.assert;
 	</script>
-	<script type="text/javascript" src="../../steal.js" config-main="@empty"></script>
+	<script type="text/javascript" src="../../steal-with-promises.js" config-main="@empty"></script>
 	<script>
 		steal.done().then(function(){
 			if(window.assert) {

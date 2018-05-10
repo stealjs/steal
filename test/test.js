@@ -59,7 +59,7 @@ if (supportsES) {
 			makeStealHTML({
 				baseUrl: "basics/basics.html",
 				scriptTagAttrs: {
-					src: "../steal.js",
+					src: "../steal-with-promises.js",
 					main: "basics/basics"
 				}
 			}),
@@ -71,7 +71,7 @@ if (supportsES) {
 		makeIframe("jsx/dev.html", assert);
 	});
 
-	QUnit.test("default bower_components config path", function(assert) {
+	QUnit.skip("default bower_components config path", function(assert) {
 		writeIframe(
 			makeStealHTML({
 				baseUrl: "basics/basics.html",
@@ -176,16 +176,6 @@ QUnit.test("production works with Babel circular dependencies", function(assert)
 	makeIframe("prod_circ/prod.html", assert);
 });
 
-if(System.promisesSupported) {
-	QUnit.test("Production bundle works with steal-sans-promises", function(assert) {
-		makeIframe("production/prod.html", assert);
-	});
-
-	QUnit.test("When the dev-bundle is missing we get a nice message", function(assert){
-		makeIframe("dev_bundle_err/dev.html", assert);
-	});
-}
-
 if (hasConsole) {
 	QUnit.test("steal.production.js logs errors", function(assert) {
 		makeIframe("production_err/prod.html", assert);
@@ -201,7 +191,7 @@ QUnit.test("Using path's * qualifier", function(assert) {
 		makeStealHTML({
 			baseUrl: "basics/basics.html",
 			scriptTagAttrs: {
-				src: "../steal.js",
+				src: "../steal-with-promises.js",
 				main: "../paths",
 				config: "../paths/config.js"
 			}
@@ -265,7 +255,7 @@ if (hasConsole) {
 
 	QUnit.test("No 'loaded twice' warnings when there is a loading error", function(assert){
 		makeIframe("load_module_twice_false_positive/on-error.html", assert);
-	})
+	});
 }
 
 QUnit.test("can add implicit deps to ES and CJS modules", function(assert) {
@@ -410,4 +400,8 @@ QUnit.test("deps bundle loads AFTER configMain", function(assert) {
 
 QUnit.test("dev bundle loads BEFORE configMain", function(assert) {
 	makeIframe("dev_bundles/dev.html", assert);
+});
+
+QUnit.test("When the dev-bundle is missing we get a nice message", function(assert){
+	makeIframe("dev_bundle_err/dev.html", assert);
 });

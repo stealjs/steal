@@ -1,7 +1,10 @@
 "use strict";
 module.exports = function (grunt) {
-
-	var core = ["<%= pkg.name %>.js", "<%= pkg.name %>.production.js", "ext/**"];
+	var core = [
+		"<%= pkg.name %>-with-promises.js",
+		"<%= pkg.name %>-with-promises.production.js",
+		"ext/**"
+	];
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON("package.json"),
@@ -43,20 +46,20 @@ module.exports = function (grunt) {
 		concat: {
 			loader: {
 				src: [
-					"node_modules/when/es6-shim/Promise.js",
 					"src/loader/lib/polyfill-wrapper-start.js",
 					"src/loader/loader-esnext.js",
 					"src/loader/lib/polyfill-wrapper-end.js"
 				],
 				dest: "src/loader/loader.js"
 			},
-			"loader-no-promises": {	// use native promises instead of shim
+			"loader-with-promises": {
 				src: [
+					"node_modules/when/es6-shim/Promise.js",
 					"src/loader/lib/polyfill-wrapper-start.js",
 					"src/loader/loader-esnext.js",
 					"src/loader/lib/polyfill-wrapper-end.js"
 				],
-				dest: "src/loader/loader-sans-promises.js"
+				dest: "src/loader/loader-with-promises.js"
 			},
 			base: {
 				src: [
@@ -109,9 +112,9 @@ module.exports = function (grunt) {
 				],
 				dest: "<%= pkg.name %>.js"
 			},
-			"dist-no-promises": {
+			"dist-with-promises": {
 				src: [
-					"src/loader/loader-sans-promises.js",
+					"src/loader/loader-with-promises.js",
 					"src/base/base.js",
 					"src/start.js",
 					"src/normalize.js",
@@ -137,7 +140,7 @@ module.exports = function (grunt) {
 					"src/make-steal-end.js", // ends makeSteal
 					"src/end.js"
 				],
-				dest: "<%= pkg.name %>-sans-promises.js"
+				dest: "<%= pkg.name %>-with-promises.js"
 			},
 			nodeMain: {
 				src: [
@@ -181,9 +184,9 @@ module.exports = function (grunt) {
 				src: "<%= pkg.name %>.js",
 				dest: "<%= pkg.name %>.production.js"
 			},
-			"dist-no-promises": {
-				src: "<%= pkg.name %>-sans-promises.js",
-				dest: "<%= pkg.name %>-sans-promises.production.js"
+			"dist-with-promises": {
+				src: "<%= pkg.name %>-with-promises.js",
+				dest: "<%= pkg.name %>-with-promises.production.js"
 			}
 		},
 		copy: {
@@ -254,7 +257,12 @@ module.exports = function (grunt) {
 	grunt.registerTask("loader", ["esnext", "string-replace"]);
 	grunt.registerTask("copy-to", ["copy:extensions", "copy:toTest"]);
 	grunt.registerTask("build", ["loader", "concat", "uglify:dist", "copy-to"]);
-	grunt.registerTask("build-no-promises", ["loader", "concat", "uglify:dist-no-promises", "copy-to"]);
+	grunt.registerTask("build-with-promises", [
+		"loader",
+		"concat",
+		"uglify:dist-with-promises",
+		"copy-to"
+	]);
 
-	grunt.registerTask("default", ["build", "build-no-promises"]);
+	grunt.registerTask("default", ["build", "build-with-promises"]);
 };
