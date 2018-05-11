@@ -169,7 +169,6 @@ dependencies will be loaded:
 The following packages are ignored by default:
 
  - "steal", "steal-tools"
- - "bower"
  - "grunt", "grunt-cli"
 
 ### package.steal.npmDependencies
@@ -259,16 +258,13 @@ In the following setup, `my-project/my-utils` will be looked for in
 
 Defines dependencies of your npm package. This is useful for loading modules,
 like extensions, that need to be initialized before the rest of your application
-is imported. For example you can use both npm and [bower] dependencies by setting
-your `bower.json` as a configDependency:
+is imported, e.g:
 
 ```js
-
 {
-  "name": "my-project",
   "steal": {
     "configDependencies": [
-      "bower.json!bower"
+      "./node_modules/steal-conditional/conditional"
     ]
   }
 }

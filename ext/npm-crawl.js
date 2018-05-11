@@ -464,7 +464,7 @@ function truthy(x) {
 	return x;
 }
 
-var alwaysIgnore = {"steal-tools":1,"bower":1,"grunt":1,"grunt-cli":1};
+var alwaysIgnore = {"steal-tools":1,"grunt":1,"grunt-cli":1};
 
 function addDeps(packageJSON, dependencies, deps, type, defProps){
 	var defaultProps = defProps;

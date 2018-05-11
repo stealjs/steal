@@ -19,17 +19,17 @@ will provide [default paths](#section_Defaultpathsconfiguredbysteal).
 
 `paths` can be configured with any of the approaches in [config.config]. It
 is used to provide the path of a module. You might use this if you install a module
-with a package manager, for example with bower. For example:
+with a package manager, for example with npm: 
 
 ```json
 "steal": {
 	"paths": {
-		"jquery": "bower_components/jquery/dist/jquery.js"
+		"jquery": "node_modules/jquery/dist/jquery.js"
 	}
 }
 ```
 
-Will map the the `jquery` module to where the JavaScript file is located in bower_components.
+Will map the the `jquery` module to where the JavaScript file is located in node_modules.
 
 ### Wildcard paths
 
@@ -66,7 +66,7 @@ If the following paths are not specified, `steal.js` will use a default path acc
 to the following rules:
 
 
-- [@config] - If `steal.js` is in _ROOT/bower\_components/steal/steal.js_, `@config` defaults to
+- [@config] - If `steal.js` is in _ROOT/node\_modules/steal/steal.js_, `@config` defaults to
   <i>ROOT/stealconfig.js</i>; otherwise, it defaults to 
   _[config.baseURL baseURL]/stealconfig.js_. Specifying `@config` will specify [config.baseURL baseURL].
 - [@dev] - defaults to _STEAL\_BASE/steal/dev.js_

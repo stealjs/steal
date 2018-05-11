@@ -1657,7 +1657,6 @@ addStealExtension(function (loader) {
 				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
 				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
-				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
 				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
@@ -1686,19 +1685,13 @@ addStealExtension(function (loader) {
 					// make sure we don't set baseURL if it already set
 					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
 
-						// if we loading steal.js and it is located in node_modules or bower_components
+						// if we loading steal.js and it is located in node_modules
 						// we rewrite the baseURL relative to steal.js (one directory up!)
 						// we do this because, normaly our app is located as a sibling folder to
-						// node_modules or bower_components
+						// node_modules
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							var isFromPackage = false;
-							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
-								System.configMain = "bower.json!bower";
-								addProductionBundles.call(this);
-								parts.pop();
-								isFromPackage = true;
-							}
 							if (last(parts) === "node_modules") {
 								System.configMain = "package.json!npm";
 								addProductionBundles.call(this);

@@ -71,24 +71,6 @@ if (supportsES) {
 		makeIframe("jsx/dev.html", assert);
 	});
 
-	QUnit.skip("default bower_components config path", function(assert) {
-		writeIframe(
-			makeStealHTML({
-				baseUrl: "basics/basics.html",
-				scriptTagAttrs: {
-					src: "../bower_components/steal/steal.js",
-					main: "basics/basics"
-
-				}
-			}),
-			assert
-		);
-	});
-
-	QUnit.test("default bower_components without config still works", function(assert) {
-		makeIframe("basics/noconfig.html", assert);
-	});
-
 	QUnit.test("read config", function(assert) {
 		writeIframe(
 			makeStealHTML({
