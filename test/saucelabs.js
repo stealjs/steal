@@ -28,14 +28,6 @@ var platforms = [{
 	platform: 'Windows 10',
 	version: '11.0'
 }, {
-	browserName: 'internet explorer',
-	platform: 'Windows 8',
-	version: '10.0'
-}, {
-	browserName: 'internet explorer',
-	platform: 'Windows 7',
-	version: '9'
-}, {
 	browserName: 'Safari',
 	'appium-version': '1.6.3',
 	platformName: 'iOS',
