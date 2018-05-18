@@ -1,4 +1,4 @@
-addStealExtension(function (loader) {
+addStealExtension(function(loader) {
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -9,13 +9,13 @@ addStealExtension(function (loader) {
 		newDeps.forEach(function(depName) {
 			var depLoad = loader.getModuleLoad(depName);
 			var specifier = loader.moduleSpecifierFromName(depLoad, load.name);
-			if(depLoad.metadata.format !== "es6") {
+			if (depLoad.metadata.format !== "es6") {
 				allUsed = true;
 				return;
 			}
 
 			var usedNames = depLoad.metadata.importNames[specifier] || [];
-			usedNames.forEach(function(name){
+			usedNames.forEach(function(name) {
 				usedExports.add(name);
 			});
 		});
@@ -35,11 +35,11 @@ addStealExtension(function (loader) {
 		var out = [];
 		var deps = this.getDependants(load.name);
 		var shakenParents = load.metadata.shakenParents;
-		if(!shakenParents) {
+		if (!shakenParents) {
 			out = deps;
 		} else {
-			for(var i = 0; i < deps.length; i++) {
-				if(shakenParents.indexOf(deps[i]) === -1) {
+			for (var i = 0; i < deps.length; i++) {
+				if (shakenParents.indexOf(deps[i]) === -1) {
 					out.push(deps[i]);
 				}
 			}
@@ -53,8 +53,11 @@ addStealExtension(function (loader) {
 	function getUsedExportsFromParent(load, parentName) {
 		var parentLoad = this.getModuleLoad(parentName);
 		var parentImportNames = parentLoad.metadata.importNames;
-		if(parentImportNames) {
-			var parentSpecifier = this.moduleSpecifierFromName(parentLoad, load.name);
+		if (parentImportNames) {
+			var parentSpecifier = this.moduleSpecifierFromName(
+				parentLoad,
+				load.name
+			);
 			var usedNames = parentImportNames[parentSpecifier];
 			return usedNames || [];
 		}
@@ -71,13 +74,13 @@ addStealExtension(function (loader) {
 		// Given the parent's used exports, loop over and see if any are not
 		// within the usedExports set.
 		var hasNewExports = false;
-		for(var i = 0; i < usedExports.length; i++) {
-			if(!load.metadata.usedExports.has(usedExports[i])) {
+		for (var i = 0; i < usedExports.length; i++) {
+			if (!load.metadata.usedExports.has(usedExports[i])) {
 				hasNewExports = true;
 			}
 		}
 
-		if(hasNewExports) {
+		if (hasNewExports) {
 			this["delete"](load.name);
 			return loader.define(load.name, load.source, load);
 		}
@@ -97,16 +100,127 @@ addStealExtension(function (loader) {
 
 			// If this module is already marked as tree-shakable it means
 			// it has been loaded before. Determine if it needs to be reexecuted.
-			if(load && load.metadata.treeShakable) {
-				return reexecuteIfNecessary.call(loader, load, parentName)
-				.then(function(){
-					return name;
-				});
+			if (load && load.metadata.treeShakable) {
+				return reexecuteIfNecessary
+					.call(loader, load, parentName)
+					.then(function() {
+						return name;
+					});
 			}
 			return name;
 		});
+	};
+
+	function getImportSpecifierPositionsPlugin(load) {
+		load.metadata.importSpecifiers = Object.create(null);
+		load.metadata.importNames = Object.create(null);
+
+		return {
+			visitor: {
+				ImportDeclaration: function(path, state) {
+					var node = path.node;
+					var specifier = node.source.value;
+					var loc = node.source.loc;
+					load.metadata.importSpecifiers[specifier] = loc;
+					load.metadata.importNames[specifier] = (
+						node.specifiers || []
+					).map(function(spec) {
+						return spec.imported && spec.imported.name;
+					});
+				}
+			}
+		};
 	}
 
-	// determineUsedExports is used with a Babel tree-shaking plugin.
-	loader.determineUsedExports = determineUsedExports;
+	function treeShakePlugin(loader, load) {
+		var notShakable = {
+			exit: function(path, state) {
+				state.treeShakable = false;
+			}
+		};
+
+		var notShakeableVisitors = {
+			ImportDeclaration: notShakable,
+			FunctionDeclaration: notShakable,
+			VariableDeclaration: notShakable
+		};
+
+		return {
+			visitor: {
+				Program: {
+					enter: function(path) {
+						var state = {};
+						path.traverse(notShakeableVisitors, state);
+						load.metadata.treeShakable =
+							state.treeShakable !== false;
+					}
+				},
+
+				ExportNamedDeclaration: function(path, state) {
+					if (load.metadata.treeShakable) {
+						var usedResult = determineUsedExports.call(
+							loader,
+							load
+						);
+
+						var usedExports = usedResult.used;
+						var allUsed = usedResult.all;
+
+						if (!allUsed) {
+							path.get("specifiers").forEach(function(path) {
+								var name = path.get("exported.name").node;
+								if (
+									!usedExports.has(name) &&
+									name !== "__esModule"
+								) {
+									path.remove();
+								}
+							});
+
+							if (path.get("specifiers").length === 0) {
+								path.remove();
+							}
+						}
+					}
+				}
+			}
+		};
+	}
+
+	function applyBabelPlugin(load) {
+		var pluginLoader = loader.pluginLoader || loader;
+
+		return pluginLoader.import("babel").then(function(mod) {
+			var transpiler = mod.__useDefault ? mod.default : mod;
+			var babel = transpiler.Babel || transpiler.babel || transpiler;
+
+			try {
+				return babel.transform(load.source, {
+					plugins: [
+						getImportSpecifierPositionsPlugin.bind(null, load),
+						treeShakePlugin.bind(null, loader, load)
+					]
+				}).code;
+			} catch (e) {
+				return Promise.reject(e);
+			}
+		});
+	}
+
+	var translate = loader.translate;
+	var es6RegEx = /(^\s*|[}\);\n]\s*)(import\s+(['"]|(\*\s+as\s+)?[^"'\(\)\n;]+\s+from\s+['"]|\{)|export\s+\*\s+from\s+["']|export\s+(\{|default|function|class|var|const|let|async\s+function))/;
+	loader.translate = function treeshakeTranslate(load) {
+		return Promise.resolve()
+			.then(function() {
+				if (es6RegEx.test(load.source)) {
+					return applyBabelPlugin(load);
+				}
+			})
+			.then(function(source) {
+				if (source) {
+					load.source = source;
+				}
+				return translate.call(loader, load);
+			});
+	};
 });
