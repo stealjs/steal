@@ -94,7 +94,7 @@ QUnit.test("gets dependency below a commented out import #23", function(assert) 
 		.then(done);
 });
 
-QUnit.only("gets dependencies when there are comments between them #21", function(assert) {
+QUnit.test("gets dependencies when there are comments between them #21", function(assert) {
 	var loader = this.loader;
 	var done = assert.async();
 

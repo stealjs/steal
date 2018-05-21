@@ -58,6 +58,7 @@ addStealExtension(function(loader) {
 				parentLoad,
 				load.name
 			);
+
 			var usedNames = parentImportNames[parentSpecifier];
 			return usedNames || [];
 		}
@@ -81,34 +82,26 @@ addStealExtension(function(loader) {
 		}
 
 		if (hasNewExports) {
+			var source = load.metadata.originalSource || load.source;
 			this["delete"](load.name);
-			return loader.define(load.name, load.source, load);
+			return loader.define(load.name, source, load);
 		}
 
 		return Promise.resolve();
 	}
 
-	// Wrap normalize to check if a module has already been tree-shaken
+	// Check if a module has already been tree-shaken.
 	// And if so, re-execute it if there are new dependant modules.
-	var normalize = loader.normalize;
-	loader.normalize = function(name, parentName) {
-		var loader = this;
-		var p = Promise.resolve(normalize.apply(this, arguments));
+	var notifyLoad = loader.notifyLoad;
+	loader.notifyLoad = function(specifier, name, parentName){
+		var load = loader.getModuleLoad(name);
 
-		return p.then(function(name) {
-			var load = loader.getModuleLoad(name);
-
-			// If this module is already marked as tree-shakable it means
-			// it has been loaded before. Determine if it needs to be reexecuted.
-			if (load && load.metadata.treeShakable) {
-				return reexecuteIfNecessary
-					.call(loader, load, parentName)
-					.then(function() {
-						return name;
-					});
-			}
-			return name;
-		});
+		// If this module is already marked as tree-shakable it means
+		// it has been loaded before. Determine if it needs to be reexecuted.
+		if (load && load.metadata.treeShakable) {
+			return reexecuteIfNecessary.call(this, load, parentName);
+		}
+		return notifyLoad.apply(this, arguments);
 	};
 
 	function getImportSpecifierPositionsPlugin(load) {
@@ -202,6 +195,10 @@ addStealExtension(function(loader) {
 					]
 				}).code;
 			} catch (e) {
+				// Probably using some syntax that requires additional plugins.
+				if(e instanceof SyntaxError) {
+					return Promise.resolve();
+				}
 				return Promise.reject(e);
 			}
 		});
@@ -213,6 +210,7 @@ addStealExtension(function(loader) {
 		return Promise.resolve()
 			.then(function() {
 				if (es6RegEx.test(load.source)) {
+					load.metadata.originalSource = load.source;
 					return applyBabelPlugin(load);
 				}
 			})
