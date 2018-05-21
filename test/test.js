@@ -312,7 +312,7 @@ QUnit.test("Can tree-shake modules that only re-export from others", function(as
 
 QUnit.test("Can tree-shake anonymous modules", function(assert){
 	makeIframe("tree_shake/anon.html", assert);
-})
+});
 
 QUnit.module("steal startup and config");
 

@@ -166,9 +166,10 @@ addStealExtension(function applyTraceExtension(loader) {
 			// deps either comes from the instantiate result, or if an
 			// es6 module it was found in the transpile hook.
 			var deps = result ? result.deps : load.metadata.deps;
+			var normalize = loader.normalizeSpecifier || loader.normalize;
 
 			return Promise.all(map.call(deps, function(depName){
-				return loader.normalize(depName, load.name);
+				return normalize.call(loader, depName, load.name);
 			})).then(function(dependencies){
 				load.metadata.deps = deps;
 				load.metadata.dependencies = dependencies;

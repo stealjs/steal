@@ -1488,7 +1488,11 @@ function logloads(loads) {
     return new Promise(function(resolve, reject) {
       resolve(loader.loaderObj.normalize(request, refererName, refererAddress));
     })
-    // 15.2.4.2.2 GetOrCreateLoad
+    .then(function(name) {
+		return Promise.resolve(loader.loaderObj.notifyLoad(request, name, refererName))
+		.then(function() { return name; });
+    })
+	// 15.2.4.2.2 GetOrCreateLoad
     .then(function(name) {
       var load;
       if (loader.modules[name]) {
@@ -1620,7 +1624,7 @@ function logloads(loads) {
         var depsList = load.depsList;
 
         var loadPromises = [];
-        for (var i = 0, l = depsList.length; i < l; i++) (function(request, index) {
+        function loadDep(request, index) {
           loadPromises.push(
             requestLoad(loader, request, load.name, load.address)
 
@@ -1644,7 +1648,10 @@ function logloads(loads) {
               // snapshot(loader);
             })
           );
-        })(depsList[i], i);
+        }
+        for (var i = 0, l = depsList.length; i < l; i++) {
+            loadDep(depsList[i], i);
+        }
 
         return Promise.all(loadPromises);
       })
@@ -2491,7 +2498,9 @@ function logloads(loads) {
     },
     // 26.3.3.18.5
     instantiate: function(load) {
-    }
+    },
+    notifyLoad: function(specifier, name, parentName) {
+    },
   };
 
   var _newModule = Loader.prototype.newModule;
@@ -3038,64 +3047,12 @@ function logloads(loads) {
 		};
 	}
 
-	var notShakable = {
-		exit: function(path, state) {
-			state.treeShakable = false;
-		}
-	};
-
-	var notShakeableVisitors = {
-		ImportDeclaration: notShakable,
-		FunctionDeclaration: notShakable,
-		VariableDeclaration: notShakable
-	};
-
-	function treeShakePlugin(loader, load) {
-		if(typeof loader.determineUsedExports !== "function") {
-			return {};
-		}
-
-		return {
-			visitor: {
-				Program: {
-					enter: function(path){
-						var state = {};
-						path.traverse(notShakeableVisitors, state);
-						load.metadata.treeShakable = state.treeShakable !== false;
-					}
-				},
-
-				ExportNamedDeclaration: function(path, state) {
-					if(load.metadata.treeShakable) {
-						var usedResult = loader.determineUsedExports(load)
-
-						var usedExports = usedResult.used;
-						var allUsed = usedResult.all;
-
-						if(!allUsed) {
-							path.get("specifiers").forEach(function(path){
-								var name = path.get("exported.name").node;
-								if(!usedExports.has(name) && name !== "__esModule") {
-									path.remove();
-								}
-							});
-
-							if(path.get("specifiers").length === 0) {
-								path.remove();
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	function babelTranspile(load, babelMod) {
+		var loader = this;
 		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
 		var babelVersion = getBabelVersion(babel);
-		var options = getBabelOptions.call(this, load, babel);
-		var loader = this;
+		var options = getBabelOptions.call(loader, load, babel);
 
 		return Promise.all([
 			processBabelPlugins.call(this, babel, options),
@@ -3107,8 +3064,7 @@ function logloads(loads) {
 			if (babelVersion >= 6) {
 				options.plugins = [
 					getImportSpecifierPositionsPlugin.bind(null, load),
-					addESModuleFlagPlugin,
-					treeShakePlugin.bind(null, loader, load)
+					addESModuleFlagPlugin
 				].concat(results[0]);
 				options.presets = results[1];
 			}
@@ -6952,7 +6908,7 @@ addStealExtension(function(loader){
 	};
 });
 
-addStealExtension(function (loader) {
+addStealExtension(function(loader) {
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -6963,13 +6919,13 @@ addStealExtension(function (loader) {
 		newDeps.forEach(function(depName) {
 			var depLoad = loader.getModuleLoad(depName);
 			var specifier = loader.moduleSpecifierFromName(depLoad, load.name);
-			if(depLoad.metadata.format !== "es6") {
+			if (depLoad.metadata.format !== "es6") {
 				allUsed = true;
 				return;
 			}
 
 			var usedNames = depLoad.metadata.importNames[specifier] || [];
-			usedNames.forEach(function(name){
+			usedNames.forEach(function(name) {
 				usedExports.add(name);
 			});
 		});
@@ -6989,11 +6945,11 @@ addStealExtension(function (loader) {
 		var out = [];
 		var deps = this.getDependants(load.name);
 		var shakenParents = load.metadata.shakenParents;
-		if(!shakenParents) {
+		if (!shakenParents) {
 			out = deps;
 		} else {
-			for(var i = 0; i < deps.length; i++) {
-				if(shakenParents.indexOf(deps[i]) === -1) {
+			for (var i = 0; i < deps.length; i++) {
+				if (shakenParents.indexOf(deps[i]) === -1) {
 					out.push(deps[i]);
 				}
 			}
@@ -7007,8 +6963,12 @@ addStealExtension(function (loader) {
 	function getUsedExportsFromParent(load, parentName) {
 		var parentLoad = this.getModuleLoad(parentName);
 		var parentImportNames = parentLoad.metadata.importNames;
-		if(parentImportNames) {
-			var parentSpecifier = this.moduleSpecifierFromName(parentLoad, load.name);
+		if (parentImportNames) {
+			var parentSpecifier = this.moduleSpecifierFromName(
+				parentLoad,
+				load.name
+			);
+
 			var usedNames = parentImportNames[parentSpecifier];
 			return usedNames || [];
 		}
@@ -7025,44 +6985,152 @@ addStealExtension(function (loader) {
 		// Given the parent's used exports, loop over and see if any are not
 		// within the usedExports set.
 		var hasNewExports = false;
-		for(var i = 0; i < usedExports.length; i++) {
-			if(!load.metadata.usedExports.has(usedExports[i])) {
+		for (var i = 0; i < usedExports.length; i++) {
+			if (!load.metadata.usedExports.has(usedExports[i])) {
 				hasNewExports = true;
 			}
 		}
 
-		if(hasNewExports) {
+		if (hasNewExports) {
+			var source = load.metadata.originalSource || load.source;
 			this["delete"](load.name);
-			return loader.define(load.name, load.source, load);
+			return loader.define(load.name, source, load);
 		}
 
 		return Promise.resolve();
 	}
 
-	// Wrap normalize to check if a module has already been tree-shaken
+	// Check if a module has already been tree-shaken.
 	// And if so, re-execute it if there are new dependant modules.
-	var normalize = loader.normalize;
-	loader.normalize = function(name, parentName) {
-		var loader = this;
-		var p = Promise.resolve(normalize.apply(this, arguments));
+	var notifyLoad = loader.notifyLoad;
+	loader.notifyLoad = function(specifier, name, parentName){
+		var load = loader.getModuleLoad(name);
 
-		return p.then(function(name) {
-			var load = loader.getModuleLoad(name);
+		// If this module is already marked as tree-shakable it means
+		// it has been loaded before. Determine if it needs to be reexecuted.
+		if (load && load.metadata.treeShakable) {
+			return reexecuteIfNecessary.call(this, load, parentName);
+		}
+		return notifyLoad.apply(this, arguments);
+	};
 
-			// If this module is already marked as tree-shakable it means
-			// it has been loaded before. Determine if it needs to be reexecuted.
-			if(load && load.metadata.treeShakable) {
-				return reexecuteIfNecessary.call(loader, load, parentName)
-				.then(function(){
-					return name;
-				});
+	function getImportSpecifierPositionsPlugin(load) {
+		load.metadata.importSpecifiers = Object.create(null);
+		load.metadata.importNames = Object.create(null);
+
+		return {
+			visitor: {
+				ImportDeclaration: function(path, state) {
+					var node = path.node;
+					var specifier = node.source.value;
+					var loc = node.source.loc;
+					load.metadata.importSpecifiers[specifier] = loc;
+					load.metadata.importNames[specifier] = (
+						node.specifiers || []
+					).map(function(spec) {
+						return spec.imported && spec.imported.name;
+					});
+				}
 			}
-			return name;
+		};
+	}
+
+	function treeShakePlugin(loader, load) {
+		var notShakable = {
+			exit: function(path, state) {
+				state.treeShakable = false;
+			}
+		};
+
+		var notShakeableVisitors = {
+			ImportDeclaration: notShakable,
+			FunctionDeclaration: notShakable,
+			VariableDeclaration: notShakable
+		};
+
+		return {
+			visitor: {
+				Program: {
+					enter: function(path) {
+						var state = {};
+						path.traverse(notShakeableVisitors, state);
+						load.metadata.treeShakable =
+							state.treeShakable !== false;
+					}
+				},
+
+				ExportNamedDeclaration: function(path, state) {
+					if (load.metadata.treeShakable) {
+						var usedResult = determineUsedExports.call(
+							loader,
+							load
+						);
+
+						var usedExports = usedResult.used;
+						var allUsed = usedResult.all;
+
+						if (!allUsed) {
+							path.get("specifiers").forEach(function(path) {
+								var name = path.get("exported.name").node;
+								if (
+									!usedExports.has(name) &&
+									name !== "__esModule"
+								) {
+									path.remove();
+								}
+							});
+
+							if (path.get("specifiers").length === 0) {
+								path.remove();
+							}
+						}
+					}
+				}
+			}
+		};
+	}
+
+	function applyBabelPlugin(load) {
+		var pluginLoader = loader.pluginLoader || loader;
+
+		return pluginLoader.import("babel").then(function(mod) {
+			var transpiler = mod.__useDefault ? mod.default : mod;
+			var babel = transpiler.Babel || transpiler.babel || transpiler;
+
+			try {
+				return babel.transform(load.source, {
+					plugins: [
+						getImportSpecifierPositionsPlugin.bind(null, load),
+						treeShakePlugin.bind(null, loader, load)
+					]
+				}).code;
+			} catch (e) {
+				// Probably using some syntax that requires additional plugins.
+				if(e instanceof SyntaxError) {
+					return Promise.resolve();
+				}
+				return Promise.reject(e);
+			}
 		});
 	}
 
-	// determineUsedExports is used with a Babel tree-shaking plugin.
-	loader.determineUsedExports = determineUsedExports;
+	var translate = loader.translate;
+	var es6RegEx = /(^\s*|[}\);\n]\s*)(import\s+(['"]|(\*\s+as\s+)?[^"'\(\)\n;]+\s+from\s+['"]|\{)|export\s+\*\s+from\s+["']|export\s+(\{|default|function|class|var|const|let|async\s+function))/;
+	loader.translate = function treeshakeTranslate(load) {
+		return Promise.resolve()
+			.then(function() {
+				if (es6RegEx.test(load.source)) {
+					load.metadata.originalSource = load.source;
+					return applyBabelPlugin(load);
+				}
+			})
+			.then(function(source) {
+				if (source) {
+					load.source = source;
+				}
+				return translate.call(loader, load);
+			});
+	};
 });
 
 addStealExtension(function applyTraceExtension(loader) {
@@ -7233,9 +7301,10 @@ addStealExtension(function applyTraceExtension(loader) {
 			// deps either comes from the instantiate result, or if an
 			// es6 module it was found in the transpile hook.
 			var deps = result ? result.deps : load.metadata.deps;
+			var normalize = loader.normalizeSpecifier || loader.normalize;
 
 			return Promise.all(map.call(deps, function(depName){
-				return loader.normalize(depName, load.name);
+				return normalize.call(loader, depName, load.name);
 			})).then(function(dependencies){
 				load.metadata.deps = deps;
 				load.metadata.dependencies = dependencies;

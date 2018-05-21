@@ -1,3 +1,4 @@
+var path = require("path");
 var steal = require("../main");
 var assert = require("assert");
 
@@ -86,5 +87,30 @@ describe("@node-require", function(){
 			assert.equal(mod, "bar", "loaded it");
 		})
 		.then(done, done);
+	});
+});
+
+describe("tree shaking", function() {
+	it("works", function() {
+		var steal = makeSteal({
+			config: path.join(__dirname, "tree_shake", "package.json!npm"),
+			main: "node_main"
+		});
+
+		// force instantiate to return an object and
+		// prevent the transpile hook to be called
+		steal.loader.preventModuleExecution = true;
+
+		return steal
+			.startup()
+			.then(function() {
+				var load = steal.loader._traceData.loads.mod;
+				var usedExports = load.metadata && load.metadata.usedExports;
+
+				assert(usedExports, "should collect usedExports");
+				assert(usedExports.has("a"), "'a' is an used export");
+				assert(!usedExports.has("b"), "'b' is not an used export");
+				assert(!usedExports.has("c"), "'c' is not an used export");
+			});
 	});
 });

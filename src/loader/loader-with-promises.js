@@ -1488,7 +1488,11 @@ function logloads(loads) {
     return new Promise(function(resolve, reject) {
       resolve(loader.loaderObj.normalize(request, refererName, refererAddress));
     })
-    // 15.2.4.2.2 GetOrCreateLoad
+    .then(function(name) {
+		return Promise.resolve(loader.loaderObj.notifyLoad(request, name, refererName))
+		.then(function() { return name; });
+    })
+	// 15.2.4.2.2 GetOrCreateLoad
     .then(function(name) {
       var load;
       if (loader.modules[name]) {
@@ -1620,7 +1624,7 @@ function logloads(loads) {
         var depsList = load.depsList;
 
         var loadPromises = [];
-        for (var i = 0, l = depsList.length; i < l; i++) (function(request, index) {
+        function loadDep(request, index) {
           loadPromises.push(
             requestLoad(loader, request, load.name, load.address)
 
@@ -1644,7 +1648,10 @@ function logloads(loads) {
               // snapshot(loader);
             })
           );
-        })(depsList[i], i);
+        }
+        for (var i = 0, l = depsList.length; i < l; i++) {
+            loadDep(depsList[i], i);
+        }
 
         return Promise.all(loadPromises);
       })
@@ -2491,7 +2498,9 @@ function logloads(loads) {
     },
     // 26.3.3.18.5
     instantiate: function(load) {
-    }
+    },
+    notifyLoad: function(specifier, name, parentName) {
+    },
   };
 
   var _newModule = Loader.prototype.newModule;
@@ -3038,64 +3047,12 @@ function logloads(loads) {
 		};
 	}
 
-	var notShakable = {
-		exit: function(path, state) {
-			state.treeShakable = false;
-		}
-	};
-
-	var notShakeableVisitors = {
-		ImportDeclaration: notShakable,
-		FunctionDeclaration: notShakable,
-		VariableDeclaration: notShakable
-	};
-
-	function treeShakePlugin(loader, load) {
-		if(typeof loader.determineUsedExports !== "function") {
-			return {};
-		}
-
-		return {
-			visitor: {
-				Program: {
-					enter: function(path){
-						var state = {};
-						path.traverse(notShakeableVisitors, state);
-						load.metadata.treeShakable = state.treeShakable !== false;
-					}
-				},
-
-				ExportNamedDeclaration: function(path, state) {
-					if(load.metadata.treeShakable) {
-						var usedResult = loader.determineUsedExports(load)
-
-						var usedExports = usedResult.used;
-						var allUsed = usedResult.all;
-
-						if(!allUsed) {
-							path.get("specifiers").forEach(function(path){
-								var name = path.get("exported.name").node;
-								if(!usedExports.has(name) && name !== "__esModule") {
-									path.remove();
-								}
-							});
-
-							if(path.get("specifiers").length === 0) {
-								path.remove();
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	function babelTranspile(load, babelMod) {
+		var loader = this;
 		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
 		var babelVersion = getBabelVersion(babel);
-		var options = getBabelOptions.call(this, load, babel);
-		var loader = this;
+		var options = getBabelOptions.call(loader, load, babel);
 
 		return Promise.all([
 			processBabelPlugins.call(this, babel, options),
@@ -3107,8 +3064,7 @@ function logloads(loads) {
 			if (babelVersion >= 6) {
 				options.plugins = [
 					getImportSpecifierPositionsPlugin.bind(null, load),
-					addESModuleFlagPlugin,
-					treeShakePlugin.bind(null, loader, load)
+					addESModuleFlagPlugin
 				].concat(results[0]);
 				options.presets = results[1];
 			}
