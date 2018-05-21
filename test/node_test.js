@@ -15,13 +15,15 @@ describe("default configuration", function () {
 		var steal = makeSteal({
 			config: __dirname + "/npm/npm-deep/package.json!npm"
 		});
-		steal.startup().then(function(main){
-			assert.ok(main, 'main');
-			assert.equal(steal.loader.transpiler, 'babel');
-			assert.equal(steal.loader.configMain, 'package.json!npm');
-			assert.strictEqual(steal.loader.npmContext.isFlatFileStructure, true);
-			done();
-		},done);
+		steal
+			.startup()
+			.then(function(main){
+				assert.ok(main, 'main');
+				assert.equal(steal.loader.transpiler, 'babel');
+				assert.equal(steal.loader.configMain, 'package.json!npm');
+				assert.strictEqual(steal.loader.npmContext.isFlatFileStructure, true);
+			})
+			.then(done, done);
 	});
 
 	it("works in production", function(done){
