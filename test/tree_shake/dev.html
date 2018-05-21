@@ -20,6 +20,7 @@
 			if(typeof window.assert !== "undefined") {
 				window.assert.equal(mod.a, "a", "a was not tree shaken");
 				window.assert.equal(mod.b, undefined, "b was tree shaken");
+				window.assert.equal(mod.d, "d", "d was not tree shaken");
 
 				window.assert.equal(modB, undefined, "b was not loaded at all");
 			} else {

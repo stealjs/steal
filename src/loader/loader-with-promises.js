@@ -3038,10 +3038,17 @@ function logloads(loads) {
 					var specifier = node.source.value;
 					var loc = node.source.loc;
 					load.metadata.importSpecifiers[specifier] = loc;
-					load.metadata.importNames[specifier] = (node.specifiers || [])
-					.map(function(spec){
+
+					var specifiers = load.metadata.importNames[specifier];
+					if(!specifiers) {
+						specifiers = load.metadata.importNames[specifier] = [];
+					}
+
+					specifiers.push.apply(specifiers, (
+						node.specifiers || []
+					).map(function(spec) {
 						return spec.imported && spec.imported.name;
-					});
+					}));
 				}
 			}
 		};
