@@ -318,23 +318,22 @@ function logloads(loads) {
           load.isDeclarative = true;
           return loader.loaderObj.transpile(load)
           .then(function(transpiled) {
-            // Hijack System.register to set declare function
-            var curSystem = __global.System;
-            var curRegister = curSystem.register;
-            curSystem.register = function(name, regDeps, regDeclare) {
-              var declare = regDeclare;
-              var deps = regDeps;
-              if (typeof name != 'string') {
-                declare = deps;
-                deps = name;
-              }
-              // store the registered declaration as load.declare
-              // store the deps as load.deps
-              load.declare = declare;
-              load.depsList = deps;
-            };
-            __eval(transpiled, __global, load);
-            curSystem.register = curRegister;
+			  // Hijack System.register to set declare function
+			  var curSystem = __global.System;
+			  var curRegister = curSystem.register;
+			  curSystem.register = function(name, regDeps, regDeclare) {
+				var declare = regDeclare;
+				var deps = regDeps;
+				if (typeof name != 'string') {
+				  declare = deps;
+				  deps = name;
+				}
+
+				load.declare = declare;
+				load.depsList = deps;
+			  };
+			  __eval(transpiled, __global, load);
+			  curSystem.register = curRegister;
           });
         }
         else if (typeof instantiateResult == 'object') {
@@ -350,6 +349,10 @@ function logloads(loads) {
         if(load.status != 'loading') {
           return;
         }
+		if(loader.loaderObj.instantiatePromises &&
+			loader.loaderObj.instantiatePromises[load.name]) {
+			loader.loaderObj.instantiatePromises[load.name].resolve();
+		}
         load.dependencies = [];
         var depsList = load.depsList;
 
@@ -1230,7 +1233,7 @@ function logloads(loads) {
     instantiate: function(load) {
     },
     notifyLoad: function(specifier, name, parentName) {
-    },
+    }
   };
 
   var _newModule = Loader.prototype.newModule;
@@ -5646,6 +5649,14 @@ addStealExtension(function(loader){
 });
 
 addStealExtension(function(loader) {
+	function Deferred() {
+		var dfd = this;
+		this.promise = new Promise(function(resolve, reject){
+			dfd.resolve = resolve;
+			dfd.reject = reject;
+		});
+	}
+
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -5729,9 +5740,24 @@ addStealExtension(function(loader) {
 		}
 
 		if (hasNewExports) {
+			if(this._loader.modules[load.name] || this._loader.importPromises[load.name]) {
+				this["delete"](load.name);
+			}
+
+			for(var i = 0; i < this._loader.loads.length; i++) {
+				var existingLoad;
+				if(this._loader.loads[i].name === load.name) {
+					existingLoad = this._loader.loads[i];
+					existingLoad.source = undefined;
+					break;
+				}
+			}
+
 			var source = load.metadata.originalSource || load.source;
-			this["delete"](load.name);
-			return loader.define(load.name, source, load);
+			this.define(load.name, source, load);
+			var dfd = new Deferred();
+			this.instantiatePromises[load.name] = dfd;
+			return dfd.promise;
 		}
 
 		return Promise.resolve();
@@ -5874,6 +5900,8 @@ addStealExtension(function(loader) {
 				return translate.call(loader, load);
 			});
 	};
+
+	loader.instantiatePromises = Object.create(null);
 });
 
 addStealExtension(function applyTraceExtension(loader) {

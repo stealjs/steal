@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script src="../../../steal.js"
+		data-base-url="."
+		data-main="@empty"
+		data-config="package.json!npm"></script>
+	<script>
+(function(){
+	var loader = steal.loader;
+	var fetch = loader.fetch;
+	var translate = loader.translate;
+	var instantiate = loader.instantiate;
+	var notifyLoad = loader.notifyLoad;
+
+	// Order
+	// mod->instantiate -> resolve(b1)
+	// two_b->translate -> waitFor(b1)
+	// two_b->notifyLoad -> waitFor(b1),resolve(b2)
+	// mod->instantiate -> waitFor(b2)
+
+	var b1 = new Deferred(),
+		b2 = new Deferred(),
+		b3 = new Deferred()
+
+	var defs = {
+		"shake@1.0.0#one": "import {a} from './two_a';\nimport {b} from './two_b';\n export{a,b}",
+		"shake@1.0.0#two_a": "import {a} from './mod';\nexport {a};",
+		"shake@1.0.0#two_b": "import {b} from './mod';\nexport {b};"
+	};
+
+	function Deferred() {
+		this.promise = new Promise(function(resolve, reject){
+			this.resolve = resolve;
+			this.reject = reject;
+		}.bind(this));
+	}
+
+	loader.fetch = function(load){
+		if(defs[load.name]) {
+			return Promise.resolve(defs[load.name]);
+		}
+
+		return fetch.apply(this, arguments);
+	};
+
+	loader.translate = function(load) {
+		if(load.name === "shake@1.0.0#two_b") {
+			var self = this, args = arguments;
+			return b1.promise.then(function(){
+				return translate.apply(self, args);
+			})
+		}
+		return translate.apply(this, arguments);
+	}
+
+	loader.notifyLoad = function(identifier, name, parentName){
+		if(parentName === "shake@1.0.0#two_b") {
+			var self = this, args = arguments;
+			return b1.promise.then(function(){
+				return Promise.resolve(notifyLoad.apply(self, args)).then(function(){
+					b2.resolve();
+				});
+			});
+		}
+		return notifyLoad.apply(this, arguments);
+	};
+
+	loader.instantiate = function(load) {
+		if(load.name === "shake@1.0.0#mod") {
+			var p = instantiate.apply(this, arguments).then(function(r){
+				b1.resolve();
+				return b2.promise.then(function(){
+					return r;
+				});
+			});
+			loader.instantiate = instantiate;
+			return p;
+		}
+		return instantiate.apply(this, arguments);
+	}
+
+	steal.import("~/one").then(function(){
+		var mod = loader.get("shake@1.0.0#one");
+		if(window.assert) {
+			window.assert.equal(mod.a, "a");
+			window.assert.equal(mod.b, "b");
+			window.done();
+		} else {
+			console.log(mod);
+		}
+
+	});
+})();
+	</script>
+</body>
+</html>

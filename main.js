@@ -926,6 +926,14 @@ addStealExtension(function(loader){
 });
 
 addStealExtension(function(loader) {
+	function Deferred() {
+		var dfd = this;
+		this.promise = new Promise(function(resolve, reject){
+			dfd.resolve = resolve;
+			dfd.reject = reject;
+		});
+	}
+
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -1009,9 +1017,24 @@ addStealExtension(function(loader) {
 		}
 
 		if (hasNewExports) {
+			if(this._loader.modules[load.name] || this._loader.importPromises[load.name]) {
+				this["delete"](load.name);
+			}
+
+			for(var i = 0; i < this._loader.loads.length; i++) {
+				var existingLoad;
+				if(this._loader.loads[i].name === load.name) {
+					existingLoad = this._loader.loads[i];
+					existingLoad.source = undefined;
+					break;
+				}
+			}
+
 			var source = load.metadata.originalSource || load.source;
-			this["delete"](load.name);
-			return loader.define(load.name, source, load);
+			this.define(load.name, source, load);
+			var dfd = new Deferred();
+			this.instantiatePromises[load.name] = dfd;
+			return dfd.promise;
 		}
 
 		return Promise.resolve();
@@ -1154,6 +1177,8 @@ addStealExtension(function(loader) {
 				return translate.call(loader, load);
 			});
 	};
+
+	loader.instantiatePromises = Object.create(null);
 });
 
 addStealExtension(function applyTraceExtension(loader) {

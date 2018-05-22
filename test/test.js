@@ -314,6 +314,10 @@ QUnit.test("Can tree-shake anonymous modules", function(assert){
 	makeIframe("tree_shake/anon.html", assert);
 });
 
+QUnit.test("Loading order doesn't affect tree-shaking ability", function(assert){
+	makeIframe("tree_shake/race.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
