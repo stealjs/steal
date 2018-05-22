@@ -8024,7 +8024,7 @@ addStealExtension(function (loader) {
 			if (typeof config.main === "boolean") {
 				delete config.main;
 			}
-			config.autoMain = true;
+			config.loadMainOnStartup = true;
 		}
 
 		return config;
@@ -8040,7 +8040,7 @@ addStealExtension(function (loader) {
 			// for Workers get options from steal query
 			if (isWebWorker) {
 				resolve(extend({
-					autoMain: true,
+					loadMainOnStartup: true,
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
@@ -8065,7 +8065,7 @@ addStealExtension(function (loader) {
 			} else {
 				// or the only option is where steal is.
 				resolve({
-					autoMain: true,
+					loadMainOnStartup: true,
 					stealPath: __dirname
 				});
 			}
@@ -8119,7 +8119,7 @@ addStealExtension(function (loader) {
 				return configPromise.then(function (cfg) {
 					setEnvsConfig.call(loader);
 					loader._configLoaded = true;
-					return loader.main && config.autoMain
+					return loader.main && config.loadMainOnStartup
 						? loader["import"](loader.main)
 						: cfg;
 				});
@@ -8178,7 +8178,7 @@ addStealExtension(function (loader) {
 					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
-					if (config.autoMain) {
+					if (config.loadMainOnStartup) {
 						var main = loader.main;
 						if (typeof main === "string") {
 							main = [main];
