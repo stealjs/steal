@@ -7010,7 +7010,7 @@ addStealExtension(function(loader) {
 		}
 
 		if (hasNewExports) {
-			if(this._loader.modules[load.name]) {
+			if(this._loader.modules[load.name] || this._loader.importPromises[load.name]) {
 				this["delete"](load.name);
 			}
 
