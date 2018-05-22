@@ -76,19 +76,28 @@
 
 	loader.instantiate = function(load) {
 		if(load.name === "shake@1.0.0#mod") {
-			return instantiate.apply(this, arguments).then(function(r){
+			var p = instantiate.apply(this, arguments).then(function(r){
 				b1.resolve();
 				return b2.promise.then(function(){
 					return r;
 				});
-			})
+			});
+			loader.instantiate = instantiate;
+			return p;
 		}
 		return instantiate.apply(this, arguments);
 	}
 
 	steal.import("~/one").then(function(){
 		var mod = loader.get("shake@1.0.0#one");
-		console.log(mod);
+		if(window.assert) {
+			window.assert.equal(mod.a, "a");
+			window.assert.equal(mod.b, "b");
+			window.done();
+		} else {
+			console.log(mod);
+		}
+
 	});
 })();
 	</script>

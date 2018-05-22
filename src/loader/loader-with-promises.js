@@ -1588,23 +1588,22 @@ function logloads(loads) {
           load.isDeclarative = true;
           return loader.loaderObj.transpile(load)
           .then(function(transpiled) {
-            // Hijack System.register to set declare function
-            var curSystem = __global.System;
-            var curRegister = curSystem.register;
-            curSystem.register = function(name, regDeps, regDeclare) {
-              var declare = regDeclare;
-              var deps = regDeps;
-              if (typeof name != 'string') {
-                declare = deps;
-                deps = name;
-              }
-              // store the registered declaration as load.declare
-              // store the deps as load.deps
-              load.declare = declare;
-              load.depsList = deps;
-            };
-            __eval(transpiled, __global, load);
-            curSystem.register = curRegister;
+			  // Hijack System.register to set declare function
+			  var curSystem = __global.System;
+			  var curRegister = curSystem.register;
+			  curSystem.register = function(name, regDeps, regDeclare) {
+				var declare = regDeclare;
+				var deps = regDeps;
+				if (typeof name != 'string') {
+				  declare = deps;
+				  deps = name;
+				}
+
+				load.declare = declare;
+				load.depsList = deps;
+			  };
+			  __eval(transpiled, __global, load);
+			  curSystem.register = curRegister;
           });
         }
         else if (typeof instantiateResult == 'object') {
@@ -1620,6 +1619,10 @@ function logloads(loads) {
         if(load.status != 'loading') {
           return;
         }
+		if(loader.loaderObj.instantiatePromises &&
+			loader.loaderObj.instantiatePromises[load.name]) {
+			loader.loaderObj.instantiatePromises[load.name].resolve();
+		}
         load.dependencies = [];
         var depsList = load.depsList;
 
@@ -2500,7 +2503,7 @@ function logloads(loads) {
     instantiate: function(load) {
     },
     notifyLoad: function(specifier, name, parentName) {
-    },
+    }
   };
 
   var _newModule = Loader.prototype.newModule;
