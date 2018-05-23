@@ -11,15 +11,16 @@
 	</script>
 	<script>
 		steal = {
+			loadMainOnStartup: true,
 			main: ["main1", "main2", "main3"]
 		};
 	</script>
 	<script src="../../steal-with-promises.js" config="./config.js"></script>
 	<script>
 		steal.done().then(function(){
-			assert.ok(main1,"main1");
-			assert.ok(main2,"main2");
-			assert.ok(main3,"main3");
+			assert.ok(main1, "main1");
+			assert.ok(main2, "main2");
+			assert.ok(main3, "main3");
 			done();
 		});
 	</script>

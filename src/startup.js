@@ -53,8 +53,19 @@
 		if(/\S/.test(source)){
 			scriptOptions.mainSource = source;
 		}
+
 		// script config ever wins!
-		return extend(getQueryOptions(script.src), scriptOptions);
+		var config = extend(getQueryOptions(script.src), scriptOptions);
+		if (config.main) {
+			// if main was passed as an html boolean, let steal figure what
+			// is the main module, but turn on auto main loading
+			if (typeof config.main === "boolean") {
+				delete config.main;
+			}
+			config.loadMainOnStartup = true;
+		}
+
+		return config;
 	};
 
 	// get steal URL
@@ -67,6 +78,7 @@
 			// for Workers get options from steal query
 			if (isWebWorker) {
 				resolve(extend({
+					loadMainOnStartup: true,
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
@@ -91,10 +103,11 @@
 			} else {
 				// or the only option is where steal is.
 				resolve({
+					loadMainOnStartup: true,
 					stealPath: __dirname
 				});
 			}
-		})
+		});
 	};
 
 	// configure and startup steal
@@ -127,20 +140,26 @@
 
 			// we only load things with force = true
 			if (loader.loadBundles) {
-
-				if (!loader.main && loader.isEnv("production") &&
-					!loader.stealBundled) {
+				if (
+					!loader.main &&
+					loader.isEnv("production") &&
+					!loader.stealBundled
+				) {
 					// prevent this warning from being removed by Uglify
 					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				loader["import"](loader.configMain)
-				.then(configResolve, configReject);
+				loader["import"](loader.configMain).then(
+					configResolve,
+					configReject
+				);
 
 				return configPromise.then(function (cfg) {
 					setEnvsConfig.call(loader);
 					loader._configLoaded = true;
-					return loader.main ? loader["import"](loader.main) : cfg;
+					return loader.main && config.loadMainOnStartup
+						? loader["import"](loader.main)
+						: cfg;
 				});
 
 			} else {
@@ -197,13 +216,17 @@
 					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
-					var main = loader.main;
-					if (typeof main === "string") {
-						main = [main];
+					if (config.loadMainOnStartup) {
+						var main = loader.main;
+						if (typeof main === "string") {
+							main = [main];
+						}
+						return Promise.all(
+							map(main, function (main) {
+								return loader["import"](main);
+							})
+						);
 					}
-					return Promise.all(map(main, function (main) {
-						return loader["import"](main);
-					}));
 				});
 			}
 		}).then(function(main){
