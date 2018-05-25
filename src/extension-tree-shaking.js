@@ -28,7 +28,11 @@ addStealExtension(function(loader) {
 			});
 		});
 
-		// 2. Remove unused exports by traversing the AST
+		if(load.metadata.usedExports) {
+			load.metadata.usedExports.forEach(function(name){
+				usedExports.add(name);
+			});
+		}
 		load.metadata.usedExports = usedExports;
 		load.metadata.allExportsUsed = allUsed;
 
@@ -210,6 +214,7 @@ addStealExtension(function(loader) {
 	}
 
 	function applyBabelPlugin(load) {
+		var loader = this;
 		var pluginLoader = loader.pluginLoader || loader;
 
 		return pluginLoader.import("babel").then(function(mod) {
@@ -236,11 +241,12 @@ addStealExtension(function(loader) {
 	var translate = loader.translate;
 	var es6RegEx = /(^\s*|[}\);\n]\s*)(import\s+(['"]|(\*\s+as\s+)?[^"'\(\)\n;]+\s+from\s+['"]|\{)|export\s+\*\s+from\s+["']|export\s+(\{|default|function|class|var|const|let|async\s+function))/;
 	loader.translate = function treeshakeTranslate(load) {
+		var loader = this;
 		return Promise.resolve()
 			.then(function() {
 				if (es6RegEx.test(load.source)) {
 					load.metadata.originalSource = load.source;
-					return applyBabelPlugin(load);
+					return applyBabelPlugin.call(loader, load);
 				}
 			})
 			.then(function(source) {
@@ -252,4 +258,24 @@ addStealExtension(function(loader) {
 	};
 
 	loader.instantiatePromises = Object.create(null);
+
+	// For the build, wrap the _newLoader hook. This is to copy config over
+	// that needs to exist for all loaders.
+	var newLoader = loader._newLoader || Function.prototype;
+	loader._newLoader = function(loader){
+		var loads = this._traceData.loads || {};
+		for(var moduleName in loads) {
+			var load = loads[moduleName];
+			if(load.metadata && load.metadata.usedExports) {
+				var metaConfig = Object.create(null);
+				metaConfig.treeShakable = load.metadata.treeShakable;
+				metaConfig.usedExports = new this.Set(load.metadata.usedExports);
+				metaConfig.allExportsUsed = load.metadata.allExportsUsed;
+
+				var config = {meta:{}};
+				config.meta[moduleName] = metaConfig;
+				loader.config(config);
+			}
+		}
+	};
 });

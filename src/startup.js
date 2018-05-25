@@ -84,22 +84,9 @@
 				return;
 			} else if(isBrowserWithWindow || isNW || isElectron) {
 				// if the browser supports currentScript, use it!
-				if (document.currentScript) {
-					steal.script = document.currentScript;
-					// get options from script tag and query
-					resolve(getScriptOptions(document.currentScript));
-					return;
-				}
-				// assume the last script on the page is the one loading steal.js
-				else {
-					var scripts = document.scripts;
-
-					if (scripts.length) {
-						var currentScript = scripts[scripts.length - 1];
-						steal.script = currentScript;
-						resolve(getScriptOptions(currentScript));
-					}
-				}
+				steal.script = stealScript || getStealScript();
+				resolve(getScriptOptions(steal.script));
+				return;
 			} else {
 				// or the only option is where steal is.
 				resolve({
