@@ -124,15 +124,16 @@
 		isElectron = isNode && !!process.versions["electron"],
 		isNode = isNode && !isNW && !isElectron,
 		getStealScript = function(){
-			if(!isBrowserWithWindow) return;
-			if(document.currentScript) {
-				return document.currentScript;
-			}
-			var scripts = document.scripts;
+			if(isBrowserWithWindow || isNW || isElectron) {
+				if(document.currentScript) {
+					return document.currentScript;
+				}
+				var scripts = document.scripts;
 
-			if (scripts.length) {
-				var currentScript = scripts[scripts.length - 1];
-				return currentScript;
+				if (scripts.length) {
+					var currentScript = scripts[scripts.length - 1];
+					return currentScript;
+				}
 			}
 		},
 		stealScript = getStealScript(),
