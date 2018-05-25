@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking</title>
+</head>
+<body>
+<script>
+	window.assert = window.parent.assert;
+	window.done = window.parent.done;
+</script>
+<script
+	src="../../../steal-with-promises.js"
+	data-main="@empty"
+	data-base-url="."
+	data-config="package.json!npm"></script>
+<script>
+	var newSteal;
+	function checkEverything() {
+		var loader = newSteal.loader;
+		var mod = loader.get("shake@1.0.0#mod");
+
+		if(window.assert) {
+			window.assert.equal(mod.a, "a");
+			window.assert.equal(mod.c, "c");
+			window.assert.equal(mod.d, "d");
+			window.done();
+		} else {
+			console.log(mod);
+		}
+	}
+
+	steal.loader.systemName = "main";
+	steal.import("~/main").then(function(){
+		newSteal = steal.clone();
+
+		steal.loader._newLoader(newSteal.loader);
+		newSteal.loader.systemName = "cloned";
+
+		newSteal.import("~/bundle").then(checkEverything);
+	});
+</script>
+</body>
+</html>

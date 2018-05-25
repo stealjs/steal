@@ -123,5 +123,18 @@
 		})(),
 		isElectron = isNode && !!process.versions["electron"],
 		isNode = isNode && !isNW && !isElectron,
+		getStealScript = function(){
+			if(!isBrowserWithWindow) return;
+			if(document.currentScript) {
+				return document.currentScript;
+			}
+			var scripts = document.scripts;
+
+			if (scripts.length) {
+				var currentScript = scripts[scripts.length - 1];
+				return currentScript;
+			}
+		},
+		stealScript = getStealScript(),
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};

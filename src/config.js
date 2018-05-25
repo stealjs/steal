@@ -359,7 +359,6 @@
 				}
 
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
-
 			}
 		},
 		devBundle: {

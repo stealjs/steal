@@ -318,6 +318,10 @@ QUnit.test("Loading order doesn't affect tree-shaking ability", function(assert)
 	makeIframe("tree_shake/race.html", assert);
 });
 
+QUnit.test("Cloned loaders get the tree-shaking configuration passed over", function(assert){
+	makeIframe("tree_shake/bundle.html", assert);
+})
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
