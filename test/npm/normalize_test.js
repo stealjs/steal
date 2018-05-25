@@ -906,3 +906,53 @@ QUnit.test("late-loaded buildConfig is applied when in the build", function(asse
 	})
 	.then(done, helpers.fail(assert, done));
 });
+
+QUnit.test("Implements the _newLoader hook", function(assert){
+	var done = assert.async();
+
+	function createLoader() {
+		return helpers.clone()
+			.rootPackage({
+				name: "app",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					dep1: "1.0.0",
+					dep2: "1.0.0"
+				}
+			})
+			.withPackages([
+				{
+					name: "dep1",
+					main: "main.js",
+					version: "1.0.0"
+				},
+				{
+					name: "dep2",
+					main: "main.js",
+					version: "1.0.0"
+				}
+			])
+			.loader;
+	}
+
+	var loader1 = createLoader();
+	var loader2 = createLoader();
+
+	helpers.init(loader1)
+	.then(function(){
+		return loader1.normalize("dep1", "app@1.0.0#main");
+	})
+	.then(function(){
+		loader1._newLoader(loader2);
+		return loader2.normalize("dep2", "app@1.0.0#main");
+	})
+	.then(function(){
+		var context = loader2.npmContext;
+		var pkgInfo = context.pkgInfo;
+
+		assert.ok(pkgInfo["dep2@1.0.0"], "has dep2");
+		assert.ok(pkgInfo["dep1@1.0.0"], "has dep1 copied from loader1");
+	})
+	.then(done, helpers.fail(assert, done));
+});
