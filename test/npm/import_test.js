@@ -1221,7 +1221,7 @@ QUnit.test("Retries when using the forward slash convention", function(assert){
 	.then(done, helpers.fail(assert, done));
 });
 
-QUnit.test("Doesn't retry the forward slash convention in production", function(assert){
+QUnit.test("Does retry the forward slash convention in production", function(assert){
 	var done = assert.async();
 
 	var loader = helpers.clone()
@@ -1238,10 +1238,13 @@ QUnit.test("Doesn't retry the forward slash convention in production", function(
 	.then(function(){
 		delete loader.npmContext;
 
-		return loader["import"]("./lib/", { name: "app@1.0.0#main" });
+		return loader["import"]("./lib", { name: "app@1.0.0#main" });
+	})
+	.then(function(app) {
+		assert.equal(app, "works", "it did load");
 	})
 	.then(null, function(err){
-		assert.ok(err, "Got an error because we don't do retries in Prod");
+		assert.ok(false, err);
 	})
 	.then(done, helpers.fail(assert, done));
 });
