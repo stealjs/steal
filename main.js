@@ -3494,8 +3494,10 @@ function amd(loader) {
       if (endExec && endExec.index === chunkStartRegex.lastIndex) {
         // Then we have identified a chunk correctly and we advance our loop of chunkStartRegex to continue after this chunk
         chunkStartRegex.lastIndex = endRx.lastIndex;
+		var lookbehind = startExec.index - 1;
+		var skip = (lookbehind > -1 && source.charAt(lookbehind) === ".");
         // if we are specifically identifying the requireAlias-type chunk at this point,
-        if (endRx === chunkEndCounterpart.require) {
+        if (!skip && endRx === chunkEndCounterpart.require) {
           // then the second capture group of the endRx is what's inside the string, inside the ()'s, after requireAlias,
           // which is the path of a dep that we want to return.
 		  if(endExec[2]) {
