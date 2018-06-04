@@ -1780,6 +1780,9 @@ function logloads(loads) {
 					specifiers.push.apply(specifiers, (
 						node.specifiers || []
 					).map(function(spec) {
+						if(spec.type === "ImportDefaultSpecifier") {
+							return "default";
+						}
 						return spec.imported && spec.imported.name;
 					}));
 				}

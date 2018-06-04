@@ -1,12 +1,4 @@
 addStealExtension(function(loader) {
-	function Deferred() {
-		var dfd = this;
-		this.promise = new Promise(function(resolve, reject){
-			dfd.resolve = resolve;
-			dfd.reject = reject;
-		});
-	}
-
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -87,17 +79,23 @@ addStealExtension(function(loader) {
 		// Given the parent's used exports, loop over and see if any are not
 		// within the usedExports set.
 		var hasNewExports = false;
-		for (var i = 0; i < usedExports.length; i++) {
-			if (!load.metadata.usedExports.has(usedExports[i])) {
-				hasNewExports = true;
+
+		// If there isn't a usedExports Set, we have yet to check.
+		if(load.metadata.usedExports) {
+			for (var i = 0; i < usedExports.length; i++) {
+				if (!load.metadata.usedExports.has(usedExports[i])) {
+					hasNewExports = true;
+				}
 			}
 		}
 
 		if (hasNewExports) {
-			if(this._loader.modules[load.name] || this._loader.importPromises[load.name]) {
+			var isCurrentlyLoading = this._loader.modules[load.name] || this._loader.importPromises[load.name];
+			if(isCurrentlyLoading) {
 				this["delete"](load.name);
 			}
 
+			// If there's an existing load object, zero it out.
 			for(var i = 0; i < this._loader.loads.length; i++) {
 				var existingLoad;
 				if(this._loader.loads[i].name === load.name) {
@@ -109,9 +107,8 @@ addStealExtension(function(loader) {
 
 			var source = load.metadata.originalSource || load.source;
 			this.define(load.name, source, load);
-			var dfd = new Deferred();
-			this.instantiatePromises[load.name] = dfd;
-			return dfd.promise;
+
+			return this.whenInstantiated(load.name);
 		}
 
 		return Promise.resolve();
@@ -151,6 +148,9 @@ addStealExtension(function(loader) {
 					specifiers.push.apply(specifiers, (
 						node.specifiers || []
 					).map(function(spec) {
+						if(spec.type === "ImportDefaultSpecifier") {
+							return "default";
+						}
 						return spec.imported && spec.imported.name;
 					}));
 				}
@@ -177,8 +177,8 @@ addStealExtension(function(loader) {
 					enter: function(path) {
 						var state = {};
 						path.traverse(notShakeableVisitors, state);
-						load.metadata.treeShakable =
-							state.treeShakable !== false;
+
+						load.metadata.treeShakable = state.treeShakable !== false;
 					}
 				},
 
@@ -256,8 +256,6 @@ addStealExtension(function(loader) {
 				return translate.call(loader, load);
 			});
 	};
-
-	loader.instantiatePromises = Object.create(null);
 
 	// For the build, wrap the _newLoader hook. This is to copy config over
 	// that needs to exist for all loaders.
