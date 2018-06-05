@@ -940,24 +940,6 @@ addStealExtension(function(loader){
 });
 
 addStealExtension(function(loader) {
-	function Deferred() {
-		var dfd = this;
-		this.promise = new Promise(function(resolve, reject){
-			dfd.resolve = resolve;
-			dfd.reject = reject;
-		});
-	}
-
-	loader.instantiatePromises = Object.create(null);
-	loader.whenInstantiated = function(name) {
-		// Should this always override?
-		var dfd = new Deferred();
-		this.instantiatePromises[name] = dfd;
-		return dfd.promise;
-	};
-})
-
-addStealExtension(function(loader) {
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -1044,30 +1026,14 @@ addStealExtension(function(loader) {
 			for (var i = 0; i < usedExports.length; i++) {
 				if (!load.metadata.usedExports.has(usedExports[i])) {
 					hasNewExports = true;
+					break;
 				}
 			}
 		}
 
 		if (hasNewExports) {
-			var isCurrentlyLoading = this._loader.modules[load.name] || this._loader.importPromises[load.name];
-			if(isCurrentlyLoading) {
-				this["delete"](load.name);
-			}
-
-			// If there's an existing load object, zero it out.
-			for(var i = 0; i < this._loader.loads.length; i++) {
-				var existingLoad;
-				if(this._loader.loads[i].name === load.name) {
-					existingLoad = this._loader.loads[i];
-					existingLoad.source = undefined;
-					break;
-				}
-			}
-
 			var source = load.metadata.originalSource || load.source;
-			this.define(load.name, source, load);
-
-			return this.whenInstantiated(load.name);
+			this.provide(load.name, source, load);
 		}
 
 		return Promise.resolve();
@@ -1204,7 +1170,8 @@ addStealExtension(function(loader) {
 		return Promise.resolve()
 			.then(function() {
 				if (es6RegEx.test(load.source)) {
-					load.metadata.originalSource = load.source;
+					if(!load.metadata.originalSource)
+						load.metadata.originalSource = load.source;
 					return applyBabelPlugin.call(loader, load);
 				}
 			})
@@ -4420,7 +4387,8 @@ function plugins(loader) {
     if (load.metadata.plugin && load.metadata.plugin.translate)
       return Promise.resolve(load.metadata.plugin.translate.call(loader, load)).then(function(result) {
         if (typeof result == 'string') {
-			load.metadata.originalSource = load.source;
+			if(!load.metadata.originalSource)
+				load.metadata.originalSource = load.source;
 			load.source = result;
 		}
 

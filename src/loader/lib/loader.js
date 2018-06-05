@@ -249,6 +249,9 @@ function logloads(loads) {
 
   // 15.2.4.5
   function proceedToTranslate(loader, load, p) {
+	var pass = load.pass || 0;
+	var passCancelled = function() { return (load.pass << 0) !== pass };
+
     p
     // 15.2.4.5.1 CallTranslate
     .then(function(source) {
@@ -259,7 +262,7 @@ function logloads(loads) {
 
       // 15.2.4.5.2 CallInstantiate
       .then(function(source) {
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
         load.source = source;
@@ -268,7 +271,7 @@ function logloads(loads) {
 
       // 15.2.4.5.3 InstantiateSucceeded
       .then(function(instantiateResult) {
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
         if (instantiateResult === undefined) {
@@ -306,13 +309,9 @@ function logloads(loads) {
       })
       // 15.2.4.6 ProcessLoadDependencies
       .then(function() {
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
-		if(loader.loaderObj.instantiatePromises &&
-			loader.loaderObj.instantiatePromises[load.name]) {
-			loader.loaderObj.instantiatePromises[load.name].resolve();
-		}
         load.dependencies = [];
         var depsList = load.depsList;
 
@@ -353,7 +352,7 @@ function logloads(loads) {
       .then(function() {
         // console.log('LoadSucceeded ' + load.name);
         // snapshot(loader);
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
 
@@ -381,6 +380,9 @@ function logloads(loads) {
   }
 
   // 15.2.4.7 PromiseOfStartLoadPartwayThrough absorbed into calling functions
+  function incrementPass(load) {
+	  load.pass = load.pass != null ? (load.pass + 1) : 1;
+  }
 
   // 15.2.4.7.1
   function asyncStartLoadPartwayThrough(stepState) {
@@ -402,7 +404,7 @@ function logloads(loads) {
           if(step == 'translate' && !existingLoad.source) {
             existingLoad.address = stepState.moduleAddress;
             proceedToTranslate(loader, existingLoad, Promise.resolve(stepState.moduleSource));
-          }
+		  }
 
           // If the module importing this is part of the same linkSet, create
           // a new one for this import.
@@ -1193,7 +1195,25 @@ function logloads(loads) {
     instantiate: function(load) {
     },
     notifyLoad: function(specifier, name, parentName) {
-    }
+    },
+	provide: function(name, source, options) {
+		var load;
+		for(var i = 0; i < this._loader.loads.length; i++) {
+			if(this._loader.loads[i].name === name) {
+				load = this._loader.loads[i];
+				break;
+			}
+		}
+
+		if(load) {
+			incrementPass(load);
+			return proceedToTranslate(this._loader, load, Promise.resolve(source));
+		} else {
+			this["delete"](name);
+		}
+
+		return this.define(name, source, options);
+	}
   };
 
   var _newModule = Loader.prototype.newModule;
