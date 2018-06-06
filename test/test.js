@@ -324,7 +324,11 @@ QUnit.test("Cloned loaders get the tree-shaking configuration passed over", func
 
 QUnit.test("Tree shaking complex apps with race conditions", function(assert){
 	makeIframe("tree-shake-complex/site.html", assert);
-})
+});
+
+QUnit.test("Can replace loads midway through the process", function(assert){
+	makeIframe("replace/site.html", assert);
+});
 
 QUnit.module("steal startup and config");
 
