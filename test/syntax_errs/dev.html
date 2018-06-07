@@ -12,20 +12,13 @@
 	<script src="../../../steal-with-promises.js"
 		data-base-url="."
 		data-config="package.json!npm"
-		data-main="@empty"></script>
+		data-main="~/importer"></script>
 	<script>
-		steal.import("~/importer").then(null, function(err){
-			var isEdge = /Anonymous function/.test(err.stack);
+		steal.done().then(null, function(err){
 			if(window.assert) {
-				if(isEdge) {
-					window.assert.ok(true);
-				} else {
-					window.assert.ok(/breaking\.js/.test(err.stack), "Breaking file in the stack trace");
-				}
-
+				window.assert.ok(true);
 				window.done();
 			} else {
-				console.error(err);
 				console.log('Did error!');
 			}
 		});

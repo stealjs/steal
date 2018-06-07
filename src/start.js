@@ -123,6 +123,7 @@
 		})(),
 		isElectron = isNode && !!process.versions["electron"],
 		isNode = isNode && !isNW && !isElectron,
+		hasAWindow = isBrowserWithWindow || isNW || isElectron,
 		getStealScript = function(){
 			if(isBrowserWithWindow || isNW || isElectron) {
 				if(document.currentScript) {

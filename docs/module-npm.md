@@ -213,7 +213,7 @@ Used to determine which algorithm is used to look up packages.
 
 The default algorithm is `flat`. **We assume that you are using npm 3 or higher.** See [here](https://github.com/npm/npm/releases/tag/v3.0.0) more about the flat file structure of npm 3.
 
-If you are using npm 2 your dependencies of `node_modules` will be nested. StealJS can handle the lookup by setting `npmAlgorithm` to `nested`.
+If you are using npm 2 or [pnpm](https://pnpm.js.org/), your dependencies of `node_modules` will be nested. StealJS can handle the lookup by setting `npmAlgorithm` to `nested`.
 
 ```js
 {

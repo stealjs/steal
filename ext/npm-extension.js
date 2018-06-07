@@ -336,6 +336,12 @@ exports.addExtension = function(System){
 					return Promise.reject(err);
 				}
 
+				// In order to retry in dev bundles there must be a forwardSlashMap
+				// to maintain the state.
+				if(!loader.npmContext) {
+					loader.npmContext = { forwardSlashMap: {} };
+				}
+
 				// Begin attempting retries. `retryTypes` defines different
 				// types of retries to do, currently retrying on the
 				// /index and /package.json conventions.
