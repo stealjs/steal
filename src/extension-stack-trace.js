@@ -123,8 +123,9 @@ addStealExtension(function (loader) {
 			this.global.process = { argv: '', env: {} };
 		}
 
-		var isProd = this.isEnv("production");
-		var p = isProd ? Promise.resolve() : this["import"]("@@babel-code-frame");
+		var loader = this.pluginLoader || this;
+		var isProd = loader.isEnv("production");
+		var p = isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
 		return p;
 	};
 

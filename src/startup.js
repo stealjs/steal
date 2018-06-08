@@ -82,7 +82,7 @@
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
-			} else if(isBrowserWithWindow || isNW || isElectron) {
+			} else if(hasAWindow) {
 				// if the browser supports currentScript, use it!
 				steal.script = stealScript || getStealScript();
 				resolve(getScriptOptions(steal.script));

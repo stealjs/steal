@@ -248,6 +248,10 @@ QUnit.test("can load a bundle with an amd module depending on a global", functio
 	makeIframe("prod_define/prod.html", assert);
 });
 
+QUnit.test("AMD CommonJS detection works with lodash", function(assert) {
+	makeIframe("amd_require/dev.html", assert);
+})
+
 QUnit.test("envs config works", function(assert) {
 	makeIframe("envs/envs.html", assert);
 });
@@ -304,6 +308,10 @@ QUnit.test("If a module errors because a child module throws show the correct st
 
 QUnit.test("Syntax error in child module shows up in the stack trace", function(assert){
 	makeIframe("syntax_errs/dev.html", assert);
+});
+
+QUnit.test("Syntax errors bubble correctly during the build", function(assert){
+	makeIframe("syntax_errs/build.html", assert);
 });
 
 QUnit.test("Can tree-shake modules that only re-export from others", function(assert){
