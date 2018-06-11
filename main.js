@@ -1313,7 +1313,7 @@ addStealExtension(function (loader) {
 			return {
 				order: order,
 				set: function(val) {
-					this[prop] = !!val;
+					this[prop] = !!val && val !== "false";
 				}
 			}
 		},
