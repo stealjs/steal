@@ -196,6 +196,10 @@ QUnit.test("loadBundles true with a different env loads the bundles", function(a
 	makeIframe("load-bundles/prod.html", assert);
 });
 
+QUnit.test("loadBundles can be disabled", function(assert) {
+	makeIframe("load-bundles/dev.html", assert);
+})
+
 QUnit.test("Using path's * qualifier", function(assert) {
 	writeIframe(
 		makeStealHTML({
