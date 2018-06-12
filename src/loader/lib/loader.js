@@ -384,6 +384,17 @@ function logloads(loads) {
 	  load.pass = load.pass != null ? (load.pass + 1) : 1;
   }
 
+  function changeLoadingStatus(load, newStatus) {
+      var oldStatus = load.status;
+
+      load.status = newStatus;
+      if(newStatus !== oldStatus && oldStatus === "loaded") {
+          load.linkSets.forEach(function(linkSet){
+              linkSet.loadingCount++;
+          });
+      }
+  }
+
   // 15.2.4.7.1
   function asyncStartLoadPartwayThrough(stepState) {
     return function(resolve, reject) {
@@ -1207,6 +1218,7 @@ function logloads(loads) {
 
 		if(load) {
 			incrementPass(load);
+            changeLoadingStatus(load, "loading");
 			return proceedToTranslate(this._loader, load, Promise.resolve(source));
 		} else {
 			this["delete"](name);
