@@ -819,6 +819,49 @@ QUnit.test("'map' configuration where the right-hand identifier is an npm packag
 	.then(done, helpers.fail(assert, done));
 });
 
+QUnit.test("'map' configuration with envs config", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				mapped: "1.0.0"
+			},
+			steal: {
+				map: {
+					dep: "one"
+				},
+				envs: {
+					test: {
+						map: {
+							dep: "two"
+						}
+					}
+				}
+			}
+		})
+		/*.withPackages([
+			{
+				name: "mapped",
+				main: "main.js",
+				version: "1.0.0"
+			}
+		])*/
+		.loader;
+
+	loader.env = "test";
+	helpers.init(loader).then(function(){
+		return loader.normalize("dep", "app@1.0.0#main");
+	})
+	.then(function(name){
+		assert.equal(name, "two");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
 QUnit.test("buildConfig that is late-loaded doesn't override outer config", function(assert){
 	var done = assert.async();
 
