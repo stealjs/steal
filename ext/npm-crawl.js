@@ -201,7 +201,7 @@ var crawl = {
 		}
 
 		if(stealPkg) {
-			return crawl.fetchDep(context, pkg, stealPkg, isRoot)
+			return Promise.resolve(crawl.fetchDep(context, pkg, stealPkg, isRoot))
 				.then(function(childPkg){
 					if(childPkg) {
 						return crawl.deps(context, childPkg);
