@@ -8,7 +8,27 @@ function Runner(System){
 	this.sources = {};
 	this.fetchAllowed = {
 		"babel": true,
-		"@@babel-code-frame": true
+		"@@babel-code-frame": true,
+
+		/* Node built-in stuff */
+		"./node_modules/steal/package.json": true,
+		"./node_modules/assert/package.json": true,
+		"./node_modules/zlib-browserify/package.json": true,
+		"./node_modules/buffer/package.json": true,
+		"./node_modules/console-browserify/package.json": true,
+		"./node_modules/constants-browserify/package.json": true,
+		"./node_modules/crypto-browserify/package.json": true,
+		"./node_modules/domain-browser/package.json": true,
+		"./node_modules/events/package.json": true,
+		"./node_modules/http-browserify/package.json": true,
+		"./node_modules/https-browserify/package.json": true,
+		"./node_modules/os-browserify/package.json": true,
+		"./node_modules/path-browserify/package.json": true,
+		"./node_modules/process/package.json": true,
+		"./node_modules/punycode/package.json": true,
+		"./node_modules/string_decoder/package.json": true,
+		"./node_modules/tty-browserify/package.json": true,
+		"./node_modules/vm-browserify/package.json": true
 	};
 	this.fetchAll = false;
 }
@@ -27,6 +47,7 @@ Runner.prototype.clone = function(){
 	}));
 
 	loader.paths["live-reload"] = "node_modules/steal/ext/live-reload.js";
+	loader.paths["./node_modules/steal/package.json"] = "package.json";
 	loader.paths["babel"] = "ext/babel.js";
 	loader.paths["@@babel-code-frame"] = "ext/babel-code-frame.js";
 	loader.meta["@@babel-code-frame"] = {"format":"global","exports":"BabelCodeFrame"};
