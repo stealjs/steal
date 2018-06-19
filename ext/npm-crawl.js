@@ -191,9 +191,14 @@ var crawl = {
 	 * Load steal and its dependencies, if needed
 	 */
 	loadSteal: function(context, pkg, isRoot, deps){
-		var stealPkg = utils.filter(deps, function(dep){
-			return dep && dep.name === "steal";
-		})[0];
+		var stealPkg, dep;
+		for(var p in deps) {
+			dep = deps[p];
+			if(dep.name === "steal") {
+				stealPkg = dep;
+				break;
+			}
+		}
 
 		if(stealPkg) {
 			return crawl.fetchDep(context, pkg, stealPkg, isRoot)

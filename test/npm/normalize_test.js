@@ -949,3 +949,25 @@ QUnit.test("late-loaded buildConfig is applied when in the build", function(asse
 	})
 	.then(done, helpers.fail(assert, done));
 });
+
+QUnit.test("Correctly normalizes built-ins", function(assert){
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				steal: "*"
+			}
+		})
+		.loader;
+
+	helpers.init(loader).then(function(){
+		return loader.normalize("util", "app@1.0.0#main");
+	}).then(function(name){
+		assert.ok(/steal@.+#ext\/builtin\/util/.test(name), "Is npm normalized");
+	})
+	.then(done, helpers.fail(assert, done));
+});
