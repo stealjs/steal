@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+<script>
+	window.done = window.parent.done;
+	window.assert = window.parent.assert;
+</script>
+<script src="../../steal.js" data-config="./package.json!npm" main="~/index"></script>
+<script>
+	steal.import("~/index")
+	.then(function(index){
+
+		if(window.assert) {
+			window.assert.equal(index.foo, "bar", "loaded correctly");
+			window.done();
+		} else {
+			console.log("index module:", index);
+		}
+	})
+	.catch(function(err) {
+		if(window.assert) {
+			window.assert.ok(false, err);
+			window.done();
+		}
+	});
+</script>
+</body>
+</html>

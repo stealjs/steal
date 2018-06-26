@@ -346,6 +346,10 @@ QUnit.test("Syntax errors bubble correctly during the build", function(assert){
 	makeIframe("syntax_errs/build.html", assert);
 });
 
+QUnit.test("CommonJS module with ES inside of comments loads", function(assert){
+	makeIframe("cjs_export_default/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
