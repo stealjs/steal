@@ -13,18 +13,25 @@ addStealExtension(function(loader) {
 				allUsed = true;
 				return;
 			}
-
-			var usedNames = depLoad.metadata.importNames[specifier] || [];
-			usedNames.forEach(function(name) {
-				usedExports.add(name);
-			});
 		});
 
+		// Only walk the export tree if all are not being used.
+		// This saves not needing to do the traversal.
+		if(!allUsed) {
+			walkExports.call(loader, load, function(exps){
+				exps.forEach(function(name){
+					usedExports.add(name);
+				});
+			});
+		}
+
+		// Copy over existing exports
 		if(load.metadata.usedExports) {
 			load.metadata.usedExports.forEach(function(name){
 				usedExports.add(name);
 			});
 		}
+
 		load.metadata.usedExports = usedExports;
 		load.metadata.allExportsUsed = allUsed;
 
@@ -51,22 +58,73 @@ addStealExtension(function(loader) {
 		return out;
 	}
 
-	/**
-	 * Look at a parent (dependant) module and get which exports it uses for a load.
-	 */
-	function getUsedExportsFromParent(load, parentName) {
-		var parentLoad = this.getModuleLoad(parentName);
-		var parentImportNames = parentLoad.metadata.importNames;
-		if (parentImportNames) {
+	function walkExports(load, cb) {
+		var moduleName = load.name;
+		var name = moduleName;
+		var visited = new this.Set();
+
+ 		// The stack is an array containing stuff we are traversing.
+		// It looks like:
+		// [moduleName, parentA, parentB, null]
+		var stack = [name].concat(this.getDependants(name));
+		var namesMap = null;
+		var index = 0;
+		var cont = true;
+
+		do {
+			index++;
+			var parentName = stack[index];
+
+			if(parentName === null) {
+				name = stack[++index];
+				cont = index < stack.length - 1;
+				continue;
+			}
+
+			if(visited.has(parentName)) {
+				continue;
+			}
+
+			visited.add(parentName);
+			var parentLoad = this.getModuleLoad(parentName);
 			var parentSpecifier = this.moduleSpecifierFromName(
 				parentLoad,
-				load.name
+				name
 			);
 
-			var usedNames = parentImportNames[parentSpecifier];
-			return usedNames || [];
-		}
-		return [];
+			var parentImportNames = parentLoad.metadata.importNames;
+			var parentExportNames = parentLoad.metadata.exportNames;
+
+			if(parentImportNames[parentSpecifier]) {
+				var names = parentImportNames[parentSpecifier];
+				if(namesMap) {
+					var parentsNames = names;
+					names = [];
+					parentsNames.forEach(function(name){
+						if(namesMap.has(name)) {
+							names.push(namesMap.get(name));
+						}
+					});
+				}
+				
+
+				cont = cb(names) !== false;
+			}
+
+			if(parentExportNames[parentSpecifier]) {
+				var names = parentExportNames[parentSpecifier];
+				// Named exports
+				if(isNaN(names)) {
+					namesMap = names;
+				}
+
+				stack.push(null);
+				stack.push(parentName);
+				stack.push.apply(stack, this.getDependants(parentName));
+			}
+
+			cont = cont !== false && index < stack.length - 1;
+		} while(cont);
 	}
 
 	/**
@@ -74,7 +132,10 @@ addStealExtension(function(loader) {
 	 * If so, redefine this module so that it goes into the registry correctly.
 	 */
 	function reexecuteIfNecessary(load, parentName) {
-		var usedExports = getUsedExportsFromParent.call(this, load, parentName);
+		var usedExports = [];
+		walkExports.call(this, load, function(exps) {
+			usedExports.push.apply(usedExports, exps);
+		});
 
 		// Given the parent's used exports, loop over and see if any are not
 		// within the usedExports set.
@@ -112,36 +173,6 @@ addStealExtension(function(loader) {
 		return notifyLoad.apply(this, arguments);
 	};
 
-	function getImportSpecifierPositionsPlugin(load) {
-		load.metadata.importSpecifiers = Object.create(null);
-		load.metadata.importNames = Object.create(null);
-
-		return {
-			visitor: {
-				ImportDeclaration: function(path, state) {
-					var node = path.node;
-					var specifier = node.source.value;
-					var loc = node.source.loc;
-					load.metadata.importSpecifiers[specifier] = loc;
-
-					var specifiers = load.metadata.importNames[specifier];
-					if(!specifiers) {
-						specifiers = load.metadata.importNames[specifier] = [];
-					}
-
-					specifiers.push.apply(specifiers, (
-						node.specifiers || []
-					).map(function(spec) {
-						if(spec.type === "ImportDefaultSpecifier") {
-							return "default";
-						}
-						return spec.imported && spec.imported.name;
-					}));
-				}
-			}
-		};
-	}
-
 	function treeShakePlugin(loader, load) {
 		var notShakable = {
 			exit: function(path, state) {
@@ -154,6 +185,19 @@ addStealExtension(function(loader) {
 			FunctionDeclaration: notShakable,
 			VariableDeclaration: notShakable
 		};
+
+		var usedResult;
+		// Call determineUsedExports, caching the result.
+		function _determineUsedExports() {
+			if(usedResult) {
+				return usedResult;
+			}
+			usedResult = determineUsedExports.call(
+				loader,
+				load
+			);
+			return usedResult;
+		}
 
 		return {
 			visitor: {
@@ -168,11 +212,7 @@ addStealExtension(function(loader) {
 
 				ExportNamedDeclaration: function(path, state) {
 					if (load.metadata.treeShakable) {
-						var usedResult = determineUsedExports.call(
-							loader,
-							load
-						);
-
+						var usedResult = _determineUsedExports();
 						var usedExports = usedResult.used;
 						var allUsed = usedResult.all;
 
@@ -206,12 +246,20 @@ addStealExtension(function(loader) {
 			var babel = transpiler.Babel || transpiler.babel || transpiler;
 
 			try {
-				return babel.transform(load.source, {
+				var code = babel.transform(load.source, {
 					plugins: [
-						getImportSpecifierPositionsPlugin.bind(null, load),
+						loader._getImportSpecifierPositionsPlugin.bind(null, load),
 						treeShakePlugin.bind(null, loader, load)
 					]
 				}).code;
+
+				// If everything is tree shaken still mark as ES6
+				// Not doing this and steal won't accept the transform.
+				if(code === "") {
+					return '"format es6";';
+				}
+
+				return code;
 			} catch (e) {
 				// Probably using some syntax that requires additional plugins.
 				if(e instanceof SyntaxError) {
