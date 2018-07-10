@@ -334,6 +334,10 @@ QUnit.test("Tree shaking complex apps with race conditions", function(assert){
 	makeIframe("tree-shake-complex/site.html", assert);
 });
 
+QUnit.test("Can tree shake multilevel re-export projects", function(assert){
+	makeIframe("tree_shake_reexport/dev.html", assert);
+})
+
 QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });

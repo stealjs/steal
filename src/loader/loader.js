@@ -1795,6 +1795,7 @@ function logloads(loads) {
 	function getImportSpecifierPositionsPlugin(load) {
 		load.metadata.importSpecifiers = Object.create(null);
 		load.metadata.importNames = Object.create(null);
+		load.metadata.exportNames = Object.create(null);
 
 		return {
 			visitor: {
@@ -1817,10 +1818,33 @@ function logloads(loads) {
 						}
 						return spec.imported && spec.imported.name;
 					}));
+				},
+				ExportDeclaration: function(path, state){
+					var node = path.node;
+
+					if(node.source) {
+						var specifier = node.source.value;
+						var specifiers = load.metadata.exportNames[specifier];
+
+						if(node.type === "ExportNamedDeclaration") {
+							if(!specifiers) {
+								specifiers = load.metadata.exportNames[specifier] = new Map();
+							}
+
+							node.specifiers.forEach(function(node){
+								specifiers.set(node.exported.name, node.local.name);
+							});
+						} else if(node.type === "ExportAllDeclaration") {
+							// TODO Not sure what to do here.
+							load.metadata.exportNames[specifier] = 1;
+						}
+					}
 				}
 			}
 		};
 	}
+
+	Loader.prototype._getImportSpecifierPositionsPlugin = getImportSpecifierPositionsPlugin;
 
 	function babelTranspile(load, babelMod) {
 		var loader = this;
