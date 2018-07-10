@@ -314,6 +314,10 @@ QUnit.test("Syntax errors bubble correctly during the build", function(assert){
 	makeIframe("syntax_errs/build.html", assert);
 });
 
+QUnit.test("Can import modules by the .mjs extension", function(assert){
+	makeIframe("mjs/dev.html", assert);
+});
+
 QUnit.test("Can tree-shake modules that only re-export from others", function(assert){
 	makeIframe("tree_shake/dev.html", assert);
 });
