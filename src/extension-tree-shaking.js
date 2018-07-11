@@ -18,7 +18,7 @@ addStealExtension(function(loader) {
 		// Only walk the export tree if all are not being used.
 		// This saves not needing to do the traversal.
 		if(!allUsed) {
-			walkExports.call(loader, load, function(exps){
+			allUsed = walkExports.call(loader, load, function(exps){
 				exps.forEach(function(name){
 					usedExports.add(name);
 				});
@@ -106,25 +106,32 @@ addStealExtension(function(loader) {
 						}
 					});
 				}
-				
+
 
 				cont = cb(names) !== false;
 			}
 
 			if(parentExportNames[parentSpecifier]) {
 				var names = parentExportNames[parentSpecifier];
+				var parentDependants = this.getDependants(parentName);
 				// Named exports
 				if(isNaN(names)) {
 					namesMap = names;
 				}
+				// export * with no dependants should result in no tree-shaking
+				else if(!parentDependants.length) {
+					return true;
+				}
 
 				stack.push(null);
 				stack.push(parentName);
-				stack.push.apply(stack, this.getDependants(parentName));
+				stack.push.apply(stack, parentDependants);
 			}
 
 			cont = cont !== false && index < stack.length - 1;
 		} while(cont);
+
+		return false;
 	}
 
 	/**
