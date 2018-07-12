@@ -350,6 +350,10 @@ QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });
 
+QUnit.test("Warning when main is not provided", function(assert){
+	makeIframe("main-warn/test.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
