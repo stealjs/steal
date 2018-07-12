@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Main warning when using steal.import()</title>
+</head>
+<body>
+<script src="./helpers.js"></script>
+<script src="../../steal-with-promises.js"
+	data-base-url="."
+	data-config="package.json!npm"></script>
+<script>
+	steal._mainWarnMs = 10;
+	steal.import("~/main");
+</script>
+<script>
+	steal.done().then(function(){
+		setTimeout(function(){
+			window.report(window.allWarnings);
+		}, 100);
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Automain warnings</title>
+	<style>
+		iframe {
+			border-style: solid;
+			border-width: 2px;
+			border-color: black;
+		}
+		iframe.success { border-color: mediumseagreen; }
+		iframe.failure { border-color: indianred; }
+	</style>
+</head>
+<body>
+<script>
+	window.done = window.parent.done;
+	window.assert = window.parent.assert;
+</script>
+<iframe src="./system-import.html" data-title="Using System.import()"></iframe>
+<iframe src="./steal-import.html" data-title="Using steal.import()"></iframe>
+<iframe src="./script-inner.html" data-title="steal <script> tag's inner content"></iframe>
+<iframe src="./with-main.html" data-title="Main is provided"></iframe>
+<iframe src="./without-main.html" data-title="Main is missing" data-warn></iframe>
+<iframe src="./steal-module.html" data-title="Using steal-module scripts"></iframe>
+<iframe src="./delayed.html" data-title="Using a delayed import call"></iframe>
+<script>
+(function(){
+	function report(iframe, warnings) {
+		remaining--;
+		var title = iframe.dataset.title;
+		var shouldWarn = iframe.dataset.warn != null;
+		var success = !!warnings.length === shouldWarn;
+		iframe.classList.add(success ? "success" : "failure");
+		var titleEl = iframe.contentWindow.document.createElement("h4");
+		titleEl.textContent = title;
+		iframe.contentWindow.document.body.appendChild(titleEl);
+		var newEl = iframe.contentWindow.document.createElement("div");
+		newEl.textContent = warnings.length ? warnings.join("\n") : "Success!";
+		iframe.contentWindow.document.body.appendChild(newEl);
+		if(window.assert) {
+			window.assert.ok(success, title + " did what it should");
+
+			if(remaining === 0) {
+				window.done();
+			}
+		} else {
+			console.log(title, success, warnings);
+		}
+	}
+
+	var iframes = Array.prototype.slice.call(document.querySelectorAll("iframe"));
+	var remaining = iframes.length;
+
+	iframes.forEach(function(iframe){
+		iframe.contentWindow.report = report.bind(null, iframe);
+	});
+})();
+</script>
+</body>
+</html>

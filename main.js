@@ -2246,8 +2246,8 @@ addStealExtension(function (loader) {
 				});
 
 				return devPromise.then(function () {
-					// if there's a main, get it, otherwise, we are just loading
-					// the config.
+					// if there's a main, get it, otherwise, we are just
+					// loading the config.
 					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
@@ -2261,6 +2261,8 @@ addStealExtension(function (loader) {
 								return loader["import"](main);
 							})
 						);
+					} else {
+						loader._warnNoMain(steal._mainWarnMs || 2000);
 					}
 				});
 			}

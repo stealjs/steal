@@ -6751,6 +6751,40 @@ addStealExtension(function(loader) {
 	};
 });
 
+/**
+ * Auto-main warning. The main is no longer automatically loaded in development.
+ * This warns the user in cases where they likely forgot to set a main.
+ **/
+addStealExtension(function (loader) {
+	loader._warnNoMain = function(ms){
+		var loader = this;
+		this._noMainTimeoutId = setTimeout(function(){
+			var msg = "No modules have loaded, did you forget to include a 'main'?" +
+				"\nSee https://stealjs.com/docs/config.main.html for more information.";
+			console.warn(msg);
+			loader.import = loaderImport;
+		}, ms);
+	};
+
+	var whitelist = {
+		"package.json!npm": true,
+		"npm": true,
+		"@empty": true,
+		"@dev": true
+	};
+
+	var loaderImport = loader.import;
+	loader.import = function(name) {
+		if(whitelist[name] === undefined && name !== this.configMain) {
+			this.import = loaderImport;
+			this._warnNoMain = Function.prototype;
+			clearTimeout(this._noMainTimeoutId);
+		}
+
+		return loaderImport.apply(this, arguments);
+	};
+});
+
 addStealExtension(function(loader) {
 	var superTranspile = loader.transpile;
 	var superDetermineFormat = loader._determineFormat;
@@ -8327,8 +8361,8 @@ addStealExtension(function (loader) {
 				});
 
 				return devPromise.then(function () {
-					// if there's a main, get it, otherwise, we are just loading
-					// the config.
+					// if there's a main, get it, otherwise, we are just
+					// loading the config.
 					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
@@ -8342,6 +8376,8 @@ addStealExtension(function (loader) {
 								return loader["import"](main);
 							})
 						);
+					} else {
+						loader._warnNoMain(steal._mainWarnMs || 2000);
 					}
 				});
 			}
