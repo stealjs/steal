@@ -9,7 +9,7 @@ Specifies that you would like to use dev bundles, in the default location of [co
 
 ```html
 <script src="./node_modules/steal/steal.js"
-  dev-bundle></script>
+  dev-bundle main></script>
 ```
 
 @option {String}
@@ -18,5 +18,5 @@ Specifies a [moduleName], relative to the [config.baseURL], for the dev-bundle. 
 
 ```html
 <script src="./node_modules/steal/steal.js"
-  dev-bundle="folder/dev-bundle"></script>
+  dev-bundle="folder/dev-bundle" main></script>
 ```

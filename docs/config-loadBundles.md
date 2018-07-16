@@ -37,7 +37,7 @@ be [config.config configured] via the `steal.js` script tag like:
 ```
 <script src="../path/to/steal/steal.js"
 		data-load-bundles
-        data-main="myapp">
+    data-main="myapp">
 </script>
 ```
 
@@ -48,6 +48,7 @@ Or specified prior to steal loading like:
   steal = { loadBundles: true };
 </script>
 <script src="../path/to/steal/steal.js"
-        data-env="production">
+        data-env="production"
+        data-main="myapp">
 </script>
 ```

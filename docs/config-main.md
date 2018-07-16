@@ -1,47 +1,88 @@
-@property {moduleName|Array<moduleName>} config.main main
+@property {Array<String>|String} config.main main
 @parent StealJS.config
 
-The name of the module(s) that loads all other modules in the application.
+The entry point of the application.
 
-  @option {moduleName} The main module to load after [config.configMain]. 
-  
-  @option {Array<moduleName>} An array of main modules that will be loaded after [config.configMain].
+@signature `main="packageName/main"`
 
+Loads an entry point by referencing it in association with the [config.packageName] of your application.
 
+```html
+<script src="node_modules/steal/steal.js"
+  main="todo-app/app"></script>
+```
+
+@param {String} packageName The name of the package from the package.json `name` field.
+
+@param {String} main The name of the entry module (usually a JavaScript file).
+
+@signature `main="~/main"`
+
+Loads an entry point by referencing in association with the [tilde homeAlias].
+
+```html
+<script src="node_modules/steal/steal.js"
+  main="~/app"></script>
+```
+
+@param {String} main The name of the entry module (usually a JavaScript file).
+
+@signature `{ main: "packageName/main" }`
+
+Loads an entry point by referencing the main in a configuration setting (such as within [steal-tools]). Any tool which takes a steal configuration object can accept a main, for example:
+
+```js
+const stealTools = require("steal-tools");
+
+stealTools.build({
+  config: __dirname + "/package.json!npm",
+  main: "todo-app/app"
+});
+```
+
+This method can also be used to configure steal within HTML, by setting the main prior to the steal script tag like so:
+
+```html
+<script>
+  steal = {
+    baseURL: "/apps/todos",
+    main: "~/main"
+  };
+</script>
+<script src="node_modules/steal/steal.js"></script>
+```
 
 @body
 
-## Use
+## Omitting the main
 
-This is the starting point of the application. In
-[config.env development], the `main` module is loaded after the [config.configMain] and [@dev] 
-modules. In [config.env production], only the `main` module is loaded, but 
-it is configured to load in a bundle.
+The __main__ module is not loaded by default. Merely adding a steal script tag will not load any code:
 
-Main should be configured by one of the approaches in [config.config].
-
-
-## Use with npm
-
-In [config.env development], your application's `package.json` will be read
-and the main module set automatically.  For instance, if 
-your package.json looks like:
-
-
-```
-{
-  "main": "my/main.js",
-  ...
-}
+```js
+<script src="node_modules/steal/steal.js"></script>
 ```
 
-The following will load `package.json` with the [npm] module and automatically load
-`my/main.js`:
+This is particular useful for demo pages where there isn't an associated JavaScript file for that particular page, and code is written inline using a [steal.steal-module] tag:
 
-```
-<script src="../node_modules/steal/steal.js">
-</script> 
+```js
+<div id="root"></div>
+
+<script src="node_modules/steal/steal.js"></script>
+
+<script type="steal-module">
+  import TodoList from "~/components/todo-list";
+
+  document.querySelector("#root").appendChild(new TodoList());
+</script>
 ```
 
-In [config.env production], make sure your script specifies `main` so the correct bundle to load
-can be known.
+## Missing main warning
+
+![No main is loaded](https://user-images.githubusercontent.com/361671/42763505-425adc50-88e1-11e8-9c01-17957b3f5ce5.png)
+
+This warning is reported to the console when steal starts and no other modules are loaded. This is usually a mistake as you wouldn't be using steal if you didn't intend to load modules with it. It could be that:
+
+* You forgot to include a `main` attribute in the steal script tag. See the above signatures for how to do that.
+* You intend to create an inline code demo using a [steal.steal-module] or one of the other techniques for loading code dynamically such as [steal.import].
+
+[steal] uses a heuristic to determine if this warning should be shown. If you believe the warning is shown by mistake please [submit an issue](https://github.com/stealjs/steal/issues/new).

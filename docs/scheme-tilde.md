@@ -60,4 +60,6 @@ Using ~ provides a shorter alias for your app's package name.
 
 Note that in production you need to use your app's package name in your script tag such as:
 
-    <script src="node_modules/steal/steal.js" main="app/main"></script>
+```html
+<script src="node_modules/steal/steal.js" main="app/main"></script>
+```

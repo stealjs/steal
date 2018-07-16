@@ -3,20 +3,20 @@
 
 @signature `moduleName!npm`
 
-@param {moduleName} moduleName The moduleName of the file you want 
+@param {moduleName} moduleName The moduleName of the file you want
 to process. This will normally be a package.json of your base application.
 
 @body
 
 ## Use
 
-The `npm` plugin makes it easy to work with npm packages. By pointing it 
+The `npm` plugin makes it easy to work with npm packages. By pointing it
 at a `package.json`, you will be able to import npm packages as modules.
 
 By default, if [config.stealPath] points to steal.js within node_modules like:
 
-    <script src="../node_modules/steal/steal.js"></script>
-    
+    <script src="../node_modules/steal/steal.js" main></script>
+
 [config.configMain] will point to `"package.json!npm"`. The `npm` plugin
 reads `package.json` and sets a normalize and locate hook.
 
@@ -25,7 +25,7 @@ reads `package.json` and sets a normalize and locate hook.
 
 ## npm Module names
 
-Package dependency module names are converted to look like: 
+Package dependency module names are converted to look like:
 
 > packageName@version#modulePath!pluginName
 
@@ -39,14 +39,14 @@ might actually import:
 
 ## Configuration
 
-`package.json` configures the behavior of a package and even dependency 
+`package.json` configures the behavior of a package and even dependency
 packages.  This section lists the configurable properties and behaviors that
 steal uses.  
 
 ### package.main
 
 Specifies the [config.main] property unless it is overwritten by `package.browser` or
-`package.steal.main`. 
+`package.steal.main`.
 
 ```
 {
@@ -56,7 +56,7 @@ Specifies the [config.main] property unless it is overwritten by `package.browse
 
 ### package.browser
 
-Specifies browser-specific overwrites for module file resolution.  This 
+Specifies browser-specific overwrites for module file resolution.  This
 behaves like Browserify's [browser field](https://github.com/substack/node-browserify#browser-field).
 
 ```
@@ -83,7 +83,7 @@ Global browser specific overwrites for module file resolution.  These mapping ta
 
 ### package.steal
 
-By default, any property on the package.steal object is passed to [config.config]. However, the 
+By default, any property on the package.steal object is passed to [config.config]. However, the
 following properties have special behavior:
 
 ### package.steal.main
@@ -100,7 +100,7 @@ The moduleName of the initial module that should be loaded when the package is i
 }
 ```
 
-When `my-module` is imported, `my-module@1.2.3#my-main` will be the actual module name being 
+When `my-module` is imported, `my-module@1.2.3#my-main` will be the actual module name being
 imported.  This path that `my-main` will be found depends on the `directories.lib` setting.
 
 
@@ -111,7 +111,7 @@ are converted to npm module names.  The keys and values must:
 
  - Start with `./` to map modules within the package like `"./src/util"`, or
  - Look like `packageName#./modulePath` to map direct dependencies of the package.
- 
+
 ```js
 {
   "steal": {
@@ -237,7 +237,7 @@ Set to true to ignore browserfy's `browser` and `browserify` configurations.
 
 ### package.steal.directories
 
-Set a folder to look for module's within your project.  Only the `lib` 
+Set a folder to look for module's within your project.  Only the `lib`
 directory can be specified.
 
 In the following setup, `my-project/my-utils` will be looked for in
@@ -272,7 +272,7 @@ is imported, e.g:
 
 ### package.steal.plugins
 
-Specifies packages that are used as plugins. These packages will be prefetched so that they're configuration will be applied before your app loads. An example is [steal-css]. 
+Specifies packages that are used as plugins. These packages will be prefetched so that they're configuration will be applied before your app loads. An example is [steal-css].
 
 ```js
 {
