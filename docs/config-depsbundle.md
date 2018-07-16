@@ -9,7 +9,7 @@ Specifies that you would like to use deps bundles, in the default location of [c
 
 ```html
 <script src="./node_modules/steal/steal.js"
-  deps-bundle></script>
+  deps-bundle main></script>
 ```
 
 @option {String}
@@ -18,5 +18,5 @@ Specifies a [moduleName], relative to the [config.baseURL], for the deps-bundle.
 
 ```html
 <script src="./node_modules/steal/steal.js"
-  deps-bundle="folder/dev-bundle"></script>
+  deps-bundle="folder/dev-bundle" main></script>
 ```
