@@ -1018,7 +1018,7 @@ addStealExtension(function(loader) {
 			index++;
 			var parentName = stack[index];
 
-			if(parentName === null) {
+			if(parentName == null) {
 				name = stack[++index];
 				cont = index < stack.length - 1;
 				continue;
@@ -1181,6 +1181,14 @@ addStealExtension(function(loader) {
 								path.remove();
 							}
 						}
+					}
+				},
+
+				ExportAllDeclaration: function(path, state) {
+					if(load.metadata.treeShakable) {
+						// This forces the load.metadata.usedExports property to be set
+						// This is needed in modules that *only* have `export *` declarations.
+						_determineUsedExports();
 					}
 				}
 			}
