@@ -346,6 +346,10 @@ QUnit.test("Doesn't tree shake export * modules when they are the main", functio
 	makeIframe("tree_shake_reexport/main.html", assert);
 });
 
+QUnit.test("Able to tree shake modules that only use export *", function(assert){
+	makeIframe("tree_shake_reexport/bundle.html", assert);
+});
+
 QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });
