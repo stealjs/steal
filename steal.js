@@ -6170,7 +6170,9 @@ addStealExtension(function applyTraceExtension(loader) {
 		}
 	};
 	loader.moduleSpecifierFromName = function(load, moduleName) {
-		var idx = load.metadata.dependencies.indexOf(moduleName);
+		var deps = load.metadata.dependencies;
+		if(!deps) return undefined;
+		var idx = deps.indexOf(moduleName);
 		return load.metadata.deps[idx];
 	};
 	loader._allowModuleExecution = {};
