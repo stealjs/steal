@@ -175,7 +175,7 @@ var translateConfig = function(loader, packages, options){
 		}
 	};
 
-	var ignoredConfig = ["bundle", "configDependencies", "transpiler"];
+	var ignoredConfig = ["bundle", "configDependencies", "transpiler", "treeShaking"];
 	packages.reverse();
 	forEach(packages, function(pkg){
 		var steal = pkg.steal || pkg.system;
