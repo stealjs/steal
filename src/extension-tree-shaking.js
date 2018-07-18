@@ -1,4 +1,17 @@
 addStealExtension(function(loader) {
+	function treeShakingEnabled(loader, load) {
+		if(loader.noTreeShaking) return false;
+
+		if(load.metadata.npmPackage) {
+			var pkg = load.metadata.npmPackage;
+			if(pkg.steal && pkg.steal.treeShaking === false) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	function determineUsedExports(load) {
 		var loader = this;
 
@@ -261,11 +274,14 @@ addStealExtension(function(loader) {
 			var babel = transpiler.Babel || transpiler.babel || transpiler;
 
 			try {
+				var babelPlugins = [
+					loader._getImportSpecifierPositionsPlugin.bind(null, load)
+				];
+				if(treeShakingEnabled(loader, load)) {
+					babelPlugins.push(treeShakePlugin.bind(null, loader, load));
+				}
 				var code = babel.transform(load.source, {
-					plugins: [
-						loader._getImportSpecifierPositionsPlugin.bind(null, load),
-						treeShakePlugin.bind(null, loader, load)
-					]
+					plugins: babelPlugins
 				}).code;
 
 				// If everything is tree shaken still mark as ES6

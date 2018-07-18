@@ -350,6 +350,14 @@ QUnit.test("Able to tree shake modules that only use export *", function(assert)
 	makeIframe("tree_shake_reexport/bundle.html", assert);
 });
 
+QUnit.test("Can disable tree shaking using the no-tree-shaking attribute", function(assert){
+	makeIframe("tree_shake_reexport/no-tree-shaking.html", assert);
+});
+
+QUnit.test("Can disable tree shaking using treeShaking: false", function(assert){
+	makeIframe("tree_shake_reexport/tree-shaking-false.html", assert);
+});
+
 QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });
