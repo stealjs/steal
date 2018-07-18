@@ -943,16 +943,7 @@ addStealExtension(function(loader){
 
 addStealExtension(function(loader) {
 	function treeShakingEnabled(loader, load) {
-		if(loader.noTreeShaking) return false;
-
-		if(load.metadata.npmPackage) {
-			var pkg = load.metadata.npmPackage;
-			if(pkg.steal && pkg.steal.treeShaking === false) {
-				return false;
-			}
-		}
-
-		return true;
+		return !loader.noTreeShaking && loader.treeShaking !== false;
 	}
 
 	function determineUsedExports(load) {
