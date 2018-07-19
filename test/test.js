@@ -168,6 +168,10 @@ QUnit.test("loadBundles true with a different env loads the bundles", function(a
 	makeIframe("load-bundles/prod.html", assert);
 });
 
+QUnit.test("loadBundles can be disabled", function(assert) {
+	makeIframe("load-bundles/dev.html", assert);
+})
+
 QUnit.test("Using path's * qualifier", function(assert) {
 	writeIframe(
 		makeStealHTML({
@@ -364,6 +368,10 @@ QUnit.test("Can replace loads midway through the process", function(assert){
 
 QUnit.test("Warning when main is not provided", function(assert){
 	makeIframe("main-warn/test.html", assert);
+});
+
+QUnit.test("CommonJS module with ES inside of comments loads", function(assert){
+	makeIframe("cjs_export_default/dev.html", assert);
 });
 
 QUnit.module("steal startup and config");

@@ -217,8 +217,15 @@ exports.addExtension = function(System){
 				// Apply mappings, if they exist in the refPkg
 				var steal = utils.pkg.config(refPkg);
 				if (steal && steal.map && typeof steal.map[name] === "string") {
+					var mappedName = steal.map[name];
+					var envConfig = steal.envs && steal.envs[loader.env];
+
+					if(envConfig && envConfig.map && typeof envConfig.map[name] === "string") {
+						mappedName = envConfig.map[name];
+					}
+
 					return loader.normalize(
-						steal.map[name],
+						mappedName,
 						parentName,
 						parentAddress,
 						pluginNormalize
