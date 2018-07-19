@@ -22,7 +22,6 @@ it would be rewritten (assuming the default location of node_modules) to:
 
 @signature `locate://resourcePath`
 
-@param {String} resourcePath Path to a resource to resolve via Steal. May be relative to the file, the baseURL, a npm
-or bower module, or any stealable module.
+@param {String} resourcePath Path to a resource to resolve via Steal. May be relative to the file, the baseURL, a npm module, or any stealable module.
 
 @return {String} A path to the located resource, relative to the importing file.

@@ -1,0 +1,11 @@
+{
+  "name": "can-simple-dom",
+  "version": "1.3.4",
+  "main": "dist/cjs/simple-dom.js",
+  "steal": {
+    "main": "simple-dom.js",
+    "directories": {
+      "lib": "lib"
+    }
+  }
+}

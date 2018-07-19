@@ -27,7 +27,7 @@ function assertFailure(reason){
 			theReason = reason + "\n" + error;
 		}
 
-		QUnit.ok(false, theReason);
+		QUnit.assert.ok(false, theReason, error);
 	};
 	return reason ? doAssert.bind(null, "Failure") : doAssert(reason);
 }
@@ -56,9 +56,6 @@ QUnit.test("Gets the dependencies of a module", function(assert) {
 	assert.deepEqual(loader.getDependencies("tests/basics/h"),
 					["tests/basics/j"],
 					"Correctly gets the dependencies for the h module");
-
-	assert.deepEqual(loader.getDependencies("tests/basics/j"), [],
-					"Correctly gets the dependencies for the j module");
 });
 
 QUnit.test("Ignores import statements within backticks", function(assert) {

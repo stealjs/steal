@@ -460,6 +460,13 @@ exports.addExtension = function(System){
 		oldConfig.apply(loader, arguments);
 	};
 
+	// Implement the newLoader hook to copy config over during the build.
+	var newLoader = System._newLoader || Function.prototype;
+	System._newLoader = function(loader) {
+		loader.npmContext = this.npmContext;
+		loader.npmParentMap = this.npmParentMap;
+		return newLoader.apply(this, arguments);
+	};
 
 	steal.addNpmPackages = function(npmPackages) {
 		var packages = npmPackages || [];

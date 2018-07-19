@@ -22,7 +22,13 @@
 			window.WARN(msg);
 		};
 	</script>
-	<script src="../../../steal-sans-promises.js" base-url="." config="package.json!npm"></script>
+	<script
+		main="~/main"
+		base-url="."
+		config="package.json!npm"
+		src="../../../steal-with-promises.js"
+	>
+	</script>
 	<script>
 		steal.done().then(function(){
 			// A promise that resolves when cloning is done.

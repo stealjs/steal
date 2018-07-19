@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking complex example</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		main="~/main"
+		src="../../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"></script>
+	<script>
+		steal.done()
+		.then(function(){
+			if(window.assert) {
+				window.assert.ok(true, "It completed!");
+				window.done();
+			} else {
+				console.log("It loaded!");
+			}
+		});
+	</script>
+</body>
+</html>

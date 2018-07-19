@@ -124,7 +124,20 @@
 		isElectron = isNode && !!process.versions["electron"],
 		isNode = isNode && !isNW && !isElectron,
 		hasAWindow = isBrowserWithWindow || isNW || isElectron,
-		stealScript = hasAWindow && document.currentScript,
+		getStealScript = function(){
+			if(isBrowserWithWindow || isNW || isElectron) {
+				if(document.currentScript) {
+					return document.currentScript;
+				}
+				var scripts = document.scripts;
+
+				if (scripts.length) {
+					var currentScript = scripts[scripts.length - 1];
+					return currentScript;
+				}
+			}
+		},
+		stealScript = getStealScript(),
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};
 
@@ -197,13 +210,30 @@ var cloneSteal = function(System){
 	return steal;
 };
 
+
+
+var ArraySet;
+if(typeof Set === "function") {
+	ArraySet = Set;
+} else {
+	ArraySet = function(){ this._items = []; };
+	ArraySet.prototype.has = function(item) {
+		return this._items.indexOf(item) !== -1;
+	};
+	ArraySet.prototype.add = function(item) {
+		if(!this.has(item)) {
+			this._items.push(item);
+		}
+	};
+}
+
 var makeSteal = function(System){
 	var addStealExtension = function (extensionFn) {
 		if (typeof System !== "undefined" && isFunction(extensionFn)) {
 			if (System._extensions) {
 				System._extensions.push(extensionFn);
 			}
-			extensionFn(System);
+			extensionFn(System, steal);
 		}
 	};
 
@@ -273,6 +303,7 @@ var makeSteal = function(System){
 		"default": steal,
 		__useDefault:true
 	}));
+	System.Set = ArraySet;
 
 	var loaderClone = System.clone;
 	System.clone = function(){
@@ -285,8 +316,11 @@ var makeSteal = function(System){
 			"default": steal,
 			__useDefault: true
 		}));
+		loader.Set = ArraySet;
 		return loader;
 	};
+
+
 
 	// steal.System remains for backwards compat only
 	steal.System = steal.loader = System;
@@ -907,6 +941,341 @@ addStealExtension(function(loader){
 	};
 });
 
+addStealExtension(function(loader) {
+	function treeShakingEnabled(loader, load) {
+		return !loader.noTreeShaking && loader.treeShaking !== false;
+	}
+
+	function determineUsedExports(load) {
+		var loader = this;
+
+		// 1. Get any new dependencies that haven't been accounted for.
+		var newDeps = newDependants.call(this, load);
+		var usedExports = new loader.Set();
+		var allUsed = false;
+		newDeps.forEach(function(depName) {
+			var depLoad = loader.getModuleLoad(depName);
+			var specifier = loader.moduleSpecifierFromName(depLoad, load.name);
+			if (depLoad.metadata.format !== "es6") {
+				allUsed = true;
+				return;
+			}
+		});
+
+		// Only walk the export tree if all are not being used.
+		// This saves not needing to do the traversal.
+		if(!allUsed) {
+			allUsed = walkExports.call(loader, load, function(exps){
+				exps.forEach(function(name){
+					usedExports.add(name);
+				});
+			});
+		}
+
+		// Copy over existing exports
+		if(load.metadata.usedExports) {
+			load.metadata.usedExports.forEach(function(name){
+				usedExports.add(name);
+			});
+		}
+
+		load.metadata.usedExports = usedExports;
+		load.metadata.allExportsUsed = allUsed;
+
+		return {
+			all: allUsed,
+			used: usedExports
+		};
+	}
+
+	// Determine if this load's dependants have changed,
+	function newDependants(load) {
+		var out = [];
+		var deps = this.getDependants(load.name);
+		var shakenParents = load.metadata.shakenParents;
+		if (!shakenParents) {
+			out = deps;
+		} else {
+			for (var i = 0; i < deps.length; i++) {
+				if (shakenParents.indexOf(deps[i]) === -1) {
+					out.push(deps[i]);
+				}
+			}
+		}
+		return out;
+	}
+
+	function walkExports(load, cb) {
+		var moduleName = load.name;
+		var name = moduleName;
+		var visited = new this.Set();
+
+ 		// The stack is an array containing stuff we are traversing.
+		// It looks like:
+		// [moduleName, parentA, parentB, null]
+		var stack = [name].concat(this.getDependants(name));
+		var namesMap = null;
+		var index = 0;
+		var cont = true;
+
+		do {
+			index++;
+			var parentName = stack[index];
+
+			if(parentName == null) {
+				name = stack[++index];
+				cont = index < stack.length - 1;
+				continue;
+			}
+
+			if(visited.has(parentName)) {
+				continue;
+			}
+
+			visited.add(parentName);
+			var parentLoad = this.getModuleLoad(parentName);
+			var parentSpecifier = this.moduleSpecifierFromName(
+				parentLoad,
+				name
+			);
+
+			var parentImportNames = parentLoad.metadata.importNames;
+			var parentExportNames = parentLoad.metadata.exportNames;
+
+			if(parentImportNames[parentSpecifier]) {
+				var names = parentImportNames[parentSpecifier];
+				if(namesMap) {
+					var parentsNames = names;
+					names = [];
+					parentsNames.forEach(function(name){
+						if(namesMap.has(name)) {
+							names.push(namesMap.get(name));
+						}
+					});
+				}
+
+
+				cont = cb(names) !== false;
+			}
+
+			if(parentExportNames[parentSpecifier]) {
+				var names = parentExportNames[parentSpecifier];
+				var parentDependants = this.getDependants(parentName);
+				// Named exports
+				if(isNaN(names)) {
+					namesMap = names;
+				}
+				// export * with no dependants should result in no tree-shaking
+				else if(!parentDependants.length) {
+					return true;
+				}
+
+				stack.push(null);
+				stack.push(parentName);
+				stack.push.apply(stack, parentDependants);
+			}
+
+			cont = cont !== false && index < stack.length - 1;
+		} while(cont);
+
+		return false;
+	}
+
+	/**
+	 * Determine if the new parent has resulted in new used export names
+	 * If so, redefine this module so that it goes into the registry correctly.
+	 */
+	function reexecuteIfNecessary(load, parentName) {
+		var usedExports = [];
+		walkExports.call(this, load, function(exps) {
+			usedExports.push.apply(usedExports, exps);
+		});
+
+		// Given the parent's used exports, loop over and see if any are not
+		// within the usedExports set.
+		var hasNewExports = false;
+
+		// If there isn't a usedExports Set, we have yet to check.
+		if(load.metadata.usedExports) {
+			for (var i = 0; i < usedExports.length; i++) {
+				if (!load.metadata.usedExports.has(usedExports[i])) {
+					hasNewExports = true;
+					break;
+				}
+			}
+		}
+
+		if (hasNewExports) {
+			var source = load.metadata.originalSource || load.source;
+			this.provide(load.name, source, load);
+		}
+
+		return Promise.resolve();
+	}
+
+	// Check if a module has already been tree-shaken.
+	// And if so, re-execute it if there are new dependant modules.
+	var notifyLoad = loader.notifyLoad;
+	loader.notifyLoad = function(specifier, name, parentName){
+		var load = loader.getModuleLoad(name);
+
+		// If this module is already marked as tree-shakable it means
+		// it has been loaded before. Determine if it needs to be reexecuted.
+		if (load && load.metadata.treeShakable) {
+			return reexecuteIfNecessary.call(this, load, parentName);
+		}
+		return notifyLoad.apply(this, arguments);
+	};
+
+	function treeShakePlugin(loader, load) {
+		var notShakable = {
+			exit: function(path, state) {
+				state.treeShakable = false;
+			}
+		};
+
+		var notShakeableVisitors = {
+			ImportDeclaration: notShakable,
+			FunctionDeclaration: notShakable,
+			VariableDeclaration: notShakable
+		};
+
+		var usedResult;
+		// Call determineUsedExports, caching the result.
+		function _determineUsedExports() {
+			if(usedResult) {
+				return usedResult;
+			}
+			usedResult = determineUsedExports.call(
+				loader,
+				load
+			);
+			return usedResult;
+		}
+
+		return {
+			visitor: {
+				Program: {
+					enter: function(path) {
+						var state = {};
+						path.traverse(notShakeableVisitors, state);
+
+						load.metadata.treeShakable = state.treeShakable !== false;
+					}
+				},
+
+				ExportNamedDeclaration: function(path, state) {
+					if (load.metadata.treeShakable) {
+						var usedResult = _determineUsedExports();
+						var usedExports = usedResult.used;
+						var allUsed = usedResult.all;
+
+						if (!allUsed) {
+							path.get("specifiers").forEach(function(path) {
+								var name = path.get("exported.name").node;
+								if (
+									!usedExports.has(name) &&
+									name !== "__esModule"
+								) {
+									path.remove();
+								}
+							});
+
+							if (path.get("specifiers").length === 0) {
+								path.remove();
+							}
+						}
+					}
+				},
+
+				ExportAllDeclaration: function(path, state) {
+					if(load.metadata.treeShakable) {
+						// This forces the load.metadata.usedExports property to be set
+						// This is needed in modules that *only* have `export *` declarations.
+						_determineUsedExports();
+					}
+				}
+			}
+		};
+	}
+
+	function applyBabelPlugin(load) {
+		var loader = this;
+		var pluginLoader = loader.pluginLoader || loader;
+
+		return pluginLoader.import("babel").then(function(mod) {
+			var transpiler = mod.__useDefault ? mod.default : mod;
+			var babel = transpiler.Babel || transpiler.babel || transpiler;
+
+			try {
+				var babelPlugins = [
+					loader._getImportSpecifierPositionsPlugin.bind(null, load)
+				];
+				if(treeShakingEnabled(loader, load)) {
+					babelPlugins.push(treeShakePlugin.bind(null, loader, load));
+				}
+				var code = babel.transform(load.source, {
+					plugins: babelPlugins
+				}).code;
+
+				// If everything is tree shaken still mark as ES6
+				// Not doing this and steal won't accept the transform.
+				if(code === "") {
+					return '"format es6";';
+				}
+
+				return code;
+			} catch (e) {
+				// Probably using some syntax that requires additional plugins.
+				if(e instanceof SyntaxError) {
+					return Promise.resolve();
+				}
+				return Promise.reject(e);
+			}
+		});
+	}
+
+	var translate = loader.translate;
+	var es6RegEx = /(^\s*|[}\);\n]\s*)(import\s+(['"]|(\*\s+as\s+)?[^"'\(\)\n;]+\s+from\s+['"]|\{)|export\s+\*\s+from\s+["']|export\s+(\{|default|function|class|var|const|let|async\s+function))/;
+	loader.translate = function treeshakeTranslate(load) {
+		var loader = this;
+		return Promise.resolve()
+			.then(function() {
+				if (es6RegEx.test(load.source)) {
+					if(!load.metadata.originalSource)
+						load.metadata.originalSource = load.source;
+					return applyBabelPlugin.call(loader, load);
+				}
+			})
+			.then(function(source) {
+				if (source) {
+					load.source = source;
+				}
+				return translate.call(loader, load);
+			});
+	};
+
+	// For the build, wrap the _newLoader hook. This is to copy config over
+	// that needs to exist for all loaders.
+	var newLoader = loader._newLoader || Function.prototype;
+	loader._newLoader = function(loader){
+		var loads = this._traceData.loads || {};
+		for(var moduleName in loads) {
+			var load = loads[moduleName];
+			if(load.metadata && load.metadata.usedExports) {
+				var metaConfig = Object.create(null);
+				metaConfig.treeShakable = load.metadata.treeShakable;
+				metaConfig.usedExports = new this.Set(load.metadata.usedExports);
+				metaConfig.allExportsUsed = load.metadata.allExportsUsed;
+
+				var config = {meta:{}};
+				config.meta[moduleName] = metaConfig;
+				loader.config(config);
+			}
+		}
+	};
+});
+
 addStealExtension(function applyTraceExtension(loader) {
 	if(loader._extensions) {
 		loader._extensions.push(applyTraceExtension);
@@ -961,6 +1330,12 @@ addStealExtension(function applyTraceExtension(loader) {
 				return load.metadata.getImportPosition(specifier);
 			}
 		}
+	};
+	loader.moduleSpecifierFromName = function(load, moduleName) {
+		var deps = load.metadata.dependencies;
+		if(!deps) return undefined;
+		var idx = deps.indexOf(moduleName);
+		return load.metadata.deps[idx];
 	};
 	loader._allowModuleExecution = {};
 	loader.allowModuleExecution = function(name){
@@ -1071,9 +1446,10 @@ addStealExtension(function applyTraceExtension(loader) {
 			// deps either comes from the instantiate result, or if an
 			// es6 module it was found in the transpile hook.
 			var deps = result ? result.deps : load.metadata.deps;
+			var normalize = loader.normalizeSpecifier || loader.normalize;
 
 			return Promise.all(map.call(deps, function(depName){
-				return loader.normalize(depName, load.name);
+				return normalize.call(loader, depName, load.name);
 			})).then(function(dependencies){
 				load.metadata.deps = deps;
 				load.metadata.dependencies = dependencies;
@@ -1522,7 +1898,6 @@ addStealExtension(function (loader) {
 				setIfNotPresent(this.paths,"npm-load", dirname+"/ext/npm-load.js");
 				setIfNotPresent(this.paths,"npm-convert", dirname+"/ext/npm-convert.js");
 				setIfNotPresent(this.paths,"semver", dirname+"/ext/semver.js");
-				setIfNotPresent(this.paths,"bower", dirname+"/ext/bower.js");
 				setIfNotPresent(this.paths,"live-reload", dirname+"/ext/live-reload.js");
 				setIfNotPresent(this.paths,"steal-clone", dirname+"/ext/steal-clone.js");
 				this.paths["traceur"] = dirname+"/ext/traceur.js";
@@ -1551,19 +1926,13 @@ addStealExtension(function (loader) {
 					// make sure we don't set baseURL if it already set
 					if(!cfg.baseURL && !cfg.config && !cfg.configPath) {
 
-						// if we loading steal.js and it is located in node_modules or bower_components
+						// if we loading steal.js and it is located in node_modules
 						// we rewrite the baseURL relative to steal.js (one directory up!)
 						// we do this because, normaly our app is located as a sibling folder to
-						// node_modules or bower_components
+						// node_modules
 						if ( last(parts) === "steal" ) {
 							parts.pop();
 							var isFromPackage = false;
-							if ( last(parts) === cfg.bowerPath || last(parts) === "bower_components" ) {
-								System.configMain = "bower.json!bower";
-								addProductionBundles.call(this);
-								parts.pop();
-								isFromPackage = true;
-							}
 							if (last(parts) === "node_modules") {
 								System.configMain = "package.json!npm";
 								addProductionBundles.call(this);
@@ -1597,7 +1966,7 @@ addStealExtension(function (loader) {
 				// we always are in production environment
 				if((this.stealBundled && this.stealBundled === true) ||
 					((lastPart.indexOf("steal.production") > -1) ||
-						(lastPart.indexOf("steal-sans-promises.production") > -1)
+						(lastPart.indexOf("steal-with-promises.production") > -1)
 					 	&& !cfg.env)) {
 					this.config({ env: platform+"-production" });
 				}
@@ -1607,7 +1976,6 @@ addStealExtension(function (loader) {
 				}
 
 				specialConfig.stealPath.set.call(this,stealPath, cfg);
-
 			}
 		},
 		devBundle: {
@@ -1750,8 +2118,19 @@ addStealExtension(function (loader) {
 		if(/\S/.test(source)){
 			scriptOptions.mainSource = source;
 		}
+
 		// script config ever wins!
-		return extend(getQueryOptions(script.src), scriptOptions);
+		var config = extend(getQueryOptions(script.src), scriptOptions);
+		if (config.main) {
+			// if main was passed as an html boolean, let steal figure what
+			// is the main module, but turn on auto main loading
+			if (typeof config.main === "boolean") {
+				delete config.main;
+			}
+			config.loadMainOnStartup = true;
+		}
+
+		return config;
 	};
 
 	// get steal URL
@@ -1764,34 +2143,23 @@ addStealExtension(function (loader) {
 			// for Workers get options from steal query
 			if (isWebWorker) {
 				resolve(extend({
+					loadMainOnStartup: true,
 					stealURL: location.href
 				}, getQueryOptions(location.href)));
 				return;
 			} else if(hasAWindow) {
 				// if the browser supports currentScript, use it!
-				if (stealScript) {
-					steal.script = stealScript;
-					// get options from script tag and query
-					resolve(getScriptOptions(stealScript));
-					return;
-				}
-				// assume the last script on the page is the one loading steal.js
-				else {
-					var scripts = document.scripts;
-
-					if (scripts.length) {
-						var currentScript = scripts[scripts.length - 1];
-						steal.script = currentScript;
-						resolve(getScriptOptions(currentScript));
-					}
-				}
+				steal.script = stealScript || getStealScript();
+				resolve(getScriptOptions(steal.script));
+				return;
 			} else {
 				// or the only option is where steal is.
 				resolve({
+					loadMainOnStartup: true,
 					stealPath: __dirname
 				});
 			}
-		})
+		});
 	};
 
 	// configure and startup steal
@@ -1824,20 +2192,26 @@ addStealExtension(function (loader) {
 
 			// we only load things with force = true
 			if (loader.loadBundles) {
-
-				if (!loader.main && loader.isEnv("production") &&
-					!loader.stealBundled) {
+				if (
+					!loader.main &&
+					loader.isEnv("production") &&
+					!loader.stealBundled
+				) {
 					// prevent this warning from being removed by Uglify
 					warn("Attribute 'main' is required in production environment. Please add it to the script tag.");
 				}
 
-				loader["import"](loader.configMain)
-				.then(configResolve, configReject);
+				loader["import"](loader.configMain).then(
+					configResolve,
+					configReject
+				);
 
 				return configPromise.then(function (cfg) {
 					setEnvsConfig.call(loader);
 					loader._configLoaded = true;
-					return loader.main ? loader["import"](loader.main) : cfg;
+					return loader.main && config.loadMainOnStartup
+						? loader["import"](loader.main)
+						: cfg;
 				});
 
 			} else {
@@ -1889,18 +2263,24 @@ addStealExtension(function (loader) {
 				});
 
 				return devPromise.then(function () {
-					// if there's a main, get it, otherwise, we are just loading
-					// the config.
+					// if there's a main, get it, otherwise, we are just
+					// loading the config.
 					if (!loader.main || loader.localLoader) {
 						return configPromise;
 					}
-					var main = loader.main;
-					if (typeof main === "string") {
-						main = [main];
+					if (config.loadMainOnStartup) {
+						var main = loader.main;
+						if (typeof main === "string") {
+							main = [main];
+						}
+						return Promise.all(
+							map(main, function (main) {
+								return loader["import"](main);
+							})
+						);
+					} else {
+						loader._warnNoMain(steal._mainWarnMs || 2000);
 					}
-					return Promise.all(map(main, function (main) {
-						return loader["import"](main);
-					}));
 				});
 			}
 		}).then(function(main){
@@ -4091,7 +4471,8 @@ function plugins(loader) {
     if (load.metadata.plugin && load.metadata.plugin.translate)
       return Promise.resolve(load.metadata.plugin.translate.call(loader, load)).then(function(result) {
         if (typeof result == 'string') {
-			load.metadata.originalSource = load.source;
+			if(!load.metadata.originalSource)
+				load.metadata.originalSource = load.source;
 			load.source = result;
 		}
 

@@ -9,7 +9,7 @@ Inline a module directly in HTML.
 
 Add a steal-module script to the page and it will run after Steal has been configured:
 
-    <script type="text/steal-module">
+    <script type="steal-module">
       import _ from "lodash";
 
 	  console.log(_.repeat("0", 10));

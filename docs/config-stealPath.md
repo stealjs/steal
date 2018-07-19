@@ -26,7 +26,6 @@ This sets up the following default values in [config.paths]:
  
 Finally, it will set [config.baseURL] provided nothing else is setting it to:
 
- - `PATH/../..` - if `PATH` ends with _/bower\_components/steal_.
  - `PATH/..` - if `PATH` ends with _/steal_.
  - `PATH` - if the first two conditions are not met.
 
