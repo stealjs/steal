@@ -341,7 +341,7 @@ exports.addExtension = function(System){
 		if(utils.moduleName.isNpm(load.name)) {
 			fetchPromise = fetchPromise.then(null, function(err){
 				var statusCode = err.statusCode;
-				if(statusCode !== 404 || statusCode !== 0) {
+				if(statusCode !== 404 && statusCode !== 0) {
 					return Promise.reject(err);
 				}
 
@@ -380,7 +380,7 @@ exports.addExtension = function(System){
 		}
 
 		return fetchPromise.catch(function(error) {
-			var statusCode = err.statusCode;
+			var statusCode = error.statusCode;
 			if ((statusCode === 404 || statusCode === 0) &&
 				utils.moduleName.isBareIdentifier(load.name) &&
 				!utils.pkg.isRoot(loader, load.metadata.npmPackage)) {
