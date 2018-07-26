@@ -7,7 +7,8 @@ exports.includeInBuild = true;
 var isNode = typeof process === "object" && {}.toString.call(process) ===
 	"[object process]";
 var isWorker = typeof WorkerGlobalScope !== "undefined" && (self instanceof WorkerGlobalScope);
-var isBrowser = typeof window !== "undefined" && !isNode && !isWorker;
+var isElectron = isNode && !!process.versions.electron;
+var isBrowser = typeof window !== "undefined" && (!isNode || isElectron) && !isWorker;
 
 exports.addExtension = function(System){
 	if (System._extensions) {
@@ -339,7 +340,8 @@ exports.addExtension = function(System){
 
 		if(utils.moduleName.isNpm(load.name)) {
 			fetchPromise = fetchPromise.then(null, function(err){
-				if(err.statusCode !== 404) {
+				var statusCode = err.statusCode;
+				if(statusCode !== 404 || statusCode !== 0) {
 					return Promise.reject(err);
 				}
 
@@ -378,7 +380,8 @@ exports.addExtension = function(System){
 		}
 
 		return fetchPromise.catch(function(error) {
-			if (error.statusCode === 404 &&
+			var statusCode = err.statusCode;
+			if ((statusCode === 404 || statusCode === 0) &&
 				utils.moduleName.isBareIdentifier(load.name) &&
 				!utils.pkg.isRoot(loader, load.metadata.npmPackage)) {
 				var newError = new Error([
