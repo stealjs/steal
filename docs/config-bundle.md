@@ -34,7 +34,8 @@ steal.config({
 
 @option {Glob}
 
-A string representing a glob pattern that match module names
+A string representing a glob pattern that match module names. see options and features on [npm globby](https://github.com/sindresorhus/globby)
+
 For example:
 
 ```
@@ -80,7 +81,7 @@ The [NPM plugin](https://stealjs.com/docs/npm.html) fits very nicely to the bund
 
 Take the example above:
 
-**bundle in your package.json:**
+**bundle options in your package.json:**
 ```
 ...
 "steal": {
@@ -96,7 +97,7 @@ Take the example above:
 
 ```
 
-**bundles in build script**
+**bundle option in build script**
 ```
 stealTools.build({
     config: __dirname + "/MY_APP_NAME/package.json!npm",
@@ -106,3 +107,16 @@ stealTools.build({
     ]
 })
 ```
+
+#### Modlet workflow
+If you follow the [modelt workflow](https://www.bitovi.com/blog/modlet-workflows), you have to know, that a glob also finds other files like markdown or test files. steal-tools can't handle these files. so you have to modify the glob.
+ ```
+ stealTools.build({
+     config: __dirname + "/MY_APP_NAME/package.json!npm",
+     bundle: [
+         "~/components/**/*.js",
+         "!~/components/**/*_test.js"
+     ]
+ })
+ ```
+ Use the negated patterns to exclude files that you don't want to add to the bundle. Also exclude files that steal can't handle or are useless to bundle with in your production build.
