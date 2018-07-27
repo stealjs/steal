@@ -30,4 +30,12 @@ addStealExtension(function (loader) {
 
 		return loaderImport.apply(this, arguments);
 	};
+
+	var loaderModule = loader.module;
+	loader.module = function() {
+		var p = loaderModule.apply(this, arguments);
+		this.module = loaderModule;
+		clearTimeout(this._noMainTimeoutId);
+		return p;
+	};
 });
