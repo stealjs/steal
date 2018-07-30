@@ -1,6 +1,7 @@
 var path = require("path");
 var steal = require("../main");
 var assert = require("assert");
+var nock = require("nock");
 
 var makeSteal = function(config){
 	var localSteal =  steal.clone();
@@ -114,5 +115,29 @@ describe("tree shaking", function() {
 				assert(!usedExports.has("b"), "'b' is not an used export");
 				assert(!usedExports.has("c"), "'c' is not an used export");
 			});
+	});
+});
+
+describe("Modules with http(s) in the module name", function() {
+	it("works", function(done){
+		var scope = nock(/example\.com/)
+                .get('/foo.mjs')
+                .reply(200, 'module.exports="one"')
+				.get('/bar.js')
+				.reply(200, 'module.exports="two"')
+				.get('/baz.mjs')
+				.reply(200, 'module.exports="three"');
+
+		var steal = makeSteal({
+			config: path.join(__dirname, "http_spec", "package.json!npm")
+		});
+
+		steal.import("~/main")
+		.then(function(main){
+			assert.equal(main.one, "one");
+			assert.equal(main.two, "two");
+			assert.equal(main.three, "three");
+		})
+		.then(done, done);
 	});
 });
