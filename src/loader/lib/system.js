@@ -42,9 +42,15 @@
     });
     return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
   }
+  var doubleSlash = /^\/\//;
   function toAbsoluteURL(inBase, inHref) {
     var href = inHref;
     var base = inBase
+
+	if(doubleSlash.test(inHref)) {
+		// Default to http
+		return 'http:' + inHref;
+	}
 
     if (isWindows)
       href = href.replace(/\\/g, '/');
@@ -115,28 +121,49 @@
     }
   }
   else if (typeof require != 'undefined') {
-    var fs, fourOhFourFS = /ENOENT/;
+    var fs, http, https, fourOhFourFS = /ENOENT/;
     fetchTextFromURL = function(rawUrl, fulfill, reject) {
-      if (rawUrl.substr(0, 5) != 'file:')
-        throw 'Only file URLs of the form file: allowed running in Node.';
-      fs = fs || require('fs');
-      var url = rawUrl.substr(5);
-      if (isWindows)
-        url = url.replace(/\//g, '\\');
-      return fs.readFile(url, function(err, data) {
-        if (err) {
-          // Mark this error as a 404, so that the npm extension
-          // will know to retry.
-          if(fourOhFourFS.test(err.message)) {
-            err.statusCode = 404;
-			err.url = rawUrl;
-          }
+      if (rawUrl.substr(0, 5) === 'file:') {
+		  fs = fs || require('fs');
+		  var url = rawUrl.substr(5);
+		  if (isWindows)
+			url = url.replace(/\//g, '\\');
+		  return fs.readFile(url, function(err, data) {
+			if (err) {
+			  // Mark this error as a 404, so that the npm extension
+			  // will know to retry.
+			  if(fourOhFourFS.test(err.message)) {
+				err.statusCode = 404;
+			  err.url = rawUrl;
+			  }
 
-          return reject(err);
-        } else {
-          fulfill(data + '');
-        }
-      });
+			  return reject(err);
+			} else {
+			  fulfill(data + '');
+			}
+		  });
+	  } else if(rawUrl.substr(0, 4) === 'http') {
+		  var h;
+		  if(rawUrl.substr(0, 6) === 'https:') {
+			  h = https = https || require('https');
+		  } else {
+			  h = http = http || require('http');
+		  }
+		  return h.get(rawUrl, function(res) {
+			  if(res.statusCode !== 200) {
+				  reject(new Error('Request failed. Status: ' + res.statusCode));
+			  } else {
+				  var rawData = "";
+				  res.setEncoding("utf8");
+				  res.on("data", function(chunk) {
+					  rawData += chunk;
+				  });
+				  res.on("end", function(){
+					  fulfill(rawData);
+				  });
+			  }
+		  })
+	  }
     }
   }
   else if(typeof fetch === 'function') {
@@ -255,11 +282,11 @@
         dotdots = i;
       }
 
-      for (var j = i; j < segments.length; j++) {
+      /*for (var j = i; j < segments.length; j++) {
         var segment = segments[j];
         if (segment == '' || segment == '.' || segment == '..')
           throw new TypeError('Illegal module name "' + name + '"');
-      }
+      }*/
 
       if (!rel)
         return name;
