@@ -374,6 +374,10 @@ QUnit.test("CommonJS module with ES inside of comments loads", function(assert){
 	makeIframe("cjs_export_default/dev.html", assert);
 });
 
+QUnit.test("Importing http(s) and // modules", function(assert){
+	makeIframe("http_spec/dev.html", assert);
+});
+
 QUnit.module("steal startup and config");
 
 QUnit.test("Load urlOptions correctly with async script append", function(assert) {
