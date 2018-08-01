@@ -314,7 +314,7 @@ QUnit.test("Loads npm convention of folder with trailing slash", function(assert
 		.withPackages([{
 			name: "dep",
 			version: "1.0.0",
-			main: "main.js"
+			main: "./lib/main.js"
 		}])
 		.loader;
 
@@ -348,18 +348,18 @@ QUnit.test("Loads npm convention of folder with trailing slash", function(assert
 	})
 	.then(function(name){
 		// Relative to parent-most is the pkg.main
-		assert.equal(name, "dep@1.0.0#main");
+		assert.equal(name, "dep@1.0.0#lib/main");
 
 		return loader.normalize("..", "dep@1.0.0#folder/mod");
 	})
 	.then(function(name){
 		// Relative to parent-most is the pkg.main
-		assert.equal(name, "dep@1.0.0#main");
+		assert.equal(name, "dep@1.0.0#lib/main");
 
 		return loader.normalize("./", "dep@1.0.0#thing");
 	})
 	.then(function(name){
-		assert.equal(name, "dep@1.0.0#main");
+		assert.equal(name, "dep@1.0.0#lib/main");
 	})
 	.then(done, done);
 });
