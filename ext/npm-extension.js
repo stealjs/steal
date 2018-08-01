@@ -80,7 +80,9 @@ exports.addExtension = function(System){
 			var isInRoot = utils.path.isPackageRootDir(relativePath);
 
 			if(isInRoot) {
-				name = refPkg.name + "#" + utils.path.removeJS(refPkg.main);
+				name = refPkg.name + "#" + utils.path.removeJS(
+					utils.path.removeDotSlash(refPkg.main)
+				);
 
 			} else {
 				name = name + "index";
