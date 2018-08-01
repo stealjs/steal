@@ -4,7 +4,7 @@
 			parts, src, query, startFile, env,
 			scripts = document.getElementsByTagName("script");
 
-		var script = scripts[scripts.length - 1];
+		var script = stealScript || getStealScript();
 
 		if (script) {
 			options.stealURL = script.src;

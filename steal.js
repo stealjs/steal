@@ -5040,7 +5040,7 @@ var $__curScript, __eval;
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
 		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
 		isBrowserWithWindow = !isNode && typeof window !== "undefined",
@@ -5050,7 +5050,21 @@ var $__curScript, __eval;
 			} catch(e) {
 				return false;
 			}
-		})();
+		})(),
+		getStealScript = function(){
+			if(isBrowserWithWindow || isNW) {
+				if(document.currentScript) {
+					return document.currentScript;
+				}
+				var scripts = document.scripts;
+
+				if (scripts.length) {
+					var currentScript = scripts[scripts.length - 1];
+					return currentScript;
+				}
+			}
+		},
+		stealScript = getStealScript();
 		isNode = isNode && !isNW;
 
 	var filename = function(uri){
@@ -6099,7 +6113,7 @@ function addEnv(loader){
 			parts, src, query, startFile, env,
 			scripts = document.getElementsByTagName("script");
 
-		var script = scripts[scripts.length - 1];
+		var script = stealScript || getStealScript();
 
 		if (script) {
 			options.stealURL = script.src;

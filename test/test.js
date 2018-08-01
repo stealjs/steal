@@ -29,6 +29,7 @@ QUnit.config.testTimeout = 30000;
 		iframe.contentWindow.document.open();
 		iframe.contentWindow.document.write(html);
 		iframe.contentWindow.document.close();
+		return iframe;
 	};
 	var makePassQUnitHTML = function(){
 		return "<script>\
@@ -338,6 +339,18 @@ QUnit.config.testTimeout = 30000;
 
 	asyncTest("script tag wins against global steal object", function(){
 		makeIframe("script-tag_wins/index.html");
+	});
+
+	// Fixes bug with Chrome 68 injecting script tags from extensions before running sync Steal script
+	asyncTest("attribute config is found when steal is not the last script element.", function(){
+		var iframe = writeIframe(makeStealHTML(
+			"basics/basics.html",
+			'id="lastScript"'));
+		var doc = iframe.contentWindow.document;
+		var stealScript = doc.createElement('script');
+		stealScript.src = "../../steal.js?basics";
+		stealScript.setAttribute("data-config", "../config.js");
+		doc.body.insertBefore(stealScript, doc.getElementById('lastScript'));
 	});
 
 	module("json extension");
