@@ -185,14 +185,23 @@ addStealExtension(function(loader) {
 	};
 
 	function treeShakePlugin(loader, load) {
+		// existence of this type of Node means the module is not tree-shakable
 		var notShakable = {
 			exit: function(path, state) {
 				state.treeShakable = false;
 			}
 		};
 
+		// "bare" imports like `import "foo";` do not affect tree-shaking
+		// any non-"bare" import means module cannot be tree-shaken
+		var checkImportForShakability = {
+			exit: function(path, state) {
+				state.treeShakable = path.node.specifiers.length === 0;
+			}
+		};
+
 		var notShakeableVisitors = {
-			ImportDeclaration: notShakable,
+			ImportDeclaration: checkImportForShakability,
 			FunctionDeclaration: notShakable,
 			VariableDeclaration: notShakable
 		};
