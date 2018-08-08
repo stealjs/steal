@@ -10,7 +10,7 @@
 		window.done = window.parent.done;
 	</script>
 	<script
-		src="../../../steal-with-promises.js"
+		src="../../steal-with-promises.js"
 		data-base-url="."
 		data-config="package.json!npm"></script>
 	<script>
@@ -18,13 +18,15 @@
 			var main = steal.loader.get("shake@1.0.0#main");
 			if(typeof window.assert !== "undefined") {
 				assert.ok(main.Component, "Includes Component");
-				assert.ok(!main.DefineList);
-				assert.ok(!main.DefineMap);
-				assert.ok(!main.assign);
-				assert.ok(!main.fixture);
-				assert.ok(!main.stache);
+				assert.ok(!("DefineList" in main), "DefineList tree-shaken");
+				assert.ok(!("DefineMap" in main), "DefineMap tree-shaken");
+				assert.ok(!("assign" in main), "assign tree-shaken");
+				assert.ok(!("fixture" in main), "fixture tree-shaken");
+				assert.ok(!("stache" in main), "stache tree-shaken");
+				assert.ok(window.sideEffect, "side-effectual module executed");
 			} else {
 				console.log("main", main);
+				console.log("window.sideEffect", window.sideEffect);
 			}
 		}
 
@@ -33,10 +35,10 @@
 			if(typeof window.assert !== "undefined") {
 				assert.ok(main.Component, "Includes Component");
 				assert.ok(main.fixture, "Includes fixture");
-				assert.ok(!main.DefineList);
-				assert.ok(!main.DefineMap);
-				assert.ok(!main.assign);
-				assert.ok(!main.stache);
+				assert.ok(!("DefineList" in main), "DefineList tree-shaken");
+				assert.ok(!("DefineMap" in main), "DefineMap tree-shaken");
+				assert.ok(!("assign" in main), "assign tree-shaken");
+				assert.ok(!("stache" in main), "stache tree-shaken");
 			} else {
 				console.log("bundle", main);
 			}
