@@ -504,6 +504,34 @@ QUnit.test("named amd module with deps from a nested dependency", function(asser
 		});
 });
 
+QUnit.test("Imports git+ssh URLs that contain a hash", function(assert) {
+	var done = assert.async();
+
+	var depName = "dep@" + encodeURIComponent("git+ssh://git@example.com/company/my-lib.git#c23dr61") +
+		"#foo";
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				dep: "git+ssh://git@example.com/company/my-lib.git#c23dr61"
+			}
+		})
+		.withModule("app@1.0.0#main", "module.exports=require('dep/foo');")
+		.withModule(depName, "module.exports='works';")
+		.loader;
+
+	helpers.init(loader).then(function(){
+		return loader["import"]("app");
+	})
+	.then(function(mod){
+		assert.equal(mod, "works", "It worked!");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
 QUnit.module("Error messages and warnings");
 
 QUnit.test("importing a package with an unsaved dependency", function(assert) {

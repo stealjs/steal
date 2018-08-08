@@ -5,11 +5,11 @@ var testPagesUrls = require('./test-pages-urls');
 var platforms = [{
 	browserName: 'firefox',
 	platform: 'Windows 10',
-	version: '59.0'
+	version: '61.0'
 }, {
 	browserName: 'firefox',
 	platform: 'OS X 10.13',
-	version: '59.0'
+	version: '61.0'
 }, {
 	browserName: 'googlechrome',
 	platform: 'Windows 10'
