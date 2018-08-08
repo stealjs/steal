@@ -149,7 +149,7 @@ var utils = {
 				}
 
 				var version = descriptor.version;
-				if(version) {
+				if(version && version[0] !== "^") {
 					version = encodeURIComponent(decodeURIComponent(version));
 				}
 
