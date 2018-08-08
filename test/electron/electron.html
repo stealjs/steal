@@ -17,7 +17,7 @@
 			versions: {
 				electron: "1.0.0"
 			},
-			platform: "eletron"
+			platform: "electron"
 		};
 
 		global = window;
@@ -30,6 +30,9 @@
 			return oldToString.apply(this, arguments);
 		};
 	</script>
-	<script src="../../steal.js" config-main="@empty" base-url="./" main="main"></script>
+	<script src="../../steal-with-promises.js"
+		data-config="package.json!npm"
+		data-base-url="./"
+		data-main="~/main"></script>
 </body>
 </html>

@@ -7,7 +7,8 @@ exports.includeInBuild = true;
 var isNode = typeof process === "object" && {}.toString.call(process) ===
 	"[object process]";
 var isWorker = typeof WorkerGlobalScope !== "undefined" && (self instanceof WorkerGlobalScope);
-var isBrowser = typeof window !== "undefined" && !isNode && !isWorker;
+var isElectron = isNode && !!process.versions.electron;
+var isBrowser = typeof window !== "undefined" && (!isNode || isElectron) && !isWorker;
 
 exports.addExtension = function(System){
 	if (System._extensions) {
@@ -79,7 +80,9 @@ exports.addExtension = function(System){
 			var isInRoot = utils.path.isPackageRootDir(relativePath);
 
 			if(isInRoot) {
-				name = refPkg.name + "#" + utils.path.removeJS(refPkg.main);
+				name = refPkg.name + "#" + utils.path.removeJS(
+					utils.path.removeDotSlash(refPkg.main)
+				);
 
 			} else {
 				name = name + "index";
@@ -339,7 +342,8 @@ exports.addExtension = function(System){
 
 		if(utils.moduleName.isNpm(load.name)) {
 			fetchPromise = fetchPromise.then(null, function(err){
-				if(err.statusCode !== 404) {
+				var statusCode = err.statusCode;
+				if(statusCode !== 404 && statusCode !== 0) {
 					return Promise.reject(err);
 				}
 
@@ -378,7 +382,8 @@ exports.addExtension = function(System){
 		}
 
 		return fetchPromise.catch(function(error) {
-			if (error.statusCode === 404 &&
+			var statusCode = error.statusCode;
+			if ((statusCode === 404 || statusCode === 0) &&
 				utils.moduleName.isBareIdentifier(load.name) &&
 				!utils.pkg.isRoot(loader, load.metadata.npmPackage)) {
 				var newError = new Error([
@@ -460,6 +465,13 @@ exports.addExtension = function(System){
 		oldConfig.apply(loader, arguments);
 	};
 
+	// Implement the newLoader hook to copy config over during the build.
+	var newLoader = System._newLoader || Function.prototype;
+	System._newLoader = function(loader) {
+		loader.npmContext = this.npmContext;
+		loader.npmParentMap = this.npmParentMap;
+		return newLoader.apply(this, arguments);
+	};
 
 	steal.addNpmPackages = function(npmPackages) {
 		var packages = npmPackages || [];

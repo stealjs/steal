@@ -575,7 +575,7 @@ var utils = {
 		},
 		addJS: function(path){
 			// Don't add `.js` for types that need to work without an extension.
-			if(/\.js(on)?$/.test(path)) {
+			if(/\.m?js(on)?$/.test(path)) {
 				return path;
 			} else {
 				return path+".js";

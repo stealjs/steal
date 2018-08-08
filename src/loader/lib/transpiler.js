@@ -513,28 +513,64 @@
 
 	function getImportSpecifierPositionsPlugin(load) {
 		load.metadata.importSpecifiers = Object.create(null);
-		return function(babel){
-			var t = babel.types;
+		load.metadata.importNames = Object.create(null);
+		load.metadata.exportNames = Object.create(null);
 
-			return {
-				visitor: {
-					ImportDeclaration: function(path, state){
-						var node = path.node;
+		return {
+			visitor: {
+				ImportDeclaration: function(path, state){
+					var node = path.node;
+					var specifier = node.source.value;
+					var loc = node.source.loc;
+					load.metadata.importSpecifiers[specifier] = loc;
+
+					var specifiers = load.metadata.importNames[specifier];
+					if(!specifiers) {
+						specifiers = load.metadata.importNames[specifier] = [];
+					}
+
+					specifiers.push.apply(specifiers, (
+						node.specifiers || []
+					).map(function(spec) {
+						if(spec.type === "ImportDefaultSpecifier") {
+							return "default";
+						}
+						return spec.imported && spec.imported.name;
+					}));
+				},
+				ExportDeclaration: function(path, state){
+					var node = path.node;
+
+					if(node.source) {
 						var specifier = node.source.value;
-						var loc = node.source.loc;
-						load.metadata.importSpecifiers[specifier] = loc;
+						var specifiers = load.metadata.exportNames[specifier];
+
+						if(node.type === "ExportNamedDeclaration") {
+							if(!specifiers) {
+								specifiers = load.metadata.exportNames[specifier] = new Map();
+							}
+
+							node.specifiers.forEach(function(node){
+								specifiers.set(node.exported.name, node.local.name);
+							});
+						} else if(node.type === "ExportAllDeclaration") {
+							// TODO Not sure what to do here.
+							load.metadata.exportNames[specifier] = 1;
+						}
 					}
 				}
-			};
+			}
 		};
 	}
 
+	Loader.prototype._getImportSpecifierPositionsPlugin = getImportSpecifierPositionsPlugin;
+
 	function babelTranspile(load, babelMod) {
+		var loader = this;
 		var babel = babelMod.Babel || babelMod.babel || babelMod;
 
 		var babelVersion = getBabelVersion(babel);
-		var options = getBabelOptions.call(this, load, babel);
-		var loader = this;
+		var options = getBabelOptions.call(loader, load, babel);
 
 		return Promise.all([
 			processBabelPlugins.call(this, babel, options),
@@ -544,8 +580,10 @@
 			// might be running on an old babel that throws if there is a
 			// plugins array in the options object
 			if (babelVersion >= 6) {
-				options.plugins = [getImportSpecifierPositionsPlugin(load),
-					addESModuleFlagPlugin].concat(results[0]);
+				options.plugins = [
+					getImportSpecifierPositionsPlugin.bind(null, load),
+					addESModuleFlagPlugin
+				].concat(results[0]);
 				options.presets = results[1];
 			}
 

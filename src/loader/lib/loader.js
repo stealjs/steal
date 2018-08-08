@@ -178,7 +178,11 @@ function logloads(loads) {
     return new Promise(function(resolve, reject) {
       resolve(loader.loaderObj.normalize(request, refererName, refererAddress));
     })
-    // 15.2.4.2.2 GetOrCreateLoad
+    .then(function(name) {
+		return Promise.resolve(loader.loaderObj.notifyLoad(request, name, refererName))
+		.then(function() { return name; });
+    })
+	// 15.2.4.2.2 GetOrCreateLoad
     .then(function(name) {
       var load;
       if (loader.modules[name]) {
@@ -245,6 +249,9 @@ function logloads(loads) {
 
   // 15.2.4.5
   function proceedToTranslate(loader, load, p) {
+	var pass = load.pass || 0;
+	var passCancelled = function() { return (load.pass << 0) !== pass };
+
     p
     // 15.2.4.5.1 CallTranslate
     .then(function(source) {
@@ -255,7 +262,7 @@ function logloads(loads) {
 
       // 15.2.4.5.2 CallInstantiate
       .then(function(source) {
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
         load.source = source;
@@ -264,7 +271,7 @@ function logloads(loads) {
 
       // 15.2.4.5.3 InstantiateSucceeded
       .then(function(instantiateResult) {
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
         if (instantiateResult === undefined) {
@@ -274,23 +281,22 @@ function logloads(loads) {
           load.isDeclarative = true;
           return loader.loaderObj.transpile(load)
           .then(function(transpiled) {
-            // Hijack System.register to set declare function
-            var curSystem = __global.System;
-            var curRegister = curSystem.register;
-            curSystem.register = function(name, regDeps, regDeclare) {
-              var declare = regDeclare;
-              var deps = regDeps;
-              if (typeof name != 'string') {
-                declare = deps;
-                deps = name;
-              }
-              // store the registered declaration as load.declare
-              // store the deps as load.deps
-              load.declare = declare;
-              load.depsList = deps;
-            };
-            __eval(transpiled, __global, load);
-            curSystem.register = curRegister;
+			  // Hijack System.register to set declare function
+			  var curSystem = __global.System;
+			  var curRegister = curSystem.register;
+			  curSystem.register = function(name, regDeps, regDeclare) {
+				var declare = regDeclare;
+				var deps = regDeps;
+				if (typeof name != 'string') {
+				  declare = deps;
+				  deps = name;
+				}
+
+				load.declare = declare;
+				load.depsList = deps;
+			  };
+			  __eval(transpiled, __global, load);
+			  curSystem.register = curRegister;
           });
         }
         else if (typeof instantiateResult == 'object') {
@@ -303,14 +309,14 @@ function logloads(loads) {
       })
       // 15.2.4.6 ProcessLoadDependencies
       .then(function() {
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
         load.dependencies = [];
         var depsList = load.depsList;
 
         var loadPromises = [];
-        for (var i = 0, l = depsList.length; i < l; i++) (function(request, index) {
+        function loadDep(request, index) {
           loadPromises.push(
             requestLoad(loader, request, load.name, load.address)
 
@@ -334,7 +340,10 @@ function logloads(loads) {
               // snapshot(loader);
             })
           );
-        })(depsList[i], i);
+        }
+        for (var i = 0, l = depsList.length; i < l; i++) {
+            loadDep(depsList[i], i);
+        }
 
         return Promise.all(loadPromises);
       })
@@ -343,7 +352,7 @@ function logloads(loads) {
       .then(function() {
         // console.log('LoadSucceeded ' + load.name);
         // snapshot(loader);
-        if(load.status != 'loading') {
+        if(load.status != 'loading' || passCancelled()) {
           return;
         }
 
@@ -371,6 +380,20 @@ function logloads(loads) {
   }
 
   // 15.2.4.7 PromiseOfStartLoadPartwayThrough absorbed into calling functions
+  function incrementPass(load) {
+	  load.pass = load.pass != null ? (load.pass + 1) : 1;
+  }
+
+  function changeLoadingStatus(load, newStatus) {
+      var oldStatus = load.status;
+
+      load.status = newStatus;
+      if(newStatus !== oldStatus && oldStatus === "loaded") {
+          load.linkSets.forEach(function(linkSet){
+              linkSet.loadingCount++;
+          });
+      }
+  }
 
   // 15.2.4.7.1
   function asyncStartLoadPartwayThrough(stepState) {
@@ -392,7 +415,7 @@ function logloads(loads) {
           if(step == 'translate' && !existingLoad.source) {
             existingLoad.address = stepState.moduleAddress;
             proceedToTranslate(loader, existingLoad, Promise.resolve(stepState.moduleSource));
-          }
+		  }
 
           // If the module importing this is part of the same linkSet, create
           // a new one for this import.
@@ -1011,6 +1034,7 @@ function logloads(loads) {
   Loader.prototype = {
     // 26.3.3.1
     constructor: Loader,
+	anonymousCount: 0,
     // 26.3.3.2
     define: function(name, source, options) {
       // check if already defined
@@ -1104,7 +1128,8 @@ function logloads(loads) {
     },
     // 26.3.3.11
     module: function(source, options) {
-      var load = createLoad();
+	  var name = "<Anonymous" + (++this.anonymousCount) + ">";
+      var load = createLoad(name);
       load.address = options && options.address;
       var linkSet = createLinkSet(this._loader, load);
       var sourcePromise = Promise.resolve(source);
@@ -1179,7 +1204,28 @@ function logloads(loads) {
     },
     // 26.3.3.18.5
     instantiate: function(load) {
-    }
+    },
+    notifyLoad: function(specifier, name, parentName) {
+    },
+	provide: function(name, source, options) {
+		var load;
+		for(var i = 0; i < this._loader.loads.length; i++) {
+			if(this._loader.loads[i].name === name) {
+				load = this._loader.loads[i];
+				break;
+			}
+		}
+
+		if(load) {
+			incrementPass(load);
+            changeLoadingStatus(load, "loading");
+			return proceedToTranslate(this._loader, load, Promise.resolve(source));
+		} else {
+			this["delete"](name);
+		}
+
+		return this.define(name, source, options);
+	}
   };
 
   var _newModule = Loader.prototype.newModule;

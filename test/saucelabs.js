@@ -8,14 +8,14 @@ var platforms = [{
 	version: '61.0'
 }, {
 	browserName: 'firefox',
-	platform: 'OS X 10.11',
+	platform: 'OS X 10.13',
 	version: '61.0'
 }, {
 	browserName: 'googlechrome',
 	platform: 'Windows 10'
 }, {
 	browserName: 'googlechrome',
-	platform: 'OS X 10.11'
+	platform: 'OS X 10.13'
 }, {
 	browserName: 'safari',
 	platform: 'OS X 10.11',
@@ -27,14 +27,6 @@ var platforms = [{
 	browserName: 'internet explorer',
 	platform: 'Windows 10',
 	version: '11.0'
-}, {
-	browserName: 'internet explorer',
-	platform: 'Windows 8',
-	version: '10.0'
-}, {
-	browserName: 'internet explorer',
-	platform: 'Windows 7',
-	version: '9'
 }, {
 	browserName: 'Safari',
 	'appium-version': '1.6.3',

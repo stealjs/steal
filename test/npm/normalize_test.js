@@ -314,7 +314,7 @@ QUnit.test("Loads npm convention of folder with trailing slash", function(assert
 		.withPackages([{
 			name: "dep",
 			version: "1.0.0",
-			main: "main.js"
+			main: "./lib/main.js"
 		}])
 		.loader;
 
@@ -348,18 +348,18 @@ QUnit.test("Loads npm convention of folder with trailing slash", function(assert
 	})
 	.then(function(name){
 		// Relative to parent-most is the pkg.main
-		assert.equal(name, "dep@1.0.0#main");
+		assert.equal(name, "dep@1.0.0#lib/main");
 
 		return loader.normalize("..", "dep@1.0.0#folder/mod");
 	})
 	.then(function(name){
 		// Relative to parent-most is the pkg.main
-		assert.equal(name, "dep@1.0.0#main");
+		assert.equal(name, "dep@1.0.0#lib/main");
 
 		return loader.normalize("./", "dep@1.0.0#thing");
 	})
 	.then(function(name){
-		assert.equal(name, "dep@1.0.0#main");
+		assert.equal(name, "dep@1.0.0#lib/main");
 	})
 	.then(done, done);
 });
@@ -946,6 +946,56 @@ QUnit.test("late-loaded buildConfig is applied when in the build", function(asse
 		var pkg = loader.npmContext.pkgInfo[0];
 		assert.equal(pkg.steal.map["app@1.0.0#one"], "dep@1.0.0#main", "Correct mapping in place");
 		assert.equal(loader.map["app@1.0.0#one"], "dep@1.0.0#main", "Mapping applied to the loader");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
+QUnit.test("Implements the _newLoader hook", function(assert){
+	var done = assert.async();
+
+	function createLoader() {
+		return helpers.clone()
+			.rootPackage({
+				name: "app",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					dep1: "1.0.0",
+					dep2: "1.0.0"
+				}
+			})
+			.withPackages([
+				{
+					name: "dep1",
+					main: "main.js",
+					version: "1.0.0"
+				},
+				{
+					name: "dep2",
+					main: "main.js",
+					version: "1.0.0"
+				}
+			])
+			.loader;
+	}
+
+	var loader1 = createLoader();
+	var loader2 = createLoader();
+
+	helpers.init(loader1)
+	.then(function(){
+		return loader1.normalize("dep1", "app@1.0.0#main");
+	})
+	.then(function(){
+		loader1._newLoader(loader2);
+		return loader2.normalize("dep2", "app@1.0.0#main");
+	})
+	.then(function(){
+		var context = loader2.npmContext;
+		var pkgInfo = context.pkgInfo;
+
+		assert.ok(pkgInfo["dep2@1.0.0"], "has dep2");
+		assert.ok(pkgInfo["dep1@1.0.0"], "has dep1 copied from loader1");
 	})
 	.then(done, helpers.fail(assert, done));
 });

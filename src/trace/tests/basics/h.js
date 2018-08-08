@@ -1,1 +1,7 @@
-export { foo } from './j';
+import { foo } from './j';
+
+function myFunction() {
+
+}
+
+export { foo };

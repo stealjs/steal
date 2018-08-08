@@ -1,4 +1,4 @@
-var System = require("./loader-sans-promises");
+var System = require("./loader");
 
 System.transpiler = "traceur";
 try {

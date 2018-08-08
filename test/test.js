@@ -59,7 +59,7 @@ if (supportsES) {
 			makeStealHTML({
 				baseUrl: "basics/basics.html",
 				scriptTagAttrs: {
-					src: "../steal.js",
+					src: "../steal-with-promises.js",
 					main: "basics/basics"
 				}
 			}),
@@ -69,24 +69,6 @@ if (supportsES) {
 
 	QUnit.test("jsx is enabled by default", function(assert) {
 		makeIframe("jsx/dev.html", assert);
-	});
-
-	QUnit.test("default bower_components config path", function(assert) {
-		writeIframe(
-			makeStealHTML({
-				baseUrl: "basics/basics.html",
-				scriptTagAttrs: {
-					src: "../bower_components/steal/steal.js",
-					main: "basics/basics"
-
-				}
-			}),
-			assert
-		);
-	});
-
-	QUnit.test("default bower_components without config still works", function(assert) {
-		makeIframe("basics/noconfig.html", assert);
 	});
 
 	QUnit.test("read config", function(assert) {
@@ -176,16 +158,6 @@ QUnit.test("production works with Babel circular dependencies", function(assert)
 	makeIframe("prod_circ/prod.html", assert);
 });
 
-if(System.promisesSupported) {
-	QUnit.test("Production bundle works with steal-sans-promises", function(assert) {
-		makeIframe("production/prod.html", assert);
-	});
-
-	QUnit.test("When the dev-bundle is missing we get a nice message", function(assert){
-		makeIframe("dev_bundle_err/dev.html", assert);
-	});
-}
-
 if (hasConsole) {
 	QUnit.test("steal.production.js logs errors", function(assert) {
 		makeIframe("production_err/prod.html", assert);
@@ -205,7 +177,7 @@ QUnit.test("Using path's * qualifier", function(assert) {
 		makeStealHTML({
 			baseUrl: "basics/basics.html",
 			scriptTagAttrs: {
-				src: "../steal.js",
+				src: "../steal-with-promises.js",
 				main: "../paths",
 				config: "../paths/config.js"
 			}
@@ -269,7 +241,7 @@ if (hasConsole) {
 
 	QUnit.test("No 'loaded twice' warnings when there is a loading error", function(assert){
 		makeIframe("load_module_twice_false_positive/on-error.html", assert);
-	})
+	});
 }
 
 QUnit.test("can add implicit deps to ES and CJS modules", function(assert) {
@@ -346,8 +318,64 @@ QUnit.test("Syntax errors bubble correctly during the build", function(assert){
 	makeIframe("syntax_errs/build.html", assert);
 });
 
+QUnit.test("Can import modules by the .mjs extension", function(assert){
+	makeIframe("mjs/dev.html", assert);
+});
+
+QUnit.test("Can tree-shake modules that only re-export from others", function(assert){
+	makeIframe("tree_shake/dev.html", assert);
+});
+
+QUnit.test("Can tree-shake anonymous modules", function(assert){
+	makeIframe("tree_shake/anon.html", assert);
+});
+
+QUnit.test("Loading order doesn't affect tree-shaking ability", function(assert){
+	makeIframe("tree_shake/race.html", assert);
+});
+
+QUnit.test("Cloned loaders get the tree-shaking configuration passed over", function(assert){
+	makeIframe("tree_shake/bundle.html", assert);
+});
+
+QUnit.test("Tree shaking complex apps with race conditions", function(assert){
+	makeIframe("tree-shake-complex/site.html", assert);
+});
+
+QUnit.test("Can tree shake multilevel re-export projects", function(assert){
+	makeIframe("tree_shake_reexport/dev.html", assert);
+});
+
+QUnit.test("Doesn't tree shake export * modules when they are the main", function(assert){
+	makeIframe("tree_shake_reexport/main.html", assert);
+});
+
+QUnit.test("Able to tree shake modules that only use export *", function(assert){
+	makeIframe("tree_shake_reexport/bundle.html", assert);
+});
+
+QUnit.test("Can disable tree shaking using the no-tree-shaking attribute", function(assert){
+	makeIframe("tree_shake_reexport/no-tree-shaking.html", assert);
+});
+
+QUnit.test("Can disable tree shaking using treeShaking: false", function(assert){
+	makeIframe("tree_shake_reexport/tree-shaking-false.html", assert);
+});
+
+QUnit.test("Can replace loads midway through the process", function(assert){
+	makeIframe("replace/site.html", assert);
+});
+
+QUnit.test("Warning when main is not provided", function(assert){
+	makeIframe("main-warn/test.html", assert);
+});
+
 QUnit.test("CommonJS module with ES inside of comments loads", function(assert){
 	makeIframe("cjs_export_default/dev.html", assert);
+});
+
+QUnit.test("Importing http(s) and // modules", function(assert){
+	makeIframe("http_spec/dev.html", assert);
 });
 
 QUnit.module("steal startup and config");
@@ -418,4 +446,8 @@ QUnit.test("deps bundle loads AFTER configMain", function(assert) {
 
 QUnit.test("dev bundle loads BEFORE configMain", function(assert) {
 	makeIframe("dev_bundles/dev.html", assert);
+});
+
+QUnit.test("When the dev-bundle is missing we get a nice message", function(assert){
+	makeIframe("dev_bundle_err/dev.html", assert);
 });

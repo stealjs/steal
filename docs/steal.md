@@ -24,7 +24,6 @@ Steal works slightly differently depending on how it is installed.  There
 are three ways to install Steal:
 
  - [npm](#section_npmbasics)
- - [bower](#section_Bowerbasics)
  - [download](#section_Downloadbasics)
 
 ## npm basics
@@ -185,7 +184,7 @@ configuration values.  Configuration values can be set in three ways:
           steal = {main: "myapp"};
         </script>
         <script src="../path/to/steal/steal.js"></script>
-   
+
  - Attributes on the steal.js script tag like:
   
         <script src="../path/to/steal/steal.js"
@@ -197,8 +196,8 @@ configuration values.  Configuration values can be set in three ways:
         steal.config({
           paths: {"can/*" : "http://canjs.com/release/2.0.1/can/*"}
         })
-        
-   If you are using bower or npm, your app's bower.json or package.json will be loaded automatically. Steal configuration happens in their `steal` properties:
+
+   If you are using npm, your app's package.json will be loaded automatically. Steal configuration happens in their `steal` properties:
    
         {
           "name": "myapp",
@@ -221,14 +220,14 @@ configPath's parent directory.  This would load _config.js_ prior to
 loading _../myapp.js_.
 
 When _steal.js_ loads, it sets [config.stealPath stealPath].  [config.stealPath stealPath] sets default values
-for [config.baseURL baseURL] and [config.configPath configPath]. If _steal.js_ is in _bower_components_,
-[config.configPath] defaults to _bower_components_ parent folder. So if you write:
+for [config.baseURL baseURL] and [config.configPath configPath]. If _steal.js_ is in _node_modules_,
+[config.configPath] defaults to _node_modules_ parent folder. So if you write:
 
-    <script src="../../bower_components/steal/steal.js"
+    <script src="../../node_modules/steal/steal.js"
             main="myapp">
     </script>
 
-This will load `../../bower.json` before it loads `../../myapp.js`.
+This will load `../../package.json` before it loads `../../myapp.js`.
 
 ## Writing Modules
 
