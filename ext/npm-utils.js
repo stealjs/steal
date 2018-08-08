@@ -147,8 +147,14 @@ var utils = {
 				if(descriptor.modulePath) {
 					modulePath = descriptor.modulePath.substr(0,2) === "./" ? descriptor.modulePath.substr(2) : descriptor.modulePath;
 				}
+
+				var version = descriptor.version;
+				if(version) {
+					version = encodeURIComponent(decodeURIComponent(version));
+				}
+
 				return descriptor.packageName
-					+ (descriptor.version ? '@' + descriptor.version : '')
+					+ (version ? '@' + version : '')
 					+ (modulePath ? '#' + modulePath : '')
 					+ (descriptor.plugin ? descriptor.plugin : '');
 			}
