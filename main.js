@@ -1224,7 +1224,8 @@ addStealExtension(function(loader) {
 					babelPlugins.push(treeShakePlugin.bind(null, loader, load));
 				}
 				var code = babel.transform(load.source, {
-					plugins: babelPlugins
+					plugins: babelPlugins,
+					compact: false
 				}).code;
 
 				// If everything is tree shaken still mark as ES6
