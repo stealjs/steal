@@ -7849,6 +7849,8 @@ addStealExtension(function (loader) {
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
 	setIfNotPresent(System.paths,jsBundlesNameGlob, "dist/bundles/*.js");
+	var less = System.global.less || (System.global.less = {});
+	less.async = true;
 
 	var configSetter = function(order){
 		return {
