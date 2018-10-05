@@ -5523,7 +5523,17 @@ addStealExtension(function (loader) {
 		}
 	}
 
+	var _supportsProto = (function(){
+		var foo = {};
+		foo.__proto__ = { bar: "baz" };
+		return foo.bar === "baz";
+	})();
+
 	loader.loadCodeFrame = function(){
+		if(!_supportsProto) {
+			return Promise.resolve();
+		}
+
 		if(!this.global.process) {
 			this.global.process = { argv: '', env: {} };
 		}
