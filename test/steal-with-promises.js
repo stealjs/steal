@@ -3774,7 +3774,14 @@ function core(loader) {
   };
 
   // support the empty module, as a concept
-  loader.set('@empty', loader.newModule({}));
+  var emptyNamespace = {};
+  Object.defineProperty(emptyNamespace, "__esModule", {
+	  enumerable: false,
+	  configurable: true,
+	  writable: false,
+	  value: true
+  })
+  loader.set('@empty', loader.newModule(emptyNamespace));
 
   // include the node require since we're overriding it
   if (typeof require != 'undefined')

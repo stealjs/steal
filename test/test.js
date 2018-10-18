@@ -67,6 +67,20 @@ if (supportsES) {
 		);
 	});
 
+	QUnit.test("@empty appears to be an ES module", function(assert) {
+		var empty = System.get("@empty");
+
+		function _interopRequireDefault(obj) {
+			return obj && obj.__esModule ? obj : {
+				default: obj
+			};
+		}
+
+		var _empty = _interopRequireDefault(empty);
+
+		assert.equal(_empty["default"], undefined);
+	});
+
 	QUnit.test("jsx is enabled by default", function(assert) {
 		makeIframe("jsx/dev.html", assert);
 	});
