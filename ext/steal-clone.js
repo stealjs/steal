@@ -41,6 +41,14 @@ function cloneConfig(obj, isTopLevel) {
 		return clone;
 	}
 
+	if(obj instanceof Set) {
+		clone = new Set();
+		obj.forEach(function(item) {
+			clone.add(item);
+		});
+		return clone;
+	}
+
 	// instanceof fails to catch objects created with `null` as prototype
 	if (obj instanceof Object || toString.call(obj) === "[object Object]") {
 		clone = {};

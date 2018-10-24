@@ -376,6 +376,10 @@ QUnit.test("Can disable tree shaking using treeShaking: false", function(assert)
 	makeIframe("tree_shake_reexport/tree-shaking-false.html", assert);
 });
 
+QUnit.test("Using steal-clone with a tree-shaken dep tree", function(assert){
+	makeIframe("tree_shake/steal-clone.html", assert);
+});
+
 QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });
