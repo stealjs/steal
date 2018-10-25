@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Tree shaking with reexports</title>
+	<title>Tree shaking with steal-clone</title>
 </head>
 <body>
 	<script>
@@ -15,22 +15,23 @@
 		data-base-url="."
 		data-config="package.json!npm"></script>
 	<script>
-		function assertMain(mods) {
-			var main = mods[0];
-			if(typeof window.assert !== "undefined") {
-				assert.ok(main.Component);
-				assert.ok(main.DefineList);
-				assert.ok(main.DefineMap);
-				assert.ok(main.assign);
-				assert.ok(main.fixture);
-				assert.ok(main.stache);
-			} else {
-				console.log("main", main);
-			}
+		function runTests() {
+			return steal.loader.import("steal-clone", { name: steal.loader.main })
+			.then(function(clone) {
+				return clone({})
+				.import(steal.loader.main)
+				.then(function() {
+					if(window.assert) {
+						window.assert.ok(true, "It loaded");
+					} else {
+						console.log("it loaded successfully");
+					}
+				})
+			});
 		}
 
 		steal.done()
-		.then(assertMain)
+		.then(runTests)
 		.then(function(){
 			if(window.assert) {
 				window.done();
