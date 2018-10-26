@@ -7,7 +7,7 @@ bundles folder is located.
 @option {String} 
 
 A folder name that specifies the path to the production bundles.  By default,
-`bundlesPath` is `"dist/bundles"`. This path is relative to the page's [config.baseURL]. So, for example, if your script tag looks like:
+`bundlesPath` is `"dist/bundles"`. This path is relative to the page's [config.baseURL].
 
 @body
 
@@ -29,21 +29,21 @@ a `bundles/myapp` module is automatically configured to contain it:
 
 ```
 <script src="steal/steal.js"
-        config="./config.js"
         main="myapp"
         env="production"
         bundles-path="packages">
 </script>
 <script>
-	steal.config({
-		bundles: {
-			"bundles/myapp": ["myapp"]
-		},
-		paths: {
-			"bundles/*": "packages/*.js",
-			"bundles/*.css": "packages/*.css"
-		}
-	});
+  // Equivelant to:
+	//steal.config({
+	//	bundles: {
+	//		"bundles/myapp": ["myapp"]
+	//	},
+	//	paths: {
+	//		"bundles/*": "packages/*.js",
+	//		"bundles/*.css": "packages/*.css"
+	//	}
+	//});
 </script>
 ```
 
@@ -53,7 +53,7 @@ Often, `bundlesPath` should be the same value as what's passed in [steal-tools.b
 <script src="node_modules/steal/steal.js"
         main="myapp"
         env="production"
-        bundles-path="packages">
+        bundles-path="has-no-effect">
 </script>
 <script>
 	steal.config({
@@ -68,5 +68,5 @@ Often, `bundlesPath` should be the same value as what's passed in [steal-tools.b
 </script>
 ```
 
-If a path rule for `paths["bundles/*"]` or `paths["bundles/*.css"]`
+If path rules for `paths["bundles/*"]` or `paths["bundles/*.css"]`
 exist, `bundlesPath` will not overwrite them.
