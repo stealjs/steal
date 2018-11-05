@@ -36,8 +36,12 @@ addStealExtension(function(loader) {
 			});
 		}
 
-		load.metadata.usedExports = usedExports;
-		load.metadata.allExportsUsed = allUsed;
+		if(!loader.treeShakeConfig[load.name]) {
+			loader.treeShakeConfig[load.name] = Object.create(null);
+		}
+
+		load.metadata.usedExports = loader.treeShakeConfig[load.name].usedExports = usedExports;
+		load.metadata.allExportsUsed = loader.treeShakeConfig[load.name].allExportsUsed = allUsed;
 
 		return {
 			all: allUsed,
@@ -227,6 +231,10 @@ addStealExtension(function(loader) {
 						path.traverse(notShakeableVisitors, state);
 
 						load.metadata.treeShakable = state.treeShakable !== false;
+						if(!loader.treeShakeConfig[load.name]) {
+							loader.treeShakeConfig[load.name] = Object.create(null);
+						}
+						loader.treeShakeConfig[load.name].treeShakable = load.metadata.treeShakable;
 					}
 				},
 
@@ -324,21 +332,23 @@ addStealExtension(function(loader) {
 
 	// For the build, wrap the _newLoader hook. This is to copy config over
 	// that needs to exist for all loaders.
+	loader.treeShakeConfig = Object.create(null);
 	var newLoader = loader._newLoader || Function.prototype;
 	loader._newLoader = function(loader){
-		var loads = this._traceData.loads || {};
-		for(var moduleName in loads) {
-			var load = loads[moduleName];
-			if(load.metadata && load.metadata.usedExports) {
-				var metaConfig = Object.create(null);
-				metaConfig.treeShakable = load.metadata.treeShakable;
-				metaConfig.usedExports = new this.Set(load.metadata.usedExports);
-				metaConfig.allExportsUsed = load.metadata.allExportsUsed;
+		var treeShakeConfig = this.treeShakeConfig;
+		loader.treeShakeConfig = this.treeShakeConfig;
 
-				var config = {meta:{}};
-				config.meta[moduleName] = metaConfig;
-				loader.config(config);
-			}
+		for(var moduleName in treeShakeConfig) {
+			var moduleTreeShakeConfig = treeShakeConfig[moduleName];
+
+			var metaConfig = Object.create(null);
+			metaConfig.treeShakable = moduleTreeShakeConfig.treeShakable;
+			metaConfig.usedExports = new this.Set(moduleTreeShakeConfig.usedExports);
+			metaConfig.allExportsUsed = moduleTreeShakeConfig.allExportsUsed;
+
+			var config = {meta:{}};
+			config.meta[moduleName] = metaConfig;
+			loader.config(config);
 		}
 	};
 });
