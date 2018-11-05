@@ -30,14 +30,25 @@
 		}
 	}
 
-	steal.loader.systemName = "main";
-	steal.import("~/main").then(function(){
-		newSteal = steal.clone();
+	var lastSteal = steal;
+	function clone() {
+		newSteal = lastSteal.clone();
 
-		steal.loader._newLoader(newSteal.loader);
+		lastSteal.loader._newLoader(newSteal.loader);
 		newSteal.loader.systemName = "cloned";
+		lastSteal = newSteal;
+		return newSteal;
+	}
 
-		newSteal.import("~/bundle").then(checkEverything);
+	steal.loader.systemName = "main";
+	steal.import("~/main")
+	.then(function() {
+		// Import something that has less stuff.
+		// This tests that ~/main carries forward.
+		return clone().import("~/mod_a");
+	})
+	.then(function(){
+		return clone().import("~/bundle").then(checkEverything);
 	});
 </script>
 </body>
