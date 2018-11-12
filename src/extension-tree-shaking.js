@@ -273,6 +273,25 @@ addStealExtension(function(loader) {
 		};
 	}
 
+	// Collect syntax plugins, because we need to always include these.
+	var getSyntaxPlugins = (function(){
+		var plugins;
+		return function(babel) {
+			if(!plugins) {
+				plugins = [];
+				for(var p in babel.availablePlugins) {
+					if(p.indexOf("syntax-") === 0) {
+						plugins.push(babel.availablePlugins[p]);
+					}
+				}
+			}
+			return plugins;
+		};
+	})();
+
+
+
+
 	function applyBabelPlugin(load) {
 		var loader = this;
 		var pluginLoader = loader.pluginLoader || loader;
@@ -282,9 +301,8 @@ addStealExtension(function(loader) {
 			var babel = transpiler.Babel || transpiler.babel || transpiler;
 
 			try {
-				var babelPlugins = [
-					loader._getImportSpecifierPositionsPlugin.bind(null, load)
-				];
+				var babelPlugins = [].concat(getSyntaxPlugins(babel));
+				babelPlugins.push(loader._getImportSpecifierPositionsPlugin.bind(null, load));
 				if(treeShakingEnabled(loader, load)) {
 					babelPlugins.push(treeShakePlugin.bind(null, loader, load));
 				}
