@@ -100,8 +100,14 @@ addStealExtension(function(loader) {
 				name
 			);
 
+			var parentIsESModule = parentLoad.metadata.format === "es6";
 			var parentImportNames = parentLoad.metadata.importNames;
 			var parentExportNames = parentLoad.metadata.exportNames;
+
+			// If this isn't an ES module then return true (indicating all are used)
+			if(!parentIsESModule) {
+				return true;
+			}
 
 			if(parentImportNames[parentSpecifier]) {
 				var names = parentImportNames[parentSpecifier];
@@ -148,16 +154,16 @@ addStealExtension(function(loader) {
 	 */
 	function reexecuteIfNecessary(load, parentName) {
 		var usedExports = [];
-		walkExports.call(this, load, function(exps) {
+		var allExportsUsed = walkExports.call(this, load, function(exps) {
 			usedExports.push.apply(usedExports, exps);
 		});
 
 		// Given the parent's used exports, loop over and see if any are not
 		// within the usedExports set.
-		var hasNewExports = false;
+		var hasNewExports = allExportsUsed;
 
 		// If there isn't a usedExports Set, we have yet to check.
-		if(load.metadata.usedExports) {
+		if(!allExportsUsed && load.metadata.usedExports) {
 			for (var i = 0; i < usedExports.length; i++) {
 				if (!load.metadata.usedExports.has(usedExports[i])) {
 					hasNewExports = true;
