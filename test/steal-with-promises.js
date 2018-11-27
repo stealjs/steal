@@ -7186,6 +7186,13 @@ addStealExtension(function(loader) {
 		var index = 0;
 		var cont = true;
 
+		// Special case for immediate parents, as these are the ones
+		// That determine when all exports are used.
+		var immediateParents = Object.create(null);
+		stack.forEach(function(name) {
+			immediateParents[name] = true;
+		});
+
 		do {
 			index++;
 			var parentName = stack[index];
@@ -7211,12 +7218,12 @@ addStealExtension(function(loader) {
 			var parentImportNames = parentLoad.metadata.importNames;
 			var parentExportNames = parentLoad.metadata.exportNames;
 
-			// If this is an ES module then return true (indicating all are used)
-			if(!parentIsESModule) {
+			// If this isn't an ES module then return true (indicating all are used)
+			if(!parentIsESModule && immediateParents[parentName]) {
 				return true;
 			}
 
-			if(parentImportNames[parentSpecifier]) {
+			if(parentImportNames && parentImportNames[parentSpecifier]) {
 				var names = parentImportNames[parentSpecifier];
 				if(namesMap) {
 					var parentsNames = names;
@@ -7232,7 +7239,7 @@ addStealExtension(function(loader) {
 				cont = cb(names) !== false;
 			}
 
-			if(parentExportNames[parentSpecifier]) {
+			if(parentExportNames && parentExportNames[parentSpecifier]) {
 				var names = parentExportNames[parentSpecifier];
 				var parentDependants = this.getDependants(parentName);
 				// Named exports
