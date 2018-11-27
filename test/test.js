@@ -380,6 +380,10 @@ QUnit.test("Using steal-clone with a tree-shaken dep tree", function(assert){
 	makeIframe("tree_shake/steal-clone.html", assert);
 });
 
+QUnit.test("Tree-shaking modules with non-ES modules in the parent tree", function(assert){
+	makeIframe("tree_shake_amd_parent/dev.html", assert);
+});
+
 QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });

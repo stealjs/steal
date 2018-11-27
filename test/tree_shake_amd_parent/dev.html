@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking with AMD parent</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		main="~/main"
+		src="../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"></script>
+	<script>
+		function assertMain() {
+			var main = steal.loader.get("shake@1.0.0#main");
+			var aMod = steal.loader.get("shake@1.0.0#a");
+			var bMod = steal.loader.get("shake@1.0.0#b");
+
+			if (typeof window.assert !== "undefined") {
+				window.assert.equal(aMod.a(), "a", "a not tree shaken");
+				window.assert.equal(bMod.b(), "b", "b not tree shaken");
+			} else {
+				console.log("a", aMod.a());
+				console.log("b", bMod.b());
+			}
+		}
+
+		steal.done()
+		.then(assertMain)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>

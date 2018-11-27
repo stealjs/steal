@@ -1022,6 +1022,13 @@ addStealExtension(function(loader) {
 		var index = 0;
 		var cont = true;
 
+		// Special case for immediate parents, as these are the ones
+		// That determine when all exports are used.
+		var immediateParents = Object.create(null);
+		stack.forEach(function(name) {
+			immediateParents[name] = true;
+		});
+
 		do {
 			index++;
 			var parentName = stack[index];
@@ -1043,10 +1050,16 @@ addStealExtension(function(loader) {
 				name
 			);
 
+			var parentIsESModule = parentLoad.metadata.format === "es6";
 			var parentImportNames = parentLoad.metadata.importNames;
 			var parentExportNames = parentLoad.metadata.exportNames;
 
-			if(parentImportNames[parentSpecifier]) {
+			// If this isn't an ES module then return true (indicating all are used)
+			if(!parentIsESModule && immediateParents[parentName]) {
+				return true;
+			}
+
+			if(parentImportNames && parentImportNames[parentSpecifier]) {
 				var names = parentImportNames[parentSpecifier];
 				if(namesMap) {
 					var parentsNames = names;
@@ -1062,7 +1075,7 @@ addStealExtension(function(loader) {
 				cont = cb(names) !== false;
 			}
 
-			if(parentExportNames[parentSpecifier]) {
+			if(parentExportNames && parentExportNames[parentSpecifier]) {
 				var names = parentExportNames[parentSpecifier];
 				var parentDependants = this.getDependants(parentName);
 				// Named exports
@@ -1091,16 +1104,16 @@ addStealExtension(function(loader) {
 	 */
 	function reexecuteIfNecessary(load, parentName) {
 		var usedExports = [];
-		walkExports.call(this, load, function(exps) {
+		var allExportsUsed = walkExports.call(this, load, function(exps) {
 			usedExports.push.apply(usedExports, exps);
 		});
 
 		// Given the parent's used exports, loop over and see if any are not
 		// within the usedExports set.
-		var hasNewExports = false;
+		var hasNewExports = allExportsUsed;
 
 		// If there isn't a usedExports Set, we have yet to check.
-		if(load.metadata.usedExports) {
+		if(!allExportsUsed && load.metadata.usedExports) {
 			for (var i = 0; i < usedExports.length; i++) {
 				if (!load.metadata.usedExports.has(usedExports[i])) {
 					hasNewExports = true;
