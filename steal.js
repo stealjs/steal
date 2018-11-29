@@ -2639,9 +2639,9 @@ function core(loader) {
  * load.metadata.some = 'meta' will now be set on the load record.
  *
  * The same meta could be set with a my/module.js file containing:
- * 
+ *
  * my/module.js
- *   "some meta"; 
+ *   "some meta";
  *   "another meta";
  *   console.log('this is my/module');
  *
@@ -2661,7 +2661,7 @@ function core(loader) {
  *
  * "format amd";
  * define(...);
- * 
+ *
  */
 
 function meta(loader) {
@@ -2698,7 +2698,7 @@ function meta(loader) {
         var firstChar = metaParts[i].substr(0, 1);
         if (metaParts[i].substr(len - 1, 1) == ';')
           len--;
-      
+
         if (firstChar != '"' && firstChar != "'")
           continue;
 
@@ -2717,7 +2717,7 @@ function meta(loader) {
     }
     // config meta overrides
     setConfigMeta(this, load);
-    
+
     return loaderTranslate.call(this, load);
   }
 }
@@ -4541,10 +4541,10 @@ function bundles(loader) {
 
 /*
  * Dependency Tree Cache
- * 
- * Allows a build to pre-populate a dependency trace tree on the loader of 
+ *
+ * Allows a build to pre-populate a dependency trace tree on the loader of
  * the expected dependency tree, to be loaded upfront when requesting the
- * module, avoinding the n round trips latency of module loading, where 
+ * module, avoinding the n round trips latency of module loading, where
  * n is the dependency tree depth.
  *
  * eg:
@@ -4553,8 +4553,8 @@ function bundles(loader) {
  *  'normalized': ['another'],
  *  'deps': ['tree']
  * };
- * 
- * System.import('app') 
+ *
+ * System.import('app')
  * // simultaneously starts loading all of:
  * // 'normalized', 'deps', 'another', 'tree'
  * // before "app" source is even loaded
@@ -4581,7 +4581,7 @@ function depCache(loader) {
     return loaderLocate.call(loader, load);
   }
 }
-  
+
 
 core(System);
 meta(System);

@@ -44,16 +44,18 @@ QUnit.test("Does warn when a JSON module cannot parse", function(assert) {
 
 	steal.import("src/json/test/jsons/empty.json").then(function(){
 		assert.equal(teardown(), 1, "one warning for bad json");
-		done();
-	});
+	}, function(err) {
+		assert.ok(/Unable to parse/.test(err.message), "Firefox reject with a better error message");
+	})
+	.then(done);
 });
 
 QUnit.test("In production, json can be loaded from bundle without warnings", function(assert) {
 	var done = assert.async();
 	var teardown = helpers.willWarn(/Error parsing/);
 
-	steal.loader.paths["bundle-a"] = "src/json/test/bundles/bundle-a";
-	steal.loader.paths["bundle-b"] = "src/json/test/bundles/bundle-b";
+	steal.loader.paths["bundle-a"] = "src/json/test/bundles/bundle-a.js";
+	steal.loader.paths["bundle-b"] = "src/json/test/bundles/bundle-b.js";
 	steal.loader.bundles["bundle-a"] = ["form-fields"];
 	steal.import("form-fields").then(function(){
 		assert.equal(teardown(), 0, "no warnings");
