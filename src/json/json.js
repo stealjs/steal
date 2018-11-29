@@ -81,6 +81,7 @@ addStealExtension(function (loader) {
       try {
         return JSON.parse(load.source);
       } catch(e) {
+		var warn = console.warn.bind(console);
 		if(e instanceof SyntaxError) {
 			var loc = this._parseSyntaxErrorLocation(e, load);
 

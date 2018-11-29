@@ -2157,7 +2157,7 @@ function plugins(loader) {
 /*
   System bundles
 
-  Allows a bundle module to be specified which will be dynamically 
+  Allows a bundle module to be specified which will be dynamically
   loaded before trying to load a given module.
 
   For example:
@@ -2208,6 +2208,10 @@ function bundles(loader) {
         return loader.load(normalized);
       })
       .then(function() {
+		  if(loader.defined[load.name] && !load.metadata.format) {
+			  load.metadata.format = "defined";
+		  }
+
         return '';
       });
     }
