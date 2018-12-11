@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>stream circular deps</title>
+<script>
+	window.done = window.parent.done;
+	window.assert = window.parent.assert;
+</script>
+<script src="../../steal-with-promises.js"
+	data-config="./stealconfig.js"
+	data-main="app"></script>
+
+<script>
+	steal.done()
+	.then(function(){
+		if(window.assert) {
+			var One = window.APP.One;
+
+			assert.equal(typeof One, "function");
+			assert.equal(typeof One.Two, "function");
+			window.done();
+		} else {
+			console.log(window.APP);
+		}
+	}, function(err) {
+		if(window.assert) {
+			window.assert.ok(false, err);
+			window.done();
+		} else {
+			throw err;
+		}
+	})
+</script>

@@ -268,7 +268,11 @@ QUnit.test("can load a bundle with an amd module depending on a global", functio
 
 QUnit.test("AMD CommonJS detection works with lodash", function(assert) {
 	makeIframe("amd_require/dev.html", assert);
-})
+});
+
+QUnit.test("AMD circular dependencies when using CJS style", function(assert) {
+	makeIframe("stream-circ/dev.html", assert);
+});
 
 QUnit.test("envs config works", function(assert) {
 	makeIframe("envs/envs.html", assert);

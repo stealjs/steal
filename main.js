@@ -4044,6 +4044,8 @@ function amd(loader) {
       var deps = modDeps;
       var factory = modFactory;
 	  var isESModule = false;
+	  var isCJS = false;
+	  var firstSpecialIndex = -1;
       if (typeof name != 'string') {
         factory = deps;
         deps = name;
@@ -4067,6 +4069,8 @@ function amd(loader) {
       var requireIndex, exportsIndex, moduleIndex;
 
       if ((requireIndex = indexOf.call(deps, 'require')) != -1) {
+		  isCJS = true;
+		  firstSpecialIndex = requireIndex;
 
         deps.splice(requireIndex, 1);
 
@@ -4077,6 +4081,10 @@ function amd(loader) {
 
 
       if ((exportsIndex = indexOf.call(deps, 'exports')) != -1) {
+		  if(exportsIndex > firstSpecialIndex) {
+			  firstSpecialIndex = exportsIndex;
+		  }
+
 		  deps.splice(exportsIndex, 1);
 
 		  // Detect esModule
@@ -4087,16 +4095,31 @@ function amd(loader) {
 	  }
 
 
-      if ((moduleIndex = indexOf.call(deps, 'module')) != -1)
-        deps.splice(moduleIndex, 1);
+      if ((moduleIndex = indexOf.call(deps, 'module')) != -1) {
+		  if(moduleIndex > firstSpecialIndex) {
+			  firstSpecialIndex = moduleIndex;
+		  }
+		  deps.splice(moduleIndex, 1);
+	  }
+
 
       var define = {
         deps: deps,
+		executingRequire: isCJS,
         execute: function(require, exports, module) {
 
           var depValues = [];
-          for (var i = 0; i < deps.length; i++)
-            depValues.push(require(deps[i]));
+
+		  if(!define.executingRequire) {
+			  for (var i = 0; i < deps.length; i++)
+				depValues.push(require(deps[i]));
+		  } else if(firstSpecialIndex > 0 && deps.length) {
+			  var currentIndex = 0;
+			  do {
+				  depValues.push(require(deps[currentIndex]));
+				  currentIndex++;
+			  } while(currentIndex < firstSpecialIndex);
+		  }
 
           module.uri = loader.baseURL + module.id;
 
@@ -4168,7 +4191,7 @@ function amd(loader) {
         defineBundle = true;
 
         // define the module through the register registry
-        loader.register(name, define.deps, false, define.execute);
+        loader.register(name, define.deps, isCJS, define.execute);
       }
 	  if(loader.defined[name]) {
 		  loader.defined[name].isESModule = isESModule;
