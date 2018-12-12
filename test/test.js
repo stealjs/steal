@@ -384,6 +384,10 @@ QUnit.test("Tree-shaking modules with non-ES modules in the parent tree", functi
 	makeIframe("tree_shake_amd_parent/dev.html", assert);
 });
 
+QUnit.test("Tree-shaking a module that reexports from another local", function(assert){
+	makeIframe("tree_shake_reexport/local.html", assert);
+})
+
 QUnit.test("Can replace loads midway through the process", function(assert){
 	makeIframe("replace/site.html", assert);
 });

@@ -1022,6 +1022,11 @@ addStealExtension(function(loader) {
 		var index = 0;
 		var cont = true;
 
+		// If there is only one item in the stack, this module has no parents yet.
+		if(stack.length === 1) {
+			return true;
+		}
+
 		// Special case for immediate parents, as these are the ones
 		// That determine when all exports are used.
 		var immediateParents = Object.create(null);

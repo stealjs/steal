@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking with reexports</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		main="~/local"
+		src="../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"></script>
+	<script>
+		function assertCore(mods) {
+			var main = mods[0];
+			if(typeof window.assert !== "undefined") {
+				assert.ok(main.DefineList, "Got DefineList");
+				assert.ok(main.DefineMap, "Got DefineMap");
+				assert.ok(main.stache, "got stache");
+			} else {
+				console.log("APP", main);
+			}
+		}
+
+		steal.done()
+		.then(assertCore)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>
