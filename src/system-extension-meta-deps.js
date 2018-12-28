@@ -1,4 +1,4 @@
-addStealExtension(function(loader) {
+addStealExtension(function addMetaDeps(loader) {
 	var superTranspile = loader.transpile;
 	var superDetermineFormat = loader._determineFormat;
 

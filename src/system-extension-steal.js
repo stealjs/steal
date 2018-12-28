@@ -1,6 +1,6 @@
 // SystemJS Steal Format
 // Provides the Steal module format definition.
-addStealExtension(function (loader) {
+addStealExtension(function addStealFormat(loader) {
   // Steal Module Format Detection RegEx
   // steal(module, ...)
   var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;

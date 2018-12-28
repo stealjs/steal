@@ -7,7 +7,7 @@
  * <script type="text/steal-module">...</script>
  * <script type="steal-module">...</script>
  */
-addStealExtension(function(loader) {
+addStealExtension(function addStealModule(loader) {
 	// taken from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
 	function completed() {
 		document.removeEventListener("DOMContentLoaded", completed, false);

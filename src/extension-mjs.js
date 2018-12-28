@@ -1,4 +1,4 @@
-addStealExtension(function(loader){
+addStealExtension(function addMJS(loader){
 	var mjsExp = /\.mjs$/;
 	var jsExp = /\.js$/;
 

@@ -1,7 +1,7 @@
 // Steal Cache-Bust Extension
 // if enabled, Steal Cache-Bust will add a
 // cacheKey and cacheVersion to the required file address
-addStealExtension(function (loader) {
+addStealExtension(function addCacheBust(loader) {
 	var fetch = loader.fetch;
 
 	loader.fetch = function(load) {

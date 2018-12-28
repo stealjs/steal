@@ -1,7 +1,7 @@
 // Steal Locate Extension
 // normalize a given path e.g.
 // "path/to/folder/" -> "path/to/folder/folder"
-addStealExtension(function (loader) {
+addStealExtension(function addForwardSlash(loader) {
   var normalize = loader.normalize;
   var npmLike = /@.+#.+/;
 
