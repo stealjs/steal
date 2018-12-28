@@ -2,7 +2,7 @@
  * Auto-main warning. The main is no longer automatically loaded in development.
  * This warns the user in cases where they likely forgot to set a main.
  **/
-addStealExtension(function (loader) {
+addStealExtension(function addNoMainWarn(loader) {
 	loader._warnNoMain = function(ms){
 		var loader = this;
 		this._noMainTimeoutId = setTimeout(function(){

@@ -339,7 +339,7 @@ var makeSteal = function(System){
 // 		foo.bar! -> foo.bar!path/to/bar
 // 2. if you load a javascript file e.g. require("./foo.js")
 // 		normalize will remove the ".js" to load the module
-addStealExtension(function (loader) {
+addStealExtension(function addExt(loader) {
   loader.ext = {};
 
   var normalize = loader.normalize,
@@ -371,7 +371,7 @@ addStealExtension(function (loader) {
 // Steal Locate Extension
 // normalize a given path e.g.
 // "path/to/folder/" -> "path/to/folder/folder"
-addStealExtension(function (loader) {
+addStealExtension(function addForwardSlash(loader) {
   var normalize = loader.normalize;
   var npmLike = /@.+#.+/;
 
@@ -396,7 +396,7 @@ addStealExtension(function (loader) {
 
 // override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
 // in resources loaded by supporting plugins
-addStealExtension(function (loader) {
+addStealExtension(function addLocateProtocol(loader) {
   /**
    * @hide
    * @function normalizeAndLocate
@@ -492,7 +492,7 @@ addStealExtension(function (loader) {
   };
 });
 
-addStealExtension(function (loader) {
+addStealExtension(function addContextual(loader) {
   loader._contextualModules = {};
 
   loader.setContextual = function(moduleName, definer){
@@ -550,7 +550,7 @@ addStealExtension(function (loader) {
  * <script type="text/steal-module">...</script>
  * <script type="steal-module">...</script>
  */
-addStealExtension(function(loader) {
+addStealExtension(function addStealModule(loader) {
 	// taken from https://github.com/ModuleLoader/es6-module-loader/blob/master/src/module-tag.js
 	function completed() {
 		document.removeEventListener("DOMContentLoaded", completed, false);
@@ -589,7 +589,7 @@ addStealExtension(function(loader) {
 
 // SystemJS Steal Format
 // Provides the Steal module format definition.
-addStealExtension(function (loader) {
+addStealExtension(function addStealFormat(loader) {
   // Steal Module Format Detection RegEx
   // steal(module, ...)
   var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
@@ -670,7 +670,8 @@ addStealExtension(function (loader) {
     return loaderInstantiate.call(loader, load);
   };
 });
-addStealExtension(function(loader) {
+
+addStealExtension(function addMetaDeps(loader) {
 	var superTranspile = loader.transpile;
 	var superDetermineFormat = loader._determineFormat;
 
@@ -705,7 +706,7 @@ addStealExtension(function(loader) {
 	};
 });
 
-addStealExtension(function (loader) {
+addStealExtension(function addStackTrace(loader) {
 	function StackTrace(message, items) {
 		this.message = message;
 		this.items = items;
@@ -931,7 +932,7 @@ addStealExtension(function (loader) {
 	};
 });
 
-addStealExtension(function(loader){
+addStealExtension(function addPrettyName(loader){
 	loader.prettyName = function(load){
 		var pnm = load.metadata.parsedModuleName;
 		if(pnm) {
@@ -941,7 +942,7 @@ addStealExtension(function(loader){
 	};
 });
 
-addStealExtension(function(loader) {
+addStealExtension(function addTreeShaking(loader) {
 	function treeShakingEnabled(loader, load) {
 		return !loader.noTreeShaking && loader.treeShaking !== false;
 	}
@@ -1332,7 +1333,7 @@ addStealExtension(function(loader) {
 	};
 });
 
-addStealExtension(function(loader){
+addStealExtension(function addMJS(loader){
 	var mjsExp = /\.mjs$/;
 	var jsExp = /\.js$/;
 
@@ -1355,10 +1356,6 @@ addStealExtension(function(loader){
 });
 
 addStealExtension(function applyTraceExtension(loader) {
-	if(loader._extensions) {
-		loader._extensions.push(applyTraceExtension);
-	}
-
 	loader._traceData = {
 		loads: {},
 		parentMap: {}
@@ -1574,7 +1571,7 @@ addStealExtension(function applyTraceExtension(loader) {
 
 // Steal JSON Format
 // Provides the JSON module format definition.
-addStealExtension(function (loader) {
+addStealExtension(function addJSON(loader) {
   var jsonExt = /\.json$/i;
   var jsExt = /\.js$/i;
 
@@ -1678,7 +1675,7 @@ addStealExtension(function (loader) {
 // Steal Cache-Bust Extension
 // if enabled, Steal Cache-Bust will add a
 // cacheKey and cacheVersion to the required file address
-addStealExtension(function (loader) {
+addStealExtension(function addCacheBust(loader) {
 	var fetch = loader.fetch;
 
 	loader.fetch = function(load) {
@@ -1694,6 +1691,7 @@ addStealExtension(function (loader) {
 		return fetch.call(this, load);
 	};
 });
+
 	// Overwrites System.config with setter hooks
 	var setterConfig = function(loader, configOrder, configSpecial){
 		var oldConfig = loader.config;
@@ -2123,7 +2121,7 @@ addStealExtension(function (loader) {
 
 // Steal Env Extension
 // adds some special environment functions to the loader
-addStealExtension(function (loader) {
+addStealExtension(function addEnv(loader) {
 
 	loader.getEnv = function(){
 		var envParts = (this.env || "").split("-");
@@ -2144,6 +2142,7 @@ addStealExtension(function (loader) {
 		return this.getPlatform() === name;
 	};
 });
+
 	// get config by the URL query
 	// like ?main=foo&env=production
 	// formally used for Webworkers

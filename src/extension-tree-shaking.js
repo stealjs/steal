@@ -1,4 +1,4 @@
-addStealExtension(function(loader) {
+addStealExtension(function addTreeShaking(loader) {
 	function treeShakingEnabled(loader, load) {
 		return !loader.noTreeShaking && loader.treeShaking !== false;
 	}

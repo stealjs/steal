@@ -1,6 +1,6 @@
 // Steal Env Extension
 // adds some special environment functions to the loader
-addStealExtension(function (loader) {
+addStealExtension(function addEnv(loader) {
 
 	loader.getEnv = function(){
 		var envParts = (this.env || "").split("-");

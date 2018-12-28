@@ -10,9 +10,9 @@ var isWorker = typeof WorkerGlobalScope !== "undefined" && (self instanceof Work
 var isElectron = isNode && !!process.versions.electron;
 var isBrowser = typeof window !== "undefined" && (!isNode || isElectron) && !isWorker;
 
-exports.addExtension = function(System){
+exports.addExtension = function addNpmExtension(System){
 	if (System._extensions) {
-		System._extensions.push(exports.addExtension);
+		System._extensions.push(addNpmExtension);
 	}
 	/**
 	 * Normalize has to deal with a "tricky" situation.  There are module names like

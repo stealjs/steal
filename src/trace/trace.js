@@ -1,8 +1,4 @@
 addStealExtension(function applyTraceExtension(loader) {
-	if(loader._extensions) {
-		loader._extensions.push(applyTraceExtension);
-	}
-
 	loader._traceData = {
 		loads: {},
 		parentMap: {}

@@ -7,7 +7,7 @@
 // 		foo.bar! -> foo.bar!path/to/bar
 // 2. if you load a javascript file e.g. require("./foo.js")
 // 		normalize will remove the ".js" to load the module
-addStealExtension(function (loader) {
+addStealExtension(function addExt(loader) {
   loader.ext = {};
 
   var normalize = loader.normalize,

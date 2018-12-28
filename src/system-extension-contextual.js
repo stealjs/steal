@@ -1,4 +1,4 @@
-addStealExtension(function (loader) {
+addStealExtension(function addContextual(loader) {
   loader._contextualModules = {};
 
   loader.setContextual = function(moduleName, definer){

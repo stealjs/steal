@@ -1,6 +1,6 @@
 // override loader.translate to rewrite 'locate://' & 'pkg://' path schemes found
 // in resources loaded by supporting plugins
-addStealExtension(function (loader) {
+addStealExtension(function addLocateProtocol(loader) {
   /**
    * @hide
    * @function normalizeAndLocate

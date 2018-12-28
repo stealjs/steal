@@ -3,7 +3,7 @@
  *
  * Multiple module instantiation might cause unexpected side effects
  */
-addStealExtension(function(loader) {
+addStealExtension(function addModuleLoadedWarn(loader) {
 	var superInstantiate = loader.instantiate;
 
 	var warn = typeof console === "object" ?

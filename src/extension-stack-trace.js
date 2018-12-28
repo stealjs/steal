@@ -1,4 +1,4 @@
-addStealExtension(function (loader) {
+addStealExtension(function addStackTrace(loader) {
 	function StackTrace(message, items) {
 		this.message = message;
 		this.items = items;

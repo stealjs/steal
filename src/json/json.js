@@ -1,6 +1,6 @@
 // Steal JSON Format
 // Provides the JSON module format definition.
-addStealExtension(function (loader) {
+addStealExtension(function addJSON(loader) {
   var jsonExt = /\.json$/i;
   var jsExt = /\.js$/i;
 
