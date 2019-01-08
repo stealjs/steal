@@ -532,6 +532,41 @@ QUnit.test("Imports git+ssh URLs that contain a hash", function(assert) {
 	.then(done, helpers.fail(assert, done));
 });
 
+QUnit.test("Can load a module loading an exact version of an npm module", function(assert) {
+	var done = assert.async();
+
+	var loader = helpers.clone()
+		.rootPackage({
+			name: "app",
+			main: "main.js",
+			version: "1.0.0",
+			dependencies: {
+				"debug": "3.0.0"
+			}
+		})
+		.withPackages([
+			{
+				name: "dep",
+				main: "main.js",
+				version: "1.0.0",
+				dependencies: {
+					"debug": "2.0.0"
+				}
+			}
+		])
+		.withModule("debug@2.0.0#index", "module.exports='works';")
+		.withModule("app@1.0.0#main", "module.exports=require('debug@2.0.0#index');")
+		.loader;
+
+	helpers.init(loader).then(function(){
+		return loader["import"]("app");
+	})
+	.then(function(mod){
+		assert.equal(mod, "works", "It worked!");
+	})
+	.then(done, helpers.fail(assert, done));
+});
+
 QUnit.module("Error messages and warnings");
 
 QUnit.test("importing a package with an unsaved dependency", function(assert) {

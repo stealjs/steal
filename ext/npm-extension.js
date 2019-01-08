@@ -36,8 +36,15 @@ exports.addExtension = function addNpmExtension(System){
 
 		var hasNoParent = !parentName;
 		var nameIsRelative = utils.path.isRelative(name);
+		var nameIsNpmModule = utils.moduleName.isNpm(name);
 		var parentIsNpmModule = utils.moduleName.isNpm(parentName);
 		var identifierEndsWithSlash = utils.path.endsWithSlash(name);
+
+		// If this is an npm module name already, we don't need to re-resolve it.
+		if(nameIsNpmModule && parentModuleName) {
+			return oldNormalize.call(this, name, parentName, parentAddress,
+									 pluginNormalize);
+		}
 
 		// If this is a relative module name and the parent is not an npm module
 		// we can skip all of this logic.
