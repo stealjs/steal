@@ -2,7 +2,7 @@ var QUnit = require("steal-qunit");
 
 QUnit.config.testTimeout = 30000;
 
-// require("src/cache-bust/test/");
+require("src/cache-bust/test/");
 require("src/env/test/");
 require("src/json/test/");
 require("src/trace/trace_test");
