@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Duplicate Import Warning</title>
+</head>
+<body>
+	<script src="../../steal.js" config="./package.json!npm">
+		var done = window.parent.done;
+		var assert = window.parent.assert;
+
+		if (assert) {
+			steal
+				.import("~/dups")
+				.then(function resolved() {
+					assert.ok(false, "it should not resolve");
+					done();
+				})
+				.catch(function rejected(err) {
+					assert.notOk(
+						/unknown:/.test(err.message),
+						"error should include the filename"
+					);
+					assert.ok(
+						/dups.js/.test(err.message),
+						"error should include the filename"
+					);
+					done();
+				});
+		}
+	</script>
+</body>
+</html>
