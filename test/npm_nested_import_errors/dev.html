@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script src="../../steal-with-promises.js" main="@empty"
+	config="package.json!npm"
+	src="../../../steal-with-promises.js">
+		System.import('dep').then(null, function(err){
+			if(window.assert) {
+				var stack = err.stack;
+				window.assert.ok(/dep.js/.test(stack), "dep.js is in the stack");
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>

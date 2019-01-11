@@ -393,11 +393,14 @@ exports.addExtension = function addNpmExtension(System){
 			if ((statusCode === 404 || statusCode === 0) &&
 				utils.moduleName.isBareIdentifier(load.name) &&
 				!utils.pkg.isRoot(loader, load.metadata.npmPackage)) {
-				var newError = new Error([
-					"Could not load '" + load.name + "'",
+				var errorMsg = ["Could not load '" + load.name + "'",
 					"Is this an npm module not saved in your package.json?"
-				].join("\n"));
+				].join("\n");
+				var newError = new Error();
 				newError.statusCode = error.statusCode;
+				newError.stack = newError.stack + error.stack;
+				newError.message = errorMsg;
+				
 				throw newError;
 			} else {
 				throw error;
