@@ -1,3 +1,2 @@
 module.exports = {};
-require('~/dep');
-
+require("~/foo");
