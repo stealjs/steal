@@ -477,3 +477,7 @@ QUnit.test("dev bundle loads BEFORE configMain", function(assert) {
 QUnit.test("When the dev-bundle is missing we get a nice message", function(assert){
 	makeIframe("dev_bundle_err/dev.html", assert);
 });
+
+QUnit.test("If a package is missing, warn which file imported it #1463", function(assert) {
+	makeIframe("npm_nested_import_errors/dev.html", assert);	
+})

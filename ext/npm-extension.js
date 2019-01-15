@@ -398,6 +398,7 @@ exports.addExtension = function addNpmExtension(System){
 					"Is this an npm module not saved in your package.json?"
 				].join("\n"));
 				newError.statusCode = error.statusCode;
+				newError.stack = newError.stack + error.stack;
 				throw newError;
 			} else {
 				throw error;
