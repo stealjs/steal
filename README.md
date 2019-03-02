@@ -1,9 +1,11 @@
 # steal
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/stealjs/steal?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-[![Build Status](https://travis-ci.org/stealjs/steal.svg?branch=master)](https://travis-ci.org/stealjs/steal)
-[![npm version](https://badge.fury.io/js/steal.svg)](http://badge.fury.io/js/steal)
+[![Join our Slack](https://img.shields.io/badge/slack-join%20chat-611f69.svg)](https://www.bitovi.com/community/slack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join our Discourse](https://img.shields.io/discourse/https/forums.bitovi.com/posts.svg)](https://forums.bitovi.com/?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/stealjs/steal/blob/master/license.md)
+[![npm version](https://badge.fury.io/js/steal.svg)](https://www.npmjs.com/package/steal)
+[![Travis build status](https://travis-ci.org/stealjs/steal.svg?branch=master)](https://travis-ci.org/stealjs/steal)
+[![Greenkeeper badge](https://badges.greenkeeper.io/stealjs/steal.svg)](https://greenkeeper.io/)
 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/matthewphillips.svg)](https://saucelabs.com/u/matthewphillips)
 
