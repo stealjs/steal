@@ -1578,7 +1578,7 @@ function logloads(loads) {
 
 	function getBabelPresets(current, loader) {
 		var presets = current || [];
-		var forceES5 = loader.forceES5 === true;
+		var forceES5 = loader.forceES5 !== false;
 		var defaultPresets = forceES5 
 			? [babelES2015Preset, "react", "stage-0"]
 			: ["react"];
