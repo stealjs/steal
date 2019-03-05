@@ -69,6 +69,7 @@ QUnit.test("Ignores import statements within backticks", function(assert) {
 	})
 	.then(done, function() {
 		assert.ok(false, "should not fail");
+		done();
 	});
 });
 
