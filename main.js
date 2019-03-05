@@ -1733,6 +1733,7 @@ addStealExtension(function addCacheBust(loader) {
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = Object.create(null);
 	System.logLevel = 0;
+	System.forceES5 = true;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");

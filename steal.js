@@ -1574,24 +1574,26 @@ function logloads(loads) {
 		return plugins;
 	}
 
-	function getBabelPresets(current) {
+	var babelES2015Preset = "es2015-no-commonjs";
+
+	function getBabelPresets(current, loader) {
 		var presets = current || [];
-		var required = ["es2015-no-commonjs"];
+		var forceES5 = loader.forceES5 === true;
+		var defaultPresets = forceES5 
+			? [babelES2015Preset, "react", "stage-0"]
+			: ["react"];
 
+		// if the user provided a list of presets to be used, treat the
+		// BABEL_ES2015_PRESET as required if stealCondig.forceES5 is `true`
 		if (presets.length) {
-			for (var i = required.length - 1; i >=0; i -= 1) {
-				var preset = required[i];
-
-				if (presets.indexOf(preset) === -1) {
-					presets.unshift(preset);
+			if (forceES5) {
+				if (presets.indexOf(babelES2015Preset) != -1) {
+					presets.unshift(babelES2015Preset);
 				}
 			}
 		}
-		else {
-			presets = ["es2015-no-commonjs", "react", "stage-0"];
-		}
 
-		return presets;
+		return presets.length ? presets : defaultPresets;
 	}
 
 	function getBabelOptionsFromLoad(load) {
@@ -1617,7 +1619,8 @@ function logloads(loads) {
 	}
 
 	function getBabelOptions(load, babel) {
-		var options = getBabelOptionsFromLoad.call(this, load);
+		var loader = this;
+		var options = getBabelOptionsFromLoad.call(loader, load);
 
 		options.sourceMap = 'inline';
 		options.filename = load.address;
@@ -1632,7 +1635,7 @@ function logloads(loads) {
 
 			// make sure presents and plugins needed for Steal to work
 			// correctly are set
-			options.presets = getBabelPresets(options.presets);
+			options.presets = getBabelPresets(options.presets, loader);
 			options.plugins = getBabelPlugins(options.plugins);
 		}
 		else {
@@ -6631,6 +6634,7 @@ addStealExtension(function addCacheBust(loader) {
 	System.env = (isWebWorker ? "worker" : "window") + "-development";
 	System.ext = Object.create(null);
 	System.logLevel = 0;
+	System.forceES5 = true;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");

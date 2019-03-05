@@ -122,6 +122,10 @@ if (supportsES) {
 	QUnit.test("Private scope variables are available in ES exports", function(assert) {
 		makeIframe("reg/index.html", assert);
 	});
+
+	QUnit.test("it allows ES2015 transforms to ES5 to be skipped", function(assert) {
+		makeIframe("skip_es_2015_preset/site.html", assert);
+	});
 }
 
 QUnit.test("steal done promise is rejected without steal config", function(assert) {
