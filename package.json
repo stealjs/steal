@@ -66,7 +66,7 @@
     "steal-conditional": "^0.3.2",
     "steal-qunit": "^1.0.0",
     "test-saucelabs": "0.0.1",
-    "testee": "^0.5.1",
+    "testee": "^0.9.0",
     "traceur": "0.0.111",
     "traceur-runtime": "jmcriffey/bower-traceur-runtime#0.0.91",
     "wd": "^1.1.3",
