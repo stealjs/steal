@@ -29,10 +29,10 @@ var platforms = [{
 	version: '11.0'
 }, {
 	browserName: 'Safari',
-	'appium-version': '1.6.3',
+	'appium-version': '1.9.1',
 	platformName: 'iOS',
 	platformVersion: '10.0',
-	deviceName: 'iPhone 7 Simulator'
+	deviceName: 'iPhone 8 Simulator'
 }];
 
 // collect platforms using the firefox browser
