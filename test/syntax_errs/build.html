@@ -28,7 +28,7 @@
 				if(isEdge) {
 					window.assert.ok(true);
 				} else {
-					window.assert.ok(/breaking\.js/.test(err.stack), "Breaking file in the stack trace");
+					window.assert.notOk(/breaking\.js/.test(err.stack), "Breaking file in the stack trace");
 				}
 
 				window.done();
