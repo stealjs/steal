@@ -52,7 +52,7 @@
 		steal.import(rec.name)
 		.then(function(){
 			if(window.assert) {
-				window.assert.notOk(false, "This should not have resolved");
+				window.assert.ok(false, "This should not have resolved");
 			}
 		}, function(err){
 			if(window.assert) {
