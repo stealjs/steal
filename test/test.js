@@ -1,3 +1,4 @@
+"format cjs";
 var QUnit = require("steal-qunit");
 
 QUnit.config.testTimeout = 30000;
@@ -272,7 +273,11 @@ QUnit.test("can load a bundle with an amd module depending on a global", functio
 
 QUnit.test("AMD CommonJS detection works with lodash", function(assert) {
 	makeIframe("amd_require/dev.html", assert);
-})
+});
+
+QUnit.test("Does not detect CJS as System.register #1500", function(assert) {
+	makeIframe("cjs_system_register/dev.html", assert);
+});
 
 QUnit.test("envs config works", function(assert) {
 	makeIframe("envs/envs.html", assert);

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title></title>
+	</head>
+	<body>
+		<script>
+			window.done = window.parent.done;
+			window.assert = window.parent.assert;
+		</script>
+		<script
+			src="../../steal.js"
+			data-base-url="."
+			data-config="package.json!npm"
+			data-main="~/index"
+		></script>
+		<script>
+			steal.import("~/index").then(
+				function(main) {
+					if (window.assert) {
+						window.assert.ok(false, "~/index should not load");
+						window.done();
+					} else {
+						console.error("~/index should not load");
+					}
+				},
+				function(err) {
+					if (window.assert) {
+						window.assert.notOk(
+							/require is not defined/i.test(err.message),
+							"should NOT error due to incorrect module detection"
+						);
+						window.assert.ok(
+							/Could not load 'fs'/i.test(err.message),
+							"should error because module was not found"
+						);
+						window.done();
+					} else {
+						console.error(err);
+					}
+				}
+			);
+		</script>
+	</body>
+</html>
