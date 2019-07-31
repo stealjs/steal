@@ -1,3 +1,4 @@
+"format cjs";
 var QUnit = require("steal-qunit");
 
 QUnit.config.testTimeout = 30000;
@@ -24,6 +25,9 @@ var makeStealHTML = helpers.makeStealHTML;
 
 var hasConsole = typeof console === "object";
 var supportsTypedArrays = typeof Uint16Array !== "undefined";
+var isSafariMobile = /iP(ad|hone|od).+Version\/[\d\.]+.*Safari/i.test(
+	navigator.userAgent
+);
 
 QUnit.module("steal via html", {
 	beforeEach: function() {
@@ -272,7 +276,11 @@ QUnit.test("can load a bundle with an amd module depending on a global", functio
 
 QUnit.test("AMD CommonJS detection works with lodash", function(assert) {
 	makeIframe("amd_require/dev.html", assert);
-})
+});
+
+QUnit.test("Does not detect CJS as System.register #1500", function(assert) {
+	makeIframe("cjs_system_register/dev.html", assert);
+});
 
 QUnit.test("envs config works", function(assert) {
 	makeIframe("envs/envs.html", assert);
@@ -324,17 +332,31 @@ QUnit.test("Error message for syntax errors in ES and CJS modules", function(ass
 	makeIframe("parse_errors/dev.html", assert);
 });
 
-QUnit.test("If a module errors because a child module throws show the correct stack trace", function(assert){
-	makeIframe("init_error/dev.html", assert);
-});
+// This test originally targeted iOS 10.0, but this version was removed from Saucelabs
+// Newer versions of iOS change the Safari Stack trace breaking the test below, we'll
+// skip this test until we figure out how to get back this functionality
+if (!isSafariMobile) {
+	QUnit.test(
+		"If a module errors because a child module throws show the correct stack trace",
+		function(assert) {
+		  makeIframe("init_error/dev.html", assert);
+		}
+	);
 
-QUnit.test("Syntax error in child module shows up in the stack trace", function(assert){
-	makeIframe("syntax_errs/dev.html", assert);
-});
-
-QUnit.test("Syntax errors bubble correctly during the build", function(assert){
-	makeIframe("syntax_errs/build.html", assert);
-});
+	QUnit.test(
+		"Syntax error in child module shows up in the stack trace", 
+		function(assert){
+			makeIframe("syntax_errs/dev.html", assert);
+		}
+	);
+	
+	QUnit.test(
+		"Syntax errors bubble correctly during the build", 
+		function(assert){
+			makeIframe("syntax_errs/build.html", assert);
+		}
+	);
+}
 
 QUnit.test("Can import modules by the .mjs extension", function(assert){
 	makeIframe("mjs/dev.html", assert);

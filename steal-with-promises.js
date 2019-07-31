@@ -4447,7 +4447,7 @@ function register(loader) {
 
   var Module = loader.newModule({}).constructor;
 
-  var registerRegEx = /System\.register/;
+  var registerRegEx = /\bSystem\.register\b/;
 
   var loaderFetch = loader.fetch;
   loader.fetch = function(load) {
