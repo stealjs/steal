@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "grunt",
-    "lint": "eslint {src,ext}/**/*.js --quiet",
+    "lint": "eslint src ext",
     "ui": "npm run npm-copy && grunt build && npm run lint && node test/saucelabs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
