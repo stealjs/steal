@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "grunt",
-    "lint": "eslint \"{src,ext}/**/*.js\"",
+    "lint": "eslint src ext",
     "ui": "npm run npm-copy && grunt build && npm run lint && node test/saucelabs.js",
     "http-server": "http-server -p 3000 --silent",
     "npm-copy": "node scripts/copy.js",
@@ -44,7 +44,7 @@
     "babel-plugin-steal-test": "0.0.2",
     "babel-preset-steal-test": "0.0.1",
     "babel-standalone": "6.24.2",
-    "eslint": "^3.19.0",
+    "eslint": "^6.1.0",
     "fs-extra": "^3.0.0",
     "grunt": "~0.4.1",
     "grunt-cli": "^1.2.0",
