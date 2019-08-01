@@ -264,6 +264,10 @@ if (hasConsole) {
 	QUnit.test("No 'loaded twice' warnings when there is a loading error", function(assert){
 		makeIframe("load_module_twice_false_positive/on-error.html", assert);
 	});
+
+	QUnit.test("Duplicate import error should include filename", function(assert) {
+		makeIframe("duplicate_import_warning/dev.html", assert);
+	});
 }
 
 QUnit.test("can add implicit deps to ES and CJS modules", function(assert) {
