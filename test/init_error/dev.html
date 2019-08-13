@@ -18,7 +18,9 @@
 <script>
 	steal.done().then(null, function(err){
 		if(window.assert) {
-			var worked = /two\.js/.test(err.stack) || /Function code/.test(err.stack);
+			// IE and Safari don’t give good stack traces for this.
+			var browserDoesntSupportGoodStackTraces = /Function code/.test(err.stack) || /anonymous/.test(err.stack);
+			var worked = /two\.js/.test(err.stack) || browserDoesntSupportGoodStackTraces;
 			window.assert.ok(worked, "got the source in the stack trace");
 			window.done();
 		} else {

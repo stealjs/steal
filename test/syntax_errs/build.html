@@ -23,9 +23,10 @@
 			return steal.import("~/importer");
 		})
 		.then(null, function(err){
-			var isEdge = /Anonymous function/.test(err.stack);
+			// IE and Safari don’t give good stack traces for this.
+			var browserDoesntSupportGoodStackTraces = /Function code/.test(err.stack) || /anonymous/.test(err.stack);
 			if(window.assert) {
-				if(isEdge) {
+				if(browserDoesntSupportGoodStackTraces) {
 					window.assert.ok(true);
 				} else {
 					window.assert.ok(/breaking\.js/.test(err.stack), "Breaking file in the stack trace");

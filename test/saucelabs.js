@@ -31,8 +31,8 @@ var platforms = [{
 	browserName: 'Safari',
 	'appium-version': '1.9.1',
 	platformName: 'iOS',
-	platformVersion: '11.0',
-	deviceName: 'iPhone 8 Simulator'
+	platformVersion: '10.3',
+	deviceName: 'iPhone 7 Simulator'
 }];
 
 // collect platforms using the firefox browser
