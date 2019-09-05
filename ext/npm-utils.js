@@ -385,7 +385,11 @@ var utils = {
 			} else if(typeof pkg.jam === "object" && pkg.jam.main) {
 				main = pkg.jam.main;
 			} else if(pkg.main) {
-				main = pkg.main;
+				if(utils.path.endsWithSlash(pkg.main)) {
+					main = pkg.main + "index";
+				} else {
+					main = pkg.main;
+				}
 			} else {
 				main = "index";
 			}

@@ -20,6 +20,11 @@ var mainVariations = {
 		pkg.main = "bar.js";
 	},
 
+	"pkg.main with trailing slash": function(pkg) {
+		pkg.main = "bar/";
+		return "bar/index";
+	},
+
 	"browser string": function(pkg){
 		pkg.browser = "bar.js";
 	},
