@@ -3454,6 +3454,7 @@ function es6(loader) {
 
   // good enough ES6 detection regex - format detections not designed to be accurate, but to handle the 99% use case
   var es6RegEx = /(^\s*|[}\);\n]\s*)(import\s+(['"]|(\*\s+as\s+)?[^"'\(\)\n;]+\s+from\s+['"]|\{)|export\s+\*\s+from\s+["']|export\s+(\{|default|function|class|var|const|let|async\s+function))/;
+  var strictStringRegEx = /["'].*["']/g;
   var strictCommentRegEx = /\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm;
 
   var traceurRuntimeRegEx = /\$traceurRuntime\s*\./;
@@ -3493,7 +3494,8 @@ function es6(loader) {
   };
 
   function looksLikeES6(source) {
-	  var sourceWithComments = source.replace(strictCommentRegEx, '$1');
+	  var sourceWithComments = source.replace(strictStringRegEx, '""')
+		  .replace(strictCommentRegEx, '$1');
 	  return sourceWithComments.match(es6RegEx);
   }
 
