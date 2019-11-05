@@ -17,7 +17,8 @@ addStealExtension(function addNoMainWarn(loader) {
 		"package.json!npm": true,
 		"npm": true,
 		"@empty": true,
-		"@dev": true
+		"@dev": true,
+		"babel": true
 	};
 
 	var loaderImport = loader.import;

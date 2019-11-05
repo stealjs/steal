@@ -19,10 +19,11 @@ addStealExtension(function addMetaDeps(loader) {
 	}
 
 	loader.transpile = function (load) {
+		// TODO this needs to change
 		prependDeps(this, load, createImport);
 		var result = superTranspile.apply(this, arguments);
 		return result;
-	}
+	};
 
 	loader._determineFormat = function (load) {
 		if(load.metadata.format === 'cjs') {

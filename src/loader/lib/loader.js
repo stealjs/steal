@@ -212,6 +212,8 @@ function logloads(loads) {
       load = createLoad(name);
       loader.loads.push(load);
 
+	  loader.loaderObj.forwardMetadata(load, refererName);
+
       proceedToLocate(loader, load);
 
       return load;
@@ -243,6 +245,10 @@ function logloads(loads) {
         return loader.loaderObj.fetch({ name: load.name, metadata: load.metadata, address: address });
       })
     );
+  }
+
+  function transpilableFormat(format) {
+	  return format === "cjs" || format === "amd";
   }
 
   var anonCnt = 0;
@@ -300,9 +306,20 @@ function logloads(loads) {
           });
         }
         else if (typeof instantiateResult == 'object') {
-          load.depsList = instantiateResult.deps || [];
-          load.execute = instantiateResult.execute;
-          load.isDeclarative = false;
+			function addToLoad() {
+				load.depsList = instantiateResult.deps || [];
+				load.execute = instantiateResult.execute;
+				load.isDeclarative = false;
+			}
+
+			if(!loader.loaderObj.transpileAllFormats ||
+				load.metadata.shouldTranspile === false ||
+				!transpilableFormat(load.metadata.format)) {
+				return addToLoad();
+			}
+
+			return loader.loaderObj.transpile(load).then(addToLoad);
+
         }
         else
           throw TypeError('Invalid instantiate return value');

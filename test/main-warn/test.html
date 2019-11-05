@@ -40,6 +40,9 @@
 		newEl.textContent = warnings.length ? warnings.join("\n") : "Success!";
 		iframe.contentWindow.document.body.appendChild(newEl);
 		if(window.assert) {
+			if(!success) {
+				debugger;
+			}
 			window.assert.ok(success, title + " did what it should");
 
 			if(remaining === 0) {

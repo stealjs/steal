@@ -252,6 +252,8 @@ function logloads(loads) {
       load = createLoad(name);
       loader.loads.push(load);
 
+	  loader.loaderObj.forwardMetadata(load, refererName);
+
       proceedToLocate(loader, load);
 
       return load;
@@ -283,6 +285,10 @@ function logloads(loads) {
         return loader.loaderObj.fetch({ name: load.name, metadata: load.metadata, address: address });
       })
     );
+  }
+
+  function transpilableFormat(format) {
+	  return format === "cjs" || format === "amd";
   }
 
   var anonCnt = 0;
@@ -340,9 +346,20 @@ function logloads(loads) {
           });
         }
         else if (typeof instantiateResult == 'object') {
-          load.depsList = instantiateResult.deps || [];
-          load.execute = instantiateResult.execute;
-          load.isDeclarative = false;
+			function addToLoad() {
+				load.depsList = instantiateResult.deps || [];
+				load.execute = instantiateResult.execute;
+				load.isDeclarative = false;
+			}
+
+			if(!loader.loaderObj.transpileAllFormats ||
+				load.metadata.shouldTranspile === false ||
+				!transpilableFormat(load.metadata.format)) {
+				return addToLoad();
+			}
+
+			return loader.loaderObj.transpile(load).then(addToLoad);
+
         }
         else
           throw TypeError('Invalid instantiate return value');
@@ -1378,7 +1395,8 @@ function logloads(loads) {
 		}
 		catch(e) {
 			// traceur throws an error array
-			throw e[0];
+			var error = e[0] || e.errors[0];
+			throw error;
 		}
 	}
 
@@ -1498,7 +1516,12 @@ function logloads(loads) {
 					var npmPluginNameOrPath = getNpmPluginNameOrPath(name);
 
 					// import the plugin!
-					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
+					promises.push(this["import"](npmPluginNameOrPath, {
+						name: parent,
+						metadata: {
+							shouldTranspile: false
+						}
+					})
 						.then(function(mod) {
 							var exported = mod.__esModule ? mod["default"] : mod;
 
@@ -1579,7 +1602,7 @@ function logloads(loads) {
 	function getBabelPresets(current, loader) {
 		var presets = current || [];
 		var forceES5 = loader.forceES5 !== false;
-		var defaultPresets = forceES5 
+		var defaultPresets = forceES5
 			? [babelES2015Preset, "react", "stage-0"]
 			: ["react"];
 
@@ -1719,7 +1742,12 @@ function logloads(loads) {
 					var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
 
 					// import the preset!
-					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
+					promises.push(this["import"](npmPresetNameOrPath, {
+						name: parent,
+						metadata: {
+							shouldTranspile: false
+						}
+					})
 						.then(function(mod) {
 							var exported = mod.__esModule ? mod["default"] : mod;
 
@@ -5551,7 +5579,8 @@ addStealExtension(function addNoMainWarn(loader) {
 		"package.json!npm": true,
 		"npm": true,
 		"@empty": true,
-		"@dev": true
+		"@dev": true,
+		"babel": true
 	};
 
 	var loaderImport = loader.import;
@@ -5595,10 +5624,11 @@ addStealExtension(function addMetaDeps(loader) {
 	}
 
 	loader.transpile = function (load) {
+		// TODO this needs to change
 		prependDeps(this, load, createImport);
 		var result = superTranspile.apply(this, arguments);
 		return result;
-	}
+	};
 
 	loader._determineFormat = function (load) {
 		if(load.metadata.format === 'cjs') {
@@ -6259,6 +6289,31 @@ addStealExtension(function addMJS(loader){
 	};
 });
 
+// This extension allows you to define metadata that should appear on
+// Any subdependencies. For example we can add the { foo: true } bool
+// to a module's metadata, and it will be forwarded to any subdependency.
+addStealExtension(function forwardMetadata(loader){
+	loader._forwardedMetadata = {};
+	loader.setForwardedMetadata = function(prop) {
+		loader._forwardedMetadata[prop] = true;
+	};
+
+	loader.forwardMetadata = function(load, parentName) {
+		  if(parentName) {
+			  var parentLoad = this.getModuleLoad(parentName);
+
+			  if(parentLoad) {
+				  // TODO use Object.assign instead?
+				  for(var p in this._forwardedMetadata) {
+					  if(p in parentLoad.metadata) {
+						  load.metadata[p] = parentLoad.metadata[p];
+					  }
+				  }
+			  }
+		  }
+	};
+});
+
 addStealExtension(function applyTraceExtension(loader) {
 	loader._traceData = {
 		loads: {},
@@ -6638,6 +6693,7 @@ addStealExtension(function addCacheBust(loader) {
 	System.ext = Object.create(null);
 	System.logLevel = 0;
 	System.forceES5 = true;
+	System.transpileAllFormats = true;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -6891,9 +6947,11 @@ addStealExtension(function addCacheBust(loader) {
 				this.paths["@@babel-code-frame"] = dirname+"/ext/babel-code-frame.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 				setIfNotPresent(this.meta, "@@babel-code-frame", {"format":"global","exports":"BabelCodeFrame"});
+				setIfNotPresent(this.meta, "babel", {"shouldTranspile": false});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');
+				this.setForwardedMetadata("shouldTranspile");
 
 				if(isNode) {
 					if(this.configMain === "@config" && last(parts) === "steal") {
