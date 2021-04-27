@@ -15,16 +15,16 @@ exports.addExtension = function addNpmExtension(System){
 		System._extensions.push(addNpmExtension);
 	}
 
-	// Returns a replacement identifier if there is one in `.packageMap`
+	// Returns a replacement identifier if there is one in `.importRewrites`
 	// Arguments:
 	// - identifier - the identifier to be replaced
 	// - parsedParentName - parent name of the module that is doing the importing
 	// Returns `undefined` if there's no match, a string replacement if one is found
-	function getPackageMapValue(identifier, parsedParentName) {
-		if(this.packageMap && typeof this.packageMap === "object" && parsedParentName) {
-			var childPackageMapping = this.packageMap[parsedParentName.packageName]
-			if(childPackageMapping) {
-				var identifierValue = childPackageMapping[identifier];
+	function getImportRewritesValue(identifier, parsedParentName) {
+		if(this.importRewrites && typeof this.importRewrites === "object" && parsedParentName) {
+			var childimportRewrites = this.importRewrites[parsedParentName.packageName]
+			if(childimportRewrites) {
+				var identifierValue = childimportRewrites[identifier];
 				return identifierValue;
 			}
 		}
@@ -55,9 +55,9 @@ exports.addExtension = function addNpmExtension(System){
 		var parsedParentModuleName = parentName && utils.moduleName.parse(parentName);
 		var parentIsNpmModule = utils.moduleName.isNpm(parentName);
 
-		var packageMapValue = getPackageMapValue.call(this, identifier, parsedParentModuleName);
-		if(packageMapValue !== undefined) {
-			name = packageMapValue;
+		var importRewritesValue = getImportRewritesValue.call(this, identifier, parsedParentModuleName);
+		if(importRewritesValue !== undefined) {
+			name = importRewritesValue;
 		}
 
 		var nameIsRelative = utils.path.isRelative(name);
@@ -469,8 +469,8 @@ exports.addExtension = function addNpmExtension(System){
 			}
 			return newPaths;
 		},
-		packageMap: function(packageMap) {
-			return packageMap;
+		importRewrites: function(importRewrites) {
+			return importRewrites;
 		}
 	};
 
