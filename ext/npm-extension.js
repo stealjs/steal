@@ -14,6 +14,22 @@ exports.addExtension = function addNpmExtension(System){
 	if (System._extensions) {
 		System._extensions.push(addNpmExtension);
 	}
+
+	// Returns a replacement identifier if there is one in `.packageMap`
+	// Arguments:
+	// - identifier - the identifier to be replaced
+	// - parsedParentName - parent name of the module that is doing the importing
+	// Returns `undefined` if there's no match, a string replacement if one is found
+	function getPackageMapValue(identifier, parsedParentName) {
+		if(this.packageMap && typeof this.packageMap === "object" && parsedParentName) {
+			var childPackageMapping = this.packageMap[parsedParentName.packageName]
+			if(childPackageMapping) {
+				var identifierValue = childPackageMapping[identifier];
+				return identifierValue;
+			}
+		}
+	}
+
 	/**
 	 * Normalize has to deal with a "tricky" situation.  There are module names like
 	 * "css" -> "css" normalize like normal
@@ -27,17 +43,25 @@ exports.addExtension = function addNpmExtension(System){
 	 *   "can-slider" //-> "can-slider#path/to/main"
 	 */
 	var oldNormalize = System.normalize;
-	System.normalize = function(identifier, parentModuleName, parentAddress, pluginNormalize){
+	System.normalize = function npmNormalize(identifier, parentModuleName, parentAddress, pluginNormalize){
 		var name = identifier;
+
 		var parentName = parentModuleName;
 		if(parentName && this.npmParentMap && this.npmParentMap[parentName]) {
 			parentName = this.npmParentMap[parentName];
 		}
 
 		var hasNoParent = !parentName;
+		var parsedParentModuleName = parentName && utils.moduleName.parse(parentName);
+		var parentIsNpmModule = utils.moduleName.isNpm(parentName);
+
+		var packageMapValue = getPackageMapValue.call(this, identifier, parsedParentModuleName);
+		if(packageMapValue !== undefined) {
+			name = packageMapValue;
+		}
+
 		var nameIsRelative = utils.path.isRelative(name);
 		var nameIsNpmModule = utils.moduleName.isNpm(name);
-		var parentIsNpmModule = utils.moduleName.isNpm(parentName);
 		var identifierEndsWithSlash = utils.path.endsWithSlash(name);
 
 		// If this is an npm module name already, we don't need to re-resolve it.
@@ -62,11 +86,11 @@ exports.addExtension = function addNpmExtension(System){
 		// Check against contextual maps that would not be converted.
 		var hasContextualMap = typeof this.map[parentName] === "object" &&
 		  this.map[parentName][name];
+
 		if(hasContextualMap) {
 			return oldNormalize.call(this, name, parentName, parentAddress,
 									 pluginNormalize);
 		}
-
 		// Get the current package
 		var refPkg = utils.pkg.findByModuleNameOrAddress(this, parentName,
 														 parentAddress);
@@ -81,7 +105,6 @@ exports.addExtension = function addNpmExtension(System){
 		var isPointingAtParentFolder = name === "../" || name === "./";
 
 		if(parentIsNpmModule && isPointingAtParentFolder) {
-			var parsedParentModuleName = utils.moduleName.parse(parentName);
 			var parentModulePath = parsedParentModuleName.modulePath || "";
 			var relativePath = utils.path.relativeTo(parentModulePath, name);
 			var isInRoot = utils.path.isPackageRootDir(relativePath);
@@ -445,6 +468,9 @@ exports.addExtension = function addNpmExtension(System){
 				newPaths[convertName(this, name)] = paths[name];
 			}
 			return newPaths;
+		},
+		packageMap: function(packageMap) {
+			return packageMap;
 		}
 	};
 
