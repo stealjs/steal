@@ -299,4 +299,8 @@ QUnit.test("npm extension helpers to add/get packages", function(assert) {
 	makeIframe("steal_npm_helpers/dev.html", assert);
 });
 
+QUnit.test("importRewrites npm config", function(assert) {
+	makeIframe("import_rewrites/dev.html", assert);
+});
+
 QUnit.start();

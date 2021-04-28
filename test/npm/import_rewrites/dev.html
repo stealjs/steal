@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="../../../steal-with-promises.js"
+		config-main="@empty" base-url="./" main="@empty"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+
+		System.import("package.json!npm")
+			.then(function(){
+				return System.normalize("dep", "import_rewrites@1.0.0#main");
+			})
+			.then(function(){
+				assert.equal((System.importRewrites["dep"] || {})["no.namespace.util"], "./util");
+				return System.import("dep");
+			}, err => { throw err; })
+			.then(done, function(err){
+				console.error("Oh no, error!", err);
+				assert.notOk(err, "should not fail");
+				done();
+			});
+	</script>
+</body>
+</html>
