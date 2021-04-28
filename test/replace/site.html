@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+<script>
+	window.done = window.parent.done;
+	window.assert = window.parent.assert;
+</script>
+<script src="../../steal-with-promises.js"
+	data-base-url="."
+	data-config-main="package.json!npm"></script>
+<script>
+(function(){
+	var steal = window.steal.clone();
+
+	var translate = steal.loader.translate;
+	steal.loader.translate = function(load){
+		var p = translate.apply(this, arguments);
+
+		if(load.name === "replace@1.0.0#main") {
+			steal.loader.translate = translate;
+			this.provide(load.name, "exports.foo='baz';", load.metadata);
+		}
+
+		return p;
+	};
+
+	steal.import("~/main").then(function(){
+		var mod = steal.loader.get("replace@1.0.0#main");
+
+		if(window.assert) {
+			window.assert.equal(mod.foo, "baz", "The replaced instance is there");
+			window.done();
+		} else {
+			console.log("mod", mod.foo);
+		}
+	});
+
+})();
+</script>
+</body>
+</html>

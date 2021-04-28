@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+	<title>npm live-reload tests</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+
+	<script type="text/javascript" src='../../../steal-with-promises.js' base-url="." config="package.json!npm"></script>
+	<script>
+		System.paths["live-reload-testing"] = "../../../node_modules/live-reload-testing/client.js";
+
+		System.import(System.configMain)
+			.then(function() {
+				return System.import("main");
+			})
+			.then(function() {
+				return System.import("live-reload-testing");
+			})
+			.then(function(liveReloadTest) {
+				function doWait(ms){
+					return function(){
+						return new Promise(function(resolve){
+							setTimeout(resolve, ms);
+						});
+					};
+				}
+
+				function doInstall(){
+					return liveReloadTest.install("jquery", "--save")
+						.then(doWait(200));
+				}
+
+				function doChangeMain(){
+					var address = "main.js";
+					var content = "module.exports = require('jquery');";
+					return liveReloadTest.put(address, content)
+						.then(doWait(200));
+				}
+
+				function doReset() {
+					return liveReloadTest.reset();
+				}
+
+				function doAssertions() {
+					// main should be right;
+					var main = System.get(System.main)["default"];
+
+					if(window.assert) {
+						assert.ok(main.fn.jquery, "jquery it is!");
+					} else {
+						console.log("got jquery:", main.fn.jquery);
+					}
+					return doReset();
+				}
+
+				doInstall()
+					.then(doChangeMain)
+					.then(doAssertions, doReset)
+					.then(function() {
+						if (window.done) {
+							done();
+						}
+					});
+				});
+	</script>
+</body>
+</html>

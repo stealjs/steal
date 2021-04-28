@@ -1,0 +1,19 @@
+{
+  "name": "babel-plugin-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "source.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-plugin-steal-test": "0.0.2"
+  },
+  "author": "",
+  "license": "ISC",
+  "steal": {
+    "babelOptions": {
+      "plugins": [
+        ["babel-plugin-steal-test", { "text": "option value" }]
+      ]
+    }
+  }
+}

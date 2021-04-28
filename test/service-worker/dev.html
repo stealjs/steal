@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Steal in Service Workers test</title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script>
+		let swURL = new URL('./sw.js', document.baseURI);
+
+		if('serviceWorker' in navigator) {
+			navigator.serviceWorker.register(swURL).catch(function(err) {
+				// registration failed :(
+				console.log('ServiceWorker registration failed: ', err);
+			});
+
+			navigator.serviceWorker.ready.then(function(reg){
+				var sw = reg.active;
+				sw.postMessage('ping');
+			});
+
+			navigator.serviceWorker.onmessage = function(ev){
+				let data = ev.data;
+
+				if(self.assert) {
+					assert.equal(data.hello, "world", "got the message back");
+					done();
+				} else {
+					console.log("dep", data);
+				}
+			};
+		}
+	</script>
+</body>
+</html>

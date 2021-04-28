@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script>
+		var steal = {
+			paths: {
+				"npm": "../../ext/npm.js",
+				"npm-utils": "../../ext/npm-utils.js",
+				"npm-extension": "../../ext/npm-extension.js",
+				"npm-crawl": "../../ext/npm-crawl.js",
+				"npm-load": "../../ext/npm-load.js",
+				"npm-convert": "../../ext/npm-convert.js",
+				"semver": "../../ext/semver.js",
+				"@traceur": "../../node_modules/steal/ext/traceur.js",
+				"css": "../../node_modules/steal/ext/css.js"
+			}
+		}
+	</script>
+	<script
+		main="~/main"
+		config="package.json!npm"
+		src="../../../steal-with-promises.js"
+	></script>
+</body>
+</html>

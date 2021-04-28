@@ -1,0 +1,15 @@
+{
+	"name": "my-module",
+	"version": "1.0.0",
+	"main": "main",
+	"dependencies": {
+		"one": "1.0.0",
+		"two": "1.0.0"
+	},
+	"system": {
+		"npmAlgorithm": "nested",
+		"npmDependencies": [
+			"one"
+		]
+	}
+}

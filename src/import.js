@@ -14,10 +14,19 @@
 			}
 		}
 
-		if(!configDeferred) {
+		if(!configPromise) {
+			// In Node a main isn't required, but we still want
+			// to call startup() to do autoconfiguration,
+			// so setting to empty allows this to work.
+			if(!loader.main) {
+				loader.main = "@empty";
+			}
 			steal.startup();
 		}
 
-		return configDeferred.then(afterConfig);
+		return configPromise.then(afterConfig);
 	};
+	steal.setContextual = fBind.call(System.setContextual, System);
+	steal.isEnv = fBind.call(System.isEnv, System);
+	steal.isPlatform = fBind.call(System.isPlatform, System);
 	return steal;

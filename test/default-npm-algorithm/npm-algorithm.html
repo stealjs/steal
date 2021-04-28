@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<!-- note, that a "npm-algorithm" config attr does not overwrite "isFlatFileStructure". see test for more info -->
+	<script type="text/javascript" src="../../steal-with-promises.js" main="npm-algorithm" config="package.json!npm" npm-algorithm="nested"></script>
+</body>
+</html>

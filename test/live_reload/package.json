@@ -1,0 +1,11 @@
+{
+  "name": "steal-live-reload",
+  "version": "0.0.1",
+  "description": "Reload your application as you develop",
+  "main": "unit.js",
+  "author": "Bitovi",
+  "license": "MIT",
+  "devDependencies": {
+    "live-reload-testing": "^5.1.0"
+  }
+}

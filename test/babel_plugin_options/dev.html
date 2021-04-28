@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>StealJS and babel plugin options</title>
+</head>
+<body>
+	<script type="text/javascript">
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script
+		main
+		src="../../steal-with-promises.js"
+		config-main="test/babel_plugin_options/package.json!npm"
+	>
+	</script>
+</body>
+</html>

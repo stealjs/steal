@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>loader extension babel tests</title>
+	<link rel="stylesheet" type="text/css" href="../../node_modules/qunitjs/qunit/qunit.css"/>
+</head>
+<body>
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+
+	<script src="../../node_modules/qunitjs/qunit/qunit.js"></script>
+	<script src="./loader.js"></script>
+
+	<script>
+		System.transpiler = "babel";
+
+		try {
+			System.paths.babel = "../../node_modules/babel-standalone/babel.js";
+		}
+		catch(e) {
+			console.error("Could not load babel\n", e);
+		}
+	</script>
+
+	<script src="../../node_modules/regenerator-runtime/runtime.js"></script>
+	<script src="./tests/system.spec.js"></script>
+
+	<script src="./tests/custom-loader.js"></script>
+	<script src="./tests/custom-loader.spec.js"></script>
+</body>
+</html>

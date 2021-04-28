@@ -1,25 +1,32 @@
-<script>
-	if(window.parent) {
-		window.QUnit = window.parent.QUnit;
-		window.removeMyself = window.parent.removeMyself;
-	}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
 
-	var warn = window.console.warn;
-	window.console.warn = function(msg) {
-		if(window.QUnit) {
-			QUnit.ok(msg, "should give a warning when 'main' is not set in production environment.");
+		window.WARN = Function.prototype.bind.call(window.console.warn,
+			window.console);
+
+		window.console.warn = function(msg) {
+			if (window.assert) {
+				assert.ok(msg, "should give a warning when 'main' is not set in production environment.");
+			}
+			window.WARN(msg);
 		}
-		warn.call(window.console, msg);
-	}
-</script>
+	</script>
 
-<script src="../steal.production.js"></script>
+	<script src="../steal-with-promises.production.js"></script>
 
-<script>
-	if (window.QUnit) {
-		QUnit.start();
-		removeMyself();
-	}
-	window.console.warn = warn;
-	delete warn;
-</script>
+	<script>
+		steal.done().then(function() {
+			if (window.done) done();
+			window.console.warn = window.WARN;
+		});
+	</script>
+</body>
+</html>

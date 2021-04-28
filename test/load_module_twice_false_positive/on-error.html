@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>module is loaded twice with different paths</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+
+		window.WARN = Function.prototype.bind.call(
+			window.console.warn,
+			window.console
+		);
+
+		window.console.warn = function(msg) {
+			window.assert.ok(
+				!/is being instantiated twice/.test(msg),
+				"steal should not warn users"
+			);
+			window.WARN.apply(this, arguments);
+			window.done();
+		};
+	</script>
+	<script src="../../steal-with-promises.js" data-base-url="."
+		data-config="package.json!npm" data-main="~/oops"></script>
+	<script>
+		function importAModuleThatImportsInvalidPackage() {
+			return steal.done().then(null, function(){
+				return steal.import('~/oops-two');
+			}).then(null, function(){
+				// We got here but that's ok.
+				return;
+			});
+		}
+
+		function importAModuleThatImportsAFileThatDoesntExist() {
+			return steal.done().then(null, function(){
+				return steal.import("~/oops-four");
+			}).then(null, function(error){
+				// We got here but that's ok.
+				return;
+			})
+		}
+
+		Promise.all([
+			importAModuleThatImportsInvalidPackage(),
+			importAModuleThatImportsAFileThatDoesntExist()
+		])
+		.then(function(){
+			if(window.assert) {
+				window.assert.ok(true, 'finished without warning');
+				window.done();
+			} else {
+				console.log('Finished without warning!');
+			}
+		});
+	</script>
+</body>
+</html>

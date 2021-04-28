@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+<script>
+	window.done = window.parent.done;
+	window.assert = window.parent.assert;
+</script>
+<script>
+	var steal = {
+		paths: {
+			"npm": "../../ext/npm.js",
+			"npm-utils": "../../ext/npm-utils.js",
+			"npm-extension": "../../ext/npm-extension.js",
+			"npm-crawl": "../../ext/npm-crawl.js",
+			"npm-load": "../../ext/npm-load.js",
+			"npm-convert": "../../ext/npm-convert.js",
+			"semver": "../../ext/semver.js",
+			"@traceur": "../../node_modules/steal/ext/traceur.js",
+			"css": "../../node_modules/steal/ext/css.js"
+		},
+		jsonOptions: {
+			transform: function (load, json) {
+				if (json.name === 'npm-app') {
+					delete json.foo;
+					delete json.steal.someConfig;
+				} else if (json.name == 'dep1') {
+					delete json._npmVersion;
+					delete json.steal.someConfig;
+				}else if(json.bar){
+                    json.bar = "bar";
+				}
+
+				return json;
+			}
+		}
+	}
+</script>
+<script
+	main="~/main"
+	config="package.json!npm"
+	src="../../../steal-with-promises.js"
+></script>
+</body>
+</html>

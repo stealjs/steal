@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		main="~/main"
+		src="../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"></script>
+	<script>
+		function assertMain() {
+			var mod = steal.loader.get("shake@1.0.0#mod");
+			var modB = steal.loader.get("shake@1.0.0#mod_b");
+
+			if(typeof window.assert !== "undefined") {
+				window.assert.equal(mod.a, "a", "a was not tree shaken");
+				window.assert.equal(mod.b, undefined, "b was tree shaken");
+				window.assert.equal(mod.d, "d", "d was not tree shaken");
+
+				window.assert.equal(modB, undefined, "b was not loaded at all");
+			} else {
+				console.log("mod", mod);
+				console.log("mod_b", modB);
+			}
+		}
+
+		function assertOther() {
+			var mod = steal.loader.get("shake@1.0.0#mod");
+			var modA = steal.loader.get("shake@1.0.0#mod_a");
+			var modB = steal.loader.get("shake@1.0.0#mod_b");
+			var modC = steal.loader.get("shake@1.0.0#mod_c");
+
+			if(typeof window.assert !== "undefined") {
+				window.assert.equal(mod.a, "a", "a was not tree shaken");
+				window.assert.equal(mod.b, "b", "b not tree shaken");
+				window.assert.equal(mod.c, undefined, "c still tree shaken");
+
+				window.assert.equal(modA.default, "a", "a is still present");
+				window.assert.equal(modB.default, "b", "b exists now");
+				window.assert.equal(modC, undefined, "c was not loaded at all");
+			} else {
+				console.log("mod", mod);
+				console.log("mod_b", modB);
+				console.log("mod_c", modC);
+			}
+		}
+
+		steal.done()
+		.then(assertMain)
+		.then(function(){
+			return steal.import("~/other");
+		})
+		.then(assertOther)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>

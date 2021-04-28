@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking with steal-clone</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		main="~/main"
+		src="../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"></script>
+	<script>
+		function runTests() {
+			return steal.loader.import("steal-clone", { name: steal.loader.main })
+			.then(function(clone) {
+				return clone({})
+				.import(steal.loader.main)
+				.then(function() {
+					if(window.assert) {
+						window.assert.ok(true, "It loaded");
+					} else {
+						console.log("it loaded successfully");
+					}
+				})
+			});
+		}
+
+		steal.done()
+		.then(runTests)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>

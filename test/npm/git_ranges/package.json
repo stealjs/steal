@@ -1,0 +1,10 @@
+{
+  "name": "git_ranges",
+  "main": "git_ranges",
+  "version": "1.0.0",
+  "dependencies": {
+    "tabs": "org/tabs#branch",
+    "framework": "org/framework#branch",
+    "library": "org/library#branch"
+  }
+}

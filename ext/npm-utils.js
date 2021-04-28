@@ -7,20 +7,49 @@
  */
 
 // A regex to test if a moduleName is npm-like.
-var npmModuleRegEx = /.+@.+\..+\..+#.+/;
 var slice = Array.prototype.slice;
+var npmModuleRegEx = /.+@.+\..+\..+#.+/;
+var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
+var gitUrlEx = /(git|http(s?)):\/\//;
+var supportsSet = typeof Set === "function";
 
 var utils = {
-	extend: function(d, s, deep){
+	extend: function(d, s, deep, existingSet){
 		var val;
+		var set = existingSet;
+
+		if(deep) {
+			if(!set) {
+				if(supportsSet) {
+					set = new Set();
+				} else {
+					set = [];
+				}
+			}
+
+			if(supportsSet) {
+				if(set.has(s)) {
+					return s;
+				} else {
+					set.add(s);
+				}
+			} else {
+				if(set.indexOf(s) !== -1) {
+					return s;
+				} else {
+					set.push(s);
+				}
+			}
+		}
+
 		for(var prop in s) {
 			val = s[prop];
 
 			if(deep) {
 				if(utils.isArray(val)) {
 					d[prop] = slice.call(val);
-				} else if(utils.isObject(val)) {
-					d[prop] = utils.extend({}, val, deep);
+				} else if(utils.isPlainObject(val)) {
+					d[prop] = utils.extend({}, val, deep, set);
 				} else {
 					d[prop] = s[prop];
 				}
@@ -42,7 +71,7 @@ var utils = {
 		for(; i < len; i++) {
 			res = fn.call(arr, arr[i]);
 			if(res) {
-				out.push(res);
+				out.push(arr[i]);
 			}
 		}
 		return out;
@@ -53,8 +82,21 @@ var utils = {
 			fn.call(arr, arr[i], i);
 		}
 	},
+	flow: function(fns) {
+		return function(){
+			var res = fns[0].apply(this, arguments);
+			for(var i = 1; i < fns.length; i++) {
+				res = fns[i].call(this, res);
+			}
+			return res;
+		};
+	},
 	isObject: function(obj){
 		return typeof obj === "object";
+	},
+	isPlainObject: function(obj){
+		// A plain object has a proto that is the Object
+		return utils.isObject(obj) && (!obj || obj.__proto__ === Object.prototype);
 	},
 	isArray: Array.isArray || function(arr){
 		return Object.prototype.toString.call(arr) === "[object Array]";
@@ -62,14 +104,25 @@ var utils = {
 	isEnv: function(name) {
 		return this.isEnv ? this.isEnv(name) : this.env === name;
 	},
+	isGitUrl: function(str) {
+		return gitUrlEx.test(str);
+	},
 	warnOnce: function(msg){
 		var w = this._warnings = this._warnings || {};
 		if(w[msg]) return;
 		w[msg] = true;
-		if(typeof steal !== "undefined" && typeof console !== "undefined" &&
-		  console.warn) {
+		this.warn(msg);
+	},
+	warn: function(msg){
+		if(typeof steal !== "undefined" && typeof console !== "undefined" && console.warn) {
 			steal.done().then(function(){
-				console.warn(msg);
+				if(steal.dev && steal.dev.warn){
+					steal.dev.warn(msg)
+				} else if(console.warn) {
+					console.warn("steal.js WARNING: "+msg);
+				} else {
+					console.log(msg);
+				}
 			});
 		}
 	},
@@ -94,8 +147,14 @@ var utils = {
 				if(descriptor.modulePath) {
 					modulePath = descriptor.modulePath.substr(0,2) === "./" ? descriptor.modulePath.substr(2) : descriptor.modulePath;
 				}
+
+				var version = descriptor.version;
+				if(version && version[0] !== "^") {
+					version = encodeURIComponent(decodeURIComponent(version));
+				}
+
 				return descriptor.packageName
-					+ (descriptor.version ? '@' + descriptor.version : '')
+					+ (version ? '@' + version : '')
 					+ (modulePath ? '#' + modulePath : '')
 					+ (descriptor.plugin ? descriptor.plugin : '');
 			}
@@ -107,6 +166,14 @@ var utils = {
 		 */
 		isNpm: function(moduleName){
 			return npmModuleRegEx.test(moduleName);
+		},
+		/**
+		 * @function moduleName.isConditional
+		 * Determines whether a moduleName includes a condition.
+		 * @return {Boolean}
+		 */
+		isConditional: function(moduleName){
+			return conditionalModuleRegEx.test(moduleName);
 		},
 		/**
 		 * @function moduleName.isFullyConvertedModuleName
@@ -134,7 +201,7 @@ var utils = {
 		 *
 		 * @return {system-npm/parsed_npm}
 		 */
-		parse: function (moduleName, currentPackageName, global) {
+		parse: function (moduleName, currentPackageName, global, context) {
 			var pluginParts = moduleName.split('!');
 			var modulePathParts = pluginParts[0].split("#");
 			var versionParts = modulePathParts[0].split("@");
@@ -150,10 +217,18 @@ var utils = {
 			var packageName,
 				modulePath;
 
-			// if relative, use currentPackageName
-			if( currentPackageName && utils.path.isRelative(moduleName) ) {
-				packageName= currentPackageName;
+			// if the module name is relative
+			// use the currentPackageName
+			if (currentPackageName && utils.path.isRelative(moduleName)) {
+				packageName = currentPackageName;
 				modulePath = versionParts[0];
+
+				// if the module name starts with the ~ (tilde) operator
+				// use the currentPackageName
+			} else if (currentPackageName && utils.path.isInHomeDir(moduleName, context)) {
+				packageName = currentPackageName;
+				modulePath = versionParts[0].split("/").slice(1).join("/");
+
 			} else {
 
 				if(modulePathParts[1]) { // foo@1.2#./path
@@ -172,6 +247,8 @@ var utils = {
 				}
 
 			}
+
+			modulePath = utils.path.removeJS(modulePath);
 
 			return {
 				plugin: pluginParts.length === 2 ? "!"+pluginParts[1] : undefined,
@@ -199,7 +276,7 @@ var utils = {
 		parseFromPackage: function(loader, refPkg, name, parentName) {
 			// Get the name of the
 			var packageName = utils.pkg.name(refPkg),
-			    parsedModuleName = utils.moduleName.parse(name, packageName),
+			    parsedModuleName = utils.moduleName.parse(name, packageName, undefined, {loader: loader}),
 				isRelative = utils.path.isRelative(parsedModuleName.modulePath);
 
 			if(isRelative && !parentName) {
@@ -210,29 +287,56 @@ var utils = {
 			// If the module needs to be loaded relative.
 			if(isRelative) {
 				// get the location of the parent
-				var parentParsed = utils.moduleName.parse( parentName, packageName );
+				var parentParsed = utils.moduleName.parse(parentName, packageName);
+
 				// If the parentModule and the currentModule are from the same parent
 				if( parentParsed.packageName === parsedModuleName.packageName && parentParsed.modulePath ) {
-					// Make the path relative to the parentName's path.
-					parsedModuleName.modulePath = utils.path.makeRelative(
-						utils.path.joinURIs(parentParsed.modulePath, parsedModuleName.modulePath) );
+					var makePathRelative = true;
+
+					if(name === "../" || name === "./" || name === "..") {
+						var relativePath = utils.path.relativeTo(
+							parentParsed.modulePath, name);
+						var isInRoot = utils.path.isPackageRootDir(relativePath);
+						if(isInRoot) {
+							parsedModuleName.modulePath = utils.pkg.main(refPkg);
+							makePathRelative = false;
+						} else {
+							parsedModuleName.modulePath = name +
+								(utils.path.endsWithSlash(name) ? "" : "/") +
+								"index";
+						}
+					}
+
+					if(makePathRelative) {
+						// Make the path relative to the parentName's path.
+						parsedModuleName.modulePath = utils.path.makeRelative(
+							utils.path.joinURIs(parentParsed.modulePath,
+												parsedModuleName.modulePath)
+						);
+					}
 				}
 			}
 
 			// we have the moduleName without the version
 			// we check this against various configs
 			var mapName = utils.moduleName.create(parsedModuleName),
+				refSteal = utils.pkg.config(refPkg),
 			    mappedName;
 
 			// The refPkg might have a browser [https://github.com/substack/node-browserify#browser-field] mapping.
 			// Perform that mapping here.
-			if(refPkg.browser && (typeof refPkg.browser !== "string") && (mapName in refPkg.browser)  && (!refPkg.system || !refPkg.system.ignoreBrowser)) {
-				mappedName = refPkg.browser[mapName] === false ? "@empty" : refPkg.browser[mapName];
+			if(refPkg.browser && (typeof refPkg.browser !== "string") &&
+			   (mapName in refPkg.browser) &&
+				   (!refSteal || !refSteal.ignoreBrowser)) {
+				mappedName = refPkg.browser[mapName] === false ?
+					"@empty" : refPkg.browser[mapName];
 			}
 			// globalBrowser looks like: {moduleName: aliasName, pgk: aliasingPkg}
-			var global = loader && loader.globalBrowser && loader.globalBrowser[mapName];
+			var global = loader && loader.globalBrowser &&
+				loader.globalBrowser[mapName];
 			if(global) {
-				mappedName = global.moduleName === false ? "@empty" : global.moduleName;
+				mappedName = global.moduleName === false ? "@empty" :
+					global.moduleName;
 			}
 
 			if(mappedName) {
@@ -243,6 +347,18 @@ var utils = {
 		},
 		nameAndVersion: function(parsedModuleName){
 			return parsedModuleName.packageName + "@" + parsedModuleName.version;
+		},
+		/**
+		 * Whether the module identifier is not relative or a special module
+		 * @param {string} identifier - The module identifier to be checked
+		 * @return {boolean}
+		 */
+		isBareIdentifier: function(identifier) {
+			return (
+				identifier &&
+				identifier[0] !== "." &&
+				identifier[0] !== "@"
+			);
 		}
 	},
 	pkg: {
@@ -252,22 +368,42 @@ var utils = {
 		 * @return {String}
 		 */
 		name: function(pkg){
-			return (pkg.system && pkg.system.name) || pkg.name;
+			var steal = utils.pkg.config(pkg);
+			return (steal && steal.name) || pkg.name;
 		},
 		main: function(pkg) {
-			return  utils.path.removeJS( 
-				(pkg.system && pkg.system.main) 
-				|| (typeof pkg.browser === "string" && pkg.browser) 
-				|| (typeof pkg.jspm === "string" && pkg.jspm) 
-				|| (typeof pkg.jspm === "object" && pkg.jspm.main) 
-				|| pkg.main || 'index' ) ;
+			var main;
+			var steal = utils.pkg.config(pkg);
+			if(steal && steal.main) {
+				main = steal.main;
+			} else if(typeof pkg.browser === "string") {
+				if(utils.path.endsWithSlash(pkg.browser)) {
+					main = pkg.browser + "index";
+				} else {
+					main = pkg.browser;
+				}
+			} else if(typeof pkg.jam === "object" && pkg.jam.main) {
+				main = pkg.jam.main;
+			} else if(pkg.main) {
+				if(utils.path.endsWithSlash(pkg.main)) {
+					main = pkg.main + "index";
+				} else {
+					main = pkg.main;
+				}
+			} else {
+				main = "index";
+			}
+
+			return utils.path.removeJS(
+				utils.path.removeDotSlash(main)
+			);
 		},
 		rootDir: function(pkg, isRoot) {
 			var root = isRoot ?
 				utils.path.removePackage( pkg.fileUrl ) :
 				utils.path.pkgDir(pkg.fileUrl);
 
-			var lib = pkg.system && pkg.system.directories && pkg.system.directories.lib;
+			var lib = utils.pkg.directoriesLib(pkg);
 			if(lib) {
 				root = utils.path.joinURIs(utils.path.addEndingSlash(root), lib);
 			}
@@ -280,7 +416,10 @@ var utils = {
 		 */
 		isRoot: function(loader, pkg) {
 			var root = utils.pkg.getDefault(loader);
-			return pkg.name === root.name && pkg.version === root.version;
+			return pkg && pkg.name === root.name && pkg.version === root.version;
+		},
+		homeAlias: function (context) {
+			return context && context.loader && context.loader.homeAlias || '~';
 		},
 		getDefault: function(loader) {
 			return loader.npmPaths.__default;
@@ -308,10 +447,16 @@ var utils = {
 					}
 				}
 				if(moduleAddress) {
-					var packageFolder = utils.pkg.folderAddress(moduleAddress);
-					return packageFolder ? loader.npmPaths[packageFolder] : loader.npmPaths.__default;
+					// Remove the baseURL so that folderAddress only detects
+					// node_modules that are within the baseURL. Otherwise
+					// you cannot load a project that is itself within
+					// node_modules
+					var startingAddress = utils.relativeURI(loader.baseURL,
+															moduleAddress);
+					var packageFolder = utils.pkg.folderAddress(startingAddress);
+					return packageFolder ? loader.npmPaths[packageFolder] : utils.pkg.getDefault(loader);
 				} else {
-					return loader.npmPaths.__default;
+					return utils.pkg.getDefault(loader);
 				}
 			}
 		},
@@ -324,6 +469,18 @@ var utils = {
 			}
 		},
 		/**
+		 * Finds a dependency by its saved resolutions. This will only be called
+		 * after we've first successful found a package the "hard way" by doing
+		 * semver matching.
+		 */
+		findDep: function(loader, refPkg, name){
+			if(loader.npm && refPkg && !utils.path.startsWithDotSlash(name)) {
+				var nameAndVersion = name + "@" + refPkg.resolutions[name];
+				var pkg = loader.npm[nameAndVersion];
+				return pkg;
+			}
+		},
+		/**
 		 * Walks up npmPaths looking for a [name]/package.json.  Returns
 		 * the package data it finds.
 		 *
@@ -333,7 +490,7 @@ var utils = {
 		 *
 		 * @return {undefined|NpmPackage}
 		 */
-		findDep: function (loader, refPackage, name) {
+		findDepWalking: function (loader, refPackage, name) {
 			if(loader.npm && refPackage && !utils.path.startsWithDotSlash(name)) {
 				// Todo .. first part of name
 				var curPackage = utils.path.depPackageDir(refPackage.fileUrl, name);
@@ -355,15 +512,35 @@ var utils = {
 				return loader.npm[name];
 			}
 		},
-		findByUrl: function(loader, url) {
-			if(loader.npm) {
-				url = utils.pkg.folderAddress(url);
-				return loader.npmPaths[url];
+		findByNameAndVersion: function(loader, name, version) {
+			if(loader.npm && !utils.path.startsWithDotSlash(name)) {
+				var nameAndVersion = name + "@" + version;
+				return loader.npm[nameAndVersion];
 			}
 		},
+		findByUrl: function(loader, url) {
+			if(loader.npm) {
+				var fullUrl = utils.pkg.folderAddress(url);
+				return loader.npmPaths[fullUrl];
+			}
+		},
+		directoriesLib: function(pkg) {
+			var steal = utils.pkg.config(pkg);
+			var lib = steal && steal.directories && steal.directories.lib;
+			var ignores = [".", "/"], ignore;
+
+			if(!lib) return undefined;
+
+			while(!!(ignore = ignores.shift())) {
+				if(lib[0] === ignore) {
+					lib = lib.substr(1);
+				}
+			}
+			return lib;
+		},
 		hasDirectoriesLib: function(pkg) {
-			var system = pkg.system;
-			return system && system.directories && !!system.directories.lib;
+			var steal = utils.pkg.config(pkg);
+			return steal && steal.directories && !!steal.directories.lib;
 		},
 		findPackageInfo: function(context, pkg){
 			var pkgInfo = context.pkgInfo;
@@ -376,6 +553,14 @@ var utils = {
 				});
 				return out;
 			}
+		},
+		saveResolution: function(context, refPkg, pkg){
+			var npmPkg = utils.pkg.findPackageInfo(context, refPkg);
+			npmPkg.resolutions[pkg.name] = refPkg.resolutions[pkg.name] =
+				pkg.version;
+		},
+		config: function(pkg){
+			return pkg.steal || pkg.system;
 		}
 	},
 	path: {
@@ -394,7 +579,7 @@ var utils = {
 		},
 		addJS: function(path){
 			// Don't add `.js` for types that need to work without an extension.
-			if(/\.js(on)?$/.test(path)) {
+			if(/\.m?js(on)?$/.test(path)) {
 				return path;
 			} else {
 				return path+".js";
@@ -403,7 +588,10 @@ var utils = {
 		isRelative: function(path) {
 			return  path.substr(0,1) === ".";
 		},
-		joinURIs: function(base, href) {
+		isInHomeDir: function( path, context ) {
+			return path.substr(0,2) === utils.pkg.homeAlias(context) + "/";
+		},
+		joinURIs: function(baseUri, rel) {
 			function removeDotSegments(input) {
 				var output = [];
 				input.replace(/^(\.\.?(\/|$))+/, '')
@@ -419,8 +607,8 @@ var utils = {
 				return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
 			}
 
-			href = parseURI(href || '');
-			base = parseURI(base || '');
+			var href = parseURI(rel || '');
+			var base = parseURI(baseUri || '');
 
 			return !href || !base ? null : (href.protocol || base.protocol) +
 				(href.protocol || href.authority ? href.authority : base.authority) +
@@ -430,6 +618,11 @@ var utils = {
 		},
 		startsWithDotSlash: function( path ) {
 			return path.substr(0,2) === "./";
+		},
+		removeDotSlash: function(path) {
+			return utils.path.startsWithDotSlash(path) ?
+				path.substr(2) :
+				path;
 		},
 		endsWithSlash: function(path){
 			return path[path.length -1] === "/";
@@ -483,6 +676,35 @@ var utils = {
 		basename: function(address){
 			var parts = address.split("/");
 			return parts[parts.length - 1];
+		},
+		relativeTo: function(modulePath, rel) {
+			var parts = modulePath.split("/");
+			var idx = 1;
+			while(rel[idx] === ".") {
+				parts.pop();
+				idx++;
+			}
+			return parts.join("/");
+		},
+		isPackageRootDir: function(pth) {
+			return pth.indexOf("/") === -1;
+		}
+	},
+	json: {
+		/**
+		 * if a jsonOptions transformer is provided (by the System.config)
+		 * use it for all json files, package.json's are also included
+		 * @param loader
+		 * @param load
+		 * @param data
+		 * @returns data
+		 */
+		transform: function(loader, load, data) {
+			// harmonize steal config
+			data.steal = utils.pkg.config(data);
+			var fn = loader.jsonOptions && loader.jsonOptions.transform;
+			if(!fn) return data;
+			return fn.call(loader, load, data);
 		}
 	},
 	includeInBuild: true
@@ -490,7 +712,7 @@ var utils = {
 
 
 function parseURI(url) {
-	var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@]*(?::[^:@]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+	var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/]*(?::[^:@\/]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
 		// authority = '//' + user + ':' + pass '@' + hostname + ':' port
 		return (m ? {
 		href     : m[0] || '',

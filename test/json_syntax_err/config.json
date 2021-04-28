@@ -1,0 +1,7 @@
+{
+  "server": "http://example.com/some-url",
+  "database": "postgres",
+  "retryCount": 15,
+  env: "production",
+  "log": "http://example.com/log"
+}

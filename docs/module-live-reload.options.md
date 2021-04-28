@@ -1,7 +1,7 @@
 @typedef {{}} steal.live-reload.options LiveReloadOptions
 @parent steal.live-reload
 
-The following options can be specified to configure [steal.live-reload]'s behavior, using any method specified in [System.config].
+The following options can be specified to configure [steal.live-reload]'s behavior, using any method specified in [config.config].
 
 @option {Number} [liveReloadPort=8012]
 

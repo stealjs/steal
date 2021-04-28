@@ -1,0 +1,6 @@
+{
+  "name": "browser-config",
+  "main": "main",
+  "version": "1.0.0",
+  "browser": "main-browser"
+}

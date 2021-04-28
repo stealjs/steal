@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>steal-module script tag with default config</title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="../steal-with-promises.js"
+		main="steal-module-script/main"
+		config-main="steal-module-script/stealconfig">
+	</script>
+
+	<script type="text/steal-module">
+		import foobar from "steal-module-script/foobar";
+
+		if (window != null && window.assert) {
+			assert.equal(foobar, "foobar", "should import module correctly");
+			done();
+		} else {
+			console.log("foobar: ", foobar);
+		}
+	</script>
+</body>
+</html>

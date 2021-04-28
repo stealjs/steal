@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tree shaking with reexports - Tree shaking disabled</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		src="../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"
+		data-no-tree-shaking></script>
+	<script>
+		function assertMain() {
+			var main = steal.loader.get("shake@1.0.0#main");
+			if(typeof window.assert !== "undefined") {
+				assert.ok(main.Component);
+				assert.ok(main.DefineList);
+				assert.ok(main.DefineMap);
+				assert.ok(main.assign);
+				assert.ok(main.fixture);
+				assert.ok(main.stache);
+			} else {
+				console.log("main", main);
+			}
+		}
+
+		steal.import("~/uses-main")
+		.then(assertMain)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		});
+	</script>
+</body>
+</html>

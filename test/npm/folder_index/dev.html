@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+
+	<script src="../../../steal-with-promises.js" config-main="@empty"
+		main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+		var output = [];
+		var oldLog = console.warn;
+		console.warn = function(/* args */){
+			var args = [].slice.call(arguments);
+			output.push(args);
+			return oldLog.apply(this, args);
+		};
+
+		System.import("package.json!npm").then(function(){
+			System.import("main").then(function(mod){
+				if(window.assert) {
+					assert.equal(typeof mod, "object", "module was fetched successfully");
+					assert.equal(mod.name, "folder", "correct name");
+					assert.equal(mod.other, "other", "got other module");
+
+					// See if we got the expected log message.
+					var str, found = false;
+					for(var i = 0, len = output.length; i < len; i++) {
+						str = output[i].join("");
+						if(str.indexOf("Don't panic") >= 0) {
+							found = true;
+							break;
+						}
+					}
+					assert.equal(found, true, "The expected log warning was printed");
+
+					done();
+				} else {
+					console.log("Got module", mod);
+				}
+			}, function(e){
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
+				} else {
+					console.log(e);
+					setTimeout(function(){
+						throw e;
+					});
+				}
+
+			});
+
+
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

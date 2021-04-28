@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script>
+		var steal = {
+			"configPath": "ssd/js/stealconfig.js",
+			"main": "main"
+		};
+	</script>
+	<script
+		main
+		type="text/javascript"
+		src="../../steal-with-promises.js"
+  ></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+	"name": "npmapp",
+	"version": "3.0.0",
+	"main": "main.js",
+	"dependencies": {
+		"dep1": "1.0.0",
+		"dep2": "1.0.0"
+	},
+	"system": {
+		"npmAlgorithm": "flat"
+	}
+}

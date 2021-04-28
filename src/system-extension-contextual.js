@@ -1,4 +1,4 @@
-function addContextual(loader){
+addStealExtension(function addContextual(loader) {
   loader._contextualModules = {};
 
   loader.setContextual = function(moduleName, definer){
@@ -8,37 +8,41 @@ function addContextual(loader){
   var normalize = loader.normalize;
   loader.normalize = function(name, parentName){
     var loader = this;
+	var pluginLoader = loader.pluginLoader || loader;
 
     if (parentName) {
       var definer = this._contextualModules[name];
 
       // See if `name` is a contextual module
       if (definer) {
-        name = name + '/' + parentName;
+        var localName = name + '/' + parentName;
 
-        if(!loader.has(name)) {
+        if(!loader.has(localName)) {
           // `definer` could be a function or could be a moduleName
           if (typeof definer === 'string') {
-            definer = loader['import'](definer);
+            definer = pluginLoader['import'](definer);
           }
 
           return Promise.resolve(definer)
-          .then(function(definer) {
-            if (definer['default']) {
-              definer = definer['default'];
-            }
-            loader.set(name, loader.newModule(definer(parentName)));
-            return name;
-          });
+            .then(function(modDefiner) {
+				var definer = modDefiner;
+              if (definer['default']) {
+                definer = definer['default'];
+              }
+              var definePromise = Promise.resolve(
+                definer.call(loader, parentName)
+              );
+              return definePromise;
+            })
+            .then(function(moduleDef){
+              loader.set(localName, loader.newModule(moduleDef));
+              return localName;
+            });
         }
-        return Promise.resolve(name);
+        return Promise.resolve(localName);
       }
     }
 
     return normalize.apply(this, arguments);
   };
-}
-
-if(typeof System !== "undefined") {
-  addContextual(System);
-}
+});

@@ -2,8 +2,8 @@
 
 	// helpers
 	var camelize = function(str){
-		return str.replace(/-+(.)?/g, function(match, chr){ 
-			return chr ? chr.toUpperCase() : '' 
+		return str.replace(/-+(.)?/g, function(match, chr){
+			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
@@ -55,7 +55,7 @@
 			return arr[arr.length - 1];
 		},
 		parseURI = function(url) {
-			var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@]*(?::[^:@]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+			var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/]*(?::[^:@\/]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
 				// authority = '//' + user + ':' + pass '@' + hostname + ':' port
 				return (m ? {
 				href     : m[0] || '',
@@ -106,7 +106,37 @@
 				result.push("../");
 			}
 			return "./" + result.join("") + uriParts.join("/");
-		};
+		},
+		fBind = Function.prototype.bind,
+		isFunction = function(obj) {
+			return !!(obj && obj.constructor && obj.call && obj.apply);
+		},
 		isWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope,
-		isBrowserWithWindow = typeof window !== "undefined",
-		isNode = !isBrowserWithWindow && !isWebWorker && typeof require != 'undefined';
+		isNode = typeof process === "object" && {}.toString.call(process) === "[object process]",
+		isBrowserWithWindow = !isNode && typeof window !== "undefined",
+		isNW = isNode && (function(){
+			try {
+				return require("nw.gui") !== "undefined";
+			} catch(e) {
+				return false;
+			}
+		})(),
+		isElectron = isNode && !!process.versions["electron"],
+		isNode = isNode && !isNW && !isElectron,
+		hasAWindow = isBrowserWithWindow || isNW || isElectron,
+		getStealScript = function(){
+			if(isBrowserWithWindow || isNW || isElectron) {
+				if(document.currentScript) {
+					return document.currentScript;
+				}
+				var scripts = document.scripts;
+
+				if (scripts.length) {
+					var currentScript = scripts[scripts.length - 1];
+					return currentScript;
+				}
+			}
+		},
+		stealScript = getStealScript(),
+		warn = typeof console === "object" ?
+			fBind.call(console.warn, console) : function(){};

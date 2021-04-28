@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+
+	<script type="text/javascript" src="../../steal-with-promises.js" data-config="../config.js" main="@empty">
+		window.foo = 'bar';
+	</script>
+
+	<script>
+		if (typeof window !== "undefined" && window.assert) {
+			steal.done()
+				.then(function () {
+					assert.equal(window.foo, 'bar', 'steal.done should wait for inline module to be loaded');
+				})
+				.then(done, function(err) {
+					assert.notOk(err, "should not fail");
+					done()
+				});
+		}
+	</script>
+</body>
+</html>

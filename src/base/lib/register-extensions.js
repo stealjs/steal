@@ -1,0 +1,11 @@
+core(System);
+meta(System);
+register(System);
+es6(System);
+global(System);
+cjs(System);
+amd(System);
+map(System);
+plugins(System);
+bundles(System);
+depCache(System);

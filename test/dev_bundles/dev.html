@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>StealJS development bundles</title>
+</head>
+<body>
+	<script
+		main="@empty"
+		src="../../steal-with-promises.js"
+		dev-bundle="test/dev_bundles/dev-bundle"
+		config-main="test/dev_bundles/stealconfig"
+	>
+	</script>
+
+	<script type="text/javascript">
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script type="text/javascript">
+		steal.done().then(function() {
+			if (window.assert) {
+				assert.equal(window.first, "bundle", "dev bundle should load first");
+				assert.equal(window.last, "configMain", "config should load after bundle");
+				done();
+			}
+			else {
+				console.log("first loaded: ", window.first);
+				console.log("last loaded: ", window.last);
+			}
+		});
+	</script>
+</body>
+</html>

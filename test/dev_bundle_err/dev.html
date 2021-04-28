@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>dev-bundle error message</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script src="../../steal-with-promises.js"
+		data-base-url="."
+		data-config="package.json!npm"
+		data-dev-bundle></script>
+	<script>
+		steal.done().then(null, function(err){
+			if(window.assert) {
+				window.assert.ok(/stealjs\.com/.test(err.message), "The message contains a link to stealjs.com");
+				window.assert.notOk(err.stack, "No stack is provided since it's not useful");
+				window.done();
+			} else {
+				console.log('Did error!');
+			}
+		});
+	</script>
+</body>
+</html>

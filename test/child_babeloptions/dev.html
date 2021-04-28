@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>child babelOptions</title>
+</head>
+<body>
+
+<script>
+	window.assert = window.parent.assert;
+	window.done = window.parent.done;
+</script>
+<script src="../../../steal-with-promises.js"
+	data-base-url="."
+	data-config="package.json!npm"
+	data-main="@empty"></script>
+<script>
+	steal.import("~/main").then(null, function(err){
+		if(window.assert) {
+			var worked = /two\.js/.test(err.stack) || /Function code/.test(err.stack);
+			window.assert.ok(worked, "got the source in the stack trace");
+			window.done();
+		} else {
+			console.error(err);
+		}
+	});
+</script>
+</body>
+</html>

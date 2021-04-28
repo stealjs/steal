@@ -1,0 +1,14 @@
+{
+  "name": "map_main",
+  "version": "0.0.0",
+  "dependencies": {
+    "dep": "1.2.2"
+  },
+  "system": {
+    "importRewrites": {
+      "dep": {
+        "no.namespace.util": "./util"
+      }
+    }
+  }
+}

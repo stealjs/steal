@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>SystemJS tests</title>
+</head>
+
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="../../../steal-with-promises.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+		System.import("package.json!npm")
+			.then(function() {
+				System.import(System.main).then(function(main) {
+					if (window.assert) {
+						assert.equal(main.can, "amd can");
+						assert.equal(main.define, "amd define plugin");
+						done();
+					} else {
+						console.log(main);
+					}
+
+				}, function(e) {
+					if (window.assert) {
+						assert.ok(false, e);
+						done();
+					} else {
+						console.log(e);
+						setTimeout(function() {
+							throw e;
+						});
+					}
+
+				});
+			})
+			.then(null, function(err) {
+				console.error("Oh no, error!", err);
+			});
+
+	</script>
+</body>
+
+</html>

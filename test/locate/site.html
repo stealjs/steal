@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<div class="logo"></div>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+		steal = {
+			paths: {
+				"$less": "../ext/less.js",
+				"$css": "../ext/css.js",
+				"stache": "stache.js"
+			}
+		};
+	</script>
+	<script type="text/javascript" src="../../steal-with-promises.js"
+        main="main" data-config="config.js"></script>
+</body>
+</html>

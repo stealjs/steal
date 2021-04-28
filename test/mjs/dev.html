@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Importing modules with .mjs</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script
+		src="../../steal-with-promises.js"
+		data-main
+		data-base-url="."
+		data-config="package.json!npm"></script>
+	<script>
+		function assertMain() {
+			if(typeof window.assert !== "undefined") {
+				assert.equal(window.MAIN.name, "main");
+				assert.equal(window.MAIN.other, "other");
+			} else {
+				console.log("MAIN", window.MAIN);
+			}
+		}
+
+		function assertAnother() {
+			if(typeof window.assert !== "undefined") {
+				assert.equal(window.ANOTHER, "another");
+			} else {
+				console.log("ANOTHER", window.ANOTHER);
+			}
+		}
+
+		steal.done()
+		.then(assertMain)
+		.then(function(){
+			return steal.import("~/uses-another");
+		})
+		.then(assertAnother)
+		.then(function(){
+			if(window.assert) {
+				window.done();
+			}
+		})
+		.catch(function(err) {
+			if(typeof window.assert !== "undefined") {
+				window.assert.equal(err, undefined, err);
+				window.done();
+				return;
+			}
+			return Promise.reject(err);
+		});
+	</script>
+</body>
+</html>

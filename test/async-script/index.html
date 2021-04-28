@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script>
+		setTimeout(function(){
+			var s = document.createElement("script");
+			s.src = 'async.js';
+			document.head.appendChild(s);
+		}, 1);
+	</script>
+	<script src="../../steal-with-promises.js"
+			main="main"
+			config="./stealconfig.js"
+			foo="bar"></script>
+</head>
+<body>
+</body>
+</html>

@@ -1,17 +1,25 @@
-<script>
-    window.QUnit = window.parent.QUnit;
-    window.removeMyself = window.parent.removeMyself;
-</script>
-<script>
-    steal = {
-        foo: 'bar'
-    };
-</script>
-<script src="../steal.js" data-foo="foo"></script>
-<script>
-    steal.done().then(function(){
-        QUnit.ok(System.foo,"foo");
-        QUnit.start();
-        removeMyself();
-    });
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script>
+		steal = {
+			foo: 'bar'
+		};
+	</script>
+	<script src="../steal-with-promises.js" data-foo="foo"></script>
+	<script>
+		steal.done().then(function(){
+			assert.ok(steal.config("foo"),"foo");
+			done();
+		});
+	</script>
+</body>
+</html>

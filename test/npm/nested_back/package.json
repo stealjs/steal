@@ -1,0 +1,12 @@
+{
+	"name": "nested_back",
+	"main": "main.js",
+	"version": "1.0.0",
+	"system": {
+		"npmAlgorithm": "nested"
+	},
+	"dependencies": {
+		"dep1": "1.0.0",
+		"dep2": "0.0.5"
+	}
+}

@@ -3,16 +3,16 @@
 /**
  * @property steal.dev
  * @parent stealjs
- * 
+ *
  * Provides helper functions for development that get removed when put in production mode.
  * This means you can leave <code>steal.dev.log("hello world")</code> in your code and it
  * will get removed in prodution.
  *
  * ## Examples
- * 
+ *
  *     steal.dev.log("Something is happening");
  *     steal.dev.warn("Something bad is happening");
- * 
+ *
  */
 (function(){
 
@@ -58,7 +58,7 @@
 		warn: function( out ) {
 			var ll = steal.config('logLevel');
 			if(ll < 2){
-				Array.prototype.unshift.call(arguments, 'steal.js WARN:');
+				Array.prototype.unshift.call(arguments, 'steal.js WARNING:');
 				if ( window.console && console.warn ) {
 					this._logger( "warn", Array.prototype.slice.call(arguments) );
 				} else if ( window.console && console.log ) {
@@ -67,7 +67,6 @@
 					opera.postError("steal.js WARNING: " + out);
 				}
 			}
-
 		},
 		/**
 		 * @function steal.dev.log
@@ -101,7 +100,7 @@
 		 *
 		 * @signature `steal.dev.assert(expression, [message])`
 		 * @param {*} expression to be evaluated.
-		 * @param {String} optional message to display on error.
+		 * @param {String} optional msg to display on error.
 		 *
 		 * @body
 		 * Throws an error if the `expression` provided is falsy.
@@ -110,7 +109,8 @@
 		 *     steal.dev.assert("", "custom message"); // throws!
 		 *
 		 */
-		assert: function(expression, message) {
+		assert: function(expression, msg) {
+			var message = msg;
 			if(!expression) {
 				message = message || "Expected " + expression + " to be truthy";
 				throw new Error(message);

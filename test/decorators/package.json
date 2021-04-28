@@ -1,0 +1,15 @@
+{
+  "name": "steal-decorators-test",
+  "version": "0.0.1",
+  "description": "",
+  "main": "cellphone.js",
+  "author": "Bitovi",
+  "license": "MIT",
+  "steal": {
+    "babelOptions": {
+      "plugins": [
+        "transform-decorators-legacy"
+      ]
+    }
+  }
+}

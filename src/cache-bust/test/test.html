@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cache-busting extension tests</title>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script>
+	var steal = {
+		paths: {
+			"steal-qunit": "node_modules/steal-qunit/steal-qunit.js"
+		},
+		map: {
+			"qunitjs": "node_modules/qunitjs"
+		},
+		meta: {
+			"node_modules/qunitjs/qunit/qunit": {
+				"format": "global",
+				"exports": "QUnit"
+			}
+		},
+		ext: {
+			"css": "node_modules/steal-css/css.js"
+		}
+	}
+</script>
+<script
+        src="../../../steal.js"
+        main="src/cache-bust/test/"
+        config-main="../../../package.json!npm"
+>
+</script>
+</body>
+</html>

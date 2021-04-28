@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script>
+		process = {
+			nextTick: function(fn){
+				setTimeout(fn, 0);
+			},
+			versions: {
+				electron: "1.0.0"
+			},
+			platform: "electron"
+		};
+
+		global = window;
+
+		var oldToString = Object.prototype.toString;
+		Object.prototype.toString = function(){
+			if(this === process) {
+				return "[object process]";
+			}
+			return oldToString.apply(this, arguments);
+		};
+	</script>
+	<script src="../../steal-with-promises.js"
+		data-config="package.json!npm"
+		data-base-url="./"
+		data-main="~/main"></script>
+</body>
+</html>

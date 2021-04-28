@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>module is loaded twice with different paths</title>
+</head>
+<body>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+
+		window.WARN = Function.prototype.bind.call(
+			window.console.warn,
+			window.console
+		);
+
+		window.console.warn = function(msg) {
+			window.assert.ok(
+				!/is being instantiated twice/.test(msg),
+				"steal should not warn users when a module was loaded before the config"
+			);
+			window.WARN.apply(this, arguments);
+			window.done();
+		};
+	</script>
+	<script
+		main="main"
+		base-url="."
+		config="package.json!npm"
+		src="../../steal-with-promises.js"
+	></script>
+	<script>
+		steal.done().then(function(){
+			if(window.assert) {
+				window.assert.ok(true, 'finished without throwing');
+				window.done();
+			} else {
+				console.log('Finished without throwing!');
+			}
+		});
+	</script>
+</body>
+</html>

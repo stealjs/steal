@@ -1,0 +1,3 @@
+steal.config({
+	main: "main"
+});

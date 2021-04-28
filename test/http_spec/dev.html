@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Loading from http(s) specifiers</title>
+</head>
+<body>
+
+<script>
+	window.assert = window.parent.assert;
+	window.done = window.parent.done;
+
+	var _open = XMLHttpRequest.prototype.open;
+	XMLHttpRequest.prototype.open = function(method, url) {
+		var match = /example\.com\/(.+)/.exec(url);
+		if(match) {
+			this.__pathname = match[1];
+			this.__url = url;
+			return;
+		}
+		return _open.apply(this, arguments);
+	}
+
+	var _send = XMLHttpRequest.prototype.send;
+	XMLHttpRequest.prototype.send = function(){
+		if(this.__url) {
+			var pn = this.__pathname;
+			setTimeout(function(){
+				Object.defineProperty(this, "readyState", {
+					value: 4
+				});
+				Object.defineProperty(this, "responseText", {
+					value: "module.exports = '" + pn +"';"
+				});
+				this.onreadystatechange();
+			}.bind(this));
+			return;
+		}
+		return _send.apply(this, arguments);
+	};
+</script>
+<script src="../../steal-with-promises.js"
+	data-base-url="."
+	data-config="package.json!npm"></script>
+<script>
+	steal.import("~/main").then(function(main){
+		if(window.assert) {
+			window.assert.equal(main.one, "foo.mjs");
+			window.assert.equal(main.two, "bar.js");
+			window.assert.equal(main.three, "baz.mjs");
+			window.done();
+		} else {
+			console.log(main);
+		}
+	}, function(err){
+		if(window.assert) {
+			window.assert.ok(false, err);
+			window.done();
+		} else {
+			console.error(err);
+		}
+	});
+</script>
+</body>
+</html>

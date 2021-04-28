@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+	<title>SystemJS tests</title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="../../../steal-with-promises.js"
+		config-main="@empty" base-url="./"></script>
+	<script src="../system_test_config.js"></script>
+	<script>
+
+		System.import("package.json!npm").then(function(){
+
+			// package name works
+			var packageName = System.import("directories_lib").then(function(main){
+				if(window.assert) {
+					assert.equal(main.default.util.name, "util");
+				} else {
+					console.log(main);
+				}
+			});
+
+			var packageUtil = System.import("directories_lib/util").then(function(util){
+				if(window.assert) {
+					assert.equal(util.name, "util");
+				} else {
+					console.log(util.name);
+				}
+			});
+
+			var test = System.import("test/test").then(function(test){
+				test = test["default"];
+				if(window.assert) {
+					assert.equal(test.name, "test/test","got name");
+					assert.equal(test.foo.name, "foo");
+					assert.equal(test.directories_lib.util.name, "util");
+					assert.equal(test.other, "bar");
+				} else {
+					console.log(test);
+				}
+			});
+
+			var main = System.import(System.main).then(function(main){
+				if(window.assert) {
+					assert.equal(main.default.util.name, "util");
+				} else {
+					console.log(main);
+				}
+			});
+
+			Promise.all([packageName,packageUtil,test,main]).then(function(){
+				done();
+			}, function(e){
+				if(window.assert) {
+					assert.ok(false, e);
+					done();
+				} else {
+					console.log(e);
+					setTimeout(function(){
+						throw e;
+					},1);
+				}
+
+			});
+
+
+		}).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
+	</script>
+</body>
+</html>

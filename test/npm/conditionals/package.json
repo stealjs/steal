@@ -1,0 +1,15 @@
+{
+  "name": "conditionals",
+	"main": "main",
+	"version": "1.0.0",
+	"dependencies": {
+		"framework": "org/framework#branch",
+		"library": "org/library#branch",
+		"steal-conditional": "^0.1.2"
+	},
+	"system": {
+		"configDependencies": [
+			"./node_modules/steal-conditional/conditional"
+		]
+	}
+}

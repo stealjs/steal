@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>syntax error messages</title>
+</head>
+<body>
+<script>
+	window.assert = window.parent.assert;
+	window.done = window.parent.done;
+</script>
+<script src="../../steal-with-promises.js"
+	data-base-url="."
+	data-config="package.json!npm"
+	data-main="@empty"></script>
+<script>
+(function(){
+	var fakeAssert = {
+		ok: function(truthy, msg){
+			if(!truthy) {
+				throw new Error(msg);
+			}
+		}
+	};
+
+	var mods = [
+		{
+			name: "~/esm",
+			test: function(assert, err) {
+				assert.ok(/esm\.js:3:10/.test(err.stack), "Line and file included in the stack");
+			}
+		},
+		{
+			name: "~/cjs",
+			test: function(assert, err) {
+				assert.ok(/cjs\.js:1/.test(err.stack), "Line and file included, even though we don't get good stack traces from evaling");
+			}
+		}
+	];
+
+	function next() {
+		if(!mods.length) {
+			if(window.assert) {
+				window.done();
+			} else {
+				console.log('All done.');
+			}
+			return;
+		}
+
+		var rec = mods.shift();
+		steal.import(rec.name)
+		.then(function(){
+			if(window.assert) {
+				window.assert.ok(false, "This should not have resolved");
+			}
+		}, function(err){
+			if(window.assert) {
+				rec.test(window.assert, err);
+			} else {
+				console.error(err);
+				rec.test(fakeAssert, err);
+			}
+
+		})
+		.then(next);
+	}
+
+	next();
+
+})();
+</script>
+</body>
+</html>

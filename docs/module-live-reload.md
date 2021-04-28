@@ -18,7 +18,7 @@ reload(function(){
 });
 ```
 
-@param {Function} callback A function to be called after a reload cycle is complete.
+@param {function(err)} callback A function to be called after a reload cycle is complete.
 
 @signature `reload(moduleName, callback)`
 
@@ -68,7 +68,7 @@ Use live-reload by including it as a configDependency in your `package.json`:
 
 ```json
 {
-  "system": {
+  "steal": {
     "configDependencies": [
       "live-reload"
     ]
@@ -102,5 +102,20 @@ render();
 reload(function(){
 	render();
 });
+```
 
+## Error handling
+
+The *live-reload* module will include an [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) if there is any error that occurs when reloading the module tree.
+
+```js
+import reload from "live-reload";
+
+reload(function(err) {
+  if(err) {
+    displayErrorMessage(err);
+  } else {
+    // Do whatever you normally do on a reload.
+  }
+});
 ```

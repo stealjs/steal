@@ -1,19 +1,31 @@
-<style>
-	div {width: 100px;}
-</style>
-<div id='test-element'>Test Element</div>
-<script>
-	window.QUnit = window.parent.QUnit;
-	window.removeMyself = window.parent.removeMyself;
-</script>
-<script>
-	steal = {
-		instantiated: {
-			"bundles/bar.css!$css": null
-		}
-	};
-</script>
-<script src="../../steal.js" 
-		data-config="./config.js"
-		data-env="production"
-		data-main="inst"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<style>
+		div { width: 100px; }
+	</style>
+	<div id="test-element">Test Element</div>
+	<script>
+		window.assert = window.parent.assert;
+		window.done = window.parent.done;
+	</script>
+	<script>
+		steal = {
+			ext: {
+				css: "$css"
+			},
+			instantiated: {
+				"bundles/bar.css!$css": null
+			}
+		};
+	</script>
+	<script src="../../steal-with-promises.js"
+			data-config="./config.js"
+			data-env="production"
+			data-main="inst"></script>
+</body>
+</html>

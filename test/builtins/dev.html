@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script src="../../steal-with-promises.js" config="../../package.json!npm" main="test/builtins/main"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+
+	<script src="./steal/foo.js"></script>
+
+	<script
+		src="../steal-with-promises.js"
+		config-main="@empty"
+		main="last_script_tag/main"
+		data-bar="bar"
+	>
+	</script>
+</body>
+</html>

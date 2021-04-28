@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Skip es-2015 preset</title>
+</head>
+<body>
+	<script>
+		window.done = window.parent.done;
+		window.assert = window.parent.assert;
+	</script>
+	<script>
+		steal = {
+			forceES5: false
+		};
+	</script>
+	<script src="../../steal-with-promises.js" main="@empty" config-main="@empty"></script>
+	<script type="steal-module">
+		export default function(){}
+
+		var p = new Promise(function(resolve) {
+			async function callMe() {}
+
+			resolve(callMe.toString());
+		});
+
+		p.then(function(fnName) {
+			assert.equal(
+				fnName,
+				"async function callMe() {}",
+				"it should not transpile ES2015 code"
+			);
+			done();
+		})
+		.catch(function(e) {
+			assert.ok(!e, "it should not fail: " + e.message);
+			done();
+		});
+	</script>
+</body>
+</html>

@@ -1,11 +1,61 @@
 var cloneSteal = function(System){
 	var loader = System || this.System;
-	return makeSteal(this.addSteal(loader.clone()));
+	var steal = makeSteal(loader.clone());
+	steal.loader.set("@steal", steal.loader.newModule({
+		"default": steal,
+		__useDefault: true
+	}));
+	steal.clone = cloneSteal;
+	return steal;
 };
 
-var makeSteal = function(System){
 
-	System.set('@loader', System.newModule({'default':System, __useDefault: true}));
+
+var ArraySet;
+if(typeof Set === "function") {
+	ArraySet = Set;
+} else {
+	ArraySet = function(){ this._items = []; };
+	ArraySet.prototype.has = function(item) {
+		return this._items.indexOf(item) !== -1;
+	};
+	ArraySet.prototype.add = function(item) {
+		if(!this.has(item)) {
+			this._items.push(item);
+		}
+	};
+}
+
+var makeSteal = function(System){
+	var addStealExtension = function (extensionFn) {
+		if (typeof System !== "undefined" && isFunction(extensionFn)) {
+			if (System._extensions) {
+				System._extensions.push(extensionFn);
+			}
+			extensionFn(System, steal);
+		}
+	};
+
+	System.set('@loader', System.newModule({
+		'default': System,
+		__useDefault: true
+	}));
+
+
+	System.set("less", System.newModule({
+		__useDefault: true,
+		default: {
+			fetch: function() {
+				throw new Error(
+					[
+						"steal-less plugin must be installed and configured properly",
+						"See https://stealjs.com/docs/steal-less.html"
+					].join("\n")
+				);
+			}
+		}
+	}));
+
 	System.config({
 		map: {
 			"@loader/@loader": "@loader",
@@ -13,9 +63,9 @@ var makeSteal = function(System){
 		}
 	});
 
-	var configDeferred,
-		devDeferred,
-		appDeferred;
+	var configPromise,
+		devPromise,
+		appPromise;
 
 	var steal = function(){
 		var args = arguments;
@@ -43,15 +93,38 @@ var makeSteal = function(System){
 			return afterConfig();
 		} else {
 			// wait until the config has loaded
-			return configDeferred.then(afterConfig,afterConfig);
+			return configPromise.then(afterConfig,afterConfig);
 		}
 
 	};
 
-	System.set("@steal", System.newModule({"default":steal, __useDefault:true}));
+	System.set("@steal", System.newModule({
+		"default": steal,
+		__useDefault:true
+	}));
+	System.Set = ArraySet;
 
-	steal.System = System;
+	var loaderClone = System.clone;
+	System.clone = function(){
+		var loader = loaderClone.apply(this, arguments);
+		loader.set("@loader", loader.newModule({
+			"default": loader,
+			__useDefault: true
+		}));
+		loader.set("@steal", loader.newModule({
+			"default": steal,
+			__useDefault: true
+		}));
+		loader.Set = ArraySet;
+		return loader;
+	};
+
+
+
+	// steal.System remains for backwards compat only
+	steal.System = steal.loader = System;
 	steal.parseURI = parseURI;
 	steal.joinURIs = joinURIs;
 	steal.normalize = normalize;
 	steal.relativeURI = relativeURI;
+	steal.addExtension = addStealExtension;

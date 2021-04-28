@@ -3,77 +3,110 @@
 var crawl = require('./npm-crawl');
 var utils = require("./npm-utils");
 
-exports.system = convertSystem;
+exports.steal = convertSteal;
 exports.propertyNames = convertPropertyNames;
 exports.propertyNamesAndValues = convertPropertyNamesAndValues;
 exports.name = convertName;
 exports.browser = convertBrowser;
 exports.browserProperty = convertBrowserProperty;
+exports.jspm = convertJspm;
 exports.toPackage = convertToPackage;
 exports.forPackage = convertForPackage;
 
-/*
-{
-  "system": {
-    "map": {
-      "package": {
-        "another": "one-more"
-	  }
-	},
-	"meta": {
-      "package": {
-        "deps": [
-          "jquery"
-		]
-	  }
-	}
-  }
+function StealConversion(context, pkg, steal, config, isRoot, waiting) {
+	this.context = context;
+	this.pkg = pkg;
+	this.steal = steal;
+	this.config = utils.extend({}, steal, true);
+	this.isRoot = isRoot;
+	this.waiting = [];
 }
-*/
 
 // Translate helpers ===============
 // Given all the package.json data, these helpers help convert it to a source.
-function convertSystem(context, pkg, system, root, ignoreWaiting) {
-	if(!system) {
-		return system;
+function convertSteal(context, pkg, steal, root, ignoreWaiting, resavePackageInfo) {
+	if(!steal) {
+		return new StealConversion(context, pkg, steal, root);
 	}
-	var copy = utils.extend({}, system, true);
-	var waiting = utils.isArray(ignoreWaiting) ? ignoreWaiting : [];
-	if(system.meta) {
-		system.meta = convertPropertyNames(context, pkg, system.meta, root, waiting);
+
+	var conv = new StealConversion(context, pkg, steal, root);
+	var waiting = conv.waiting;
+
+	if(steal.meta) {
+		steal.meta = convertPropertyNames(context, pkg, steal.meta, root,
+										  waiting);
 	}
-	if(system.map) {
-		system.map = convertPropertyNamesAndValues(context, pkg, system.map, root, waiting);
+	if(steal.map) {
+		steal.map = convertPropertyNamesAndValues(context, pkg, steal.map,
+												  root, waiting);
 	}
-	if(system.paths) {
-		system.paths = convertPropertyNames(context, pkg, system.paths, root, waiting);
+	if(steal.paths) {
+		steal.paths = convertPropertyNames(context, pkg, steal.paths, root,
+										   waiting);
 	}
 	// needed for builds
-	if(system.buildConfig) {
-		system.buildConfig = convertSystem(context, pkg, system.buildConfig, root, waiting);
+	if(steal.buildConfig) {
+		var buildConv = convertSteal(context, pkg, steal.buildConfig, root);
+		conv.buildConversion = buildConv;
+
+		steal.buildConfig = conv.config;
 	}
 
-	// Push the waiting conversions down.
-	if(ignoreWaiting !== true && waiting.length) {
-		convertLater(context, waiting, function(){
-			var local = utils.extend({}, copy, true);
-			var config = convertSystem(context, pkg, local, root, true);
-
-			// If we are building we need to resave the package's system
-			// configuration so that it will be written out into the build.
-			if(context.resavePackageInfo) {
-				var info = utils.pkg.findPackageInfo(context, pkg);
-				info.system = config;
-			}
-
-			delete config.main;
-			delete config.transpiler;
-			context.loader.config(config);
-		});
-	}
-
-	return system;
+	return conv;
 }
+
+var lazyConfig = {
+	// Queue package reconfiguration whenever a package is first loaded.
+	// This is for progressively loaded package.jsons
+	updateConfigOnPackageLoad: function(conv, isPackageInfoSaved,
+		isConfigApplied, isBuildConfigApplied) {
+		var fns = [function(){return lazyConfig.cloneConversion.call(this, conv)}];
+		if(isPackageInfoSaved) {
+			fns.push(lazyConfig.resavePackageInfo);
+		}
+		if(isConfigApplied) {
+			fns.push(lazyConfig.applyConfig);
+		}
+		var fn = utils.flow(fns);
+
+		convertLater(conv.context, conv.waiting, fn);
+
+		if(isBuildConfigApplied && conv.buildConversion) {
+			var c = conv.buildConversion;
+			fn = utils.flow([
+				function(){return lazyConfig.cloneConversion.call(this, c)},
+				lazyConfig.resavePackageInfo,
+				lazyConfig.applyConfig
+			]);
+			convertLater(c.context, c.waiting, fn);
+		}
+	},
+	resavePackageInfo: function(conv) {
+		var info = utils.pkg.findPackageInfo(conv.context, conv.pkg);
+		info.steal = info.system = conv.steal;
+		return conv;
+	},
+	applyConfig: function(conv) {
+		var config = conv.steal;
+		var context = this;
+
+		// Temporarily remove steal.main so that it doesn't set System.main
+		var stealMain = config.main;
+		delete config.main;
+		delete config.transpiler;
+		context.loader.config(config);
+		config.main = stealMain;
+		return conv;
+	},
+	cloneConversion: function(conv) {
+		var context = this;
+		var local = utils.extend({}, conv.config, true);
+		var lConv = convertSteal(context, conv.pkg, local, conv.isRoot);
+		return lConv;
+	}
+};
+
+exports.updateConfigOnPackageLoad = lazyConfig.updateConfigOnPackageLoad;
 
 // converts only the property name
 function convertPropertyNames (context, pkg, map , root, waiting) {
@@ -106,19 +139,23 @@ function convertPropertyNamesAndValues (context, pkg, map, root, waiting) {
 	var clone = {}, val, name;
 	for(var property in map ) {
 		val = map[property];
-		name = convertName(context, pkg, map, root, property, waiting); 
+		name = convertName(context, pkg, map, root, property, waiting);
 		val = typeof val === "object"
 			? convertPropertyNamesAndValues(context, pkg, val, root, waiting)
 			: convertName(context, pkg, map, root, val, waiting);
 		if(typeof name !== 'undefined' && typeof val !== 'undefined') {
 			clone[name] = val;
 		}
+		// keep map entry if the key isn't a package but value might
+		if (name && typeof val === "undefined") {
+			clone[name] = map[property];
+		}
 	}
 	return clone;
 }
 
 function convertName (context, pkg, map, root, name, waiting) {
-	var parsed = utils.moduleName.parse(name, pkg.name),
+	var parsed = utils.moduleName.parse(name, pkg.name, null, context),
 		depPkg, requestedVersion;
 	if( name.indexOf("#") >= 0 ) {
 		// If this is a fully converted name just return the name.
@@ -157,14 +194,12 @@ function convertName (context, pkg, map, root, name, waiting) {
 					plugin: parsed.plugin
 				});
 			} else {
-				// TODO: share code better!
 				// SYSTEM.NAME
 				if(  pkg.name === parsed.packageName || ( (pkg.system && pkg.system.name) === parsed.packageName) ) {
 					depPkg = pkg;
 				} else {
 					var requestedProject = crawl.getDependencyMap(context.loader, pkg, root)[parsed.packageName];
 					if(!requestedProject) {
-						if(root) warn(name);
 						return name;
 					}
 					requestedVersion = requestedProject.version;
@@ -200,7 +235,6 @@ function convertName (context, pkg, map, root, name, waiting) {
 	}
 }
 
-
 /**
  * Converts browser names into actual module names.
  *
@@ -227,7 +261,8 @@ function convertName (context, pkg, map, root, name, waiting) {
  * ```
  */
 function convertBrowser(pkg, browser) {
-	if(typeof browser === "string") {
+	var type = typeof browser;
+	if(type === "string" || type === "undefined") {
 		return browser;
 	}
 	var map = {};
@@ -241,29 +276,65 @@ function convertBrowser(pkg, browser) {
 function convertBrowserProperty(map, pkg, fromName, toName) {
 	var packageName = pkg.name;
 
-	var fromParsed = utils.moduleName.parse(fromName, packageName),
-		  toParsed = toName  ? utils.moduleName.parse(toName, packageName): "@empty";
+	var fromParsed = utils.moduleName.parse(fromName, packageName);
+	var toResult = toName;
 
-	map[utils.moduleName.create(fromParsed)] = utils.moduleName.create(toParsed);
+	if(!toName || typeof toName === "string") {
+		var toParsed = toName ? utils.moduleName.parse(toName, packageName)
+			: "@empty";
+		toResult = utils.moduleName.create(toParsed);
+	} else if(utils.isArray(toName)) {
+		toResult = toName;
+	}
+
+	map[utils.moduleName.create(fromParsed)] = toResult;
+}
+
+function convertJspm(pkg, jspm){
+	var type = typeof jspm;
+	if(type === "undefined" || type === "string") {
+		return jspm;
+	}
+	return {
+		main: jspm.main
+	};
 }
 
 
-function convertToPackage(context, pkg, index) {
+function convertToPackage(context, npmPkg, index) {
+	var pkg = npmPkg;
 	var packages = context.pkgInfo;
 	var nameAndVersion = pkg.name+"@"+pkg.version;
 	var localPkg;
 	if(!packages[nameAndVersion]) {
+		crawl.setVersionsConfig(context, pkg, pkg.version);
 		if(pkg.browser){
 			delete pkg.browser.transform;
 		}
+		// fake load obj, because we don't have one here
+		pkg = utils.json.transform(context.loader, {
+			address: pkg.fileUrl,
+			name: pkg.fileUrl.split('/').pop(),
+			metadata: {}
+		}, pkg);
+		var steal = utils.pkg.config(pkg);
+		var stealConversion = convertSteal(context, pkg, steal, index === 0);
+		lazyConfig.updateConfigOnPackageLoad(stealConversion, context.resavePackageInfo,
+			true, context.applyBuildConfig);
+
 		localPkg = {
 			name: pkg.name,
 			version: pkg.version,
-			fileUrl: utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
+			fileUrl: utils.path.isRelative(pkg.fileUrl) ?
+				pkg.fileUrl :
+				utils.relativeURI(context.loader.baseURL, pkg.fileUrl),
 			main: pkg.main,
-			system: convertSystem(context, pkg, pkg.system, index === 0),
+			steal: stealConversion.steal,
 			globalBrowser: convertBrowser(pkg, pkg.globalBrowser),
-			browser: convertBrowser(pkg, pkg.browser)
+			browser: convertBrowser(pkg, pkg.browser || pkg.browserify),
+			jspm: convertJspm(pkg, pkg.jspm),
+			jam: convertJspm(pkg, pkg.jam),
+			resolutions: {}
 		};
 		packages.push(localPkg);
 		packages[nameAndVersion] = true;
@@ -305,7 +376,7 @@ function convertLater(context, waiting, fn) {
 /**
  * When progressively loading package.jsons we need to convert any config
  * that is waiting on a package.json to load. This function is called after
- * a package is loaded and will call all of the callbacks that cause the 
+ * a package is loaded and will call all of the callbacks that cause the
  * config to be applied.
  */
 function convertForPackage(context, pkg) {
@@ -321,7 +392,7 @@ function convertForPackage(context, pkg) {
 			if(depPkg) {
 				fns = pkgConv[range];
 				for(var i = 0, len = fns.length; i < len; i++) {
-					fns[i]();
+					fns[i].call(context);
 				}
 				delete pkgConv[range];
 			} else {
@@ -333,16 +404,3 @@ function convertForPackage(context, pkg) {
 		}
 	}
 }
-
-var warn = (function(){
-	var warned = {};
-	return function(name){
-		if(!warned[name]) {
-			warned[name] = true;
-			var warning = "WARN: Could not find " + name + " in node_modules. Ignoring.";
-			if(typeof steal !== "undefined" && steal.dev && steal.dev.warn) steal.dev.warn(warning)
-			else if(console.warn) console.warn(warning);
-			else console.log(warning);
-		}
-	};
-})();
