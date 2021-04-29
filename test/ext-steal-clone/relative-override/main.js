@@ -1,6 +1,6 @@
 var stealClone = require('steal-clone');
 
-return stealClone({
+stealClone({
   './moduleB': {
     getName: function() {
       return 'mockModuleB';

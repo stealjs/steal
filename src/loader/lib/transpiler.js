@@ -97,7 +97,8 @@
 		}
 		catch(e) {
 			// traceur throws an error array
-			throw e[0];
+			var error = e[0] || e.errors[0];
+			throw error;
 		}
 	}
 
@@ -217,7 +218,12 @@
 					var npmPluginNameOrPath = getNpmPluginNameOrPath(name);
 
 					// import the plugin!
-					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
+					promises.push(this["import"](npmPluginNameOrPath, {
+						name: parent,
+						metadata: {
+							shouldTranspile: false
+						}
+					})
 						.then(function(mod) {
 							var exported = mod.__esModule ? mod["default"] : mod;
 
@@ -298,7 +304,7 @@
 	function getBabelPresets(current, loader) {
 		var presets = current || [];
 		var forceES5 = loader.forceES5 !== false;
-		var defaultPresets = forceES5 
+		var defaultPresets = forceES5
 			? [babelES2015Preset, "react", "stage-0"]
 			: ["react"];
 
@@ -438,7 +444,12 @@
 					var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
 
 					// import the preset!
-					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
+					promises.push(this["import"](npmPresetNameOrPath, {
+						name: parent,
+						metadata: {
+							shouldTranspile: false
+						}
+					})
 						.then(function(mod) {
 							var exported = mod.__esModule ? mod["default"] : mod;
 

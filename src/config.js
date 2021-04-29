@@ -40,6 +40,7 @@
 	System.ext = Object.create(null);
 	System.logLevel = 0;
 	System.forceES5 = true;
+	System.transpileAllFormats = true;
 	var cssBundlesNameGlob = "bundles/*.css",
 		jsBundlesNameGlob = "bundles/*";
 	setIfNotPresent(System.paths,cssBundlesNameGlob, "dist/bundles/*css");
@@ -293,9 +294,11 @@
 				this.paths["@@babel-code-frame"] = dirname+"/ext/babel-code-frame.js";
 				setIfNotPresent(this.meta,"traceur",{"exports":"traceur"});
 				setIfNotPresent(this.meta, "@@babel-code-frame", {"format":"global","exports":"BabelCodeFrame"});
+				setIfNotPresent(this.meta, "babel", {"shouldTranspile": false});
 
 				// steal-clone is contextual so it can override modules using relative paths
 				this.setContextual('steal-clone', 'steal-clone');
+				this.setForwardedMetadata("shouldTranspile");
 
 				if(isNode) {
 					if(this.configMain === "@config" && last(parts) === "steal") {

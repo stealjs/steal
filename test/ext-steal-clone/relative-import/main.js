@@ -1,6 +1,6 @@
 var stealClone = require('steal-clone');
 
-return stealClone()
+stealClone()
 .import('ext-steal-clone/relative-import/moduleA')
 .then(function(moduleA) {
   if (typeof window !== "undefined" && window.assert) {
