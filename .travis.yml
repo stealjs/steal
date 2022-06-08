@@ -11,6 +11,6 @@ matrix:
         - npm run http-server &
         - sleep 2
       script: npm run ui
-dist: xenial
+dist: focal
 services:
   - xvfb
