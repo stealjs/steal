@@ -54,7 +54,10 @@ function cloneConfig(obj, isTopLevel) {
 		clone = {};
 		for (var attr in obj) {
 			obj['isCloned'] = true; // prevent infinite recursion
-			if (hasOwnProperty.call(obj, attr)) {
+			if (
+				hasOwnProperty.call(obj, attr) &&
+				typeof Object.getOwnPropertyDescriptor(obj, attr).get !== 'function' // safari/iOS returns true for hasOwnProperty on getter properties in objects
+			) {
 				if (isTopLevel) {
 					// exclude specific props and functions from top-level of config
 					if (typeof obj[attr] !== 'function' &&
