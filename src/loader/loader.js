@@ -38,112 +38,14 @@ __global.$__Object$create = Object.create || function(o, props) {
   return new F();
 };
 
-/*
-*********************************************************************************************
-
-  Dynamic Module Loader Polyfill
-
-    - Implemented exactly to the former 2014-08-24 ES6 Specification Draft Rev 27, Section 15
-      http://wiki.ecmascript.org/doku.php?id=harmony:specification_drafts#august_24_2014_draft_rev_27
-
-    - Functions are commented with their spec numbers, with spec differences commented.
-
-    - Spec bugs are commented in this code with links.
-
-    - Abstract functions have been combined where possible, and their associated functions
-      commented.
-
-    - Realm implementation is entirely omitted.
-
-*********************************************************************************************
-*/
-
-// Some Helpers
-
-// logs a linkset snapshot for debugging
-/* function snapshot(loader) {
-  console.log('---Snapshot---');
-  for (var i = 0; i < loader.loads.length; i++) {
-    var load = loader.loads[i];
-    var linkSetLog = '  ' + load.name + ' (' + load.status + '): ';
-
-    for (var j = 0; j < load.linkSets.length; j++) {
-      linkSetLog += '{' + logloads(load.linkSets[j].loads) + '} ';
-    }
-    console.log(linkSetLog);
-  }
-  console.log('');
-}
-function logloads(loads) {
-  var log = '';
-  for (var k = 0; k < loads.length; k++)
-    log += loads[k].name + (k != loads.length - 1 ? ' ' : '');
-  return log;
-} */
-
-
-/* function checkInvariants() {
-  // see https://bugs.ecmascript.org/show_bug.cgi?id=2603#c1
-
-  var loads = System._loader.loads;
-  var linkSets = [];
-
-  for (var i = 0; i < loads.length; i++) {
-    var load = loads[i];
-    console.assert(load.status == 'loading' || load.status == 'loaded', 'Each load is loading or loaded');
-
-    for (var j = 0; j < load.linkSets.length; j++) {
-      var linkSet = load.linkSets[j];
-
-      for (var k = 0; k < linkSet.loads.length; k++)
-        console.assert(loads.indexOf(linkSet.loads[k]) != -1, 'linkSet loads are a subset of loader loads');
-
-      if (linkSets.indexOf(linkSet) == -1)
-        linkSets.push(linkSet);
-    }
-  }
-
-  for (var i = 0; i < loads.length; i++) {
-    var load = loads[i];
-    for (var j = 0; j < linkSets.length; j++) {
-      var linkSet = linkSets[j];
-
-      if (linkSet.loads.indexOf(load) != -1)
-        console.assert(load.linkSets.indexOf(linkSet) != -1, 'linkSet contains load -> load contains linkSet');
-
-      if (load.linkSets.indexOf(linkSet) != -1)
-        console.assert(linkSet.loads.indexOf(load) != -1, 'load contains linkSet -> linkSet contains load');
-    }
-  }
-
-  for (var i = 0; i < linkSets.length; i++) {
-    var linkSet = linkSets[i];
-    for (var j = 0; j < linkSet.loads.length; j++) {
-      var load = linkSet.loads[j];
-
-      for (var k = 0; k < load.dependencies.length; k++) {
-        var depName = load.dependencies[k].value;
-        var depLoad;
-        for (var l = 0; l < loads.length; l++) {
-          if (loads[l].name != depName)
-            continue;
-          depLoad = loads[l];
-          break;
-        }
-
-        // loading records are allowed not to have their dependencies yet
-        // if (load.status != 'loading')
-        //  console.assert(depLoad, 'depLoad found');
-
-        // console.assert(linkSet.loads.indexOf(depLoad) != -1, 'linkset contains all dependencies');
-      }
-    }
-  }
-} */
+var $__Object$defineProperties = Object.defineProperties;
+var $__Object$defineProperty0 = Object.defineProperty;
+var $__Object$create = Object.create;
+var $__Object$getPrototypeOf = Object.getPrototypeOf;
 
 
 (function() {
-  var Promise = __global.Promise || require('when/es6-shim/Promise');
+  var Promise = __global.Promise || require("when/es6-shim/Promise");
   var console;
   var $__curScript;
   if (__global.console) {
@@ -153,8 +55,8 @@ function logloads(loads) {
     console = { assert: function() {} };
   }
   if(isBrowser) {
-	  var scripts = document.getElementsByTagName("script");
-	  $__curScript = document.currentScript || scripts[scripts.length - 1];
+    var scripts = document.getElementsByTagName("script");
+    $__curScript = document.currentScript || scripts[scripts.length - 1];
   }
 
 
@@ -187,7 +89,7 @@ function logloads(loads) {
   // 15.2.3.2.1
   function createLoad(name) {
     return {
-      status: 'loading',
+      status: "loading",
       name: name,
       linkSets: [],
       dependencies: [],
@@ -202,7 +104,7 @@ function logloads(loads) {
   // 15.2.4.1
   function loadModule(loader, name, options) {
     return new Promise(asyncStartLoadPartwayThrough({
-      step: options.address ? 'fetch' : 'locate',
+      step: options.address ? "fetch" : "locate",
       loader: loader,
       moduleName: name,
       // allow metadata for import https://bugs.ecmascript.org/show_bug.cgi?id=3091
@@ -219,15 +121,17 @@ function logloads(loads) {
       resolve(loader.loaderObj.normalize(request, refererName, refererAddress));
     })
     .then(function(name) {
-		return Promise.resolve(loader.loaderObj.notifyLoad(request, name, refererName))
-		.then(function() { return name; });
+      return Promise.resolve(loader.loaderObj.notifyLoad(request, name, refererName))
+      .then(function() {
+        return name;
+      });
     })
 	// 15.2.4.2.2 GetOrCreateLoad
     .then(function(name) {
       var load;
       if (loader.modules[name]) {
         load = createLoad(name);
-        load.status = 'linked';
+        load.status = "linked";
         // https://bugs.ecmascript.org/show_bug.cgi?id=2795
         load.module = loader.modules[name];
         return load;
@@ -237,7 +141,7 @@ function logloads(loads) {
         load = loader.loads[i];
         if (load.name != name)
           continue;
-        console.assert(load.status == 'loading' || load.status == 'loaded', 'loading or loaded');
+        console.assert(load.status == "loading" || load.status == "loaded", "loading or loaded");
         return load;
       }
 
@@ -246,7 +150,7 @@ function logloads(loads) {
         load = failedLoads[i];
         if(load.name !== name)
           continue;
-        return Promise.reject('The load ' + name + ' already failed.');
+        return Promise.reject("The load " + name + " already failed.");
       }
 
       load = createLoad(name);
@@ -276,7 +180,7 @@ function logloads(loads) {
       // 15.2.4.4.1 CallFetch
       .then(function(address) {
         // adjusted, see https://bugs.ecmascript.org/show_bug.cgi?id=2602
-        if (load.status != 'loading')
+        if (load.status != "loading")
           return;
         load.address = address;
 
@@ -289,20 +193,22 @@ function logloads(loads) {
 
   // 15.2.4.5
   function proceedToTranslate(loader, load, p) {
-	var pass = load.pass || 0;
-	var passCancelled = function() { return (load.pass << 0) !== pass };
+    var pass = load.pass || 0;
+    var passCancelled = function() {
+      return (load.pass << 0) !== pass ;
+    };
 
     p
     // 15.2.4.5.1 CallTranslate
     .then(function(source) {
-      if (load.status != 'loading')
+      if (load.status != "loading")
         return;
 
       return Promise.resolve(loader.loaderObj.translate({ name: load.name, metadata: load.metadata, address: load.address, source: source }))
 
       // 15.2.4.5.2 CallInstantiate
       .then(function(source) {
-        if(load.status != 'loading' || passCancelled()) {
+        if(load.status != "loading" || passCancelled()) {
           return;
         }
         load.source = source;
@@ -311,45 +217,45 @@ function logloads(loads) {
 
       // 15.2.4.5.3 InstantiateSucceeded
       .then(function(instantiateResult) {
-        if(load.status != 'loading' || passCancelled()) {
+        if(load.status != "loading" || passCancelled()) {
           return;
         }
         if (instantiateResult === undefined) {
-          load.address = load.address || '<Anonymous Module ' + ++anonCnt + '>';
+          load.address = load.address || "<Anonymous Module " + ++anonCnt + ">";
 
           // instead of load.kind, use load.isDeclarative
           load.isDeclarative = true;
           return loader.loaderObj.transpile(load)
           .then(function(transpiled) {
-			  // Hijack System.register to set declare function
-			  var curSystem = __global.System;
-			  var curRegister = curSystem.register;
-			  curSystem.register = function(name, regDeps, regDeclare) {
-				var declare = regDeclare;
-				var deps = regDeps;
-				if (typeof name != 'string') {
-				  declare = deps;
-				  deps = name;
-				}
+            // Hijack System.register to set declare function
+            var curSystem = __global.System;
+            var curRegister = curSystem.register;
+            curSystem.register = function(name, regDeps, regDeclare) {
+              var declare = regDeclare;
+              var deps = regDeps;
+              if (typeof name != "string") {
+                declare = deps;
+                deps = name;
+              }
 
-				load.declare = declare;
-				load.depsList = deps;
-			  };
-			  __eval(transpiled, __global, load);
-			  curSystem.register = curRegister;
+              load.declare = declare;
+              load.depsList = deps;
+            };
+            __eval(transpiled, __global, load);
+            curSystem.register = curRegister;
           });
         }
-        else if (typeof instantiateResult == 'object') {
+        else if (typeof instantiateResult == "object") {
           load.depsList = instantiateResult.deps || [];
           load.execute = instantiateResult.execute;
           load.isDeclarative = false;
         }
         else
-          throw TypeError('Invalid instantiate return value');
+          throw TypeError("Invalid instantiate return value");
       })
       // 15.2.4.6 ProcessLoadDependencies
       .then(function() {
-        if(load.status != 'loading' || passCancelled()) {
+        if(load.status != "loading" || passCancelled()) {
           return;
         }
         load.dependencies = [];
@@ -362,7 +268,6 @@ function logloads(loads) {
 
             // 15.2.4.6.1 AddDependencyLoad (load is parentLoad)
             .then(function(depLoad) {
-
               // adjusted from spec to maintain dependency order
               // this is due to the System.register internal implementation needs
               load.dependencies[index] = {
@@ -370,19 +275,18 @@ function logloads(loads) {
                 value: depLoad.name
               };
 
-              if (depLoad.status != 'linked') {
+              // console.log('AddDependencyLoad ' + depLoad.name + ' for ' + load.name);
+              // snapshot(loader);
+              if (depLoad.status != "linked") {
                 var linkSets = load.linkSets.concat([]);
                 for (var i = 0, l = linkSets.length; i < l; i++)
                   addLoadToLinkSet(linkSets[i], depLoad);
               }
-
-              // console.log('AddDependencyLoad ' + depLoad.name + ' for ' + load.name);
-              // snapshot(loader);
             })
           );
         }
         for (var i = 0, l = depsList.length; i < l; i++) {
-            loadDep(depsList[i], i);
+          loadDep(depsList[i], i);
         }
 
         return Promise.all(loadPromises);
@@ -392,13 +296,13 @@ function logloads(loads) {
       .then(function() {
         // console.log('LoadSucceeded ' + load.name);
         // snapshot(loader);
-        if(load.status != 'loading' || passCancelled()) {
+        if(load.status != "loading" || passCancelled()) {
           return;
         }
 
-        console.assert(load.status == 'loading', 'is loading');
+        console.assert(load.status == "loading", "is loading");
 
-        load.status = 'loaded';
+        load.status = "loaded";
 
         var linkSets = load.linkSets.concat([]);
         for (var i = 0, l = linkSets.length; i < l; i++)
@@ -406,8 +310,8 @@ function logloads(loads) {
       });
     })
     // 15.2.4.5.4 LoadFailed
-    ['catch'](function(exc) {
-      load.status = 'failed';
+    ["catch"](function(exc) {
+      load.status = "failed";
       load.exception = exc;
 
       var linkSets = load.linkSets.concat([]);
@@ -415,24 +319,24 @@ function logloads(loads) {
         linkSetFailed(linkSets[i], load, exc);
       }
 
-      console.assert(load.linkSets.length == 0, 'linkSets not removed');
+      console.assert(load.linkSets.length == 0, "linkSets not removed");
     });
   }
 
   // 15.2.4.7 PromiseOfStartLoadPartwayThrough absorbed into calling functions
   function incrementPass(load) {
-	  load.pass = load.pass != null ? (load.pass + 1) : 1;
+    load.pass = load.pass != null ? (load.pass + 1) : 1;
   }
 
   function changeLoadingStatus(load, newStatus) {
-      var oldStatus = load.status;
+    var oldStatus = load.status;
 
-      load.status = newStatus;
-      if(newStatus !== oldStatus && oldStatus === "loaded") {
-          load.linkSets.forEach(function(linkSet){
-              linkSet.loadingCount++;
-          });
-      }
+    load.status = newStatus;
+    if(newStatus !== oldStatus && oldStatus === "loaded") {
+      load.linkSets.forEach(function(linkSet){
+        linkSet.loadingCount++;
+      });
+    }
   }
 
   // 15.2.4.7.1
@@ -444,7 +348,7 @@ function logloads(loads) {
       var importingModuleName = stepState.moduleMetadata.importingModuleName;
 
       if (loader.modules[name])
-        throw new TypeError('"' + name + '" already exists in the module table');
+        throw new TypeError("\"" + name + "\" already exists in the module table");
 
       // adjusted to pick up existing loads
       var existingLoad, firstLinkSet;
@@ -452,10 +356,10 @@ function logloads(loads) {
         if (loader.loads[i].name == name) {
           existingLoad = loader.loads[i];
 
-          if(step == 'translate' && !existingLoad.source) {
+          if(step == "translate" && !existingLoad.source) {
             existingLoad.address = stepState.moduleAddress;
             proceedToTranslate(loader, existingLoad, Promise.resolve(stepState.moduleSource));
-		  }
+          }
 
           // If the module importing this is part of the same linkSet, create
           // a new one for this import.
@@ -486,14 +390,14 @@ function logloads(loads) {
 
       resolve(linkSet.done);
 
-      if (step == 'locate')
+      if (step == "locate")
         proceedToLocate(loader, load);
 
-      else if (step == 'fetch')
+      else if (step == "fetch")
         proceedToFetch(loader, load, Promise.resolve(stepState.moduleAddress));
 
       else {
-        console.assert(step == 'translate', 'translate step');
+        console.assert(step == "translate", "translate step");
         load.address = stepState.moduleAddress;
         proceedToTranslate(loader, load, Promise.resolve(stepState.moduleSource));
       }
@@ -522,8 +426,8 @@ function logloads(loads) {
   }
   // 15.2.5.2.2
   function addLoadToLinkSet(linkSet, load) {
-    console.assert(load.status == 'loading' || load.status == 'loaded' || load.status === 'failed',
-		'loading or loaded on link set');
+    console.assert(load.status == "loading" || load.status == "loaded" || load.status === "failed",
+		"loading or loaded on link set");
 
     for (var i = 0, l = linkSet.loads.length; i < l; i++)
       if (linkSet.loads[i] == load)
@@ -534,12 +438,14 @@ function logloads(loads) {
     load.linkSets.push(linkSet);
 
     // adjustment, see https://bugs.ecmascript.org/show_bug.cgi?id=2603
-    if (load.status != 'loaded') {
+    if (load.status != "loaded") {
       linkSet.loadingCount++;
     }
 
     var loader = linkSet.loader;
 
+    // console.log('add to linkset ' + load.name);
+    // snapshot(linkSet.loader);
     for (var i = 0, l = load.dependencies.length; i < l; i++) {
       var name = load.dependencies[i].value;
 
@@ -554,8 +460,6 @@ function logloads(loads) {
         break;
       }
     }
-    // console.log('add to linkset ' + load.name);
-    // snapshot(linkSet.loader);
   }
 
   // linking errors can be generic or load-specific
@@ -580,7 +484,7 @@ function logloads(loads) {
     // console.log('update linkset on load ' + load.name);
     // snapshot(linkSet.loader);
 
-    console.assert(load.status == 'loaded' || load.status == 'linked', 'loaded or linked');
+    console.assert(load.status == "loaded" || load.status == "linked", "loaded or linked");
 
     linkSet.loadingCount--;
 
@@ -604,7 +508,7 @@ function logloads(loads) {
           module: _newModule({}),
           evaluated: true
         };
-        load.status = 'linked';
+        load.status = "linked";
         finishLoad(linkSet.loader, load);
       }
       return linkSet.resolve(startingLoad);
@@ -616,7 +520,7 @@ function logloads(loads) {
     if (abrupt)
       return;
 
-    console.assert(linkSet.loads.length == 0, 'loads cleared');
+    console.assert(linkSet.loads.length == 0, "loads cleared");
 
     linkSet.resolve(startingLoad);
   }
@@ -626,12 +530,12 @@ function logloads(loads) {
     var loader = linkSet.loader;
     var exc = linkExc;
 
-	/*
+    /*
     if (linkSet.loads[0].name != load.name)
       exc = addToError(exc, 'Error loading "' + load.name + '" from "' + linkSet.loads[0].name + '" at ' + (linkSet.loads[0].address || '<unknown>') + '\n');
 
     exc = addToError(exc, 'Error loading "' + load.name + '" at ' + (load.address || '<unknown>') + '\n');
-	*/
+    */
 
     var loads = linkSet.loads.concat([]);
     for (var i = 0, l = loads.length; i < l; i++) {
@@ -645,7 +549,7 @@ function logloads(loads) {
 	  	loader.loaderObj._pendingState(load);
 
       var linkIndex = indexOf.call(load.linkSets, linkSet);
-      console.assert(linkIndex != -1, 'link not present');
+      console.assert(linkIndex != -1, "link not present");
       load.linkSets.splice(linkIndex, 1);
       if (load.linkSets.length == 0) {
         var globalLoadsIndex = indexOf.call(linkSet.loader.loads, load);
@@ -668,17 +572,19 @@ function logloads(loads) {
       });
       loader.loaderObj.loads[load.name] = {
         name: load.name,
-        deps: load.dependencies.map(function(dep){ return dep.key }),
+        deps: load.dependencies.map(function(dep){
+          return dep.key ;
+        }),
         depMap: depMap,
         address: load.address,
         metadata: load.metadata,
         source: load.source,
-        kind: load.isDeclarative ? 'declarative' : 'dynamic'
+        kind: load.isDeclarative ? "declarative" : "dynamic"
       };
     }
     // if not anonymous, add to the module table
     if (load.name) {
-      console.assert(!loader.modules[load.name], 'load not in module table');
+      console.assert(!loader.modules[load.name], "load not in module table");
       loader.modules[load.name] = load.module;
     }
     var loadIndex = indexOf.call(loader.loads, load);
@@ -717,7 +623,7 @@ function logloads(loads) {
       for (var j = 0; j < load.dependencies.length; j++) {
         if (loadDep.name == load.dependencies[j].value) {
           // by definition all loads in linkset are loaded, not linked
-          console.assert(loadDep.status == 'loaded', 'Load in linkSet not loaded!');
+          console.assert(loadDep.status == "loaded", "Load in linkSet not loaded!");
 
           // if it is a group transition, the index of the dependency has gone up
           // otherwise it is the same as the parent
@@ -725,7 +631,6 @@ function logloads(loads) {
 
           // the group index of an entry is always the maximum
           if (loadDep.groupIndex === undefined || loadDep.groupIndex < loadDepGroupIndex) {
-
             // if already in a group, remove from the old group
             if (loadDep.groupIndex !== undefined) {
               groups[loadDep.groupIndex].splice(indexOf.call(groups[loadDep.groupIndex], loadDep), 1);
@@ -753,14 +658,13 @@ function logloads(loads) {
       return;
     }
     if (!module || !(module instanceof Module))
-      linkError(load, new TypeError('Execution must define a Module instance'));
+      linkError(load, new TypeError("Execution must define a Module instance"));
     else
       return module;
   }
 
   // 15.2.5.4
   function link(linkSet, linkError) {
-
     var loader = linkSet.loader;
 
     if (!linkSet.loads.length)
@@ -801,7 +705,7 @@ function logloads(loads) {
             name: load.name,
             module: module
           };
-          load.status = 'linked';
+          load.status = "linked";
         }
         finishLoad(loader, load);
       }
@@ -837,7 +741,7 @@ function logloads(loads) {
       //    By disaling this module write-protection we gain performance.
       //    It could be useful to allow an option to enable or disable this.
       module.locked = true;
-      if(typeof name === 'object') {
+      if(typeof name === "object") {
         for(var p in name) {
           moduleObj[p] = name[p];
         }
@@ -902,7 +806,7 @@ function logloads(loads) {
         module.setters[i](depModule.module);
     }
 
-    load.status = 'linked';
+    load.status = "linked";
   }
 
 
@@ -915,7 +819,7 @@ function logloads(loads) {
 
   // 15.2.6.1
   function evaluateLoadedModule(loader, load) {
-    console.assert(load.status == 'linked', 'is linked ' + load.name);
+    console.assert(load.status == "linked", "is linked " + load.name);
 
     doEnsureEvaluated(load.module, [], loader);
     return load.module.module;
@@ -935,26 +839,26 @@ function logloads(loads) {
       module.execute.call(__global);
     }
     catch(e) {
-		e.onModuleExecution = true;
-		cleanupStack(e);
+      e.onModuleExecution = true;
+      cleanupStack(e);
       return e;
     }
   }
 
   function cleanupStack(err) {
-	  if (!err.originalErr) {
-		var stack = (err.stack || err.message || err).toString().split('\n');
-		var newStack = [];
-		for (var i = 0; i < stack.length; i++) {
-		  if (typeof $__curScript == 'undefined' || stack[i].indexOf($__curScript.src) == -1)
-			newStack.push(stack[i]);
-		}
+    if (!err.originalErr) {
+      var stack = (err.stack || err.message || err).toString().split("\n");
+      var newStack = [];
+      for (var i = 0; i < stack.length; i++) {
+        if (typeof $__curScript == "undefined" || stack[i].indexOf($__curScript.src) == -1)
+          newStack.push(stack[i]);
+      }
 
-		if(newStack.length) {
-			err.stack = newStack.join('\n\t');
-		}
-	  }
-	  return err;
+      if(newStack.length) {
+        err.stack = newStack.join("\n\t");
+      }
+    }
+    return err;
   }
 
   // propogate execution errors
@@ -984,14 +888,14 @@ function logloads(loads) {
         err = ensureEvaluated(dep, seen, loader);
         // stop on error, see https://bugs.ecmascript.org/show_bug.cgi?id=2996
         if (err) {
-          err = addToError(err, 'Error evaluating ' + dep.name + '\n');
+          err = addToError(err, "Error evaluating " + dep.name + "\n");
           return err;
         }
       }
     }
 
     if (module.failed)
-      return new Error('Module failed execution.');
+      return new Error("Module failed execution.");
 
     if (module.evaluated)
       return;
@@ -1025,8 +929,8 @@ function logloads(loads) {
 
   // 26.3.1.1
   function Loader(options) {
-    if (typeof options != 'object')
-      throw new TypeError('Options must be an object');
+    if (typeof options != "object")
+      throw new TypeError("Options must be an object");
 
     if (options.normalize)
       this.normalize = options.normalize;
@@ -1048,13 +952,12 @@ function logloads(loads) {
     };
 
     // 26.3.3.6
-    defineProperty(this, 'global', {
+    // 26.3.3.13 realm not implemented
+    defineProperty(this, "global", {
       get: function() {
         return __global;
       }
     });
-
-    // 26.3.3.13 realm not implemented
   }
 
   function Module() {}
@@ -1079,9 +982,9 @@ function logloads(loads) {
     define: function(name, source, options) {
       // check if already defined
       if (this._loader.importPromises[name])
-        throw new TypeError('Module is already loading.');
+        throw new TypeError("Module is already loading.");
       return createImportPromise(this, name, new Promise(asyncStartLoadPartwayThrough({
-        step: 'translate',
+        step: "translate",
         loader: this._loader,
         moduleName: name,
         moduleMetadata: options && options.metadata || {},
@@ -1090,20 +993,20 @@ function logloads(loads) {
       })));
     },
     // 26.3.3.3
-    'delete': function(name) {
+    "delete": function(name) {
       var loader = this._loader;
       delete loader.importPromises[name];
       delete loader.moduleRecords[name];
-	  if(this.failed) {
-		  var load;
-		  for(var i = 0; i < this.failed.length; i++) {
-			  load = this.failed[i];
-			  if(load.name === name) {
-				  this.failed.splice(i, 1);
-				  break;
-			  }
-		  }
-	  }
+      if(this.failed) {
+        var load;
+        for(var i = 0; i < this.failed.length; i++) {
+          load = this.failed[i];
+          if(load.name === name) {
+            this.failed.splice(i, 1);
+            break;
+          }
+        }
+      }
       return loader.modules[name] ? delete loader.modules[name] : false;
     },
     // 26.3.3.4 entries not implemented
@@ -1119,7 +1022,7 @@ function logloads(loads) {
       return !!this._loader.modules[name];
     },
     // 26.3.3.8
-    'import': function(name, options) {
+    "import": function(name, options) {
       // run normalize first
       var loaderObj = this;
 
@@ -1138,20 +1041,20 @@ function logloads(loads) {
           .then(function(load) {
             delete loader.importPromises[name];
             return evaluateLoadedModule(loader, load);
-		  })
+          })
 		  .then(null, function(err){
             if(loaderObj.defined) {
               loaderObj.defined[name] = undefined;
             }
 
-			if(err.onModuleExecution && loaderObj.getModuleLoad) {
-				var load = loaderObj.getModuleLoad(name);
-				if(load) {
-					return loaderObj.rejectWithCodeFrame(err, load);
-				}
-			} else if(err.promise) {
-				return err.promise;
-			}
+            if(err.onModuleExecution && loaderObj.getModuleLoad) {
+              var load = loaderObj.getModuleLoad(name);
+              if(load) {
+                return loaderObj.rejectWithCodeFrame(err, load);
+              }
+            } else if(err.promise) {
+              return err.promise;
+            }
 
             return Promise.reject(err);
           }));
@@ -1168,7 +1071,7 @@ function logloads(loads) {
     },
     // 26.3.3.11
     module: function(source, options) {
-	  var name = "<Anonymous" + (++this.anonymousCount) + ">";
+      var name = "<Anonymous" + (++this.anonymousCount) + ">";
       var load = createLoad(name);
       load.address = options && options.address;
       var linkSet = createLinkSet(this._loader, load);
@@ -1182,8 +1085,8 @@ function logloads(loads) {
     },
     // 26.3.3.12
     newModule: function (obj) {
-      if (typeof obj != 'object')
-        throw new TypeError('Expected object');
+      if (typeof obj != "object")
+        throw new TypeError("Expected object");
 
       // we do this to be able to tell if a module is a module privately in ES5
       // by doing m instanceof Module
@@ -1217,7 +1120,7 @@ function logloads(loads) {
     // 26.3.3.14
     set: function(name, module) {
       if (!(module instanceof Module))
-        throw new TypeError('Loader.set(' + name + ', module) must be a module');
+        throw new TypeError("Loader.set(" + name + ", module) must be a module");
       this._loader.modules[name] = {
         module: module
       };
@@ -1236,744 +1139,721 @@ function logloads(loads) {
     },
     // 26.3.3.18.3
     fetch: function(load) {
-      throw new TypeError('Fetch not implemented');
+      throw new TypeError("Fetch not implemented");
     },
     // 26.3.3.18.4
     translate: function(load) {
       return load.source;
     },
     // 26.3.3.18.5
-    instantiate: function(load) {
-    },
-    notifyLoad: function(specifier, name, parentName) {
-    },
+    instantiate: function(load) {},
+    notifyLoad: function(specifier, name, parentName) {},
 	provide: function(name, source, options) {
-		var load;
-		for(var i = 0; i < this._loader.loads.length; i++) {
-			if(this._loader.loads[i].name === name) {
-				load = this._loader.loads[i];
-				break;
-			}
-		}
+      var load;
+      for(var i = 0; i < this._loader.loads.length; i++) {
+        if(this._loader.loads[i].name === name) {
+          load = this._loader.loads[i];
+          break;
+        }
+      }
 
-		if(load) {
-			incrementPass(load);
-            changeLoadingStatus(load, "loading");
-			return proceedToTranslate(this._loader, load, Promise.resolve(source));
-		} else {
-			this["delete"](name);
-		}
+      if(load) {
+        incrementPass(load);
+        changeLoadingStatus(load, "loading");
+        return proceedToTranslate(this._loader, load, Promise.resolve(source));
+      } else {
+        this["delete"](name);
+      }
 
-		return this.define(name, source, options);
-	}
+      return this.define(name, source, options);
+    }
   };
 
   var _newModule = Loader.prototype.newModule;
 
-  if (typeof exports === 'object')
+  if (typeof exports === "object")
     module.exports = Loader;
 
   __global.Reflect = __global.Reflect || {};
   __global.Reflect.Loader = __global.Reflect.Loader || Loader;
   __global.Reflect.global = __global.Reflect.global || __global;
   __global.LoaderPolyfill = Loader;
-
 })();
-/*
- * Traceur and Babel transpile hook for Loader
- */
 (function(Loader) {
-	var g = __global;
+    var g = __global;
 
-	var isNode = typeof self === "undefined" &&
+    var isNode = typeof self === "undefined" &&
 		typeof process !== "undefined" &&
-		{}.toString.call(process) === '[object process]';
+		{}.toString.call(process) === "[object process]";
 
-	function getTranspilerModule(loader, globalName) {
-		return loader.newModule({
+    function getTranspilerModule(loader, globalName) {
+        return loader.newModule({
 			__useDefault: true,
 			"default": g[globalName]
 		});
-	}
+    }
 
-	function getTranspilerGlobalName(loadName) {
-		return loadName === "babel" ? "Babel" : loadName;
-	}
+    function getTranspilerGlobalName(loadName) {
+        return loadName === "babel" ? "Babel" : loadName;
+    }
 
-	// Use Babel by default
-	Loader.prototype.transpiler = 'babel';
+    // Use Babel by default
+    Loader.prototype.transpiler = "babel";
 
-	Loader.prototype.transpile = function(load) {
-		var self = this;
+    Loader.prototype.transpile = function(load) {
+        var self = this;
 
-		// pick up Transpiler modules from existing globals on first run if set
-		if (!self.transpilerHasRun) {
-			if (g.traceur && !self.has('traceur')) {
-				self.set('traceur', getTranspilerModule(self, 'traceur'));
-			}
-			if (g.Babel && !self.has("babel")) {
-				self.set("babel", getTranspilerModule(self, "Babel"));
-			}
-			self.transpilerHasRun = true;
-		}
+        // pick up Transpiler modules from existing globals on first run if set
+        if (!self.transpilerHasRun) {
+            if (g.traceur && !self.has("traceur")) {
+                self.set("traceur", getTranspilerModule(self, "traceur"));
+            }
+            if (g.Babel && !self.has("babel")) {
+                self.set("babel", getTranspilerModule(self, "Babel"));
+            }
+            self.transpilerHasRun = true;
+        }
 
-		return self['import'](self.transpiler)
+        return self["import"](self.transpiler)
 			.then(function(transpilerMod) {
-				var transpiler = transpilerMod;
-				if (transpiler.__useDefault) {
-					transpiler = transpiler['default'];
-				}
+            var transpiler = transpilerMod;
+            if (transpiler.__useDefault) {
+                transpiler = transpiler["default"];
+            }
 
-				return (transpiler.Compiler ? traceurTranspile : babelTranspile)
-					.call(self, load, transpiler);
-			})
+            return (transpiler.Compiler ? traceurTranspile : babelTranspile)
+                .call(self, load, transpiler);
+        })
 			.then(function(code) {
-				return 'var __moduleAddress = "' + load.address + '";' + code;
-			});
-	};
+            return "var __moduleAddress = \"" + load.address + "\";" + code;
+        });
+    };
 
-	Loader.prototype.instantiate = function(load) {
-		var self = this;
-		return Promise.resolve(self.normalize(self.transpiler))
+    Loader.prototype.instantiate = function(load) {
+        var self = this;
+        return Promise.resolve(self.normalize(self.transpiler))
 			.then(function(transpilerNormalized) {
-				// load transpiler as a global (avoiding System clobbering)
-				if (load.name === transpilerNormalized) {
-					return {
-						deps: [],
-						execute: function() {
-							var curSystem = g.System;
-							var curLoader = g.Reflect.Loader;
-							// ensure not detected as CommonJS
-							__eval('(function(require,exports,module){' + load.source + '})();', g, load);
-							g.System = curSystem;
-							g.Reflect.Loader = curLoader;
-							return getTranspilerModule(self, getTranspilerGlobalName(load.name));
-						}
-					};
-				}
-			});
-	};
+            // load transpiler as a global (avoiding System clobbering)
+            if (load.name === transpilerNormalized) {
+                return {
+                    deps: [],
+                    execute: function() {
+                        var curSystem = g.System;
+                        var curLoader = g.Reflect.Loader;
+                        // ensure not detected as CommonJS
+                        __eval("(function(require,exports,module){" + load.source + "})();", g, load);
+                        g.System = curSystem;
+                        g.Reflect.Loader = curLoader;
+                        return getTranspilerModule(self, getTranspilerGlobalName(load.name));
+                    }
+                };
+            }
+        });
+    };
 
-	function traceurTranspile(load, traceur) {
-		var options = this.traceurOptions || {};
-		options.modules = 'instantiate';
-		options.script = false;
-		options.sourceMaps = 'inline';
-		options.filename = load.address;
-		options.inputSourceMap = load.metadata.sourceMap;
-		options.moduleName = false;
+    function traceurTranspile(load, traceur) {
+        var options = this.traceurOptions || {};
+        options.modules = "instantiate";
+        options.script = false;
+        options.sourceMaps = "inline";
+        options.filename = load.address;
+        options.inputSourceMap = load.metadata.sourceMap;
+        options.moduleName = false;
 
-		var compiler = new traceur.Compiler(options);
-		var source = doTraceurCompile(load.source, compiler, options.filename);
+        var compiler = new traceur.Compiler(options);
+        var source = doTraceurCompile(load.source, compiler, options.filename);
 
-		// add "!eval" to end of Traceur sourceURL
-		// I believe this does something?
-		source += '!eval';
+        // add "!eval" to end of Traceur sourceURL
+        // I believe this does something?
+        source += "!eval";
 
-		return source;
-	}
-	function doTraceurCompile(source, compiler, filename) {
-		try {
-			return compiler.compile(source, filename);
-		}
+        return source;
+    }
+    function doTraceurCompile(source, compiler, filename) {
+        try {
+            return compiler.compile(source, filename);
+        }
 		catch(e) {
-			// traceur throws an error array
-			throw e[0];
-		}
-	}
+            throw e[0];
+        }
+    }
 
-	/**
-	 * Gets the babel environment name
-	 * return {string} The babel environment name
-	 */
-	function getBabelEnv() {
-		var loader = this;
-		var defaultEnv = "development";
-		var loaderEnv = typeof loader.getEnv === "function" && loader.getEnv();
+    /**
+     * Gets the babel environment name
+     * return {string} The babel environment name
+     */
+    function getBabelEnv() {
+        var loader = this;
+        var defaultEnv = "development";
+        var loaderEnv = typeof loader.getEnv === "function" && loader.getEnv();
 
-		if (isNode) {
-			return process.env.BABEL_ENV ||
+        if (isNode) {
+            return process.env.BABEL_ENV ||
 				process.env.NODE_ENV ||
 				loaderEnv ||
 				defaultEnv;
-		}
+        }
 		else {
-			return loaderEnv || defaultEnv;
-		}
-	}
+            return loaderEnv || defaultEnv;
+        }
+    }
 
-	/**
-	 * Gets the babel preset or plugin name
-	 * @param {BabelPreset|BabelPlugin} presetOrPlugin A babel plugin or preset
-	 * @return {?string} The preset/plugin name
-	 */
-	function getPresetOrPluginName(presetOrPlugin) {
-		if (includesPresetOrPluginName(presetOrPlugin)) {
-			return typeof presetOrPlugin === "string" ? presetOrPlugin : presetOrPlugin[0];
-		}
+    /**
+     * Gets the babel preset or plugin name
+     * @param {BabelPreset|BabelPlugin} presetOrPlugin A babel plugin or preset
+     * @return {?string} The preset/plugin name
+     */
+    function getPresetOrPluginName(presetOrPlugin) {
+        if (includesPresetOrPluginName(presetOrPlugin)) {
+            return typeof presetOrPlugin === "string" ? presetOrPlugin : presetOrPlugin[0];
+        }
 		else {
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 
-	/**
-	 * Whether the babel plugin/preset name was provided
-	 *
-	 * @param {BabelPreset|BabelPlugin} presetOrPlugin
-	 * @return {boolean}
-	 */
-	function includesPresetOrPluginName(presetOrPlugin) {
-		return typeof presetOrPlugin === "string" ||
+    /**
+     * Whether the babel plugin/preset name was provided
+     *
+     * @param {BabelPreset|BabelPlugin} presetOrPlugin
+     * @return {boolean}
+     */
+    function includesPresetOrPluginName(presetOrPlugin) {
+        return typeof presetOrPlugin === "string" ||
 			presetOrPlugin.length && typeof presetOrPlugin[0] === "string";
-	}
+    }
 
-	/**
-	 * A Babel plugins as defined in `babelOptions.plugins`
-	 * @typedef {string|Function|<string, Object>[]|<Function, Object>[]} BabelPlugin
-	 */
+    /**
+     * A Babel plugins as defined in `babelOptions.plugins`
+     * @typedef {string|Function|<string, Object>[]|<Function, Object>[]} BabelPlugin
+     */
 
-	var processBabelPlugins = (function() {
-		/**
-		 * Returns a list of babel plugins to be used during transpilation
-		 *
-		 * Collects the babel plugins defined in `babelOptions.plugins` plus
-		 * the environment dependant plugins.
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {babelOptions} babelOptions The babel configuration object
-		 * @return {Promise.<BabelPlugin[]>} Promise that resolves to a list of babel plugins
-		 */
-		return function processBabelPlugins(babel, babelOptions) {
-			var babelEnv = getBabelEnv.call(this);
-			var babelEnvConfig = babelOptions.env || {};
+    var processBabelPlugins = (function() {
+        /**
+         * Returns a list of babel plugins to be used during transpilation
+         *
+         * Collects the babel plugins defined in `babelOptions.plugins` plus
+         * the environment dependant plugins.
+         *
+         * @param {Object} babel The babel object exported by babel-standalone
+         * @param {babelOptions} babelOptions The babel configuration object
+         * @return {Promise.<BabelPlugin[]>} Promise that resolves to a list of babel plugins
+         */
+        return function processBabelPlugins(babel, babelOptions) {
+            var babelEnv = getBabelEnv.call(this);
+            var babelEnvConfig = babelOptions.env || {};
 
-			var pluginsPromises = [
+            var pluginsPromises = [
 				doProcessPlugins.call(this, babel, babelOptions.plugins)
 			];
 
-			for (var envName in babelEnvConfig) {
-				// do not process plugins if the current environment does not match
-				// the environment in which the plugins are set to be used
-				if (babelEnv === envName) {
-					var plugins = babelEnvConfig[envName].plugins || [];
-					pluginsPromises.push(doProcessPlugins.call(this, babel, plugins));
-				}
-			}
+            for (var envName in babelEnvConfig) {
+                // do not process plugins if the current environment does not match
+                // the environment in which the plugins are set to be used
+                if (babelEnv === envName) {
+                    var plugins = babelEnvConfig[envName].plugins || [];
+                    pluginsPromises.push(doProcessPlugins.call(this, babel, plugins));
+                }
+            }
 
-			return Promise.all(pluginsPromises)
+            return Promise.all(pluginsPromises)
 				.then(function(results) {
-					var plugins = [];
+                var plugins = [];
 
-					// results is an array of arrays, flatten it out!
-					results.forEach(function(processedPlugins) {
-						plugins = plugins.concat(processedPlugins);
-					});
+                // results is an array of arrays, flatten it out!
+                results.forEach(function(processedPlugins) {
+                    plugins = plugins.concat(processedPlugins);
+                });
 
-					return plugins;
-				});
-		}
+                return plugins;
+            });
+        }
 
-		/**
-		 * Collects builtin plugin names and non builtins functions
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPlugin[]} babelPlugins A list of babel plugins
-		 * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
-		 *		of babel-standalone builtin plugin names and non-builtin plugin
-		 *		functions
-		 */
-		function doProcessPlugins(babel, babelPlugins) {
-			var promises = [];
+        /**
+         * Collects builtin plugin names and non builtins functions
+         *
+         * @param {Object} babel The babel object exported by babel-standalone
+         * @param {BabelPlugin[]} babelPlugins A list of babel plugins
+         * @return {Promise.<BabelPlugin[]>} A promise that resolves to a list
+         *		of babel-standalone builtin plugin names and non-builtin plugin
+         *		functions
+         */
+        function doProcessPlugins(babel, babelPlugins) {
+            var promises = [];
 
-			var plugins = babelPlugins || [];
+            var plugins = babelPlugins || [];
 
-			plugins.forEach(function(plugin) {
-				var name = getPresetOrPluginName(plugin);
+            plugins.forEach(function(plugin) {
+                var name = getPresetOrPluginName(plugin);
 
-				if (!includesPresetOrPluginName(plugin) || isBuiltinPlugin(babel, name)) {
-					promises.push(plugin);
-				}
+                if (!includesPresetOrPluginName(plugin) || isBuiltinPlugin(babel, name)) {
+                    promises.push(plugin);
+                }
 				else if (!isBuiltinPlugin(babel, name)) {
-					var parent = this.configMain || "package.json!npm";
-					var npmPluginNameOrPath = getNpmPluginNameOrPath(name);
+                    var parent = this.configMain || "package.json!npm";
+                    var npmPluginNameOrPath = getNpmPluginNameOrPath(name);
 
-					// import the plugin!
-					promises.push(this["import"](npmPluginNameOrPath, { name: parent })
+                    // import the plugin!
+                    promises.push(this["import"](npmPluginNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod["default"] : mod;
+                        var exported = mod.__esModule ? mod["default"] : mod;
 
-							if (typeof plugin === "string") {
-								return exported;
-							}
-							// assume the array form was provided
-							else {
-								// [ pluginFunction, pluginOptions ]
-								return [exported, plugin[1]];
-							}
-						}));
-				}
-			}, this);
+                        if (typeof plugin === "string") {
+                            return exported;
+                        }
+                        // assume the array form was provided
+                        else {
+                            // [ pluginFunction, pluginOptions ]
+                            return [exported, plugin[1]];
+                        }
+                    }));
+                }
+            }, this);
 
-			return Promise.all(promises);
-		}
+            return Promise.all(promises);
+        }
 
-		/**
-		 * Whether the plugin is built in babel-standalone
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {string} pluginName The plugin name to be checked
-		 * @return {boolean}
-		 */
-		function isBuiltinPlugin(babel, pluginName) {
-			var isNpmPluginName = /^(?:babel-plugin-)/;
-			var availablePlugins = babel.availablePlugins || {};
+        /**
+         * Whether the plugin is built in babel-standalone
+         *
+         * @param {Object} babel The babel object exported by babel-standalone
+         * @param {string} pluginName The plugin name to be checked
+         * @return {boolean}
+         */
+        function isBuiltinPlugin(babel, pluginName) {
+            var isNpmPluginName = /^(?:babel-plugin-)/;
+            var availablePlugins = babel.availablePlugins || {};
 
-			// babel-standalone registers its bundled plugins using the shorthand name
-			var shorthand = isNpmPluginName.test(pluginName) ?
+            // babel-standalone registers its bundled plugins using the shorthand name
+            var shorthand = isNpmPluginName.test(pluginName) ?
 				pluginName.replace("babel-plugin-", "") :
 				pluginName;
 
-			return !!availablePlugins[shorthand];
-		}
+            return !!availablePlugins[shorthand];
+        }
 
-		/**
-		 * Returns babel full plugin name if shorthand was used or the path provided
-		 *
-		 * @param {string} name The entry in the plugin array
-		 * @return {string} Relative/absolute path to plugin or babel npm plugin name
-		 *
-		 * If a babel plugin is on npm, it can be set in the `plugins` array using
-		 * one of the following forms:
-		 *
-		 * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
-		 * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
-		 * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
-		 *
-		 * Since plugins are loaded through steal, we need to make sure the full
-		 * plugin name is passed to `steal.import` so the npm extension can locate
-		 * the babel plugin. Relative/absolute paths should be loaded as any other
-		 * module.
-		 */
-		function getNpmPluginNameOrPath(name) {
-			var isPath = /\//;
-			var isBabelPluginName = /^(?:babel-plugin-)/;
+        /**
+         * Returns babel full plugin name if shorthand was used or the path provided
+         *
+         * @param {string} name The entry in the plugin array
+         * @return {string} Relative/absolute path to plugin or babel npm plugin name
+         *
+         * If a babel plugin is on npm, it can be set in the `plugins` array using
+         * one of the following forms:
+         *
+         * 1) full plugin name, e.g `"plugins": ["babel-plugin-myPlugin"]`
+         * 2) relative/absolute path, e.g: `"plugins": ["./node_modules/asdf/plugin"]`
+         * 3) using a shorthand, e.g: `"plugins": ["myPlugin"]`
+         *
+         * Since plugins are loaded through steal, we need to make sure the full
+         * plugin name is passed to `steal.import` so the npm extension can locate
+         * the babel plugin. Relative/absolute paths should be loaded as any other
+         * module.
+         */
+        function getNpmPluginNameOrPath(name) {
+            var isPath = /\//;
+            var isBabelPluginName = /^(?:babel-plugin-)/;
 
-			return isPath.test(name) || isBabelPluginName.test(name) ?
+            return isPath.test(name) || isBabelPluginName.test(name) ?
 				name : "babel-plugin-" + name;
-		}
-	}());
+        }
+    }());
 
-	function getBabelPlugins(current) {
-		var plugins = current || [];
-		var required = "transform-es2015-modules-systemjs";
+    function getBabelPlugins(current) {
+        var plugins = current || [];
+        var required = "transform-es2015-modules-systemjs";
 
-		if (plugins.indexOf(required) === -1) {
-			plugins.unshift(required);
-		}
+        if (plugins.indexOf(required) === -1) {
+            plugins.unshift(required);
+        }
 
-		return plugins;
-	}
+        return plugins;
+    }
 
-	var babelES2015Preset = "es2015-no-commonjs";
+    var babelES2015Preset = "es2015-no-commonjs";
 
-	function getBabelPresets(current, loader) {
-		var presets = current || [];
-		var forceES5 = loader.forceES5 !== false;
-		var defaultPresets = forceES5 
+    function getBabelPresets(current, loader) {
+        var presets = current || [];
+        var forceES5 = loader.forceES5 !== false;
+        var defaultPresets = forceES5 
 			? [babelES2015Preset, "react", "stage-0"]
 			: ["react"];
 
-		// if the user provided a list of presets to be used, treat the
-		// BABEL_ES2015_PRESET as required if stealCondig.forceES5 is `true`
-		if (presets.length) {
-			if (forceES5) {
-				if (presets.indexOf(babelES2015Preset) != -1) {
-					presets.unshift(babelES2015Preset);
-				}
-			}
-		}
+        // if the user provided a list of presets to be used, treat the
+        // BABEL_ES2015_PRESET as required if stealCondig.forceES5 is `true`
+        if (presets.length) {
+            if (forceES5) {
+                if (presets.indexOf(babelES2015Preset) != -1) {
+                    presets.unshift(babelES2015Preset);
+                }
+            }
+        }
 
-		return presets.length ? presets : defaultPresets;
-	}
+        return presets.length ? presets : defaultPresets;
+    }
 
-	function getBabelOptionsFromLoad(load) {
-		var pkg = load.metadata.npmPackage;
-		if(pkg) {
-			var steal = pkg.steal || pkg.system;
-			if(steal && steal.babelOptions) {
-				return steal.babelOptions;
-			}
-		}
-		return this.babelOptions || {};
-	}
+    function getBabelOptionsFromLoad(load) {
+        var pkg = load.metadata.npmPackage;
+        if(pkg) {
+            var steal = pkg.steal || pkg.system;
+            if(steal && steal.babelOptions) {
+                return steal.babelOptions;
+            }
+        }
+        return this.babelOptions || {};
+    }
 
-	/**
-	 * Returns the babel version
-	 * @param {Object} babel The babel object
-	 * @return {number} The babel version
-	 */
-	function getBabelVersion(babel) {
-		var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
+    /**
+     * Returns the babel version
+     * @param {Object} babel The babel object
+     * @return {number} The babel version
+     */
+    function getBabelVersion(babel) {
+        var babelVersion = babel.version ? +babel.version.split(".")[0] : 6;
 
-		return babelVersion || 6;
-	}
+        return babelVersion || 6;
+    }
 
-	function getBabelOptions(load, babel) {
-		var loader = this;
-		var options = getBabelOptionsFromLoad.call(loader, load);
+    function getBabelOptions(load, babel) {
+        var loader = this;
+        var options = getBabelOptionsFromLoad.call(loader, load);
 
-		options.sourceMap = 'inline';
-		options.filename = load.address;
-		options.code = true;
-		options.ast = false;
+        options.sourceMap = "inline";
+        options.filename = load.address;
+        options.code = true;
+        options.ast = false;
 
-		if (getBabelVersion(babel) >= 6) {
-			// delete the old babel options if they are present in config
-			delete options.optional;
-			delete options.whitelist;
-			delete options.blacklist;
+        if (getBabelVersion(babel) >= 6) {
+            // delete the old babel options if they are present in config
+            delete options.optional;
+            delete options.whitelist;
+            delete options.blacklist;
 
-			// make sure presents and plugins needed for Steal to work
-			// correctly are set
-			options.presets = getBabelPresets(options.presets, loader);
-			options.plugins = getBabelPlugins(options.plugins);
-		}
+            // make sure presents and plugins needed for Steal to work
+            // correctly are set
+            options.presets = getBabelPresets(options.presets, loader);
+            options.plugins = getBabelPlugins(options.plugins);
+        }
 		else {
-			options.modules = 'system';
+            options.modules = "system";
 
-			if (!options.blacklist) {
-				options.blacklist = ['react'];
-			}
-		}
+            if (!options.blacklist) {
+                options.blacklist = ["react"];
+            }
+        }
 
-		return options;
-	}
+        return options;
+    }
 
-	/**presets
-	 * A Babel preset as defined in `babelOptions.presets`
-	 * @typedef {string|Function|Object|<string, Object>[]|<Function, Object>[]|<Object, Object>} BabelPreset
-	 */
+    /**presets
+     * A Babel preset as defined in `babelOptions.presets`
+     * @typedef {string|Function|Object|<string, Object>[]|<Function, Object>[]|<Object, Object>} BabelPreset
+     */
 
-	var processBabelPresets = (function() {
-		/**
-		 * Returns a list of babel presets to be used during transpilation
-		 *
-		 * Collects the babel presets defined in `babelOptions.presets` plus
-		 * the environment dependant presets.
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {babelOptions} babelOptions The babel configuration object
-		 * @return {Promise.<BabelPreset[]>} Promise that resolves to a list of babel presets
-		 */
-		return function processBabelPresets(babel, babelOptions) {
-			var babelEnv = getBabelEnv.call(this);
-			var babelEnvConfig = babelOptions.env || {};
+    var processBabelPresets = (function() {
+        /**
+         * Returns a list of babel presets to be used during transpilation
+         *
+         * Collects the babel presets defined in `babelOptions.presets` plus
+         * the environment dependant presets.
+         *
+         * @param {Object} babel The babel object exported by babel-standalone
+         * @param {babelOptions} babelOptions The babel configuration object
+         * @return {Promise.<BabelPreset[]>} Promise that resolves to a list of babel presets
+         */
+        return function processBabelPresets(babel, babelOptions) {
+            var babelEnv = getBabelEnv.call(this);
+            var babelEnvConfig = babelOptions.env || {};
 
-			var presetsPromises = [
+            var presetsPromises = [
 				doProcessPresets.call(this, babel, babelOptions.presets)
 			];
 
-			for (var envName in babelEnvConfig) {
-				// do not process presets if the current environment does not match
-				// the environment in which the presets are set to be used
-				if (babelEnv === envName) {
-					var presets = babelEnvConfig[envName].presets || [];
-					presetsPromises.push(doProcessPresets.call(this, babel, presets));
-				}
-			}
+            for (var envName in babelEnvConfig) {
+                // do not process presets if the current environment does not match
+                // the environment in which the presets are set to be used
+                if (babelEnv === envName) {
+                    var presets = babelEnvConfig[envName].presets || [];
+                    presetsPromises.push(doProcessPresets.call(this, babel, presets));
+                }
+            }
 
-			return Promise.all(presetsPromises)
+            return Promise.all(presetsPromises)
 				.then(function(results) {
-					var presets = [];
+                var presets = [];
 
-					// results is an array of arrays, flatten it out!
-					results.forEach(function(processedPresets) {
-						presets = presets.concat(processedPresets);
-					});
+                // results is an array of arrays, flatten it out!
+                results.forEach(function(processedPresets) {
+                    presets = presets.concat(processedPresets);
+                });
 
-					return presets;
-				});
-		};
+                return presets;
+            });
+        };
 
-		/**
-		 * Collects builtin presets names and non builtins objects/functions
-		 *
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {BabelPreset[]} babelPresets A list of babel presets
-		 * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
-		 *		of babel-standalone builtin preset names and non-builtin preset
-		 *		definitions (object or function).
-		 */
-		function doProcessPresets(babel, babelPresets) {
-			var promises = [];
-			var presets = babelPresets || [];
+        /**
+         * Collects builtin presets names and non builtins objects/functions
+         *
+         * @param {Object} babel The babel object exported by babel-standalone
+         * @param {BabelPreset[]} babelPresets A list of babel presets
+         * @return {Promise.<BabelPreset[]>} A promise that resolves to a list
+         *		of babel-standalone builtin preset names and non-builtin preset
+         *		definitions (object or function).
+         */
+        function doProcessPresets(babel, babelPresets) {
+            var promises = [];
+            var presets = babelPresets || [];
 
-			presets.forEach(function(preset) {
-				var name = getPresetOrPluginName(preset);
+            presets.forEach(function(preset) {
+                var name = getPresetOrPluginName(preset);
 
-				if (!includesPresetOrPluginName(preset) || isBuiltinPreset(babel, name)) {
-					promises.push(preset);
-				}
+                if (!includesPresetOrPluginName(preset) || isBuiltinPreset(babel, name)) {
+                    promises.push(preset);
+                }
 				else if (!isBuiltinPreset(babel, name)) {
-					var parent = this.configMain || "package.json!npm";
-					var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
+                    var parent = this.configMain || "package.json!npm";
+                    var npmPresetNameOrPath = getNpmPresetNameOrPath(name);
 
-					// import the preset!
-					promises.push(this["import"](npmPresetNameOrPath, { name: parent })
+                    // import the preset!
+                    promises.push(this["import"](npmPresetNameOrPath, { name: parent })
 						.then(function(mod) {
-							var exported = mod.__esModule ? mod["default"] : mod;
+                        var exported = mod.__esModule ? mod["default"] : mod;
 
-							if (typeof preset === "string") {
-								return exported;
-							}
-							// assume the array form was provided
-							else {
-								// [ presetDefinition, presetOptions ]
-								return [exported, preset[1]];
-							}
-						}));
-				}
-			}, this);
+                        if (typeof preset === "string") {
+                            return exported;
+                        }
+                        // assume the array form was provided
+                        else {
+                            // [ presetDefinition, presetOptions ]
+                            return [exported, preset[1]];
+                        }
+                    }));
+                }
+            }, this);
 
-			return Promise.all(promises);
-		}
+            return Promise.all(promises);
+        }
 
-		/**
-		 * Whether the preset is built in babel-standalone
-		 * @param {Object} babel The babel object exported by babel-standalone
-		 * @param {string} pluginName The plugin name to be checked
-		 * @return {boolean}
-		 */
-		function isBuiltinPreset(babel, presetName) {
-			var isNpmPresetName = /^(?:babel-preset-)/;
-			var availablePresets = babel.availablePresets || {};
+        /**
+         * Whether the preset is built in babel-standalone
+         * @param {Object} babel The babel object exported by babel-standalone
+         * @param {string} pluginName The plugin name to be checked
+         * @return {boolean}
+         */
+        function isBuiltinPreset(babel, presetName) {
+            var isNpmPresetName = /^(?:babel-preset-)/;
+            var availablePresets = babel.availablePresets || {};
 
-			// babel-standalone registers its builtin presets using the shorthand name
-			var shorthand = isNpmPresetName.test(presetName) ?
+            // babel-standalone registers its builtin presets using the shorthand name
+            var shorthand = isNpmPresetName.test(presetName) ?
 				presetName.replace("babel-preset-", "") :
 				presetName;
 
-			return !!availablePresets[shorthand];
-		}
+            return !!availablePresets[shorthand];
+        }
 
-		function getNpmPresetNameOrPath(name) {
-			var isPath = /\//;
-			var isNpmPresetName = /^(?:babel-preset-)/;
+        function getNpmPresetNameOrPath(name) {
+            var isPath = /\//;
+            var isNpmPresetName = /^(?:babel-preset-)/;
 
-			if (!isPath.test(name) && !isNpmPresetName.test(name)) {
-				return "babel-preset-" + name;
-			}
+            if (!isPath.test(name) && !isNpmPresetName.test(name)) {
+                return "babel-preset-" + name;
+            }
 
-			return name;
-		}
-	}());
+            return name;
+        }
+    }());
 
-	/**
-	 * Babel plugin that sets `__esModule` to true
-	 *
-	 * This flag is needed to interop the SystemJS format used by steal on the
-	 * browser in development with the CJS format used for built modules.
-	 *
-	 * With dev bundles is possible to load a part of the app already built while
-	 * other modules are being transpiled on the fly, with this flag, transpiled
-	 * amd modules will be able to load the modules transpiled on the browser.
-	 */
-	function addESModuleFlagPlugin(babel) {
-		var t = babel.types;
+    /**
+     * Babel plugin that sets `__esModule` to true
+     *
+     * This flag is needed to interop the SystemJS format used by steal on the
+     * browser in development with the CJS format used for built modules.
+     *
+     * With dev bundles is possible to load a part of the app already built while
+     * other modules are being transpiled on the fly, with this flag, transpiled
+     * amd modules will be able to load the modules transpiled on the browser.
+     */
+    function addESModuleFlagPlugin(babel) {
+        var t = babel.types;
 
-		return {
+        return {
 			visitor: {
 				Program: function(path, state) {
-					path.unshiftContainer("body", [
+                    path.unshiftContainer("body", [
 						t.exportNamedDeclaration(null, [
 							t.exportSpecifier(t.identifier("true"),
 								t.identifier("__esModule"))
 						])
 					]);
-				}
+                }
 			}
 		};
-	}
+    }
 
-	function getImportSpecifierPositionsPlugin(load) {
-		load.metadata.importSpecifiers = Object.create(null);
-		load.metadata.importNames = Object.create(null);
-		load.metadata.exportNames = Object.create(null);
+    function getImportSpecifierPositionsPlugin(load) {
+        load.metadata.importSpecifiers = Object.create(null);
+        load.metadata.importNames = Object.create(null);
+        load.metadata.exportNames = Object.create(null);
 
-		return {
+        return {
 			visitor: {
 				ImportDeclaration: function(path, state){
-					var node = path.node;
-					var specifier = node.source.value;
-					var loc = node.source.loc;
-					load.metadata.importSpecifiers[specifier] = loc;
+                    var node = path.node;
+                    var specifier = node.source.value;
+                    var loc = node.source.loc;
+                    load.metadata.importSpecifiers[specifier] = loc;
 
-					var specifiers = load.metadata.importNames[specifier];
-					if(!specifiers) {
-						specifiers = load.metadata.importNames[specifier] = [];
-					}
+                    var specifiers = load.metadata.importNames[specifier];
+                    if(!specifiers) {
+                        specifiers = load.metadata.importNames[specifier] = [];
+                    }
 
-					specifiers.push.apply(specifiers, (
-						node.specifiers || []
+                    specifiers.push.apply(specifiers, (
+						(node.specifiers || [])
 					).map(function(spec) {
-						if(spec.type === "ImportDefaultSpecifier") {
-							return "default";
-						}
-						return spec.imported && spec.imported.name;
-					}));
-				},
+                        if(spec.type === "ImportDefaultSpecifier") {
+                            return "default";
+                        }
+                        return spec.imported && spec.imported.name;
+                    }));
+                },
 				ExportDeclaration: function(path, state){
-					var node = path.node;
+                    var node = path.node;
 
-					if(node.source) {
-						var specifier = node.source.value;
-						var specifiers = load.metadata.exportNames[specifier];
+                    if(node.source) {
+                        var specifier = node.source.value;
+                        var specifiers = load.metadata.exportNames[specifier];
 
-						if(node.type === "ExportNamedDeclaration") {
-							if(!specifiers) {
-								specifiers = load.metadata.exportNames[specifier] = new Map();
-							}
+                        if(node.type === "ExportNamedDeclaration") {
+                            if(!specifiers) {
+                                specifiers = load.metadata.exportNames[specifier] = new Map();
+                            }
 
-							node.specifiers.forEach(function(node){
-								specifiers.set(node.exported.name, node.local.name);
-							});
-						} else if(node.type === "ExportAllDeclaration") {
-							// TODO Not sure what to do here.
-							load.metadata.exportNames[specifier] = 1;
-						}
-					}
-				}
+                            node.specifiers.forEach(function(node){
+                                specifiers.set(node.exported.name, node.local.name);
+                            });
+                        } else if(node.type === "ExportAllDeclaration") {
+                            // TODO Not sure what to do here.
+                            load.metadata.exportNames[specifier] = 1;
+                        }
+                    }
+                }
 			}
 		};
-	}
+    }
 
-	Loader.prototype._getImportSpecifierPositionsPlugin = getImportSpecifierPositionsPlugin;
+    Loader.prototype._getImportSpecifierPositionsPlugin = getImportSpecifierPositionsPlugin;
 
-	function babelTranspile(load, babelMod) {
-		var loader = this;
-		var babel = babelMod.Babel || babelMod.babel || babelMod;
+    function babelTranspile(load, babelMod) {
+        var loader = this;
+        var babel = babelMod.Babel || babelMod.babel || babelMod;
 
-		var babelVersion = getBabelVersion(babel);
-		var options = getBabelOptions.call(loader, load, babel);
+        var babelVersion = getBabelVersion(babel);
+        var options = getBabelOptions.call(loader, load, babel);
 
-		return Promise.all([
+        return Promise.all([
 			processBabelPlugins.call(this, babel, options),
 			processBabelPresets.call(this, babel, options)
 		])
 		.then(function(results) {
-			// might be running on an old babel that throws if there is a
-			// plugins array in the options object
-			if (babelVersion >= 6) {
-				options.plugins = [
+            // might be running on an old babel that throws if there is a
+            // plugins array in the options object
+            if (babelVersion >= 6) {
+                options.plugins = [
 					getImportSpecifierPositionsPlugin.bind(null, load),
 					addESModuleFlagPlugin
 				].concat(results[0]);
-				options.presets = results[1];
-			}
+                options.presets = results[1];
+            }
 
-			try {
-				var result = babel.transform(load.source, options);
-				var source = result.code;
+            try {
+                var result = babel.transform(load.source, options);
+                var source = result.code;
 
-				// add "!eval" to end of Babel sourceURL
-				// I believe this does something?
-				return source + '\n//# sourceURL=' + load.address + '!eval';
-			} catch(ex) {
-				if(ex instanceof SyntaxError) {
-					var newError = new SyntaxError(ex.message);
-					var stack = new loader.StackTrace(ex.message, [
+                // add "!eval" to end of Babel sourceURL
+                // I believe this does something?
+                return source + "\n//# sourceURL=" + load.address + "!eval";
+            } catch(ex) {
+                if(ex instanceof SyntaxError) {
+                    var newError = new SyntaxError(ex.message);
+                    var stack = new loader.StackTrace(ex.message, [
 						loader.StackTrace.item("", load.address,
 							ex.loc.line, ex.loc.column)
 					]);
-					newError.stack = stack.toString();
-					return Promise.reject(newError);
-				}
-				return Promise.reject(ex);
-			}
-		});
-	}
-
+                    newError.stack = stack.toString();
+                    return Promise.reject(newError);
+                }
+                return Promise.reject(ex);
+            }
+        });
+    }
 })(__global.LoaderPolyfill);
-/*
-*********************************************************************************************
-
-  System Loader Implementation
-
-    - Implemented to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js
-
-*********************************************************************************************
-*/
-
-
 
 (function() {
-  var isWindows = typeof process != 'undefined' && !!process.platform.match(/^win/);
-  var Promise = __global.Promise || require('when/es6-shim/Promise');
+  var isWindows = typeof process != "undefined" && !!process.platform.match(/^win/);
+  var Promise = __global.Promise || require("when/es6-shim/Promise");
 
   // Helpers
   // Absolute URL parsing, from https://gist.github.com/Yaffle/1088850
   function parseURI(url) {
-    var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/?#]*(?::[^:@\/?#]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+    var m = String(url).replace(/^\s+|\s+$/g, "").match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/?#]*(?::[^:@\/?#]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
     // authority = '//' + user + ':' + pass '@' + hostname + ':' port
     return (m ? {
-      href     : m[0] || '',
-      protocol : m[1] || '',
-      authority: m[2] || '',
-      host     : m[3] || '',
-      hostname : m[4] || '',
-      port     : m[5] || '',
-      pathname : m[6] || '',
-      search   : m[7] || '',
-      hash     : m[8] || ''
+      href: m[0] || "",
+      protocol: m[1] || "",
+      authority: m[2] || "",
+      host: m[3] || "",
+      hostname: m[4] || "",
+      port: m[5] || "",
+      pathname: m[6] || "",
+      search: m[7] || "",
+      hash: m[8] || ""
     } : null);
   }
-
   function removeDotSegments(input) {
     var output = [];
-    input.replace(/^(\.\.?(\/|$))+/, '')
-      .replace(/\/(\.(\/|$))+/g, '/')
-      .replace(/\/\.\.$/, '/../')
+    input.replace(/^(\.\.?(\/|$))+/, "")
+      .replace(/\/(\.(\/|$))+/g, "/")
+      .replace(/\/\.\.$/, "/../")
       .replace(/\/?[^\/]*/g, function (p) {
-        if (p === '/..')
-          output.pop();
-        else
-          output.push(p);
+      if (p === "/..")
+        output.pop();
+      else
+        output.push(p);
     });
-    return output.join('').replace(/^\//, input.charAt(0) === '/' ? '/' : '');
+    return output.join("").replace(/^\//, input.charAt(0) === "/" ? "/" : "");
   }
-
   var doubleSlash = /^\/\//;
-
   function toAbsoluteURL(inBase, inHref) {
     var href = inHref;
-    var base = inBase
+    var base = inBase;
 
-	if(doubleSlash.test(inHref)) {
-		// Default to http
-		return 'http:' + inHref;
-	}
+    if(doubleSlash.test(inHref)) {
+      // Default to http
+      return "http:" + inHref;
+    }
 
     if (isWindows)
-      href = href.replace(/\\/g, '/');
+      href = href.replace(/\\/g, "/");
 
-    href = parseURI(href || '');
-    base = parseURI(base || '');
+    href = parseURI(href || "");
+    base = parseURI(base || "");
 
     return !href || !base ? null : (href.protocol || base.protocol) +
       (href.protocol || href.authority ? href.authority : base.authority) +
-      removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === '/' ? href.pathname : (href.pathname ? ((base.authority && !base.pathname ? '/' : '') + base.pathname.slice(0, base.pathname.lastIndexOf('/') + 1) + href.pathname) : base.pathname)) +
+      removeDotSegments(href.protocol || href.authority || href.pathname.charAt(0) === "/" ? href.pathname : (href.pathname ? ((base.authority && !base.pathname ? "/" : "") + base.pathname.slice(0, base.pathname.lastIndexOf("/") + 1) + href.pathname) : base.pathname)) +
       (href.protocol || href.authority || href.pathname ? href.search : (href.search || base.search)) +
       href.hash;
   }
 
   var fetchTextFromURL;
-
-  if (typeof XMLHttpRequest != 'undefined') {
+  if (typeof XMLHttpRequest != "undefined") {
     fetchTextFromURL = function(url, fulfill, reject) {
       var xhr = new XMLHttpRequest();
       var sameDomain = true;
       var doTimeout = false;
-      if (!('withCredentials' in xhr)) {
+      if (!("withCredentials" in xhr)) {
         // check if same domain
         var domainCheck = /^(\w+:)?\/\/([^\/]+)/.exec(url);
         if (domainCheck) {
@@ -1982,7 +1862,7 @@ function logloads(loads) {
             sameDomain &= domainCheck[1] === window.location.protocol;
         }
       }
-      if (!sameDomain && typeof XDomainRequest != 'undefined') {
+      if (!sameDomain && typeof XDomainRequest != "undefined") {
         xhr = new XDomainRequest();
         xhr.onload = load;
         xhr.onerror = error;
@@ -1995,10 +1875,10 @@ function logloads(loads) {
         fulfill(xhr.responseText);
       }
       function error() {
-		var s = xhr.status;
-        var msg = s + ' ' + xhr.statusText + ': ' + url + '\n' || 'XHR error';
+        var s = xhr.status;
+        var msg = s + " " + xhr.statusText + ": " + url + "\n" || "XHR error";
         var err = new Error(msg);
-		err.url = url;
+        err.url = url;
         err.statusCode = s;
         reject(err);
       }
@@ -2022,53 +1902,53 @@ function logloads(loads) {
       xhr.send(null);
     }
   }
-  else if (typeof require != 'undefined') {
+  else if (typeof require != "undefined") {
     var fs, http, https, fourOhFourFS = /ENOENT/;
     fetchTextFromURL = function(rawUrl, fulfill, reject) {
-      if (rawUrl.substr(0, 5) === 'file:') {
-		  fs = fs || require('fs');
-		  var url = rawUrl.substr(5);
-		  if (isWindows)
-			url = url.replace(/\//g, '\\');
-		  return fs.readFile(url, function(err, data) {
-			if (err) {
-			  // Mark this error as a 404, so that the npm extension
-			  // will know to retry.
-			  if(fourOhFourFS.test(err.message)) {
-				err.statusCode = 404;
-			  err.url = rawUrl;
-			  }
+      if (rawUrl.substr(0, 5) === "file:") {
+        fs = fs || require("fs");
+        var url = rawUrl.substr(5);
+        if (isWindows)
+          url = url.replace(/\//g, "\\");
+        return fs.readFile(url, function(err, data) {
+          if (err) {
+            // Mark this error as a 404, so that the npm extension
+            // will know to retry.
+            if(fourOhFourFS.test(err.message)) {
+              err.statusCode = 404;
+              err.url = rawUrl;
+            }
 
-			  return reject(err);
-			} else {
-			  fulfill(data + '');
-			}
-		  });
-	  } else if(rawUrl.substr(0, 4) === 'http') {
-		  var h;
-		  if(rawUrl.substr(0, 6) === 'https:') {
-			  h = https = https || require('https');
-		  } else {
-			  h = http = http || require('http');
-		  }
-		  return h.get(rawUrl, function(res) {
-			  if(res.statusCode !== 200) {
-				  reject(new Error('Request failed. Status: ' + res.statusCode));
-			  } else {
-				  var rawData = "";
-				  res.setEncoding("utf8");
-				  res.on("data", function(chunk) {
-					  rawData += chunk;
-				  });
-				  res.on("end", function(){
-					  fulfill(rawData);
-				  });
-			  }
-		  })
-	  }
+            return reject(err);
+          } else {
+            fulfill(data + "");
+          }
+        });
+      } else if(rawUrl.substr(0, 4) === "http") {
+        var h;
+        if(rawUrl.substr(0, 6) === "https:") {
+          h = https = https || require("https");
+        } else {
+          h = http = http || require("http");
+        }
+        return h.get(rawUrl, function(res) {
+          if(res.statusCode !== 200) {
+            reject(new Error("Request failed. Status: " + res.statusCode));
+          } else {
+            var rawData = "";
+            res.setEncoding("utf8");
+            res.on("data", function(chunk) {
+              rawData += chunk;
+            });
+            res.on("end", function(){
+              fulfill(rawData);
+            });
+          }
+        });
+      }
     }
   }
-  else if(typeof fetch === 'function') {
+  else if(typeof fetch === "function") {
     fetchTextFromURL = function(url, fulfill, reject) {
       fetch(url).then(function(resp){
         return resp.text();
@@ -2080,216 +1960,225 @@ function logloads(loads) {
     }
   }
   else {
-    throw new TypeError('No environment fetch API available.');
+    throw new TypeError("No environment fetch API available.");
   }
 
   function transformError(err, load, loader) {
-	  if(typeof loader.getDependants === "undefined") {
-		  return Promise.resolve();
-	  }
-	  var dependants = loader.getDependants(load.name);
-	  if(Array.isArray(dependants) && dependants.length) {
-		  var StackTrace = loader.StackTrace;
-		  var isProd = loader.isEnv("production");
+    if(typeof loader.getDependants === "undefined") {
+      return Promise.resolve();
+    }
+    var dependants = loader.getDependants(load.name);
+    if(Array.isArray(dependants) && dependants.length) {
+      var StackTrace = loader.StackTrace;
+      var isProd = loader.isEnv("production");
 
-		  return Promise.resolve()
-		  .then(function(){
-			  return isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
-		  })
-		  .then(function(codeFrame){
-			  var parentLoad = loader.getModuleLoad(dependants[0]);
-			  var pos = loader.getImportSpecifier(load.name, parentLoad) || {
-				  line: 1, column: 0
-			  };
+      return Promise.resolve()
+      .then(function(){
+        return isProd ? Promise.resolve() : loader["import"]("@@babel-code-frame");
+      })
+      .then(function(codeFrame){
+        var parentLoad = loader.getModuleLoad(dependants[0]);
+        var pos = loader.getImportSpecifier(load.name, parentLoad) || {
+            line: 1, column: 0
+        };
 
-			  var detail = "The module [" + loader.prettyName(load) + "] couldn't be fetched.\n" +
-				"Clicking the link in the stack trace below takes you to the import.\n" +
-				"See https://stealjs.com/docs/StealJS.error-messages.html#404-not-found for more information.\n";
-			  var msg = err.message + "\n" + detail;
+        var detail = "The module [" + loader.prettyName(load) + "] couldn't be fetched.\n" +
+          "Clicking the link in the stack trace below takes you to the import.\n" +
+          "See https://stealjs.com/docs/StealJS.error-messages.html#404-not-found for more information.\n";
+        var msg = err.message + "\n" + detail;
 
-			  if(!isProd) {
-				  var src = parentLoad.metadata.originalSource || parentLoad.source;
-				  var codeSample = codeFrame(src, pos.line, pos.column);
-				  msg += "\n" + codeSample + "\n";
-			  }
+        if(!isProd) {
+          var src = parentLoad.metadata.originalSource || parentLoad.source;
+          var codeSample = codeFrame(src, pos.line, pos.column);
+          msg += "\n" + codeSample + "\n";
+        }
 
-			  err.message = msg;
+        err.message = msg;
 
-			  var stackTrace = new StackTrace(msg, [
-				  StackTrace.item(null, parentLoad.address, pos.line, pos.column)
-			  ]);
+        var stackTrace = new StackTrace(msg, [
+            StackTrace.item(null, parentLoad.address, pos.line, pos.column)
+        ]);
 
-			  err.stack = stackTrace.toString();
-		  })
-	  }
-	  return Promise.resolve();
+        err.stack = stackTrace.toString();
+      });
+    }
+    return Promise.resolve();
   }
 
   var SystemLoader = function($__super) {
+    "use strict";
+
     function SystemLoader(options) {
       $__super.call(this, options || {});
 
       // Set default baseURL and paths
-      if (typeof location != 'undefined' && location.href) {
-        var href = __global.location.href.split('#')[0].split('?')[0];
-        this.baseURL = href.substring(0, href.lastIndexOf('/') + 1);
+      if (typeof location != "undefined" && location.href) {
+        var href = __global.location.href.split("#")[0].split("?")[0];
+        this.baseURL = href.substring(0, href.lastIndexOf("/") + 1);
       }
-      else if (typeof process != 'undefined' && process.cwd) {
-        this.baseURL = 'file:' + process.cwd() + '/';
+      else if (typeof process != "undefined" && process.cwd) {
+        this.baseURL = "file:" + process.cwd() + "/";
         if (isWindows)
-          this.baseURL = this.baseURL.replace(/\\/g, '/');
+          this.baseURL = this.baseURL.replace(/\\/g, "/");
       }
       else {
-        throw new TypeError('No environment baseURL');
+        throw new TypeError("No environment baseURL");
       }
-      this.paths = { '*': '*.js' };
+      this.paths = { "*": "*.js" };
     }
 
     SystemLoader.__proto__ = ($__super !== null ? $__super : Function.prototype);
     SystemLoader.prototype = $__Object$create(($__super !== null ? $__super.prototype : null));
 
-    $__Object$defineProperty(SystemLoader.prototype, "constructor", {
+    $__Object$defineProperty0(SystemLoader.prototype, "constructor", {
       value: SystemLoader
     });
 
-    $__Object$defineProperty(SystemLoader.prototype, "global", {
-      get: function() {
-        return isBrowser ? window : (isWorker ? self : __global);
+    $__Object$defineProperties(SystemLoader.prototype, {
+      global: {
+        get: function() {
+          return isBrowser ? window : (isWorker ? self : __global);
+        },
+
+        enumerable: true,
+        configurable: true
       },
 
-      enumerable: false
-    });
+      strict: {
+        get: function() {
+          return true;
+        },
 
-    $__Object$defineProperty(SystemLoader.prototype, "strict", {
-      get: function() { return true; },
-      enumerable: false
-    });
+        enumerable: true,
+        configurable: true
+      },
 
-    $__Object$defineProperty(SystemLoader.prototype, "normalize", {
-      value: function(name, parentName, parentAddress) {
-        if (typeof name != 'string')
-          throw new TypeError('Module name must be a string');
+      normalize: {
+        value: function(name, parentName, parentAddress) {
+          if (typeof name != "string")
+            throw new TypeError("Module name must be a string");
 
-        var segments = name.split('/');
+          var segments = name.split("/");
 
-        if (segments.length == 0)
-          throw new TypeError('No module name provided');
+          if (segments.length == 0)
+            throw new TypeError("No module name provided");
 
-        // current segment
-        var i = 0;
-        // is the module name relative
-        var rel = false;
-        // number of backtracking segments
-        var dotdots = 0;
-        if (segments[0] == '.') {
-          i++;
-          if (i == segments.length)
-            throw new TypeError('Illegal module name "' + name + '"');
-          rel = true;
-        }
-        else {
-          while (segments[i] == '..') {
+          // current segment
+          var i = 0;
+          // is the module name relative
+          var rel = false;
+          // number of backtracking segments
+          var dotdots = 0;
+          if (segments[0] == ".") {
             i++;
             if (i == segments.length)
-              throw new TypeError('Illegal module name "' + name + '"');
-          }
-          if (i)
+              throw new TypeError("Illegal module name \"" + name + "\"");
             rel = true;
-          dotdots = i;
-        }
-
-        /*for (var j = i; j < segments.length; j++) {
-          var segment = segments[j];
-          if (segment == '' || segment == '.' || segment == '..')
-            throw new TypeError('Illegal module name "' + name + '"');
-        }*/
-
-        if (!rel)
-          return name;
-
-        // build the full module name
-        var normalizedParts = [];
-        var parentParts = (parentName || '').split('/');
-        var normalizedLen = parentParts.length - 1 - dotdots;
-
-        normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
-        normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));
-
-        return normalizedParts.join('/');
-      },
-
-      enumerable: false,
-      writable: true
-    });
-
-    $__Object$defineProperty(SystemLoader.prototype, "locate", {
-      value: function(load) {
-        var name = load.name;
-
-        // NB no specification provided for System.paths, used ideas discussed in https://github.com/jorendorff/js-loaders/issues/25
-
-        // most specific (longest) match wins
-        var pathMatch = '', wildcard;
-
-        // check to see if we have a paths entry
-        for (var p in this.paths) {
-          var pathParts = p.split('*');
-          if (pathParts.length > 2)
-            throw new TypeError('Only one wildcard in a path is permitted');
-
-          // exact path match
-          if (pathParts.length == 1) {
-            if (name == p && p.length > pathMatch.length) {
-              pathMatch = p;
-              break;
-            }
           }
-
-          // wildcard path match
           else {
-            if (name.substr(0, pathParts[0].length) == pathParts[0] && name.substr(name.length - pathParts[1].length) == pathParts[1]) {
-              pathMatch = p;
-              wildcard = name.substr(pathParts[0].length, name.length - pathParts[1].length - pathParts[0].length);
+            while (segments[i] == "..") {
+              i++;
+              if (i == segments.length)
+                throw new TypeError("Illegal module name \"" + name + "\"");
             }
+            if (i)
+              rel = true;
+            dotdots = i;
           }
-        }
 
-        var outPath = this.paths[pathMatch];
-        if (wildcard)
-          outPath = outPath.replace('*', wildcard);
+          /*for (var j = i; j < segments.length; j++) {
+            var segment = segments[j];
+            if (segment == '' || segment == '.' || segment == '..')
+              throw new TypeError('Illegal module name "' + name + '"');
+          }*/
 
-        // percent encode just '#' in module names
-        // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
-        // we should encode everything, but it breaks for servers that don't expect it
-        // like in (https://github.com/systemjs/systemjs/issues/168)
-        if (isBrowser)
-          outPath = outPath.replace(/#/g, '%23');
+          if (!rel)
+            return name;
 
-        return toAbsoluteURL(this.baseURL, outPath);
+          // build the full module name
+          var normalizedParts = [];
+          var parentParts = (parentName || "").split("/");
+          var normalizedLen = parentParts.length - 1 - dotdots;
+
+          normalizedParts = normalizedParts.concat(parentParts.splice(0, parentParts.length - 1 - dotdots));
+          normalizedParts = normalizedParts.concat(segments.splice(i, segments.length - i));
+
+          return normalizedParts.join("/");
+        },
+
+        enumerable: false,
+        writable: true
       },
 
-      enumerable: false,
-      writable: true
-    });
+      locate: {
+        value: function(load) {
+          var name = load.name;
 
-    $__Object$defineProperty(SystemLoader.prototype, "fetch", {
-      value: function(load) {
-        var self = this;
-        return new Promise(function(resolve, reject) {
-          function onError(err) {
+          // NB no specification provided for System.paths, used ideas discussed in https://github.com/jorendorff/js-loaders/issues/25
+
+          // most specific (longest) match wins
+          var pathMatch = "", wildcard;
+
+          // check to see if we have a paths entry
+          for (var p in this.paths) {
+            var pathParts = p.split("*");
+            if (pathParts.length > 2)
+              throw new TypeError("Only one wildcard in a path is permitted");
+
+            // exact path match
+            if (pathParts.length == 1) {
+              if (name == p && p.length > pathMatch.length) {
+                pathMatch = p;
+                break;
+              }
+            }
+
+            // wildcard path match
+            else {
+              if (name.substr(0, pathParts[0].length) == pathParts[0] && name.substr(name.length - pathParts[1].length) == pathParts[1]) {
+                pathMatch = p;
+                wildcard = name.substr(pathParts[0].length, name.length - pathParts[1].length - pathParts[0].length);
+              }
+            }
+          }
+
+          var outPath = this.paths[pathMatch];
+          if (wildcard)
+            outPath = outPath.replace("*", wildcard);
+
+          // percent encode just '#' in module names
+          // according to https://github.com/jorendorff/js-loaders/blob/master/browser-loader.js#L238
+          // we should encode everything, but it breaks for servers that don't expect it
+          // like in (https://github.com/systemjs/systemjs/issues/168)
+          if (isBrowser)
+            outPath = outPath.replace(/#/g, "%23");
+
+          return toAbsoluteURL(this.baseURL, outPath);
+        },
+
+        enumerable: false,
+        writable: true
+      },
+
+      fetch: {
+        value: function(load) {
+          var self = this;
+          return new Promise(function(resolve, reject) {
+            function onError(err) {
               var r = reject.bind(null, err);
               transformError(err, load, self)
               .then(r, r);
-          }
+            }
 
-          fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
-            resolve(source);
-        }, onError);
-        });
-      },
+            fetchTextFromURL(toAbsoluteURL(self.baseURL, load.address), function(source) {
+              resolve(source);
+            }, onError);
+          });
+        },
 
-      enumerable: false,
-      writable: true
+        enumerable: false,
+        writable: true
+      }
     });
 
     return SystemLoader;
@@ -2298,11 +2187,12 @@ function logloads(loads) {
   var System = new SystemLoader();
 
   // note we have to export before runing "init" below
-  if (typeof exports === 'object')
+  if (typeof exports === "object")
     module.exports = System;
 
   __global.System = System;
 })();
+//# sourceMappingURL=loadesr-esnext.js.map
 
 
 // Define our eval outside of the scope of any other reference defined in this

@@ -40,7 +40,7 @@ QUnit.test("process.cwd()", function(assert){
 	loader["import"]("app")
 	.then(function(app){
 		assert.equal(typeof app, "string", "process.cwd is a string");
-		assert.equal(app[app.length - 1], "/", "ends in a slash");
+		assert.equal(app, "", "process.cwd is an empty string in testee-client");
 	})
 	.then(done, done);
 });

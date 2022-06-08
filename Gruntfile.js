@@ -22,8 +22,11 @@ module.exports = function (grunt) {
 					"src/loader/lib/transpiler.js",
 					"src/loader/lib/system.js"
 				],
-				dest: "src/loader/loader-esnext.js"
-			}
+			    dest: "src/loader/loader-esnext.js",
+			    options: {
+				sourceMapName: "src/loader/loadesr-esnext.js.map"
+			    }
+			},
 		},
 		"string-replace": {
 			dist: {
@@ -252,7 +255,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-simple-mocha");
 	grunt.loadNpmTasks("grunt-esnext");
-	grunt.loadNpmTasks("testee");
+	grunt.loadNpmTasks("grunt-testee");
 
 	grunt.registerTask("test", ["build", "testee:tests", "simplemocha"]);
 	grunt.registerTask("loader", ["esnext", "string-replace"]);
