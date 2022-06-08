@@ -11,6 +11,10 @@ matrix:
         - npm run http-server &
         - sleep 2
       script: npm run ui
+# grunt-esnext works with later grunt but has a peer dep for earlier
+install:
+  - npm install --legacy-peer-deps
+
 dist: focal
 services:
   - xvfb
