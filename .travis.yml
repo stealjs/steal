@@ -2,8 +2,10 @@ sudo: false
 language: node_js
 matrix:
   include:
-    - node_js: 14
+    - node_js: 10
       script: 'npm run test-node:ci'
+      before_install:
+        - git config --global url."https://github.com/".insteadOf "git://github.com/"
     - node_js: node
       addons:
         sauce_connect: true
