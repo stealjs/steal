@@ -1,13 +1,13 @@
 (function(global){
 
 	// helpers
-	var camelize = function(str){
+	let camelize = function(str){
 		return str.replace(/-+(.)?/g, function(match, chr){
 			return chr ? chr.toUpperCase() : ''
 		});
 	},
 		each = function( o, cb){
-			var i, len;
+			let i, len;
 
 			// weak array detection, but we only use this internally so don't
 			// pass it weird stuff
@@ -25,7 +25,7 @@
 			return o;
 		},
 		map = function(o, cb) {
-			var arr = [];
+			let arr = [];
 			each(o, function(item, i){
 				arr[i] = cb(item, i);
 			});
@@ -41,7 +41,7 @@
 			return d;
 		},
 		dir = function(uri){
-			var lastSlash = uri.lastIndexOf("/");
+			let lastSlash = uri.lastIndexOf("/");
 			//if no / slashes, check for \ slashes since it might be a windows path
 			if(lastSlash === -1)
 				lastSlash = uri.lastIndexOf("\\");
@@ -55,7 +55,7 @@
 			return arr[arr.length - 1];
 		},
 		parseURI = function(url) {
-			var m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/]*(?::[^:@\/]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
+			let m = String(url).replace(/^\s+|\s+$/g, '').match(/^([^:\/?#]+:)?(\/\/(?:[^:@\/]*(?::[^:@\/]*)?@)?(([^:\/?#]*)(?::(\d*))?))?([^?#]*)(\?[^#]*)?(#[\s\S]*)?/);
 				// authority = '//' + user + ':' + pass '@' + hostname + ':' port
 				return (m ? {
 				href     : m[0] || '',
@@ -71,7 +71,7 @@
 		},
 		joinURIs = function(base, href) {
 			function removeDotSegments(input) {
-				var output = [];
+				let output = [];
 				input.replace(/^(\.\.?(\/|$))+/, '')
 					.replace(/\/(\.(\/|$))+/g, '/')
 					.replace(/\/\.\.$/, '/../')
@@ -95,7 +95,7 @@
 					href.hash;
 		},
 		relativeURI = function(base, path) {
-			var uriParts = path.split("/"),
+			let uriParts = path.split("/"),
 				baseParts = base.split("/"),
 				result = [];
 			while ( uriParts.length && baseParts.length && uriParts[0] == baseParts[0] ) {
@@ -129,10 +129,10 @@
 				if(document.currentScript) {
 					return document.currentScript;
 				}
-				var scripts = document.scripts;
+				let scripts = document.scripts;
 
 				if (scripts.length) {
-					var currentScript = scripts[scripts.length - 1];
+					let currentScript = scripts[scripts.length - 1];
 					return currentScript;
 				}
 			}
@@ -141,12 +141,12 @@
 		warn = typeof console === "object" ?
 			fBind.call(console.warn, console) : function(){};
 
-	var filename = function(uri){
-		var lastSlash = uri.lastIndexOf("/");
+	let filename = function(uri){
+		let lastSlash = uri.lastIndexOf("/");
 		//if no / slashes, check for \ slashes since it might be a windows path
 		if(lastSlash === -1)
 			lastSlash = uri.lastIndexOf("\\");
-		var matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
+		let matches = ( lastSlash == -1 ? uri : uri.substr(lastSlash+1) ).match(/^[\w-\s\.!]+/);
 		return matches ? matches[0] : "";
 	};
 
