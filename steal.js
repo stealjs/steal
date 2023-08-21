@@ -1,14 +1,14 @@
 (function(__global) {
 
-var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
+let isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
   && self instanceof WorkerGlobalScope;
-var isBrowser = typeof window != 'undefined' && !isWorker;
+let isBrowser = typeof window != 'undefined' && !isWorker;
 
 __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
 
-var $__Object$defineProperty;
+let $__Object$defineProperty;
 (function () {
   try {
     if (!!Object.defineProperty({}, 'a', {})) {
@@ -38,16 +38,16 @@ __global.$__Object$create = Object.create || function(o, props) {
   return new F();
 };
 
-var $__Object$defineProperties = Object.defineProperties;
-var $__Object$defineProperty0 = Object.defineProperty;
-var $__Object$create = Object.create;
-var $__Object$getPrototypeOf = Object.getPrototypeOf;
+let $__Object$defineProperties = Object.defineProperties;
+let $__Object$defineProperty0 = Object.defineProperty;
+let $__Object$create = Object.create;
+let $__Object$getPrototypeOf = Object.getPrototypeOf;
 
 
 (function() {
-  var Promise = __global.Promise || require("when/es6-shim/Promise");
-  var console;
-  var $__curScript;
+  let Promise = __global.Promise || require("when/es6-shim/Promise");
+  let console;
+  let $__curScript;
   if (__global.console) {
     console = __global.console;
     console.assert = console.assert || function() {};
@@ -55,22 +55,22 @@ var $__Object$getPrototypeOf = Object.getPrototypeOf;
     console = { assert: function() {} };
   }
   if(isBrowser) {
-    var scripts = document.getElementsByTagName("script");
+    let scripts = document.getElementsByTagName("script");
     $__curScript = document.currentScript || scripts[scripts.length - 1];
   }
 
 
   // IE8 support
-  var indexOf = Array.prototype.indexOf || function(item) {
-    for (var i = 0, thisLen = this.length; i < thisLen; i++) {
+  let indexOf = Array.prototype.indexOf || function(item) {
+    for (let i = 0, thisLen = this.length; i < thisLen; i++) {
       if (this[i] === item) {
         return i;
       }
     }
     return -1;
   };
-  var defineProperty = $__Object$defineProperty;
-  var emptyArray = [];
+  let defineProperty = $__Object$defineProperty;
+  let emptyArray = [];
 
   // 15.2.3 - Runtime Semantics: Loader State
 
@@ -128,7 +128,7 @@ var $__Object$getPrototypeOf = Object.getPrototypeOf;
     })
 	// 15.2.4.2.2 GetOrCreateLoad
     .then(function(name) {
-      var load;
+      let load;
       if (loader.modules[name]) {
         load = createLoad(name);
         load.status = "linked";
@@ -137,7 +137,7 @@ var $__Object$getPrototypeOf = Object.getPrototypeOf;
         return load;
       }
 
-      for (var i = 0, l = loader.loads.length; i < l; i++) {
+      for (let i = 0, l = loader.loads.length; i < l; i++) {
         load = loader.loads[i];
         if (load.name != name)
           continue;
@@ -145,8 +145,8 @@ var $__Object$getPrototypeOf = Object.getPrototypeOf;
         return load;
       }
 
-      var failedLoads = loader.loaderObj.failed || emptyArray;
-      for(var i = 0, l = failedLoads.length; i < l; i++) {
+      let failedLoads = loader.loaderObj.failed || emptyArray;
+      for(let i = 0, l = failedLoads.length; i < l; i++) {
         load = failedLoads[i];
         if(load.name !== name)
           continue;
@@ -189,12 +189,12 @@ var $__Object$getPrototypeOf = Object.getPrototypeOf;
     );
   }
 
-  var anonCnt = 0;
+  let anonCnt = 0;
 
   // 15.2.4.5
   function proceedToTranslate(loader, load, p) {
-    var pass = load.pass || 0;
-    var passCancelled = function() {
+    let pass = load.pass || 0;
+    let passCancelled = function() {
       return (load.pass << 0) !== pass ;
     };
 
