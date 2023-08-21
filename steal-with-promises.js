@@ -6,8 +6,8 @@
 /**
  * ES6 global Promise shim
  */
-var unhandledRejections = require('../lib/decorators/unhandledRejection');
-var PromiseConstructor = unhandledRejections(require('../lib/Promise'));
+let unhandledRejections = require('../lib/decorators/unhandledRejection');
+let PromiseConstructor = unhandledRejections(require('../lib/Promise'));
 
 module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstructor)
 	           : typeof self   != 'undefined' ? (self.Promise   = PromiseConstructor)
@@ -21,9 +21,9 @@ module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstru
 (function(define) { 'use strict';
 define(function (require) {
 
-	var makePromise = require('./makePromise');
-	var Scheduler = require('./Scheduler');
-	var async = require('./env').asap;
+	let makePromise = require('./makePromise');
+	let Scheduler = require('./Scheduler');
+	let async = require('./env').asap;
 
 	return makePromise({
 		scheduler: new Scheduler(async)
@@ -92,7 +92,7 @@ define(function() {
 	 * Drain the handler queue entirely, and then the after queue
 	 */
 	Scheduler.prototype._drain = function() {
-		var i = 0;
+		let i = 0;
 		for (; i < this._queueLen; ++i) {
 			this._queue[i].run();
 			this._queue[i] = void 0;
@@ -122,14 +122,14 @@ define(function() {
 (function(define) { 'use strict';
 define(function(require) {
 
-	var setTimer = require('../env').setTimer;
-	var format = require('../format');
+	let setTimer = require('../env').setTimer;
+	let format = require('../format');
 
 	return function unhandledRejection(Promise) {
 
-		var logError = noop;
-		var logInfo = noop;
-		var localConsole;
+		let logError = noop;
+		let logInfo = noop;
+		let localConsole;
 
 		if(typeof console !== 'undefined') {
 			// Alias console to prevent things like uglify's drop_console option from
