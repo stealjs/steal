@@ -15,7 +15,7 @@
 		data-config="package.json!npm"></script>
 	<script>
 		function assertMain() {
-			var main = steal.loader.get("shake@1.0.0#main");
+			let main = steal.loader.get("shake@1.0.0#main");
 			if(typeof window.assert !== "undefined") {
 				assert.ok(main.Component, "Includes Component");
 				assert.ok(!("DefineList" in main), "DefineList tree-shaken");
@@ -31,7 +31,7 @@
 		}
 
 		function assertBundle() {
-			var main = steal.loader.get("shake@1.0.0#main");
+			let main = steal.loader.get("shake@1.0.0#main");
 			if(typeof window.assert !== "undefined") {
 				assert.ok(main.Component, "Includes Component");
 				assert.ok(main.fixture, "Includes fixture");
