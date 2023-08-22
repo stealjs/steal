@@ -15,9 +15,9 @@
 		data-config="package.json!npm"></script>
 	<script>
 	(function(){
-		var fetch = steal.loader.fetch;
+		let fetch = steal.loader.fetch;
 		steal.loader.fetch = function(load) {
-			var p = fetch.apply(this, arguments);
+			let p = fetch.apply(this, arguments);
 			if(load.name === "package.json!npm") {
 				return p.then(function(rawJSON){
 					var data = JSON.parse(rawJSON);
@@ -31,7 +31,7 @@
 	</script>
 	<script>
 		function assertMain() {
-			var main = steal.loader.get("shake@1.0.0#main");
+			let main = steal.loader.get("shake@1.0.0#main");
 			if(typeof window.assert !== "undefined") {
 				assert.ok(main.Component);
 				assert.ok(main.DefineList);
