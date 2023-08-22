@@ -1,6 +1,6 @@
 "use strict";
 module.exports = function (grunt) {
-	var core = [
+	let core = [
 		"<%= pkg.name %>-with-promises.js",
 		"<%= pkg.name %>-with-promises.production.js",
 		"ext/**"
