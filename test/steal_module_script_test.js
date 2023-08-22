@@ -1,5 +1,5 @@
-var QUnit = require("steal-qunit");
-var makeIframe = require("./helpers").makeIframe;
+let QUnit = require("steal-qunit");
+let makeIframe = require("./helpers").makeIframe;
 
 QUnit.module("script type 'steal-module'");
 
