@@ -1,4 +1,4 @@
-var dep = require("./dep");
+let dep = require("./dep");
 
 global.postMessage(dep);
 
