@@ -16,7 +16,7 @@
 		data-config="package.json!npm"></script>
 	<script>
 		function assertCore(mods) {
-			var main = mods[0];
+			let main = mods[0];
 			if(typeof window.assert !== "undefined") {
 				assert.ok(main.DefineList, "Got DefineList");
 				assert.ok(main.DefineMap, "Got DefineMap");
