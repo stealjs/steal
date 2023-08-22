@@ -1,4 +1,4 @@
-var QUnit = require("steal-qunit");
+let QUnit = require("steal-qunit");
 
 QUnit.module("steal via system import");
 
@@ -30,7 +30,7 @@ QUnit.test("steal's normalize with a plugin", function(assert) {
 });
 
 QUnit.test("steal's normalize with plugin only the bang", function(assert) {
-    var done = assert.async();
+    let done = assert.async();
     System.instantiate({
 		name: "foobar",
 		metadata: {format: "steal"},
@@ -54,7 +54,7 @@ QUnit.test("ignoring an import by mapping to @empty", function(assert) {
 });
 
 QUnit.test("steal.dev.assert", function(assert) {
-    var done = assert.async();
+    let done = assert.async();
     System["import"]("@dev").then(function(){
 		assert.throws(
 			function() {
@@ -75,7 +75,7 @@ QUnit.test("steal.dev.assert", function(assert) {
 });
 
 QUnit.test("__esModule flag is added by babel plugin", function(assert) {
-	var done = assert.async();
+	let done = assert.async();
 
 	return System["import"]("test/babel/other")
 		.then(function(mod) {
@@ -89,7 +89,7 @@ QUnit.test("__esModule flag is added by babel plugin", function(assert) {
 });
 
 QUnit.test("__esModule flag only set to ES6 modules", function(assert) {
-	var done = assert.async();
+	let done = assert.async();
 
 	return System["import"]("test/tests/module")
 		.then(function(mod) {
@@ -103,15 +103,15 @@ QUnit.test("__esModule flag only set to ES6 modules", function(assert) {
 });
 
 QUnit.test("babel decorators plugin work", function(assert) {
-	var done = assert.async();
+	let done = assert.async();
 
 	System["import"]("test/decorators/package.json!npm")
 		.then(function() {
 			return System["import"]("test/decorators/cellphone");
 		})
 		.then(function(mod) {
-			var Cellphone = mod.default;
-			var foo = new Cellphone();
+			let Cellphone = mod.default;
+			let foo = new Cellphone();
 
 			assert.equal(foo.brand, "Bitovi", "decorators should work");
 			done();
