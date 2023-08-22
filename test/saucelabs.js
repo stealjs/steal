@@ -1,8 +1,8 @@
-var testSaucelabs = require('test-saucelabs');
-var testPagesUrls = require('./test-pages-urls');
+let testSaucelabs = require('test-saucelabs');
+let testPagesUrls = require('./test-pages-urls');
 
 // https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
-var platforms = [{
+let platforms = [{
 	browserName: 'firefox',
 	platform: 'Windows 10',
 	version: '61.0'
@@ -36,12 +36,12 @@ var platforms = [{
 }];
 
 // collect platforms using the firefox browser
-var onlyFirefox = platforms.filter(p => {
+let onlyFirefox = platforms.filter(p => {
 	return p.browserName === 'firefox';
 });
 
-var urls = testPagesUrls.map(testPage => {
-	var cloned = Object.assign({}, testPage);
+let urls = testPagesUrls.map(testPage => {
+	let cloned = Object.assign({}, testPage);
 
 	// run the main test page in all platforms AND
 	// run the other tests only in firefox
