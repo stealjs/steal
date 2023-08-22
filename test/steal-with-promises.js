@@ -6,8 +6,8 @@
 /**
  * ES6 global Promise shim
  */
-var unhandledRejections = require('../lib/decorators/unhandledRejection');
-var PromiseConstructor = unhandledRejections(require('../lib/Promise'));
+let unhandledRejections = require('../lib/decorators/unhandledRejection');
+let PromiseConstructor = unhandledRejections(require('../lib/Promise'));
 
 module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstructor)
 	           : typeof self   != 'undefined' ? (self.Promise   = PromiseConstructor)
@@ -21,9 +21,9 @@ module.exports = typeof global != 'undefined' ? (global.Promise = PromiseConstru
 (function(define) { 'use strict';
 define(function (require) {
 
-	var makePromise = require('./makePromise');
-	var Scheduler = require('./Scheduler');
-	var async = require('./env').asap;
+	let makePromise = require('./makePromise');
+	let Scheduler = require('./Scheduler');
+	let async = require('./env').asap;
 
 	return makePromise({
 		scheduler: new Scheduler(async)
@@ -57,7 +57,7 @@ define(function() {
 		this._afterQueue = {};
 		this._afterQueueLen = 0;
 
-		var self = this;
+		let self = this;
 		this.drain = function() {
 			self._drain();
 		};
@@ -92,7 +92,7 @@ define(function() {
 	 * Drain the handler queue entirely, and then the after queue
 	 */
 	Scheduler.prototype._drain = function() {
-		var i = 0;
+		let i = 0;
 		for (; i < this._queueLen; ++i) {
 			this._queue[i].run();
 			this._queue[i] = void 0;
@@ -122,14 +122,14 @@ define(function() {
 (function(define) { 'use strict';
 define(function(require) {
 
-	var setTimer = require('../env').setTimer;
-	var format = require('../format');
+	let setTimer = require('../env').setTimer;
+	let format = require('../format');
 
 	return function unhandledRejection(Promise) {
 
-		var logError = noop;
-		var logInfo = noop;
-		var localConsole;
+		let logError = noop;
+		let logInfo = noop;
+		let localConsole;
 
 		if(typeof console !== 'undefined') {
 			// Alias console to prevent things like uglify's drop_console option from
@@ -157,9 +157,9 @@ define(function(require) {
 			enqueue(throwit, rejection.value);
 		};
 
-		var tasks = [];
-		var reported = [];
-		var running = null;
+		let tasks = [];
+		let reported = [];
+		let running = null;
 
 		function report(r) {
 			if(!r.handled) {
@@ -169,7 +169,7 @@ define(function(require) {
 		}
 
 		function unreport(r) {
-			var i = reported.indexOf(r);
+			let i = reported.indexOf(r);
 			if(i >= 0) {
 				reported.splice(i, 1);
 				logInfo('Handled previous rejection [' + r.id + '] ' + format.formatObject(r.value));
@@ -217,13 +217,13 @@ define(function(require) {
 	// setTimeout, and finally vertx, since its the only env that doesn't
 	// have setTimeout
 
-	var MutationObs;
-	var capturedSetTimeout = typeof setTimeout !== 'undefined' && setTimeout;
+	let MutationObs;
+	let capturedSetTimeout = typeof setTimeout !== 'undefined' && setTimeout;
 
 	// Default env
-	var setTimer = function(f, ms) { return setTimeout(f, ms); };
-	var clearTimer = function(t) { return clearTimeout(t); };
-	var asap = function (f) { return capturedSetTimeout(f, 0); };
+	let setTimer = function(f, ms) { return setTimeout(f, ms); };
+	let clearTimer = function(t) { return clearTimeout(t); };
+	let asap = function (f) { return capturedSetTimeout(f, 0); };
 
 	// Detect specific env
 	if (isNode()) { // Node
@@ -233,8 +233,8 @@ define(function(require) {
 		asap = initMutationObserver(MutationObs);
 
 	} else if (!capturedSetTimeout) { // vert.x
-		var vertxRequire = require;
-		var vertx = vertxRequire('vertx');
+		let vertxRequire = require;
+		let vertx = vertxRequire('vertx');
 		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
 		clearTimer = vertx.cancelTimer;
 		asap = vertx.runOnLoop || vertx.runOnContext;
@@ -257,18 +257,18 @@ define(function(require) {
 	}
 
 	function initMutationObserver(MutationObserver) {
-		var scheduled;
-		var node = document.createTextNode('');
-		var o = new MutationObserver(run);
+		let scheduled;
+		let node = document.createTextNode('');
+		let o = new MutationObserver(run);
 		o.observe(node, { characterData: true });
 
 		function run() {
-			var f = scheduled;
+			let f = scheduled;
 			scheduled = void 0;
 			f();
 		}
 
-		var i = 0;
+		let i = 0;
 		return function (f) {
 			scheduled = f;
 			node.data = (i ^= 1);
@@ -299,7 +299,7 @@ define(function() {
 	 * @returns {String} formatted string, suitable for output to developers
 	 */
 	function formatError(e) {
-		var s = typeof e === 'object' && e !== null && (e.stack || e.message) ? e.stack || e.message : formatObject(e);
+		let s = typeof e === 'object' && e !== null && (e.stack || e.message) ? e.stack || e.message : formatObject(e);
 		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
 	}
 
@@ -345,10 +345,10 @@ define(function() {
 
 	return function makePromise(environment) {
 
-		var tasks = environment.scheduler;
-		var emitRejection = initEmitRejection();
+		let tasks = environment.scheduler;
+		let emitRejection = initEmitRejection();
 
-		var objectCreate = Object.create ||
+		let objectCreate = Object.create ||
 			function(proto) {
 				function Child() {}
 				Child.prototype = proto;
@@ -371,7 +371,7 @@ define(function() {
 		 * @returns {Pending}
 		 */
 		function init(resolver) {
-			var handler = new Pending();
+			let handler = new Pending();
 
 			try {
 				resolver(promiseResolve, promiseReject, promiseNotify);
@@ -467,8 +467,8 @@ define(function() {
 		 * @return {Promise} new promise
 		 */
 		Promise.prototype.then = function(onFulfilled, onRejected, onProgress) {
-			var parent = this._handler;
-			var state = parent.join().state();
+			let parent = this._handler;
+			let state = parent.join().state();
 
 			if ((typeof onFulfilled !== 'function' && state > 0) ||
 				(typeof onRejected !== 'function' && state < 0)) {
@@ -476,8 +476,8 @@ define(function() {
 				return new this.constructor(Handler, parent);
 			}
 
-			var p = this._beget();
-			var child = p._handler;
+			let p = this._beget();
+			let child = p._handler;
 
 			parent.chain(child, parent.receiver, onFulfilled, onRejected, onProgress);
 
@@ -504,7 +504,7 @@ define(function() {
 		};
 
 		function begetFrom(parent, Promise) {
-			var child = new Pending(parent.receiver, parent.join().context);
+			let child = new Pending(parent.receiver, parent.join().context);
 			return new Promise(Handler, child);
 		}
 
@@ -537,13 +537,13 @@ define(function() {
 		}
 
 		function traverseWith(tryMap, f, promises) {
-			var handler = typeof f === 'function' ? mapAt : settleAt;
+			let handler = typeof f === 'function' ? mapAt : settleAt;
 
-			var resolver = new Pending();
-			var pending = promises.length >>> 0;
-			var results = new Array(pending);
+			let resolver = new Pending();
+			let pending = promises.length >>> 0;
+			let results = new Array(pending);
 
-			for (var i = 0, x; i < promises.length && !resolver.resolved; ++i) {
+			for (let i = 0, x; i < promises.length && !resolver.resolved; ++i) {
 				x = promises[i];
 
 				if (x === void 0 && !(i in promises)) {
@@ -576,8 +576,8 @@ define(function() {
 
 		function traverseAt(promises, handler, i, x, resolver) {
 			if (maybeThenable(x)) {
-				var h = getHandlerMaybeThenable(x);
-				var s = h.state();
+				let h = getHandlerMaybeThenable(x);
+				let s = h.state();
 
 				if (s === 0) {
 					h.fold(handler, i, void 0, resolver);
@@ -594,7 +594,7 @@ define(function() {
 
 		Promise._visitRemaining = visitRemaining;
 		function visitRemaining(promises, start, handler) {
-			for(var i=start; i<promises.length; ++i) {
+			for(let i=start; i<promises.length; ++i) {
 				markAsHandled(getHandler(promises[i]), handler);
 			}
 		}
@@ -604,7 +604,7 @@ define(function() {
 				return;
 			}
 
-			var s = h.state();
+			let s = h.state();
 			if(s === 0) {
 				h.visit(h, void 0, h._unreport);
 			} else if(s < 0) {
@@ -639,8 +639,8 @@ define(function() {
 		}
 
 		function runRace(promises) {
-			var resolver = new Pending();
-			var i, x, h;
+			let resolver = new Pending();
+			let i, x, h;
 			for(i=0; i<promises.length; ++i) {
 				x = promises[i];
 				if (x === void 0 && !(i in promises)) {
@@ -691,7 +691,7 @@ define(function() {
 		 */
 		function getHandlerUntrusted(x) {
 			try {
-				var untrustedThen = x.then;
+				let untrustedThen = x.then;
 				return typeof untrustedThen === 'function'
 					? new Thenable(untrustedThen, x)
 					: new Fulfilled(x);
@@ -726,7 +726,7 @@ define(function() {
 		 * @returns {object} handler nearest the fully resolved value
 		 */
 		Handler.prototype.join = function() {
-			var h = this;
+			let h = this;
 			while(h.handler !== void 0) {
 				h = h.handler;
 			}
@@ -763,7 +763,7 @@ define(function() {
 			h.fail();
 		};
 
-		var failIfRejected = new FailIfRejected();
+		let failIfRejected = new FailIfRejected();
 
 		/**
 		 * Handler that manages a queue of consumers waiting on a pending promise
@@ -812,12 +812,12 @@ define(function() {
 		};
 
 		Pending.prototype.run = function() {
-			var q = this.consumers;
-			var handler = this.handler;
+			let q = this.consumers;
+			let handler = this.handler;
 			this.handler = this.handler.join();
 			this.consumers = void 0;
 
-			for (var i = 0; i < q.length; ++i) {
+			for (let i = 0; i < q.length; ++i) {
 				handler.when(q[i]);
 			}
 		};
@@ -860,7 +860,7 @@ define(function() {
 		};
 
 		Pending.prototype.fail = function(context) {
-			var c = typeof context === 'undefined' ? this.context : context;
+			let c = typeof context === 'undefined' ? this.context : context;
 			this.resolved && this.handler.join().fail(c);
 		};
 
@@ -930,7 +930,7 @@ define(function() {
 			runContinuation1(cont.fulfilled, this, cont.receiver, cont.resolver);
 		};
 
-		var errorId = 0;
+		let errorId = 0;
 
 		/**
 		 * Handler for a rejected promise
@@ -1018,8 +1018,8 @@ define(function() {
 
 		// Errors and singletons
 
-		var foreverPendingHandler = new Handler();
-		var foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
+		let foreverPendingHandler = new Handler();
+		let foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
 
 		function cycle() {
 			return new Rejected(new TypeError('Promise cycle'));
@@ -1050,12 +1050,12 @@ define(function() {
 		}
 
 		ProgressTask.prototype.run = function() {
-			var q = this.handler.consumers;
+			let q = this.handler.consumers;
 			if(q === void 0) {
 				return;
 			}
 
-			for (var c, i = 0; i < q.length; ++i) {
+			for (let c, i = 0; i < q.length; ++i) {
 				c = q[i];
 				runNotify(c.progress, this.value, this.handler, c.receiver, c.resolver);
 			}
@@ -1075,7 +1075,7 @@ define(function() {
 		}
 
 		AssimilateTask.prototype.run = function() {
-			var h = this.resolver;
+			let h = this.resolver;
 			tryAssimilate(this._then, this.thenable, _resolve, _reject, _notify);
 
 			function _resolve(x) { h.resolve(x); }
@@ -1235,14 +1235,14 @@ define(function() {
 				};
 			} else if(typeof self !== 'undefined' && typeof CustomEvent === 'function') {
 				return (function(noop, self, CustomEvent) {
-					var hasCustomEvent = false;
+					let hasCustomEvent = false;
 					try {
 						var ev = new CustomEvent('unhandledRejection');
 						hasCustomEvent = ev instanceof CustomEvent;
 					} catch (e) {}
 
 					return !hasCustomEvent ? noop : function(type, rejection) {
-						var ev = new CustomEvent(type, {
+						let ev = new CustomEvent(type, {
 							detail: {
 								reason: rejection.value,
 								key: rejection
@@ -1270,15 +1270,15 @@ define(function() {
 ;
 (function(__global) {
 
-var isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
+let isWorker = typeof self !== 'undefined' && typeof WorkerGlobalScope !== 'undefined'
   && self instanceof WorkerGlobalScope;
-var isBrowser = typeof window != 'undefined' && !isWorker;
+let isBrowser = typeof window != 'undefined' && !isWorker;
 
 __global.$__Object$getPrototypeOf = Object.getPrototypeOf || function(obj) {
   return obj.__proto__;
 };
 
-var $__Object$defineProperty;
+let $__Object$defineProperty;
 (function () {
   try {
     if (!!Object.defineProperty({}, 'a', {})) {
@@ -1308,16 +1308,16 @@ __global.$__Object$create = Object.create || function(o, props) {
   return new F();
 };
 
-var $__Object$defineProperties = Object.defineProperties;
-var $__Object$defineProperty0 = Object.defineProperty;
-var $__Object$create = Object.create;
-var $__Object$getPrototypeOf = Object.getPrototypeOf;
+let $__Object$defineProperties = Object.defineProperties;
+let $__Object$defineProperty0 = Object.defineProperty;
+let $__Object$create = Object.create;
+let $__Object$getPrototypeOf = Object.getPrototypeOf;
 
 
 (function() {
-  var Promise = __global.Promise || require("when/es6-shim/Promise");
-  var console;
-  var $__curScript;
+  let Promise = __global.Promise || require("when/es6-shim/Promise");
+  let console;
+  let $__curScript;
   if (__global.console) {
     console = __global.console;
     console.assert = console.assert || function() {};
@@ -1325,22 +1325,22 @@ var $__Object$getPrototypeOf = Object.getPrototypeOf;
     console = { assert: function() {} };
   }
   if(isBrowser) {
-    var scripts = document.getElementsByTagName("script");
+    let scripts = document.getElementsByTagName("script");
     $__curScript = document.currentScript || scripts[scripts.length - 1];
   }
 
 
   // IE8 support
-  var indexOf = Array.prototype.indexOf || function(item) {
-    for (var i = 0, thisLen = this.length; i < thisLen; i++) {
+  let indexOf = Array.prototype.indexOf || function(item) {
+    for (let i = 0, thisLen = this.length; i < thisLen; i++) {
       if (this[i] === item) {
         return i;
       }
     }
     return -1;
   };
-  var defineProperty = $__Object$defineProperty;
-  var emptyArray = [];
+  let defineProperty = $__Object$defineProperty;
+  let emptyArray = [];
 
   // 15.2.3 - Runtime Semantics: Loader State
 
