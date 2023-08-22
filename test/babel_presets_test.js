@@ -1,9 +1,9 @@
-var QUnit = require("steal-qunit");
+let QUnit = require("steal-qunit");
 
-var helpers = require("./helpers");
-var makeIframe = helpers.makeIframe;
-var supportsES = helpers.supportsProto();
-var supportsAsyncAwait = helpers.supportsAsyncAwait();
+let helpers = require("./helpers");
+let makeIframe = helpers.makeIframe;
+let supportsES = helpers.supportsProto();
+let supportsAsyncAwait = helpers.supportsAsyncAwait();
 
 (supportsES ? QUnit.module : QUnit.skip)("babel presets", function() {
 	QUnit.test("babel presets work", function(assert) {
