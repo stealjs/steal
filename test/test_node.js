@@ -1,5 +1,5 @@
-var steal = require('../main');
-var path = require("path");
+let steal = require('../main');
+let path = require("path");
 
 steal.loader.logLevel = 0;
 
