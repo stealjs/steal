@@ -1,8 +1,8 @@
-var QUnit = require("steal-qunit");
+let QUnit = require("steal-qunit");
 
-var helpers = require("./helpers");
-var makeIframe = helpers.makeIframe;
-var supportsES = helpers.supportsProto();
+let helpers = require("./helpers");
+let makeIframe = helpers.makeIframe;
+let supportsES = helpers.supportsProto();
 
 (supportsES ? QUnit.module : QUnit.skip)("babel plugins", function(hooks) {
 	QUnit.test("babel plugins works", function(assert) {
