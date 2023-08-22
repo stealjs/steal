@@ -1,5 +1,5 @@
 "format cjs";
-var QUnit = require("steal-qunit");
+let QUnit = require("steal-qunit");
 
 QUnit.config.testTimeout = 30000;
 
