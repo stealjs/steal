@@ -1,10 +1,10 @@
 // Returns a Promise that will resolve once the module is set on the loader
 function setModule(moduleName, parentName, moduleOverrides) {
-	var newLoader = this;
+	let newLoader = this;
 	return new Promise(function(resolve) {
 		newLoader.normalize(moduleName, parentName)
 		.then(function(normalizedModuleName) {
-			var moduleObject = moduleOverrides[moduleName];
+			let moduleObject = moduleOverrides[moduleName];
 
 			// if overriding default export, make sure __useDefault is set
 			if (moduleObject.hasOwnProperty('default') && !moduleObject.hasOwnProperty('__useDefault')) {
@@ -18,16 +18,16 @@ function setModule(moduleName, parentName, moduleOverrides) {
 	});
 }
 
-var excludedConfigProps = {
+let excludedConfigProps = {
 	'_extensions': true,
 	'_loader': true,
 	'defined': true
 };
 // Recursively copy a config object
 function cloneConfig(obj, isTopLevel) {
-	var clone;
-	var toString = Object.prototype.toString;
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	let clone;
+	let toString = Object.prototype.toString;
+	let hasOwnProperty = Object.prototype.hasOwnProperty;
 
 	if (obj == null || typeof obj !== "object" || obj['isCloned']) {
 		return obj;
@@ -35,7 +35,7 @@ function cloneConfig(obj, isTopLevel) {
 
 	if (obj instanceof Array) {
 		clone = [];
-		for (var i = 0, len = obj.length; i < len; i++) {
+		for (let i = 0, len = obj.length; i < len; i++) {
 			clone[i] = cloneConfig(obj[i]);
 		}
 		return clone;
@@ -52,7 +52,7 @@ function cloneConfig(obj, isTopLevel) {
 	// instanceof fails to catch objects created with `null` as prototype
 	if (obj instanceof Object || toString.call(obj) === "[object Object]") {
 		clone = {};
-		for (var attr in obj) {
+		for (let attr in obj) {
 			obj['isCloned'] = true; // prevent infinite recursion
 			if (
 				hasOwnProperty.call(obj, attr) &&
@@ -77,16 +77,16 @@ function cloneConfig(obj, isTopLevel) {
 }
 
 module.exports = function(parentName) {
-	var loader = this;
+	let loader = this;
 	return {
 		'default': function clone(moduleOverrides) {
-			var newLoader = loader.clone();
+			let newLoader = loader.clone();
 			newLoader.cloned = true;
 
 			// prevent import from being called before module overrides are complete
-			var _import = newLoader['import'];
+			let _import = newLoader['import'];
 			newLoader['import'] = function() {
-				var args = arguments;
+				let args = arguments;
 				if(this._overridePromises) {
 					// call import once all module overrides are complete
 					return Promise.all(this._overridePromises).then(function(){
@@ -99,10 +99,10 @@ module.exports = function(parentName) {
 				return _import.call(this, args[0], { name: parentName });
 			};
 
-			var _fetch = newLoader.fetch;
+			let _fetch = newLoader.fetch;
 			newLoader.fetch = function() {
-				var name = arguments[0].name;
-				var cached = newLoader._traceData.loads[name];
+				let name = arguments[0].name;
+				let cached = newLoader._traceData.loads[name];
 				if (cached) {
 					return Promise.resolve(cached.source);
 				}
@@ -110,7 +110,7 @@ module.exports = function(parentName) {
 			};
 
 			// copy module config
-			var newConfig = cloneConfig(loader, true);
+			let newConfig = cloneConfig(loader, true);
 			newLoader.config(newConfig);
 			if (newLoader.npmContext) {
 				newLoader.npmContext.loader = newLoader;
@@ -124,7 +124,7 @@ module.exports = function(parentName) {
 			// set module overrides
 			if (moduleOverrides) {
 				newLoader._overridePromises = [];
-				for (var moduleOverrideName in moduleOverrides) {
+				for (let moduleOverrideName in moduleOverrides) {
 					newLoader._overridePromises.push(
 						setModule.call(newLoader, moduleOverrideName, parentName, moduleOverrides)
 					);
