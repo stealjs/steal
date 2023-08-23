@@ -8,7 +8,7 @@
     global.Reflect.global = global.Reflect.global || global;
   }
   setupGlobals(global);
-  var typeOf = function(x) {
+  let typeOf = function(x) {
     return typeof x;
   };
   global.$traceurRuntime = {
@@ -19,7 +19,7 @@
 })(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this);
 (function() {
   function buildFromEncodedParts(opt_scheme, opt_userInfo, opt_domain, opt_port, opt_path, opt_queryData, opt_fragment) {
-    var out = [];
+    let out = [];
     if (opt_scheme) {
       out.push(opt_scheme, ':');
     }
@@ -44,8 +44,8 @@
     }
     return out.join('');
   }
-  var splitRe = new RegExp('^' + '(?:' + '([^:/?#.]+)' + ':)?' + '(?://' + '(?:([^/?#]*)@)?' + '([\\w\\d\\-\\u0100-\\uffff.%]*)' + '(?::([0-9]+))?' + ')?' + '([^?#]+)?' + '(?:\\?([^#]*))?' + '(?:#(.*))?' + '$');
-  var ComponentIndex = {
+  let splitRe = new RegExp('^' + '(?:' + '([^:/?#.]+)' + ':)?' + '(?://' + '(?:([^/?#]*)@)?' + '([\\w\\d\\-\\u0100-\\uffff.%]*)' + '(?::([0-9]+))?' + ')?' + '([^?#]+)?' + '(?:\\?([^#]*))?' + '(?:#(.*))?' + '$');
+  let ComponentIndex = {
     SCHEME: 1,
     USER_INFO: 2,
     DOMAIN: 3,
@@ -60,13 +60,13 @@
   function removeDotSegments(path) {
     if (path === '/')
       return '/';
-    var leadingSlash = path[0] === '/' ? '/' : '';
-    var trailingSlash = path.slice(-1) === '/' ? '/' : '';
-    var segments = path.split('/');
-    var out = [];
-    var up = 0;
-    for (var pos = 0; pos < segments.length; pos++) {
-      var segment = segments[pos];
+    let leadingSlash = path[0] === '/' ? '/' : '';
+    let trailingSlash = path.slice(-1) === '/' ? '/' : '';
+    let segments = path.split('/');
+    let out = [];
+    let up = 0;
+    for (let pos = 0; pos < segments.length; pos++) {
+      let segment = segments[pos];
       switch (segment) {
         case '':
         case '.':
@@ -91,18 +91,18 @@
     return leadingSlash + out.join('/') + trailingSlash;
   }
   function joinAndCanonicalizePath(parts) {
-    var path = parts[ComponentIndex.PATH] || '';
+    let path = parts[ComponentIndex.PATH] || '';
     path = removeDotSegments(path);
     parts[ComponentIndex.PATH] = path;
     return buildFromEncodedParts(parts[ComponentIndex.SCHEME], parts[ComponentIndex.USER_INFO], parts[ComponentIndex.DOMAIN], parts[ComponentIndex.PORT], parts[ComponentIndex.PATH], parts[ComponentIndex.QUERY_DATA], parts[ComponentIndex.FRAGMENT]);
   }
   function canonicalizeUrl(url) {
-    var parts = split(url);
+    let parts = split(url);
     return joinAndCanonicalizePath(parts);
   }
   function resolveUrl(base, url) {
-    var parts = split(url);
-    var baseParts = split(base);
+    let parts = split(url);
+    let baseParts = split(base);
     if (parts[ComponentIndex.SCHEME]) {
       return joinAndCanonicalizePath(parts);
     } else {
@@ -116,8 +116,8 @@
     if (parts[ComponentIndex.PATH][0] == '/') {
       return joinAndCanonicalizePath(parts);
     }
-    var path = baseParts[ComponentIndex.PATH];
-    var index = path.lastIndexOf('/');
+    let path = baseParts[ComponentIndex.PATH];
+    let index = path.lastIndexOf('/');
     path = path.slice(0, index + 1) + parts[ComponentIndex.PATH];
     parts[ComponentIndex.PATH] = path;
     return joinAndCanonicalizePath(parts);
@@ -139,12 +139,12 @@
 })();
 (function(global) {
   'use strict';
-  var $__3 = $traceurRuntime,
+  let $__3 = $traceurRuntime,
       canonicalizeUrl = $__3.canonicalizeUrl,
       resolveUrl = $__3.resolveUrl,
       isAbsolute = $__3.isAbsolute;
-  var moduleInstantiators = Object.create(null);
-  var baseURL;
+  let moduleInstantiators = Object.create(null);
+  let baseURL;
   if (global.location && global.location.href)
     baseURL = resolveUrl(global.location.href, './');
   else
@@ -176,7 +176,7 @@
     this.stack += '\n loaded by ' + moduleName;
   };
   ModuleEvaluationError.prototype.stripStack = function(causeStack) {
-    var stack = [];
+    let stack = [];
     causeStack.split('\n').some(function(frame) {
       if (/UncoatedModuleInstantiator/.test(frame))
         return true;
@@ -186,28 +186,28 @@
     return stack.join('\n');
   };
   function beforeLines(lines, number) {
-    var result = [];
-    var first = number - 3;
+    let result = [];
+    let first = number - 3;
     if (first < 0)
       first = 0;
-    for (var i = first; i < number; i++) {
+    for (let i = first; i < number; i++) {
       result.push(lines[i]);
     }
     return result;
   }
   function afterLines(lines, number) {
-    var last = number + 1;
+    let last = number + 1;
     if (last > lines.length - 1)
       last = lines.length - 1;
-    var result = [];
-    for (var i = number; i <= last; i++) {
+    let result = [];
+    for (let i = number; i <= last; i++) {
       result.push(lines[i]);
     }
     return result;
   }
   function columnSpacing(columns) {
-    var result = '';
-    for (var i = 0; i < columns - 1; i++) {
+    let result = '';
+    for (let i = 0; i < columns - 1; i++) {
       result += '-';
     }
     return result;
@@ -218,11 +218,11 @@
   }
   UncoatedModuleInstantiator.prototype = Object.create(UncoatedModuleEntry.prototype);
   UncoatedModuleInstantiator.prototype.getUncoatedModule = function() {
-    var $__2 = this;
+    let $__2 = this;
     if (this.value_)
       return this.value_;
     try {
-      var relativeRequire;
+      let relativeRequire;
       if (typeof $traceurRuntime !== undefined && $traceurRuntime.require) {
         relativeRequire = $traceurRuntime.require.bind(null, this.url);
       }
@@ -233,14 +233,14 @@
         throw ex;
       }
       if (ex.stack) {
-        var lines = this.func.toString().split('\n');
-        var evaled = [];
+        let lines = this.func.toString().split('\n');
+        let evaled = [];
         ex.stack.split('\n').some(function(frame, index) {
           if (frame.indexOf('UncoatedModuleInstantiator.getUncoatedModule') > 0)
             return true;
-          var m = /(at\s[^\s]*\s).*>:(\d*):(\d*)\)/.exec(frame);
+          let m = /(at\s[^\s]*\s).*>:(\d*):(\d*)\)/.exec(frame);
           if (m) {
-            var line = parseInt(m[2], 10);
+            let line = parseInt(m[2], 10);
             evaled = evaled.concat(beforeLines(lines, line));
             if (index === 1) {
               evaled.push(columnSpacing(m[3]) + '^ ' + $__2.url);
@@ -261,20 +261,20 @@
   function getUncoatedModuleInstantiator(name) {
     if (!name)
       return;
-    var url = ModuleStore.normalize(name);
+    let url = ModuleStore.normalize(name);
     return moduleInstantiators[url];
   }
   ;
-  var moduleInstances = Object.create(null);
-  var liveModuleSentinel = {};
+  let moduleInstances = Object.create(null);
+  let liveModuleSentinel = {};
   function Module(uncoatedModule) {
-    var isLive = arguments[1];
-    var coatedModule = Object.create(null);
+    let isLive = arguments[1];
+    let coatedModule = Object.create(null);
     Object.getOwnPropertyNames(uncoatedModule).forEach(function(name) {
-      var getter,
+      let getter,
           value;
       if (isLive === liveModuleSentinel) {
-        var descr = Object.getOwnPropertyDescriptor(uncoatedModule, name);
+        let descr = Object.getOwnPropertyDescriptor(uncoatedModule, name);
         if (descr.get)
           getter = descr.get;
       }
@@ -306,10 +306,10 @@
       return canonicalizeUrl(name);
     },
     get: function(normalizedName) {
-      var m = getUncoatedModuleInstantiator(normalizedName);
+      let m = getUncoatedModuleInstantiator(normalizedName);
       if (!m)
         return undefined;
-      var moduleInstance = moduleInstances[m.url];
+      let moduleInstance = moduleInstances[m.url];
       if (moduleInstance)
         return moduleInstance;
       moduleInstance = Module(m.getUncoatedModule(), liveModuleSentinel);
@@ -329,7 +329,7 @@
       baseURL = String(v);
     },
     registerModule: function(name, deps, func) {
-      var normalizedName = ModuleStore.normalize(name);
+      let normalizedName = ModuleStore.normalize(name);
       if (moduleInstantiators[normalizedName])
         throw new Error('duplicate module named ' + normalizedName);
       moduleInstantiators[normalizedName] = new UncoatedModuleInstantiator(normalizedName, func);
@@ -342,12 +342,12 @@
         this.bundleStore[name] = {
           deps: deps,
           execute: function() {
-            var $__2 = arguments;
-            var depMap = {};
+            let $__2 = arguments;
+            let depMap = {};
             deps.forEach(function(dep, index) {
               return depMap[dep] = $__2[index];
             });
-            var registryEntry = func.call(this, depMap);
+            let registryEntry = func.call(this, depMap);
             registryEntry.execute.call(this);
             return registryEntry.exports;
           }
@@ -358,9 +358,9 @@
       return new Module(func(), liveModuleSentinel);
     }
   };
-  var moduleStoreModule = new Module({ModuleStore: ModuleStore});
+  let moduleStoreModule = new Module({ModuleStore: ModuleStore});
   ModuleStore.set('@traceur/src/runtime/ModuleStore.js', moduleStoreModule);
-  var setupGlobals = $traceurRuntime.setupGlobals;
+  let setupGlobals = $traceurRuntime.setupGlobals;
   $traceurRuntime.setupGlobals = function(global) {
     setupGlobals(global);
   };
@@ -372,9 +372,9 @@
 })(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this);
 $traceurRuntime.registerModule("traceur@0.0.111/src/runtime/new-unique-string.js", [], function() {
   "use strict";
-  var __moduleName = "traceur@0.0.111/src/runtime/new-unique-string.js";
-  var random = Math.random;
-  var counter = Date.now() % 1e9;
+  let __moduleName = "traceur@0.0.111/src/runtime/new-unique-string.js";
+  let random = Math.random;
+  let counter = Date.now() % 1e9;
   function newUniqueString() {
     return '__$' + (random() * 1e9 >>> 1) + '$' + ++counter + '$__';
   }
@@ -384,8 +384,8 @@ $traceurRuntime.registerModule("traceur@0.0.111/src/runtime/new-unique-string.js
 });
 $traceurRuntime.registerModule("traceur@0.0.111/src/runtime/has-native-symbols.js", [], function() {
   "use strict";
-  var __moduleName = "traceur@0.0.111/src/runtime/has-native-symbols.js";
-  var v = !!Object.getOwnPropertySymbols && typeof Symbol === 'function';
+  let __moduleName = "traceur@0.0.111/src/runtime/has-native-symbols.js";
+  let v = !!Object.getOwnPropertySymbols && typeof Symbol === 'function';
   function hasNativeSymbol() {
     return v;
   }
@@ -395,15 +395,15 @@ $traceurRuntime.registerModule("traceur@0.0.111/src/runtime/has-native-symbols.j
 });
 $traceurRuntime.registerModule("traceur@0.0.111/src/runtime/modules/symbols.js", [], function() {
   "use strict";
-  var __moduleName = "traceur@0.0.111/src/runtime/modules/symbols.js";
-  var newUniqueString = $traceurRuntime.getModule($traceurRuntime.normalizeModuleName("../new-unique-string.js", "traceur@0.0.111/src/runtime/modules/symbols.js")).default;
-  var hasNativeSymbol = $traceurRuntime.getModule($traceurRuntime.normalizeModuleName("../has-native-symbols.js", "traceur@0.0.111/src/runtime/modules/symbols.js")).default;
-  var $create = Object.create;
-  var $defineProperty = Object.defineProperty;
-  var $freeze = Object.freeze;
-  var $getOwnPropertyNames = Object.getOwnPropertyNames;
-  var $keys = Object.keys;
-  var $TypeError = TypeError;
+  let __moduleName = "traceur@0.0.111/src/runtime/modules/symbols.js";
+  let newUniqueString = $traceurRuntime.getModule($traceurRuntime.normalizeModuleName("../new-unique-string.js", "traceur@0.0.111/src/runtime/modules/symbols.js")).default;
+  let hasNativeSymbol = $traceurRuntime.getModule($traceurRuntime.normalizeModuleName("../has-native-symbols.js", "traceur@0.0.111/src/runtime/modules/symbols.js")).default;
+  let $create = Object.create;
+  let $defineProperty = Object.defineProperty;
+  let $freeze = Object.freeze;
+  let $getOwnPropertyNames = Object.getOwnPropertyNames;
+  let $keys = Object.keys;
+  let $TypeError = TypeError;
   function nonEnum(value) {
     return {
       configurable: true,
@@ -412,12 +412,12 @@ $traceurRuntime.registerModule("traceur@0.0.111/src/runtime/modules/symbols.js",
       writable: true
     };
   }
-  var symbolInternalProperty = newUniqueString();
-  var symbolDescriptionProperty = newUniqueString();
-  var symbolDataProperty = newUniqueString();
-  var symbolValues = $create(null);
-  var SymbolImpl = function Symbol(description) {
-    var value = new SymbolValue(description);
+  let symbolInternalProperty = newUniqueString();
+  let symbolDescriptionProperty = newUniqueString();
+  let symbolDataProperty = newUniqueString();
+  let symbolValues = $create(null);
+  let SymbolImpl = function Symbol(description) {
+    let value = new SymbolValue(description);
     if (!(this instanceof SymbolImpl))
       return value;
     throw new $TypeError('Symbol cannot be new\'ed');
