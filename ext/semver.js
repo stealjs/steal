@@ -2,9 +2,9 @@
 
 
 
-  var map = Array.prototype.map || function(callback, thisArg) {
+  let map = Array.prototype.map || function(callback, thisArg) {
 
-    var T, A, k;
+    let T, A, k;
 
     if (this == null) {
       throw new TypeError(' this is null or not defined');
@@ -12,12 +12,12 @@
 
     // 1. Let O be the result of calling ToObject passing the |this|
     //    value as the argument.
-    var O = Object(this);
+    let O = Object(this);
 
     // 2. Let lenValue be the result of calling the Get internal
     //    method of O with the argument "length".
     // 3. Let len be ToUint32(lenValue).
-    var len = O.length >>> 0;
+    let len = O.length >>> 0;
 
     // 4. If IsCallable(callback) is false, throw a TypeError exception.
     // See: http://es5.github.com/#x9.11
@@ -41,7 +41,7 @@
     // 8. Repeat, while k < len
     while (k < len) {
 
-      var kValue, mappedValue;
+      let kValue, mappedValue;
 
       // a. Let Pk be ToString(k).
       //   This is implicit for LHS operands of the in operator
@@ -89,24 +89,24 @@
 
 
 
-  var filter = Array.prototype.filter || function(fun/*, thisArg*/) {
+  let filter = Array.prototype.filter || function(fun/*, thisArg*/) {
     'use strict';
 
     if (this === void 0 || this === null) {
       throw new TypeError();
     }
 
-    var t = Object(this);
-    var len = t.length >>> 0;
+    let t = Object(this);
+    let len = t.length >>> 0;
     if (typeof fun !== 'function') {
       throw new TypeError();
     }
 
-    var res = [];
-    var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
-    for (var i = 0; i < len; i++) {
+    let res = [];
+    let thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+    for (let i = 0; i < len; i++) {
       if (i in t) {
-        var val = t[i];
+        let val = t[i];
 
         // NOTE: Technically this should Object.defineProperty at
         //       the next index, as push can be affected by
@@ -123,10 +123,10 @@
   };
 
 
-  var trim;
+  let trim;
   (function() {
     // Make sure we trim BOM and NBSP
-    var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+    let rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
     trim = String.prototype.trim || function() {
       return this.replace(rtrim, '');
     };
@@ -142,9 +142,9 @@ if (typeof module === 'object' && module.exports === exports)
 exports.SEMVER_SPEC_VERSION = '2.0.0';
 
 // The actual regexps go on exports.re
-var re = exports.re = [];
-var src = exports.src = [];
-var R = 0;
+let re = exports.re = [];
+let src = exports.src = [];
+let R = 0;
 
 // The following Regular Expressions can be used for tokenizing,
 // validating, and parsing SemVer version strings.
@@ -152,9 +152,9 @@ var R = 0;
 // ## Numeric Identifier
 // A single `0`, or a non-zero digit followed by zero or more digits.
 
-var NUMERICIDENTIFIER = R++;
+let NUMERICIDENTIFIER = R++;
 src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
-var NUMERICIDENTIFIERLOOSE = R++;
+let NUMERICIDENTIFIERLOOSE = R++;
 src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
 
 
@@ -162,19 +162,19 @@ src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
-var NONNUMERICIDENTIFIER = R++;
+let NONNUMERICIDENTIFIER = R++;
 src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
 
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
 
-var MAINVERSION = R++;
+let MAINVERSION = R++;
 src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')';
 
-var MAINVERSIONLOOSE = R++;
+let MAINVERSIONLOOSE = R++;
 src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
@@ -182,11 +182,11 @@ src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
 
-var PRERELEASEIDENTIFIER = R++;
+let PRERELEASEIDENTIFIER = R++;
 src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
                             '|' + src[NONNUMERICIDENTIFIER] + ')';
 
-var PRERELEASEIDENTIFIERLOOSE = R++;
+let PRERELEASEIDENTIFIERLOOSE = R++;
 src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
                                  '|' + src[NONNUMERICIDENTIFIER] + ')';
 
@@ -195,25 +195,25 @@ src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
 // Hyphen, followed by one or more dot-separated pre-release version
 // identifiers.
 
-var PRERELEASE = R++;
+let PRERELEASE = R++;
 src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
                   '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
 
-var PRERELEASELOOSE = R++;
+let PRERELEASELOOSE = R++;
 src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
                        '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
 
 // ## Build Metadata Identifier
 // Any combination of digits, letters, or hyphens.
 
-var BUILDIDENTIFIER = R++;
+let BUILDIDENTIFIER = R++;
 src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
 // identifiers.
 
-var BUILD = R++;
+let BUILD = R++;
 src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
              '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
 
@@ -227,8 +227,8 @@ src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
 // capturing group, because it should not ever be used in version
 // comparison.
 
-var FULL = R++;
-var FULLPLAIN = 'v?' + src[MAINVERSION] +
+let FULL = R++;
+let FULLPLAIN = 'v?' + src[MAINVERSION] +
                 src[PRERELEASE] + '?' +
                 src[BUILD] + '?';
 
@@ -237,25 +237,25 @@ src[FULL] = '^' + FULLPLAIN + '$';
 // like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
 // also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
 // common in the npm registry.
-var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+let LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
                  src[PRERELEASELOOSE] + '?' +
                  src[BUILD] + '?';
 
-var LOOSE = R++;
+let LOOSE = R++;
 src[LOOSE] = '^' + LOOSEPLAIN + '$';
 
-var GTLT = R++;
+let GTLT = R++;
 src[GTLT] = '((?:<|>)?=?)';
 
 // Something like "2.*" or "1.2.x".
 // Note that "x.x" is a valid xRange identifer, meaning "any version"
 // Only the first item is strictly required.
-var XRANGEIDENTIFIERLOOSE = R++;
+let XRANGEIDENTIFIERLOOSE = R++;
 src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
-var XRANGEIDENTIFIER = R++;
+let XRANGEIDENTIFIER = R++;
 src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
 
-var XRANGEPLAIN = R++;
+let XRANGEPLAIN = R++;
 src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
@@ -263,7 +263,7 @@ src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    src[BUILD] + '?' +
                    ')?)?';
 
-var XRANGEPLAINLOOSE = R++;
+let XRANGEPLAINLOOSE = R++;
 src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
@@ -271,109 +271,109 @@ src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         src[BUILD] + '?' +
                         ')?)?';
 
-var XRANGE = R++;
+let XRANGE = R++;
 src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
-var XRANGELOOSE = R++;
+let XRANGELOOSE = R++;
 src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
-var LONETILDE = R++;
+let LONETILDE = R++;
 src[LONETILDE] = '(?:~>?)';
 
-var TILDETRIM = R++;
+let TILDETRIM = R++;
 src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
 re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
-var tildeTrimReplace = '$1~';
+let tildeTrimReplace = '$1~';
 
-var TILDE = R++;
+let TILDE = R++;
 src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
-var TILDELOOSE = R++;
+let TILDELOOSE = R++;
 src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
 
 // Caret ranges.
 // Meaning is "at least and backwards compatible with"
-var LONECARET = R++;
+let LONECARET = R++;
 src[LONECARET] = '(?:\\^)';
 
-var CARETTRIM = R++;
+let CARETTRIM = R++;
 src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
 re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
-var caretTrimReplace = '$1^';
+let caretTrimReplace = '$1^';
 
-var CARET = R++;
+let CARET = R++;
 src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
-var CARETLOOSE = R++;
+let CARETLOOSE = R++;
 src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
 
 // A simple gt/lt/eq thing, or just "" to indicate "any version"
-var COMPARATORLOOSE = R++;
+let COMPARATORLOOSE = R++;
 src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
-var COMPARATOR = R++;
+let COMPARATOR = R++;
 src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
 
 
 // An expression to strip any whitespace between the gtlt and the thing
 // it modifies, so that `> 1.2.3` ==> `>1.2.3`
-var COMPARATORTRIM = R++;
+let COMPARATORTRIM = R++;
 src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
                       '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
 
 // this one has to use the /g flag
 re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
-var comparatorTrimReplace = '$1$2$3';
+let comparatorTrimReplace = '$1$2$3';
 
 
 // Something like `1.2.3 - 1.2.4`
 // Note that these all use the loose form, because they'll be
 // checked against either the strict or loose comparator form
 // later.
-var HYPHENRANGE = R++;
+let HYPHENRANGE = R++;
 src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
                    '\\s+-\\s+' +
                    '(' + src[XRANGEPLAIN] + ')' +
                    '\\s*$';
 
-var HYPHENRANGELOOSE = R++;
+let HYPHENRANGELOOSE = R++;
 src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s+-\\s+' +
                         '(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s*$';
 
 // Star ranges basically just allow anything at all.
-var STAR = R++;
+let STAR = R++;
 src[STAR] = '(<|>)?=?\\s*\\*';
 
 // Compile to actual regexp objects.
 // All are flag-free, unless they were created above with a flag.
-for (var i = 0; i < R; i++) {
+for (let i = 0; i < R; i++) {
   ;
   if (!re[i])
     re[i] = new RegExp(src[i]);
 }
 
 /* polyfill-start */
-var map = typeof map !== "undefined" ? map : Array.prototype.map;
-var filter = typeof filter !== "undefined" ? filter : Array.prototype.filter;
-var trim = typeof trim !== "undefined" ? trim : String.prototype.trim;
+let map = typeof map !== "undefined" ? map : Array.prototype.map;
+let filter = typeof filter !== "undefined" ? filter : Array.prototype.filter;
+let trim = typeof trim !== "undefined" ? trim : String.prototype.trim;
 /* polyfill-end */
 
 exports.parse = parse;
 function parse(version, loose) {
-  var r = loose ? re[LOOSE] : re[FULL];
+  let r = loose ? re[LOOSE] : re[FULL];
   return (r.test(version)) ? new SemVer(version, loose) : null;
 }
 
 exports.valid = valid;
 function valid(version, loose) {
-  var v = parse(version, loose);
+  let v = parse(version, loose);
   return v ? v.version : null;
 }
 
 
 exports.clean = clean;
 function clean(version, loose) {
-  var s = parse(trim.call(version).replace(/^[=v]+/, ''), loose);
+  let s = parse(trim.call(version).replace(/^[=v]+/, ''), loose);
   return s ? s.version : null;
 }
 
