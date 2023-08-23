@@ -1,10 +1,10 @@
 "format cjs";
 
-var utils = require('./npm-utils');
-var convert = require("./npm-convert");
-var crawl = require('./npm-crawl');
-var npmLoad = require("./npm-load");
-var isNode = typeof process === "object" &&
+let utils = require('./npm-utils');
+let convert = require("./npm-convert");
+let crawl = require('./npm-crawl');
+let npmLoad = require("./npm-load");
+let isNode = typeof process === "object" &&
 	{}.toString.call(process) === "[object process]";
 
 /**
@@ -15,20 +15,20 @@ var isNode = typeof process === "object" &&
  * @return {Promise} a promise to resolve with the load's new source.
  */
 exports.translate = function(load){
-	var loader = this;
+	let loader = this;
 
 	// This could be an empty string if the fetch failed.
 	if(load.source == "") {
 		return "define([]);";
 	}
 
-	var resavePackageInfo = isNode && !loader.isEnv("production");
-	var isBuild = loader.isPlatform("build");
+	let resavePackageInfo = isNode && !loader.isEnv("production");
+	let isBuild = loader.isPlatform("build");
 
-	var prevPackages = loader.npmContext && loader.npmContext.pkgInfo;
-	var versions = loader.npmContext && loader.npmContext.versions;
+	let prevPackages = loader.npmContext && loader.npmContext.pkgInfo;
+	let versions = loader.npmContext && loader.npmContext.versions;
 
-	var context = {
+	let context = {
 		packages: [],
 		pkgInfo: [],
 		loader: this,
@@ -54,9 +54,9 @@ exports.translate = function(load){
 		isFlatFileStructure: true
 	};
 	this.npmContext = context;
-	var pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
+	let pkg = {origFileUrl: load.address, fileUrl: utils.relativeURI(loader.baseURL, load.address)};
 	crawl.processPkgSource(context, pkg, load.source);
-	var pkgVersion = context.versions[pkg.name] = {};
+	let pkgVersion = context.versions[pkg.name] = {};
 	pkgVersion[pkg.version] = context.versions.__default = pkg;
 
 	if (!pkg.name) {
@@ -74,7 +74,7 @@ exports.translate = function(load){
 	}
 
 	// backwards compatible for < npm 3
-	var steal = utils.pkg.config(pkg) || {};
+	let steal = utils.pkg.config(pkg) || {};
 
 	if(steal.npmAlgorithm === "nested"){
 		context.isFlatFileStructure = false;
@@ -86,17 +86,17 @@ exports.translate = function(load){
 
 	return crawl.root(context, pkg, true).then(function(){
 		// clean up packages so everything is unique
-		var names = {};
-		var packages = context.pkgInfo;
+		let names = {};
+		let packages = context.pkgInfo;
 		utils.forEach(context.packages, function(npmPkg, index){
-			var pkg = npmPkg;
+			let pkg = npmPkg;
 			if(!packages[pkg.name+"@"+pkg.version]) {
 				if(pkg.browser){
 					delete pkg.browser.transform;
 				}
 				pkg = utils.json.transform(loader, load, pkg);
 
-				var conv = convert.steal(context, pkg, pkg.steal, index === 0);
+				let conv = convert.steal(context, pkg, pkg.steal, index === 0);
 
 				// When packages load, apply their configuration
 				convert.updateConfigOnPackageLoad(conv, resavePackageInfo,
