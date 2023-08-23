@@ -7,16 +7,16 @@
  */
 
 // A regex to test if a moduleName is npm-like.
-var slice = Array.prototype.slice;
-var npmModuleRegEx = /.+@.+\..+\..+#.+/;
-var conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
-var gitUrlEx = /(git|http(s?)):\/\//;
-var supportsSet = typeof Set === "function";
+let slice = Array.prototype.slice;
+let npmModuleRegEx = /.+@.+\..+\..+#.+/;
+let conditionalModuleRegEx = /#\{[^\}]+\}|#\?.+$/;
+let gitUrlEx = /(git|http(s?)):\/\//;
+let supportsSet = typeof Set === "function";
 
-var utils = {
+let utils = {
 	extend: function(d, s, deep, existingSet){
-		var val;
-		var set = existingSet;
+		let val;
+		let set = existingSet;
 
 		if(deep) {
 			if(!set) {
@@ -42,7 +42,7 @@ var utils = {
 			}
 		}
 
-		for(var prop in s) {
+		for(let prop in s) {
 			val = s[prop];
 
 			if(deep) {
@@ -60,14 +60,14 @@ var utils = {
 		return d;
 	},
 	map: function(arr, fn){
-		var i = 0, len = arr.length, out = [];
+		let i = 0, len = arr.length, out = [];
 		for(; i < len; i++) {
 			out.push(fn.call(arr, arr[i]));
 		}
 		return out;
 	},
 	filter: function(arr, fn){
-		var i = 0, len = arr.length, out = [], res;
+		let i = 0, len = arr.length, out = [], res;
 		for(; i < len; i++) {
 			res = fn.call(arr, arr[i]);
 			if(res) {
@@ -77,15 +77,15 @@ var utils = {
 		return out;
 	},
 	forEach: function(arr, fn) {
-		var i = 0, len = arr.length;
+		let i = 0, len = arr.length;
 		for(; i < len; i++) {
 			fn.call(arr, arr[i], i);
 		}
 	},
 	flow: function(fns) {
 		return function(){
-			var res = fns[0].apply(this, arguments);
-			for(var i = 1; i < fns.length; i++) {
+			let res = fns[0].apply(this, arguments);
+			for(let i = 1; i < fns.length; i++) {
 				res = fns[i].call(this, res);
 			}
 			return res;
@@ -108,7 +108,7 @@ var utils = {
 		return gitUrlEx.test(str);
 	},
 	warnOnce: function(msg){
-		var w = this._warnings = this._warnings || {};
+		let w = this._warnings = this._warnings || {};
 		if(w[msg]) return;
 		w[msg] = true;
 		this.warn(msg);
@@ -143,12 +143,12 @@ var utils = {
 				if(descriptor === "@empty") {
 					return descriptor;
 				}
-				var modulePath;
+				let modulePath;
 				if(descriptor.modulePath) {
 					modulePath = descriptor.modulePath.substr(0,2) === "./" ? descriptor.modulePath.substr(2) : descriptor.modulePath;
 				}
 
-				var version = descriptor.version;
+				let version = descriptor.version;
 				if(version && version[0] !== "^") {
 					version = encodeURIComponent(decodeURIComponent(version));
 				}
@@ -202,9 +202,9 @@ var utils = {
 		 * @return {system-npm/parsed_npm}
 		 */
 		parse: function (moduleName, currentPackageName, global, context) {
-			var pluginParts = moduleName.split('!');
-			var modulePathParts = pluginParts[0].split("#");
-			var versionParts = modulePathParts[0].split("@");
+			let pluginParts = moduleName.split('!');
+			let modulePathParts = pluginParts[0].split("#");
+			let versionParts = modulePathParts[0].split("@");
 			// it could be something like `@empty`
 			if(!modulePathParts[1] && !versionParts[0]) {
 				versionParts = ["@"+versionParts[1]];
@@ -214,7 +214,7 @@ var utils = {
 				versionParts.splice(0, 1);
 				versionParts[0] = "@"+versionParts[0];
 			}
-			var packageName,
+			let packageName,
 				modulePath;
 
 			// if the module name is relative
@@ -236,7 +236,7 @@ var utils = {
 					modulePath = modulePathParts[1];
 				} else {
 					// test/abc
-					var folderParts = versionParts[0].split("/");
+					let folderParts = versionParts[0].split("/");
 					// Detect scoped packages
 					if(folderParts.length && folderParts[0][0] === "@") {
 						packageName = folderParts.splice(0, 2).join("/");
@@ -275,7 +275,7 @@ var utils = {
 		 */
 		parseFromPackage: function(loader, refPkg, name, parentName) {
 			// Get the name of the
-			var packageName = utils.pkg.name(refPkg),
+			let packageName = utils.pkg.name(refPkg),
 			    parsedModuleName = utils.moduleName.parse(name, packageName, undefined, {loader: loader}),
 				isRelative = utils.path.isRelative(parsedModuleName.modulePath);
 
@@ -287,16 +287,16 @@ var utils = {
 			// If the module needs to be loaded relative.
 			if(isRelative) {
 				// get the location of the parent
-				var parentParsed = utils.moduleName.parse(parentName, packageName);
+				let parentParsed = utils.moduleName.parse(parentName, packageName);
 
 				// If the parentModule and the currentModule are from the same parent
 				if( parentParsed.packageName === parsedModuleName.packageName && parentParsed.modulePath ) {
-					var makePathRelative = true;
+					let makePathRelative = true;
 
 					if(name === "../" || name === "./" || name === "..") {
-						var relativePath = utils.path.relativeTo(
+						let relativePath = utils.path.relativeTo(
 							parentParsed.modulePath, name);
-						var isInRoot = utils.path.isPackageRootDir(relativePath);
+						let isInRoot = utils.path.isPackageRootDir(relativePath);
 						if(isInRoot) {
 							parsedModuleName.modulePath = utils.pkg.main(refPkg);
 							makePathRelative = false;
@@ -319,7 +319,7 @@ var utils = {
 
 			// we have the moduleName without the version
 			// we check this against various configs
-			var mapName = utils.moduleName.create(parsedModuleName),
+			let mapName = utils.moduleName.create(parsedModuleName),
 				refSteal = utils.pkg.config(refPkg),
 			    mappedName;
 
@@ -332,7 +332,7 @@ var utils = {
 					"@empty" : refPkg.browser[mapName];
 			}
 			// globalBrowser looks like: {moduleName: aliasName, pgk: aliasingPkg}
-			var global = loader && loader.globalBrowser &&
+			let global = loader && loader.globalBrowser &&
 				loader.globalBrowser[mapName];
 			if(global) {
 				mappedName = global.moduleName === false ? "@empty" :
@@ -368,12 +368,12 @@ var utils = {
 		 * @return {String}
 		 */
 		name: function(pkg){
-			var steal = utils.pkg.config(pkg);
+			let steal = utils.pkg.config(pkg);
 			return (steal && steal.name) || pkg.name;
 		},
 		main: function(pkg) {
-			var main;
-			var steal = utils.pkg.config(pkg);
+			let main;
+			let steal = utils.pkg.config(pkg);
 			if(steal && steal.main) {
 				main = steal.main;
 			} else if(typeof pkg.browser === "string") {
