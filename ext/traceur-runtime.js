@@ -8,7 +8,7 @@
     global.Reflect.global = global.Reflect.global || global;
   }
   setupGlobals(global);
-  var typeOf = function(x) {
+  let typeOf = function(x) {
     return typeof x;
   };
   global.$traceurRuntime = {
@@ -19,7 +19,7 @@
 })(typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this);
 (function() {
   function buildFromEncodedParts(opt_scheme, opt_userInfo, opt_domain, opt_port, opt_path, opt_queryData, opt_fragment) {
-    var out = [];
+    let out = [];
     if (opt_scheme) {
       out.push(opt_scheme, ':');
     }
@@ -44,8 +44,8 @@
     }
     return out.join('');
   }
-  var splitRe = new RegExp('^' + '(?:' + '([^:/?#.]+)' + ':)?' + '(?://' + '(?:([^/?#]*)@)?' + '([\\w\\d\\-\\u0100-\\uffff.%]*)' + '(?::([0-9]+))?' + ')?' + '([^?#]+)?' + '(?:\\?([^#]*))?' + '(?:#(.*))?' + '$');
-  var ComponentIndex = {
+  let splitRe = new RegExp('^' + '(?:' + '([^:/?#.]+)' + ':)?' + '(?://' + '(?:([^/?#]*)@)?' + '([\\w\\d\\-\\u0100-\\uffff.%]*)' + '(?::([0-9]+))?' + ')?' + '([^?#]+)?' + '(?:\\?([^#]*))?' + '(?:#(.*))?' + '$');
+  let ComponentIndex = {
     SCHEME: 1,
     USER_INFO: 2,
     DOMAIN: 3,
@@ -60,13 +60,13 @@
   function removeDotSegments(path) {
     if (path === '/')
       return '/';
-    var leadingSlash = path[0] === '/' ? '/' : '';
-    var trailingSlash = path.slice(-1) === '/' ? '/' : '';
-    var segments = path.split('/');
-    var out = [];
-    var up = 0;
-    for (var pos = 0; pos < segments.length; pos++) {
-      var segment = segments[pos];
+    let leadingSlash = path[0] === '/' ? '/' : '';
+    let trailingSlash = path.slice(-1) === '/' ? '/' : '';
+    let segments = path.split('/');
+    let out = [];
+    let up = 0;
+    for (let pos = 0; pos < segments.length; pos++) {
+      let segment = segments[pos];
       switch (segment) {
         case '':
         case '.':
@@ -91,24 +91,24 @@
     return leadingSlash + out.join('/') + trailingSlash;
   }
   function joinAndCanonicalizePath(parts) {
-    var path = parts[ComponentIndex.PATH] || '';
+    let path = parts[ComponentIndex.PATH] || '';
     path = removeDotSegments(path);
     parts[ComponentIndex.PATH] = path;
     return buildFromEncodedParts(parts[ComponentIndex.SCHEME], parts[ComponentIndex.USER_INFO], parts[ComponentIndex.DOMAIN], parts[ComponentIndex.PORT], parts[ComponentIndex.PATH], parts[ComponentIndex.QUERY_DATA], parts[ComponentIndex.FRAGMENT]);
   }
   function canonicalizeUrl(url) {
-    var parts = split(url);
+    let parts = split(url);
     return joinAndCanonicalizePath(parts);
   }
   function resolveUrl(base, url) {
-    var parts = split(url);
-    var baseParts = split(base);
+    let parts = split(url);
+    let baseParts = split(base);
     if (parts[ComponentIndex.SCHEME]) {
       return joinAndCanonicalizePath(parts);
     } else {
       parts[ComponentIndex.SCHEME] = baseParts[ComponentIndex.SCHEME];
     }
-    for (var i = ComponentIndex.SCHEME; i <= ComponentIndex.PORT; i++) {
+    for (let i = ComponentIndex.SCHEME; i <= ComponentIndex.PORT; i++) {
       if (!parts[i]) {
         parts[i] = baseParts[i];
       }
@@ -116,8 +116,8 @@
     if (parts[ComponentIndex.PATH][0] == '/') {
       return joinAndCanonicalizePath(parts);
     }
-    var path = baseParts[ComponentIndex.PATH];
-    var index = path.lastIndexOf('/');
+    let path = baseParts[ComponentIndex.PATH];
+    let index = path.lastIndexOf('/');
     path = path.slice(0, index + 1) + parts[ComponentIndex.PATH];
     parts[ComponentIndex.PATH] = path;
     return joinAndCanonicalizePath(parts);
@@ -127,7 +127,7 @@
       return false;
     if (name[0] === '/')
       return true;
-    var parts = split(name);
+    let parts = split(name);
     if (parts[ComponentIndex.SCHEME])
       return true;
     return false;
@@ -139,12 +139,12 @@
 })();
 (function(global) {
   'use strict';
-  var $__3 = $traceurRuntime,
+  let $__3 = $traceurRuntime,
       canonicalizeUrl = $__3.canonicalizeUrl,
       resolveUrl = $__3.resolveUrl,
       isAbsolute = $__3.isAbsolute;
-  var moduleInstantiators = Object.create(null);
-  var baseURL;
+  let moduleInstantiators = Object.create(null);
+  let baseURL;
   if (global.location && global.location.href)
     baseURL = resolveUrl(global.location.href, './');
   else
@@ -186,28 +186,28 @@
     return stack.join('\n');
   };
   function beforeLines(lines, number) {
-    var result = [];
-    var first = number - 3;
+    let result = [];
+    let first = number - 3;
     if (first < 0)
       first = 0;
-    for (var i = first; i < number; i++) {
+    for (let i = first; i < number; i++) {
       result.push(lines[i]);
     }
     return result;
   }
   function afterLines(lines, number) {
-    var last = number + 1;
+    let last = number + 1;
     if (last > lines.length - 1)
       last = lines.length - 1;
-    var result = [];
-    for (var i = number; i <= last; i++) {
+    let result = [];
+    for (let i = number; i <= last; i++) {
       result.push(lines[i]);
     }
     return result;
   }
   function columnSpacing(columns) {
-    var result = '';
-    for (var i = 0; i < columns - 1; i++) {
+    let result = '';
+    for (let i = 0; i < columns - 1; i++) {
       result += '-';
     }
     return result;
@@ -218,11 +218,11 @@
   }
   UncoatedModuleInstantiator.prototype = Object.create(UncoatedModuleEntry.prototype);
   UncoatedModuleInstantiator.prototype.getUncoatedModule = function() {
-    var $__2 = this;
+    let $__2 = this;
     if (this.value_)
       return this.value_;
     try {
-      var relativeRequire;
+      let relativeRequire;
       if (typeof $traceurRuntime !== undefined && $traceurRuntime.require) {
         relativeRequire = $traceurRuntime.require.bind(null, this.url);
       }
