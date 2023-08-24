@@ -4,9 +4,9 @@
  * Multiple module instantiation might cause unexpected side effects
  */
 addStealExtension(function addModuleLoadedWarn(loader) {
-	var superInstantiate = loader.instantiate;
+	let superInstantiate = loader.instantiate;
 
-	var warn = typeof console === "object" ?
+	let warn = typeof console === "object" ?
 	Function.prototype.bind.call(console.warn, console) :
 	null;
 
@@ -20,19 +20,19 @@ addStealExtension(function addModuleLoadedWarn(loader) {
 	// When loads are part of a failed linkset they have been instantiated
 	// but might be re-instantiated if part of another linkset.
 	loader._pendingState = function(load){
-		var instantiated = loader._instantiatedModules;
+		let instantiated = loader._instantiatedModules;
 		delete instantiated[load.address];
 	};
 
 	loader.instantiate = function(load) {
-		var address = load.address;
-		var loader = this;
-		var instantiated = loader._instantiatedModules;
+		let address = load.address;
+		let loader = this;
+		let instantiated = loader._instantiatedModules;
 
 		if (warn && address && instantiated[address]) {
-			var loads = (loader._traceData && loader._traceData.loads) || {};
-			var map = (loader._traceData && loader._traceData.parentMap) || {};
-			var instantiatedFromAddress = instantiated[load.address];
+			let loads = (loader._traceData && loader._traceData.loads) || {};
+			let map = (loader._traceData && loader._traceData.parentMap) || {};
+			let instantiatedFromAddress = instantiated[load.address];
 
 			// If we get here there might be a race condition from a failed linkset.
 			if(instantiatedFromAddress.length === 1 &&
@@ -40,8 +40,8 @@ addStealExtension(function addModuleLoadedWarn(loader) {
 				return superInstantiate.apply(loader, arguments);
 			}
 
-			var parentMods = instantiatedFromAddress.concat(load.name);
-			var parents = parentMods
+			let parentMods = instantiatedFromAddress.concat(load.name);
+			let parents = parentMods
 				.map(function(moduleName){
 					return "\t" + moduleName + "\n" +
 
@@ -71,10 +71,10 @@ addStealExtension(function addModuleLoadedWarn(loader) {
 	};
 
 	// When a module is deleted, remove its _instantiatedModules record as well.
-	var loaderDelete = loader["delete"];
+	let loaderDelete = loader["delete"];
 	loader["delete"] = function(moduleName){
-		var res = loaderDelete.apply(this, arguments);
-		var load = this.getModuleLoad(moduleName);
+		let res = loaderDelete.apply(this, arguments);
+		let load = this.getModuleLoad(moduleName);
 		if(load) {
 			this._instantiatedModules[load.address] = undefined;
 		}
