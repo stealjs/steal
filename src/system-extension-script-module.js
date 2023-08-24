@@ -16,11 +16,11 @@ addStealExtension(function addStealModule(loader) {
 	}
 
 	function ready() {
-		var scripts = document.getElementsByTagName("script");
-		for (var i = 0; i < scripts.length; i++) {
-			var script = scripts[i];
+		let scripts = document.getElementsByTagName("script");
+		for (let i = 0; i < scripts.length; i++) {
+			let script = scripts[i];
 			if (script.type == "steal-module" || script.type == "text/steal-module") {
-				var source = script.innerHTML;
+				let source = script.innerHTML;
 				if (/\S/.test(source)) {
 					loader.module(source)["catch"](function(err) {
 						setTimeout(function() {
