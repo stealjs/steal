@@ -1,10 +1,10 @@
-var path = require("path");
-var fs = require("fs-extra");
+let path = require("path");
+let fs = require("fs-extra");
 
-var root = path.join(__dirname, "..");
+let root = path.join(__dirname, "..");
 
 // copy test node_modules dependencies
-var nodeModules = [
+let nodeModules = [
 	"jquery"
 ];
 
@@ -23,7 +23,7 @@ fs.copySync(
 
 // copy babel plugin tests dependencies
 (function() {
-	var paths = [
+	let paths = [
 		"babel_npm_plugins",
 		"babel_env_plugins",
 		"babel_plugin_options",
@@ -40,13 +40,13 @@ fs.copySync(
 
 // copy babel presets tests dependencies
 (function() {
-	var paths = [
+	let paths = [
 		"babel_presets",
 		"babel_env_presets",
 		"babel_presets_options"
 	];
 
-	var deps = [
+	let deps = [
 		"babel-preset-steal-test",
 		"babel-plugin-steal-test"
 	];
