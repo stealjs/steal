@@ -3,10 +3,10 @@
 addStealExtension(function addStealFormat(loader) {
   // Steal Module Format Detection RegEx
   // steal(module, ...)
-  var stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
+  let stealRegEx = /(?:^\s*|[}{\(\);,\n\?\&]\s*)steal\s*\(\s*((?:"[^"]+"\s*,|'[^']+'\s*,\s*)*)/;
 
   // What we stole.
-  var stealInstantiateResult;
+  let stealInstantiateResult;
 
   function createSteal(loader) {
     stealInstantiateResult = null;
@@ -16,10 +16,10 @@ addStealExtension(function addStealFormat(loader) {
     loader.global.exports = undefined;
 
     function steal() {
-      var deps = [];
-      var factory;
+      let deps = [];
+      let factory;
 
-      for( var i = 0; i < arguments.length; i++ ) {
+      for( let i = 0; i < arguments.length; i++ ) {
         if (typeof arguments[i] === 'string') {
           deps.push( normalize(arguments[i]) );
         } else {
@@ -37,12 +37,12 @@ addStealExtension(function addStealFormat(loader) {
         deps: deps,
         execute: function(require, exports, moduleName) {
 
-          var depValues = [];
-          for (var i = 0; i < deps.length; i++) {
+          let depValues = [];
+          for (let i = 0; i < deps.length; i++) {
             depValues.push(require(deps[i]));
           }
 
-          var output = factory.apply(loader.global, depValues);
+          let output = factory.apply(loader.global, depValues);
 
           if (typeof output !== 'undefined') {
             return output;
